@@ -26,6 +26,14 @@ export const en: Dictionary = {
   cta: {
     startProject: 'Start a project',
   },
+  hero: {
+    titleLine1: 'Build digital.',
+    titleLine2: 'Things that matter.',
+    description:
+      'I design and build thoughtful websites and web applications, combining technology, creativity and a sharp eye for detail.',
+    ctaPrimary: 'Explore my work',
+    scrollCue: 'Scroll to explore',
+  },
   theme: {
     darkMode: 'Dark mode',
   },

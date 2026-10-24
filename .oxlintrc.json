@@ -4,5 +4,14 @@
   "rules": {
     "react/rules-of-hooks": "error",
     "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
+  },
+  "overrides": [
+    {
+      // The 3D scene mutates Three.js objects (cameras, materials, lights) inside per-frame
+      // callbacks. That is how React Three Fiber is meant to be used, and re-rendering per frame
+      // would defeat the point, so the "no mutation" rule does not apply there.
+      "files": ["src/components/hero/**"],
+      "rules": { "react/immutability": "off" }
+    }
+  ]
 }

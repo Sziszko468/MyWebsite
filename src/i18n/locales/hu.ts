@@ -26,6 +26,14 @@ export const hu = {
   cta: {
     startProject: 'Indítsunk projektet',
   },
+  hero: {
+    titleLine1: 'Építs digitálisan.',
+    titleLine2: 'Ami valóban számít.',
+    description:
+      'Átgondolt weboldalakat és webalkalmazásokat tervezek és építek, a technológiát, a kreativitást és a részletek iránti érzéket ötvözve.',
+    ctaPrimary: 'Munkáim megtekintése',
+    scrollCue: 'Görgess a felfedezéshez',
+  },
   theme: {
     darkMode: 'Sötét mód',
   },

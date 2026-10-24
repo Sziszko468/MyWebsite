@@ -4,6 +4,7 @@ import styles from './SceneLayer.module.scss'
 
 interface BoundaryProps {
   fallback: ReactNode
+  onError?: (error: unknown) => void
   children: ReactNode
 }
 
@@ -17,6 +18,7 @@ class SceneBoundary extends Component<BoundaryProps, { failed: boolean }> {
 
   componentDidCatch(error: unknown) {
     console.error('Scene failed to render; showing the fallback instead.', error)
+    this.props.onError?.(error)
   }
 
   render() {
@@ -29,6 +31,8 @@ interface SceneLayerProps {
   children: ReactNode
   /** Shown if the scene throws. Defaults to nothing, which leaves a plain themed background. */
   fallback?: ReactNode
+  /** Called once if the scene throws, so the owner can stop trying to render it. */
+  onError?: (error: unknown) => void
   className?: string
 }
 
@@ -42,10 +46,12 @@ interface SceneLayerProps {
  * Use the `under-header` mixin to run the section beneath the sticky header. The scene reads
  * its colours from the `--scene-*` tokens and the theme from `useTheme()`.
  */
-export function SceneLayer({ children, fallback = null, className }: SceneLayerProps) {
+export function SceneLayer({ children, fallback = null, onError, className }: SceneLayerProps) {
   return (
     <div className={cx(styles.layer, className)} aria-hidden="true">
-      <SceneBoundary fallback={fallback}>{children}</SceneBoundary>
+      <SceneBoundary fallback={fallback} onError={onError}>
+        {children}
+      </SceneBoundary>
     </div>
   )
 }

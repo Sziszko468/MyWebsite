@@ -26,6 +26,14 @@ export const nl: Dictionary = {
   cta: {
     startProject: 'Start een project',
   },
+  hero: {
+    titleLine1: 'Bouw digitaal.',
+    titleLine2: 'Dingen die ertoe doen.',
+    description:
+      'Ik ontwerp en bouw doordachte websites en webapplicaties, waarin technologie, creativiteit en oog voor detail samenkomen.',
+    ctaPrimary: 'Bekijk mijn werk',
+    scrollCue: 'Scroll om te ontdekken',
+  },
   theme: {
     darkMode: 'Donkere modus',
   },
