@@ -1,0 +1,137 @@
+@use '../styles/mixins' as m;
+
+.block {
+  padding-top: var(--space-section);
+}
+
+.content {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-7);
+}
+
+.sub {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+code {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  overflow-wrap: anywhere;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: var(--space-3);
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.chip {
+  height: 3.5rem;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+.typeList {
+  display: grid;
+}
+
+.typeRow {
+  display: grid;
+  gap: var(--space-1);
+  padding-block: var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-divider);
+
+  @include m.up('md') {
+    grid-template-columns: 10rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-5);
+  }
+}
+
+.typeSample {
+  font-weight: var(--fw-black);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-tight);
+  overflow-wrap: break-word;
+}
+
+.matrix {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: center;
+  justify-items: start;
+
+  @include m.up('md') {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.matrixHead {
+  grid-column: auto;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  /* Column titles only make sense once the matrix is a grid. */
+  display: none;
+
+  @include m.up('md') {
+    display: block;
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.cards {
+  display: grid;
+  gap: var(--space-5);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.scaleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-6);
+}
+
+.scaleItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.spaceBar {
+  height: var(--space-4);
+  background-color: var(--color-accent);
+}
+
+.shape {
+  width: 4.5rem;
+  height: 4.5rem;
+  border: var(--border-width) solid var(--color-border);
+  background-color: var(--color-surface-raised);
+}

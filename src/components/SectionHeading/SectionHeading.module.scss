@@ -1,0 +1,56 @@
+@use '../../styles/mixins' as m;
+
+.root {
+  display: grid;
+  gap: var(--space-4);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-5);
+    row-gap: var(--space-5);
+  }
+}
+
+.index {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-accent-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wider);
+  font-variant-numeric: tabular-nums;
+
+  &::after {
+    content: '';
+    width: var(--space-7);
+    height: 1px;
+    background-color: currentColor;
+  }
+
+  @include m.up('lg') {
+    grid-column: 1 / -1;
+  }
+}
+
+.title {
+  font-size: var(--fs-2xl);
+  overflow-wrap: break-word;
+
+  @include m.up('lg') {
+    grid-column: 1 / span 8;
+  }
+}
+
+.description {
+  max-width: 38ch;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+
+  @include m.up('lg') {
+    grid-column: 9 / span 4;
+    align-self: end;
+  }
+}

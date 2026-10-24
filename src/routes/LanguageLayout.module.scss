@@ -1,0 +1,27 @@
+.skipLink {
+  position: fixed;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: var(--z-skip-link);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--dur-fast) var(--ease-out);
+
+  &:focus-visible {
+    transform: none;
+  }
+}
+
+.main {
+  padding-block: var(--space-section);
+
+  /* Focus moves here from the skip link; the page itself needs no ring. */
+  &:focus {
+    outline: none;
+  }
+}

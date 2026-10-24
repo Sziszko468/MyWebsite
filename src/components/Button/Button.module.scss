@@ -1,0 +1,148 @@
+@use '../../styles/mixins' as m;
+
+.button {
+  --_bg: transparent;
+  --_fg: var(--color-text);
+  --_border: transparent;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--size-touch);
+  max-width: 100%;
+  padding: 0 var(--space-5);
+  border: var(--border-width) solid var(--_border);
+  border-radius: var(--radius-sm);
+  background-color: var(--_bg);
+  color: var(--_fg);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wide);
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    var(--transition-colors),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+
+  @include m.hover {
+    .arrow {
+      transform: translateX(0.25em);
+    }
+  }
+}
+
+.label {
+  min-width: 0;
+  /* A long translated label may wrap, even mid-word, rather than push the page wider. */
+  overflow-wrap: anywhere;
+}
+
+.arrow {
+  flex: none;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+/* Variants */
+
+.primary {
+  --_bg: var(--color-accent);
+  --_fg: var(--color-on-accent);
+  --_border: var(--color-accent);
+
+  @include m.hover {
+    --_bg: var(--color-accent-hover);
+    --_border: var(--color-accent-hover);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+  }
+
+  @include m.pressed {
+    --_bg: var(--color-accent-active);
+    --_border: var(--color-accent-active);
+    box-shadow: none;
+    transform: translateY(0);
+  }
+}
+
+.secondary {
+  --_border: var(--color-border-strong);
+
+  @include m.hover {
+    --_bg: var(--color-surface-hover);
+    --_border: var(--color-text);
+  }
+
+  @include m.pressed {
+    --_bg: var(--color-surface-active);
+    --_border: var(--color-text);
+  }
+}
+
+.text {
+  min-height: var(--size-touch);
+  padding-inline: var(--space-1);
+
+  .label {
+    padding-bottom: 0.2em;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat;
+    transition: background-size var(--dur-fast) var(--ease-out);
+  }
+
+  @include m.hover {
+    --_fg: var(--color-accent-text);
+
+    .label {
+      background-size: 100% 2px;
+    }
+  }
+
+  @include m.pressed {
+    --_fg: var(--color-accent-text);
+  }
+}
+
+/* Sizes */
+
+.md {
+  font-size: var(--fs-sm);
+}
+
+.lg {
+  min-height: 3.5rem;
+  padding-inline: var(--space-6);
+  font-size: var(--fs-base);
+
+  &.text {
+    padding-inline: var(--space-1);
+  }
+}
+
+/* Disabled — declared last; `:disabled` / `[aria-disabled]` outrank the variant classes. */
+
+.button:disabled,
+.button[aria-disabled='true'] {
+  --_bg: var(--color-disabled-bg);
+  --_fg: var(--color-disabled-text);
+  --_border: var(--color-disabled-border);
+
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+
+  &.text {
+    --_bg: transparent;
+    --_border: transparent;
+
+    .label {
+      background: none;
+    }
+  }
+}

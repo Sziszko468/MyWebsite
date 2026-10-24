@@ -1,0 +1,35 @@
+@use 'sass:map';
+
+// Media queries cannot read CSS custom properties, so breakpoints live here.
+// Mobile first: write base styles for the narrowest screen, then layer `up()`.
+
+$breakpoints: (
+  'sm': 36rem,
+  'md': 48rem,
+  'lg': 64rem,
+  'xl': 80rem,
+);
+
+@mixin up($name) {
+  @media (min-width: map.get($breakpoints, $name)) {
+    @content;
+  }
+}
+
+// Interaction states apply only to enabled controls, so a disabled control can
+// never pick up hover or pressed styling from a variant rule.
+$enabled: ':not(:disabled):not([aria-disabled="true"])';
+
+@mixin hover {
+  @media (hover: hover) {
+    &:hover#{$enabled} {
+      @content;
+    }
+  }
+}
+
+@mixin pressed {
+  &:active#{$enabled} {
+    @content;
+  }
+}

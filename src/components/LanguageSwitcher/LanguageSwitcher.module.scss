@@ -1,0 +1,44 @@
+@use '../../styles/mixins' as m;
+
+.list {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+}
+
+.link {
+  display: grid;
+  place-items: center;
+  min-width: var(--size-touch);
+  min-height: 2.25rem;
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wide);
+  text-decoration: none;
+  transition: var(--transition-colors);
+
+  @include m.up('md') {
+    min-width: 2.5rem;
+  }
+
+  @include m.hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text);
+  }
+
+  &:active {
+    background-color: var(--color-surface-active);
+  }
+
+  /* The current language is marked by fill, not by colour alone: it is also bold-on-solid. */
+  &[aria-current='true'] {
+    background-color: var(--color-text);
+    color: var(--color-bg);
+  }
+}

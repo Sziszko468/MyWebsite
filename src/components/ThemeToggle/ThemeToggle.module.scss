@@ -1,0 +1,74 @@
+@use '../../styles/mixins' as m;
+
+$track-width: 3.25rem;
+$track-height: 1.75rem;
+$thumb-size: 1.25rem;
+$inset: calc((#{$track-height} - #{$thumb-size}) / 2);
+
+/* The button keeps a 44px touch target; only the track is drawn. */
+.toggle {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--size-touch);
+  min-height: var(--size-touch);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  /* Ring the visible track, not the larger hit area. */
+  &:focus-visible {
+    outline: none;
+
+    .track {
+      outline: var(--focus-ring-width) solid var(--color-focus);
+      outline-offset: var(--focus-ring-offset);
+    }
+  }
+
+  @include m.hover {
+    .track {
+      border-color: var(--color-text);
+    }
+  }
+
+  @include m.pressed {
+    .thumb {
+      transform: translateX(var(--_shift)) scale(0.92);
+    }
+  }
+}
+
+.track {
+  --_shift: 0;
+
+  position: relative;
+  width: $track-width;
+  height: $track-height;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface-raised);
+  transition: var(--transition-colors);
+}
+
+.thumb {
+  position: absolute;
+  top: calc(#{$inset} - var(--border-width));
+  left: calc(#{$inset} - var(--border-width));
+  display: grid;
+  place-items: center;
+  width: $thumb-size;
+  height: $thumb-size;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  transform: translateX(var(--_shift));
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+/* Dark mode is "on": the thumb sits at the far end. */
+.toggle[aria-checked='true'] .track {
+  --_shift: calc(#{$track-width} - #{$thumb-size} - #{$inset} * 2);
+}

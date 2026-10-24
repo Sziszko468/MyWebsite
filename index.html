@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="hu" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Your Name</title>
+    <meta name="description" content="Átgondolt weboldalakat és webalkalmazásokat tervezek és fejlesztek." />
+    <meta name="theme-color" content="#0b0b0d" />
+
+    <!--
+      Pre-paint theme: runs before first paint so the page never flashes the wrong theme.
+      Keep in step with src/theme/theme.ts (storage key + resolution rule); theme.test.ts checks it.
+      The background colours below only cover the moment before the stylesheet arrives and
+      must equal --color-bg in src/styles/tokens.css.
+    -->
+    <style>
+      html { background-color: #0b0b0d; }
+      html[data-theme='light'] { background-color: #f4f0e8; }
+    </style>
+    <script>
+      (function () {
+        var theme = null;
+        try { theme = localStorage.getItem('theme'); } catch (e) {}
+        if (theme !== 'dark' && theme !== 'light') {
+          theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
