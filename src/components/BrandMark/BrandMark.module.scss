@@ -1,0 +1,71 @@
+@use '../../styles/mixins' as m;
+
+.brand {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: var(--size-touch);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.monogram {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding-inline: var(--space-2);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wide);
+  transition: var(--transition-colors);
+
+  /* Racing slash on the lower edge. */
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0.3rem;
+    bottom: -2px;
+    width: 0.8rem;
+    height: 3px;
+    background-color: var(--color-accent);
+    transform: skewX(-32deg);
+  }
+}
+
+.name {
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-black);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wide);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brand {
+  @include m.hover {
+    .monogram {
+      border-color: var(--color-text);
+    }
+  }
+}
+
+/* Between the `nav` and `xl` breakpoints the monogram stands alone; the name returns at `xl`. */
+.collapseName .name {
+  @include m.up('nav') {
+    display: none;
+  }
+
+  @include m.up('xl') {
+    display: inline;
+  }
+}

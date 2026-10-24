@@ -96,6 +96,8 @@
   --container-wide: 96rem;
   --gutter: clamp(1rem, 0.4rem + 3vw, 2.5rem);
   --size-touch: 2.75rem;
+  /* Height of the sticky site header. Pages that start under it (the Hero) offset by this. */
+  --header-height: 4.5rem;
 
   /* Focus ring geometry (colour is semantic, below) */
   --focus-ring-width: 2px;
@@ -112,6 +114,9 @@
   --z-modal: 400;
   --z-toast: 500;
   --z-skip-link: 1000;
+
+  /* Derived from --color-bg, so it follows whichever theme is active. */
+  --color-header-bg: color-mix(in srgb, var(--color-bg) 84%, transparent);
 }
 
 /* ── 3a. Semantic colours — Dark (default) ────────────────────────────── */

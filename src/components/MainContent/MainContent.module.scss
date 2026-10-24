@@ -1,0 +1,9 @@
+.main {
+  flex: 1 0 auto;
+  min-width: 0;
+
+  /* Focus lands here from the skip link; the region itself needs no ring. */
+  &:focus {
+    outline: none;
+  }
+}

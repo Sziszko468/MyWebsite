@@ -1,0 +1,132 @@
+@use '../../styles/mixins' as m;
+
+.link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    color: var(--color-text);
+  }
+}
+
+.label {
+  position: relative;
+}
+
+/* Current page: full-strength text plus a red bar, so it never relies on colour alone. */
+.active {
+  color: var(--color-text);
+}
+
+/* ── Header bar ───────────────────────────────────────────────────── */
+
+.bar {
+  .list {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .link {
+    min-height: var(--size-touch);
+    padding-inline: var(--space-2);
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+  }
+
+  .label::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -0.35rem;
+    left: 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .active .label::after {
+    transform: scaleX(1);
+  }
+}
+
+/* ── Mobile menu panel ────────────────────────────────────────────── */
+
+.panel {
+  .link {
+    gap: var(--space-4);
+    min-height: 3.75rem;
+    padding-block: var(--space-2);
+    border-bottom: var(--border-width) solid var(--color-divider);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-black);
+    letter-spacing: var(--ls-tight);
+    text-transform: uppercase;
+  }
+
+  .index {
+    min-width: 2ch;
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    font-stretch: var(--fstretch-expanded);
+    letter-spacing: var(--ls-wider);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .active {
+    .index {
+      color: var(--color-accent-text);
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.75rem;
+      bottom: 0.75rem;
+      left: calc(var(--gutter) * -1);
+      width: 4px;
+      background-color: var(--color-accent);
+    }
+  }
+}
+
+/* ── Footer column ────────────────────────────────────────────────── */
+
+.footer {
+  .list {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .link {
+    min-height: var(--size-touch);
+    font-size: var(--fs-sm);
+
+    @include m.up('lg') {
+      min-height: 2rem;
+    }
+
+    @include m.hover {
+      .label {
+        background-size: 100% 1px;
+      }
+    }
+  }
+
+  .label {
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+    padding-bottom: 0.15em;
+    transition: background-size var(--dur-fast) var(--ease-out);
+  }
+
+  .active .label {
+    background-size: 100% 1px;
+  }
+}

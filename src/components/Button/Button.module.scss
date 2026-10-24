@@ -111,6 +111,16 @@
 
 /* Sizes */
 
+.sm {
+  min-height: 2.5rem;
+  padding-inline: var(--space-4);
+  font-size: var(--fs-xs);
+
+  &.text {
+    padding-inline: var(--space-1);
+  }
+}
+
 .md {
   font-size: var(--fs-sm);
 }
@@ -123,6 +133,11 @@
   &.text {
     padding-inline: var(--space-1);
   }
+}
+
+.fullWidth {
+  display: flex;
+  width: 100%;
 }
 
 /* Disabled — declared last; `:disabled` / `[aria-disabled]` outrank the variant classes. */

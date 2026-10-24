@@ -5,9 +5,11 @@ import styles from './Button.module.scss'
 
 interface BaseProps {
   variant?: 'primary' | 'secondary' | 'text'
-  size?: 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg'
   /** Trailing arrow that nudges forward on hover. */
   arrow?: boolean
+  /** Stretch to the width of the container. */
+  fullWidth?: boolean
   disabled?: boolean
   className?: string
   children: ReactNode
@@ -36,6 +38,7 @@ export function Button({
   variant = 'primary',
   size = 'md',
   arrow = false,
+  fullWidth = false,
   disabled = false,
   className,
   children,
@@ -43,7 +46,7 @@ export function Button({
   to,
   ...rest
 }: ButtonProps) {
-  const classes = cx(styles.button, styles[variant], styles[size], className)
+  const classes = cx(styles.button, styles[variant], styles[size], fullWidth && styles.fullWidth, className)
   const content = (
     <>
       <span className={styles.label}>{children}</span>

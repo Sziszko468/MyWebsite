@@ -1,3 +1,8 @@
+/* Vertical rhythm of a page; <main> adds none, so each page decides. */
+.page {
+  padding-block: var(--space-section);
+}
+
 .actions {
   margin-top: var(--space-6);
 }

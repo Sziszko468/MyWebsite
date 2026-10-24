@@ -12,8 +12,3 @@ export function splitLanguage(pathname: string): { lang: Language | null; rest: 
   if (isLanguage(first)) return { lang: first, rest: `/${tail.join('/')}` }
   return { lang: null, rest: pathname.startsWith('/') ? pathname : `/${pathname}` }
 }
-
-/** Same page, other language. Search and hash are appended by the caller. */
-export function switchLanguagePath(pathname: string, next: Language): string {
-  return localizedPath(next, splitLanguage(pathname).rest)
-}

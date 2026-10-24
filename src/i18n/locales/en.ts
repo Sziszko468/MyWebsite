@@ -7,12 +7,45 @@ export const en: Dictionary = {
   },
   a11y: {
     skipToContent: 'Skip to content',
+    opensInNewTab: '(opens in a new tab)',
+  },
+  common: {
+    backHome: 'Back to home',
+  },
+  nav: {
+    primary: 'Main navigation',
+    menuOpen: 'Open menu',
+    menuClose: 'Close menu',
+    home: 'Home',
+    work: 'Work',
+    services: 'Services',
+    about: 'About',
+    lab: 'Lab',
+    contact: 'Contact',
+  },
+  cta: {
+    startProject: 'Start a project',
   },
   theme: {
     darkMode: 'Dark mode',
   },
   language: {
     label: 'Language',
+  },
+  footer: {
+    role: 'Websites and web applications, designed and built.',
+    navLabel: 'Footer navigation',
+    pagesHeading: 'Pages',
+    contactHeading: 'Contact',
+    contactIntro: "Have an idea or a question? Let's talk.",
+    contactLink: 'Get in touch',
+    socialHeading: 'Social profiles',
+    legalLabel: 'Legal',
+    legal: {
+      privacy: 'Privacy',
+      legalNotice: 'Legal notice',
+    },
+    rights: 'All rights reserved.',
   },
   status: {
     live: 'Live',
@@ -30,9 +63,11 @@ export const en: Dictionary = {
   home: {
     underConstruction: 'This site is under construction.',
   },
+  placeholder: {
+    description: 'This page is coming soon.',
+  },
   notFound: {
     title: 'Page not found',
     description: "This address doesn't exist, or the page has moved.",
-    backHome: 'Back to home',
   },
 }

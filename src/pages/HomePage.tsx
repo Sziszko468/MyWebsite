@@ -10,15 +10,17 @@ export function HomePage() {
   const { t } = useI18n()
 
   return (
-    <Container>
-      <SectionHeading level={1} index="00" title={siteConfig.brandName} description={t.home.underConstruction} />
-      {import.meta.env.DEV && (
-        <p className={styles.actions}>
-          <Button to="/design-system" variant="secondary" arrow>
-            Design system
-          </Button>
-        </p>
-      )}
-    </Container>
+    <div className={styles.page}>
+      <Container>
+        <SectionHeading level={1} index="00" title={siteConfig.brandName} description={t.home.underConstruction} />
+        {import.meta.env.DEV && (
+          <p className={styles.actions}>
+            <Button to="/design-system" variant="secondary" arrow>
+              Design system
+            </Button>
+          </p>
+        )}
+      </Container>
+    </div>
   )
 }

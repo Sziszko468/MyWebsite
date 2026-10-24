@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_LANGUAGE, LANGUAGES, isLanguage } from './config'
 import { dictionaries } from './dictionaries'
-import { localizedPath, splitLanguage, switchLanguagePath } from './paths'
+import { localizedPath, splitLanguage } from './paths'
 
 function flatten(value: unknown, prefix = ''): Record<string, string> {
   if (typeof value === 'string') return { [prefix]: value }
@@ -50,13 +50,5 @@ describe('paths', () => {
     expect(splitLanguage('/en/services')).toEqual({ lang: 'en', rest: '/services' })
     expect(splitLanguage('/en')).toEqual({ lang: 'en', rest: '/' })
     expect(splitLanguage('/services')).toEqual({ lang: null, rest: '/services' })
-  })
-
-  it('keeps the current page when switching language', () => {
-    expect(switchLanguagePath('/hu/', 'en')).toBe('/en/')
-    expect(switchLanguagePath('/hu', 'nl')).toBe('/nl/')
-    expect(switchLanguagePath('/en/design-system', 'hu')).toBe('/hu/design-system')
-    expect(switchLanguagePath('/nl/a/b', 'en')).toBe('/en/a/b')
-    expect(switchLanguagePath('/unknown', 'en')).toBe('/en/unknown')
   })
 })

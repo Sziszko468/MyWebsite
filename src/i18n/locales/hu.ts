@@ -7,12 +7,45 @@ export const hu = {
   },
   a11y: {
     skipToContent: 'Ugrás a tartalomhoz',
+    opensInNewTab: '(új lapon nyílik meg)',
+  },
+  common: {
+    backHome: 'Vissza a nyitóoldalra',
+  },
+  nav: {
+    primary: 'Főmenü',
+    menuOpen: 'Menü megnyitása',
+    menuClose: 'Menü bezárása',
+    home: 'Kezdőlap',
+    work: 'Munkáim',
+    services: 'Szolgáltatások',
+    about: 'Rólam',
+    lab: 'Lab',
+    contact: 'Kapcsolat',
+  },
+  cta: {
+    startProject: 'Indítsunk projektet',
   },
   theme: {
     darkMode: 'Sötét mód',
   },
   language: {
     label: 'Nyelv',
+  },
+  footer: {
+    role: 'Weboldalak és webalkalmazások tervezése és fejlesztése.',
+    navLabel: 'Lábléc menü',
+    pagesHeading: 'Oldalak',
+    contactHeading: 'Kapcsolat',
+    contactIntro: 'Van egy ötleted vagy kérdésed? Beszéljük meg.',
+    contactLink: 'Írj nekem',
+    socialHeading: 'Közösségi profilok',
+    legalLabel: 'Jogi hivatkozások',
+    legal: {
+      privacy: 'Adatvédelem',
+      legalNotice: 'Jogi nyilatkozat',
+    },
+    rights: 'Minden jog fenntartva.',
   },
   status: {
     live: 'Élő',
@@ -30,10 +63,12 @@ export const hu = {
   home: {
     underConstruction: 'Az oldal készül.',
   },
+  placeholder: {
+    description: 'Ez az oldal hamarosan elkészül.',
+  },
   notFound: {
     title: 'Az oldal nem található',
     description: 'Ez a cím nem létezik, vagy az oldal időközben máshová költözött.',
-    backHome: 'Vissza a nyitóoldalra',
   },
 }
 

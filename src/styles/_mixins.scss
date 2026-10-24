@@ -2,11 +2,14 @@
 
 // Media queries cannot read CSS custom properties, so breakpoints live here.
 // Mobile first: write base styles for the narrowest screen, then layer `up()`.
+//
+// `nav` is where the header switches from the menu button to the inline navigation.
 
 $breakpoints: (
   'sm': 36rem,
   'md': 48rem,
   'lg': 64rem,
+  'nav': 70rem,
   'xl': 80rem,
 );
 
@@ -32,4 +35,11 @@ $enabled: ':not(:disabled):not([aria-disabled="true"])';
   &:active#{$enabled} {
     @content;
   }
+}
+
+// For a first section (the Hero) that should run underneath the sticky header:
+// it slides up by the header's height and pads itself back down.
+@mixin under-header {
+  margin-top: calc(var(--header-height) * -1);
+  padding-top: var(--header-height);
 }

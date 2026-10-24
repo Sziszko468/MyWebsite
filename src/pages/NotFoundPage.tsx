@@ -8,13 +8,15 @@ export function NotFoundPage() {
   const { t } = useI18n()
 
   return (
-    <Container>
-      <SectionHeading level={1} index="404" title={t.notFound.title} description={t.notFound.description} />
-      <p className={styles.actions}>
-        <Button to="/" arrow>
-          {t.notFound.backHome}
-        </Button>
-      </p>
-    </Container>
+    <div className={styles.page}>
+      <Container>
+        <SectionHeading level={1} index="404" title={t.notFound.title} description={t.notFound.description} />
+        <p className={styles.actions}>
+          <Button to="/" arrow>
+            {t.common.backHome}
+          </Button>
+        </p>
+      </Container>
+    </div>
   )
 }

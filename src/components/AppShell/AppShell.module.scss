@@ -1,3 +1,10 @@
+/* The footer always sits at the bottom, even on a short page. */
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
 .skipLink {
   position: fixed;
   top: var(--space-3);
@@ -14,14 +21,5 @@
 
   &:focus-visible {
     transform: none;
-  }
-}
-
-.main {
-  padding-block: var(--space-section);
-
-  /* Focus moves here from the skip link; the page itself needs no ring. */
-  &:focus {
-    outline: none;
   }
 }

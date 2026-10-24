@@ -4,6 +4,7 @@ import { Button } from '../components/Button/Button'
 import { Container } from '../components/Container/Container'
 import { LanguageSwitcher } from '../components/LanguageSwitcher/LanguageSwitcher'
 import { ProjectCard } from '../components/ProjectCard/ProjectCard'
+import { SceneLayer } from '../components/SceneLayer/SceneLayer'
 import { SectionHeading } from '../components/SectionHeading/SectionHeading'
 import { ServiceCard } from '../components/ServiceCard/ServiceCard'
 import { ThemeToggle } from '../components/ThemeToggle/ThemeToggle'
@@ -74,7 +75,7 @@ function Block({ id, index, title, children }: { id: string; index: string; titl
 
 export default function DesignSystemPage() {
   return (
-    <>
+    <div className={styles.root}>
       <Container>
         <SectionHeading
           level={1}
@@ -239,6 +240,20 @@ export default function DesignSystemPage() {
           ))}
         </ul>
       </Block>
-    </>
+      <Block id="ds-scene" index="07" title="Scene layer">
+        <section className={styles.sceneDemo}>
+          <SceneLayer>
+            <div className={styles.sceneArt} />
+          </SceneLayer>
+          <div className={styles.sceneContent}>
+            <p>Content sits above the scene and stays readable and clickable.</p>
+            <Button variant="secondary" arrow>
+              Clickable
+            </Button>
+          </div>
+        </section>
+      </Block>
+
+    </div>
   )
 }

@@ -1,0 +1,51 @@
+@use '../../styles/mixins' as m;
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  border-bottom: var(--border-width) solid transparent;
+  background-color: transparent;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+
+.scrolled {
+  border-bottom-color: var(--color-divider);
+  background-color: var(--color-header-bg);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--header-height);
+
+  @include m.up('nav') {
+    display: grid;
+    /* Navigation in the middle; the right column never shrinks below its content. */
+    grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+/* Inline navigation and actions only exist from the `nav` breakpoint; below it the menu takes over. */
+.nav,
+.actions {
+  display: none;
+
+  @include m.up('nav') {
+    display: flex;
+  }
+}
+
+.actions {
+  align-items: center;
+  white-space: nowrap;
+  justify-self: end;
+  gap: var(--space-3);
+}

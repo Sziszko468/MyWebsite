@@ -1,0 +1,14 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  overflow: hidden;
+  background-color: var(--scene-bg);
+  contain: paint;
+  pointer-events: none;
+
+  /* Whatever the scene renders, including a canvas, stays transparent to input. */
+  & * {
+    pointer-events: none !important;
+  }
+}

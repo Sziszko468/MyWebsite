@@ -7,12 +7,45 @@ export const nl: Dictionary = {
   },
   a11y: {
     skipToContent: 'Direct naar de inhoud',
+    opensInNewTab: '(opent in een nieuw tabblad)',
+  },
+  common: {
+    backHome: 'Terug naar home',
+  },
+  nav: {
+    primary: 'Hoofdmenu',
+    menuOpen: 'Menu openen',
+    menuClose: 'Menu sluiten',
+    home: 'Home',
+    work: 'Werk',
+    services: 'Diensten',
+    about: 'Over mij',
+    lab: 'Lab',
+    contact: 'Contact',
+  },
+  cta: {
+    startProject: 'Start een project',
   },
   theme: {
     darkMode: 'Donkere modus',
   },
   language: {
     label: 'Taal',
+  },
+  footer: {
+    role: 'Websites en webapplicaties, ontworpen en gebouwd.',
+    navLabel: 'Footermenu',
+    pagesHeading: "Pagina's",
+    contactHeading: 'Contact',
+    contactIntro: 'Heb je een idee of een vraag? Laten we praten.',
+    contactLink: 'Neem contact op',
+    socialHeading: 'Sociale profielen',
+    legalLabel: 'Juridisch',
+    legal: {
+      privacy: 'Privacy',
+      legalNotice: 'Juridische informatie',
+    },
+    rights: 'Alle rechten voorbehouden.',
   },
   status: {
     live: 'Live',
@@ -30,9 +63,11 @@ export const nl: Dictionary = {
   home: {
     underConstruction: 'Deze site is nog in aanbouw.',
   },
+  placeholder: {
+    description: 'Deze pagina komt binnenkort.',
+  },
   notFound: {
     title: 'Pagina niet gevonden',
     description: 'Dit adres bestaat niet, of de pagina is verplaatst.',
-    backHome: 'Terug naar home',
   },
 }

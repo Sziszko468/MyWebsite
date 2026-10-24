@@ -1,10 +1,13 @@
 import { Link, useLocation } from 'react-router'
 import { LANGUAGES, LANGUAGE_META } from '../../i18n/config'
-import { switchLanguagePath } from '../../i18n/paths'
 import { useI18n } from '../../i18n/useI18n'
+import { resolveLanguageSwitch } from '../../routes/languageSwitch'
 import styles from './LanguageSwitcher.module.scss'
 
-/** Real links to the same page in each language, so it works without JS and is crawlable. */
+/**
+ * Real links to the same page in each language, so it works without JS and is crawlable.
+ * A page without a translation links to that language's home page instead of a dead path.
+ */
 export function LanguageSwitcher() {
   const { lang, t } = useI18n()
   const { pathname, search, hash } = useLocation()
@@ -15,10 +18,12 @@ export function LanguageSwitcher() {
         {LANGUAGES.map((code) => {
           const { code: label, name } = LANGUAGE_META[code]
           const isCurrent = code === lang
+          const target = resolveLanguageSwitch(pathname, code)
           return (
             <li key={code}>
               <Link
-                to={`${switchLanguagePath(pathname, code)}${search}${hash}`}
+                // Query and hash belong to the page, so they only travel with it.
+                to={target.samePage ? `${target.path}${search}${hash}` : target.path}
                 className={styles.link}
                 lang={code}
                 hrefLang={code}

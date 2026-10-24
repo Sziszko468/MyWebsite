@@ -1,0 +1,99 @@
+@use '../../styles/mixins' as m;
+
+/* Menu and close buttons share one look and a 44px touch target. */
+.button {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--size-touch);
+  height: var(--size-touch);
+  padding: 0;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    border-color: var(--color-text);
+    background-color: var(--color-surface-hover);
+  }
+
+  @include m.pressed {
+    background-color: var(--color-surface-active);
+  }
+}
+
+/* The header shows the inline navigation from the `nav` breakpoint up; the menu button leaves. */
+.opener {
+  @include m.up('nav') {
+    display: none;
+  }
+}
+
+.dialog {
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+
+  &[open] {
+    display: flex;
+    flex-direction: column;
+    animation: menu-in var(--dur-base) var(--ease-out);
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.top {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--header-height);
+  padding-inline: var(--gutter);
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.footer {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: auto;
+}
+
+.switches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
