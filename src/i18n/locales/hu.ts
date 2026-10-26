@@ -26,6 +26,18 @@ export const hu = {
   cta: {
     startProject: 'Indítsunk projektet',
   },
+  intro: {
+    titleLine1: 'Üdvözlök',
+    titleLine2: 'a weboldalak',
+    titleLine3: 'következő',
+    titleLine4: 'dimenziójában.',
+    supporting: 'A digitális tér a te mozdulatodra reagál.',
+    cta: 'Kattints a belépéshez',
+    ctaTouch: 'Koppints a belépéshez',
+    hint: 'Mozdítsd a pointert. Alakítsd a teret.',
+    hintTouch: 'Húzd az ujjad. Alakítsd a teret.',
+    skip: 'Ne mutasd újra',
+  },
   hero: {
     titleLine1: 'Építs digitálisan.',
     titleLine2: 'Ami valóban számít.',

@@ -165,17 +165,13 @@
   --shadow-glow: 0 0 0 1px color-mix(in srgb, var(--brand-red) 40%, transparent),
     0 10px 36px -8px color-mix(in srgb, var(--brand-red) 50%, transparent);
 
-  /* Consumed by the 3D scene (read via getComputedStyle). Colours are plain hex or brand
-     tokens; plain numbers are multipliers. */
+  /* Consumed by the hero's generative scene (read via getComputedStyle). Colours are plain hex
+     or brand tokens; plain numbers are multipliers. */
   --scene-bg: var(--brand-black);
-  --scene-track: #131316;
-  --scene-marking: #8a8a94;
-  --scene-car-body: #232838;
-  --scene-car-trim: #2e3340;
-  --scene-reflection: 0.9;
-  --scene-env: 1.7;
-  --scene-glow: 1;
-  --scene-bloom: 0.85;
+  --scene-ink: var(--brand-paper);
+  --scene-grid: #4a5072;
+  --scene-glow: 1.9;
+  --scene-bloom: 0.8;
   --scene-light-red: var(--brand-red);
   --scene-light-blue: var(--brand-blue);
 }
@@ -222,14 +218,10 @@
     0 12px 32px -10px color-mix(in srgb, var(--brand-red) 40%, transparent);
 
   --scene-bg: var(--brand-paper);
-  --scene-track: #8d8981;
-  --scene-marking: #f4f0e8;
-  --scene-car-body: #9ca0ab;
-  --scene-car-trim: #3a3c45;
-  --scene-reflection: 0.3;
-  --scene-env: 0.85;
-  --scene-glow: 1.6;
-  --scene-bloom: 0.18;
+  --scene-ink: var(--brand-graphite);
+  --scene-grid: #8d8a9a;
+  --scene-glow: 3.4;
+  --scene-bloom: 0.12;
   --scene-light-red: var(--brand-red);
   --scene-light-blue: var(--brand-blue);
 }

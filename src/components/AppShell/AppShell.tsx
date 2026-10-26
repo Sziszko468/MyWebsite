@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useI18n } from '../../i18n/useI18n'
+import { VelocityIntro } from '../intro/VelocityIntro'
 import { MainContent } from '../MainContent/MainContent'
 import { SiteFooter } from '../SiteFooter/SiteFooter'
 import { SiteHeader } from '../SiteHeader/SiteHeader'
@@ -22,6 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <SiteHeader />
       <MainContent>{children}</MainContent>
       <SiteFooter />
+      <VelocityIntro />
     </div>
   )
 }

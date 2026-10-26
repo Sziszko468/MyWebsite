@@ -1,4 +1,4 @@
-import { Component, type ReactNode } from 'react'
+import { Component, type ReactNode, type Ref } from 'react'
 import { cx } from '../../utils/cx'
 import styles from './SceneLayer.module.scss'
 
@@ -34,6 +34,8 @@ interface SceneLayerProps {
   /** Called once if the scene throws, so the owner can stop trying to render it. */
   onError?: (error: unknown) => void
   className?: string
+  /** The layer's own element, e.g. to measure the area the scene covers. */
+  ref?: Ref<HTMLDivElement>
 }
 
 /**
@@ -46,9 +48,9 @@ interface SceneLayerProps {
  * Use the `under-header` mixin to run the section beneath the sticky header. The scene reads
  * its colours from the `--scene-*` tokens and the theme from `useTheme()`.
  */
-export function SceneLayer({ children, fallback = null, onError, className }: SceneLayerProps) {
+export function SceneLayer({ children, fallback = null, onError, className, ref }: SceneLayerProps) {
   return (
-    <div className={cx(styles.layer, className)} aria-hidden="true">
+    <div ref={ref} className={cx(styles.layer, className)} aria-hidden="true">
       <SceneBoundary fallback={fallback} onError={onError}>
         {children}
       </SceneBoundary>

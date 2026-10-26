@@ -49,3 +49,21 @@ export function useReducedMotion(): boolean {
     () => false,
   )
 }
+
+const TOUCH_QUERY = '(hover: none)'
+
+function subscribeTouch(onChange: () => void): () => void {
+  const query = window.matchMedia(TOUCH_QUERY)
+  query.addEventListener('change', onChange)
+  return () => query.removeEventListener('change', onChange)
+}
+
+/** True on devices whose main input cannot hover (phones and tablets), where wording and entry rules differ. */
+export function useTouchFirst(): boolean {
+  return useSyncExternalStore(
+    subscribeTouch,
+    () => window.matchMedia(TOUCH_QUERY).matches,
+    () => false,
+  )
+}
+

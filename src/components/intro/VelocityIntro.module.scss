@@ -1,0 +1,346 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The fullscreen intro. A modal <dialog> fills the screen (the browser puts it above everything and
+ * makes the page behind inert); the generative scene is its background, and the headline, the
+ * entry button and the small controls are HTML above it.
+ *
+ * Layouts: the headline sits top-left on narrow screens, with the entry row at the bottom where a
+ * thumb reaches it; from `lg` up it is a left-aligned editorial block, vertically centred, with
+ * the focal point of the field to its right.
+ *
+ * The leaving transition is driven by one variable, --intro-exit (0..1), and the click point
+ * (--ix, --iy): a hole opens from that point and the text fades while the scene rushes and flies
+ * apart. Under reduced motion it is a plain fade.
+ */
+
+.intro {
+  --_pad: clamp(1.25rem, 4vw, 3.5rem);
+  --_solid: color-mix(in srgb, var(--color-bg) var(--scene-scrim), transparent);
+
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+
+  &::backdrop {
+    background: transparent;
+  }
+}
+
+/* The scene: the whole screen. The layout name tells the camera how to compose the field. */
+.intro .stage {
+  --hero-layout: intro;
+  --hero-shift: 0px;
+
+  inset: 0;
+
+  @include m.up('lg') {
+    --hero-shift: 230px;
+  }
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+
+.canvasVisible {
+  opacity: 1;
+}
+
+/* Keeps the headline and the entry row readable over the brightest streak; see hero.test.ts. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  pointer-events: none;
+  background:
+    linear-gradient(to top, color-mix(in srgb, var(--color-bg) 70%, transparent) 0%, transparent 34%),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-bg) 70%, transparent) 0%, transparent 40%);
+
+  @include m.up('lg') {
+    background:
+      linear-gradient(to top, color-mix(in srgb, var(--color-bg) 50%, transparent) 0%, transparent 20%),
+      linear-gradient(to right, color-mix(in srgb, var(--color-bg) 62%, transparent) 0%, transparent 52%);
+  }
+}
+
+.content {
+  position: relative;
+  z-index: var(--z-content);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-5);
+  height: 100%;
+  padding: calc(var(--_pad) + var(--size-touch) + var(--space-3)) var(--_pad) calc(var(--_pad) + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  @include m.up('lg') {
+    justify-content: center;
+    gap: var(--space-7);
+    padding-top: var(--_pad);
+  }
+}
+
+.copy {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+  width: fit-content;
+  max-width: 46rem;
+
+  /* Sized by the viewport's width and capped by its height, so that the longest word and all four
+     lines fit on every screen, in every language, including a phone held sideways. The headline is
+     modest on purpose: the field is the show, the words are the caption. */
+  --title-size: min(clamp(1.35rem, 6.4vw, 2.2rem), 8.5vh);
+
+  @include m.up('sm') {
+    --title-size: min(clamp(1.7rem, 5.6vw, 2.7rem), 8.5vh);
+  }
+
+  @include m.up('md') {
+    --title-size: min(clamp(2.1rem, 5vw, 3.5rem), 8.5vh);
+  }
+
+  @include m.up('lg') {
+    --title-size: min(clamp(2.3rem, 3.5vw, 4.4rem), 9vh);
+
+    max-width: 52vw;
+  }
+}
+
+/* A soft plate in the page colour hugs each block of text, so it stays readable over the brightest
+   part of a busy field without dimming the field elsewhere. */
+.copy::before,
+.entry::before {
+  content: '';
+  position: absolute;
+  /* The bottom edge stays well within the content area's padding (and the rise-in animation's
+     offset), so a plate never makes it scroll. */
+  inset: -1.75rem -1.75rem -0.25rem;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, var(--_solid) 58%, transparent 100%);
+}
+
+/* Small text has no scrim of its own where it sits mid-screen, so it carries a soft halo in the
+   background colour: a bright streak behind it never takes the words away. */
+.supporting,
+.hint,
+.skip {
+  text-shadow:
+    0 0 0.35em var(--color-bg),
+    0 0 0.9em var(--color-bg);
+}
+
+.supporting {
+  max-width: 34ch;
+  color: var(--color-text-secondary);
+  font-size: clamp(0.875rem, 0.8rem + 0.35vw, 1.125rem);
+  line-height: var(--lh-relaxed);
+}
+
+.entry {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  width: fit-content;
+  max-width: 34rem;
+
+  /* On a touch screen the entry row spans the width, within thumb reach. */
+  @media (hover: none) {
+    width: 100%;
+  }
+}
+
+.hint {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wider);
+  line-height: var(--lh-normal);
+  text-transform: uppercase;
+}
+
+/* A short, wide screen (a phone held sideways): the headline and the way in sit side by side, so
+   the button is on screen without scrolling. */
+@media (orientation: landscape) and (max-height: 32rem) {
+  .content {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding-top: var(--_pad);
+  }
+
+  .copy {
+    --title-size: min(clamp(1.35rem, 3.6vw, 2.4rem), 9vh);
+
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: var(--space-3);
+  }
+
+  .entry {
+    flex: none;
+    width: min(18rem, 40vw);
+    gap: var(--space-2);
+  }
+}
+
+/* The language and theme controls: small, in the corner, out of the way of the headline. */
+.controls {
+  position: absolute;
+  top: var(--_pad);
+  right: var(--_pad);
+  z-index: calc(var(--z-content) + 1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.skip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--size-touch);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+
+.skipInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.skipBox {
+  position: relative;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  transition: var(--transition-colors);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0.12rem;
+    left: 0.38rem;
+    width: 0.32rem;
+    height: 0.64rem;
+    border: solid var(--color-on-accent);
+    border-width: 0 2px 2px 0;
+    opacity: 0;
+    transform: rotate(40deg);
+  }
+}
+
+.skipInput:checked + .skipBox {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+
+  &::after {
+    opacity: 1;
+  }
+}
+
+.skipInput:focus-visible + .skipBox {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* The headline's words rise as the intro opens (see KineticTypography); the rest follows. */
+.supporting,
+.entry {
+  animation: rise 0.7s var(--ease-out) both;
+}
+
+.supporting {
+  animation-delay: 0.55s;
+}
+
+.entry {
+  animation-delay: 0.75s;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.8rem, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Leaving ─────────────────────────────────────────────────────────── */
+
+.intro[data-phase='exiting'] {
+  /* A hole opens from the click point and grows past the screen's corners. */
+  --_radius: calc(var(--intro-exit, 0) * 150vmax);
+
+  -webkit-mask-image: radial-gradient(
+    circle at var(--ix, 50%) var(--iy, 50%),
+    transparent var(--_radius),
+    #000 calc(var(--_radius) + 14vmax)
+  );
+  mask-image: radial-gradient(circle at var(--ix, 50%) var(--iy, 50%), transparent var(--_radius), #000 calc(var(--_radius) + 14vmax));
+
+  .content,
+  .controls {
+    opacity: max(0, calc(1 - var(--intro-exit, 0) * 2.4));
+    transform: translate3d(0, calc(var(--intro-exit, 0) * -1.6rem), 0);
+  }
+
+  /* The static graphic (no WebGL) swells instead of rushing. */
+  .stage {
+    transform: scale(calc(1 + var(--intro-exit, 0) * 0.5));
+    transform-origin: var(--ix, 50%) var(--iy, 50%);
+  }
+}
+
+/* Reduced motion: no hole, no rush; the whole intro fades out. */
+.intro[data-reduced='true'][data-phase='exiting'] {
+  -webkit-mask-image: none;
+  mask-image: none;
+  opacity: calc(1 - var(--intro-exit, 0));
+
+  .content,
+  .controls {
+    opacity: 1;
+    transform: none;
+  }
+
+  .stage {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .supporting,
+  .entry {
+    animation: none;
+  }
+}

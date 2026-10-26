@@ -8,8 +8,8 @@ export interface ScenePart {
 }
 
 /**
- * Builds a scene part once and releases its GPU resources (geometries, materials, textures) when
- * the component unmounts. Parts depend on the quality tier, so the scene gives each of them
+ * Builds a scene part once and releases its GPU resources (geometries, materials) when the
+ * component unmounts. Parts depend on the quality tier, so the scene gives each of them
  * `key={tier}` and a tier change rebuilds them from scratch.
  */
 export function usePart<T extends ScenePart>(factory: () => T): T {

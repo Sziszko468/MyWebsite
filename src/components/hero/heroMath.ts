@@ -18,3 +18,20 @@ export function smoothstep(edge0: number, edge1: number, value: number): number 
 export function damp(current: number, target: number, halfLife: number, dt: number): number {
   return lerp(current, target, 1 - Math.pow(0.5, dt / halfLife))
 }
+
+/** The shared clock, in seconds. Click waves are stamped with it by the driver and aged by the shaders. */
+export function clockSeconds(): number {
+  return performance.now() / 1000
+}
+
+/** Small deterministic generator, so generated art looks the same on every load. */
+export function seededRandom(seed: number): () => number {
+  let state = seed >>> 0
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0
+    let t = state
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}

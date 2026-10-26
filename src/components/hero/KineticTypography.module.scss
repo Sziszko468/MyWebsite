@@ -1,0 +1,187 @@
+/*
+ * Kinetic headline. The text stays plain and readable at every moment: the movement is small,
+ * eased, bounded, and drops away entirely under prefers-reduced-motion.
+ *
+ * Variables written by the hero's driver (all optional, they default to rest):
+ *   --hero-cx, --hero-cy   eased pointer position, -1..1
+ *   --hero-energy          0..1, how hard the pointer is moving
+ *   --hero-progress        0..1, how far the hero has scrolled out
+ */
+
+/* The size can be set by whoever uses the headline, through --title-size. */
+.title {
+  font-size: var(--title-size, clamp(2rem, 1.1rem + 4.6vw, 5.5rem));
+  line-height: 0.94;
+  letter-spacing: var(--ls-tight);
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+}
+
+.line {
+  --_cx: var(--hero-cx, 0);
+  --_cy: var(--hero-cy, 0);
+  --_p: var(--hero-progress, 0);
+  --_dir: -1;
+
+  position: relative;
+  display: block;
+  /* Deeper lines move more with the cursor; on scroll the lines part in opposite directions. */
+  transform: translate3d(
+    calc(var(--_cx) * var(--depth) * -0.7rem + var(--_p) * var(--depth) * var(--_dir) * 3.4vw),
+    calc(var(--_cy) * var(--depth) * 0.3rem - var(--_p) * 2.2rem),
+    0
+  );
+  will-change: transform;
+
+  &:nth-of-type(even) {
+    --_dir: 1;
+  }
+}
+
+/* The face is the readable text; the echo (a pseudo-element, so it adds nothing to the DOM) is an
+   outline of it that trails behind with a little lag. The empty alternative text keeps it out of
+   the accessibility tree. */
+.face {
+  position: relative;
+  z-index: 1;
+}
+
+.line::before {
+  content: attr(data-text);
+  content: attr(data-text) / '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-secondary-text);
+  opacity: 0.6;
+  pointer-events: none;
+  user-select: none;
+  transform: translate3d(
+    calc(0.35rem + var(--hero-cx, 0) * var(--depth) * 1.1rem),
+    calc(0.25rem + var(--hero-cy, 0) * var(--depth) * -0.5rem),
+    0
+  );
+  animation: echo-in 1.2s var(--ease-out) 0.9s both;
+}
+
+/* Each word rises out of its own mask. The padding leaves room for accents and descenders. */
+.mask {
+  display: inline-block;
+  overflow: clip;
+  vertical-align: top;
+  padding-block: 0.22em 0.14em;
+  margin-block: -0.22em -0.14em;
+}
+
+.word {
+  display: inline-block;
+  animation: word-in 0.95s var(--ease-out) calc(var(--i) * 85ms + 120ms) both;
+}
+
+.accent {
+  color: var(--color-accent-text);
+
+  /* One highlight sweeps across the accent line after it has arrived, then it rests. */
+  .word {
+    background-image: linear-gradient(105deg, currentcolor 0 42%, var(--color-text) 50%, currentcolor 58% 100%);
+    background-size: 260% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation:
+      word-in 0.95s var(--ease-out) calc(var(--i) * 85ms + 120ms) both,
+      sweep 1.5s var(--ease-in-out) 1.25s both;
+  }
+}
+
+@keyframes word-in {
+  from {
+    transform: translate3d(0, 115%, 0) skewY(5deg);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes echo-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0.6;
+  }
+}
+
+@keyframes sweep {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0% 0;
+  }
+}
+
+/* A headline that is not reactive never moves with the pointer or the scroll and has no echo. */
+.title[data-reactive='false'] {
+  .line {
+    transform: none;
+    will-change: auto;
+  }
+
+  .line::before {
+    display: none;
+  }
+}
+
+/* Without a pointer there is nothing for the echo to follow, so on touch screens it is left out. */
+@media (hover: none) {
+  .line::before {
+    display: none;
+  }
+}
+
+/* While the intro covers the page, the headline waits; its words rise as the intro opens onto it. */
+:global([data-intro-pending='true']) {
+  .word,
+  .line::before {
+    animation-play-state: paused;
+  }
+}
+
+@media (forced-colors: active) {
+  .accent .word {
+    background: none;
+    -webkit-text-fill-color: currentcolor;
+  }
+
+  .line::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line {
+    transform: none;
+    will-change: auto;
+  }
+
+  .word,
+  .accent .word,
+  .line::before {
+    animation: none;
+  }
+
+  .line::before {
+    transform: translate3d(0.35rem, 0.25rem, 0);
+  }
+
+  .accent .word {
+    background: none;
+    -webkit-text-fill-color: currentcolor;
+  }
+}

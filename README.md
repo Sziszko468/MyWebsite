@@ -7,7 +7,7 @@ npm run dev        # dev server; /hu/design-system shows every token and compone
 npm run build      # type-check + production build
 npm run typecheck  # tsc -b
 npm run lint       # oxlint
-npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero logic and geometry
+npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition
 ```
 
 ## Where things live
@@ -21,9 +21,11 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 | `src/routes/pages.ts` | The page registry: which pages exist, their paths and languages. Router, navigation, footer, titles and the language switcher all read it. |
 | `src/routes/` | `LanguageLayout` (`/:lang/*` guard, providers, shell) and `languageSwitch.ts`. |
 | `src/components/` | UI kit (Button, Container, SectionHeading, Badge, ProjectCard, ServiceCard) and the global frame: `AppShell`, `SiteHeader`, `MainNav`, `BrandMark`, `MobileMenu`, `SiteFooter`, `MainContent`, `SceneLayer`, `ThemeToggle`, `LanguageSwitcher`. |
-| `src/components/hero/` | The Home hero ("Velocity Engine"): HTML layer, static fallback and the lazily loaded Three.js scene. See below. |
+| `src/components/hero/` | The Home hero ("Velocity Field"): kinetic headline, input drivers, generated SVG fallback and the lazily loaded Three.js scene. It is also the engine of the intro. See below. |
+| `src/components/intro/` | The fullscreen opening ("Velocity Intro"): state machine, show/skip policy, exit transition, the dialog and its entry button. See below. |
 | `src/pages/` | Home, placeholder pages, 404. `DesignSystemPage` exists in dev builds only. |
 | `src/config/site.ts` | Brand name, monogram, contact email, social profiles, legal pages. Every `null` is a placeholder. |
+| `src/config/intro.ts` | When the intro appears (`first-visit`, `every-session`, `never`), whether visitors can skip it, how long the exit lasts. |
 
 ## Conventions
 
@@ -37,27 +39,114 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 - **Scene layer:** the hero's 3D canvas lives inside `SceneLayer` (behind content, never captures input, isolated by an error boundary). A section that should run under the header uses the `under-header` mixin from `_mixins.scss`.
 - **Hosting:** the site is a single-page app, so the host must serve `index.html` for every path.
 
-## The hero ("Velocity Engine")
+## The hero ("Velocity Field")
 
-`src/components/hero/`. Headline, description and both buttons are plain HTML above the scene, so they read and work from the first paint. Strings are in `hero.*` of the dictionaries; the second button reuses `cta.startProject`; both buttons are real links (`/work`, `/contact`).
+`src/components/hero/`. An abstract, generative field of light that the visitor moves: streaks rush out of a vanishing point, curved trails wind through it, dust parts around the cursor and a wireframe floor and ceiling rise and roll. There is no car and no scripted scene: the cursor, clicks and scroll change the picture. Headline, description and both buttons are plain HTML above the scene, so they read and work from the first paint. Strings are in `hero.*` of the dictionaries; the second button reuses `cta.startProject`; both buttons are real links (`/work`, `/contact`).
 
 | File | Role |
 | --- | --- |
-| `VelocityHero.tsx`, `.module.scss` | The section: HTML layer, scrim, layout, mode decision (scene or fallback), quality tier, watchdog callbacks. |
-| `VelocityHeroFallback.tsx` | Static SVG version of the same world. Shows while the scene loads, with no WebGL 2, on reduced motion, after a failure or context loss. |
-| `VelocityHeroScene.tsx` | The R3F canvas, the master clock (`Runtime`), palette easing, frame-rate watchdog, context-loss handling. Lazy-loaded: Three.js is its own chunk. |
-| `Track`, `RacingLines`, `ParticleField`, `RacingCar`, `EnvironmentLighting`, `RacingCamera`, `Bloom` | Scene parts. Each builds its Three.js objects once per quality tier and frees them on unmount (`usePart`). |
-| `velocityHeroConfig.ts` | Everything tunable: quality tiers, camera poses, track path, light streaks, composition. |
-| `heroTimeline.ts` | The choreography as a pure function of time: ignition, launch, acceleration, cruise, plus the scroll transition. |
-| `heroPalette.ts`, `heroUniforms.ts` | Reads the `--scene-*` tokens for the active theme and eases the scene towards them. |
-| `heroGeometry.ts`, `heroShaders.ts`, `heroMaterials.ts` | Ribbon and loft builders, GLSL, shared materials and textures. |
-| `capabilities.ts`, `useHeroInputs.ts` | WebGL 2 and reduced-motion detection; cursor, scroll and click written to a ref, never to state. |
+| `VelocityHero.tsx`, `.module.scss` | The section: layers, scrim, layout, mode decision (scene or fallback), quality tier, watchdog callbacks, the bridge to the next section. |
+| `KineticTypography.tsx` | The headline as masked, layered, moving type. Real words in the DOM; CSS-only motion driven by the CSS variables below. |
+| `CursorController.ts` | Pure. Turns the pointer into an eased position, a velocity (direction and speed), an `energy` that drains away at rest, and a ring of click waves. |
+| `ScrollTransition.ts` | Pure. Eases the scroll position and maps it to a pose (roll, pitch, focal-point shift, speed, brightness). |
+| `HeroDriver.ts`, `useHeroDriver.ts` | The only code that touches the page: passive pointer, scroll and visibility listeners, one small loop that sleeps when everything has settled, CSS variables for the typography and fallback. Never calls `preventDefault`. |
+| `VelocityHeroScene.tsx` | The R3F canvas and the master clock (`Runtime`): writes a handful of uniforms per frame, eases the theme palette, runs the frame-rate watchdog, reports context loss. Lazy-loaded: Three.js is its own chunk. |
+| `VelocityField`, `LightTrails`, `DistortionField`, `ReactiveParticles` | The four systems: instanced streaks, curved trail ribbons, deforming grid surfaces, dust. Built once per quality tier, freed on unmount (`usePart`). Each is one or two draw calls. |
+| `FieldCamera.tsx`, `Bloom.tsx` | Camera (cursor lean, scroll roll and pitch, composition) and optional bloom (high tier). |
+| `fieldShaders.ts`, `fieldGeometry.ts`, `fieldUniforms.ts` | GLSL (one shared force function: ambient swirl, cursor, click waves), geometry builders, shared uniforms and palette easing. |
+| `GenerativeHeroFallback.tsx` | The same world as a generated SVG: shows while the scene loads, with no WebGL 2, on reduced motion, after a failure or context loss. |
+| `velocityHeroConfig.ts` | Everything tunable: quality tiers, field size, input time constants, composition. |
 
-- **Theme:** the scene reads the one global theme (`useTheme`) and the `--scene-*` tokens in `tokens.css`. A theme change eases colours, light levels and the additive/alpha blend; it does not restart the run or reset the camera.
-- **Layout:** CSS decides (`--hero-layout`): stacked below `lg` (text first, the scene as its own stage below it), full from `lg` up (scene behind the text, car to the right). The camera reads it back.
+**What the visitor changes**
+
+- **Cursor:** the flow parts around the pointer and is dragged along its motion; streaks lengthen and the world speeds up with the pointer's speed; the surfaces rise under it; the headline's lines lean and their outlined echo trails behind. The effect follows `energy`, which rises at once and drains away with a 0.6 s half-life once the pointer rests. The scene never sees the raw pointer, only an eased position.
+- **Click** on the hero background (not on links or buttons; on touch, a quick tap): a ring travels outwards through the field, pushing streaks, trails, dust and surfaces, and fades over 2.4 s. Up to four can overlap.
+- **Scroll:** the eased scroll progress rolls and pitches the view so the lines turn, sinks the focal point towards the next section, speeds the world up and fades the light; the headline's lines part; three hairlines grow out of the hero's lower edge. Scrolling is never intercepted.
+- **Touch:** dragging moves the field and scrolling speeds it up; a drag never produces a wave, a quick tap does.
+
+**Variables** written on the hero's root element (only while motion is allowed): `--hero-cx`, `--hero-cy` (eased pointer, -1..1), `--hero-energy`, `--hero-progress` (eased scroll-out, 0..1).
+
+- **Theme:** the scene reads the one global theme (`useTheme`) and the `--scene-*` tokens in `tokens.css`. A theme change eases colours, light levels and the additive/alpha blend; it does not restart the scene. On dark the lights add to the image; on light they are painted over it (graphite lines, red and blue strokes).
+- **Layout:** CSS decides (`--hero-layout`): stacked below `lg` (text first, the scene as its own stage below it), full from `lg` up (scene behind the text, focal point to the right). The camera reads it back.
 - **Quality:** `pickQuality` chooses high, medium or low from cores, memory, pointer type, width and save-data. A watchdog lowers the tier after two slow windows of frames and gives up (static fallback) if even the lowest tier is unusable. Bloom is high tier only.
-- **Pausing:** rendering stops while the hero is off screen or the tab is hidden, and resumes on return.
-- **Reduced motion:** the scene is not mounted at all; the static graphic stays. It reacts live if the setting changes.
-- **Development aids** (stripped from production): `?hero=fallback` forces the static graphic, `?hero=high|medium|low` forces a tier, and `window.__hero` exposes the rig, camera and renderer.
-- **Assets:** none. The car, the track, the environment and the textures are generated in code; no model, texture or HDR image is downloaded.
+- **Pausing:** rendering and the driver's loop stop while the hero is off screen or the tab is hidden, and resume on return.
+- **Reduced motion:** the scene is not mounted, no listeners are attached, no CSS variables are written, the headline's animation is off. The generated SVG stays, still. It reacts live if the setting changes.
+- **Development aids** (stripped from production): `?hero=fallback` forces the SVG, `?hero=high|medium|low` forces a tier, `?bloom=0|1` forces bloom, `window.__hero` exposes the rig, uniforms, driver, camera and renderer, and `window.__heroRenderFrame()` renders one frame for benchmarking. The intro's scene has its own slots, `window.__intro` and `window.__introRenderFrame()`, because both scenes can exist at once.
+- **Assets:** none. All geometry, shaders and the SVG are generated in code; nothing is downloaded.
 
+**Measured cost** (Intel Iris Xe, 1781×1125 canvas, GPU-synchronised, median of five runs of 40 frames):
+
+| Tier | ms per frame |
+| --- | --- |
+| high, with bloom | 6.95 |
+| high, bloom off | 3.00 |
+| medium (1.5 DPR cap, fewer systems) | 1.43 |
+| low (DPR 1, no AA, no halos) | 0.27 |
+
+Bloom adds about 4 ms (2.3×) for a soft glow around the brightest nodes and trail edges. It is kept on the high tier only, where it fits the frame budget with room to spare, and it is the first thing the watchdog removes. With the cursor moving constantly, the page held 16.67 ms per frame (p95 16.9 ms, worst 17.3 ms, none over 20 ms) and the JS heap stayed flat.
+
+## The intro ("Velocity Intro")
+
+`src/components/intro/`, texts in `intro.*` of the dictionaries. A fullscreen, interactive opening on a visitor's first visit: the same field of light as the hero, but still until it is touched. It is not a loading screen and not an animation that plays by itself. Move the pointer and the field answers; click (or tap the button) and it flies apart onto the home page that is already waiting underneath.
+
+| File | Role |
+| --- | --- |
+| `VelocityIntro.tsx`, `.module.scss` | A modal `<dialog>`: the browser makes the page behind it inert, traps focus and puts it above the header. Scene, scrim, headline, entry button, language and theme controls, "don't show again". |
+| `IntroProvider.tsx`, `introContext.ts`, `useIntro.ts` | The state `ready → active → exiting → completed`, held above the router so it survives navigation and language changes. Guards make the entry fire once. |
+| `introPolicy.ts` | Pure: whether to show the intro, and what to remember (`localStorage`/`sessionStorage`, both guarded; blocked storage means "show"). |
+| `introTransition.ts`, `useIntroExit.ts` | Pure easing, and the hook that writes one eased number (`--intro-exit`) to a CSS variable and to the scene's signal each frame. No React state per frame. |
+| `IntroEntryButton.tsx` | A real `<button>`, independent of WebGL. |
+| `../hero/fieldMotion.ts` | Pure: how the field moves for the hero (always flowing) and for the intro (still at rest, driven by pointer energy), and for the exit. |
+| `../hero/PointerBeam.tsx` | The light beam through the pointer, stretching with speed. |
+| `../hero/PointerHud.tsx` | One full-screen quad that draws the pointer's reticle, the click shock rings and the exit starburst. Hidden (not drawn) unless one of them is showing. |
+| `../hero/TunnelRings.tsx` | Concentric ring gates rushing down the tunnel, in four families. One draw call. |
+| `../hero/useSceneHealth.ts` | The scene-or-fallback decision, tier and watchdog, shared by hero and intro. |
+| `../hero/velocityHeroConfig.ts` | `INTRO_QUALITY`: the intro's own, much denser quality profiles; `profileFor(mode, tier)` picks them. |
+
+**Configuration** (`src/config/intro.ts`): `frequency` is `'first-visit'` (default, remembered in `localStorage` as `intro:seen`), `'every-session'` (`sessionStorage`) or `'never'`; `allowSkip` adds a "don't show again" checkbox (`localStorage` `intro:skip`) that wins over `frequency`; `exitMs` (1000) and `exitMsReduced` (320). The decision is made on every page load and in-app navigation never restarts the intro. Development only: `?intro=1` forces it, `?intro=0` hides it; production ignores the query.
+
+**What the visitor changes**
+
+- **Pointer:** position, direction, speed and distance all matter. The flow parts around the pointer and swirls with the direction of travel (left→right differs from right→left); faster movement means longer beams, stronger distortion and a faster world; slow, close movement shows fine dust around the pointer. Everything is eased and returns to rest gradually (energy half-life 0.6 s), and the page renders no frames at rest.
+- **Entry:** a click on the background with a mouse or pen, a tap on the button, Enter or Space on the button, or Escape. The transition lasts 1000 ms: the click point becomes an impulse, the world rushes past, the field spreads towards the edges, the view widens and rolls, the light fades and a hole opens from the click point onto the page. Entry fires once; later clicks are ignored.
+- **Touch:** a finger on the background (a drag, a tap) never enters, so scrolling-by-habit cannot dismiss it; the button is full width and at least 60 px tall. There is no simulated mouse.
+- **Language and theme** can be changed inside the intro; texts and colours change, the scene is not restarted.
+- **Reticle:** while the pointer moves (and for about a second after) a fine targeting reticle follows it: dashed rings, ticks and a gapped cross that swell with speed and burn brightest on the side the pointer is travelling towards.
+- **Shock rings:** a click sends a bright ring and three echoes outwards, broken into dashes with short spokes riding the front, on the same front that pushes the field.
+- **Exit starburst:** fine spokes in three densities radiate from the click point behind a bright band and rings in its wake; the layers fly apart at different rates (hairlines fastest) for depth. Its envelope is zero at both ends, so nothing flashes.
+
+**Detail.** The intro runs the hero's engine with several times the detail (`INTRO_QUALITY`; the hero's own profiles and look are unchanged):
+
+| Layer | Hero, high | Intro, high | Intro, medium | Intro, low |
+| --- | --- | --- | --- | --- |
+| Streaks (+ hairline layer: thinner, shorter, fainter, with bright tips) | 2600 | 3000 + 9000 | 1700 + 3600 | 800 + 1500 |
+| Dust (mostly 1–2 px specks, few large motes) | 2000 | 9000 | 3600 | 1500 |
+| Trails (main + hair-thin; halos only under the main ones) | 24 | 28 + 40 | 18 + 18 | 10 + 10 |
+| Surface grid lines (every 4th strong, the rest fine) | 1× | 2× | 1.5× | 1× |
+| Tunnel rings (rows per family, four families) | – | 12 | 8 | 5 |
+| Overlay (reticle, shock rings, starburst) | – | yes | yes | yes |
+| Pixel budget | 3.4 M | 2.8 M | 1.5 M | 0.9 M |
+
+**Loading and failure.** Headline and button are HTML and usable from the first paint, over the generated SVG graphic. The WebGL scene fades in after its first frame. With no WebGL 2, after a failure or context loss, or on reduced motion, the SVG stays and entry still works (with a CSS-only version of the exit; on reduced motion a plain 320 ms fade, no pointer-driven motion). The home page, including its own scene, loads quietly behind the intro (one frame to compile shaders, no input, headline animation held), so the reveal lands on a live field. After entry the intro's canvas unmounts, its WebGL context is released and nothing keeps running.
+
+**Layout.** Over 1440 px: a left-aligned editorial block, the field's focal point to the right. 1024–1439 and 768–1023: the same block scaled by viewport width. Below 768: headline at the top, the entry row at the bottom within thumb reach; the headline is sized by width and capped by height so the longest word ("dimenziójában.") fits at 320 px. Short landscape screens (phones held sideways) put headline and entry side by side so the button is on screen without scrolling. Dynamic viewport units (`dvh`) are used throughout.
+
+**Type.** The headline is modest on purpose, the field is the show: about 50 px at 1440 px wide (31% of the width), 67 px at 1920, 37 px at 1024, 25 px at 390 and 21.6 px at 320; the supporting line is 14–18 px and the entry label 13–16 px. Each text block carries a soft plate in the page colour (`.copy::before`, `.entry::before`) so it stays readable over the brightest part of a busy field without dimming the field elsewhere.
+
+**Measured** (Intel Iris Xe, embedded Chromium, 1920×1080 viewport, with the detailed profiles). GPU clocks on this machine drift by up to 2× between runs, so costs are given against the hero's old scene rendered in the same call, alternating A/B:
+
+| What | Result |
+| --- | --- |
+| High tier, one frame with bloom (2231×1254) | 13.7 ms, against 11.5 ms for the hero's scene (2400×1350) |
+| Medium tier, one frame (1788×1006) | 10–13 ms, against 1.9–3.3 ms for the hero's medium scene |
+| Frames rendered while at rest | 0 in 1.5 s, for the intro and the hero behind it |
+| Exit transition | 1057 ms, from the entry button's centre |
+| After entry | context lost (released), geometries 0, one canvas left (the hero's), dev slot removed |
+
+Live frame pacing under pointer motion was measured before the extra detail was added (16.7 ms average, p99 17.3 ms at the old cost) and could not be repeated reliably afterwards: during this round the embedded browser ran `requestAnimationFrame` at 30 Hz even on an idle page. Treat the detailed intro's real-world frame rate as unconfirmed; the watchdog lowers the tier after two slow windows of frames, as in the hero.
+
+**Pixel budget fix.** `PixelBudget` lowers the canvas's pixel ratio on big screens, but React Three Fiber puts its own `dpr` prop back whenever the canvas's parent re-renders (for example when the intro goes from `ready` to `active`), which silently undid the budget. It now re-applies itself whenever the ratio has drifted, not only when the size changes.
+
+Layout was measured in the DOM (headline word extents, button box, overlaps, horizontal overflow) at 1920×1080, 1440×900, 1024×768, 768×1024, 390×844, 360×800, 320×640, 844×390, 667×375, 568×320 and 1440×480, in all three languages where noted: no horizontal overflow, the headline always inside the viewport, the button at least 44×44 px and visible without scrolling.
+
+**Not tested** (be aware): real phones and real touch hardware (touch was checked by emulating the viewport and dispatching `pointerType: 'touch'` events), Safari and Firefox (only an embedded Chromium was available), screen readers, genuinely slow devices (the quality tiers and watchdog are the same as the hero's), and a browser that really lacks WebGL (the fallback was forced with `?hero=fallback`). Reduced motion was simulated by overriding `matchMedia` in the page, so the CSS-side `@media (prefers-reduced-motion)` rule (it only switches the text's rise-in animation off) was not exercised.

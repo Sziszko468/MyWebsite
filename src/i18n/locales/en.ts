@@ -26,6 +26,18 @@ export const en: Dictionary = {
   cta: {
     startProject: 'Start a project',
   },
+  intro: {
+    titleLine1: 'Welcome to',
+    titleLine2: 'the next',
+    titleLine3: 'dimension',
+    titleLine4: 'of the web.',
+    supporting: 'A digital space that responds to your movement.',
+    cta: 'Click to enter',
+    ctaTouch: 'Tap to enter',
+    hint: 'Move to distort. Click to enter.',
+    hintTouch: 'Drag to distort. Tap to enter.',
+    skip: "Don't show this again",
+  },
   hero: {
     titleLine1: 'Build digital.',
     titleLine2: 'Things that matter.',

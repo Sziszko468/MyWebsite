@@ -1,0 +1,71 @@
+.fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--scene-bg);
+}
+
+/* --hero-shift comes from the hero's CSS: wide screens move the world right, clear of the headline. */
+.world {
+  transform: translateX(var(--hero-shift, 0px));
+}
+
+line,
+path {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.red {
+  stroke: var(--scene-light-red);
+}
+
+.ink {
+  stroke: var(--scene-ink);
+}
+
+.blue {
+  stroke: var(--scene-light-blue);
+}
+
+.halo {
+  opacity: 0.16;
+}
+
+.floor {
+  stroke: var(--scene-grid);
+  stroke-width: 1.2;
+  opacity: 0.55;
+}
+
+/* Three depths lean with the cursor by different amounts. The variables only exist while the
+   visitor allows motion, so this costs nothing otherwise. */
+.deep {
+  transform: translate(calc(var(--hero-cx, 0) * -4px), calc(var(--hero-cy, 0) * 3px));
+}
+
+.mid {
+  transform: translate(calc(var(--hero-cx, 0) * -9px), calc(var(--hero-cy, 0) * 6px));
+}
+
+.near {
+  transform: translate(calc(var(--hero-cx, 0) * -16px), calc(var(--hero-cy, 0) * 10px));
+}
+
+/* Minimal motion for visitors who have not asked for less: a handful of streaks drift outward. */
+.flow {
+  stroke-dasharray: 26 60;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .flow {
+    animation: drift 2.6s linear infinite;
+  }
+}
+
+@keyframes drift {
+  to {
+    stroke-dashoffset: -86;
+  }
+}

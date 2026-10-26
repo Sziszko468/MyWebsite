@@ -1,0 +1,62 @@
+@use '../../styles/mixins' as m;
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: var(--size-touch);
+  min-height: 3rem;
+  padding: var(--space-2) 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: clamp(0.8rem, 0.72rem + 0.3vw, 1rem);
+  font-weight: var(--fw-bold);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  /* A thumb-sized row on touch screens, with rules above and below so it reads as a control. */
+  @media (hover: none) {
+    justify-content: space-between;
+    width: 100%;
+    min-height: 3.5rem;
+    padding-inline: var(--space-1);
+    border-block: var(--border-width) solid var(--color-border-strong);
+  }
+}
+
+.label {
+  padding-bottom: 0.25em;
+  background: linear-gradient(var(--color-accent), var(--color-accent)) 0 100% / 100% 2px no-repeat;
+  transition: background-size var(--dur-fast) var(--ease-out);
+}
+
+.arrow {
+  flex: none;
+  font-size: 1.35em;
+  color: var(--color-accent-text);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.button {
+  @include m.hover {
+    .label {
+      background-size: 100% 100%;
+      color: var(--color-on-accent);
+    }
+
+    .arrow {
+      transform: translate(0.2em, -0.2em);
+    }
+  }
+
+  @include m.pressed {
+    .arrow {
+      transform: translate(0.35em, -0.35em);
+    }
+  }
+}

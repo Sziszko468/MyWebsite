@@ -1,33 +1,36 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Fragment, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { Bloom } from './Bloom'
-import { EnvironmentLighting } from './EnvironmentLighting'
-import { ParticleField } from './ParticleField'
-import { RacingCamera } from './RacingCamera'
-import { RacingCar } from './RacingCar'
-import { RacingLines } from './RacingLines'
-import { Track } from './Track'
-import { damp, smoothstep } from './heroMath'
-import { readScenePalette } from './heroPalette'
+import { DistortionField } from './DistortionField'
+import { createMotion, fieldMotion, type ExitSignal, type FieldMode } from './fieldMotion'
+import { blendPalette, createBlended, createUniforms, type BlendedPalette, type FieldUniforms } from './fieldUniforms'
+import { FieldCamera } from './FieldCamera'
+import type { HeroDriver } from './HeroDriver'
+import { clamp, clockSeconds, smoothstep } from './heroMath'
+import { readScenePalette, type ScenePalette } from './heroPalette'
 import { createRig, type HeroRig } from './heroRig'
-import { sampleTimeline, scrollTransition } from './heroTimeline'
-import { blendPalette, createBlended, createUniforms, type BlendedPalette, type HeroUniforms } from './heroUniforms'
-import type { HeroInputs } from './useHeroInputs'
-import {
-  POSE_IDLE,
-  PULSE_SECONDS,
-  QUALITY,
-  SLOW_FRAME_MS,
-  TOP_SPEED,
-  type QualityProfile,
-  type QualityTier,
-} from './velocityHeroConfig'
-import { createRigCapture } from './rigCapture'
+import { LightTrails } from './LightTrails'
+import { PointerBeam } from './PointerBeam'
+import { PointerHud } from './PointerHud'
+import { ReactiveParticles } from './ReactiveParticles'
+import { createRigCapture, registerFrameRenderer, type DevSlot } from './rigCapture'
+import { scrollPose } from './ScrollTransition'
+import { TunnelRings } from './TunnelRings'
+import { VelocityField } from './VelocityField'
+import { CURSOR, FIELD, SLOW_FRAME_MS, profileFor, type QualityProfile, type QualityTier } from './velocityHeroConfig'
 
 export interface VelocityHeroSceneProps {
   theme: 'dark' | 'light'
   tier: QualityTier
-  inputs: RefObject<HeroInputs>
+  /** The page's input: cursor, clicks and scroll, already eased. Read every frame, never copied to state. */
+  driver: HeroDriver
+  /**
+   * `hero`: a world that is always flowing, rendered every frame while on screen.
+   * `intro`: a world that is still until touched, rendered only while something is changing.
+   */
+  mode?: FieldMode
+  /** The intro's leaving transition; read every frame. */
+  exit?: RefObject<ExitSignal>
   /** False when the hero is off screen: rendering stops until it returns. */
   active: boolean
   onReady: () => void
@@ -35,12 +38,16 @@ export interface VelocityHeroSceneProps {
   onSlow: (averageMs: number) => void
   onContextLost: () => void
   onContextRestored: () => void
+  /** Development only: force bloom on or off, to measure its cost. */
+  bloom?: boolean
 }
 
-type RuntimeProps = Pick<VelocityHeroSceneProps, 'inputs' | 'onReady' | 'onSlow' | 'onContextLost' | 'onContextRestored'> & {
-  target: ReturnType<typeof readScenePalette>
+type RuntimeProps = Pick<VelocityHeroSceneProps, 'driver' | 'onReady' | 'onSlow' | 'onContextLost' | 'onContextRestored'> & {
+  mode: FieldMode
+  exit?: RefObject<ExitSignal>
+  target: ScenePalette
   blended: BlendedPalette
-  uniforms: HeroUniforms
+  uniforms: FieldUniforms
   rig: HeroRig
 }
 
@@ -51,19 +58,41 @@ const WINDOW_FRAMES = 90
 const COOL_DOWN_FRAMES = 150
 
 /**
- * The master clock. It runs before every other part (priority -2), advances the choreography,
- * eases the palette, writes the shared uniforms, and watches the frame rate. It also reports
- * WebGL context loss and restoration.
+ * The master clock. It runs before every other part (priority -2): it advances the world's
+ * motion, turns the visitor's eased input into uniforms, eases the palette, and watches the
+ * frame rate. It also reports WebGL context loss and restoration. Per frame it only writes
+ * numbers into objects created once; it allocates nothing.
+ *
+ * In `intro` mode the canvas renders on demand: this keeps asking for the next frame only while
+ * something is changing (pointer, click waves, waking up, theme blend, exit), so a scene at rest
+ * costs nothing.
  */
-function Runtime({ inputs, target, blended, uniforms, rig, onReady, onSlow, onContextLost, onContextRestored }: RuntimeProps) {
+function Runtime({ driver, mode, exit, target, blended, uniforms, rig, onReady, onSlow, onContextLost, onContextRestored }: RuntimeProps) {
   const gl = useThree((state) => state.gl)
+  const size = useThree((state) => state.size)
+  const scene = useThree((state) => state.scene)
+  const invalidate = useThree((state) => state.invalidate)
   const frames = useRef(0)
   const watch = useRef({ time: 0, count: 0, strikes: 0, cooldown: WARM_UP_FRAMES })
+  const rippleVersion = useRef(-1)
   const latest = useRef(target)
+  const motion = useRef(createMotion())
 
   useEffect(() => {
     latest.current = target
-  }, [target])
+    invalidate()
+  }, [target, invalidate])
+
+  // New input may need a new frame.
+  useEffect(() => driver.subscribe(invalidate), [driver, invalidate])
+
+  // The scene's background is the page colour, eased with the theme.
+  useEffect(() => {
+    scene.background = blended.bg
+    return () => {
+      scene.background = null
+    }
+  }, [scene, blended])
 
   useEffect(() => {
     const canvas = gl.domElement
@@ -81,33 +110,75 @@ function Runtime({ inputs, target, blended, uniforms, rig, onReady, onSlow, onCo
 
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05)
+    const { cursor, scroll } = driver
+    const u = uniforms
+    const intro = mode === 'intro'
+    const now = clockSeconds()
+    const leaving = exit?.current.progress ?? 0
 
     rig.elapsed += dt
-    sampleTimeline(rig.elapsed, rig.state)
+    rig.intro = smoothstep(0, intro ? FIELD.introRampSeconds : FIELD.introSeconds, rig.elapsed)
+    scrollPose(scroll.progress, rig.pose)
 
-    const input = inputs.current
-    rig.scroll = damp(rig.scroll, input.scroll, 0.12, dt)
-    const scroll = scrollTransition(rig.scroll)
-    rig.speed = rig.state.speed + scroll.speedBoost
-    rig.travel += rig.speed * TOP_SPEED * dt
+    // How hard the visitor is pushing the field: the cursor's eased energy, plus scroll speed.
+    const energy = cursor.energy
+    const pull = Math.min(1, Math.abs(scroll.velocity) * 1.5)
+    const m = fieldMotion(
+      { mode, ramp: rig.intro, energy, pull, boost: rig.pose.speedBoost, exit: leaving },
+      motion.current,
+    )
+    rig.speed = m.speed
+    rig.travel += m.speed * dt
+    rig.phase += m.phaseRate * dt
+    rig.exit = leaving
+    rig.motion = m
 
-    // A click: sharp attack, slow decay.
-    const age = performance.now() / 1000 - input.pulseAt
-    rig.pulse = age >= 0 && age < PULSE_SECONDS ? Math.pow(1 - age / PULSE_SECONDS, 2) * smoothstep(0, 0.06, age) : 0
+    const paletteMoving = blendPalette(blended, latest.current, dt)
 
-    blendPalette(blended, latest.current, dt)
+    u.uTime.value = now
+    u.uTravel.value = rig.travel
+    u.uPhase.value = rig.phase
+    u.uPresence.value = cursor.presence
+    u.uSpread.value = m.spread
+    u.uExit.value = leaving
+    u.uStreak.value = m.streak
+    u.uEnergy.value = energy
+    u.uWarp.value = m.warp
+    u.uAspect.value = size.width / Math.max(size.height, 1)
+    u.uPixel.value.set(2 / Math.max(size.width, 1), 2 / Math.max(size.height, 1))
+    u.uCursor.value.set(cursor.x, cursor.y)
+    u.uCursorVel.value.set(cursor.vx, cursor.vy)
+    if (leaving > 0) {
+      // The exit radiates from the newest click wave: the click (or the button) that started it.
+      let newest = 0
+      for (let i = 1; i < CURSOR.maxRipples; i++) {
+        if (cursor.ripples[i * 4 + 2] > cursor.ripples[newest * 4 + 2]) newest = i
+      }
+      u.uOrigin.value.set(cursor.ripples[newest * 4], cursor.ripples[newest * 4 + 1])
+    }
 
-    uniforms.uTravel.value = rig.travel
-    uniforms.uStreak.value = Math.min(1, rig.state.streak + scroll.speedBoost)
-    uniforms.uPulse.value = rig.pulse
-    uniforms.uAdd.value = blended.additive
-    uniforms.uGlow.value = blended.glow
-    uniforms.uBright.value = (0.12 + 0.88 * rig.state.lights) * scroll.brightness
-    uniforms.uRed.value.copy(blended.red)
-    uniforms.uBlue.value.copy(blended.blue)
+    if (rippleVersion.current !== cursor.rippleVersion) {
+      rippleVersion.current = cursor.rippleVersion
+      for (let i = 0; i < u.uRipples.value.length; i++) {
+        u.uRipples.value[i].set(cursor.ripples[i * 4], cursor.ripples[i * 4 + 1], cursor.ripples[i * 4 + 2], cursor.ripples[i * 4 + 3])
+      }
+    }
+
+    u.uAdd.value = blended.additive
+    u.uGlow.value = blended.glow
+    u.uBright.value = rig.intro * rig.pose.brightness * m.brightness
+    u.uRed.value.copy(blended.red)
+    u.uBlue.value.copy(blended.blue)
+    u.uInk.value.copy(blended.ink)
+    u.uGrid.value.copy(blended.grid)
 
     frames.current += 1
     if (frames.current === 2) onReady()
+
+    // On demand: ask for another frame only while something is still changing.
+    if (intro && (!cursor.settled || !scroll.settled || rig.intro < 1 || leaving > 0 || paletteMoving || cursor.hasActiveRipples(now))) {
+      invalidate()
+    }
 
     // Frame-rate watchdog: two consecutive slow windows lower the quality tier.
     const w = watch.current
@@ -116,7 +187,7 @@ function Runtime({ inputs, target, blended, uniforms, rig, onReady, onSlow, onCo
       return
     }
     if (delta > 0.25) {
-      // A pause (tab hidden, hero scrolled away) is not slowness.
+      // A pause (tab hidden, hero scrolled away, a scene at rest) is not slowness.
       Object.assign(w, { time: 0, count: 0, strikes: 0 })
       return
     }
@@ -138,15 +209,60 @@ function Runtime({ inputs, target, blended, uniforms, rig, onReady, onSlow, onCo
   return null
 }
 
+/**
+ * Keeps the canvas within the tier's pixel budget. On a big screen the pixel ratio is lowered so
+ * the canvas never has more pixels than the device can fill at a steady frame rate; the budget is
+ * re-applied whenever the size changes (resize, rotation, a new window).
+ */
+function PixelBudget({ profile }: { profile: QualityProfile }) {
+  const size = useThree((state) => state.size)
+  const dpr = useThree((state) => state.viewport.dpr)
+  const setDpr = useThree((state) => state.setDpr)
+
+  // The canvas puts its own `dpr` prop back whenever its parent re-renders, so the budget is
+  // re-applied whenever the pixel ratio has drifted from it, not only when the size changes.
+  useEffect(() => {
+    const cssPixels = Math.max(size.width * size.height, 1)
+    const budget = Math.sqrt(profile.maxPixels / cssPixels)
+    const chosen = clamp(Math.min(window.devicePixelRatio || 1, profile.maxDpr, budget), 0.75, 3)
+    if (Math.abs(dpr - chosen) > 0.001) setDpr(chosen)
+  }, [size.width, size.height, dpr, profile.maxPixels, profile.maxDpr, setDpr])
+
+  return null
+}
+
+/** Development hook for inspecting and benchmarking the scene from the console. Compiles away in production. */
+function DevHandle({
+  rig,
+  uniforms,
+  driver,
+  bloom,
+  slot,
+}: {
+  rig: HeroRig
+  uniforms: FieldUniforms
+  driver: HeroDriver
+  bloom: boolean
+  slot: DevSlot
+}) {
+  const { camera, gl, scene, get } = useThree()
+  useEffect(() => createRigCapture({ rig, uniforms, driver, camera, gl, scene, get }, slot), [rig, uniforms, driver, camera, gl, scene, get, slot])
+  // Without the composer, plain rendering is the frame; with it, the composer registers itself.
+  useEffect(() => (bloom ? undefined : registerFrameRenderer(() => gl.render(scene, camera), slot)), [bloom, gl, scene, camera, slot])
+  return null
+}
+
 function Scene({
   profile,
   theme,
-  inputs,
+  driver,
+  mode,
+  exit,
   onReady,
   onSlow,
   onContextLost,
   onContextRestored,
-}: { profile: QualityProfile } & Omit<VelocityHeroSceneProps, 'tier' | 'active'>) {
+}: { profile: QualityProfile; mode: FieldMode } & Omit<VelocityHeroSceneProps, 'tier' | 'active' | 'bloom' | 'mode'>) {
   // The active theme's colours and light levels, read from the design tokens. Changing the theme
   // changes this target; the scene eases towards it instead of restarting.
   const target = useMemo(() => readScenePalette(theme), [theme])
@@ -157,7 +273,9 @@ function Scene({
   return (
     <>
       <Runtime
-        inputs={inputs}
+        driver={driver}
+        mode={mode}
+        exit={exit}
         target={target}
         blended={blended}
         uniforms={uniforms}
@@ -167,49 +285,66 @@ function Scene({
         onContextLost={onContextLost}
         onContextRestored={onContextRestored}
       />
-      <RacingCamera rig={rig} inputs={inputs} />
-      <EnvironmentLighting profile={profile} palette={blended} uniforms={uniforms} rig={rig} light={theme === 'light'} />
+      <PixelBudget profile={profile} />
+      <FieldCamera rig={rig} driver={driver} />
       {/* Parts are built for one quality tier; a tier change rebuilds them. */}
       <Fragment key={profile.tier}>
-        <Track profile={profile} uniforms={uniforms} palette={blended} />
-        <RacingLines profile={profile} uniforms={uniforms} />
-        <ParticleField profile={profile} uniforms={uniforms} />
-        <RacingCar profile={profile} uniforms={uniforms} palette={blended} rig={rig} />
+        {profile.surfaces > 0 && <DistortionField profile={profile} uniforms={uniforms} />}
+        {profile.rings > 0 && <TunnelRings profile={profile} uniforms={uniforms} />}
+        <LightTrails profile={profile} uniforms={uniforms} />
+        <VelocityField profile={profile} uniforms={uniforms} />
+        <ReactiveParticles profile={profile} uniforms={uniforms} />
+        {mode === 'intro' && <PointerBeam uniforms={uniforms} />}
+        {mode === 'intro' && profile.overlay && <PointerHud uniforms={uniforms} />}
       </Fragment>
-      {profile.bloom && <Bloom palette={blended} rig={rig} />}
-      <RigCapture rig={rig} />
+      {profile.bloom && <Bloom palette={blended} rig={rig} driver={driver} slot={mode} />}
+      <DevHandle rig={rig} uniforms={uniforms} driver={driver} bloom={profile.bloom} slot={mode} />
     </>
   )
 }
 
-/** Dev-only hook for inspecting the scene from the console. Compiles away in production. */
-function RigCapture({ rig }: { rig: HeroRig }) {
-  const { camera, gl, scene } = useThree()
-  useEffect(() => createRigCapture({ rig, camera, gl, scene }), [rig, camera, gl, scene])
-  return null
-}
-
 /**
- * The Three.js hero scene, loaded on demand. The canvas fills its layer, never takes pointer
- * input, and stops rendering while the hero is off screen. Antialiasing is fixed when the
- * context is created, so the canvas is re-created only if a tier change turns it on or off.
+ * The generative scene, loaded on demand. The canvas fills its layer, never takes pointer input,
+ * and stops rendering while it is off screen (hero) or at rest (intro). Antialiasing is fixed when
+ * the context is created, so the canvas is re-created only if a tier change turns it on or off.
  */
-export default function VelocityHeroScene({ theme, tier, inputs, active, onReady, onSlow, onContextLost, onContextRestored }: VelocityHeroSceneProps) {
-  const profile = QUALITY[tier]
+export default function VelocityHeroScene({
+  theme,
+  tier,
+  driver,
+  mode = 'hero',
+  exit,
+  active,
+  onReady,
+  onSlow,
+  onContextLost,
+  onContextRestored,
+  bloom,
+}: VelocityHeroSceneProps) {
+  const base = profileFor(mode, tier)
+  const profile = bloom === undefined ? base : { ...base, bloom }
+
+  // The intro renders on demand. The hero does too while something else (the intro) covers it: it
+  // draws one frame to compile its shaders, then waits.
+  const frameloop = mode === 'intro' || !active ? 'demand' : 'always'
 
   return (
     <Canvas
+      // No tone mapping: the scene's background must come out as exactly the page colour in both themes.
+      flat
       key={profile.antialias ? 'antialiased' : 'plain'}
-      frameloop={active ? 'always' : 'never'}
+      frameloop={frameloop}
       dpr={[1, profile.maxDpr]}
-      gl={{ antialias: profile.antialias, alpha: false, powerPreference: 'high-performance', stencil: false }}
-      camera={{ fov: POSE_IDLE.fov, near: 0.1, far: 260, position: [POSE_IDLE.x, POSE_IDLE.y, POSE_IDLE.z] }}
+      gl={{ antialias: profile.antialias, alpha: false, powerPreference: 'high-performance', stencil: false, depth: false }}
+      camera={{ fov: 60, near: 0.1, far: 300, position: [0, 0, 0] }}
       resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
     >
       <Scene
         profile={profile}
+        mode={mode}
         theme={theme}
-        inputs={inputs}
+        driver={driver}
+        exit={exit}
         onReady={onReady}
         onSlow={onSlow}
         onContextLost={onContextLost}

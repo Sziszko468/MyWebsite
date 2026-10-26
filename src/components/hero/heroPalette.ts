@@ -7,17 +7,13 @@ import type { Theme } from '../../theme/theme'
  */
 export interface ScenePalette {
   bg: Color
-  track: Color
-  marking: Color
-  carBody: Color
-  carTrim: Color
+  /** The neutral line colour: paper-white on dark, graphite on light. */
+  ink: Color
+  /** Base colour of the distortion surfaces. */
+  grid: Color
   red: Color
   blue: Color
-  /** Strength of reflections on the track and body. */
-  reflection: number
-  /** Brightness of the generated reflection environment. */
-  env: number
-  /** Multiplier for emissive light streaks and lamps. */
+  /** Multiplier for the light of every system. */
   glow: number
   /** Strength of the post-processing bloom. */
   bloom: number
@@ -41,14 +37,10 @@ export function readScenePalette(theme: Theme, root: HTMLElement = document.docu
 
   return {
     bg: color(style, '--scene-bg', '#0b0b0d'),
-    track: color(style, '--scene-track', '#131316'),
-    marking: color(style, '--scene-marking', '#8a8a94'),
-    carBody: color(style, '--scene-car-body', '#12141a'),
-    carTrim: color(style, '--scene-car-trim', '#1c1e26'),
+    ink: color(style, '--scene-ink', '#f4f0e8'),
+    grid: color(style, '--scene-grid', '#4a5072'),
     red: color(style, '--scene-light-red', '#ff161f'),
     blue: color(style, '--scene-light-blue', '#445cff'),
-    reflection: number(style, '--scene-reflection', 0.5),
-    env: number(style, '--scene-env', 1),
     glow: number(style, '--scene-glow', 1),
     bloom: number(style, '--scene-bloom', 0.8),
     additive: theme === 'light' ? 0 : 1,

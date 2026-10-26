@@ -1,6 +1,7 @@
 /**
- * Everything tunable about the hero scene, in one place: quality tiers, camera poses,
- * the track's path and the light streaks. Plain data and pure functions, no WebGL.
+ * Everything tunable about the hero's generative scene, in one place: quality tiers, the field's
+ * geometry, how strongly the visitor's input moves it, and the screen composition. Plain data
+ * and pure functions, no WebGL.
  */
 
 // ── Quality ────────────────────────────────────────────────────────────
@@ -11,24 +12,57 @@ export interface QualityProfile {
   tier: QualityTier
   /** Upper bound for the renderer's device pixel ratio. */
   maxDpr: number
+  /** Instanced light streaks that rush towards the camera. */
+  streaks: number
+  /** Cursor-reactive dust. */
   particles: number
-  /** Real post-processing bloom. Everything else glows through additive halos. */
+  /** Curved light trails and the samples along each. */
+  trails: number
+  trailSegments: number
+  /** Distortion surfaces: 0 none, 1 floor, 2 floor and ceiling. */
+  surfaces: 0 | 1 | 2
+  /** Real post-processing bloom. Everything else glows through additive blending and halos. */
   bloom: boolean
   antialias: boolean
-  /** Extra wide, soft halo layers around the light streaks. */
+  /** A second, wider and softer layer under each trail. */
   halos: boolean
-  /** Resolution of the generated reflection environment. */
-  envSize: number
-  /** Radial segments of wheels and the lofted body. */
-  detail: number
-  /** Samples along the track ribbon. */
-  trackSamples: number
+  /** Most pixels the canvas may have; the pixel ratio is lowered on big screens to stay within it. */
+  maxPixels: number
+  /** A second, much denser layer of thin, short streaks under the main ones. 0 for none. */
+  hairlines: number
+  /** Thin trails added to the main ones, in the same geometry. 0 for none. */
+  fineTrails: number
+  /** Rows of concentric rings per family rushing down the tunnel. 0 for none. */
+  rings: number
+  /** 1 is the standard surface grid; 2 has twice as many lines, with every fourth one stronger. */
+  gridDetail: number
+  /** The pointer reticle, click shock rings and the exit starburst, drawn over the field. */
+  overlay: boolean
 }
 
+/** What the Home hero draws. */
 export const QUALITY: Record<QualityTier, QualityProfile> = {
-  high: { tier: 'high', maxDpr: 2, particles: 900, bloom: true, antialias: true, halos: true, envSize: 256, detail: 40, trackSamples: 220 },
-  medium: { tier: 'medium', maxDpr: 1.5, particles: 450, bloom: false, antialias: true, halos: true, envSize: 128, detail: 28, trackSamples: 150 },
-  low: { tier: 'low', maxDpr: 1, particles: 200, bloom: false, antialias: false, halos: false, envSize: 64, detail: 18, trackSamples: 100 },
+  high: { tier: 'high', maxDpr: 2, streaks: 2600, particles: 2000, trails: 24, trailSegments: 96, surfaces: 2, bloom: true, antialias: true, halos: true, maxPixels: 3_400_000, hairlines: 0, fineTrails: 0, rings: 0, gridDetail: 1, overlay: false },
+  medium: { tier: 'medium', maxDpr: 1.5, streaks: 1400, particles: 1000, trails: 16, trailSegments: 64, surfaces: 1, bloom: false, antialias: true, halos: true, maxPixels: 2_000_000, hairlines: 0, fineTrails: 0, rings: 0, gridDetail: 1, overlay: false },
+  low: { tier: 'low', maxDpr: 1, streaks: 700, particles: 450, trails: 10, trailSegments: 40, surfaces: 1, bloom: false, antialias: false, halos: false, maxPixels: 1_100_000, hairlines: 0, fineTrails: 0, rings: 0, gridDetail: 1, overlay: false },
+}
+
+/**
+ * What the fullscreen intro draws: the same engine with several times the detail, because the intro
+ * has no text over most of its field and is the first thing a visitor sees. Dust and hairlines are
+ * several times denser, trails and surface lines about twice as many, concentric rings rush down
+ * the tunnel, and a thin overlay draws the pointer's reticle, click shock rings and the exit's
+ * starburst. The pixel budget is a little lower to pay for it.
+ */
+export const INTRO_QUALITY: Record<QualityTier, QualityProfile> = {
+  high: { ...QUALITY.high, streaks: 3000, particles: 9000, trails: 28, fineTrails: 40, trailSegments: 112, hairlines: 9000, rings: 12, gridDetail: 2, overlay: true, maxPixels: 2_800_000 },
+  medium: { ...QUALITY.medium, streaks: 1700, particles: 3600, trails: 18, fineTrails: 18, trailSegments: 80, hairlines: 3600, rings: 8, gridDetail: 1.5, overlay: true, maxPixels: 1_500_000 },
+  low: { ...QUALITY.low, streaks: 800, particles: 1500, trails: 10, fineTrails: 10, trailSegments: 48, hairlines: 1500, rings: 5, gridDetail: 1, overlay: true, maxPixels: 900_000 },
+}
+
+/** The profile for a use of the engine at a quality tier. */
+export function profileFor(mode: 'hero' | 'intro', tier: QualityTier): QualityProfile {
+  return (mode === 'intro' ? INTRO_QUALITY : QUALITY)[tier]
 }
 
 export interface DeviceHints {
@@ -43,7 +77,7 @@ export interface DeviceHints {
   saveData: boolean
 }
 
-/** First guess from what the browser tells us; the frame-time governor corrects it later. */
+/** First guess from what the browser tells us; the frame-time watchdog corrects it later. */
 export function pickQuality({ width, cores, memory, coarsePointer, saveData }: DeviceHints): QualityTier {
   if (saveData) return 'low'
   if ((memory !== undefined && memory <= 2) || (cores !== undefined && cores <= 2)) return 'low'
@@ -64,132 +98,93 @@ export function lowerTier(tier: QualityTier): QualityTier | null {
   return null
 }
 
-/** Average frame time (ms) above which the governor lowers the tier, and the one that gives up on WebGL. */
+/** Average frame time (ms) above which the watchdog lowers the tier, and the one that gives up on WebGL. */
 export const SLOW_FRAME_MS = 30
 export const UNUSABLE_FRAME_MS = 55
 
-// ── World ──────────────────────────────────────────────────────────────
+// ── The field ──────────────────────────────────────────────────────────
 
-/** Metres per second at full speed. Kept modest so lane dashes never strobe. */
-export const TOP_SPEED = 34
-export const TRACK_WIDTH = 9
-export const DASH_PITCH = 9
-
-/** Centre line of the track in the XZ plane, running away from the camera along -z with an S-bend. */
-export const TRACK_PATH: ReadonlyArray<readonly [number, number, number]> = [
-  [0, 0, 22],
-  [0, 0, 6],
-  [-0.2, 0, -14],
-  [-1.6, 0, -34],
-  [-5.5, 0, -56],
-  [-9.5, 0, -78],
-  [-9.5, 0, -100],
-  [-4, 0, -122],
-  [5, 0, -146],
-  [16, 0, -170],
-]
-
-export const FOG = { near: 28, far: 150 }
-
-export type LineColor = 'red' | 'blue'
-
-export interface LineSpec {
-  id: string
-  color: LineColor
-  /** Lateral offset from the track centre, metres (negative = left). */
-  offset: number
-  /** Height above the surface, metres. */
-  y: number
-  /** Core width, metres. */
-  width: number
-  /** Metres between pulses, and how fast they move relative to the road. */
-  pitch: number
-  rate: number
-  /** Tail sharpness: higher means shorter, brighter comets. */
-  tail: number
-  /** Always-on glow between pulses, 0..1. */
-  base: number
-  intensity: number
+export const FIELD = {
+  /** Length of the volume the streaks, trails and surfaces fill, in world units. */
+  depth: 140,
+  /** Units per second the world rushes past at rest. */
+  baseSpeed: 15,
+  /** Extra units per second at full cursor energy. */
+  energySpeed: 14,
+  /** Cursor influence radius in screen units (1 = half the screen height). */
+  cursorRadius: 0.42,
+  /** Seconds a click's wave takes to fade. */
+  rippleSeconds: 2.4,
+  /** Seconds the scene takes to light up and reach speed after it appears. */
+  introSeconds: 1.8,
+  /** The same for the fullscreen intro, which wakes up faster. */
+  introRampSeconds: 0.9,
 }
 
-// Red dominates and sits close to the car; blue stays outside as the secondary light.
-export const LINES: readonly LineSpec[] = [
-  { id: 'edge-left', color: 'red', offset: -4.5, y: 0.05, width: 0.5, pitch: 26, rate: 1.0, tail: 7, base: 0.55, intensity: 1.5 },
-  { id: 'edge-right', color: 'red', offset: 4.5, y: 0.05, width: 0.5, pitch: 31, rate: 1.0, tail: 7, base: 0.55, intensity: 1.5 },
-  { id: 'lane-left', color: 'red', offset: -2.3, y: 0.04, width: 0.2, pitch: 22, rate: 1.4, tail: 8, base: 0.06, intensity: 1.3 },
-  { id: 'lane-right', color: 'red', offset: 2.3, y: 0.04, width: 0.2, pitch: 27, rate: 1.6, tail: 8, base: 0.06, intensity: 1.3 },
-  { id: 'trail-left', color: 'red', offset: -3.3, y: 1.1, width: 0.16, pitch: 38, rate: 1.7, tail: 9, base: 0.08, intensity: 1.4 },
-  { id: 'trail-right', color: 'red', offset: 3.5, y: 0.7, width: 0.14, pitch: 44, rate: 2.1, tail: 10, base: 0.07, intensity: 1.3 },
-  { id: 'wall-left', color: 'blue', offset: -7.2, y: 0.78, width: 0.32, pitch: 30, rate: 1.0, tail: 6, base: 0.6, intensity: 1.2 },
-  { id: 'wall-right', color: 'blue', offset: 7.2, y: 0.78, width: 0.32, pitch: 34, rate: 1.0, tail: 6, base: 0.6, intensity: 1.2 },
-  { id: 'overhead-blue', color: 'blue', offset: 5.4, y: 2.6, width: 0.12, pitch: 52, rate: 2.4, tail: 12, base: 0.05, intensity: 1.2 },
-]
+// ── Visitor input ──────────────────────────────────────────────────────
 
-// ── Camera ─────────────────────────────────────────────────────────────
+/**
+ * How the cursor is turned into a smooth, bounded signal. The scene never sees the raw pointer:
+ * it sees a position that eases towards it, a velocity measured on that eased position, and an
+ * `energy` that rises with movement and drains away slowly once the cursor rests.
+ */
+export const CURSOR = {
+  /** Seconds for the eased position to cover half the distance to the real one. */
+  positionHalfLife: 0.14,
+  velocityHalfLife: 0.09,
+  /** Seconds for the energy to halve while the cursor is still. */
+  energyHalfLife: 0.6,
+  /** Screen units per second that count as full energy. */
+  velocityRef: 2,
+  maxVelocity: 6,
+  /** Seconds for the pointer's "presence" to halve once it stops moving. */
+  presenceHalfLife: 0.9,
+  /** Concurrent click waves. */
+  maxRipples: 4,
+} as const
 
-export interface CameraPose {
-  /** Camera position relative to the car, metres. */
-  x: number
-  y: number
-  z: number
-  /** Look-at target relative to the car. */
-  tx: number
-  ty: number
-  tz: number
-  /** Vertical field of view, degrees (wide screens). */
-  fov: number
-}
+/** Scroll position is eased before it drives anything; these are the time constants. */
+export const SCROLL = {
+  progressHalfLife: 0.16,
+  velocityHalfLife: 0.12,
+} as const
 
-export const POSE_IDLE: CameraPose = { x: 1.3, y: 1.05, z: 7.9, tx: 0, ty: 0.45, tz: -2, fov: 37 }
-export const POSE_SPEED: CameraPose = { x: 0.8, y: 0.8, z: 9.6, tx: 0, ty: 0.5, tz: -9, fov: 46 }
-
-/** Cursor reaction: limited, smoothed range (metres of camera travel at the screen edge). */
-export const POINTER = { rangeX: 0.9, rangeY: 0.35, lookX: 0.5, halfLife: 0.22 }
-
-/** Idle sway so the camera never looks locked off, in metres and radians per second. */
-export const SWAY = { x: 0.06, y: 0.04, speed: 0.35 }
-
-export interface Composition {
-  /** Fraction of the viewport the image is shifted by (+ is right), so the car sits clear of the headline. */
-  shiftX: number
-  /** Fraction of the viewport the image is shifted by (+ is up). */
-  shiftY: number
-  /** Extra metres between camera and car. */
-  dolly: number
-  /** Vertical field of view, degrees. */
-  fov: number
-}
+// ── Composition ────────────────────────────────────────────────────────
 
 /**
  * How the scene is laid out, decided in CSS (`--hero-layout` on the scene's container) and read
  * back here:
  *   full     the scene fills the whole hero behind the text (wide screens)
  *   stacked  the scene is its own stage below the text (narrow screens)
+ *   intro    the scene is the whole screen of the fullscreen intro
  */
-export type HeroLayout = 'full' | 'stacked'
+export type HeroLayout = 'full' | 'stacked' | 'intro'
 
 export function parseLayout(value: string): HeroLayout {
-  return value.trim() === 'stacked' ? 'stacked' : 'full'
+  const layout = value.trim()
+  return layout === 'stacked' || layout === 'intro' ? layout : 'full'
 }
 
-/** Wide screens put the car beside the headline; a stacked stage centres it and backs off as it narrows. */
-export function composeFor(aspect: number, baseFov: number, layout: HeroLayout = 'full'): Composition {
-  if (layout === 'stacked') {
-    return {
-      shiftX: 0,
-      shiftY: 0,
-      dolly: Math.min(Math.max((1.15 - aspect) * 4, 0), 3),
-      fov: baseFov + (aspect < 1.3 ? 2 : 0),
-    }
+export interface Composition {
+  /** Fraction of the viewport the image is shifted by (+ is right): the focal point sits clear of the headline. */
+  shiftX: number
+  /** Fraction of the viewport the image is shifted by (+ is up). */
+  shiftY: number
+  /** Vertical field of view, degrees. */
+  fov: number
+}
+
+export function composeFor(aspect: number, layout: HeroLayout): Composition {
+  if (layout === 'intro') {
+    // Fullscreen: the focal point sits to the right of the editorial headline on wide screens,
+    // a little below centre on narrow ones, where the headline is above it.
+    if (aspect >= 1.25) return { shiftX: 0.16, shiftY: 0, fov: 62 }
+    if (aspect >= 0.9) return { shiftX: 0.06, shiftY: -0.04, fov: 68 }
+    return { shiftX: 0, shiftY: -0.1, fov: 76 }
   }
-
-  if (aspect >= 1.25) return { shiftX: 0.24, shiftY: 0.02, dolly: 0, fov: baseFov }
-
-  // A full-bleed hero on a squarish window: the car still has to fit beside the text.
-  return { shiftX: 0.1, shiftY: -0.04, dolly: 1, fov: Math.min(baseFov + 6, 52) }
+  if (layout === 'stacked') {
+    return { shiftX: 0, shiftY: 0, fov: aspect < 1 ? 74 : 66 }
+  }
+  if (aspect >= 1.25) return { shiftX: 0.2, shiftY: 0, fov: 60 }
+  return { shiftX: 0.08, shiftY: 0, fov: 66 }
 }
-
-// ── Lights and interaction ─────────────────────────────────────────────
-
-/** A click adds a short light impulse that fades over this many seconds. */
-export const PULSE_SECONDS = 1.1

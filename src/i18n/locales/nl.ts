@@ -26,6 +26,18 @@ export const nl: Dictionary = {
   cta: {
     startProject: 'Start een project',
   },
+  intro: {
+    titleLine1: 'Welkom in',
+    titleLine2: 'de volgende',
+    titleLine3: 'dimensie',
+    titleLine4: 'van het web.',
+    supporting: 'Een digitale ruimte die op jouw beweging reageert.',
+    cta: 'Klik om binnen te gaan',
+    ctaTouch: 'Tik om binnen te gaan',
+    hint: 'Beweeg je cursor. Vorm de ruimte.',
+    hintTouch: 'Sleep je vinger. Vorm de ruimte.',
+    skip: 'Niet meer tonen',
+  },
   hero: {
     titleLine1: 'Bouw digitaal.',
     titleLine2: 'Dingen die ertoe doen.',

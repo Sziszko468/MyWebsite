@@ -7,6 +7,7 @@ import { NotFoundPage } from './pages/NotFoundPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { PAGES, type PageId } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
+import { IntroProvider } from './components/intro/IntroProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
 
 // Internal showcase of the design system. `import.meta.env.DEV` is a build-time
@@ -32,21 +33,23 @@ const PAGE_ELEMENTS: Record<PageId, ReactElement | null> = {
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to={localizedPath(DEFAULT_LANGUAGE)} replace />} />
-          <Route path=":lang" element={<LanguageLayout />}>
-            {PAGES.map((page) =>
-              page.path === '/' ? (
-                <Route key={page.id} index element={PAGE_ELEMENTS[page.id]} />
-              ) : (
-                <Route key={page.id} path={page.path.slice(1)} element={PAGE_ELEMENTS[page.id]} />
-              ),
-            )}
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <IntroProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to={localizedPath(DEFAULT_LANGUAGE)} replace />} />
+            <Route path=":lang" element={<LanguageLayout />}>
+              {PAGES.map((page) =>
+                page.path === '/' ? (
+                  <Route key={page.id} index element={PAGE_ELEMENTS[page.id]} />
+                ) : (
+                  <Route key={page.id} path={page.path.slice(1)} element={PAGE_ELEMENTS[page.id]} />
+                ),
+              )}
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </IntroProvider>
     </ThemeProvider>
   )
 }
