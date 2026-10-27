@@ -1,4 +1,5 @@
 import {
+  BufferAttribute,
   BufferGeometry,
   Float32BufferAttribute,
   InstancedBufferAttribute,
@@ -193,7 +194,8 @@ export function createGridGeometry({ lines, spacing, segmentsZ, crossSpacing, se
   const count = Math.round(((lines - 1) * detail) / 2) * 2 + 1
   const step = ((lines - 1) * spacing) / (count - 1)
   const cross = crossSpacing / detail
-  const divisions = Math.round(segmentsX * detail)
+  // More lines do not need a finer subdivision: the waves they ride are long.
+  const divisions = segmentsX
   const half = ((count - 1) / 2) * step
   const isMajor = (index: number) => (detail <= 1 || index % 4 === 0 ? 1 : 0)
 
@@ -222,6 +224,55 @@ export function createGridGeometry({ lines, spacing, segmentsZ, crossSpacing, se
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
   geometry.setAttribute('aAxis', new Float32BufferAttribute(axis, 1))
   geometry.setAttribute('aMajor', new Float32BufferAttribute(major, 1))
+  return geometry
+}
+
+// ── Ribbons ────────────────────────────────────────────────────────────
+
+/**
+ * Turns a geometry of line segments (pairs of vertices) into one of quads, for drawing the lines
+ * as screen-space ribbons (see RIBBON in fieldShaders.ts). Every segment becomes four vertices:
+ * each end twice, once for each side. A vertex carries its own end as `position`, the segment's
+ * other end as `aOther` and the side (-1 or 1) as `aSide`; every other attribute of the source is
+ * copied from the vertex's own end.
+ */
+export function createRibbonGeometry(lines: BufferGeometry): BufferGeometry {
+  const source = lines.getAttribute('position')
+  const segments = source.count / 2
+  const quads = segments * 4
+
+  const position = new Float32Array(quads * 3)
+  const other = new Float32Array(quads * 3)
+  const side = new Float32Array(quads)
+  const extras = Object.entries(lines.attributes)
+    .filter(([name]) => name !== 'position')
+    .map(([name, attribute]) => ({ name, size: attribute.itemSize, from: attribute.array as ArrayLike<number>, to: new Float32Array(quads * attribute.itemSize) }))
+  const index = new Uint32Array(segments * 6)
+
+  for (let s = 0; s < segments; s++) {
+    for (let corner = 0; corner < 4; corner++) {
+      const vertex = s * 4 + corner
+      const own = s * 2 + (corner >> 1)
+      const far = s * 2 + (1 - (corner >> 1))
+      for (let axis = 0; axis < 3; axis++) {
+        position[vertex * 3 + axis] = source.array[own * 3 + axis]
+        other[vertex * 3 + axis] = source.array[far * 3 + axis]
+      }
+      side[vertex] = corner & 1 ? 1 : -1
+      for (const extra of extras) {
+        for (let k = 0; k < extra.size; k++) extra.to[vertex * extra.size + k] = extra.from[own * extra.size + k]
+      }
+    }
+    const base = s * 4
+    index.set([base, base + 1, base + 2, base + 2, base + 1, base + 3], s * 6)
+  }
+
+  const geometry = new BufferGeometry()
+  geometry.setAttribute('position', new Float32BufferAttribute(position, 3))
+  geometry.setAttribute('aOther', new Float32BufferAttribute(other, 3))
+  geometry.setAttribute('aSide', new Float32BufferAttribute(side, 1))
+  for (const extra of extras) geometry.setAttribute(extra.name, new Float32BufferAttribute(extra.to, extra.size))
+  geometry.setIndex(new BufferAttribute(index, 1))
   return geometry
 }
 

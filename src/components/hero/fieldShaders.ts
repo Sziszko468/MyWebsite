@@ -88,6 +88,28 @@ const FORCE = /* glsl */ `
   }
 `
 
+/**
+ * Line segments drawn as screen-space ribbons. A raw GL line is one device pixel wide and not
+ * anti-aliased, so thin, dense, moving lines crawl and twinkle (and break up on some drivers); a
+ * ribbon of about a pixel and a half with a smooth edge moves smoothly. The arguments are the
+ * segment's two ends in view space; the result is the clip-space position of one corner.
+ */
+const RIBBON = /* glsl */ `
+  uniform vec2 uPixel;
+
+  vec4 ribbonCorner(vec3 here, vec3 other, float side, float widthPx) {
+    vec4 ch = projectionMatrix * vec4(here, 1.0);
+    vec4 co = projectionMatrix * vec4(other, 1.0);
+    vec2 asp = vec2(uAspect, 1.0);
+    vec2 dir = (ch.xy / ch.w - co.xy / co.w) * asp;
+    float dl = length(dir);
+    dir = dl > 1e-6 ? dir / dl : vec2(0.0, 1.0);
+    vec2 perp = vec2(-dir.y, dir.x) / asp;
+    vec2 ndc = ch.xy / ch.w + perp * side * widthPx * uPixel.y;
+    return vec4(ndc * ch.w, ch.z, ch.w);
+  }
+`
+
 /** Streaks: instanced quads stretched between a head and a tail point, drawn at constant pixel width. */
 export const STREAK_VERT = /* glsl */ `
   ${FORCE}
@@ -95,8 +117,9 @@ export const STREAK_VERT = /* glsl */ `
   attribute vec2 aCorner;
   uniform float uTravel, uDepth, uStreak, uGlow, uBright, uSpread;
   // The layer's character: hairlines are thinner, shorter and fainter than the main streaks, and
-  // fly apart faster when the intro leaves.
-  uniform float uWidthScale, uLenScale, uAlphaScale, uLayerSpread;
+  // fly apart faster when the intro leaves. A streak thinner than uMinWidth pixels is drawn that
+  // wide and dimmed in proportion, so its light stays the same but it no longer twinkles.
+  uniform float uWidthScale, uLenScale, uAlphaScale, uLayerSpread, uMinWidth;
   uniform vec2 uPixel;
   uniform vec3 uRed, uBlue, uInk;
   varying vec3 vCol;
@@ -126,7 +149,9 @@ export const STREAK_VERT = /* glsl */ `
     vec2 perp = vec2(-dir.y, dir.x) / asp;
 
     float dist = -head.z;
-    float width = (0.8 + 1.4 * smoothstep(90.0, 5.0, dist)) * (0.7 + 0.6 * fract(rnd * 3.1)) * uWidthScale;
+    float width = (0.8 + 1.4 * (1.0 - smoothstep(5.0, 90.0, dist))) * (0.7 + 0.6 * fract(rnd * 3.1)) * uWidthScale;
+    float thin = width < uMinWidth ? width / max(uMinWidth, 1e-4) : 1.0;
+    width = max(width, uMinWidth);
     vec4 c = mix(ct, ch, aCorner.y);
     vec2 ndc = c.xy / c.w + perp * aCorner.x * width * uPixel.y;
     gl_Position = vec4(ndc * c.w, c.z, c.w);
@@ -135,7 +160,7 @@ export const STREAK_VERT = /* glsl */ `
     vAcross = aCorner.x;
     vAlong = aCorner.y;
     float fade = (1.0 - smoothstep(uDepth * 0.5, uDepth, dist)) * smoothstep(2.0, 16.0, dist);
-    vAlpha = fade * (0.3 + 0.7 * fract(rnd * 5.7)) * uGlow * uBright * (1.0 + 0.9 * glow) * uAlphaScale;
+    vAlpha = fade * (0.3 + 0.7 * fract(rnd * 5.7)) * uGlow * uBright * (1.0 + 0.9 * glow) * uAlphaScale * thin;
   }
 `
 export const STREAK_FRAG = /* glsl */ `
@@ -145,7 +170,10 @@ export const STREAK_FRAG = /* glsl */ `
 
   void main() {
     float profile = 1.0 - smoothstep(0.0, 1.0, abs(vAcross));
-    float tail = pow(vAlong, 1.6);
+    // pow() of a negative number is undefined (NaN on most GPUs), and a varying that should be 0 can
+    // arrive a hair below it. One NaN pixel in a half-float target is blurred over the whole frame
+    // by the bloom and the frame goes black, so every base here is clamped to be non-negative.
+    float tail = pow(max(vAlong, 0.0), 1.6);
     // A brighter tip at the head of every streak (the detailed intro only), so each one reads as
     // a moving point of light.
     float tip = smoothstep(0.9, 1.0, vAlong) * uTipGain;
@@ -164,7 +192,7 @@ export const TRAIL_VERT = /* glsl */ `
   attribute float aS;
   attribute float aSeed;
   attribute vec4 aInfo; // rate, pitch, width in px, colour (0 red, 1 ink, 2 blue)
-  uniform float uDepth, uGlow, uBright, uWidthScale, uSpread;
+  uniform float uDepth, uGlow, uBright, uWidthScale, uSpread, uMinWidth;
   uniform vec2 uPixel;
   uniform vec3 uRed, uBlue, uInk;
   varying vec3 vCol;
@@ -193,7 +221,10 @@ export const TRAIL_VERT = /* glsl */ `
     vec2 perp = vec2(-dir.y, dir.x) / asp;
 
     float dist = -here.z;
-    float width = aInfo.z * uWidthScale * (0.7 + 0.9 * smoothstep(110.0, 6.0, dist));
+    float width = aInfo.z * uWidthScale * (0.7 + 0.9 * (1.0 - smoothstep(6.0, 110.0, dist)));
+    // As for streaks: never thinner than uMinWidth pixels, dimmed in proportion instead.
+    float thin = width < uMinWidth ? width / max(uMinWidth, 1e-4) : 1.0;
+    width = max(width, uMinWidth);
     vec2 ndc = ch.xy / ch.w + perp * aSide * width * uPixel.y;
     gl_Position = vec4(ndc * ch.w, ch.z, ch.w);
 
@@ -203,7 +234,7 @@ export const TRAIL_VERT = /* glsl */ `
     vRate = aInfo.x;
     vPitch = aInfo.y;
     float fade = (1.0 - smoothstep(uDepth * 0.55, uDepth, dist)) * smoothstep(0.8, 10.0, dist);
-    vAlpha = fade * uGlow * uBright * (1.0 + 0.8 * glow);
+    vAlpha = fade * uGlow * uBright * (1.0 + 0.8 * glow) * thin;
   }
 `
 export const TRAIL_FRAG = /* glsl */ `
@@ -212,7 +243,7 @@ export const TRAIL_FRAG = /* glsl */ `
   varying float vAcross, vS, vAlpha, vRate, vPitch;
 
   void main() {
-    float profile = pow(1.0 - abs(vAcross), uSoft);
+    float profile = pow(max(1.0 - abs(vAcross), 0.0), uSoft);
     // Pulses run towards the camera; the head is sharp and the tail fades away behind it.
     float f = fract((vS * uDepth + uTravel * vRate) / vPitch);
     // The head fades in over a short distance instead of ending in a hard edge.
@@ -223,16 +254,23 @@ export const TRAIL_FRAG = /* glsl */ `
   }
 `
 
-/** Surfaces: wireframe grids on the floor and ceiling, rolling in waves and raised by input. */
+/**
+ * Surfaces: wireframe grids on the floor and ceiling, rolling in waves and raised by input. Every
+ * line segment is a ribbon (see RIBBON): its two ends are placed by the same function, so they
+ * move together.
+ */
 export const GRID_VERT = /* glsl */ `
   ${FORCE}
+  ${RIBBON}
+  attribute vec3 aOther; // the segment's other end
+  attribute float aSide; // which side of the segment this corner is on: -1 or 1
   attribute float aAxis; // 0: runs along the flow, 1: runs across it
   attribute float aMajor; // 1 for a strong line, 0 for a fine one
-  uniform float uTravel, uDepth, uFace, uHeight, uGlow, uBright;
-  varying float vFade, vGlow, vMajor;
+  uniform float uTravel, uDepth, uFace, uHeight, uGlow, uBright, uLineWidth;
+  varying float vFade, vGlow, vMajor, vAcross;
 
-  void main() {
-    vec3 p = position;
+  // One end of a segment, in view space, with how strongly the input lights it.
+  vec3 gridPoint(vec3 p, out float glow) {
     float z = aAxis > 0.5 ? -uDepth + mod(p.z + uTravel, uDepth) : p.z;
     float phase = z - uTravel;
     float wave = sin(p.x * 0.28 + phase * 0.09 + uPhase * 0.35) * 0.45 + sin(p.x * 0.11 - phase * 0.05) * 0.8;
@@ -240,30 +278,40 @@ export const GRID_VERT = /* glsl */ `
 
     vec3 v = (modelViewMatrix * vec4(p.x, y, z, 1.0)).xyz;
     vec3 push = fieldOffset(v, 0.5, 0.35);
-    float glow = gGlow;
+    glow = gGlow;
     // Input raises the surface towards the centre, as a relief that follows the cursor and rides the waves.
     v += push;
     v.y -= uFace * glow * 1.8;
     v.z = min(v.z, -0.35);
+    return v;
+  }
 
-    float dist = -v.z;
+  void main() {
+    float glow;
+    float glowOther;
+    vec3 here = gridPoint(position, glow);
+    vec3 other = gridPoint(aOther, glowOther);
+
+    float dist = -here.z;
     vFade = (1.0 - smoothstep(uDepth * 0.4, uDepth, dist)) * smoothstep(1.0, 10.0, dist) * uGlow * uBright;
     vGlow = glow;
     vMajor = aMajor;
-    gl_Position = projectionMatrix * vec4(v, 1.0);
+    vAcross = aSide;
+    gl_Position = ribbonCorner(here, other, aSide, uLineWidth);
   }
 `
 export const GRID_FRAG = /* glsl */ `
   uniform vec3 uGrid, uRed;
   uniform float uAdd;
-  varying float vFade, vGlow, vMajor;
+  varying float vFade, vGlow, vMajor, vAcross;
 
   void main() {
     float lit = clamp(vGlow * 1.3, 0.0, 1.0);
     vec3 col = mix(uGrid, uRed, lit);
     // Fine lines are fainter than major ones, and light up less under the pointer.
     float weight = mix(0.5, 1.0, vMajor);
-    float a = min((0.16 + 0.7 * lit * weight) * vFade * weight, mix(0.96, 4.0, uAdd));
+    float edge = 1.0 - smoothstep(0.0, 1.0, abs(vAcross));
+    float a = min((0.16 + 0.7 * lit * weight) * vFade * weight * edge, mix(0.96, 4.0, uAdd));
     gl_FragColor = vec4(col * a, a * (1.0 - uAdd));
     ${OUTPUT}
   }
@@ -276,35 +324,48 @@ export const GRID_FRAG = /* glsl */ `
  */
 export const RING_VERT = /* glsl */ `
   ${FORCE}
+  ${RIBBON}
+  attribute vec3 aOther; // the segment's other end
+  attribute float aSide; // which side of the segment this corner is on: -1 or 1
   attribute vec2 aRing; // x: family 0..1, y: random per ring
-  uniform float uTravel, uDepth, uGlow, uBright, uSpread;
-  varying float vFade, vGlow, vRed, vFamily;
+  uniform float uTravel, uDepth, uGlow, uBright, uSpread, uLineWidth;
+  varying float vFade, vGlow, vRed, vFamily, vAcross;
 
-  void main() {
-    vec3 p = position;
+  // One end of a segment, in view space, with how strongly the input lights it.
+  vec3 ringPoint(vec3 p, out float glow) {
     float z = -uDepth + mod(p.z + uTravel, uDepth);
     vec3 v = (modelViewMatrix * vec4(p.xy * pow(uSpread, 1.3), z, 1.0)).xyz;
     v += fieldOffset(v, aRing.y, 0.7);
-    float glow = gGlow;
+    glow = gGlow;
     v.z = min(v.z, -0.35);
+    return v;
+  }
 
-    float dist = -v.z;
+  void main() {
+    float glow;
+    float glowOther;
+    vec3 here = ringPoint(position, glow);
+    vec3 other = ringPoint(aOther, glowOther);
+
+    float dist = -here.z;
     vFade = (1.0 - smoothstep(uDepth * 0.45, uDepth, dist)) * smoothstep(1.0, 12.0, dist) * uGlow * uBright;
     vGlow = glow;
     vRed = step(0.84, aRing.y);
     vFamily = aRing.x;
-    gl_Position = projectionMatrix * vec4(v, 1.0);
+    vAcross = aSide;
+    gl_Position = ribbonCorner(here, other, aSide, uLineWidth);
   }
 `
 export const RING_FRAG = /* glsl */ `
   uniform vec3 uGrid, uRed, uInk;
   uniform float uAdd;
-  varying float vFade, vGlow, vRed, vFamily;
+  varying float vFade, vGlow, vRed, vFamily, vAcross;
 
   void main() {
     float lit = clamp(max(vGlow * 1.4, vRed), 0.0, 1.0);
     vec3 col = mix(mix(uGrid, uInk * 0.7, 0.25 * vFamily), uRed, lit);
-    float a = min((0.11 + 0.55 * lit) * vFade, mix(0.96, 4.0, uAdd));
+    float edge = 1.0 - smoothstep(0.0, 1.0, abs(vAcross));
+    float a = min((0.11 + 0.55 * lit) * vFade * edge, mix(0.96, 4.0, uAdd));
     gl_FragColor = vec4(col * a, a * (1.0 - uAdd));
     ${OUTPUT}
   }
@@ -332,12 +393,16 @@ export const DUST_VERT = /* glsl */ `
     float dist = -v.z;
     float fine = gNear * uPresence * (1.0 - uEnergy);
     float sizeK = mix(1.0 + 2.0 * aSeed, 0.5 + 2.8 * aSeed * aSeed * aSeed, uFineDust);
-    float minSize = mix(1.5, 1.0, uFineDust);
-    gl_PointSize = clamp(uSize * uPixelRatio * sizeK * (1.0 + 1.4 * fine) * (26.0 / dist), minSize, 16.0 * uPixelRatio);
+    // A speck smaller than the minimum is drawn at the minimum and dimmed in proportion: a one
+    // pixel point crossing the pixel grid flickers, a slightly larger, softer one does not.
+    float minSize = mix(1.5, 1.8, uFineDust);
+    float rawSize = uSize * uPixelRatio * sizeK * (1.0 + 1.4 * fine) * (26.0 / dist);
+    gl_PointSize = clamp(rawSize, minSize, 16.0 * uPixelRatio);
+    float thin = mix(1.0, clamp(rawSize / minSize, 0.35, 1.0), uFineDust);
     float tone = mix(aSeed, fract(aSeed * 91.7), uFineDust);
     vCol = tone < 0.5 ? uRed : (tone < 0.8 ? uInk * 0.7 : uBlue);
     float fade = (1.0 - smoothstep(uDepth * 0.5, uDepth, dist)) * smoothstep(2.0, 14.0, dist);
-    vAlpha = fade * (0.3 + 0.7 * aSeed) * uGlow * uBright * (1.0 + 1.2 * glow + 2.0 * fine);
+    vAlpha = fade * (0.3 + 0.7 * aSeed) * uGlow * uBright * (1.0 + 1.2 * glow + 2.0 * fine) * thin;
     gl_Position = projectionMatrix * vec4(v, 1.0);
   }
 `
@@ -393,7 +458,7 @@ export const BEAM_FRAG = /* glsl */ `
 
   void main() {
     float profile = 1.0 - smoothstep(0.0, 1.0, abs(vAcross));
-    float a = min(profile * pow(1.0 - vAlong, 1.5) * vAlpha, mix(0.96, 4.0, uAdd));
+    float a = min(profile * pow(max(1.0 - vAlong, 0.0), 1.5) * vAlpha, mix(0.96, 4.0, uAdd));
     gl_FragColor = vec4(vCol * a * 1.3, a * (1.0 - uAdd));
     ${OUTPUT}
   }
@@ -427,6 +492,11 @@ export const HUD_FRAG = /* glsl */ `
     return 1.0 - smoothstep(0.0, w, abs(d));
   }
 
+  // The turn of a vector in 0..1, defined (as 0.5) for the zero vector, where atan(0.0, 0.0) is not.
+  float turnOf(vec2 v) {
+    return abs(v.x) + abs(v.y) < 1e-7 ? 0.5 : atan(v.y, v.x) / TAU + 0.5;
+  }
+
   void main() {
     vec2 asp = vec2(uAspect, 1.0);
     float px = uPixel.y;
@@ -440,7 +510,7 @@ export const HUD_FRAG = /* glsl */ `
     vec2 p = (vNdc - uCursor) * asp;
     float r = length(p);
     if (uPresence > 0.04 && r < 0.5) {
-      float turn = atan(p.y, p.x) / TAU + 0.5;
+      float turn = turnOf(p);
       vec2 heading = uCursorVel * asp;
       float speed = length(heading);
       vec2 dir = speed > 1e-3 ? heading / speed : vec2(1.0, 0.0);
@@ -474,7 +544,7 @@ export const HUD_FRAG = /* glsl */ `
         float front = age * 1.25;
         // Only the thin band the rings and spokes occupy does any work.
         if (rr > front - 0.2 * (1.0 + age) && rr < front + 0.1) {
-          float turn = atan(q.y, q.x) / TAU + 0.5;
+          float turn = turnOf(q);
           float life = 1.0 - age / ${FIELD.rippleSeconds.toFixed(2)};
           float rings = 0.0;
           for (int e = 0; e < 4; e++) {
@@ -495,12 +565,13 @@ export const HUD_FRAG = /* glsl */ `
     if (uExit > 0.001) {
       vec2 q = (vNdc - uOrigin) * asp;
       float rr = length(q);
-      float an = atan(q.y, q.x);
+      float an = turnOf(q) * TAU - 3.14159265;
       float env = sin(3.14159265 * clamp(uExit, 0.0, 1.0));
       float front = uExit * 2.6;
       float spokes = pow(abs(sin(an * 18.0 + 0.7)), 36.0) * 0.9 + pow(abs(sin(an * 47.0 + 2.1)), 70.0) * 0.7 + pow(abs(sin(an * 131.0)), 120.0) * 0.5;
-      float band = exp(-pow((rr - front * 0.85) / 0.55, 2.0));
-      float behind = smoothstep(front, front - 1.4, rr) * smoothstep(0.02, 0.35, rr);
+      float bandX = (rr - front * 0.85) / 0.55;
+      float band = exp(-bandX * bandX);
+      float behind = (1.0 - smoothstep(front - 1.4, front, rr)) * smoothstep(0.02, 0.35, rr);
       float rings = 0.0;
       for (int k = 0; k < 3; k++) {
         rings += stroke(rr - front * (1.0 - float(k) * 0.16), w * 1.4) * (1.0 - float(k) * 0.3);

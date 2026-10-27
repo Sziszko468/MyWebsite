@@ -1,5 +1,5 @@
-import { Group, LineSegments, ShaderMaterial } from 'three'
-import { createGridGeometry } from './fieldGeometry'
+import { Group, Mesh, ShaderMaterial } from 'three'
+import { createGridGeometry, createRibbonGeometry } from './fieldGeometry'
 import { GRID_FRAG, GRID_VERT } from './fieldShaders'
 import type { FieldUniforms } from './fieldUniforms'
 import { createGlowMaterial } from './heroMaterials'
@@ -9,8 +9,12 @@ import type { QualityProfile } from './velocityHeroConfig'
 /** Distance of the floor and the ceiling from the view axis, world units. */
 const HEIGHT = 5.4
 
+/** Width of a surface line, in CSS pixels. */
+const LINE_WIDTH = 1.1
+
 function buildSurfaces(profile: QualityProfile, uniforms: FieldUniforms) {
-  const geometry = createGridGeometry(undefined, profile.gridDetail)
+  // Every line is a screen-space ribbon: a raw GL line is one aliased pixel and crawls when it moves.
+  const geometry = createRibbonGeometry(createGridGeometry(undefined, profile.gridDetail))
   const root = new Group()
   const materials: ShaderMaterial[] = []
 
@@ -21,8 +25,9 @@ function buildSurfaces(profile: QualityProfile, uniforms: FieldUniforms) {
       ...uniforms,
       uFace: { value: face },
       uHeight: { value: HEIGHT },
+      uLineWidth: { value: LINE_WIDTH },
     })
-    const lines = new LineSegments(geometry, material)
+    const lines = new Mesh(geometry, material)
     lines.frustumCulled = false
     lines.renderOrder = 1
     root.add(lines)

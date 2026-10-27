@@ -1,5 +1,5 @@
-import { LineSegments } from 'three'
-import { createRingGeometry } from './fieldGeometry'
+import { Mesh } from 'three'
+import { createRibbonGeometry, createRingGeometry } from './fieldGeometry'
 import { RING_FRAG, RING_VERT } from './fieldShaders'
 import type { FieldUniforms } from './fieldUniforms'
 import { createGlowMaterial } from './heroMaterials'
@@ -7,9 +7,9 @@ import { usePart } from './usePart'
 import type { QualityProfile } from './velocityHeroConfig'
 
 function buildRings(profile: QualityProfile, uniforms: FieldUniforms) {
-  const geometry = createRingGeometry(profile.rings)
-  const material = createGlowMaterial(RING_VERT, RING_FRAG, { ...uniforms })
-  const lines = new LineSegments(geometry, material)
+  const geometry = createRibbonGeometry(createRingGeometry(profile.rings))
+  const material = createGlowMaterial(RING_VERT, RING_FRAG, { ...uniforms, uLineWidth: { value: 1.1 } })
+  const lines = new Mesh(geometry, material)
   lines.frustumCulled = false
   lines.renderOrder = 1
 

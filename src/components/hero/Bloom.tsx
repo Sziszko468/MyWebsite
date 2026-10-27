@@ -5,6 +5,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { FXAAPass } from 'three/examples/jsm/postprocessing/FXAAPass.js'
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 import type { HeroDriver } from './HeroDriver'
 import type { HeroRig } from './heroRig'
@@ -20,6 +21,35 @@ import { registerFrameRenderer, type DevSlot } from './rigCapture'
  * The render target is not multisampled: a multisampled half-float target rendered blank on some
  * GPUs, so edges are smoothed in post instead.
  */
+/**
+ * Guards the bloom against a single bad pixel. The bloom blurs the whole frame in several passes,
+ * so one NaN in the half-float target (from an undefined operation in some driver, say) would be
+ * spread over every pixel and the frame would go black for as long as it lasted: a flicker. This
+ * pass zeroes any NaN or overflowed pixel and caps everything else at a sane radiance before that
+ * can happen. It costs one full-screen pass.
+ */
+const SANITIZE = {
+  uniforms: { tDiffuse: { value: null } },
+  vertexShader: /* glsl */ `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: /* glsl */ `
+    uniform sampler2D tDiffuse;
+    varying vec2 vUv;
+    void main() {
+      vec3 v = texture2D(tDiffuse, vUv).rgb;
+      // NaN, or a value so large it is really an overflow (a half float tops out at 65504): drop the
+      // pixel. Capping it instead would turn a bug into a white flare once the bloom has blurred it.
+      bool bad = !(v.r == v.r) || !(v.g == v.g) || !(v.b == v.b) || any(greaterThan(v, vec3(6.0e4)));
+      gl_FragColor = bad ? vec4(0.0, 0.0, 0.0, 1.0) : vec4(clamp(v, 0.0, 32.0), 1.0);
+    }
+  `,
+}
+
 export function Bloom({ palette, rig, driver, slot }: { palette: BlendedPalette; rig: HeroRig; driver: HeroDriver; slot: DevSlot }) {
   const gl = useThree((state) => state.gl)
   const scene = useThree((state) => state.scene)
@@ -32,6 +62,7 @@ export function Bloom({ palette, rig, driver, slot }: { palette: BlendedPalette;
     const composer = new EffectComposer(gl, target)
     const bloom = new UnrealBloomPass(new Vector2(256, 256), 0.8, 0.5, 0.85)
     composer.addPass(new RenderPass(scene, camera))
+    composer.addPass(new ShaderPass(SANITIZE))
     composer.addPass(bloom)
     composer.addPass(new OutputPass())
     composer.addPass(new FXAAPass())

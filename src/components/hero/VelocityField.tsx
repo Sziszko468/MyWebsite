@@ -6,6 +6,9 @@ import { createGlowMaterial } from './heroMaterials'
 import { usePart } from './usePart'
 import type { QualityProfile } from './velocityHeroConfig'
 
+/** The detailed intro never draws a streak thinner than this many CSS pixels; thinner ones are dimmed instead. */
+const MIN_WIDTH = 1.1
+
 interface StreakLayer {
   count: number
   seed: number
@@ -36,6 +39,7 @@ function buildField(profile: QualityProfile, uniforms: FieldUniforms) {
       uAlphaScale: { value: layer.alpha },
       uLayerSpread: { value: layer.spread },
       uTipGain: { value: layer.tip },
+      uMinWidth: { value: detailed ? MIN_WIDTH : 0 },
     }),
   )
   geometries.forEach((geometry, index) => {

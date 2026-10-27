@@ -18,7 +18,8 @@ describe('shader sources', () => {
 
   it.each(sources)('%s has all its template values substituted', (_name, source) => {
     expect(source).not.toContain('${')
-    expect(source).not.toMatch(/undefined|NaN|Infinity/)
+    // Comments may say these words; code may not contain them as an unsubstituted value.
+    expect(source.replace(/\/\/.*$/gm, '')).not.toMatch(/undefined|NaN|Infinity/)
   })
 
   it.each(sources)('%s has balanced braces, parentheses and brackets', (_name, source) => {

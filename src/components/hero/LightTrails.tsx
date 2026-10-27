@@ -26,6 +26,8 @@ function buildTrails(profile: QualityProfile, uniforms: FieldUniforms) {
       uWidthScale: { value: layer.width },
       uIntensity: { value: layer.intensity },
       uSoft: { value: layer.soft },
+      // Hair-thin trails (the detailed intro) are never drawn thinner than a pixel and a bit; they are dimmed instead.
+      uMinWidth: { value: fine.length > 0 ? 1.1 : 0 },
     })
     const mesh = new Mesh(layer.geometry, material)
     mesh.frustumCulled = false

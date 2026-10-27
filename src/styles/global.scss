@@ -10,9 +10,13 @@ html {
   background-color: var(--color-bg);
   /* In-page anchors and focus targets stop below the sticky header. */
   scroll-padding-top: calc(var(--header-height) + var(--space-4));
+  /* The page keeps its scrollbar's width whether or not a dialog has hidden the scrollbar, so
+     opening or closing the intro (or the mobile menu) never makes the layout jump sideways. On
+     systems with overlay scrollbars this reserves nothing. */
+  scrollbar-gutter: stable;
 }
 
-/* A modal dialog (the mobile menu) freezes the page behind it; closed, nothing is locked. */
+/* A modal dialog (the intro, the mobile menu) freezes the page behind it; closed, nothing is locked. */
 html:has(dialog[open]) {
   overflow: hidden;
 }

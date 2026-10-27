@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GRID, RING_RADII, createGridGeometry, createRingGeometry, makeTrailSpecs, trailPoint } from './fieldGeometry'
+import { GRID, RING_RADII, createGridGeometry, createRibbonGeometry, createRingGeometry, makeTrailSpecs, trailPoint } from './fieldGeometry'
 import { FIELD } from './velocityHeroConfig'
 
 // The geometry that the detailed intro adds to the engine: thin trails, a finer surface grid and
@@ -39,7 +39,8 @@ describe('detailed surfaces', () => {
   it('has twice the lines over the same area', () => {
     const along = axis.filter((value) => value === 0).length / (GRID.segmentsZ * 2)
     expect(along).toBe((GRID.lines - 1) * 2 + 1)
-    const across = axis.filter((value) => value === 1).length / (GRID.segmentsX * 2 * 2)
+    // Twice the rows, each divided as before: more lines do not need a finer subdivision.
+    const across = axis.filter((value) => value === 1).length / (GRID.segmentsX * 2)
     expect(across).toBe(Math.floor(FIELD.depth / (GRID.crossSpacing / 2)))
 
     const position = dense.getAttribute('position').array as Float32Array
@@ -119,5 +120,66 @@ describe('rings', () => {
 
   it('is identical on every build', () => {
     expect(Array.from(createRingGeometry(rows, segments).getAttribute('aRing').array)).toEqual(Array.from(ring))
+  })
+})
+
+describe('ribbons', () => {
+  // Raw GL lines are one aliased pixel wide and crawl when they move; every line is drawn as a
+  // ribbon instead. A segment becomes four vertices: each end twice, once for each side.
+  const lines = createGridGeometry()
+  const ribbons = createRibbonGeometry(lines)
+  const segments = lines.getAttribute('position').count / 2
+  const own = ribbons.getAttribute('position').array as Float32Array
+  const far = ribbons.getAttribute('aOther').array as Float32Array
+  const source = lines.getAttribute('position').array as Float32Array
+
+  it('has four vertices and two triangles per segment', () => {
+    expect(ribbons.getAttribute('position').count).toBe(segments * 4)
+    expect(ribbons.getAttribute('aOther').count).toBe(segments * 4)
+    expect(ribbons.getAttribute('aSide').count).toBe(segments * 4)
+    expect(ribbons.getIndex()!.count).toBe(segments * 6)
+    for (const i of ribbons.getIndex()!.array) expect(i).toBeLessThan(segments * 4)
+  })
+
+  it('gives each vertex its own end, the segment’s other end and a side', () => {
+    for (let s = 0; s < segments; s += 97) {
+      for (let corner = 0; corner < 4; corner++) {
+        const vertex = s * 4 + corner
+        const end = corner >> 1
+        for (let axis = 0; axis < 3; axis++) {
+          expect(own[vertex * 3 + axis]).toBe(source[(s * 2 + end) * 3 + axis])
+          expect(far[vertex * 3 + axis]).toBe(source[(s * 2 + 1 - end) * 3 + axis])
+        }
+      }
+    }
+    const sides = ribbons.getAttribute('aSide').array as Float32Array
+    expect(new Set(sides)).toEqual(new Set([-1, 1]))
+  })
+
+  it('has both sides of each end, so the quad spans the line', () => {
+    const sides = ribbons.getAttribute('aSide').array as Float32Array
+    for (let s = 0; s < segments; s += 211) {
+      expect([sides[s * 4], sides[s * 4 + 1], sides[s * 4 + 2], sides[s * 4 + 3]]).toEqual([-1, 1, -1, 1])
+    }
+  })
+
+  it('carries every other attribute over from the vertex’s own end', () => {
+    const axisIn = lines.getAttribute('aAxis').array as Float32Array
+    const axisOut = ribbons.getAttribute('aAxis').array as Float32Array
+    const majorIn = lines.getAttribute('aMajor').array as Float32Array
+    const majorOut = ribbons.getAttribute('aMajor').array as Float32Array
+    for (let s = 0; s < segments; s += 53) {
+      for (let corner = 0; corner < 4; corner++) {
+        expect(axisOut[s * 4 + corner]).toBe(axisIn[s * 2 + (corner >> 1)])
+        expect(majorOut[s * 4 + corner]).toBe(majorIn[s * 2 + (corner >> 1)])
+      }
+    }
+  })
+
+  it('works for the rings, whose attribute has two components', () => {
+    const rings = createRingGeometry(4, 12)
+    const converted = createRibbonGeometry(rings)
+    expect(converted.getAttribute('aRing').itemSize).toBe(2)
+    expect(converted.getAttribute('aRing').count).toBe(rings.getAttribute('position').count * 2)
   })
 })
