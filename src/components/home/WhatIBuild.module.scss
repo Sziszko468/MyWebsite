@@ -1,0 +1,170 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * Four blocks that are deliberately not equal: websites wide with its drawing on top, the
+ * application narrow and lower with its drawing underneath, mobile tinted blue, integrations wide
+ * with the drawing beside the words. Under `lg` they stack.
+ */
+.grid {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+    margin-top: var(--space-9);
+  }
+}
+
+.item {
+  display: grid;
+  min-width: 0;
+
+  @include m.up('md') {
+    &[data-kind='websites'],
+    &[data-kind='integrations'] {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @include m.up('lg') {
+    &[data-kind='websites'] {
+      grid-column: 1 / span 7;
+    }
+
+    &[data-kind='webapps'] {
+      grid-column: 8 / span 5;
+      margin-top: var(--space-9);
+    }
+
+    &[data-kind='mobile'] {
+      grid-column: 1 / span 5;
+    }
+
+    &[data-kind='integrations'] {
+      grid-column: 6 / span 7;
+      margin-top: var(--space-7);
+    }
+  }
+}
+
+.fill {
+  min-width: 0;
+  height: 100%;
+}
+
+.block {
+  --_tint: transparent;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: color-mix(in srgb, var(--_tint) 14%, var(--color-surface));
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+
+  @include m.hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  &[data-kind='webapps'] {
+    flex-direction: column-reverse;
+    background-color: var(--color-surface-raised);
+  }
+
+  &[data-kind='mobile'] {
+    --_tint: var(--brand-blue);
+  }
+
+  &[data-kind='integrations'] {
+    --_tint: var(--brand-red);
+
+    @include m.up('lg') {
+      flex-direction: row;
+      align-items: stretch;
+    }
+  }
+}
+
+.art {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 360 / 220;
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text);
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .block[data-kind='integrations'] & {
+    @include m.up('lg') {
+      flex: 0 0 56%;
+      aspect-ratio: auto;
+      min-height: 17rem;
+      order: 2;
+    }
+  }
+}
+
+.copy {
+  /* The title sizes itself to the room the words have (cqw), so the longest name in any language
+     ("WEBALKALMAZÁSOK", 15 expanded capitals) fits a column of any width without being cut. */
+  container-type: inline-size;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+
+  @include m.up('md') {
+    padding: var(--space-6);
+  }
+
+  .block[data-kind='integrations'] & {
+    @include m.up('lg') {
+      justify-content: flex-end;
+    }
+  }
+}
+
+.number {
+  color: transparent;
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-black);
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  -webkit-text-stroke: 1px var(--color-accent-text);
+}
+
+.title {
+  font-size: clamp(1.1rem, 7.4cqw, 1.9rem);
+  font-stretch: var(--fstretch-expanded);
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.text {
+  max-width: 36ch;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+@media (forced-colors: active) {
+  .number {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+}

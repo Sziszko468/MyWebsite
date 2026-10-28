@@ -1,0 +1,64 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * An uneven grid, on purpose. Below `md` the projects stack. From `md` two columns: the lead runs
+ * across both, the next two sit side by side, the wide one runs across. From `lg` twelve columns
+ * with the cards staggered: lead (7) beside a lower second card (5), then a compact card (5)
+ * beside a wide one (7) that starts lower.
+ */
+.grid {
+  display: grid;
+  gap: var(--space-6) var(--space-5);
+  margin-top: var(--space-8);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+    margin-top: var(--space-9);
+  }
+}
+
+.item {
+  display: grid;
+  min-width: 0;
+
+  @include m.up('md') {
+    &[data-layout='lead'],
+    &[data-layout='wide'] {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @include m.up('lg') {
+    &[data-layout='lead'] {
+      grid-column: 1 / span 7;
+    }
+
+    &[data-layout='offset'] {
+      grid-column: 8 / span 5;
+      margin-top: var(--space-10);
+    }
+
+    &[data-layout='compact'] {
+      grid-column: 1 / span 5;
+    }
+
+    &[data-layout='wide'] {
+      grid-column: 6 / span 7;
+      margin-top: var(--space-8);
+    }
+  }
+}
+
+.fill {
+  min-width: 0;
+  height: 100%;
+}
+
+.card {
+  height: 100%;
+}

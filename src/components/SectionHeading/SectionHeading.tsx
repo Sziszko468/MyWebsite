@@ -8,14 +8,24 @@ interface SectionHeadingProps {
   index?: string
   /** Heading level; the visual size is the same, so pick by document outline. */
   level?: 1 | 2 | 3
+  /** `large`: the title across the whole width at display size, for a section that opens with a statement. */
+  size?: 'default' | 'large'
   id?: string
   className?: string
 }
 
-export function SectionHeading({ title, description, index, level = 2, id, className }: SectionHeadingProps) {
+export function SectionHeading({
+  title,
+  description,
+  index,
+  level = 2,
+  size = 'default',
+  id,
+  className,
+}: SectionHeadingProps) {
   const Heading = `h${level}` as const
   return (
-    <header className={cx(styles.root, className)}>
+    <header className={cx(styles.root, size === 'large' && styles.large, className)}>
       {index && (
         <span className={styles.index} aria-hidden="true">
           {index}

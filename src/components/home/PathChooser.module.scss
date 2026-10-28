@@ -1,0 +1,285 @@
+@use '../../styles/mixins' as m;
+
+.paths {
+  display: grid;
+  gap: var(--space-6) var(--space-5);
+  margin-top: var(--space-8);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+    margin-top: var(--space-9);
+  }
+}
+
+.careerSlot {
+  @include m.up('lg') {
+    grid-column: 1 / span 5;
+  }
+}
+
+/* The second door starts lower and is wider: the two never line up. */
+.clientsSlot {
+  @include m.up('lg') {
+    grid-column: 6 / span 7;
+    margin-top: var(--space-9);
+  }
+}
+
+/* The shared shell of a door. Both are links as a whole (the hidden twin), and both follow the pointer. */
+.career,
+.clients {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: var(--space-6) var(--space-5);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition:
+    box-shadow var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+
+  @include m.up('md') {
+    padding: var(--space-7) var(--space-7);
+  }
+
+  /* The words sit above the decoration but let clicks fall through to the hidden link under them;
+     only the button takes them itself. */
+  > :not(.overlay, .grid, .crossH, .crossV, .streaks, .beam, .ghostA, .ghostB) {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  @include m.hover {
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/* The larger hit area. Hidden from assistive tech and the tab order: the button is the link. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.career .cta,
+.clients .cta {
+  align-self: flex-start;
+  margin-top: var(--space-6);
+  pointer-events: auto;
+}
+
+/* ── A · Careers: paper, measured, a blueprint under the pointer ───────── */
+
+.career {
+  --_line: color-mix(in srgb, var(--color-secondary) 38%, transparent);
+
+  min-height: 25rem;
+  justify-content: flex-end;
+}
+
+.careerLabel,
+.clientsLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  span {
+    display: inline-grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: var(--border-width) solid currentColor;
+    font-size: var(--fs-xs);
+  }
+}
+
+.careerLabel {
+  color: var(--color-secondary-text);
+}
+
+.careerTitle {
+  max-width: 14ch;
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.careerText {
+  max-width: 34ch;
+  margin-top: var(--space-4);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+.ghostA,
+.ghostB {
+  position: absolute;
+  z-index: 0;
+  color: transparent;
+  font-size: clamp(11rem, 8rem + 16vw, 22rem);
+  font-weight: var(--fw-black);
+  line-height: 0.8;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ghostA {
+  top: -0.5rem;
+  right: -1rem;
+  -webkit-text-stroke: 1px var(--_line);
+}
+
+/* The blueprint: hairlines in cobalt, shown in a disc around the pointer. At rest the disc sits
+   in a corner, so a touch screen sees a quiet version of the same thing. */
+.grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--_line) 1px, transparent 1px), linear-gradient(90deg, var(--_line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.55;
+  mask-image: radial-gradient(circle 12rem at var(--mx, 82%) var(--my, 18%), #000 0%, transparent 100%);
+  transition: opacity var(--dur-slow) var(--ease-out);
+  pointer-events: none;
+}
+
+.crossH,
+.crossV {
+  position: absolute;
+  z-index: 0;
+  background-color: var(--color-secondary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.crossH {
+  top: var(--my, 0);
+  right: 0;
+  left: 0;
+  height: 1px;
+}
+
+.crossV {
+  top: 0;
+  bottom: 0;
+  left: var(--mx, 0);
+  width: 1px;
+}
+
+.career[data-pointer='active'] {
+  .grid {
+    opacity: 1;
+  }
+
+  .crossH,
+  .crossV {
+    opacity: 0.7;
+  }
+}
+
+/* ── B · Clients: carbon, wide, a red streak that leans after the pointer ── */
+
+.clients {
+  --_streak: color-mix(in srgb, var(--brand-red) 70%, transparent);
+
+  min-height: 31rem;
+  justify-content: flex-end;
+  border-color: color-mix(in srgb, var(--brand-red) 55%, var(--color-border-strong));
+}
+
+.clientsLabel {
+  color: var(--color-accent-text);
+}
+
+.clientsTitle {
+  max-width: 15ch;
+  font-size: clamp(2rem, 1.2rem + 3.2vw, 4rem);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.04em;
+  line-height: 0.96;
+  text-transform: uppercase;
+}
+
+.clientsText {
+  max-width: 40ch;
+  margin-top: var(--space-4);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+.ghostB {
+  top: -1.5rem;
+  right: 0.5rem;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--brand-red) 45%, transparent);
+}
+
+/* Thin diagonal lines, the brand's 112°, revealed around the pointer. */
+.streaks {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    112deg,
+    transparent 0 17px,
+    color-mix(in srgb, var(--color-text) 20%, transparent) 17px 18px
+  );
+  opacity: 0.5;
+  mask-image: radial-gradient(circle 15rem at var(--mx, 84%) var(--my, 70%), #000 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* The beam is one long red streak through the pointer; moving across the panel leans it. */
+.beam {
+  position: absolute;
+  z-index: 0;
+  top: var(--my, 70%);
+  left: var(--mx, 84%);
+  width: 180%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--brand-red) 38%, var(--color-text) 50%, var(--brand-red) 62%, transparent);
+  opacity: 0.55;
+  transform: translate(-50%, -50%) rotate(calc(-22deg + var(--px, 0) * 5deg));
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+  pointer-events: none;
+}
+
+.clients[data-pointer='active'] .beam {
+  opacity: 1;
+  transition-duration: var(--dur-fast), var(--dur-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam {
+    transform: translate(-50%, -50%) rotate(-22deg);
+  }
+}
+
+@media (forced-colors: active) {
+  .grid,
+  .crossH,
+  .crossV,
+  .streaks,
+  .beam,
+  .ghostA,
+  .ghostB {
+    display: none;
+  }
+}

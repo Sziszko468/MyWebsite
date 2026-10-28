@@ -28,10 +28,28 @@ function DocumentMeta({ page }: { page: PageDef | undefined }) {
   return null
 }
 
-/** A new page starts at the top; switching language on the same page keeps the scroll position. */
-function ScrollToTop({ path, hash }: { path: string; hash: string }) {
+/**
+ * A new page starts at the top; switching language on the same page keeps the scroll position.
+ * An address with a #fragment scrolls to that element once the page has rendered it (the browser
+ * itself cannot, because the page is drawn by script after it has looked for the target).
+ */
+function ScrollToTarget({ path, hash }: { path: string; hash: string }) {
   useEffect(() => {
-    if (!hash) window.scrollTo(0, 0)
+    if (!hash) {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+      return
+    }
+
+    const id = decodeURIComponent(hash.slice(1))
+    let frame = 0
+    let attempts = 0
+    const seek = () => {
+      const target = document.getElementById(id)
+      if (target) target.scrollIntoView({ block: 'start' })
+      else if (attempts++ < 30) frame = requestAnimationFrame(seek)
+    }
+    seek()
+    return () => cancelAnimationFrame(frame)
   }, [path, hash])
   return null
 }
@@ -59,7 +77,7 @@ export function LanguageLayout() {
   return (
     <I18nProvider lang={lang}>
       <DocumentMeta page={page} />
-      <ScrollToTop path={rest} hash={hash} />
+      <ScrollToTarget path={rest} hash={hash} />
       <AppShell>
         <Outlet />
       </AppShell>

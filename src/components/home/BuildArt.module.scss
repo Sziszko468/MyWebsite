@@ -1,0 +1,61 @@
+/* The details that move while a mouse is over a block (it sets data-pointer), and sit still otherwise. */
+
+.flow {
+  fill: none;
+  stroke: var(--brand-red);
+  stroke-dasharray: 6 6;
+  stroke-linecap: round;
+  stroke-width: 2.5;
+}
+
+.ripple,
+.rippleLate {
+  fill: none;
+  opacity: 0;
+  stroke: var(--brand-red);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+:global([data-pointer='active']) {
+  .flow {
+    animation: flow 0.9s linear infinite;
+  }
+
+  .ripple {
+    animation: ripple 1.6s var(--ease-out) infinite;
+  }
+
+  .rippleLate {
+    animation: ripple 1.6s var(--ease-out) 0.55s infinite;
+  }
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes ripple {
+  from {
+    opacity: 0.9;
+    transform: scale(0.6);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global([data-pointer='active']) {
+    .flow,
+    .ripple,
+    .rippleLate {
+      animation: none;
+    }
+  }
+}

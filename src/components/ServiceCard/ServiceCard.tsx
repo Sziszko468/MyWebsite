@@ -20,6 +20,8 @@ interface ServiceCardProps {
   headingLevel?: 2 | 3 | 4
   /** Optional extra content (deliverables, scope notes) between description and price. */
   children?: ReactNode
+  /** The way to act on the offer (a quote request), under the price. */
+  action?: ReactNode
   className?: string
 }
 
@@ -31,6 +33,7 @@ export function ServiceCard({
   featured = false,
   headingLevel = 3,
   children,
+  action,
   className,
 }: ServiceCardProps) {
   const { lang, t } = useI18n()
@@ -66,6 +69,7 @@ export function ServiceCard({
         )}
         {price.kind === 'quote' && <span className={styles.priceValue}>{t.services.priceQuote}</span>}
         {price.kind === 'tbd' && <span className={styles.priceMuted}>{t.services.priceTbd}</span>}
+        {action && <div className={styles.action}>{action}</div>}
       </footer>
     </article>
   )

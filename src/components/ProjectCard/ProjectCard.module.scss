@@ -34,9 +34,31 @@
 }
 
 .media {
+  position: relative;
   overflow: hidden;
   aspect-ratio: 16 / 10;
   background-color: var(--color-bg-subtle);
+}
+
+/*
+ * The picture follows the pointer a little: it tilts and leans towards it. Only the picture
+ * moves, never the text, and only while a mouse is over the card (see usePointerField); a touch
+ * screen sees it at rest. It eases back when the pointer leaves.
+ */
+.stage {
+  width: 100%;
+  height: 100%;
+  transform: perspective(900px) rotateX(calc(var(--py, 0) * -2.4deg)) rotateY(calc(var(--px, 0) * 3deg))
+    scale(var(--_zoom, 1));
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.card[data-pointer='active'] {
+  --_zoom: 1.025;
+
+  .stage {
+    transition-duration: var(--dur-fast);
+  }
 }
 
 .image,
@@ -72,6 +94,39 @@
     var(--color-surface-raised);
 }
 
+.sketch {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: stretch;
+  color: var(--color-text);
+
+  > svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Says, in words, that the picture is an illustration and not a screenshot of the product. */
+.mediaLabel {
+  position: absolute;
+  bottom: var(--space-3);
+  left: var(--space-3);
+  max-width: calc(100% - var(--space-5));
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--color-bg) 82%, transparent);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wide);
+  line-height: 1.4;
+  text-transform: uppercase;
+  backdrop-filter: blur(6px);
+}
+
 .body {
   display: flex;
   flex: 1;
@@ -83,12 +138,30 @@
 .meta {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-2);
+}
+
+/* An outlined numeral: part of the editorial rhythm, not content. */
+.index {
+  margin-right: var(--space-2);
+  color: transparent;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-black);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  -webkit-text-stroke: 1px var(--color-accent-text);
 }
 
 .title {
   font-size: var(--fs-xl);
   overflow-wrap: break-word;
+}
+
+.description {
+  max-width: 46ch;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
 }
 
 .link {
@@ -126,5 +199,114 @@
     font-size: var(--fs-xs);
     font-weight: var(--fw-medium);
     letter-spacing: var(--ls-wide);
+  }
+}
+
+/* A second link inside a linked card sits above the title's stretched hit area. */
+.demo {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--size-touch);
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  text-underline-offset: 0.25em;
+
+  @include m.hover {
+    text-decoration: underline;
+  }
+}
+
+/* ── Compositions ───────────────────────────────────────────────────── */
+
+/* The lead project: the largest picture and the largest name. */
+.lead {
+  .media {
+    aspect-ratio: 16 / 11;
+  }
+
+  .body {
+    padding: var(--space-6);
+  }
+
+  .title {
+    font-size: var(--fs-2xl);
+  }
+
+  .index {
+    font-size: var(--fs-2xl);
+  }
+}
+
+/* A tall, narrower card: the picture is closer to square. */
+.offset {
+  .media {
+    aspect-ratio: 5 / 4;
+  }
+
+  .title {
+    font-size: var(--fs-xl);
+  }
+}
+
+/* A compact card: a letterbox picture and a small name. */
+.compact {
+  .media {
+    aspect-ratio: 21 / 10;
+  }
+
+  .body {
+    gap: var(--space-3);
+  }
+
+  .title {
+    font-size: var(--fs-lg);
+  }
+
+  .index {
+    font-size: var(--fs-lg);
+  }
+}
+
+/* A wide card: text on one side and a broad picture on the other, where there is room. */
+.wide {
+  @include m.up('lg') {
+    flex-direction: row-reverse;
+
+    .media {
+      flex: 0 0 56%;
+      aspect-ratio: auto;
+      min-height: 19rem;
+    }
+
+    .body {
+      padding: var(--space-6);
+    }
+
+    .title {
+      font-size: var(--fs-2xl);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    transform: none;
+  }
+
+  .linked:hover {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .index {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
   }
 }

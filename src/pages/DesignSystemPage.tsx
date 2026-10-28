@@ -164,6 +164,7 @@ export default function DesignSystemPage() {
       <Block id="ds-badges" index="04" title="Badges & switches">
         <div className={styles.row}>
           <Badge status="live" />
+          <Badge status="demo" />
           <Badge status="in-progress" />
           <Badge status="concept" />
           <Badge>Category</Badge>

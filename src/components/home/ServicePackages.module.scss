@@ -1,0 +1,190 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * Not a pricing table. From `lg`: Launch and Grow on the left, Build large on the right across
+ * both rows, Care as a wider card under Launch and Grow. From `md` two columns with Build and Care
+ * across; below that a stack in reading order.
+ */
+.grid {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: auto auto;
+    margin-top: var(--space-9);
+  }
+}
+
+.item {
+  display: grid;
+  min-width: 0;
+
+  @include m.up('md') {
+    &[data-package='build'],
+    &[data-package='care'] {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @include m.up('lg') {
+    &[data-package='launch'] {
+      grid-column: 1 / span 4;
+      grid-row: 1;
+    }
+
+    &[data-package='grow'] {
+      grid-column: 5 / span 4;
+      grid-row: 1;
+      margin-top: var(--space-7);
+    }
+
+    &[data-package='build'] {
+      grid-column: 9 / span 4;
+      grid-row: 1 / span 2;
+    }
+
+    &[data-package='care'] {
+      grid-column: 1 / span 8;
+      grid-row: 2;
+    }
+  }
+}
+
+.fill {
+  min-width: 0;
+  height: 100%;
+}
+
+.slot {
+  position: relative;
+  height: 100%;
+
+  /* A faint wash of red under the pointer; it sits over the card and takes no clicks. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    background: radial-gradient(
+      circle 14rem at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--brand-red) 11%, transparent),
+      transparent 100%
+    );
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease-out);
+  }
+
+  &[data-pointer='active']::after {
+    opacity: 1;
+  }
+}
+
+.card {
+  height: 100%;
+  color: var(--color-text);
+}
+
+/* The large one. It wears the page's own theme inside the inverted section, so it is the one
+   dark card on a light band (or the light one on a dark band). */
+.featured .card {
+  padding: var(--space-6);
+  border-color: var(--color-border-strong);
+  background-color: var(--color-surface-raised);
+  box-shadow: var(--shadow-lg);
+
+  @include m.up('lg') {
+    padding: var(--space-7) var(--space-6);
+  }
+
+  > header > h3 {
+    font-size: var(--fs-2xl);
+  }
+}
+
+.facts {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.label {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+/* The brand's slash, not a tick. */
+.includes {
+  display: grid;
+  gap: var(--space-2);
+
+  li {
+    position: relative;
+    padding-left: var(--space-5);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.7em;
+      left: 0;
+      width: 0.75rem;
+      height: 2px;
+      background-color: var(--color-accent);
+      transform: skewX(-32deg);
+    }
+  }
+}
+
+/* Care is a wider card: its text on one side, who it is for and what it includes on the other, where there is room. */
+.item[data-package='care'] .card {
+  @include m.up('lg') {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-areas:
+      'head extra'
+      'desc extra'
+      'foot extra';
+    grid-template-rows: auto auto 1fr;
+    column-gap: var(--space-6);
+    align-items: start;
+
+    /* ServiceCard's own parts, placed by position: name, description, extra, price and action. */
+    > header {
+      grid-area: head;
+    }
+
+    > p {
+      grid-area: desc;
+    }
+
+    > div {
+      grid-area: extra;
+    }
+
+    > footer {
+      grid-area: foot;
+      align-self: end;
+    }
+
+    .facts {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-5);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot::after {
+    display: none;
+  }
+}

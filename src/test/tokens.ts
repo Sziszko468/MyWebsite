@@ -26,8 +26,8 @@ const css = tokensCss.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@media[^{]*\{[\s
 // The first `:root {` is the theme-independent block.
 const base = blockFor(css, /(?<=^|\n):root/)
 const themes: Record<ThemeName, TokenMap> = {
-  dark: blockFor(css, /:root,\s*:root\[data-theme='dark'\]/),
-  light: blockFor(css, /:root\[data-theme='light'\]/),
+  dark: blockFor(css, /:root,\s*\[data-theme='dark'\]/),
+  light: blockFor(css, /(?<=^|\n)\[data-theme='light'\]/),
 }
 
 export function rawToken(name: string, theme?: ThemeName): string | undefined {

@@ -1,0 +1,130 @@
+/* The drawing is made of theme tokens only, so it follows the section's theme. */
+.root {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.root svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.bg {
+  fill: var(--color-bg-subtle);
+}
+
+.panel {
+  fill: var(--color-surface-raised);
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.rail {
+  fill: var(--color-surface-hover);
+}
+
+.card {
+  fill: var(--color-surface-raised);
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+
+.shadow {
+  fill: var(--color-text);
+  opacity: 0.14;
+}
+
+.bar {
+  fill: color-mix(in srgb, var(--color-text) 16%, transparent);
+}
+
+.barStrong {
+  fill: color-mix(in srgb, var(--color-text) 36%, transparent);
+}
+
+.dot {
+  fill: color-mix(in srgb, var(--color-text) 26%, transparent);
+}
+
+.red {
+  fill: var(--brand-red);
+}
+
+.blue {
+  fill: var(--brand-blue);
+}
+
+.line {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+
+.grid {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.route {
+  fill: none;
+  stroke: var(--brand-red);
+  stroke-dasharray: 5 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
+
+.track {
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-text) 16%, transparent);
+  stroke-width: 6;
+}
+
+.ring {
+  fill: none;
+  stroke: var(--brand-blue);
+  stroke-linecap: round;
+  stroke-width: 6;
+  transform: rotate(-90deg);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/*
+ * Three depths. The numbers are the pointer's position inside the card, -1..1, written by the
+ * card; without a pointer they are 0 and the drawing sits flat.
+ */
+.far,
+.mid,
+.near {
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.far {
+  transform: translate(calc(var(--px, 0) * -5px), calc(var(--py, 0) * -4px));
+}
+
+.mid {
+  transform: translate(calc(var(--px, 0) * 2px), calc(var(--py, 0) * 1.5px));
+}
+
+.near {
+  transform: translate(calc(var(--px, 0) * 9px), calc(var(--py, 0) * 7px));
+}
+
+:global([data-pointer='active']) {
+  .far,
+  .mid,
+  .near {
+    transition-duration: var(--dur-fast);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .far,
+  .mid,
+  .near {
+    transform: none;
+  }
+}

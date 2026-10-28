@@ -1,0 +1,196 @@
+@use '../../styles/mixins' as m;
+
+.layout {
+  display: grid;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-5);
+    align-items: start;
+    margin-top: var(--space-9);
+  }
+}
+
+.principlesSlot {
+  /* The words size themselves to the width they are given (cqw), so the longest one in any of the
+     three languages fits on a line, from a phone to a wide desktop. */
+  container-type: inline-size;
+
+  @include m.up('lg') {
+    grid-column: 1 / span 7;
+  }
+}
+
+.aside {
+  display: grid;
+  gap: var(--space-6);
+
+  @include m.up('lg') {
+    grid-column: 9 / span 4;
+    padding-top: var(--space-8);
+  }
+}
+
+/* ── Three words ───────────────────────────────────────────────────────── */
+
+.principles {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/*
+ * Each word is drawn in outline with a faint fill. A mouse over it lights a red disc inside the
+ * letters at the pointer (the spotlight is the text's own background, clipped to the glyphs), so
+ * the word is complete and readable at rest and the interaction only adds to it.
+ */
+.principle {
+  /* From `lg`, each word steps further in, so the three read as a staircase. */
+  @include m.up('lg') {
+    padding-left: calc(var(--step, 0) * 4cqw);
+  }
+}
+
+.word {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding-block: 0.05em 0.12em;
+  background-image:
+    radial-gradient(circle 7rem at var(--mx, -100%) var(--my, -100%), var(--color-accent) 0%, transparent 100%),
+    linear-gradient(color-mix(in srgb, var(--color-text) 10%, transparent), color-mix(in srgb, var(--color-text) 10%, transparent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(1.75rem, 9.4cqw, 7rem);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-text);
+
+  @include m.up('lg') {
+    font-size: clamp(1.75rem, 8.4cqw, 7rem);
+  }
+}
+
+/* ── The words that carry the meaning ─────────────────────────────────── */
+
+.statement {
+  font-size: var(--fs-lg);
+  line-height: var(--lh-relaxed);
+  text-wrap: pretty;
+}
+
+.block {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border-strong);
+}
+
+.blockTitle {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wider);
+  line-height: var(--lh-normal);
+  text-transform: uppercase;
+}
+
+.story {
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  li {
+    padding: var(--space-1) var(--space-3);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-xs);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-wide);
+  }
+}
+
+.note {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.skillGroup {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.skillLabel {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.timeline {
+  display: grid;
+  gap: var(--space-4);
+
+  li {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  p {
+    color: var(--color-text-secondary);
+    line-height: var(--lh-relaxed);
+  }
+}
+
+.period {
+  color: var(--color-accent-text);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+}
+
+.entryTitle {
+  font-size: var(--fs-md);
+}
+
+.place {
+  color: var(--color-text-secondary);
+}
+
+.pending {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-style: italic;
+}
+
+@media (forced-colors: active) {
+  .word {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word {
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--color-text) 10%, transparent),
+      color-mix(in srgb, var(--color-text) 10%, transparent)
+    );
+  }
+}

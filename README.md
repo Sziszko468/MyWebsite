@@ -7,7 +7,7 @@ npm run dev        # dev server; /hu/design-system shows every token and compone
 npm run build      # type-check + production build
 npm run typecheck  # tsc -b
 npm run lint       # oxlint
-npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition
+npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition, home-page content, rhythm and link targets
 ```
 
 ## Where things live
@@ -23,6 +23,9 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 | `src/components/` | UI kit (Button, Container, SectionHeading, Badge, ProjectCard, ServiceCard) and the global frame: `AppShell`, `SiteHeader`, `MainNav`, `BrandMark`, `MobileMenu`, `SiteFooter`, `MainContent`, `SceneLayer`, `ThemeToggle`, `LanguageSwitcher`. |
 | `src/components/hero/` | The Home hero ("Velocity Field"): kinetic headline, input drivers, generated SVG fallback and the lazily loaded Three.js scene. It is also the engine of the intro. See below. |
 | `src/components/intro/` | The fullscreen opening ("Velocity Intro"): state machine, show/skip policy, exit transition, the dialog and its entry button. See below. |
+| `src/components/home/` | The home page's sections after the hero (path chooser, selected work, what I build, about, lab, packages, closing call to action) and their drawings. See "The home page" below. |
+| `src/components/Section/`, `src/components/motion/` | `Section` (a band that wears its own theme), `Reveal` (arrive-once on scroll), `usePointerField` (pointer variables for CSS). |
+| `src/content/` | The home page's editable data: projects, areas of work, packages, lab experiments, About facts. No words in here, only structure; the words are in the dictionaries. |
 | `src/pages/` | Home, placeholder pages, 404. `DesignSystemPage` exists in dev builds only. |
 | `src/config/site.ts` | Brand name, monogram, contact email, social profiles, legal pages. Every `null` is a placeholder. |
 | `src/config/intro.ts` | When the intro appears (`first-visit`, `every-session`, `never`), whether visitors can skip it, how long the exit lasts. |
@@ -30,7 +33,7 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 ## Conventions
 
 - **Colours:** components use semantic tokens (`--color-*`), never hex values. Raw brand colours (`--brand-*`) are for tokens and decorative art.
-- **Themes:** `data-theme="dark|light"` on `<html>`. Dark is the default. The choice is stored in `localStorage` under `theme`; without one, the system setting applies.
+- **Themes:** `data-theme="dark|light"` on `<html>`. Dark is the default. The choice is stored in `localStorage` under `theme`; without one, the system setting applies. The semantic token blocks are selected by `[data-theme]` alone, so any element can carry a theme of its own: that is how a band of the home page is light on a dark page (see `Section`).
 - **Strings:** every UI string comes from `src/i18n/locales/*`. `hu.ts` defines the shape, so `en.ts` and `nl.ts` fail to compile when a key is missing or extra.
 - **URLs:** `/hu/`, `/en/`, `/nl/`; `/` redirects to `/hu/`. Slugs are the same in every language. The language switcher keeps the current page, query and hash; a page with no translation in the chosen language links to that language's home page, and opening such a page directly redirects to its Hungarian version.
 - **Adding a page:** add it to `src/routes/pages.ts` and to `PAGE_ELEMENTS` in `src/App.tsx`. Add its label to `nav` in the dictionaries if it belongs in the navigation.
@@ -41,7 +44,7 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 
 ## The hero ("Velocity Field")
 
-`src/components/hero/`. An abstract, generative field of light that the visitor moves: streaks rush out of a vanishing point, curved trails wind through it, dust parts around the cursor and a wireframe floor and ceiling rise and roll. There is no car and no scripted scene: the cursor, clicks and scroll change the picture. Headline, description and both buttons are plain HTML above the scene, so they read and work from the first paint. Strings are in `hero.*` of the dictionaries; the second button reuses `cta.startProject`; both buttons are real links (`/work`, `/contact`).
+`src/components/hero/`. An abstract, generative field of light that the visitor moves: streaks rush out of a vanishing point, curved trails wind through it, dust parts around the cursor and a wireframe floor and ceiling rise and roll. There is no car and no scripted scene: the cursor, clicks and scroll change the picture. Headline, description and both buttons are plain HTML above the scene, so they read and work from the first paint. Strings are in `hero.*` of the dictionaries; the first button scrolls to the Selected work section of the same page (`#work`), the second opens `/contact`.
 
 | File | Role |
 | --- | --- |
@@ -166,3 +169,42 @@ GPU clocks on this machine drift by up to 2× between runs, and the embedded bro
 Layout was measured in the DOM (headline word extents, button box, overlaps, horizontal overflow) at 1920×1080, 1440×900, 1024×768, 768×1024, 390×844, 360×800, 320×640, 844×390, 667×375, 568×320 and 1440×480, in all three languages where noted: no horizontal overflow, the headline always inside the viewport, the button at least 44×44 px and visible without scrolling.
 
 **Not tested** (be aware): real phones and real touch hardware (touch was checked by emulating the viewport and dispatching `pointerType: 'touch'` events), Safari and Firefox (only an embedded Chromium was available), screen readers, genuinely slow devices (the quality tiers and watchdog are the same as the hero's), and a browser that really lacks WebGL (the fallback was forced with `?hero=fallback`). Reduced motion was simulated by overriding `matchMedia` in the page, so the CSS-side `@media (prefers-reduced-motion)` rule (it only switches the text's rise-in animation off) was not exercised.
+
+## The home page
+
+`src/pages/HomePage.tsx` stacks the hero and seven bands from `src/components/home/`, in this order. Each has its own composition; nothing is a card grid of equals.
+
+| # | Band (anchor) | Composition | What the pointer does |
+| --- | --- | --- | --- |
+| 0 | Hero | The Velocity Field scene behind the headline "Digitális élmények. Valódi hatással." and two buttons (`#work`, `/contact`). | The hero's own cursor, click and scroll reactions. |
+| 01 | Choose your path (`#path`) | Two doors of different width, height and temperature: a narrow paper one for careers, a wide carbon one for clients. Each is dark or light whatever the page is. | A blueprint grid and crosshair under the pointer on the career door; a red streak that leans after the pointer on the client door. |
+| 02 | Selected work (`#work`) | Four projects, uneven: a large lead, a lower second card, a compact third, a wide fourth. | The picture tilts and its three drawing layers slide against each other. Text never moves. |
+| 03 | What I build (`#build`) | Four blocks of different shape and tint, each with a drawing of its own. | Websites fan out, the application's flow runs, the phone is tapped, the integrations pass data. |
+| 04 | About (`#about`) | One statement, three words in outline, the owner's sentence, the tools this site is built with. | A red spotlight lights the letters of the word under the pointer. |
+| 05 | The Lab (`#lab`) | Three saturated tiles (carbon, Racing Red, deep cobalt), the same in either theme. | Dots swell and turn red, shapes melt into each other, five easings chase the pointer. |
+| 06 | Ways to work together (`#services`) | Build is the large dark card, Launch and Grow flank it, Care is a wider card. | A faint red wash under the pointer. |
+| 07 | Closing call to action (`#start`) | "VALÓSÍTSUK MEG." at display size on Racing Red, black type and a black button. | The fan of lines behind it leans. |
+
+**Dark and light rhythm.** `Section` gives a band its own `data-theme`: `base` (the page's), `inverse` (the other one), or fixed `dark`/`light`. From the first band on, every band is the opposite of the one above it in both themes, and the last is Racing Red; `home/rhythm.ts` is the one place that says so and `home.test.ts` checks it. The top edges are cut on the brand's diagonal (`slant`).
+
+**Editing the content.** The words are in the dictionaries under `home.*` (all three languages, checked for equal keys and equal list lengths). The structure is in `src/content/`:
+
+| File | What to edit |
+| --- | --- |
+| `projects.ts` | Per project: name, status (`live`, `demo`, `in-progress`, `concept`), technology tags, composition, sketch, a real screenshot (`image`), a details route (`detailPath`), a live demo address (`demoUrl`). A card links only when `detailPath` or `demoUrl` is set. A test refuses `live` without a demo address, a demo address on a concept, and a details route that is not a registered page. |
+| `offerings.ts` | The areas in "What I build". Remove one to hide its block. |
+| `packages.ts` | Launch, Grow, Build, Care: price (`quote` until a real figure exists; `{ kind: 'from', amount, currency }` publishes one) and which is featured. |
+| `lab.ts` | The experiments, their status and, once one really works, its `demoUrl`. |
+| `about.ts` | Story, experience, education and skills, one `Localized` string per language. All empty: an empty block renders nothing (in development a muted note shows where it goes). "What this site is built with" is read from this site's own `package.json`. |
+
+**Project facts, and where they came from.** The brief's descriptions were starting points, so the status and technologies were checked against the projects' own repositories next to this one: Spendly (its README calls it WALLEX; a "production-style portfolio project": Django REST, React 19, Expo, PostgreSQL, Docker), BookingHub (`Bookingsite/booking-app`: Next.js 16, React 19, TypeScript, Tailwind; demo credentials and browser-local storage), Logistics Platform (`Logextic`: "a portfolio / demo project, not used in production"; FastAPI, React 19, PostgreSQL, React Native, Docker). None says it is live, so they carry the new `demo` status ("Demóprojekt"), not `live`. No repository for Hollandia Kezdőknek was found, so it stays on the most cautious status (`concept`) with no technology tags until you set them. These mappings are my reading of the folder names: confirm them.
+
+**Pictures.** A project without a screenshot shows a generated concept sketch (line-and-block drawings with no words or numbers in them), captioned "Koncepcióvázlat" so it cannot pass for a screenshot. Real screenshots exist in `Spendly/docs/screenshots` and `Logextic/docs/screenshots`, but they show the names WALLEX and Logextic, so they were not copied: put one in `public/` and set `image` once the names are decided.
+
+**Calls to action.** Every route link goes to a registered page (`/contact`) and every in-page link to a band that exists (`#work`); `home.test.ts` reads the sources and fails on anything else. `/contact`, like Work, Services, About and Lab, is still the translated "coming soon" page, so a visitor who follows a call to action lands there until that page is built; the closing band shows a `mailto:` link as soon as `contact.email` is set in `config/site.ts`.
+
+**Interaction rules.** Only a mouse or pen drives the pointer effects (`usePointerField` writes `--mx --my --px --py` on the element, one write per frame); a finger never does, so touch sees every composition at rest with all text, status and tags on screen. Reduced motion switches the pointer effects, the entrance (`Reveal`) and the glide of in-page jumps off. Content that is already on screen is never hidden for an entrance.
+
+**Verified** (embedded Chromium; desktop and emulated phone sizes): no horizontal overflow at 1920, 1440, 1024, 768, 390, 360 and 320 px; no text spilling out of its box or cut by a clipping parent in Hungarian at 320 to 1920 px, in Dutch (the longest text) at 320 to 1920 px and in English at 320 to 1440 px (the first pass of that check missed clipped text, and the strict one then found four real problems, all fixed: a category badge wider than its card, a title wider than its column, a squeezed Care card, a Dutch word breaking mid-word); both themes; the intro followed by the page, with one canvas; the keyboard order (nine real links, no focusable hidden link) and visible focus rings in the light door and on the red band; the `#work` jump and the `/contact` link; hover depth on cards, doors and lab tiles; the production build (no development notes, no console output). The suite is 404 tests; the new ones cover content, tones, contrast, link targets and the pointer maths.
+
+**Not verified.** Safari and Firefox; real phones and touch hardware; screen readers; the `prefers-reduced-motion` CSS (the script side was reasoned, not run, because the embedded browser cannot emulate the setting); forced-colours mode (rules are written, not seen); slow or 60 Hz hardware for the new sections.

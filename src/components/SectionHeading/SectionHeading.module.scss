@@ -54,3 +54,23 @@
     align-self: end;
   }
 }
+
+/* A statement, not a label: the title runs the full width at display size. */
+.large {
+  .title {
+    max-width: 16ch;
+    font-size: var(--fs-3xl);
+    line-height: 0.98;
+
+    @include m.up('lg') {
+      grid-column: 1 / -1;
+      max-width: 18ch;
+    }
+  }
+
+  .description {
+    @include m.up('lg') {
+      grid-column: 1 / span 5;
+    }
+  }
+}

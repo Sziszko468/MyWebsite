@@ -12,7 +12,9 @@
   letter-spacing: var(--ls-wide);
   line-height: 1.4;
   text-transform: uppercase;
-  white-space: nowrap;
+  /* A long category (in any language) wraps inside its pill rather than push its card wider. */
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .dot {
@@ -28,6 +30,12 @@
 .live .dot {
   background-color: var(--color-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 28%, transparent);
+}
+
+/* A working build that is not in production: a filled square, between the live dot and the open concept ring. */
+.demo .dot {
+  border-radius: 1px;
+  background-color: var(--color-text-secondary);
 }
 
 .progress .dot {

@@ -1,0 +1,18 @@
+/* The hidden state is set by script, only for content that starts below the fold. */
+.reveal {
+  transition:
+    opacity var(--dur-slow) var(--ease-out) var(--reveal-delay, 0ms),
+    transform 0.8s var(--ease-out) var(--reveal-delay, 0ms);
+
+  &[data-reveal='hidden'] {
+    opacity: 0;
+    transform: translate3d(0, 1.5rem, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &[data-reveal='hidden'] {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

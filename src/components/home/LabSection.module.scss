@@ -1,0 +1,286 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * Three tiles, three colours, three shapes. They keep their own colours in either theme (carbon,
+ * Racing Red, deep cobalt), which is what makes the Lab louder than the sections around it. Text
+ * on them uses only the tokens set below, all of which meet 4.5:1 on their tile.
+ */
+.grid {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    margin-top: var(--space-9);
+  }
+}
+
+.item {
+  display: grid;
+  min-width: 0;
+
+  @include m.up('md') {
+    &[data-kind='particles'] {
+      grid-row: span 2;
+    }
+  }
+
+  @include m.up('lg') {
+    &[data-kind='particles'] {
+      grid-column: 1 / span 5;
+    }
+
+    &[data-kind='liquid'] {
+      grid-column: 6 / span 6;
+    }
+
+    &[data-kind='motion'] {
+      grid-column: 7 / span 6;
+    }
+  }
+}
+
+.fill {
+  min-width: 0;
+  height: 100%;
+}
+
+.tile {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  min-height: 19rem;
+  overflow: hidden;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+
+  &[data-kind='particles'] {
+    min-height: 28rem;
+    border-color: color-mix(in srgb, var(--brand-red) 50%, var(--color-border-strong));
+  }
+
+  &[data-kind='liquid'] {
+    min-height: 22rem;
+    --color-bg: var(--brand-red);
+    --color-text: var(--brand-black);
+    --color-text-secondary: var(--brand-black);
+    --color-accent-text: var(--brand-black);
+    --color-border-strong: var(--brand-black);
+    --color-focus: var(--brand-black);
+  }
+
+  &[data-kind='motion'] {
+    min-height: 25rem;
+    --color-bg: color-mix(in srgb, var(--brand-blue) 52%, var(--brand-black));
+  }
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-5) var(--space-5);
+  background: linear-gradient(to top, var(--color-bg) 62%, transparent);
+
+  @include m.up('md') {
+    padding-inline: var(--space-6);
+    padding-bottom: var(--space-6);
+  }
+}
+
+.title {
+  font-size: var(--fs-xl);
+  font-stretch: var(--fstretch-expanded);
+  text-transform: uppercase;
+}
+
+.text {
+  max-width: 38ch;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+.demo {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-touch);
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+/* ── Particle Playground: a field of dots, swelling and turning red under the pointer ─ */
+
+.dotsBase,
+.dotsLit {
+  position: absolute;
+  inset: 0;
+  background-size: 20px 20px;
+}
+
+.dotsBase {
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--color-text) 40%, transparent) 1.2px, transparent 1.8px);
+}
+
+/* At rest the lit patch sits in a corner, so a touch screen sees a quiet version of the same thing. */
+.dotsLit {
+  background-image: radial-gradient(circle, var(--brand-red) 3.4px, transparent 4px);
+  opacity: 0.6;
+  mask-image: radial-gradient(circle 9rem at var(--mx, 72%) var(--my, 26%), #000 0%, transparent 100%);
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+
+.tile[data-pointer='active'] .dotsLit {
+  opacity: 1;
+}
+
+/* ── Liquid Geometry: shapes that melt into one another as the pointer passes ───── */
+
+.blobOne,
+.blobTwo,
+.blobThree {
+  position: absolute;
+  transition:
+    border-radius 1100ms var(--ease-out),
+    transform 900ms var(--ease-out);
+}
+
+.blobOne {
+  top: 8%;
+  right: 8%;
+  width: min(46%, 14rem);
+  aspect-ratio: 1;
+  background-color: var(--brand-black);
+  border-radius: 62% 38% 55% 45% / 48% 58% 42% 52%;
+}
+
+.blobTwo {
+  top: 30%;
+  right: 34%;
+  width: min(28%, 9rem);
+  aspect-ratio: 1;
+  border: 2px solid var(--brand-black);
+  border-radius: 38% 62% 44% 56% / 60% 40% 60% 40%;
+}
+
+.blobThree {
+  top: 14%;
+  right: 40%;
+  width: min(12%, 4rem);
+  aspect-ratio: 1;
+  background-color: var(--brand-paper);
+  border-radius: 50%;
+}
+
+.tile[data-pointer='active'] {
+  .blobOne {
+    border-radius: 38% 62% 45% 55% / 58% 42% 58% 42%;
+    transform: translate(calc(var(--px, 0) * 16px), calc(var(--py, 0) * 12px)) rotate(calc(var(--px, 0) * 10deg));
+  }
+
+  .blobTwo {
+    border-radius: 60% 40% 56% 44% / 40% 60% 40% 60%;
+    transform: translate(calc(var(--px, 0) * -12px), calc(var(--py, 0) * -9px));
+  }
+
+  .blobThree {
+    transform: translate(calc(var(--px, 0) * 22px), calc(var(--py, 0) * 16px));
+  }
+}
+
+/* ── Motion Experiments: five easings chasing the pointer's position ──────────── */
+
+.tracks {
+  position: absolute;
+  inset: var(--space-5) var(--space-5) auto;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.track {
+  --_t: var(--rest);
+
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.tile[data-pointer='active'] .track {
+  --_t: calc(var(--px, 0) * 0.5 + 0.5);
+}
+
+.curve {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-text-secondary);
+}
+
+.rail {
+  position: relative;
+  display: block;
+  height: 1px;
+  background-color: color-mix(in srgb, var(--color-text) 40%, transparent);
+  container-type: inline-size;
+}
+
+.runner {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-top: -0.375rem;
+  border-radius: 50%;
+  background-color: var(--brand-red);
+  transform: translateX(calc(var(--_t) * (100cqw - 0.75rem)));
+  transition: transform 900ms var(--timing, ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blobOne,
+  .blobTwo,
+  .blobThree,
+  .runner {
+    transition: none;
+  }
+
+  .tile[data-pointer='active'] {
+    .blobOne,
+    .blobTwo,
+    .blobThree {
+      transform: none;
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  .dotsBase,
+  .dotsLit,
+  .blobOne,
+  .blobTwo,
+  .blobThree {
+    display: none;
+  }
+}

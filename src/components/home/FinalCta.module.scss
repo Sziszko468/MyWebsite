@@ -1,0 +1,112 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * Racing Red in either theme. Black type on this red is 5.05:1; the button is black with paper
+ * type (about 17:1). The tokens below are what the section's components read, so the Button,
+ * links and the focus ring all take the red band's colours without knowing about it.
+ */
+.final[data-theme] {
+  --color-bg: var(--brand-red);
+  --color-text: var(--brand-black);
+  --color-text-secondary: var(--brand-black);
+  --color-accent: var(--brand-black);
+  --color-accent-hover: #26262c;
+  --color-accent-active: #000;
+  --color-accent-text: var(--brand-black);
+  --color-on-accent: var(--brand-paper);
+  --color-focus: var(--brand-black);
+  --shadow-glow: 0 10px 32px -8px rgb(0 0 0 / 45%);
+
+  padding-block: calc(var(--space-9) + var(--_slant)) var(--space-section);
+}
+
+.stage {
+  position: relative;
+  isolation: isolate;
+}
+
+.lines {
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 0 auto;
+  width: min(100%, 78rem);
+  height: 100%;
+  pointer-events: none;
+  /* Keeps the lines to the lower right and off the words. */
+  mask-image: linear-gradient(to bottom, transparent 18%, #000 52%);
+}
+
+.fan {
+  transform-origin: 470px 520px;
+  transform: rotate(calc(var(--px, 0) * 2.2deg)) scale(calc(1 + var(--py, 0) * 0.02));
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+[data-pointer='active'] .fan {
+  transition-duration: var(--dur-fast);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  max-width: 11ch;
+  /* The longest word in any language (REALISEREN.) must fit a 320 px screen on one line. */
+  font-size: clamp(1.9rem, 9.2vw, 10rem);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.05em;
+  line-height: 0.88;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.row {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-7);
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 28rem) auto;
+    align-items: end;
+    justify-content: start;
+    gap: var(--space-9);
+    margin-top: var(--space-8);
+  }
+}
+
+.text {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-relaxed);
+}
+
+.actions {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+}
+
+.mail {
+  font-size: var(--fs-sm);
+
+  a {
+    font-weight: var(--fw-bold);
+    text-underline-offset: 0.2em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fan {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .lines {
+    display: none;
+  }
+}

@@ -3,7 +3,11 @@ import { useI18n } from '../../i18n/useI18n'
 import { cx } from '../../utils/cx'
 import styles from './Badge.module.scss'
 
-export type ProjectStatus = 'live' | 'in-progress' | 'concept'
+/**
+ * `live`: running and open to the public. `demo`: a working portfolio build that is not in
+ * production. `in-progress`: being built. `concept`: an idea or a design, not built.
+ */
+export type ProjectStatus = 'live' | 'demo' | 'in-progress' | 'concept'
 
 type BadgeProps = { className?: string } & (
   /** Project status: shows a status dot and the translated label. */
@@ -14,6 +18,7 @@ type BadgeProps = { className?: string } & (
 
 const STATUS_STYLE: Record<ProjectStatus, string> = {
   live: styles.live,
+  demo: styles.demo,
   'in-progress': styles.progress,
   concept: styles.concept,
 }
@@ -24,6 +29,7 @@ export function Badge({ status, children, className }: BadgeProps) {
   if (status) {
     const labels: Record<ProjectStatus, string> = {
       live: t.status.live,
+      demo: t.status.demo,
       'in-progress': t.status.inProgress,
       concept: t.status.concept,
     }

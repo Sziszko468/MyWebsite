@@ -8,6 +8,10 @@
  *
  * Components must only reference layers 2 and 3. Dark is the default theme;
  * the `data-theme` attribute on <html> switches to light (see src/theme).
+ *
+ * The semantic blocks are selected by `[data-theme]`, not `:root[data-theme]`, so any element
+ * can carry a theme of its own: a section of the home page that is dark on a light page (or the
+ * other way round) sets data-theme on itself and every component inside follows it.
  * Keep colour values plain hex or var() chains so src/styles/contrast.test.ts
  * can resolve and verify them.
  */
@@ -125,7 +129,7 @@
 
 /* ── 3a. Semantic colours — Dark (default) ────────────────────────────── */
 :root,
-:root[data-theme='dark'] {
+[data-theme='dark'] {
   color-scheme: dark;
 
   --color-bg: var(--brand-black);
@@ -177,7 +181,7 @@
 }
 
 /* ── 3b. Semantic colours — Light ─────────────────────────────────────── */
-:root[data-theme='light'] {
+[data-theme='light'] {
   color-scheme: light;
 
   --color-bg: var(--brand-paper);

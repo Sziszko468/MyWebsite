@@ -1,6 +1,9 @@
+import type { ReactNode } from 'react'
 import { useI18n } from '../../i18n/useI18n'
 import { cx } from '../../utils/cx'
 import { Badge, type ProjectStatus } from '../Badge/Badge'
+import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
+import { usePointerField } from '../motion/usePointerField'
 import styles from './ProjectCard.module.scss'
 
 interface ProjectImage {
@@ -11,15 +14,34 @@ interface ProjectImage {
   height: number
 }
 
+export type ProjectCardLayout = 'default' | 'lead' | 'offset' | 'compact' | 'wide'
+
 interface ProjectCardProps {
   title: string
   category: string
   status: ProjectStatus
   tags: readonly string[]
-  /** Without an image the card shows a neutral generated placeholder. */
+  /** A short description under the title. */
+  description?: string
+  /** A real screenshot. */
   image?: ProjectImage
+  /**
+   * Illustration shown in place of a screenshot, for a project that has none (a generated concept
+   * sketch). It is decorative; `mediaLabel` says in words what it is.
+   */
+  media?: ReactNode
+  /** Caption pinned to the media, e.g. "Concept sketch", so an illustration is never read as a screenshot. */
+  mediaLabel?: string
+  /** Editorial number, e.g. "01". Decorative. */
+  index?: string
   /** Without a destination the card is static; nothing is linked until a real URL exists. */
   href?: string
+  /** An internal destination: language-free, gets the current language prefix. Used instead of `href`. */
+  to?: string
+  /** A live demo, offered as its own link beside the title's. */
+  demoHref?: string
+  demoLabel?: string
+  layout?: ProjectCardLayout
   headingLevel?: 2 | 3 | 4
   className?: string
 }
@@ -29,40 +51,66 @@ export function ProjectCard({
   category,
   status,
   tags,
+  description,
   image,
+  media,
+  mediaLabel,
+  index,
   href,
+  to,
+  demoHref,
+  demoLabel,
+  layout = 'default',
   headingLevel = 3,
   className,
 }: ProjectCardProps) {
   const { t } = useI18n()
   const Heading = `h${headingLevel}` as const
+  const linked = Boolean(href || to)
+  const pointer = usePointerField<HTMLElement>()
 
   return (
-    <article className={cx(styles.card, href && styles.linked, className)}>
+    <article ref={pointer} className={cx(styles.card, styles[layout], linked && styles.linked, className)}>
       <div className={styles.media}>
-        {image ? (
-          <img
-            className={styles.image}
-            src={image.src}
-            alt={image.alt}
-            width={image.width}
-            height={image.height}
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className={styles.placeholder} aria-hidden="true" />
-        )}
+        <div className={styles.stage}>
+          {image ? (
+            <img
+              className={styles.image}
+              src={image.src}
+              alt={image.alt}
+              width={image.width}
+              height={image.height}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : media ? (
+            <div className={styles.sketch} aria-hidden="true">
+              {media}
+            </div>
+          ) : (
+            <div className={styles.placeholder} aria-hidden="true" />
+          )}
+        </div>
+        {mediaLabel && !image && <span className={styles.mediaLabel}>{mediaLabel}</span>}
       </div>
 
       <div className={styles.body}>
         <div className={styles.meta}>
+          {index && (
+            <span className={styles.index} aria-hidden="true">
+              {index}
+            </span>
+          )}
           <Badge>{category}</Badge>
           <Badge status={status} />
         </div>
 
         <Heading className={styles.title}>
-          {href ? (
+          {to ? (
+            <LocalizedLink className={styles.link} to={to}>
+              {title}
+            </LocalizedLink>
+          ) : href ? (
             <a className={styles.link} href={href}>
               {title}
             </a>
@@ -71,12 +119,21 @@ export function ProjectCard({
           )}
         </Heading>
 
+        {description && <p className={styles.description}>{description}</p>}
+
         {tags.length > 0 && (
           <ul className={styles.tags} aria-label={t.projects.technologies}>
             {tags.map((tag) => (
               <li key={tag}>{tag}</li>
             ))}
           </ul>
+        )}
+
+        {demoHref && (
+          <a className={styles.demo} href={demoHref} target="_blank" rel="noopener noreferrer">
+            {demoLabel}
+            <span className="visually-hidden"> {t.a11y.opensInNewTab}</span>
+          </a>
         )}
       </div>
     </article>

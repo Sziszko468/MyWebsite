@@ -16,6 +16,13 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* In-page jumps glide, unless the visitor asked for less motion. Navigating to another page never does. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /* A modal dialog (the intro, the mobile menu) freezes the page behind it; closed, nothing is locked. */
 html:has(dialog[open]) {
   overflow: hidden;

@@ -1,0 +1,27 @@
+@use '../../styles/mixins' as m;
+
+.section {
+  --_slant: clamp(1.25rem, 0.5rem + 4vw, 4.5rem);
+
+  position: relative;
+  isolation: isolate;
+  padding-block: var(--space-section);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  /* Decorative art may run past the band; it never widens the page. */
+  overflow: clip;
+}
+
+/*
+ * The top edge climbs to the right at the brand's diagonal. The section pulls up by the height
+ * of the cut so the section above shows through the wedge, and pads itself back down.
+ */
+.slant {
+  margin-top: calc(var(--_slant) * -1);
+  padding-top: calc(var(--space-section) + var(--_slant));
+  clip-path: polygon(0 var(--_slant), 100% 0, 100% 100%, 0 100%);
+
+  @include m.up('lg') {
+    --_slant: clamp(3rem, 1rem + 4vw, 5.5rem);
+  }
+}
