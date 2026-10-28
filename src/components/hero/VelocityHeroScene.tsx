@@ -1,10 +1,11 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Fragment, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { Bloom } from './Bloom'
 import { DistortionField } from './DistortionField'
 import { createMotion, fieldMotion, type ExitSignal, type FieldMode } from './fieldMotion'
 import { blendPalette, createBlended, createUniforms, type BlendedPalette, type FieldUniforms } from './fieldUniforms'
 import { FieldCamera } from './FieldCamera'
+import { FramePacer, stepScaleDown } from './framePacing'
 import type { HeroDriver } from './HeroDriver'
 import { clamp, clockSeconds, smoothstep } from './heroMath'
 import { readScenePalette, type ScenePalette } from './heroPalette'
@@ -15,9 +16,13 @@ import { PointerHud } from './PointerHud'
 import { ReactiveParticles } from './ReactiveParticles'
 import { createRigCapture, registerFrameRenderer, type DevSlot } from './rigCapture'
 import { scrollPose } from './ScrollTransition'
+import { quietKnownLibraryWarnings } from './threeConsole'
 import { TunnelRings } from './TunnelRings'
 import { VelocityField } from './VelocityField'
 import { CURSOR, FIELD, SLOW_FRAME_MS, profileFor, type QualityProfile, type QualityTier } from './velocityHeroConfig'
+
+// Before the first Canvas exists: react-three-fiber creates its clock when the Canvas mounts.
+quietKnownLibraryWarnings()
 
 export interface VelocityHeroSceneProps {
   theme: 'dark' | 'light'
@@ -40,6 +45,8 @@ export interface VelocityHeroSceneProps {
   onContextRestored: () => void
   /** Development only: force bloom on or off, to measure its cost. */
   bloom?: boolean
+  /** Development only: force multisampling on or off, to measure its cost. */
+  antialias?: boolean
 }
 
 type RuntimeProps = Pick<VelocityHeroSceneProps, 'driver' | 'onReady' | 'onSlow' | 'onContextLost' | 'onContextRestored'> & {
@@ -56,6 +63,9 @@ type RuntimeProps = Pick<VelocityHeroSceneProps, 'driver' | 'onReady' | 'onSlow'
 const WARM_UP_FRAMES = 150
 const WINDOW_FRAMES = 90
 const COOL_DOWN_FRAMES = 150
+
+/** However low the budget and the adaptive scale, the canvas keeps at least this pixel ratio. */
+const MIN_DPR = 0.55
 
 /**
  * The master clock. It runs before every other part (priority -2): it advances the world's
@@ -141,6 +151,7 @@ function Runtime({ driver, mode, exit, target, blended, uniforms, rig, onReady, 
     u.uPresence.value = cursor.presence
     u.uSpread.value = m.spread
     u.uExit.value = leaving
+    u.uWaves.value = cursor.hasActiveRipples(now) ? 1 : 0
     u.uStreak.value = m.streak
     u.uEnergy.value = energy
     u.uWarp.value = m.warp
@@ -214,19 +225,56 @@ function Runtime({ driver, mode, exit, target, blended, uniforms, rig, onReady, 
  * the canvas never has more pixels than the device can fill at a steady frame rate; the budget is
  * re-applied whenever the size changes (resize, rotation, a new window).
  */
-function PixelBudget({ profile }: { profile: QualityProfile }) {
+function PixelBudget({ profile, scale }: { profile: QualityProfile; scale: number }) {
   const size = useThree((state) => state.size)
   const dpr = useThree((state) => state.viewport.dpr)
   const setDpr = useThree((state) => state.setDpr)
 
   // The canvas puts its own `dpr` prop back whenever its parent re-renders, so the budget is
   // re-applied whenever the pixel ratio has drifted from it, not only when the size changes.
+  // `scale` is the adaptive part: it shrinks when the frame rate cannot hold (see Scene).
   useEffect(() => {
     const cssPixels = Math.max(size.width * size.height, 1)
     const budget = Math.sqrt(profile.maxPixels / cssPixels)
-    const chosen = clamp(Math.min(window.devicePixelRatio || 1, profile.maxDpr, budget), 0.75, 3)
+    const chosen = clamp(Math.min(window.devicePixelRatio || 1, profile.maxDpr, budget) * scale, MIN_DPR, 3)
     if (Math.abs(dpr - chosen) > 0.001) setDpr(chosen)
-  }, [size.width, size.height, dpr, profile.maxPixels, profile.maxDpr, setDpr])
+  }, [size.width, size.height, dpr, scale, profile.maxPixels, profile.maxDpr, setDpr])
+
+  return null
+}
+
+/**
+ * Caps the rate at which frames are drawn, so that a 120, 144 or 240 Hz screen does not cost two
+ * or three times the power and heat of a 60 Hz one for no visible gain (see FramePacer). This
+ * takes over the drawing (a subscriber above priority 0 does) and skips the frames the pacer
+ * says to skip. On demand, a skipped frame asks for the next one, so the last frame before a
+ * scene settles is never lost.
+ */
+function FrameCap() {
+  const invalidate = useThree((state) => state.invalidate)
+  const [pacer] = useState(() => new FramePacer())
+
+  useFrame((state) => {
+    if (!pacer.tick(performance.now())) {
+      if (state.get().frameloop === 'demand') invalidate()
+      return
+    }
+    state.gl.render(state.scene, state.camera)
+  }, 1)
+
+  return null
+}
+
+/** Asks the driver to compile the scene's shader programs in parallel, so the first frame does not wait for them one by one. */
+function Warmup({ tier }: { tier: QualityTier }) {
+  const gl = useThree((state) => state.gl)
+  const scene = useThree((state) => state.scene)
+  const camera = useThree((state) => state.camera)
+
+  useEffect(() => {
+    // Best effort: where it is not supported the first frame simply compiles them as before.
+    gl.compileAsync?.(scene, camera).catch(() => undefined)
+  }, [gl, scene, camera, tier])
 
   return null
 }
@@ -270,6 +318,23 @@ function Scene({
   const [uniforms] = useState(createUniforms)
   const [rig] = useState(createRig)
 
+  // When the frame rate cannot hold, the cheapest remedy comes first: draw fewer pixels. Only when
+  // the resolution is already at its floor does the quality tier drop, which rebuilds the scene.
+  const [scale, setScale] = useState(1)
+  const scaleRef = useRef(1)
+  const handleSlow = useCallback(
+    (averageMs: number) => {
+      const lower = stepScaleDown(scaleRef.current)
+      if (lower !== null) {
+        scaleRef.current = lower
+        setScale(lower)
+      } else {
+        onSlow(averageMs)
+      }
+    },
+    [onSlow],
+  )
+
   return (
     <>
       <Runtime
@@ -281,11 +346,11 @@ function Scene({
         uniforms={uniforms}
         rig={rig}
         onReady={onReady}
-        onSlow={onSlow}
+        onSlow={handleSlow}
         onContextLost={onContextLost}
         onContextRestored={onContextRestored}
       />
-      <PixelBudget profile={profile} />
+      <PixelBudget profile={profile} scale={scale} />
       <FieldCamera rig={rig} driver={driver} />
       {/* Parts are built for one quality tier; a tier change rebuilds them. */}
       <Fragment key={profile.tier}>
@@ -297,7 +362,8 @@ function Scene({
         {mode === 'intro' && <PointerBeam uniforms={uniforms} />}
         {mode === 'intro' && profile.overlay && <PointerHud uniforms={uniforms} />}
       </Fragment>
-      {profile.bloom && <Bloom palette={blended} rig={rig} driver={driver} slot={mode} />}
+      {profile.bloom ? <Bloom palette={blended} rig={rig} driver={driver} slot={mode} /> : <FrameCap />}
+      <Warmup tier={profile.tier} />
       <DevHandle rig={rig} uniforms={uniforms} driver={driver} bloom={profile.bloom} slot={mode} />
     </>
   )
@@ -320,9 +386,10 @@ export default function VelocityHeroScene({
   onContextLost,
   onContextRestored,
   bloom,
+  antialias,
 }: VelocityHeroSceneProps) {
   const base = profileFor(mode, tier)
-  const profile = bloom === undefined ? base : { ...base, bloom }
+  const profile = { ...base, bloom: bloom ?? base.bloom, antialias: antialias ?? base.antialias }
 
   // The intro renders on demand. The hero does too while something else (the intro) covers it: it
   // draws one frame to compile its shaders, then waits.
@@ -335,7 +402,9 @@ export default function VelocityHeroScene({
       key={profile.antialias ? 'antialiased' : 'plain'}
       frameloop={frameloop}
       dpr={[1, profile.maxDpr]}
-      gl={{ antialias: profile.antialias, alpha: false, powerPreference: 'high-performance', stencil: false, depth: false }}
+      // The default power preference lets the browser pick the GPU: forcing the discrete one on a hybrid laptop
+      // means copying every frame across to the integrated one that drives the screen.
+      gl={{ antialias: profile.antialias, alpha: false, powerPreference: 'default', stencil: false, depth: false }}
       camera={{ fov: 60, near: 0.1, far: 300, position: [0, 0, 0] }}
       resize={{ scroll: false, debounce: { scroll: 0, resize: 0 } }}
     >

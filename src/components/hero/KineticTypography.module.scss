@@ -25,10 +25,12 @@
 
   position: relative;
   display: block;
-  /* Deeper lines move more with the cursor; on scroll the lines part in opposite directions. */
+  /* Deeper lines move a little more with the cursor; on scroll the lines part in opposite
+     directions. The pointer's share is in em, so it scales with the type and stays a few pixels
+     however large the headline is. */
   transform: translate3d(
-    calc(var(--_cx) * var(--depth) * -0.7rem + var(--_p) * var(--depth) * var(--_dir) * 3.4vw),
-    calc(var(--_cy) * var(--depth) * 0.3rem - var(--_p) * 2.2rem),
+    calc(var(--_cx) * var(--depth) * -0.025em + var(--_p) * var(--depth) * var(--_dir) * 3.4vw),
+    calc(var(--_cy) * var(--depth) * 0.012em - var(--_p) * 2.2rem),
     0
   );
   will-change: transform;
@@ -39,8 +41,10 @@
 }
 
 /* The face is the readable text; the echo (a pseudo-element, so it adds nothing to the DOM) is an
-   outline of it that trails behind with a little lag. The empty alternative text keeps it out of
-   the accessibility tree. */
+   outline of it that trails just behind it. It is faint at rest and shows more as the pointer
+   moves, and it never strays more than a few pixels from the text, so it reads as depth and not as
+   a doubled, misaligned headline. The empty alternative text keeps it out of the accessibility
+   tree. */
 .face {
   position: relative;
   z-index: 1;
@@ -54,12 +58,12 @@
   z-index: 0;
   color: transparent;
   -webkit-text-stroke: 1px var(--color-secondary-text);
-  opacity: 0.6;
+  opacity: calc(0.16 + 0.34 * var(--hero-energy, 0));
   pointer-events: none;
   user-select: none;
   transform: translate3d(
-    calc(0.35rem + var(--hero-cx, 0) * var(--depth) * 1.1rem),
-    calc(0.25rem + var(--hero-cy, 0) * var(--depth) * -0.5rem),
+    calc(0.03em + var(--hero-cx, 0) * var(--depth) * 0.03em),
+    calc(0.025em + var(--hero-cy, 0) * var(--depth) * -0.015em),
     0
   );
   animation: echo-in 1.2s var(--ease-out) 0.9s both;
@@ -109,10 +113,6 @@
 @keyframes echo-in {
   from {
     opacity: 0;
-  }
-
-  to {
-    opacity: 0.6;
   }
 }
 
@@ -177,7 +177,7 @@
   }
 
   .line::before {
-    transform: translate3d(0.35rem, 0.25rem, 0);
+    transform: translate3d(0.03em, 0.025em, 0);
   }
 
   .accent .word {

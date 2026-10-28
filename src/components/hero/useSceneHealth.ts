@@ -6,12 +6,13 @@ interface DevOverride {
   fallback: boolean
   tier?: QualityTier
   bloom?: boolean
+  antialias?: boolean
 }
 
 /**
  * Development only: `?hero=fallback` forces the static graphic, `?hero=high|medium|low` forces a
- * quality tier and `?bloom=0|1` forces bloom off or on, so every path (and bloom's cost) can be
- * checked on one machine. Production ignores the query.
+ * quality tier, `?bloom=0|1` forces bloom off or on and `?aa=0|1` forces multisampling off or on,
+ * so every path (and each one's cost) can be checked on one machine. Production ignores the query.
  */
 function readDevOverride(): DevOverride {
   if (!import.meta.env.DEV) return { fallback: false }
@@ -22,6 +23,7 @@ function readDevOverride(): DevOverride {
     fallback: hero === 'fallback',
     tier: hero === 'high' || hero === 'medium' || hero === 'low' ? hero : undefined,
     bloom: bloom === '1' ? true : bloom === '0' ? false : undefined,
+    antialias: params.get('aa') === '1' ? true : params.get('aa') === '0' ? false : undefined,
   }
 }
 
@@ -66,6 +68,7 @@ export function useSceneHealth() {
     mode,
     tier,
     bloom: override.bloom,
+    antialias: override.antialias,
     /** True once the live scene has drawn its first frame and has not lost its context. */
     sceneVisible: mode === 'scene' && ready && !contextLost,
     sceneHandlers: { onReady, onSlow, onContextLost, onContextRestored },

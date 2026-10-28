@@ -35,6 +35,8 @@ export interface FieldUniforms {
   uCursorVel: IUniform<Vector2>
   /** Click waves: x, y, start time, strength. */
   uRipples: IUniform<Vector4[]>
+  /** 1 while any click wave is in flight, 0 otherwise: the shaders skip the wave loop when it is 0. */
+  uWaves: IUniform<number>
   /** Size of one pixel in screen units, for constant-width lines. */
   uPixel: IUniform<Vector2>
   uDepth: IUniform<number>
@@ -65,6 +67,7 @@ export function createUniforms(): FieldUniforms {
     uCursor: { value: new Vector2() },
     uCursorVel: { value: new Vector2() },
     uRipples: { value: Array.from({ length: CURSOR.maxRipples }, () => new Vector4(0, 0, -1e4, 0)) },
+    uWaves: { value: 0 },
     uPixel: { value: new Vector2(0.002, 0.002) },
     uDepth: { value: FIELD.depth },
     uAdd: { value: 1 },

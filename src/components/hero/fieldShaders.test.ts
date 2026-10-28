@@ -48,6 +48,10 @@ describe('the shared forces', () => {
     }
   })
 
+  it('skip the wave loop unless a wave is in flight', () => {
+    for (const source of forced) expect(source).toContain('uWaves > 0.5')
+  })
+
   it('are drawn by the overlay on the same front the force pushes: age times 1.25', () => {
     expect(shaders.HUD_FRAG).toContain('age * 1.25')
     expect(shaders.STREAK_VERT).toContain('age * 1.25')

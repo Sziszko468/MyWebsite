@@ -24,15 +24,19 @@ const VelocityHeroScene = lazy(() => import('./VelocityHeroScene'))
  * The scene is used only when it can run well (see useSceneHealth). Otherwise the generated SVG
  * stays.
  *
- * While the fullscreen intro covers the page the hero is loaded but quiet: it draws one frame to
- * compile its shaders, listens to no input and holds its headline animation, which then plays
- * as the intro opens onto it.
+ * While the fullscreen intro covers the page the hero holds still: its scene is not mounted until
+ * the intro (its exit included) is gone, because the intro has the page's one WebGL context and two
+ * at once would double the GPU memory and the work. It listens to no input and holds its headline
+ * animation, which then plays as the intro opens onto it. The generated graphic stands in until
+ * the scene has drawn its first frame.
  */
 export function VelocityHero() {
   const { t } = useI18n()
   const { theme } = useTheme()
   const titleId = useId()
-  const { blocking } = useIntro()
+  const { blocking, phase } = useIntro()
+  // The scene waits until the intro is entirely gone, exit included: until then the intro holds the page's one WebGL context.
+  const sceneHeld = phase !== 'completed'
   const health = useSceneHealth()
   const { mode, tier, sceneVisible, sceneHandlers } = health
 
@@ -54,15 +58,16 @@ export function VelocityHero() {
       >
         <SceneLayer ref={stageRef} className={styles.stage} fallback={<GenerativeHeroFallback />} onError={health.onError}>
           <GenerativeHeroFallback />
-          {mode === 'scene' && (
+          {mode === 'scene' && !sceneHeld && (
             <div className={cx(styles.canvas, sceneVisible && styles.canvasVisible)}>
               <Suspense fallback={null}>
                 <VelocityHeroScene
                   theme={theme}
                   tier={tier}
                   driver={driver}
-                  active={inView && !blocking}
+                  active={inView}
                   bloom={health.bloom}
+                  antialias={health.antialias}
                   {...sceneHandlers}
                 />
               </Suspense>

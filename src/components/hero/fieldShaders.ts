@@ -33,7 +33,7 @@ const OUTPUT = /* glsl */ `
  * It also leaves `gGlow` set: how strongly this point is lit by that input, for brightening.
  */
 const FORCE = /* glsl */ `
-  uniform float uTime, uPhase, uEnergy, uPresence, uWarp, uAspect, uRadius;
+  uniform float uTime, uPhase, uEnergy, uPresence, uWarp, uAspect, uRadius, uWaves;
   uniform vec2 uCursor, uCursorVel;
   uniform vec4 uRipples[${CURSOR.maxRipples}];
   float gGlow;
@@ -69,17 +69,20 @@ const FORCE = /* glsl */ `
     gNear = near;
     float glow = near * uEnergy;
 
-    for (int i = 0; i < ${CURSOR.maxRipples}; i++) {
-      vec4 wave = uRipples[i];
-      float age = uTime - wave.z;
-      if (age > 0.0 && age < ${FIELD.rippleSeconds.toFixed(2)}) {
-        vec2 toWave = (ndc - wave.xy) * asp;
-        float r = length(toWave);
-        float life = 1.0 - age / ${FIELD.rippleSeconds.toFixed(2)};
-        float q = (r - age * 1.25) / (0.14 + age * 0.12);
-        float ring = exp(-q * q) * life * life * wave.w;
-        dn += toWave / (r + 0.03) / asp * ring * 0.16 * reach;
-        glow += ring;
+    // Most of the time no wave is in flight, and then none of the work below is needed.
+    if (uWaves > 0.5) {
+      for (int i = 0; i < ${CURSOR.maxRipples}; i++) {
+        vec4 wave = uRipples[i];
+        float age = uTime - wave.z;
+        if (age > 0.0 && age < ${FIELD.rippleSeconds.toFixed(2)}) {
+          vec2 toWave = (ndc - wave.xy) * asp;
+          float r = length(toWave);
+          float life = 1.0 - age / ${FIELD.rippleSeconds.toFixed(2)};
+          float q = (r - age * 1.25) / (0.14 + age * 0.12);
+          float ring = exp(-q * q) * life * life * wave.w;
+          dn += toWave / (r + 0.03) / asp * ring * 0.16 * reach;
+          glow += ring;
+        }
       }
     }
 

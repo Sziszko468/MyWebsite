@@ -21,8 +21,19 @@ export interface QualityProfile {
   trailSegments: number
   /** Distortion surfaces: 0 none, 1 floor, 2 floor and ceiling. */
   surfaces: 0 | 1 | 2
-  /** Real post-processing bloom. Everything else glows through additive blending and halos. */
+  /**
+   * Real post-processing bloom (a half-float render target and several full-screen passes). Off in
+   * every tier: it is the most expensive and the least portable part of the pipeline, and the glow
+   * comes from additive blending and halos instead. It can still be switched on in development.
+   */
   bloom: boolean
+  /**
+   * Multisampling. Off in every tier: every primitive in the scene already has a soft, shader-made edge
+   * (ribbons, streak and trail profiles, round dust, the overlay), so it adds nothing you can see, and
+   * with thousands of overdrawn additive quads it was the single most expensive thing in the frame
+   * (18 ms against 0.9 ms without it on one integrated GPU). It also means the canvas's context never
+   * has to be re-created when the quality tier changes.
+   */
   antialias: boolean
   /** A second, wider and softer layer under each trail. */
   halos: boolean
@@ -42,8 +53,8 @@ export interface QualityProfile {
 
 /** What the Home hero draws. */
 export const QUALITY: Record<QualityTier, QualityProfile> = {
-  high: { tier: 'high', maxDpr: 2, streaks: 2600, particles: 2000, trails: 24, trailSegments: 96, surfaces: 2, bloom: true, antialias: true, halos: true, maxPixels: 3_400_000, hairlines: 0, fineTrails: 0, rings: 0, gridDetail: 1, overlay: false },
-  medium: { tier: 'medium', maxDpr: 1.5, streaks: 1400, particles: 1000, trails: 16, trailSegments: 64, surfaces: 1, bloom: false, antialias: true, halos: true, maxPixels: 2_000_000, hairlines: 0, fineTrails: 0, rings: 0, gridDetail: 1, overlay: false },
+  high: { tier: 'high', maxDpr: 2, streaks: 2600, particles: 2000, trails: 24, trailSegments: 96, surfaces: 2, bloom: false, antialias: false, halos: true, maxPixels: 3_400_000, hairlines: 0, fineTrails: 0, rings: 0, gridDetail: 1, overlay: false },
+  medium: { tier: 'medium', maxDpr: 1.5, streaks: 1400, particles: 1000, trails: 16, trailSegments: 64, surfaces: 1, bloom: false, antialias: false, halos: true, maxPixels: 2_000_000, hairlines: 0, fineTrails: 0, rings: 0, gridDetail: 1, overlay: false },
   low: { tier: 'low', maxDpr: 1, streaks: 700, particles: 450, trails: 10, trailSegments: 40, surfaces: 1, bloom: false, antialias: false, halos: false, maxPixels: 1_100_000, hairlines: 0, fineTrails: 0, rings: 0, gridDetail: 1, overlay: false },
 }
 

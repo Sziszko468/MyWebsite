@@ -174,6 +174,7 @@ function IntroDialog() {
                 driver={driver}
                 active
                 bloom={health.bloom}
+                antialias={health.antialias}
                 {...sceneHandlers}
               />
             </Suspense>

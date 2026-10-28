@@ -258,3 +258,18 @@ describe('scene tokens', () => {
     expect(bloom('light')).toBeLessThan(bloom('dark'))
   })
 })
+
+describe('the rendering pipeline', () => {
+  const all = [...Object.values(QUALITY), ...Object.values(INTRO_QUALITY)]
+
+  it('uses no multisampling and no bloom in any tier, the two most expensive and least portable parts', () => {
+    for (const profile of all) {
+      expect(profile.antialias, `${profile.tier} antialias`).toBe(false)
+      expect(profile.bloom, `${profile.tier} bloom`).toBe(false)
+    }
+  })
+
+  it('never needs the canvas re-created by a tier change, since the context is the same for every tier', () => {
+    expect(new Set(all.map((profile) => profile.antialias)).size).toBe(1)
+  })
+})
