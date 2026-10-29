@@ -5,7 +5,7 @@ import { resolveTone, type SectionTone } from '../Section/tone'
 import { HOME_RHYTHM, homeTone } from './rhythm'
 
 // Everything the home page's components and the hero's say about where they link to.
-const sources = import.meta.glob(['./*.tsx', '../hero/VelocityHero.tsx', '../intro/*.tsx'], {
+const sources = import.meta.glob(['./*.tsx', '../project/*.tsx', '../../pages/ProjectPage.tsx', '../hero/VelocityHero.tsx', '../intro/*.tsx'], {
   eager: true,
   query: '?raw',
   import: 'default',
@@ -84,14 +84,16 @@ describe('call to action targets', () => {
   const routes = PAGES.map((page) => page.path)
   const sectionIds = HOME_RHYTHM.map((section) => section.id)
 
-  it('finds the home page’s sources', () => {
-    expect(Object.keys(sources).length).toBeGreaterThan(8)
+  it('finds the home page’s sources and the project page’s', () => {
+    expect(Object.keys(sources).length).toBeGreaterThan(16)
+    expect(Object.keys(sources).some((file) => file.includes('ProjectNav'))).toBe(true)
   })
 
-  it('send every route link to a page that exists', () => {
+  it('send every route link to a page that exists, and its #fragment to a band that exists', () => {
     for (const [file, source] of Object.entries(sources)) {
-      for (const match of source.matchAll(/\bto="(\/[^"]*)"/g)) {
-        expect(routes, `${file}: to="${match[1]}"`).toContain(match[1])
+      for (const match of source.matchAll(/\bto="(\/[^"#]*)(?:#([^"]*))?"/g)) {
+        expect(routes, `${file}: to="${match[0]}"`).toContain(match[1])
+        if (match[2]) expect(sectionIds, `${file}: to="${match[0]}"`).toContain(match[2])
       }
     }
   })

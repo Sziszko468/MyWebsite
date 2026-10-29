@@ -1,0 +1,89 @@
+@use '../../styles/mixins' as m;
+
+.band {
+  padding-block: var(--space-9);
+}
+
+.nav {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.pair {
+  display: grid;
+  gap: var(--space-4);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+}
+
+/* Two large links, the previous one flush left and the next one flush right, the next one set lower. */
+.neighbour {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-height: 11rem;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    var(--transition-colors),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+
+  &[data-direction='next'] {
+    text-align: right;
+
+    @include m.up('md') {
+      margin-top: var(--space-6);
+    }
+  }
+
+  @include m.hover {
+    border-color: var(--pa, var(--color-accent));
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+}
+
+.direction {
+  color: var(--pa-text, var(--color-accent-text));
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.name {
+  font-size: clamp(1.75rem, 1rem + 3vw, 3.5rem);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.category {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neighbour:hover {
+    transform: none;
+  }
+}

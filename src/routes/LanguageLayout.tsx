@@ -6,23 +6,40 @@ import { DEFAULT_LANGUAGE, isLanguage } from '../i18n/config'
 import { I18nProvider } from '../i18n/I18nProvider'
 import { localizedPath, splitLanguage } from '../i18n/paths'
 import { useI18n } from '../i18n/useI18n'
-import { findPage, type NavPageId, type PageDef } from './pages'
+import { buildDocumentMeta, ogLocale } from './documentMeta'
+import { findPage, type PageDef } from './pages'
 
-const NAV_IDS: readonly string[] = ['work', 'services', 'about', 'lab', 'contact']
+/** Sets (or creates) one <meta> tag in the head. */
+function setMeta(attribute: 'name' | 'property', key: string, content: string) {
+  let tag = document.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`)
+  if (!tag) {
+    tag = document.createElement('meta')
+    tag.setAttribute(attribute, key)
+    document.head.appendChild(tag)
+  }
+  tag.setAttribute('content', content)
+}
 
-/** Keeps <html lang>, the title and the description in step with the language and page. */
+/**
+ * Keeps <html lang>, the title, the description and the Open Graph tags in step with the language
+ * and page. Open Graph is set from script, so it reaches crawlers that run scripts; one that reads
+ * only the static HTML sees the site-wide tags in index.html.
+ */
 function DocumentMeta({ page }: { page: PageDef | undefined }) {
   const { lang, t } = useI18n()
   const { brandName } = siteConfig
 
   useEffect(() => {
-    let title = `${brandName} — ${t.meta.title}`
-    if (!page) title = `${t.notFound.title} — ${brandName}`
-    else if (NAV_IDS.includes(page.id)) title = `${t.nav[page.id as NavPageId]} — ${brandName}`
-
+    const meta = buildDocumentMeta(page, lang, t, brandName)
     document.documentElement.lang = lang
-    document.title = title
-    document.querySelector('meta[name="description"]')?.setAttribute('content', t.meta.description)
+    document.title = meta.title
+    setMeta('name', 'description', meta.description)
+    setMeta('property', 'og:title', meta.title)
+    setMeta('property', 'og:description', meta.description)
+    setMeta('property', 'og:type', meta.ogType)
+    setMeta('property', 'og:locale', ogLocale(lang))
+    setMeta('property', 'og:site_name', brandName)
+    setMeta('property', 'og:url', window.location.href)
   }, [lang, t, page, brandName])
 
   return null

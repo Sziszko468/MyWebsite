@@ -26,7 +26,8 @@ export function MainNav({ variant, label, onNavigate }: MainNavProps) {
           <li key={page.id}>
             <NavLink
               to={localizedPath(lang, page.path)}
-              end
+              // Only Home matches exactly; Work stays current on a project's page beneath it.
+              end={page.path === '/'}
               className={({ isActive }) => cx(styles.link, isActive && styles.active)}
               onClick={onNavigate}
             >

@@ -39,7 +39,10 @@ export interface ProjectEntry {
    * one, and never a stock image presented as the app.
    */
   image: ProjectImage | null
-  /** Language-free path of a real details page, e.g. '/work/spendly'. `null` until it exists: the card is then not a link. */
+  /**
+   * Language-free path of the project's details page, e.g. '/work/spendly'. Its content is in
+   * content/projectDetails/. `null` until a page exists: the card is then not a link and says so.
+   */
   detailPath: string | null
   /** Full https:// address of a live demo. `null` unless one is running. */
   demoUrl: string | null
@@ -57,7 +60,7 @@ export const projects: readonly ProjectEntry[] = [
     layout: 'lead',
     mockup: 'finance',
     image: null,
-    detailPath: null,
+    detailPath: '/work/spendly',
     demoUrl: null,
   },
   {
@@ -71,7 +74,7 @@ export const projects: readonly ProjectEntry[] = [
     layout: 'offset',
     mockup: 'booking',
     image: null,
-    detailPath: null,
+    detailPath: '/work/bookinghub',
     demoUrl: null,
   },
   {
@@ -99,7 +102,7 @@ export const projects: readonly ProjectEntry[] = [
     layout: 'wide',
     mockup: 'logistics',
     image: null,
-    detailPath: null,
+    detailPath: '/work/logistics-platform',
     demoUrl: null,
   },
 ]

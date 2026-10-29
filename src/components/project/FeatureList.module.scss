@@ -1,0 +1,145 @@
+@use '../../styles/mixins' as m;
+
+.layout {
+  display: grid;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    column-gap: var(--space-7);
+    align-items: start;
+    margin-top: var(--space-9);
+  }
+}
+
+.groups {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.group {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.groupTitle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--color-text);
+  font-size: var(--fs-md);
+}
+
+.group[data-status='planned'] .groupTitle {
+  border-bottom-style: dashed;
+}
+
+.group[data-status='partial'] .groupTitle {
+  border-bottom-style: double;
+  border-bottom-width: 4px;
+}
+
+.count {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+}
+
+.list {
+  display: grid;
+}
+
+.feature {
+  padding-block: var(--space-5);
+  border-bottom: var(--border-width) solid var(--color-divider);
+
+  @include m.up('md') {
+    padding-inline-start: var(--space-4);
+  }
+}
+
+.group[data-status='planned'] .feature {
+  border-bottom-style: dashed;
+}
+
+.title {
+  font-size: var(--fs-lg);
+  text-wrap: balance;
+}
+
+.text {
+  max-width: 68ch;
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+  text-wrap: pretty;
+}
+
+.shot {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-touch);
+  margin-top: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pa-text, var(--color-accent-text));
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-transform: uppercase;
+  text-underline-offset: 0.25em;
+
+  @include m.hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* What it does not do: a plain, honest list beside the features. */
+.limits {
+  padding: var(--space-5);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+
+  @include m.up('lg') {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-5));
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  li {
+    position: relative;
+    padding-left: var(--space-5);
+    color: var(--color-text-secondary);
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.85em;
+      left: 0;
+      width: 0.75rem;
+      height: 2px;
+      background-color: var(--color-text-muted);
+    }
+  }
+}
+
+.limitsTitle {
+  margin-bottom: var(--space-4);
+  font-size: var(--fs-md);
+  text-wrap: balance;
+}

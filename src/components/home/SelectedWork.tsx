@@ -53,6 +53,8 @@ export function SelectedWork() {
                     to={project.detailPath ?? undefined}
                     demoHref={project.demoUrl ?? undefined}
                     demoLabel={t.home.work.demo}
+                    detailsLabel={t.home.work.details}
+                    note={t.home.work.noDetails}
                   />
                 </Reveal>
               </li>

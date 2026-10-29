@@ -41,6 +41,10 @@ interface ProjectCardProps {
   /** A live demo, offered as its own link beside the title's. */
   demoHref?: string
   demoLabel?: string
+  /** A cue at the foot of a linked card ("Details →"). Decorative: the title is the link. */
+  detailsLabel?: string
+  /** Said at the foot of a card that links nowhere, e.g. that its details page is not ready. */
+  note?: string
   layout?: ProjectCardLayout
   headingLevel?: 2 | 3 | 4
   className?: string
@@ -60,6 +64,8 @@ export function ProjectCard({
   to,
   demoHref,
   demoLabel,
+  detailsLabel,
+  note,
   layout = 'default',
   headingLevel = 3,
   className,
@@ -128,6 +134,14 @@ export function ProjectCard({
             ))}
           </ul>
         )}
+
+        {linked && detailsLabel && (
+          <span className={styles.details} aria-hidden="true">
+            {detailsLabel} →
+          </span>
+        )}
+
+        {!linked && note && <p className={styles.note}>{note}</p>}
 
         {demoHref && (
           <a className={styles.demo} href={demoHref} target="_blank" rel="noopener noreferrer">

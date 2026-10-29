@@ -5,7 +5,7 @@ import { localizedPath } from './i18n/paths'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
-import { PAGES, type PageId } from './routes/pages'
+import { PAGES, projectIdOfPage, type NavPageId, type PageDef } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
 import { IntroProvider } from './components/intro/IntroProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
@@ -14,9 +14,14 @@ import { ThemeProvider } from './theme/ThemeProvider'
 // constant, so this page and its code are dropped from production bundles.
 const DesignSystemPage = import.meta.env.DEV ? lazy(() => import('./pages/DesignSystemPage')) : null
 
+// A project's page and its three-language content are their own chunk: the home page and the rest of
+// the site do not pay for them, and they load when a project is opened.
+const ProjectPage = lazy(() => import('./pages/ProjectPage').then((module) => ({ default: module.ProjectPage })))
+
 // What renders at each registered page. Paths and languages live in routes/pages.ts.
-// Work, Services, About, Lab and Contact are placeholders until their pages are built.
-const PAGE_ELEMENTS: Record<PageId, ReactElement | null> = {
+// Work, Services, About, Lab and Contact are placeholders until their pages are built; a project's
+// details page is the same component for every project, fed by content/projectDetails.
+const PAGE_ELEMENTS: Record<NavPageId | 'designSystem', ReactElement | null> = {
   home: <HomePage />,
   work: <PlaceholderPage pageId="work" />,
   services: <PlaceholderPage pageId="services" />,
@@ -30,6 +35,18 @@ const PAGE_ELEMENTS: Record<PageId, ReactElement | null> = {
   ),
 }
 
+function elementFor(page: PageDef): ReactElement | null {
+  const project = projectIdOfPage(page.id)
+  if (project) {
+    return (
+      <Suspense fallback={<div style={{ minHeight: '70svh' }} aria-hidden="true" />}>
+        <ProjectPage projectId={project} />
+      </Suspense>
+    )
+  }
+  return PAGE_ELEMENTS[page.id as NavPageId | 'designSystem']
+}
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -40,9 +57,9 @@ export default function App() {
             <Route path=":lang" element={<LanguageLayout />}>
               {PAGES.map((page) =>
                 page.path === '/' ? (
-                  <Route key={page.id} index element={PAGE_ELEMENTS[page.id]} />
+                  <Route key={page.id} index element={elementFor(page)} />
                 ) : (
-                  <Route key={page.id} path={page.path.slice(1)} element={PAGE_ELEMENTS[page.id]} />
+                  <Route key={page.id} path={page.path.slice(1)} element={elementFor(page)} />
                 ),
               )}
               <Route path="*" element={<NotFoundPage />} />

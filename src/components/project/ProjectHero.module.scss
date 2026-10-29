@@ -1,0 +1,330 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * Three compositions, one per project:
+ *   split  the name on the left, a tilted screenshot bleeding off the right edge (the finance app)
+ *   stack  the name above, a wide screenshot below it, offset to the right (the booking app)
+ *   route  the name low on the left, a smaller screenshot floating up on the right over a route (logistics)
+ * The picture leans towards a mouse through --px and --py (see usePointerField); at rest it keeps its tilt.
+ */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+
+  @include m.under-header;
+  padding-top: calc(var(--header-height) + var(--space-7));
+  padding-bottom: var(--space-9);
+
+  @include m.up('lg') {
+    padding-top: calc(var(--header-height) + var(--space-9));
+    padding-bottom: var(--space-10);
+  }
+}
+
+.inner {
+  position: relative;
+  z-index: var(--z-content);
+  display: grid;
+  gap: var(--space-8);
+}
+
+.copy {
+  /* The name sizes itself to the room it has, so the longest one fits its column. */
+  container-type: inline-size;
+
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: start;
+  min-height: var(--size-touch);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-decoration-color: transparent;
+  text-decoration-line: underline;
+  text-transform: uppercase;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    color: var(--color-text);
+    text-decoration-color: currentcolor;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.title {
+  font-size: clamp(2.25rem, 11.5cqw, 8rem);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.repoName {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--ls-wide);
+}
+
+.lead {
+  max-width: 38rem;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+
+  @include m.up('md') {
+    font-size: var(--fs-lg);
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  li {
+    padding: var(--space-1) var(--space-3);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-xs);
+    color: var(--color-text);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--ls-wide);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* ── The picture ───────────────────────────────────────────────────── */
+
+.visual {
+  min-width: 0;
+  margin: 0;
+}
+
+.frame {
+  --_tilt-y: 0deg;
+  --_tilt-x: 0deg;
+
+  overflow: hidden;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  transform: perspective(1400px) rotateY(calc(var(--_tilt-y) + var(--px, 0) * -3deg))
+    rotateX(calc(var(--_tilt-x) + var(--py, 0) * 2deg));
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.hero[data-pointer='active'] .frame {
+  transition-duration: var(--dur-fast);
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.sketch {
+  aspect-ratio: 16 / 10;
+}
+
+.caption {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+/* ── split: the finance app ────────────────────────────────────────── */
+
+.split {
+  @include m.up('lg') {
+    .inner {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-5);
+      align-items: center;
+    }
+
+    .copy {
+      grid-column: 1 / span 6;
+    }
+
+    .visual {
+      grid-column: 7 / span 6;
+      margin-right: calc(var(--gutter) * -1);
+    }
+
+    .frame {
+      --_tilt-y: -6deg;
+      --_tilt-x: 2deg;
+
+      border-right: 0;
+      border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    }
+  }
+}
+
+.artFinance {
+  position: absolute;
+  z-index: 0;
+  right: 0;
+  bottom: 0;
+  width: min(100%, 60rem);
+  height: 70%;
+  fill: color-mix(in srgb, var(--pa, var(--color-accent)) 16%, transparent);
+  mask-image: linear-gradient(to top, #000 0%, transparent 85%);
+  pointer-events: none;
+}
+
+/* ── stack: the booking app ────────────────────────────────────────── */
+
+.stack {
+  @include m.up('lg') {
+    .copy {
+      max-width: 54rem;
+    }
+
+    .visual {
+      width: min(100%, 66rem);
+      margin-top: calc(var(--space-6) * -1);
+      margin-left: auto;
+    }
+  }
+}
+
+.artBooking {
+  position: absolute;
+  z-index: 0;
+  top: var(--header-height);
+  right: 0;
+  width: min(100%, 36rem);
+  height: 26rem;
+  fill: color-mix(in srgb, var(--pa, var(--color-accent)) 7%, transparent);
+  mask-image: linear-gradient(to left, #000 20%, transparent 100%);
+  pointer-events: none;
+
+  .picked {
+    fill: color-mix(in srgb, var(--pa, var(--color-accent)) 38%, transparent);
+  }
+}
+
+/* ── route: the logistics system ───────────────────────────────────── */
+
+.route {
+  @include m.up('lg') {
+    .inner {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-5);
+      align-items: end;
+    }
+
+    .copy {
+      grid-column: 1 / span 7;
+    }
+
+    .visual {
+      grid-column: 8 / span 5;
+      margin-bottom: var(--space-8);
+    }
+
+    .frame {
+      --_tilt-y: 2deg;
+      --_tilt-x: 1deg;
+    }
+  }
+}
+
+.artRoute {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-text) 9%, transparent);
+  stroke-width: 1;
+  /* Fainter where the words are: on a narrow screen they cover the whole hero. */
+  opacity: 0.3;
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
+  pointer-events: none;
+
+  /* From lg the words keep to the left and the route runs through the right-hand part only. */
+  @include m.up('lg') {
+    left: 40%;
+    width: 60%;
+    opacity: 1;
+  }
+
+  .routeLine {
+    stroke: var(--brand-red);
+    stroke-dasharray: 10 10;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 3;
+  }
+
+  .stop {
+    fill: var(--color-bg);
+    stroke: var(--color-text);
+    stroke-width: 2;
+  }
+
+  .stopEnd {
+    fill: var(--brand-red);
+    stroke: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame {
+    transition: none;
+    transform: perspective(1400px) rotateY(var(--_tilt-y)) rotateX(var(--_tilt-x));
+  }
+}
+
+@media (forced-colors: active) {
+  .artFinance,
+  .artBooking,
+  .artRoute {
+    display: none;
+  }
+}

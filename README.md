@@ -7,7 +7,7 @@ npm run dev        # dev server; /hu/design-system shows every token and compone
 npm run build      # type-check + production build
 npm run typecheck  # tsc -b
 npm run lint       # oxlint
-npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition, home-page content, rhythm and link targets
+npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition, home-page content, rhythm and link targets, project-page content, pictures and meta
 ```
 
 ## Where things live
@@ -26,6 +26,9 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 | `src/components/home/` | The home page's sections after the hero (path chooser, selected work, what I build, about, lab, packages, closing call to action) and their drawings. See "The home page" below. |
 | `src/components/Section/`, `src/components/motion/` | `Section` (a band that wears its own theme), `Reveal` (arrive-once on scroll), `usePointerField` (pointer variables for CSS). |
 | `src/content/` | The home page's editable data: projects, areas of work, packages, lab experiments, About facts. No words in here, only structure; the words are in the dictionaries. |
+| `src/content/projectDetails/` | The project pages' content (`spendly.ts`, `bookinghub.ts`, `logistics.ts`), each with its text in Hungarian, English and Dutch side by side (`tri(hu, en, nl)`), and `meta.ts` for their titles and descriptions. See "Project pages" below. |
+| `src/components/project/`, `src/pages/ProjectPage.tsx` | One page component for every project: the hero, the eight bands, the architecture diagram, the gallery with its lightbox, the previous/next links. Loaded as its own chunk. |
+| `public/projects/<slug>/` | The optimised screenshots (WebP, at most 1440 px wide). |
 | `src/pages/` | Home, placeholder pages, 404. `DesignSystemPage` exists in dev builds only. |
 | `src/config/site.ts` | Brand name, monogram, contact email, social profiles, legal pages. Every `null` is a placeholder. |
 | `src/config/intro.ts` | When the intro appears (`first-visit`, `every-session`, `never`), whether visitors can skip it, how long the exit lasts. |
@@ -191,7 +194,7 @@ Layout was measured in the DOM (headline word extents, button box, overlaps, hor
 
 | File | What to edit |
 | --- | --- |
-| `projects.ts` | Per project: name, status (`live`, `demo`, `in-progress`, `concept`), technology tags, composition, sketch, a real screenshot (`image`), a details route (`detailPath`), a live demo address (`demoUrl`). A card links only when `detailPath` or `demoUrl` is set. A test refuses `live` without a demo address, a demo address on a concept, and a details route that is not a registered page. |
+| `projects.ts` | Per project: name, status (`live`, `demo`, `in-progress`, `concept`), technology tags, composition, sketch, a real screenshot (`image`), a details route (`detailPath`), a live demo address (`demoUrl`). A card links when `detailPath` or `demoUrl` is set; without a details page it says so in words. A test refuses `live` without a demo address, a demo address on a concept, and a details route that is not a registered page. |
 | `offerings.ts` | The areas in "What I build". Remove one to hide its block. |
 | `packages.ts` | Launch, Grow, Build, Care: price (`quote` until a real figure exists; `{ kind: 'from', amount, currency }` publishes one) and which is featured. |
 | `lab.ts` | The experiments, their status and, once one really works, its `demoUrl`. |
@@ -208,3 +211,25 @@ Layout was measured in the DOM (headline word extents, button box, overlaps, hor
 **Verified** (embedded Chromium; desktop and emulated phone sizes): no horizontal overflow at 1920, 1440, 1024, 768, 390, 360 and 320 px; no text spilling out of its box or cut by a clipping parent in Hungarian at 320 to 1920 px, in Dutch (the longest text) at 320 to 1920 px and in English at 320 to 1440 px (the first pass of that check missed clipped text, and the strict one then found four real problems, all fixed: a category badge wider than its card, a title wider than its column, a squeezed Care card, a Dutch word breaking mid-word); both themes; the intro followed by the page, with one canvas; the keyboard order (nine real links, no focusable hidden link) and visible focus rings in the light door and on the red band; the `#work` jump and the `/contact` link; hover depth on cards, doors and lab tiles; the production build (no development notes, no console output). The suite is 404 tests; the new ones cover content, tones, contrast, link targets and the pointer maths.
 
 **Not verified.** Safari and Firefox; real phones and touch hardware; screen readers; the `prefers-reduced-motion` CSS (the script side was reasoned, not run, because the embedded browser cannot emulate the setting); forced-colours mode (rules are written, not seen); slow or 60 Hz hardware for the new sections.
+
+## Project pages
+
+`/hu/work/spendly`, `/hu/work/bookinghub` and `/hu/work/logistics-platform` (and the same under `/en/` and `/nl/`) are written from the projects' own repositories next to this one, not from the brief. Hollandia Kezdőknek has no page: no repository for it was found, so its card on the home page says "the details page is not ready yet" and links nowhere, and the previous/next links skip it.
+
+**Every page has the same eight bands, in the same order** (overview, the challenge, the approach, technical architecture, key features, design decisions, lessons and next steps, gallery), alternating dark and light like the home page; a band with nothing behind it is left out. What differs is each project's identity: its accent (Spendly red, BookingHub cobalt, Logistics ink), its hero composition (a tilted screenshot bleeding off the right, a wide screenshot under the name, a smaller one floating over a route) and a backdrop drawn from the subject (rising bars, a month grid, a route with stops). The picture leans towards a mouse, as on the home page; a finger never moves it.
+
+**What a page says, and how it is kept honest**
+
+- Features are *built*, *partly working* or *planned*, told apart by an outline and a word, not by colour. A part of the architecture or a connection that is only a plan is dashed and says so; every part appears in at least one connection (a test), and the connections are also written out as the diagram's text version.
+- Each challenge names where it is documented in the project (for example `docs/code-review.md · H1`). Only problems that the repositories document are shown, with the fix they document.
+- A list of what the project does not do comes from its own limitations or its code. "What I learned" is empty on purpose: it is the owner's to write (a test asserts it is empty, so adding some is a deliberate edit). The role line says "a single-author project", which is what the git history of each repository shows (one author in all of them).
+- Spendly is called WALLEX in its repository and screenshots (Spendly was its earlier name); the page says so. The Logistics Platform is called Logextic there.
+- Tests refuse invented figures (10K+, 99.9 %, ratings), demo credentials, key-like strings, a `live` project without an address and a demo link on a concept.
+
+**Where the facts came from, and where the code disagrees with a README.** Spendly and the Logistics Platform: their READMEs and `docs/` (code review, design system, architecture, known limitations), checked against the code's structure; their test suites were not re-run. BookingHub: its code and git history, because its README overstates: it says "Next.js 15" (it is 16), says the theme follows the system setting (it only remembers a toggle), lists an `/api/test` route (there is none) and calls the sign-in secure (it is a fixed demo account checked in the browser). BookingHub's pictures are screenshots of a *copy* of the running app (with no e-mail key, so nothing could be sent), and its landing page is left out on purpose: its "10K+ users, 99.9 % uptime, 4.9/5" are placeholder marketing text.
+
+**Editing.** Change a page in `content/projectDetails/<name>.ts`: every text is a `tri(hu, en, nl)`, so a missing translation does not compile. To publish a project, add its file, register it in `projectDetails/index.ts` and `meta.ts`, and give the project in `content/projects.ts` a `detailPath` (`/work/<slug>`); the route, the previous/next links, the language switch and the title all follow. A real screenshot goes in `public/projects/<slug>/` as WebP; `projectDetails.test.ts` reads each file's header and fails if its size differs from what the data says or if it is over 300 KB (a gallery over 1 MB fails too). Open Graph tags are written by script per page and language (`routes/documentMeta.ts`); a crawler that does not run scripts sees only the site-wide tags in `index.html`.
+
+**Verified** (Chrome driven by Playwright against the dev server and the production build, plus the embedded browser): no horizontal overflow, text spilling or clipping on any of the three pages in Hungarian, English and Dutch at 320, 360, 390, 768, 1024, 1120, 1440 and 1920 px, in both themes (it found and fixed one: a Dutch heading wider than a 320 px screen); the lightbox by keyboard (Enter, arrows, Escape, focus returns to the thumbnail) and by tap and click outside; every control in the page has an accessible name and stays in the tab order; previous/next, back to the portfolio and the language switch keep the project and its page (the intro does not return); Work stays current in the header on a project page; reduced motion (nothing hidden for an entrance, no pointer tilt, no transitions, no gliding jumps); a touch screen; the pictures blocked (text intact, no script error); no WebGL on these pages; the production build (deep links, all pictures load with alt text, no failed request, no development notes). 472 tests.
+
+**Not verified.** Safari, Firefox, real phones and a screen reader; that the projects' claims are *true* beyond what their documentation and code structure show (their tests and apps were not run, except BookingHub's app, whose screens were opened); forced-colours mode (written, not seen).

@@ -1,0 +1,434 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The accent a project leans on arrives as --pa and --pa-text (set per page in ProjectPage.module.scss),
+ * so every project's numerals, rules and markers take its colour with no rule of their own.
+ */
+
+/* ── Overview ──────────────────────────────────────────────────────── */
+
+.overview {
+  display: grid;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-5);
+    margin-top: var(--space-9);
+  }
+}
+
+.overviewLead {
+  @include m.up('lg') {
+    grid-column: 1 / span 5;
+    align-self: start;
+  }
+}
+
+.lead {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-medium);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-snug);
+  text-wrap: pretty;
+}
+
+.reviewed {
+  margin-top: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.overviewFacts {
+  @include m.up('lg') {
+    grid-column: 7 / span 6;
+  }
+}
+
+.facts {
+  display: grid;
+  margin: 0;
+}
+
+.fact {
+  display: grid;
+  gap: var(--space-1);
+  padding-block: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border-strong);
+
+  dt {
+    color: var(--pa-text, var(--color-accent-text));
+    font-size: var(--fs-xs);
+    font-stretch: var(--fstretch-expanded);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: 0;
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+  }
+
+  @include m.up('md') {
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+.stack {
+  @include m.up('lg') {
+    grid-column: 1 / -1;
+  }
+}
+
+.stackTitle {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wider);
+  line-height: var(--lh-normal);
+  text-transform: uppercase;
+}
+
+.stackGroups {
+  display: grid;
+  gap: var(--space-4) var(--space-6);
+  margin: 0;
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.stackGroup {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+
+  dt {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  li {
+    padding: var(--space-1) var(--space-2);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-xs);
+    font-size: var(--fs-sm);
+    letter-spacing: var(--ls-wide);
+  }
+}
+
+/* ── Challenges ────────────────────────────────────────────────────── */
+
+.challenges {
+  display: grid;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+
+  @include m.up('lg') {
+    gap: var(--space-9);
+    margin-top: var(--space-9);
+  }
+}
+
+.challenge {
+  display: block;
+
+  @include m.up('lg') {
+    &[data-side='left'] {
+      margin-right: 12%;
+    }
+
+    &[data-side='right'] {
+      margin-left: 12%;
+    }
+  }
+}
+
+.numeral,
+.stepNumber {
+  display: block;
+  color: transparent;
+  font-size: clamp(3.5rem, 2rem + 6vw, 7rem);
+  font-weight: var(--fw-black);
+  font-variant-numeric: tabular-nums;
+  line-height: 0.85;
+  -webkit-text-stroke: 1.5px var(--pa-text, var(--color-accent-text));
+}
+
+.challengeTitle {
+  max-width: 28ch;
+  margin-top: var(--space-4);
+  font-size: var(--fs-2xl);
+  text-wrap: balance;
+}
+
+.pair {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+
+  p {
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+  }
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-7);
+  }
+}
+
+.pairLabel {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.source {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin-top: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+
+  code {
+    padding: var(--space-1) var(--space-2);
+    background-color: var(--color-surface-hover);
+    color: var(--color-text-secondary);
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-size: var(--fs-xs);
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ── Approach ──────────────────────────────────────────────────────── */
+
+.approach {
+  display: grid;
+  gap: var(--space-7);
+  margin-top: var(--space-8);
+  counter-reset: step;
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-7) var(--space-6);
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    margin-top: var(--space-9);
+  }
+}
+
+.step {
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--pa, var(--color-accent));
+
+  p {
+    margin-top: var(--space-3);
+    color: var(--color-text-secondary);
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+  }
+
+  /* From lg the steps stair-step down the row: the first spans three columns, the next three and so on, offset. */
+  @include m.up('lg') {
+    grid-column: span 2;
+    margin-top: calc(var(--i, 0) * var(--space-5));
+
+    &:nth-child(4) {
+      grid-column: 2 / span 2;
+    }
+
+    &:nth-child(5) {
+      grid-column: 4 / span 2;
+    }
+  }
+}
+
+.stepNumber {
+  font-size: var(--fs-3xl);
+}
+
+.stepTitle {
+  margin-top: var(--space-3);
+  font-size: var(--fs-lg);
+}
+
+/* ── Decisions ─────────────────────────────────────────────────────── */
+
+.decisions {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-8);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    margin-top: var(--space-9);
+  }
+}
+
+.decision {
+  display: grid;
+  min-width: 0;
+
+  /* Every other card sits lower, so the two columns do not line up like a table. */
+  @include m.up('md') {
+    &:nth-child(even) {
+      margin-top: var(--space-7);
+    }
+  }
+
+  article {
+    position: relative;
+    height: 100%;
+    padding: var(--space-6) var(--space-5) var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: var(--space-5);
+      width: 3rem;
+      height: 4px;
+      background-color: var(--pa, var(--color-accent));
+      transform: skewX(-32deg);
+    }
+
+    p {
+      margin-top: var(--space-3);
+      color: var(--color-text-secondary);
+      line-height: var(--lh-relaxed);
+      text-wrap: pretty;
+    }
+  }
+}
+
+.decisionTitle {
+  font-size: var(--fs-lg);
+  text-wrap: balance;
+}
+
+/* ── Lessons ───────────────────────────────────────────────────────── */
+
+.lessons {
+  display: grid;
+  gap: var(--space-7);
+  margin-top: var(--space-8);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-5);
+    margin-top: var(--space-9);
+  }
+}
+
+.learned {
+  display: grid;
+  gap: var(--space-5);
+
+  @include m.up('lg') {
+    grid-column: 1 / span 7;
+  }
+}
+
+.quote {
+  padding-left: var(--space-5);
+  border-left: 4px solid var(--pa, var(--color-accent));
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-medium);
+  letter-spacing: -0.015em;
+  line-height: var(--lh-snug);
+  text-wrap: pretty;
+}
+
+.next {
+  @include m.up('lg') {
+    grid-column: 8 / span 5;
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  li {
+    position: relative;
+    padding-left: var(--space-5);
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.8em;
+      left: 0;
+      width: 0.75rem;
+      height: 2px;
+      background-color: var(--pa, var(--color-accent));
+      transform: skewX(-32deg);
+    }
+  }
+}
+
+.nextTitle {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wider);
+  line-height: var(--lh-normal);
+  text-transform: uppercase;
+}
+
+.pending {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-style: italic;
+
+  @include m.up('lg') {
+    grid-column: 1 / span 7;
+  }
+}
+
+@media (forced-colors: active) {
+  .numeral,
+  .stepNumber {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+}

@@ -202,6 +202,28 @@
   }
 }
 
+/* The cue that the whole card is a link; the title is the link itself. */
+.details {
+  align-self: flex-start;
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.linked:hover .details {
+  transform: translateX(0.25rem);
+}
+
+/* A card that links nowhere says why, in words. */
+.note {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-style: italic;
+}
+
 /* A second link inside a linked card sits above the title's stretched hit area. */
 .demo {
   position: relative;
@@ -296,6 +318,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .stage {
+    transform: none;
+  }
+
+  .linked:hover .details {
     transform: none;
   }
 

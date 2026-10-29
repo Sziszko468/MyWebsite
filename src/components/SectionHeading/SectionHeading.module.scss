@@ -36,7 +36,9 @@
 
 .title {
   font-size: var(--fs-2xl);
-  overflow-wrap: break-word;
+  /* A long word in any language (Dutch "Ontwerpbeslissingen") breaks, hyphenated where the browser can, rather than widen the page. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
 
   @include m.up('lg') {
     grid-column: 1 / span 8;

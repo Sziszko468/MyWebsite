@@ -1,0 +1,24 @@
+/*
+ * A project page's own colour. The bands set their theme on themselves (see Section), so the accent
+ * is handed down as --pa and --pa-text on every section, resolved against that section's own theme.
+ * Components read it with a fallback to the site's red.
+ */
+.page {
+  display: block;
+}
+
+.page[data-accent='red'] section {
+  --pa: var(--color-accent);
+  --pa-text: var(--color-accent-text);
+}
+
+.page[data-accent='blue'] section {
+  --pa: var(--color-secondary);
+  --pa-text: var(--color-secondary-text);
+}
+
+/* The logistics system leans on the ink itself: graphite on paper, paper on carbon, with red only for the route. */
+.page[data-accent='ink'] section {
+  --pa: var(--color-text);
+  --pa-text: var(--color-text);
+}
