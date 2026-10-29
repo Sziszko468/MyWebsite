@@ -2,7 +2,7 @@ import { useId } from 'react'
 import type { Feature, FeatureStatus, ProjectDetail } from '../../content/projectDetails/types'
 import { useI18n } from '../../i18n/useI18n'
 import { Reveal } from '../motion/Reveal'
-import { pad } from './format'
+import { pad } from '../../utils/format'
 import { StatusMark } from './StatusMark'
 import styles from './FeatureList.module.scss'
 

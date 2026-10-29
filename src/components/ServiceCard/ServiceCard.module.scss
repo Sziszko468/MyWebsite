@@ -70,27 +70,6 @@
   border-top: var(--border-width) solid var(--color-divider);
 }
 
-.priceLabel {
-  color: var(--color-text-muted);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  font-stretch: var(--fstretch-expanded);
-  letter-spacing: var(--ls-wider);
-  text-transform: uppercase;
-}
-
-.priceValue {
-  font-size: var(--fs-lg);
-  font-weight: var(--fw-black);
-  letter-spacing: var(--ls-tight);
-  font-variant-numeric: tabular-nums;
-}
-
-.priceMuted {
-  color: var(--color-text-muted);
-  font-size: var(--fs-md);
-}
-
 .action {
   display: flex;
   margin-top: var(--space-3);

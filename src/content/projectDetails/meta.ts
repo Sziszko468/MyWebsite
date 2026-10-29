@@ -1,5 +1,5 @@
 import type { ProjectId } from '../projects'
-import { tri, type Trilingual } from './trilingual'
+import { tri, type Trilingual } from '../trilingual'
 
 /**
  * What a search result, a browser tab and a shared link say about each project page. It is kept

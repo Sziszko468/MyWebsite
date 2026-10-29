@@ -7,7 +7,7 @@ npm run dev        # dev server; /hu/design-system shows every token and compone
 npm run build      # type-check + production build
 npm run typecheck  # tsc -b
 npm run lint       # oxlint
-npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition, home-page content, rhythm and link targets, project-page content, pictures and meta
+npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition, home-page content, rhythm and link targets, project-page content, pictures and meta, services content and wording, quote-form validation and sending, the services page rendered in three languages
 ```
 
 ## Where things live
@@ -29,8 +29,12 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 | `src/content/projectDetails/` | The project pages' content (`spendly.ts`, `bookinghub.ts`, `logistics.ts`), each with its text in Hungarian, English and Dutch side by side (`tri(hu, en, nl)`), and `meta.ts` for their titles and descriptions. See "Project pages" below. |
 | `src/components/project/`, `src/pages/ProjectPage.tsx` | One page component for every project: the hero, the eight bands, the architecture diagram, the gallery with its lightbox, the previous/next links. Loaded as its own chunk. |
 | `public/projects/<slug>/` | The optimised screenshots (WebP, at most 1440 px wide). |
-| `src/pages/` | Home, placeholder pages, 404. `DesignSystemPage` exists in dev builds only. |
+| `src/content/services/` | The services page's editable content: `areas.ts` (the four service areas), `process.ts` (the five steps), `faq.ts` (the six questions), each with its text in three languages side by side. The packages are in `src/content/packages.ts`, shared with the home page. See "Services page" below. |
+| `src/components/services/`, `src/components/form/`, `src/pages/ServicesPage.tsx` | The services page's bands, the package picker, the quote form and its steps, and the form fields (labels, hints, errors and radio groups wired for assistive technology). Loaded as its own chunk. |
+| `src/quote/` | The quote request without any screen: the types, the validation rules, the summary text, the error wording and the transport that sends it (`submit.ts`). |
+| `src/pages/` | Home, services, project pages, placeholder pages, 404. `DesignSystemPage` exists in dev builds only. |
 | `src/config/site.ts` | Brand name, monogram, contact email, social profiles, legal pages. Every `null` is a placeholder. |
+| `src/config/quote.ts` | Where the quote request is sent (`VITE_QUOTE_ENDPOINT`) and whether the visitor has to tick the acknowledgement of how the data is used. |
 | `src/config/intro.ts` | When the intro appears (`first-visit`, `every-session`, `never`), whether visitors can skip it, how long the exit lasts. |
 
 ## Conventions
@@ -196,7 +200,7 @@ Layout was measured in the DOM (headline word extents, button box, overlaps, hor
 | --- | --- |
 | `projects.ts` | Per project: name, status (`live`, `demo`, `in-progress`, `concept`), technology tags, composition, sketch, a real screenshot (`image`), a details route (`detailPath`), a live demo address (`demoUrl`). A card links when `detailPath` or `demoUrl` is set; without a details page it says so in words. A test refuses `live` without a demo address, a demo address on a concept, and a details route that is not a registered page. |
 | `offerings.ts` | The areas in "What I build". Remove one to hide its block. |
-| `packages.ts` | Launch, Grow, Build, Care: price (`quote` until a real figure exists; `{ kind: 'from', amount, currency }` publishes one) and which is featured. |
+| `packages.ts` | Launch, Grow, Build, Care: their words (tagline, who it is for, the kinds of project it suits, what it can include), price (`quote` until a real figure exists; `{ kind: 'from', amount, currency }` publishes one), VAT treatment, a note under the price, a deadline range, and which is featured. The home page and the services page both read it. |
 | `lab.ts` | The experiments, their status and, once one really works, its `demoUrl`. |
 | `about.ts` | Story, experience, education and skills, one `Localized` string per language. All empty: an empty block renders nothing (in development a muted note shows where it goes). "What this site is built with" is read from this site's own `package.json`. |
 
@@ -204,7 +208,7 @@ Layout was measured in the DOM (headline word extents, button box, overlaps, hor
 
 **Pictures.** A project without a screenshot shows a generated concept sketch (line-and-block drawings with no words or numbers in them), captioned "Koncepcióvázlat" so it cannot pass for a screenshot. Real screenshots exist in `Spendly/docs/screenshots` and `Logextic/docs/screenshots`, but they show the names WALLEX and Logextic, so they were not copied: put one in `public/` and set `image` once the names are decided.
 
-**Calls to action.** Every route link goes to a registered page (`/contact`) and every in-page link to a band that exists (`#work`); `home.test.ts` reads the sources and fails on anything else. `/contact`, like Work, Services, About and Lab, is still the translated "coming soon" page, so a visitor who follows a call to action lands there until that page is built; the closing band shows a `mailto:` link as soon as `contact.email` is set in `config/site.ts`.
+**Calls to action.** Every route link goes to a registered page (`/contact`) and every in-page link to a band that exists (`#work`); `home.test.ts` reads the sources and fails on anything else. The package buttons are the exception: they open the quote request on the services page with that package chosen (`/services?package=build#quote`). `/contact`, like Work, About and Lab, is still the translated "coming soon" page, so a visitor who follows the other calls to action lands there until that page is built; the closing band shows a `mailto:` link as soon as `contact.email` is set in `config/site.ts`.
 
 **Interaction rules.** Only a mouse or pen drives the pointer effects (`usePointerField` writes `--mx --my --px --py` on the element, one write per frame); a finger never does, so touch sees every composition at rest with all text, status and tags on screen. Reduced motion switches the pointer effects, the entrance (`Reveal`) and the glide of in-page jumps off. Content that is already on screen is never hidden for an entrance.
 
@@ -233,3 +237,46 @@ Layout was measured in the DOM (headline word extents, button box, overlaps, hor
 **Verified** (Chrome driven by Playwright against the dev server and the production build, plus the embedded browser): no horizontal overflow, text spilling or clipping on any of the three pages in Hungarian, English and Dutch at 320, 360, 390, 768, 1024, 1120, 1440 and 1920 px, in both themes (it found and fixed one: a Dutch heading wider than a 320 px screen); the lightbox by keyboard (Enter, arrows, Escape, focus returns to the thumbnail) and by tap and click outside; every control in the page has an accessible name and stays in the tab order; previous/next, back to the portfolio and the language switch keep the project and its page (the intro does not return); Work stays current in the header on a project page; reduced motion (nothing hidden for an entrance, no pointer tilt, no transitions, no gliding jumps); a touch screen; the pictures blocked (text intact, no script error); no WebGL on these pages; the production build (deep links, all pictures load with alt text, no failed request, no development notes). 472 tests.
 
 **Not verified.** Safari, Firefox, real phones and a screen reader; that the projects' claims are *true* beyond what their documentation and code structure show (their tests and apps were not run, except BookingHub's app, whose screens were opened); forced-colours mode (written, not seen).
+
+## Services page
+
+`/hu/services`, `/en/services`, `/nl/services`: seven bands under the page's own hero, in this order, each reachable by its anchor: the hero, **the four areas of work** (`#areas`), **the four packages** (`#packages`), **the quote request** (`#quote`), **how we work** (`#process`), **the questions** (`#faq`) and the closing call to action (`#start`). They alternate dark and light like the home page and the last one is Racing Red (`components/services/rhythm.ts`, checked by `services.test.ts`). The hero's light field is a few SVG lines and a gradient, not the WebGL scene: nothing plays by itself, a mouse makes it lean a little, a finger or "reduce motion" leaves it still.
+
+**What is edited where**
+
+| What | Where |
+| --- | --- |
+| The four packages: words, price, VAT, deadline | `src/content/packages.ts` (also read by the home page) |
+| The four service areas: name, summary, the list of what they can include, an example project | `src/content/services/areas.ts` |
+| The five steps and the note under them | `src/content/services/process.ts` |
+| The six questions and answers | `src/content/services/faq.ts` |
+| The page's labels, the form's questions, hints and error messages | `servicesPage.*` in `src/i18n/locales/*.ts` (types make a missing translation a build error) |
+| Where the request is sent, and whether the acknowledgement box is required | `src/config/quote.ts` |
+| The privacy notice's page, the e-mail address | `src/config/site.ts` (`legal`, `contact.email`) |
+
+**Prices are configuration.** Every package asks for a custom quote ("The price depends on the scope of the project.") until you decide otherwise. To publish one, in `packages.ts`:
+
+```ts
+price: { kind: 'from', amount: 1200, currency: 'EUR' },   // 'EUR' or 'HUF'
+vat: 'excluded',                                          // 'excluded' | 'included' | 'exempt'
+quoteRequired: true,                                      // keeps "the exact amount is given in the quote"
+priceNote: tri('…', '…', '…'),                            // optional sentence under the price
+timeline: { kind: 'estimate', min: 2, max: 4, unit: 'weeks' }, // optional; shown as an estimate the quote confirms
+```
+
+A test refuses a published price whose VAT treatment is `unspecified`. The wording is the same on the home page's cards. No discount, original price, percentage or "most popular" exists anywhere, and a test reads all the page's text in three languages to keep it so (it also refuses a stated length of time, "guarantee", "unlimited" and superlatives).
+
+**The package picker** is one group of radio buttons: the whole card is the target, the arrow keys move between cards, and the chosen card changes its frame, shows a tick and says "Chosen" in words, so colour is not the only signal. Every card carries the same five rows in the same order (who it is for, what it suits, what it can include, price, timeline); on wide screens CSS subgrid lines the rows up across the four cards. Build carries more weight (a red edge, a raised face) and no claim about popularity. Nothing is shown only on hover; hover lifts a card by 2 px at most.
+
+**The quote request** asks the seven questions of the brief in four steps (project and package; description and an existing site; budget and timing, both optional; name, e-mail and an optional phone number, with a summary and the acknowledgement). What is asked is the minimum: a first name and an e-mail address. A step is checked when the visitor moves on; the first wrong answer takes focus, every message is a sentence with an icon and is tied to its field, and a message goes away as soon as the answer is right. Answers survive going back and forth, and survive a language switch. They are held in memory only: no storage, no cookie, nothing in the address bar (a test reads the sources for it). The package chosen in the picker, the kind of project chosen in a service block and a package in the address (`?package=build`, which the home page's buttons use) all arrive in the form already filled in.
+
+**Sending is the one place that decides what is true** (`src/quote/submit.ts`):
+
+- With no endpoint configured (today's state), the form says so before the first question, and its last step offers the summary to copy (and, once `contact.email` is set, to open as an e-mail draft that only leaves when the visitor sends it there). It shows no success message, ever, because nothing was sent.
+- With `VITE_QUOTE_ENDPOINT` set at build time to an https address, the request is POSTed there as JSON (`language`, `projectType`, `package`, `description`, `reference`, `budget`, `timing`, `name`, `email`, `phone`; no cookies, no referrer). Only a 2xx answer counts as sent; any other answer, a network failure or no answer within 12 seconds is reported as a failure, the answers stay in the form, and the page says which. A double click sends once. After a real success the draft is cleared. The handler must allow cross-origin POSTs from this site (CORS) and should validate and rate-limit on its side.
+
+**Before launch** the owner has to decide or supply: the prices, VAT treatment and any deadline range; whether each service's list and each package's contents are what they will take on (they are starting copy built from the brief's lists and from what the portfolio projects show); the answers in the FAQ (kept general on purpose); the endpoint or form service, and where the requests are received; the privacy notice (its page, `legal` in `site.ts`, and whether the acknowledgement box is required); the e-mail address; and a decision about the brand name, which is still "Your Name".
+
+**Verified** (Chrome driven by Playwright against the dev server and the production build; a local stand-in for the endpoint for the sending paths): no horizontal overflow, text spilling or clipping at 320, 360, 390, 768, 1024, 1120, 1440 and 1920 px in Hungarian, English and Dutch, in both themes; the picker by mouse, arrow keys and touch; the whole form by keyboard and mouse (errors, focus, going back, the summary and the copy button); a real POST, a 500, a 422, a request that never answers (given up after 12 s) and a double click against the stand-in; the language switch (query, hash and answers kept); the hand-over from the home page; reduced motion; the production build in all three languages (titles, descriptions and Open Graph tags, deep links, no console output, no failed request, no development notes). The suite is 602 tests, including the whole page rendered in three languages.
+
+**Not verified.** Safari and Firefox; real phones; a screen reader (the markup uses native radios, fieldsets, labels and `details`, but it was not listened to); forced-colours mode (written, not seen); a real form service or backend (none exists yet); the Open Graph tags for a crawler that does not run scripts, which sees only the site-wide ones in `index.html`.

@@ -18,13 +18,21 @@ const DesignSystemPage = import.meta.env.DEV ? lazy(() => import('./pages/Design
 // the site do not pay for them, and they load when a project is opened.
 const ProjectPage = lazy(() => import('./pages/ProjectPage').then((module) => ({ default: module.ProjectPage })))
 
+// The services page carries the packages, the questions and the quote form in three languages, so
+// it is a chunk of its own too: the home page does not pay for it.
+const ServicesPage = lazy(() => import('./pages/ServicesPage').then((module) => ({ default: module.ServicesPage })))
+
 // What renders at each registered page. Paths and languages live in routes/pages.ts.
-// Work, Services, About, Lab and Contact are placeholders until their pages are built; a project's
+// Work, About, Lab and Contact are placeholders until their pages are built; a project's
 // details page is the same component for every project, fed by content/projectDetails.
 const PAGE_ELEMENTS: Record<NavPageId | 'designSystem', ReactElement | null> = {
   home: <HomePage />,
   work: <PlaceholderPage pageId="work" />,
-  services: <PlaceholderPage pageId="services" />,
+  services: (
+    <Suspense fallback={<div style={{ minHeight: '70svh' }} aria-hidden="true" />}>
+      <ServicesPage />
+    </Suspense>
+  ),
   about: <PlaceholderPage pageId="about" />,
   lab: <PlaceholderPage pageId="lab" />,
   contact: <PlaceholderPage pageId="contact" />,

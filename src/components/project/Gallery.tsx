@@ -3,7 +3,7 @@ import type { GalleryImage } from '../../content/projectDetails/types'
 import { useI18n } from '../../i18n/useI18n'
 import { cx } from '../../utils/cx'
 import { Reveal } from '../motion/Reveal'
-import { fill } from './format'
+import { fill } from '../../utils/format'
 import styles from './Gallery.module.scss'
 
 function Thumbnails({

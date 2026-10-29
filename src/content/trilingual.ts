@@ -1,4 +1,4 @@
-import type { Language } from '../../i18n/config'
+import type { Language } from '../i18n/config'
 
 /** A text in every language the site speaks. All three are required, so a missing translation fails the build. */
 export type Trilingual = Record<Language, string>

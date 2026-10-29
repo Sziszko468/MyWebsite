@@ -14,10 +14,9 @@ import { homeTone } from './rhythm'
 import styles from './ServicePackages.module.scss'
 
 function Package({ pkg, position }: { pkg: ServicePackage; position: number }) {
-  const { t } = useI18n()
+  const { lang, t } = useI18n()
   const { theme } = useTheme()
   const ref = usePointerField<HTMLDivElement>()
-  const copy = t.home.packages.items[pkg.id]
 
   return (
     // The featured package keeps the page's own theme inside a section that is the opposite one,
@@ -27,11 +26,15 @@ function Package({ pkg, position }: { pkg: ServicePackage; position: number }) {
         className={styles.card}
         index={String(position + 1).padStart(2, '0')}
         name={pkg.name}
-        description={copy.description}
+        description={pkg.tagline[lang]}
         price={pkg.price}
+        vat={pkg.vat}
+        quoteRequired={pkg.quoteRequired}
+        priceNote={pkg.priceNote?.[lang]}
         featured={pkg.featured}
         action={
-          <Button to="/contact" size="sm" variant={pkg.featured ? 'primary' : 'secondary'} arrow>
+          // The quote request lives on the services page; the package travels with the visitor.
+          <Button to={`/services?package=${pkg.id}#quote`} size="sm" variant={pkg.featured ? 'primary' : 'secondary'} arrow>
             {t.home.packages.cta}
             <span className="visually-hidden"> — {pkg.name}</span>
           </Button>
@@ -40,13 +43,13 @@ function Package({ pkg, position }: { pkg: ServicePackage; position: number }) {
         <div className={styles.facts}>
           <div>
             <p className={styles.label}>{t.home.packages.audienceLabel}</p>
-            <p>{copy.audience}</p>
+            <p>{pkg.audience[lang]}</p>
           </div>
           <div>
             <p className={styles.label}>{t.home.packages.includesLabel}</p>
             <ul className={styles.includes}>
-              {copy.includes.map((item) => (
-                <li key={item}>{item}</li>
+              {pkg.includes.map((item) => (
+                <li key={item.hu}>{item[lang]}</li>
               ))}
             </ul>
           </div>
@@ -58,8 +61,10 @@ function Package({ pkg, position }: { pkg: ServicePackage; position: number }) {
 
 /**
  * The collaboration packages, with a clear order of weight: Build is the large dark card, Launch
- * and Grow flank it, Care is a wider card with its parts side by side. Prices come from content/packages.ts and read
- * "request a custom quote" until a real figure is set. The call to action opens the contact page.
+ * and Grow flank it, Care is a wider card with its parts side by side. Words and prices come from
+ * content/packages.ts, the same source as the services page, and a price reads "request a custom
+ * quote" until a real figure is set. The call to action opens the quote request on the services
+ * page with the package already chosen.
  */
 export function ServicePackages() {
   const { t } = useI18n()

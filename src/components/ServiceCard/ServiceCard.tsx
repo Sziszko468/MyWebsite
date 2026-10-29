@@ -1,18 +1,21 @@
 import type { ReactNode } from 'react'
-import { useI18n } from '../../i18n/useI18n'
+import type { ServicePrice, VatMode } from '../../content/pricing'
 import { cx } from '../../utils/cx'
+import { PriceTag } from './PriceTag'
 import styles from './ServiceCard.module.scss'
 
-/** Prices are configuration, never hard-wired: `tbd` until a real value exists. */
-export type ServicePrice =
-  | { kind: 'from'; amount: number; currency: 'EUR' | 'HUF' }
-  | { kind: 'quote' }
-  | { kind: 'tbd' }
+export type { ServicePrice } from '../../content/pricing'
 
 interface ServiceCardProps {
   name: string
   description: string
   price: ServicePrice
+  /** How a published price treats VAT. */
+  vat?: VatMode
+  /** The exact price is confirmed in a quote. */
+  quoteRequired?: boolean
+  /** An optional sentence under the price. */
+  priceNote?: string | null
   /** Editorial number, e.g. "01". Decorative. */
   index?: string
   /** Highlights the card with the red accent. */
@@ -29,6 +32,9 @@ export function ServiceCard({
   name,
   description,
   price,
+  vat,
+  quoteRequired,
+  priceNote,
   index,
   featured = false,
   headingLevel = 3,
@@ -36,7 +42,6 @@ export function ServiceCard({
   action,
   className,
 }: ServiceCardProps) {
-  const { lang, t } = useI18n()
   const Heading = `h${headingLevel}` as const
 
   return (
@@ -55,20 +60,7 @@ export function ServiceCard({
       {children && <div className={styles.extra}>{children}</div>}
 
       <footer className={styles.price}>
-        {price.kind === 'from' && (
-          <>
-            <span className={styles.priceLabel}>{t.services.priceFrom}</span>
-            <span className={styles.priceValue}>
-              {new Intl.NumberFormat(lang, {
-                style: 'currency',
-                currency: price.currency,
-                maximumFractionDigits: 0,
-              }).format(price.amount)}
-            </span>
-          </>
-        )}
-        {price.kind === 'quote' && <span className={styles.priceValue}>{t.services.priceQuote}</span>}
-        {price.kind === 'tbd' && <span className={styles.priceMuted}>{t.services.priceTbd}</span>}
+        <PriceTag price={price} vat={vat} quoteRequired={quoteRequired} note={priceNote} />
         {action && <div className={styles.action}>{action}</div>}
       </footer>
     </article>

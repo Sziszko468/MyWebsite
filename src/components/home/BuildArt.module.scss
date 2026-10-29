@@ -1,5 +1,13 @@
 /* The details that move while a mouse is over a block (it sets data-pointer), and sit still otherwise. */
 
+/* An outline of a design that is not built yet. */
+.dashed {
+  fill: none;
+  stroke: var(--color-border-strong);
+  stroke-dasharray: 4 4;
+  stroke-width: 1.25;
+}
+
 .flow {
   fill: none;
   stroke: var(--brand-red);

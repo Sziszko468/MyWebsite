@@ -76,3 +76,20 @@
     }
   }
 }
+
+/* For a heading in a narrow column: everything stays in one column, whatever the width of the page. */
+.stacked {
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 1fr);
+
+    .index,
+    .title,
+    .description {
+      grid-column: 1 / -1;
+    }
+
+    .description {
+      align-self: start;
+    }
+  }
+}

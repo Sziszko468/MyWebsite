@@ -6,7 +6,7 @@ import { Reveal } from '../motion/Reveal'
 import { Section } from '../Section/Section'
 import type { SectionTone } from '../Section/tone'
 import { SectionHeading } from '../SectionHeading/SectionHeading'
-import { formatDate, pad } from './format'
+import { formatDate, pad } from '../../utils/format'
 import styles from './ProjectSections.module.scss'
 
 // Muted notes that show where a missing piece will go: development only, nothing in production.

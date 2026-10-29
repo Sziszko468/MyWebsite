@@ -153,14 +153,51 @@ function Integrations() {
   )
 }
 
-const ART: Record<OfferingId, () => ReactElement> = {
+/** An existing design on the left, drawn as outlines, and the built page on the right. */
+function UiImplementation() {
+  return (
+    <svg {...FRAME}>
+      <g className={sketch.far}>
+        <rect className={styles.dashed} x="22" y="30" width="138" height="164" rx="8" />
+        <rect className={styles.dashed} x="34" y="44" width="114" height="14" rx="3" />
+        <rect className={styles.dashed} x="34" y="68" width="114" height="46" rx="4" />
+        {[0, 1, 2].map((i) => (
+          <rect key={i} className={styles.dashed} x={34 + i * 40} y="126" width="34" height="52" rx="4" />
+        ))}
+        <line className={sketch.grid} x1="22" y1="206" x2="160" y2="206" />
+        <line className={sketch.grid} x1="22" y1="202" x2="22" y2="210" />
+        <line className={sketch.grid} x1="160" y1="202" x2="160" y2="210" />
+      </g>
+      <g className={sketch.mid}>
+        <path className={styles.flow} d="M168 112 C180 112 182 112 192 112" fill="none" />
+        <path className={sketch.line} d="M188 106 l8 6 l-8 6" fill="none" />
+      </g>
+      <g className={sketch.near}>
+        <rect className={sketch.shadow} x="205" y="40" width="138" height="160" rx="10" />
+        <rect className={sketch.card} x="200" y="34" width="138" height="160" rx="10" />
+        <rect className={sketch.barStrong} x="212" y="48" width="70" height="10" rx="5" />
+        <rect className={sketch.blue} x="212" y="68" width="114" height="44" rx="6" />
+        {[0, 1, 2].map((i) => (
+          <rect key={i} className={sketch.bar} x={212 + i * 40} y="124" width="34" height="46" rx="5" />
+        ))}
+        <rect className={sketch.red} x="212" y="176" width="48" height="10" rx="5" />
+      </g>
+    </svg>
+  )
+}
+
+/** The areas of work on the home page, and the services page's UI implementation. */
+export type ArtKind = OfferingId | 'ui'
+
+const ART: Record<ArtKind, () => ReactElement> = {
   websites: Websites,
   webapps: WebApps,
   mobile: Mobile,
   integrations: Integrations,
+  ui: UiImplementation,
 }
 
-export function BuildArt({ kind }: { kind: OfferingId }) {
+export function BuildArt({ kind }: { kind: ArtKind }) {
   const Art = ART[kind]
   return <Art />
 }

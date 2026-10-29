@@ -1,0 +1,325 @@
+@use '../../styles/mixins' as m;
+
+.card {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-raised);
+  box-shadow: var(--shadow-lg);
+
+  @include m.up('md') {
+    padding: var(--space-7);
+  }
+}
+
+/* Said before the first question, so nobody fills in a form that cannot send without knowing it. */
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+/* ── Where you are ─────────────────────────────────────────────────── */
+
+.steps {
+  min-width: 0;
+}
+
+.compact {
+  display: grid;
+  gap: var(--space-2);
+
+  @include m.up('md') {
+    display: none;
+  }
+}
+
+.compactText {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.bar {
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-divider);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background-color: var(--color-accent);
+    transition: width var(--dur-slow) var(--ease-out);
+  }
+}
+
+.list {
+  display: none;
+
+  @include m.up('md') {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  li {
+    min-width: 0;
+    border-top: 3px solid var(--color-divider);
+    transition: border-color var(--dur-base) var(--ease-out);
+  }
+
+  li[data-state='done'] {
+    border-top-color: var(--color-text-secondary);
+  }
+
+  li[data-state='current'] {
+    border-top-color: var(--color-accent);
+  }
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--size-touch);
+  padding: var(--space-2) 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+
+  li[data-state='current'] & {
+    color: var(--color-text);
+  }
+
+  li[data-state='done'] & {
+    color: var(--color-text-secondary);
+    cursor: pointer;
+  }
+
+  @include m.hover {
+    color: var(--color-text);
+    text-decoration: underline;
+  }
+}
+
+.stepMark {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  border: var(--border-width) solid currentcolor;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+
+  li[data-state='current'] & {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+}
+
+.stepName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ── The questions ─────────────────────────────────────────────────── */
+
+.stepTitle {
+  margin-bottom: var(--space-5);
+  font-size: var(--fs-xl);
+  overflow-wrap: anywhere;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.fields {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.consent {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.privacy {
+  justify-self: start;
+  padding-left: calc(1.5rem + var(--space-3));
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.pending,
+.small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+/* ── What has been said so far ─────────────────────────────────────── */
+
+.review {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-subtle);
+
+  dl {
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--space-2) 0 0;
+  }
+
+  dt {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    font-stretch: var(--fstretch-expanded);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+
+  dd {
+    margin: var(--space-1) 0 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+}
+
+.reviewTitle {
+  font-size: var(--fs-md);
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────── */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.primary {
+  flex: 1 1 12rem;
+
+  @include m.up('md') {
+    flex: 0 1 auto;
+    margin-left: auto;
+  }
+}
+
+/* ── A result that is not a success ────────────────────────────────── */
+
+.panel {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-left: 4px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-subtle);
+  line-height: var(--lh-normal);
+
+  &[data-tone='error'] {
+    border-color: var(--color-accent-text);
+  }
+}
+
+.panelTitle {
+  font-size: var(--fs-md);
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.summaryLabel {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.summaryText {
+  width: 100%;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  resize: vertical;
+}
+
+.panelActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.copyState {
+  min-height: 1.5em;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.sent {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+
+  .stepTitle {
+    margin-bottom: 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .bar span {
+    background-color: Highlight;
+  }
+
+  li[data-state='current'] .stepMark {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}

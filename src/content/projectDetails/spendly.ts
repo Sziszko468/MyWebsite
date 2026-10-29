@@ -1,4 +1,4 @@
-import { tri } from './trilingual'
+import { tri } from '../trilingual'
 import type { ProjectDetail } from './types'
 
 /*

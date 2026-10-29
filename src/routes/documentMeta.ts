@@ -21,8 +21,9 @@ export function ogLocale(lang: Language): string {
 
 /**
  * The title and description of a page in a language. A project's page has its own, written in
- * content/projectDetails/meta.ts; the navigation pages are titled by their navigation label; the home page
- * by the brand and the site's tagline; an unknown path says so.
+ * content/projectDetails/meta.ts; the services page has its own title and description in the
+ * dictionary; the other navigation pages are titled by their navigation label; the home page by
+ * the brand and the site's tagline; an unknown path says so.
  */
 export function buildDocumentMeta(
   page: PageDef | undefined,
@@ -37,6 +38,11 @@ export function buildDocumentMeta(
   const own = projectId ? projectMeta[projectId] : undefined
   if (own) {
     return { title: `${own.title[lang]} — ${brandName}`, description: own.description[lang], ogType: 'article' }
+  }
+
+  // The services page describes itself: what it offers is worth more in a search result than its menu label.
+  if (page.id === 'services') {
+    return { ...site, title: `${t.servicesPage.meta.title} — ${brandName}`, description: t.servicesPage.meta.description }
   }
 
   if (NAV_IDS.includes(page.id)) return { ...site, title: `${t.nav[page.id as NavPageId]} — ${brandName}` }

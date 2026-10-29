@@ -6,6 +6,7 @@ import { Container } from '../Container/Container'
 import { Reveal } from '../motion/Reveal'
 import { usePointerField } from '../motion/usePointerField'
 import { Section } from '../Section/Section'
+import type { SectionTone } from '../Section/tone'
 import styles from './FinalCta.module.scss'
 import { homeTone } from './rhythm'
 
@@ -21,21 +22,32 @@ const LINES = Array.from({ length: 19 }, (_, i) => {
   }
 })
 
+interface FinalCtaProps {
+  /** The words; the home page's by default. `emailLead` adds the e-mail line once an address is set. */
+  copy?: { title: string; text: string; cta: string; emailLead?: string }
+  /** Where the button goes: a page of the site (`to`) or a place on the page it is on (`href`). */
+  action?: { to: string } | { href: string }
+  /** The band's anchor; "start" on the home page. */
+  id?: string
+  tone?: SectionTone
+}
+
 /**
  * The closing statement: one headline, one sentence, one button, on Racing Red. Text and the button
  * are black and paper on red (the contrast is tested). The lines behind lean a little with the
- * pointer and stay still otherwise. The button goes to the contact page; the e-mail address
- * appears only once it is set in config/site.ts.
+ * pointer and stay still otherwise. On the home page the button goes to the contact page; the
+ * services page points it at its own quote request. The e-mail address appears only once it is
+ * set in config/site.ts.
  */
-export function FinalCta() {
+export function FinalCta({ copy: given, action = { to: '/contact' }, id = 'start', tone = homeTone('start') }: FinalCtaProps = {}) {
   const { t } = useI18n()
   const titleId = useId()
   const ref = usePointerField<HTMLDivElement>()
   const { email } = siteConfig.contact
-  const copy = t.home.final
+  const copy = given ?? t.home.final
 
   return (
-    <Section id="start" tone={homeTone('start')} slant labelledBy={titleId} className={styles.final}>
+    <Section id={id} tone={tone} slant labelledBy={titleId} className={styles.final}>
       <div ref={ref} className={styles.stage}>
         <svg className={styles.lines} viewBox="0 0 1200 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
           <g className={styles.fan}>
@@ -64,10 +76,16 @@ export function FinalCta() {
           <Reveal className={styles.row} delay={120}>
             <p className={styles.text}>{copy.text}</p>
             <div className={styles.actions}>
-              <Button to="/contact" size="lg" arrow>
-                {copy.cta}
-              </Button>
-              {email && (
+              {'href' in action ? (
+                <Button href={action.href} size="lg" arrow>
+                  {copy.cta}
+                </Button>
+              ) : (
+                <Button to={action.to} size="lg" arrow>
+                  {copy.cta}
+                </Button>
+              )}
+              {email && copy.emailLead && (
                 <p className={styles.mail}>
                   {copy.emailLead} <a href={`mailto:${email}`}>{email}</a>
                 </p>

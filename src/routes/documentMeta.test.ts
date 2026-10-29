@@ -56,6 +56,15 @@ describe('buildDocumentMeta', () => {
     expect(buildDocumentMeta(findPage('/'), 'en', t, BRAND).title).toBe(`${BRAND} — ${t.meta.title}`)
   })
 
+  it.each(LANGUAGES)('gives the services page its own title and description in %s', (lang) => {
+    const t = dictionaries[lang]
+    const meta = buildDocumentMeta(findPage('/services'), lang, t, BRAND)
+    expect(meta.title).toBe(`${t.servicesPage.meta.title} — ${BRAND}`)
+    expect(meta.description).toBe(t.servicesPage.meta.description)
+    expect(meta.title).not.toBe(`${t.nav.services} — ${BRAND}`)
+    expect(meta.ogType).toBe('website')
+  })
+
   it('says so for a path that does not exist', () => {
     const t = dictionaries.nl
     expect(buildDocumentMeta(undefined, 'nl', t, BRAND)).toMatchObject({ title: `${t.notFound.title} — ${BRAND}`, description: t.notFound.description })

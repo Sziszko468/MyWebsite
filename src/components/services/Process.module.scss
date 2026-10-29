@@ -1,0 +1,99 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * A line with the steps along it. On a phone it runs down the left; from `lg` it runs across and
+ * each step sits a little lower than the one before, so the row climbs like the brand's diagonal
+ * instead of lining up like a table.
+ */
+
+.steps {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  padding-left: var(--space-5);
+  border-left: 3px solid var(--color-divider);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin-top: var(--space-9);
+    padding: 0;
+    border-left: 0;
+  }
+}
+
+.step {
+  position: relative;
+  min-width: 0;
+
+  /* The stop on the line. */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    left: calc(var(--space-5) * -1 - 7px);
+    width: 11px;
+    height: 11px;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-accent);
+  }
+
+  @include m.up('lg') {
+    margin-top: calc(var(--i) * var(--space-6));
+    padding-top: var(--space-5);
+    border-top: 3px solid var(--color-divider);
+
+    &::before {
+      top: -7px;
+      left: 0;
+    }
+  }
+}
+
+.number {
+  display: block;
+  margin-bottom: var(--space-3);
+  color: transparent;
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-black);
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  -webkit-text-stroke: 1px var(--color-accent-text);
+}
+
+.title {
+  margin-bottom: var(--space-2);
+  font-size: var(--fs-lg);
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.text {
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+.note {
+  max-width: 46rem;
+  margin-top: var(--space-8);
+  padding-left: var(--space-5);
+  border-left: 3px solid var(--color-accent);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+
+  @include m.up('lg') {
+    margin-top: calc(var(--space-9) + var(--space-5));
+  }
+}
+
+@media (forced-colors: active) {
+  .number {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+
+  .step::before {
+    forced-color-adjust: none;
+    background-color: Highlight;
+  }
+}

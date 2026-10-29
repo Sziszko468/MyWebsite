@@ -9,7 +9,7 @@ import { Container } from '../Container/Container'
 import { ProjectMockup } from '../home/ProjectMockup'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
 import { usePointerField } from '../motion/usePointerField'
-import { fill } from './format'
+import { fill } from '../../utils/format'
 import styles from './ProjectHero.module.scss'
 
 /*

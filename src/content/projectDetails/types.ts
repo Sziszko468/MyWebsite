@@ -1,5 +1,5 @@
 import type { ProjectId } from '../projects'
-import type { Trilingual } from './trilingual'
+import type { Trilingual } from '../trilingual'
 
 /**
  * The data behind a project page. Everything a visitor reads is a `Trilingual`; names of tools,

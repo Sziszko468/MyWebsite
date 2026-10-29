@@ -111,15 +111,13 @@ describe('packages', () => {
     }
   })
 
-  it('say who they are for and what they include, with the same number of points in every language', () => {
+  it('say who they are for and what they include, with something to read in every language', () => {
     for (const pkg of packages) {
-      const counts = LANGUAGES.map((lang) => dictionaries[lang].home.packages.items[pkg.id].includes.length)
-      expect(new Set(counts).size, `${pkg.id}: ${counts}`).toBe(1)
-      expect(counts[0], pkg.id).toBeGreaterThan(0)
+      expect(pkg.includes.length, pkg.id).toBeGreaterThan(0)
       for (const lang of LANGUAGES) {
-        const copy = dictionaries[lang].home.packages.items[pkg.id]
-        expect(copy.audience.trim(), `${lang}:${pkg.id}`).not.toBe('')
-        for (const item of copy.includes) expect(item.trim(), `${lang}:${pkg.id}`).not.toBe('')
+        expect(pkg.tagline[lang].trim(), `${lang}:${pkg.id}`).not.toBe('')
+        expect(pkg.audience[lang].trim(), `${lang}:${pkg.id}`).not.toBe('')
+        for (const item of pkg.includes) expect(item[lang].trim(), `${lang}:${pkg.id}`).not.toBe('')
       }
     }
   })
@@ -127,8 +125,10 @@ describe('packages', () => {
   it('promise no deadline or guarantee in any language', () => {
     const promise = /\d+\s*(days?|weeks?|nap|hét|dagen|weken)|guarantee|garanci|garantie/i
     for (const lang of LANGUAGES) {
-      const copy = dictionaries[lang].home.packages
-      const text = [copy.intro, ...Object.values(copy.items).flatMap((i) => [i.description, i.audience, ...i.includes])]
+      const text = [
+        dictionaries[lang].home.packages.intro,
+        ...packages.flatMap((p) => [p.tagline[lang], p.audience[lang], ...p.fits.map((f) => f[lang]), ...p.includes.map((i) => i[lang])]),
+      ]
       for (const line of text) expect(line, `${lang}: ${line}`).not.toMatch(promise)
     }
   })

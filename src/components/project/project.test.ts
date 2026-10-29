@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { dictionaries } from '../../i18n/dictionaries'
 import { LANGUAGES } from '../../i18n/config'
 import { COMPLETION, weaker } from './architecture'
-import { fill, formatDate, pad } from './format'
+import { fill, formatDate, pad } from '../../utils/format'
 
 describe('fill', () => {
   it('fills named placeholders and leaves unknown ones as written', () => {

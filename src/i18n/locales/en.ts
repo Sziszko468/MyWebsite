@@ -81,6 +81,230 @@ export const en: Dictionary = {
     priceFrom: 'Starting from',
     priceQuote: 'Request a custom quote',
     priceTbd: 'Pricing to be confirmed',
+    priceQuoteHint: 'The price depends on the scope of the project.',
+    priceExact: 'The exact amount is given in the quote.',
+    vat: {
+      excluded: '+ VAT',
+      included: 'incl. VAT',
+      exempt: 'VAT-exempt',
+    },
+  },
+  servicesPage: {
+    meta: {
+      title: 'Services and packages',
+      description:
+        'Custom websites and web applications: services, four starting packages and a custom quote request.',
+    },
+    hero: {
+      titleLine1: 'Your idea.',
+      titleLine2: 'The next step.',
+      lead: 'Custom websites and web applications that combine a distinctive look with real usability.',
+      ctaPrimary: 'Choose a service',
+      ctaSecondary: 'Request a custom quote',
+      indexLabel: 'On this page',
+      index: {
+        areas: 'Services',
+        packages: 'Packages',
+        quote: 'Quote request',
+        process: 'Process',
+        faq: 'FAQ',
+      },
+    },
+    areas: {
+      title: 'What I take on',
+      intro:
+        'Four areas where I can help. The details change from project to project; the exact content is settled after a quote request.',
+      featuresLabel: 'What can be part of it',
+      exampleLabel: 'An example from my work',
+      cta: 'Request a quote',
+    },
+    packages: {
+      title: 'Packages',
+      intro:
+        'Four starting structures. They are not final offers: the exact content, price and timing are settled after a quote request, once the project is known.',
+      legend: 'Choose a package',
+      choose: 'Choose',
+      chosen: 'Chosen',
+      rows: {
+        audience: 'Who it is for',
+        fits: 'Suits projects like',
+        includes: 'What can be included',
+        price: 'Price',
+        timeline: 'Timeline',
+      },
+      timeline: {
+        scope: 'Depends on the scope of the project and is fixed in the quote.',
+        estimate: 'Typically {range} {unit}, confirmed in the quote.',
+        units: {
+          days: { one: 'day', other: 'days' },
+          weeks: { one: 'week', other: 'weeks' },
+          months: { one: 'month', other: 'months' },
+        },
+      },
+      bar: {
+        none: 'No package chosen yet. Choose one above, or request a quote without one.',
+        some: 'Chosen package: {name}',
+        ctaSome: 'Continue to the quote request',
+        ctaNone: 'Request a custom quote',
+      },
+    },
+    quote: {
+      title: 'Request a custom quote',
+      intro:
+        'Tell me briefly what you have in mind. Seven questions in four steps; anything optional is marked. You can go back and change your answers at any time.',
+      aside: {
+        title: 'Good to know',
+        items: [
+          'Asking for a quote is not placing an order.',
+          'Until you send it, your answers exist only on this page, in your browser’s memory: I do not save them anywhere. Reloading the page clears them.',
+          'The exact scope, price and timing are settled together after the quote request.',
+        ],
+      },
+      stepsLabel: 'Steps of the quote request',
+      stepOf: 'Step {current} of {total}',
+      stepDone: 'done',
+      stepCurrent: 'current step',
+      steps: {
+        project: 'Project',
+        details: 'Details',
+        extras: 'Budget and timing',
+        contact: 'Contact',
+      },
+      stepTitles: {
+        project: 'What is it about?',
+        details: 'Tell me about the project',
+        extras: 'Budget and timing',
+        contact: 'How can I reach you?',
+      },
+      optional: 'optional',
+      fields: {
+        projectType: {
+          label: 'What kind of project is it?',
+          options: {
+            website: 'A website',
+            webapp: 'A web application',
+            ui: 'Implementing an existing design',
+            integrations: 'An API or integration',
+            maintenance: 'Maintaining or developing an existing site',
+            unsure: 'Not sure yet',
+          },
+        },
+        package: {
+          label: 'Which package interests you?',
+          hint: 'If you chose one above, it is already filled in here; you can change it.',
+          unsure: 'Not sure yet, help me choose',
+        },
+        description: {
+          label: 'What is the project, briefly?',
+          hint: 'What do you want to create, for whom, and what is the goal? A few sentences are enough.',
+          count: '{count} / {max}',
+        },
+        reference: {
+          label: 'Is there an existing website or a reference?',
+          hint: 'A link, or a few words about something you like.',
+        },
+        budget: {
+          label: 'Approximate budget',
+          hint: 'If you have an idea, write it with an amount and currency. If not, leave it empty.',
+        },
+        timing: {
+          label: 'When would you like the project?',
+          placeholder: 'I would rather not say',
+          options: {
+            unsure: 'Not sure yet',
+            asap: 'As soon as possible',
+            weeks: 'In the coming weeks',
+            months: 'In the coming months',
+            flexible: 'No rush',
+          },
+        },
+        name: { label: 'Your name', hint: 'A first name is enough.' },
+        email: { label: 'Email address', hint: 'This is where I will reply.' },
+        phone: { label: 'Phone number', hint: 'Only if you would rather talk by phone.' },
+        consent: {
+          label: 'I understand that the details I give will be used to answer this quote request.',
+          privacy: 'Privacy notice',
+          pending: 'The privacy notice path is not set yet: src/config/site.ts',
+        },
+      },
+      errors: {
+        required: {
+          projectType: 'Choose what kind of project it is.',
+          package: 'Choose a package, or say you are not sure yet.',
+          description: 'Write a few words about the project.',
+          timing: 'Choose from the list, or leave it empty.',
+          name: 'Enter your name.',
+          email: 'Enter your email address so I can reply.',
+        },
+        tooShort: 'At least {min} characters are needed here.',
+        tooLong: 'No more than {max} characters.',
+        invalidEmail: 'That does not look like a valid email address. The format is name@domain.com',
+        invalidPhone: 'Use digits, spaces and the characters + ( ) - . /, with at least 6 digits.',
+        consentRequired: 'You need to tick this to send the request.',
+      },
+      actions: {
+        next: 'Next',
+        back: 'Back',
+        send: 'Send quote request',
+        prepare: 'Prepare summary',
+        sending: 'Sending…',
+      },
+      summary: {
+        title: 'Quote request',
+        heading: 'Summary',
+        reviewHint: 'Check it before you go on.',
+        empty: '—',
+        labels: {
+          projectType: 'Project type',
+          package: 'Package',
+          description: 'Description',
+          reference: 'Existing site or reference',
+          budget: 'Budget',
+          timing: 'Timing',
+          name: 'Name',
+          email: 'Email',
+          phone: 'Phone',
+          language: 'Language',
+        },
+      },
+      unavailable: {
+        notice:
+          'Online sending is not connected yet. You can go through the questions, but the request cannot leave this page right now: at the end you can copy the summary.',
+        title: 'The quote request was not sent',
+        text: 'Online sending is not set up yet, so nothing has been sent. Your answers are still here: copy the summary and send it another way.',
+        copy: 'Copy summary',
+        copied: 'The summary is on your clipboard.',
+        copyFailed: 'Copying did not work. Select the text below and copy it by hand.',
+        mail: 'Open as an email draft',
+        mailNote: 'Your email app opens with a draft; it is only sent when you send it there.',
+        subject: 'Quote request',
+      },
+      failed: {
+        title: 'Sending did not work',
+        network: 'I could not reach the service. Your answers are still here; check your connection and try again.',
+        timeout:
+          'Sending took too long, so I cannot tell whether it arrived. Your answers are still here; try again later.',
+        rejected: 'The service did not accept the request. Your answers are still here; try again later.',
+      },
+      sent: {
+        title: 'Sent',
+        text: 'Your quote request has been sent. I will get back to you at the email address you gave.',
+        again: 'New quote request',
+      },
+    },
+    process: {
+      title: 'How we work together',
+      intro: 'Five steps from idea to handover.',
+    },
+    faq: {
+      title: 'Frequently asked questions',
+      intro: 'Honest, general answers. If yours is not here, write it in the quote request.',
+    },
+    final: {
+      title: 'Have an idea?',
+      text: 'Let’s see how it can become a working digital product.',
+      cta: 'Let’s get started',
+    },
   },
   home: {
     path: {
@@ -185,33 +409,6 @@ export const en: Dictionary = {
       audienceLabel: 'Who it is for',
       includesLabel: 'Includes',
       cta: 'Request a quote',
-      items: {
-        launch: {
-          description: 'A clear, fast website to get you started.',
-          audience: 'New businesses and individuals who need a first or a fresh web presence.',
-          includes: ['Responsive website', 'Content and page structure', 'Basic SEO setup', 'Handover and a short guide'],
-        },
-        grow: {
-          description: 'Developing an existing presence: new sections, a better experience, expansion.',
-          audience: 'Businesses with a working website that want to take the next step.',
-          includes: [
-            'A review of the existing site',
-            'New pages and features',
-            'Better performance and usability',
-            'Goals defined together',
-          ],
-        },
-        build: {
-          description: 'A custom web application, from the idea to the first usable version.',
-          audience: 'Businesses and teams that need a custom application for a specific process.',
-          includes: ['Discovery and planning', 'User interface and experience', 'Development and testing', 'Integration of the services needed'],
-        },
-        care: {
-          description: 'Ongoing care: updates, fixes and smaller improvements.',
-          audience: 'Owners of existing websites and applications.',
-          includes: ['Updates and maintenance', 'Bug fixes', 'Small changes', 'Regular check-ups'],
-        },
-      },
     },
     final: {
       title: "Let's make it real.",

@@ -1,4 +1,4 @@
-import type { Language } from '../../i18n/config'
+import type { Language } from '../i18n/config'
 
 /** Fills `{name}`-style placeholders in a translated string. A placeholder with no value is left as written. */
 export function fill(template: string, values: Record<string, string | number>): string {
