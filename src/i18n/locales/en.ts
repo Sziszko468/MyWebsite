@@ -238,7 +238,7 @@ export const en: Dictionary = {
         },
         tooShort: 'At least {min} characters are needed here.',
         tooLong: 'No more than {max} characters.',
-        invalidEmail: 'That does not look like a valid email address. The format is name@domain.com',
+        invalidEmail: 'That does not look like a valid email address. Check that it has an @ sign followed by a domain.',
         invalidPhone: 'Use digits, spaces and the characters + ( ) - . /, with at least 6 digits.',
         consentRequired: 'You need to tick this to send the request.',
       },
@@ -380,10 +380,7 @@ export const en: Dictionary = {
       principlesLabel: 'Three words that sum up the aim',
       stackHeading: 'What this site is built with',
       stackNote: "The tools are taken from this site's own source code.",
-      storyHeading: 'Story',
-      experienceHeading: 'Experience',
-      educationHeading: 'Education',
-      skillsHeading: 'Skills',
+      more: 'More about me',
     },
     lab: {
       title: 'The Lab',
@@ -415,6 +412,168 @@ export const en: Dictionary = {
       text: "Tell me about your idea, and let's see how it can become a working digital experience.",
       cta: "Let's talk about your project",
       emailLead: 'Or write directly:',
+    },
+  },
+  aboutPage: {
+    meta: {
+      title: 'About me and how I work',
+      description:
+        'From logistics to software development: my story, how I work, my technologies and what I am focused on now.',
+    },
+    hero: {
+      titleLine1: 'Not just writing code.',
+      titleLine2: 'Building digital experiences.',
+      lead: 'I believe good development comes from technology, creativity and problem-solving thinking meeting.',
+      ctaPrimary: 'See my work',
+      ctaSecondary: 'Get in touch',
+    },
+    story: {
+      fromLabel: 'Logistics',
+      toLabel: 'Software development',
+      skillsTitle: 'What I brought with me',
+      skillsIntro: 'Seven skills that carry over from one field to the other, and how each shows up in development.',
+    },
+    approach: {
+      title: 'How I work',
+      intro: 'Four principles that lead into one another.',
+    },
+    skills: {
+      title: 'Technologies',
+      intro: 'The tools I work with, in groups.',
+      note: 'The list names tools; it is not a ranking of skill levels.',
+      levels: {
+        learning: 'Learning',
+        working: 'Working with it',
+        confident: 'Confident with it',
+      },
+    },
+    focus: {
+      title: 'Current focus',
+      intro: 'Where most of my attention goes right now.',
+    },
+    final: {
+      title: 'Let’s build something meaningful.',
+      text: 'Every good project starts with a conversation.',
+      cta: 'Get in touch',
+    },
+  },
+  contactPage: {
+    meta: {
+      title: 'Contact',
+      description: 'Write to me about a professional opportunity, a collaboration or a web development project.',
+    },
+    hero: {
+      title: 'Got a good idea?',
+      lead: 'Let’s talk about it. Whether it is a new project, a professional opportunity or a collaboration, I would be glad to listen.',
+      doorsLabel: 'Choose what you would like to talk about',
+      employers: {
+        label: 'For employers',
+        title: 'A professional opportunity, a developer position or teamwork.',
+        cta: 'Let’s talk about the opportunity',
+      },
+      clients: {
+        label: 'For clients',
+        title: 'A website, a web application or a custom digital solution.',
+        cta: 'Start a project',
+      },
+    },
+    form: {
+      title: 'Write to me',
+      intro: 'A few lines are enough: the topic, a subject and your message, and how I can reply.',
+      aside: {
+        title: 'Good to know',
+        items: [
+          'Until you send it, your message exists only on this page, in your browser’s memory: I do not save it anywhere. Reloading the page clears it.',
+          'I only need your name and your e-mail address, so that I can reply.',
+        ],
+      },
+      fields: {
+        name: { label: 'Your name', hint: 'A first name is enough.' },
+        email: { label: 'Email address', hint: 'This is where I will reply.' },
+        kind: {
+          label: 'What would you like to talk about?',
+          options: {
+            job: 'A job opportunity',
+            collaboration: 'Collaboration',
+            project: 'A web development project',
+            other: 'Something else',
+          },
+        },
+        subject: { label: 'Subject', hint: 'A few words on what it is about.' },
+        message: {
+          label: 'Message',
+          hint: 'Tell me what you have in mind. A few sentences are enough.',
+          count: '{count} / {max}',
+        },
+        consent: {
+          label: 'I understand that the details I give will be used to answer this message.',
+          privacy: 'Privacy notice',
+          pending: 'The privacy notice path is not set yet: src/config/site.ts',
+        },
+      },
+      subjects: {
+        job: 'A professional opportunity',
+        collaboration: 'Collaboration',
+        project: 'A web development project',
+      },
+      errors: {
+        required: {
+          name: 'Enter your name.',
+          email: 'Enter your email address so I can reply.',
+          kind: 'Choose what you would like to talk about.',
+          subject: 'Write a short subject.',
+          message: 'Write a few words in the message.',
+        },
+        tooShort: 'At least {min} characters are needed here.',
+        tooLong: 'No more than {max} characters.',
+        invalidEmail: 'That does not look like a valid email address. Check that it has an @ sign followed by a domain.',
+        consentRequired: 'You need to tick this to send the message.',
+      },
+      actions: {
+        send: 'Send message',
+        prepare: 'Prepare summary',
+        sending: 'Sending…',
+      },
+      summary: {
+        title: 'Contact',
+        heading: 'Summary',
+        empty: '—',
+        labels: {
+          kind: 'Topic',
+          subject: 'Subject',
+          message: 'Message',
+          name: 'Name',
+          email: 'Email',
+          language: 'Language',
+        },
+      },
+      unavailable: {
+        notice:
+          'Online sending is not connected yet. You can fill in the form, but the message cannot leave this page right now: at the end you can copy the summary.',
+        title: 'The message was not sent',
+        text: 'Online sending is not set up yet, so nothing has been sent. Your message is still here: copy the summary and send it another way.',
+        copy: 'Copy summary',
+        copied: 'The summary is on your clipboard.',
+        copyFailed: 'Copying did not work. Select the text below and copy it by hand.',
+        mail: 'Open as an email draft',
+        mailNote: 'Your email app opens with a draft; it is only sent when you send it there.',
+        subject: 'Contact',
+      },
+      failed: {
+        title: 'Sending did not work',
+        network: 'I could not reach the service. Your message is still here; check your connection and try again.',
+        timeout:
+          'Sending took too long, so I cannot tell whether it arrived. Your message is still here; try again later.',
+        rejected: 'The service did not accept the message. Your message is still here; try again later.',
+      },
+      sent: {
+        title: 'Sent',
+        text: 'Your message has been sent. I will reply at the email address you gave.',
+        again: 'New message',
+      },
+    },
+    links: {
+      title: 'Other ways to reach me',
     },
   },
   project: {

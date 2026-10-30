@@ -22,20 +22,35 @@ const ProjectPage = lazy(() => import('./pages/ProjectPage').then((module) => ({
 // it is a chunk of its own too: the home page does not pay for it.
 const ServicesPage = lazy(() => import('./pages/ServicesPage').then((module) => ({ default: module.ServicesPage })))
 
+// The About and Contact pages are chunks of their own too: the story, the skills and the two forms
+// load when one of them is opened.
+const AboutPage = lazy(() => import('./pages/AboutPage').then((module) => ({ default: module.AboutPage })))
+const ContactPage = lazy(() => import('./pages/ContactPage').then((module) => ({ default: module.ContactPage })))
+
+const PageFallback = () => <div style={{ minHeight: '70svh' }} aria-hidden="true" />
+
 // What renders at each registered page. Paths and languages live in routes/pages.ts.
-// Work, About, Lab and Contact are placeholders until their pages are built; a project's
+// Work and Lab are placeholders until their pages are built; a project's
 // details page is the same component for every project, fed by content/projectDetails.
 const PAGE_ELEMENTS: Record<NavPageId | 'designSystem', ReactElement | null> = {
   home: <HomePage />,
   work: <PlaceholderPage pageId="work" />,
   services: (
-    <Suspense fallback={<div style={{ minHeight: '70svh' }} aria-hidden="true" />}>
+    <Suspense fallback={<PageFallback />}>
       <ServicesPage />
     </Suspense>
   ),
-  about: <PlaceholderPage pageId="about" />,
+  about: (
+    <Suspense fallback={<PageFallback />}>
+      <AboutPage />
+    </Suspense>
+  ),
   lab: <PlaceholderPage pageId="lab" />,
-  contact: <PlaceholderPage pageId="contact" />,
+  contact: (
+    <Suspense fallback={<PageFallback />}>
+      <ContactPage />
+    </Suspense>
+  ),
   designSystem: DesignSystemPage && (
     <Suspense fallback={null}>
       <DesignSystemPage />
@@ -47,7 +62,7 @@ function elementFor(page: PageDef): ReactElement | null {
   const project = projectIdOfPage(page.id)
   if (project) {
     return (
-      <Suspense fallback={<div style={{ minHeight: '70svh' }} aria-hidden="true" />}>
+      <Suspense fallback={<PageFallback />}>
         <ProjectPage projectId={project} />
       </Suspense>
     )

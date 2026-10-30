@@ -1,0 +1,9 @@
+/* The doors sit under the headline; the hero's own spacing does the rest. */
+.doors {
+  min-width: 0;
+
+  /* PathDoors brings its own top margin for a section; here the hero's gap is enough. */
+  > div {
+    margin-top: 0;
+  }
+}

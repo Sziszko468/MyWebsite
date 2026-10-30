@@ -1,0 +1,120 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * Four groups of different widths, so the band is not a table: Frontend wide, Backend narrow, then
+ * Database narrow and Tools wide, the second row stepping lower. Under `lg` they stack.
+ */
+.groups {
+  display: grid;
+  gap: var(--space-7);
+  margin-top: var(--space-8);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-6);
+    row-gap: var(--space-8);
+    align-items: start;
+    margin-top: var(--space-9);
+  }
+}
+
+.slot {
+  min-width: 0;
+
+  @include m.up('lg') {
+    &:nth-child(1) {
+      grid-column: 1 / span 7;
+    }
+
+    &:nth-child(2) {
+      grid-column: 8 / span 5;
+      margin-top: var(--space-8);
+    }
+
+    &:nth-child(3) {
+      grid-column: 1 / span 5;
+    }
+
+    &:nth-child(4) {
+      grid-column: 6 / span 7;
+      margin-top: var(--space-7);
+    }
+  }
+}
+
+.group {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 3px solid var(--color-border-strong);
+
+  &[data-group='frontend'] {
+    border-top-color: var(--color-accent);
+  }
+}
+
+.groupTitle {
+  font-size: var(--fs-xl);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.skill {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  max-width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+
+  @include m.hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+}
+
+.name {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.level {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.note {
+  max-width: 40rem;
+  margin-top: var(--space-8);
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skill {
+    transform: none !important;
+  }
+}

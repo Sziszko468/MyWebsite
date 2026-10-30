@@ -58,6 +58,8 @@ export type FieldId = keyof QuoteDraft
 
 /** What the form sends. Optional answers that were left empty are `null`, not empty strings. */
 export interface QuoteRequest {
+  /** Which of the site's forms this is, so one handler can tell a quote request from a contact message. */
+  form: 'quote'
   language: Language
   projectType: ProjectTypeId
   package: PackageChoice

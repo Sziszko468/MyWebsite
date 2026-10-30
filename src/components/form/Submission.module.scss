@@ -1,0 +1,94 @@
+/* Said before the first question, so nobody fills in a form that cannot send without knowing it. */
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+/* A result that is not a success. */
+.panel {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-left: 4px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg-subtle);
+  line-height: var(--lh-normal);
+
+  &[data-tone='error'] {
+    border-color: var(--color-accent-text);
+  }
+}
+
+.panelTitle,
+.sentTitle {
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.panelTitle {
+  font-size: var(--fs-md);
+}
+
+.summaryLabel {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.summaryText {
+  width: 100%;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  resize: vertical;
+}
+
+.panelActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.copyState {
+  min-height: 1.5em;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.small {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+/* The confirmation, shown in place of the form. */
+.sent {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+}
+
+.sentTitle {
+  font-size: var(--fs-xl);
+  overflow-wrap: anywhere;
+}

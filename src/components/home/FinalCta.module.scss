@@ -52,7 +52,9 @@
 }
 
 .title {
-  max-width: 11ch;
+  /* Wide enough for the longest word in any language set in expanded capitals (MARADANDÓT., VALÓSÍTSUK,
+     REALISEREN.): they must fit on one line, from a 320 px phone to a wide desktop. */
+  max-width: 16ch;
   /* The longest word in any language (REALISEREN.) must fit a 320 px screen on one line. */
   font-size: clamp(1.9rem, 9.2vw, 10rem);
   font-stretch: var(--fstretch-expanded);

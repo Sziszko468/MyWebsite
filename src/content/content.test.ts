@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { LANGUAGES } from '../i18n/config'
 import { dictionaries } from '../i18n/dictionaries'
 import { findPage } from '../routes/pages'
-import { aboutProfile, localize, siteStack } from './about'
+import { siteStack } from './about'
 import { experiments } from './lab'
 import { offerings } from './offerings'
 import { packages } from './packages'
@@ -134,15 +134,7 @@ describe('packages', () => {
   })
 })
 
-describe('the About section', () => {
-  it('invents nothing personal: story, experience, education and skills start empty', () => {
-    // These are the owner's to fill in. If you add some, update this test to say what you added.
-    expect(aboutProfile.story).toEqual([])
-    expect(aboutProfile.experience).toEqual([])
-    expect(aboutProfile.education).toEqual([])
-    expect(aboutProfile.skills).toEqual([])
-  })
-
+describe('the home page’s About section', () => {
   it('has three words in every language, the same number each', () => {
     for (const lang of LANGUAGES) expect(dictionaries[lang].home.about.principles).toHaveLength(3)
   })
@@ -151,8 +143,8 @@ describe('the About section', () => {
     expect(new Set(siteStack).size).toBe(siteStack.length)
   })
 
-  it('picks a language and falls back to Hungarian', () => {
-    expect(localize({ hu: 'szia', en: 'hello' }, 'en')).toBe('hello')
-    expect(localize({ hu: 'szia', en: 'hello' }, 'nl')).toBe('szia')
+  it('leaves the story, the way of working and the skills to the About page, and says where to find it', () => {
+    for (const lang of LANGUAGES) expect(dictionaries[lang].home.about.more.trim(), lang).not.toBe('')
+    expect(findPage('/about')?.id).toBe('about')
   })
 })

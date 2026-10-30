@@ -1,0 +1,45 @@
+.depth0,
+.depth1,
+.depth2 {
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.depth0 {
+  transform: translate(calc(var(--px, 0) * -6px), calc(var(--py, 0) * -4px));
+}
+
+.depth1 {
+  transform: translate(calc(var(--px, 0) * 3px), calc(var(--py, 0) * 2px));
+}
+
+.depth2 {
+  transform: translate(calc(var(--px, 0) * 12px), calc(var(--py, 0) * 8px));
+}
+
+:global([data-pointer='active']) {
+  .depth0,
+  .depth1,
+  .depth2 {
+    transition-duration: var(--dur-fast);
+  }
+}
+
+.ink {
+  stroke: color-mix(in srgb, var(--color-text) 22%, transparent);
+}
+
+.red {
+  stroke: var(--brand-red);
+}
+
+.blue {
+  stroke: var(--brand-blue);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .depth0,
+  .depth1,
+  .depth2 {
+    transform: none;
+  }
+}

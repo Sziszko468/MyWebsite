@@ -113,6 +113,7 @@ const orNull = (value: string): string | null => value.trim() || null
 export function toRequest(draft: QuoteDraft, language: Language): QuoteRequest {
   if (!draft.projectType || !draft.package) throw new Error('toRequest: the draft is not complete')
   return {
+    form: 'quote',
     language,
     projectType: draft.projectType,
     package: draft.package,

@@ -1,0 +1,64 @@
+@use '../../styles/mixins' as m;
+
+.links {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: var(--border-width) solid var(--color-border-strong);
+
+  ul {
+    display: grid;
+  }
+
+  li {
+    border-bottom: var(--border-width) solid var(--color-divider);
+  }
+}
+
+.title {
+  font-size: var(--fs-sm);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 3.25rem;
+  padding-block: var(--space-2);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    color: var(--color-accent-text);
+
+    .arrow {
+      transform: translateX(0.25em);
+    }
+  }
+}
+
+.arrow {
+  flex: none;
+  color: var(--color-accent-text);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.pending {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-style: italic;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link .arrow {
+    transform: none !important;
+  }
+}

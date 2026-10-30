@@ -1,4 +1,4 @@
-import { normalizeEndpoint } from '../quote/submit'
+import { normalizeEndpoint } from '../forms/submit'
 
 /**
  * How the quote request form behaves. Everything the owner has to decide before the form can send

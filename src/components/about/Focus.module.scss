@@ -1,0 +1,71 @@
+@use '../../styles/mixins' as m;
+
+.list {
+  margin-top: var(--space-8);
+  border-top: var(--border-width) solid var(--color-border-strong);
+
+  @include m.up('lg') {
+    margin-top: var(--space-9);
+  }
+
+  > li {
+    border-bottom: var(--border-width) solid var(--color-border-strong);
+  }
+}
+
+/* The title takes the width, the sentence sits beside it from `lg`; a line that is pointed at moves in a little. */
+.row {
+  /* The title sizes itself to the room it has, so the longest one in any language fits. */
+  container-type: inline-size;
+
+  display: grid;
+  gap: var(--space-2) var(--space-5);
+  padding-block: var(--space-5);
+  transition: padding-left var(--dur-base) var(--ease-out);
+
+  @include m.up('lg') {
+    grid-template-columns: 3rem minmax(0, 7fr) minmax(0, 5fr);
+    align-items: baseline;
+    padding-block: var(--space-6);
+  }
+
+  @include m.hover {
+    padding-left: var(--space-4);
+
+    .number {
+      color: var(--color-accent-text);
+    }
+  }
+}
+
+.number {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.title {
+  /* "WEBAPPLICATIES" is fourteen wide capitals: it has to fit its column at 1024 px. */
+  font-size: clamp(1.3rem, 5.4cqw, 2.5rem);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.text {
+  max-width: 34rem;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    padding-left: 0 !important;
+  }
+}

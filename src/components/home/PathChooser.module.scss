@@ -111,6 +111,7 @@
 
 .careerTitle {
   max-width: 14ch;
+  overflow-wrap: anywhere;
   font-size: var(--fs-2xl);
   font-weight: var(--fw-black);
   letter-spacing: -0.035em;
@@ -192,6 +193,24 @@
   }
 }
 
+/* A title that is a whole sentence (the contact page): smaller, as wide as the door, breaking inside a long word if it must. */
+.career[data-size='long'] .careerTitle {
+  max-width: none;
+  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
+  hyphens: auto;
+}
+
+.clients[data-size='long'] .clientsTitle {
+  max-width: none;
+  /* "WEBALKALMAZÁS" is thirteen wide capitals: it has to fit one line in a door on the narrowest phone. */
+  font-size: clamp(1.2rem, 0.5rem + 3.6vw, 2rem);
+  hyphens: auto;
+
+  @include m.up('md') {
+    font-size: clamp(1.6rem, 1rem + 2.2vw, 3rem);
+  }
+}
+
 /* ── B · Clients: carbon, wide, a red streak that leans after the pointer ── */
 
 .clients {
@@ -208,12 +227,18 @@
 
 .clientsTitle {
   max-width: 15ch;
-  font-size: clamp(2rem, 1.2rem + 3.2vw, 4rem);
+  overflow-wrap: anywhere;
+  /* The longest words (VALÓSÍTSUK, REALISEREN.) are ten and eleven wide capitals: on a phone they have to fit the door. */
+  font-size: clamp(1.7rem, 0.9rem + 4.2vw, 2.4rem);
   font-stretch: var(--fstretch-expanded);
   font-weight: var(--fw-black);
   letter-spacing: -0.04em;
   line-height: 0.96;
   text-transform: uppercase;
+
+  @include m.up('md') {
+    font-size: clamp(2rem, 1.2rem + 3.2vw, 4rem);
+  }
 }
 
 .clientsText {

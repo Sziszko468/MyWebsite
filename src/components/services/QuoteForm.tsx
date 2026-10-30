@@ -1,11 +1,11 @@
-import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode, type RefObject } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { packages } from '../../content/packages'
 import { quoteConfig } from '../../config/quote'
 import { siteConfig } from '../../config/site'
+import { createTransport, type Transport } from '../../forms/submit'
 import { useI18n } from '../../i18n/useI18n'
 import { errorText } from '../../quote/messages'
-import { buildSummary, mailtoHref, packageLabel, summaryRows, type QuoteText } from '../../quote/summary'
-import { createTransport, type QuoteTransport } from '../../quote/submit'
+import { buildSummary, packageLabel, summaryRows, type QuoteText } from '../../quote/summary'
 import {
   PACKAGE_CHOICES,
   PROJECT_TYPES,
@@ -13,13 +13,16 @@ import {
   TIMINGS,
   type FieldId,
   type QuoteDraft,
+  type QuoteRequest,
   type StepId,
 } from '../../quote/types'
 import type { QuoteDraftApi } from '../../quote/useQuoteDraft'
 import { LIMITS, firstInvalidStep, toRequest, validateStep } from '../../quote/validation'
 import { fill } from '../../utils/format'
 import { Button } from '../Button/Button'
-import { ChoiceGroup, CheckboxField, SelectField, TextField } from '../form/fields'
+import { ChoiceGroup, CheckboxField, FIRST_INVALID, SelectField, TextField } from '../form/fields'
+import { SentPanel, SubmissionNotice, SubmissionResult } from '../form/Submission'
+import { useSubmission } from '../form/useSubmission'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
 import { QuoteSteps } from './QuoteSteps'
 import styles from './QuoteForm.module.scss'
@@ -27,24 +30,13 @@ import styles from './QuoteForm.module.scss'
 // A muted note that shows where a missing piece goes: development only, nothing in production.
 const SHOW_PENDING = import.meta.env.DEV
 
-type Phase =
-  | { kind: 'editing' }
-  | { kind: 'sending' }
-  | { kind: 'failed'; reason: 'network' | 'timeout' | 'rejected' }
-  | { kind: 'unavailable' }
-  | { kind: 'sent' }
-
 interface QuoteFormProps {
   draft: QuoteDraft
   onChange: QuoteDraftApi['set']
   onReset: () => void
   /** Replaces the configured transport; used by tests and previews. */
-  transport?: QuoteTransport
+  transport?: Transport<QuoteRequest>
 }
-
-/** Where focus goes when a step is not acceptable: the first control that says it is invalid. */
-const FIRST_INVALID =
-  'input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="true"], fieldset[data-invalid="true"] input'
 
 /**
  * The quote request: seven questions in four steps. The answers live in the draft the page keeps
@@ -61,14 +53,13 @@ export function QuoteForm({ draft, onChange, onReset, transport: given }: QuoteF
   const q = t.servicesPage.quote
   const formId = useId()
 
-  const transport = useMemo(() => given ?? createTransport(quoteConfig.endpoint), [given])
+  const transport = useMemo(() => given ?? createTransport<QuoteRequest>(quoteConfig.endpoint), [given])
+  const submission = useSubmission(transport)
   const options = { requireConsent: quoteConfig.requireConsent }
 
   const [stepIndex, setStepIndex] = useState(0)
   const [tried, setTried] = useState<ReadonlySet<StepId>>(() => new Set())
   const [attempts, setAttempts] = useState(0)
-  const [phase, setPhase] = useState<Phase>({ kind: 'editing' })
-  const [copy, setCopy] = useState<'idle' | 'copied' | 'failed'>('idle')
 
   const step = STEPS[stepIndex]
   const isLast = stepIndex === STEPS.length - 1
@@ -77,8 +68,6 @@ export function QuoteForm({ draft, onChange, onReset, transport: given }: QuoteF
 
   const formRef = useRef<HTMLFormElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
-  const panelRef = useRef<HTMLHeadingElement>(null)
-  const sentRef = useRef<HTMLHeadingElement>(null)
   const movedRef = useRef(false)
 
   // A new step starts at its heading, so a keyboard or screen-reader user lands where the questions are.
@@ -93,16 +82,9 @@ export function QuoteForm({ draft, onChange, onReset, transport: given }: QuoteF
     formRef.current?.querySelector<HTMLElement>(FIRST_INVALID)?.focus()
   }, [attempts])
 
-  // A result (not sent, or sent) is announced by moving focus to its heading.
-  useEffect(() => {
-    if (phase.kind === 'sent') sentRef.current?.focus()
-    else if (phase.kind === 'failed' || phase.kind === 'unavailable') panelRef.current?.focus()
-  }, [phase.kind])
-
   const goTo = (index: number) => {
     movedRef.current = true
-    setPhase({ kind: 'editing' })
-    setCopy('idle')
+    submission.reset()
     setStepIndex(index)
   }
 
@@ -126,26 +108,12 @@ export function QuoteForm({ draft, onChange, onReset, transport: given }: QuoteF
       setAttempts((count) => count + 1)
       return
     }
-    if (transport.id === 'none') {
-      setPhase({ kind: 'unavailable' })
-      return
-    }
-
-    setPhase({ kind: 'sending' })
-    const outcome = await transport.submit(toRequest(draft, lang))
-    if (outcome.status === 'sent') {
-      onReset()
-      setPhase({ kind: 'sent' })
-    } else if (outcome.status === 'unavailable') {
-      setPhase({ kind: 'unavailable' })
-    } else {
-      setPhase({ kind: 'failed', reason: outcome.reason })
-    }
+    await submission.submit(toRequest(draft, lang), onReset)
   }
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault()
-    if (phase.kind === 'sending') return
+    if (submission.sending) return
     if (isLast) void send()
     else next()
   }
@@ -155,47 +123,24 @@ export function QuoteForm({ draft, onChange, onReset, transport: given }: QuoteF
     setAttempts(0)
     movedRef.current = true
     setStepIndex(0)
-    setCopy('idle')
-    setPhase({ kind: 'editing' })
+    submission.reset()
   }
 
-  if (phase.kind === 'sent') {
+  if (submission.phase.kind === 'sent') {
     return (
       <div className={styles.card}>
-        <div className={styles.sent} role="status">
-          <h3 ref={sentRef} tabIndex={-1} className={styles.stepTitle}>
-            {q.sent.title}
-          </h3>
-          <p>{q.sent.text}</p>
-          <Button type="button" variant="secondary" onClick={startAgain}>
-            {q.sent.again}
-          </Button>
-        </div>
+        <SentPanel title={q.sent.title} text={q.sent.text} again={q.sent.again} onAgain={startAgain} headingRef={submission.sentRef} />
       </div>
     )
   }
 
   const privacyPath = siteConfig.legal.find((entry) => entry.id === 'privacy')?.path ?? null
-  const sending = phase.kind === 'sending'
+  const sending = submission.sending
   const summary = buildSummary(draft, lang, q)
-  const email = siteConfig.contact.email
-
-  const copySummary = async () => {
-    try {
-      await navigator.clipboard.writeText(summary)
-      setCopy('copied')
-    } catch {
-      setCopy('failed')
-    }
-  }
 
   return (
     <div className={styles.card}>
-      {transport.id === 'none' && (
-        <p className={styles.notice} role="note">
-          {q.unavailable.notice}
-        </p>
-      )}
+      {transport.id === 'none' && <SubmissionNotice>{q.unavailable.notice}</SubmissionNotice>}
 
       <QuoteSteps current={stepIndex} onGoTo={goTo} />
 
@@ -333,42 +278,12 @@ export function QuoteForm({ draft, onChange, onReset, transport: given }: QuoteF
           )}
         </div>
 
-        {phase.kind === 'failed' && (
-          <Panel tone="error" title={q.failed.title} headingRef={panelRef}>
-            <p>{q.failed[phase.reason]}</p>
-          </Panel>
-        )}
-
-        {phase.kind === 'unavailable' && (
-          <Panel tone="info" title={q.unavailable.title} headingRef={panelRef}>
-            <p>{q.unavailable.text}</p>
-            <label className={styles.summaryLabel}>
-              <span>{q.summary.heading}</span>
-              <textarea
-                readOnly
-                className={styles.summaryText}
-                rows={Math.min(14, summary.split('\n').length + 1)}
-                value={summary}
-                onFocus={(event) => event.currentTarget.select()}
-              />
-            </label>
-            <div className={styles.panelActions}>
-              <Button type="button" variant="secondary" onClick={() => void copySummary()}>
-                {q.unavailable.copy}
-              </Button>
-              {email && (
-                <Button href={mailtoHref(email, q.unavailable.subject, summary)} variant="secondary">
-                  {q.unavailable.mail}
-                </Button>
-              )}
-            </div>
-            <p role="status" className={styles.copyState}>
-              {copy === 'copied' && q.unavailable.copied}
-              {copy === 'failed' && q.unavailable.copyFailed}
-            </p>
-            {email && <p className={styles.small}>{q.unavailable.mailNote}</p>}
-          </Panel>
-        )}
+        <SubmissionResult
+          phase={submission.phase}
+          text={{ failed: q.failed, unavailable: q.unavailable, summaryLabel: q.summary.heading }}
+          summary={summary}
+          headingRef={submission.panelRef}
+        />
 
         <div className={styles.actions}>
           {stepIndex > 0 && (
@@ -399,27 +314,6 @@ function Review({ draft, q }: { draft: QuoteDraft; q: QuoteText }) {
           </div>
         ))}
       </dl>
-    </section>
-  )
-}
-
-function Panel({
-  tone,
-  title,
-  headingRef,
-  children,
-}: {
-  tone: 'error' | 'info'
-  title: string
-  headingRef: RefObject<HTMLHeadingElement | null>
-  children: ReactNode
-}) {
-  return (
-    <section className={styles.panel} data-tone={tone}>
-      <h4 ref={headingRef} tabIndex={-1} className={styles.panelTitle}>
-        {title}
-      </h4>
-      {children}
     </section>
   )
 }

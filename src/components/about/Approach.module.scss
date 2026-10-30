@@ -1,0 +1,157 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The chain's step size is the width of the field (cqw), so the words, the stagger and the elbow
+ * lines all scale together from a laptop to a wide desktop.
+ */
+.field {
+  container-type: inline-size;
+  margin-top: var(--space-8);
+
+  @include m.up('lg') {
+    margin-top: var(--space-9);
+  }
+}
+
+.chain {
+  display: grid;
+  gap: var(--space-7);
+  padding-left: var(--space-5);
+  border-left: 3px solid var(--color-divider);
+
+  @include m.up('lg') {
+    gap: var(--space-6);
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+.step {
+  position: relative;
+  min-width: 0;
+
+  /* A stop on the line. */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0.75rem;
+    left: calc(var(--space-5) * -1 - 7px);
+    width: 11px;
+    height: 11px;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-accent);
+  }
+
+  @include m.up('lg') {
+    margin-left: calc(var(--i) * 7cqw);
+
+    &::before {
+      display: none;
+    }
+
+    /* The elbow: down from where the step above began, then across to where this one begins. */
+    & + &::before {
+      display: block;
+      top: calc(var(--space-6) * -1);
+      left: calc(-7cqw + 1.5rem);
+      width: calc(7cqw - 1.5rem);
+      height: var(--space-6);
+      border-radius: 0;
+      border-bottom: 3px solid var(--color-accent);
+      border-left: 3px solid var(--color-accent);
+      background: none;
+    }
+  }
+}
+
+.number {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-accent-text);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+}
+
+/* The name is drawn in outline with a faint fill; each principle keeps its own line colour. */
+.word {
+  --_line: var(--color-text);
+
+  width: fit-content;
+  max-width: 100%;
+  padding-block: 0.05em 0.12em;
+  background-image: linear-gradient(color-mix(in srgb, var(--_line) 10%, transparent), color-mix(in srgb, var(--_line) 10%, transparent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* "UNDERSTAND" is ten wide capitals: it has to fit one line on the narrowest phone. */
+  font-size: clamp(1.6rem, 10.5cqw, 6.5rem);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px var(--_line);
+
+  @include m.up('lg') {
+    font-size: clamp(2.2rem, 8.5cqw, 6.5rem);
+    -webkit-text-stroke-width: 2px;
+  }
+
+  .step[data-step='design'] & {
+    --_line: var(--color-secondary-text);
+  }
+
+  .step[data-step='build'] & {
+    --_line: var(--color-accent-text);
+  }
+}
+
+.text {
+  max-width: 28rem;
+  margin-top: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+}
+
+/* The last step leads back to the first. */
+.loop {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: 38rem;
+  margin-top: var(--space-7);
+  padding-left: var(--space-5);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+
+  svg {
+    flex: none;
+    margin-top: 0.2em;
+    color: var(--color-accent-text);
+  }
+
+  @include m.up('lg') {
+    margin-top: var(--space-8);
+    padding-left: 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .word {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+
+  .step::before {
+    forced-color-adjust: none;
+    background-color: Highlight;
+  }
+}

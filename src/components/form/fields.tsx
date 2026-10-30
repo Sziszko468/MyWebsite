@@ -8,6 +8,10 @@ import styles from './Form.module.scss'
  * control says so (aria-invalid), and an error is a sentence with an icon, never only a colour.
  */
 
+/** Where focus goes when a form is not acceptable: the first control that says it is invalid, in page order. */
+export const FIRST_INVALID =
+  'input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="true"], fieldset[data-invalid="true"] input'
+
 const join = (...ids: Array<string | false | undefined>) => ids.filter(Boolean).join(' ') || undefined
 
 function ErrorMessage({ id, children }: { id: string; children: ReactNode }) {

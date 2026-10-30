@@ -1,0 +1,178 @@
+@use '../../styles/mixins' as m;
+
+.layout {
+  display: grid;
+  gap: var(--space-7);
+  margin-top: var(--space-8);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-6);
+    align-items: start;
+    margin-top: var(--space-9);
+  }
+}
+
+.paragraphs {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+
+  p {
+    max-width: 40rem;
+    color: var(--color-text-secondary);
+  }
+
+  /* The first paragraph is the one that says it. */
+  p:first-child {
+    color: var(--color-text);
+    font-size: var(--fs-lg);
+  }
+
+  @include m.up('lg') {
+    grid-column: 1 / span 6;
+  }
+}
+
+/* The thought sits lower and further right: the two columns do not line up. */
+.thoughtSlot {
+  min-width: 0;
+
+  @include m.up('lg') {
+    grid-column: 8 / span 5;
+    padding-top: var(--space-9);
+  }
+}
+
+.thought {
+  padding-left: var(--space-5);
+  border-left: 4px solid var(--color-accent);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-snug);
+  text-wrap: balance;
+}
+
+/* ── What carried over ─────────────────────────────────────────────── */
+
+.bridge {
+  margin-top: var(--space-9);
+  padding-top: var(--space-7);
+  border-top: var(--border-width) solid var(--color-border-strong);
+
+  @include m.up('lg') {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-6);
+    margin-top: calc(var(--space-9) + var(--space-5));
+  }
+
+  > :first-child {
+    @include m.up('lg') {
+      grid-column: 1 / span 4;
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-5));
+      align-self: start;
+    }
+  }
+}
+
+.bridgeTitle {
+  font-size: var(--fs-2xl);
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+.bridgeIntro {
+  max-width: 30rem;
+  margin-top: var(--space-3);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+/* From one field to the other. The labels may wrap between words, never inside one. */
+.ends {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+
+  span:last-child {
+    color: var(--color-accent-text);
+  }
+}
+
+.endsLine {
+  flex: 1 1 1.5rem;
+  min-width: 1.5rem;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-border-strong), var(--color-accent));
+}
+
+.skills {
+  display: grid;
+  gap: var(--space-6) var(--space-6);
+  margin-top: var(--space-7);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    grid-column: 5 / span 8;
+    margin-top: 0;
+  }
+}
+
+.skill {
+  min-width: 0;
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-divider);
+
+  /* Every second one is lower: the seven read as a path, not as a table. */
+  @include m.up('md') {
+    &:nth-child(even) {
+      margin-top: var(--space-7);
+    }
+  }
+}
+
+.number {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: transparent;
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-black);
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
+  -webkit-text-stroke: 1px var(--color-accent-text);
+}
+
+.skillName {
+  margin-bottom: var(--space-2);
+  font-size: var(--fs-lg);
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+.skillText {
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+@media (forced-colors: active) {
+  .number {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+}

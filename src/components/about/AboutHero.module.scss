@@ -1,0 +1,49 @@
+@use '../../styles/mixins' as m;
+
+/* From `lg` the second line steps in from the left, so the headline is not a flush block. */
+.step {
+  @include m.up('lg') {
+    padding-left: 9cqw;
+  }
+}
+
+/*
+ * The line is drawn in outline with a faint fill. A mouse over it lights a red disc inside the
+ * letters at the pointer; at rest the disc is out of sight and the outline is the whole line.
+ */
+.kinetic {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding-block: 0.05em 0.12em;
+  background-image:
+    radial-gradient(circle 11rem at var(--mx, -100%) var(--my, -100%), var(--color-accent) 0%, transparent 100%),
+    linear-gradient(color-mix(in srgb, var(--color-text) 10%, transparent), color-mix(in srgb, var(--color-text) 10%, transparent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px var(--color-text);
+
+  @include m.up('md') {
+    -webkit-text-stroke-width: 2px;
+  }
+}
+
+@media (forced-colors: active) {
+  .kinetic {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    -webkit-text-stroke: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kinetic {
+    background-image: linear-gradient(
+      color-mix(in srgb, var(--color-text) 10%, transparent),
+      color-mix(in srgb, var(--color-text) 10%, transparent)
+    );
+  }
+}

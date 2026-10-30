@@ -238,7 +238,7 @@ export const hu = {
         },
         tooShort: 'Legalább {min} karakter kell ide.',
         tooLong: 'Legfeljebb {max} karakter lehet.',
-        invalidEmail: 'Ez nem tűnik érvényes e-mail-címnek. A formátum: nev@domain.hu',
+        invalidEmail: 'Ez nem tűnik érvényes e-mail-címnek. Nézd meg, hogy van-e benne @ jel, és utána egy tartomány.',
         invalidPhone: 'Számokat, szóközt és a + ( ) - . / jeleket használhatsz, legalább 6 számjeggyel.',
         consentRequired: 'A küldéshez ezt be kell jelölnöd.',
       },
@@ -380,10 +380,7 @@ export const hu = {
       principlesLabel: 'Három szó, amelyek a célt összefoglalják',
       stackHeading: 'Ezzel épült ez az oldal',
       stackNote: 'Az eszközök ennek az oldalnak a forráskódjából származnak.',
-      storyHeading: 'Történet',
-      experienceHeading: 'Tapasztalat',
-      educationHeading: 'Tanulmányok',
-      skillsHeading: 'Készségek',
+      more: 'Többet rólam',
     },
     lab: {
       title: 'A Lab',
@@ -415,6 +412,168 @@ export const hu = {
       text: 'Mesélj az ötletedről, és nézzük meg, hogyan válhat belőle működő digitális élmény.',
       cta: 'Beszéljünk a projektedről',
       emailLead: 'Vagy írj közvetlenül:',
+    },
+  },
+  aboutPage: {
+    meta: {
+      title: 'Rólam és a munkamódszerem',
+      description:
+        'Logisztikából a szoftverfejlesztésbe: a történetem, a munkamódszerem, a technológiáim és a jelenlegi szakmai fókuszom.',
+    },
+    hero: {
+      titleLine1: 'Nem csak kódot írok.',
+      titleLine2: 'Digitális élményeket építek.',
+      lead: 'Hiszek abban, hogy a jó fejlesztés a technológia, a kreativitás és a problémamegoldó gondolkodás találkozásából születik.',
+      ctaPrimary: 'Nézd meg a munkáimat',
+      ctaSecondary: 'Lépj kapcsolatba velem',
+    },
+    story: {
+      fromLabel: 'Logisztika',
+      toLabel: 'Szoftverfejlesztés',
+      skillsTitle: 'Amit magammal vittem',
+      skillsIntro: 'Hét készség, amely az egyik területről a másikra átvihető, és ahogyan a fejlesztésben megjelenik.',
+    },
+    approach: {
+      title: 'Hogyan dolgozom',
+      intro: 'Négy alapelv, amelyek egymásba kapcsolódnak.',
+    },
+    skills: {
+      title: 'Technológiák',
+      intro: 'Az eszközök, amelyekkel dolgozom, csoportosítva.',
+      note: 'A lista az eszközöket sorolja fel, nem tudásszintet.',
+      levels: {
+        learning: 'Tanulom',
+        working: 'Dolgozom vele',
+        confident: 'Magabiztosan használom',
+      },
+    },
+    focus: {
+      title: 'Jelenlegi fókusz',
+      intro: 'Amire most a legtöbb figyelmet fordítom.',
+    },
+    final: {
+      title: 'Építsünk valami maradandót.',
+      text: 'Minden jó projekt egy beszélgetéssel kezdődik.',
+      cta: 'Kapcsolatfelvétel',
+    },
+  },
+  contactPage: {
+    meta: {
+      title: 'Kapcsolat',
+      description: 'Írj nekem szakmai lehetőségről, együttműködésről vagy webfejlesztési projektről.',
+    },
+    hero: {
+      title: 'Van egy jó ötleted?',
+      lead: 'Beszéljünk róla. Legyen szó egy új projektről, szakmai lehetőségről vagy együttműködésről, szívesen meghallgatom.',
+      doorsLabel: 'Válaszd ki, miről szeretnél beszélni',
+      employers: {
+        label: 'Munkáltatóknak',
+        title: 'Szakmai lehetőség, fejlesztői pozíció vagy csapatmunka.',
+        cta: 'Beszéljünk a lehetőségről',
+      },
+      clients: {
+        label: 'Ügyfeleknek',
+        title: 'Weboldal, webalkalmazás vagy egyedi digitális megoldás.',
+        cta: 'Indítsunk projektet',
+      },
+    },
+    form: {
+      title: 'Írj nekem',
+      intro: 'Pár sor is elég: a témát, a tárgyat és az üzenetet várom, és azt, hogyan válaszolhatok.',
+      aside: {
+        title: 'Tudnivalók',
+        items: [
+          'Amíg el nem küldöd, az üzeneted csak ezen az oldalon, a böngésző memóriájában van: sehová nem mentem el. Az oldal újratöltésekor elvész.',
+          'Csak a neved és az e-mail-címed kell, hogy válaszolhassak.',
+        ],
+      },
+      fields: {
+        name: { label: 'Neved', hint: 'A keresztneved is elég.' },
+        email: { label: 'E-mail-cím', hint: 'Erre válaszolok.' },
+        kind: {
+          label: 'Miről szeretnél beszélni?',
+          options: {
+            job: 'Álláslehetőség',
+            collaboration: 'Együttműködés',
+            project: 'Webfejlesztési projekt',
+            other: 'Egyéb',
+          },
+        },
+        subject: { label: 'Tárgy', hint: 'Néhány szó arról, miről van szó.' },
+        message: {
+          label: 'Üzenet',
+          hint: 'Írd le, miben gondolkodsz. Néhány mondat elég.',
+          count: '{count} / {max}',
+        },
+        consent: {
+          label: 'Tudomásul veszem, hogy a megadott adatokat az üzenet megválaszolásához használják fel.',
+          privacy: 'Adatkezelési tájékoztató',
+          pending: 'Az adatkezelési tájékoztató elérési útja még nincs megadva: src/config/site.ts',
+        },
+      },
+      subjects: {
+        job: 'Szakmai lehetőség',
+        collaboration: 'Együttműködés',
+        project: 'Webfejlesztési projekt',
+      },
+      errors: {
+        required: {
+          name: 'Add meg a neved.',
+          email: 'Add meg az e-mail-címed, hogy válaszolhassak.',
+          kind: 'Válaszd ki, miről szeretnél beszélni.',
+          subject: 'Írj egy rövid tárgyat.',
+          message: 'Írj néhány szót az üzenetben.',
+        },
+        tooShort: 'Legalább {min} karakter kell ide.',
+        tooLong: 'Legfeljebb {max} karakter lehet.',
+        invalidEmail: 'Ez nem tűnik érvényes e-mail-címnek. Nézd meg, hogy van-e benne @ jel, és utána egy tartomány.',
+        consentRequired: 'A küldéshez ezt be kell jelölnöd.',
+      },
+      actions: {
+        send: 'Üzenet elküldése',
+        prepare: 'Összegzés elkészítése',
+        sending: 'Küldés…',
+      },
+      summary: {
+        title: 'Kapcsolatfelvétel',
+        heading: 'Összegzés',
+        empty: '—',
+        labels: {
+          kind: 'Téma',
+          subject: 'Tárgy',
+          message: 'Üzenet',
+          name: 'Név',
+          email: 'E-mail',
+          language: 'Nyelv',
+        },
+      },
+      unavailable: {
+        notice:
+          'Az online beküldés még nincs bekötve. Kitöltheted az űrlapot, de az üzenet innen most nem tud elmenni: a végén az összegzést kimásolhatod.',
+        title: 'Az üzenet nem lett elküldve',
+        text: 'Az online beküldés még nincs beállítva, ezért semmi nem ment el. Az üzeneted itt maradt: másold ki az összegzést, és küldd el másik úton.',
+        copy: 'Összegzés másolása',
+        copied: 'Az összegzés a vágólapon van.',
+        copyFailed: 'A másolás nem sikerült. Jelöld ki és másold ki kézzel az alábbi szöveget.',
+        mail: 'Megnyitás e-mail-vázlatként',
+        mailNote: 'Megnyílik az e-mail-programod egy vázlattal; csak akkor megy el, ha ott elküldöd.',
+        subject: 'Kapcsolatfelvétel',
+      },
+      failed: {
+        title: 'Nem sikerült elküldeni',
+        network: 'Nem értem el a szolgáltatást. Az üzeneted itt maradt; ellenőrizd a kapcsolatot, és próbáld újra.',
+        timeout:
+          'A küldés túl sokáig tartott, ezért nem tudom, megérkezett-e. Az üzeneted itt maradt; próbáld újra később.',
+        rejected: 'A szolgáltatás nem fogadta el az üzenetet. Az üzeneted itt maradt; próbáld újra később.',
+      },
+      sent: {
+        title: 'Elküldve',
+        text: 'Az üzeneted elküldve. A megadott e-mail-címen válaszolok.',
+        again: 'Új üzenet',
+      },
+    },
+    links: {
+      title: 'Más módon is elérsz',
     },
   },
   project: {

@@ -1,8 +1,7 @@
-import type { QuoteRequest } from './types'
-
 /**
- * The one place that knows how a quote request leaves the browser. The form calls `submit` and
- * shows what comes back; it never assumes that a request was sent.
+ * The one place that knows how a form's request (the quote request, the contact message) leaves
+ * the browser. A form calls `submit` and shows what comes back; it never assumes that a request
+ * was sent.
  *
  * - With no endpoint configured, the transport is `none`: it sends nothing and says so
  *   (`unavailable`). The form then offers the summary to copy instead and never claims success.
@@ -19,9 +18,9 @@ export type SubmitOutcome =
   | { status: 'unavailable' }
   | { status: 'failed'; reason: 'network' | 'timeout' | 'rejected' }
 
-export interface QuoteTransport {
+export interface Transport<T extends object> {
   readonly id: 'none' | 'endpoint'
-  submit(request: QuoteRequest): Promise<SubmitOutcome>
+  submit(request: T): Promise<SubmitOutcome>
 }
 
 const LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\])$/
@@ -45,15 +44,15 @@ export function normalizeEndpoint(value: unknown, allowLocalHttp = false): strin
   return null
 }
 
-export const unavailableTransport: QuoteTransport = {
+export const unavailableTransport: Transport<object> = {
   id: 'none',
   submit: () => Promise.resolve({ status: 'unavailable' }),
 }
 
-export function endpointTransport(
+export function endpointTransport<T extends object>(
   endpoint: string,
   { fetchImpl = (...args) => fetch(...args), timeoutMs = 12000 }: { fetchImpl?: typeof fetch; timeoutMs?: number } = {},
-): QuoteTransport {
+): Transport<T> {
   return {
     id: 'endpoint',
     async submit(request) {
@@ -79,6 +78,6 @@ export function endpointTransport(
   }
 }
 
-export function createTransport(endpoint: string | null): QuoteTransport {
-  return endpoint ? endpointTransport(endpoint) : unavailableTransport
+export function createTransport<T extends object>(endpoint: string | null): Transport<T> {
+  return endpoint ? endpointTransport<T>(endpoint) : unavailableTransport
 }

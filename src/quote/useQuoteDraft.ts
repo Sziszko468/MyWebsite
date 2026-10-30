@@ -1,21 +1,12 @@
-import { useCallback, useState } from 'react'
-import { EMPTY_DRAFT, type FieldId, type QuoteDraft } from './types'
+import { useDraft } from '../forms/useDraft'
+import { EMPTY_DRAFT, type QuoteDraft } from './types'
 
 /**
- * The visitor's answers, held in memory for as long as the page is open: the package picker, the
- * service buttons and the form all read and write the same draft. Nothing is saved anywhere, so a
- * reload starts a blank form, which is the point: personal details never sit in storage.
+ * The quote request's answers (see forms/useDraft.ts): the package picker, the service buttons and
+ * the form all read and write the same draft.
  */
 export function useQuoteDraft(initial: Partial<QuoteDraft> = {}) {
-  const [draft, setDraft] = useState<QuoteDraft>(() => ({ ...EMPTY_DRAFT, ...initial }))
-
-  const set = useCallback(<K extends FieldId>(field: K, value: QuoteDraft[K]) => {
-    setDraft((current) => ({ ...current, [field]: value }))
-  }, [])
-
-  const reset = useCallback(() => setDraft(EMPTY_DRAFT), [])
-
-  return { draft, set, reset }
+  return useDraft(EMPTY_DRAFT, initial)
 }
 
 export type QuoteDraftApi = ReturnType<typeof useQuoteDraft>

@@ -91,17 +91,23 @@ describe('call to action targets', () => {
 
   it('send every route link to a page that exists, and its #fragment to a band that exists', () => {
     for (const [file, source] of Object.entries(sources)) {
-      for (const match of source.matchAll(/\bto="(\/[^"#]*)(?:#([^"]*))?"/g)) {
-        expect(routes, `${file}: to="${match[0]}"`).toContain(match[1])
-        if (match[2]) expect(sectionIds, `${file}: to="${match[0]}"`).toContain(match[2])
+      // A link as an attribute (to="/contact") or as a door's action ({ to: '/contact?for=clients' }),
+      // with an optional ?query and #fragment.
+      const links = [
+        ...source.matchAll(/\bto="(\/[^"#?]*)(?:\?[^"#]*)?(?:#([^"]*))?"/g),
+        ...source.matchAll(/\bto: '(\/[^'#?]*)(?:\?[^'#]*)?(?:#([^']*))?'/g),
+      ]
+      for (const match of links) {
+        expect(routes, `${file}: ${match[0]}`).toContain(match[1])
+        if (match[2]) expect(sectionIds, `${file}: ${match[0]}`).toContain(match[2])
       }
     }
   })
 
   it('send every in-page link to a section that exists', () => {
     for (const [file, source] of Object.entries(sources)) {
-      for (const match of source.matchAll(/\bhref="#([^"]+)"/g)) {
-        expect(sectionIds, `${file}: href="#${match[1]}"`).toContain(match[1])
+      for (const match of [...source.matchAll(/\bhref="#([^"]+)"/g), ...source.matchAll(/\bhref: '#([^']+)'/g)]) {
+        expect(sectionIds, `${file}: ${match[0]}`).toContain(match[1])
       }
     }
   })

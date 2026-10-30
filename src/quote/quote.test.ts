@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { LANGUAGES } from '../i18n/config'
 import { dictionaries } from '../i18n/dictionaries'
 import { errorText } from './messages'
-import { createTransport, endpointTransport, normalizeEndpoint, unavailableTransport } from './submit'
+import { createTransport, endpointTransport, normalizeEndpoint, unavailableTransport } from '../forms/submit'
 import { buildSummary, mailtoHref, packageLabel, summaryRows } from './summary'
 import {
   EMPTY_DRAFT,
@@ -164,6 +164,7 @@ describe('the whole form', () => {
       'nl',
     )
     expect(request).toEqual<QuoteRequest>({
+      form: 'quote',
       language: 'nl',
       projectType: 'webapp',
       package: 'build',
@@ -183,7 +184,7 @@ describe('the whole form', () => {
 
   it('never puts the consent box, or anything else that is not an answer, into the request', () => {
     expect(Object.keys(toRequest(valid, 'hu')).sort()).toEqual(
-      ['budget', 'description', 'email', 'language', 'name', 'package', 'phone', 'projectType', 'reference', 'timing'].sort(),
+      ['budget', 'description', 'email', 'form', 'language', 'name', 'package', 'phone', 'projectType', 'reference', 'timing'].sort(),
     )
   })
 })
@@ -310,8 +311,9 @@ describe('sending', () => {
     await expect(outcome).resolves.toEqual({ status: 'failed', reason: 'timeout' })
   })
 
-  it('is the only code in the quote module that talks to the network or to storage', async () => {
-    const files = import.meta.glob('./*.ts', { eager: true, query: '?raw', import: 'default' }) as Record<string, string>
+  it('is the only code in the form modules that talks to the network or to storage', async () => {
+    const files = import.meta.glob(['./*.ts', '../forms/*.ts', '../contact/*.ts'], { eager: true, query: '?raw', import: 'default' }) as Record<string, string>
+    expect(Object.keys(files).some((file) => file.endsWith('forms/submit.ts'))).toBe(true)
     for (const [file, source] of Object.entries(files)) {
       if (file.endsWith('.test.ts')) continue
       const body = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
