@@ -129,3 +129,53 @@
   fill: var(--brand-blue);
   stroke: var(--scene-bg);
 }
+
+.gridLine {
+  stroke: var(--scene-ink);
+  opacity: 0.22;
+}
+
+.faceTop {
+  fill: var(--brand-red);
+}
+
+.faceLeft {
+  fill: color-mix(in srgb, var(--brand-red) 62%, var(--scene-bg));
+}
+
+.faceRight {
+  fill: color-mix(in srgb, var(--brand-red) 38%, var(--scene-bg));
+}
+
+.verge {
+  stroke: color-mix(in srgb, var(--brand-graphite) 70%, var(--scene-bg));
+}
+
+.asphalt {
+  stroke: var(--brand-graphite);
+}
+
+.kerb {
+  stroke: var(--brand-red);
+}
+
+.redRing {
+  fill: color-mix(in srgb, var(--brand-red) 22%, transparent);
+  stroke: var(--brand-red);
+  stroke-width: 2;
+}
+
+.pointFill {
+  fill: var(--scene-bg);
+  stroke: var(--brand-blue);
+}
+
+.carBody {
+  filter: drop-shadow(0 6px 10px color-mix(in srgb, var(--brand-black) 50%, transparent));
+}
+
+.tyre {
+  fill: var(--brand-black);
+  stroke: var(--brand-graphite);
+  stroke-width: 4;
+}

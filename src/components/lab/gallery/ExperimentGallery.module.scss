@@ -25,6 +25,20 @@
   line-height: var(--lh-normal);
 }
 
+.headSecond {
+  margin-top: var(--space-10);
+  padding-top: var(--space-9);
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.subtitle {
+  font-size: var(--fs-3xl);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
 /* A quick way in: every ready experiment, one tap away. */
 .index {
   margin-top: var(--space-8);

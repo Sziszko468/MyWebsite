@@ -116,6 +116,10 @@ function Entry({ experiment, position }: { experiment: LabExperiment; position: 
 export function ExperimentGallery() {
   const { text } = useLabText()
   const titleId = useId()
+  const experiencesId = useId()
+  // The short pieces first, then the four applications, each group laid out from its own start.
+  const pieces = experiments.filter((experiment) => experiment.kind === 'experiment')
+  const full = experiments.filter((experiment) => experiment.kind === 'experience')
 
   return (
     <Section id="experiments" tone="dark" labelledBy={titleId} className={styles.section}>
@@ -148,10 +152,26 @@ export function ExperimentGallery() {
         </nav>
 
         <ol className={styles.list}>
-          {experiments.map((experiment, position) => (
+          {pieces.map((experiment, position) => (
             <Entry key={experiment.id} experiment={experiment} position={position} />
           ))}
         </ol>
+
+        {full.length > 0 && (
+          <>
+            <header className={`${styles.head} ${styles.headSecond}`}>
+              <h2 id={experiencesId} className={styles.subtitle}>
+                {text.gallery.experiencesTitle}
+              </h2>
+              <p className={styles.intro}>{text.gallery.experiencesIntro}</p>
+            </header>
+            <ol className={styles.list} aria-labelledby={experiencesId}>
+              {full.map((experiment, position) => (
+                <Entry key={experiment.id} experiment={experiment} position={position} />
+              ))}
+            </ol>
+          </>
+        )}
       </Container>
     </Section>
   )

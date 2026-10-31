@@ -14,7 +14,7 @@ import { useLabInput } from './useLabInput'
 const LabCanvas = lazy(() => import('./LabScene').then((module) => ({ default: module.LabCanvas })))
 
 /** A scene that throws (WebGL unavailable, a shader that will not compile) must never take the page with it. */
-class StageBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
+export class StageBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
   state = { failed: false }
 
   static getDerivedStateFromError() {
@@ -47,6 +47,7 @@ interface LiveSceneProps {
   camera: Camera
   antialias?: boolean
   maxDpr?: number
+  onDemand?: boolean
   onSlow: (averageMs: number) => void
   notices: { loading: string; contextLost: string }
   children: ReactNode
@@ -57,7 +58,7 @@ interface LiveSceneProps {
  * been drawn" and "was the context lost" are its own state and begin afresh each time a scene starts:
  * the picture underneath stays until the first frame, then the canvas fades in over it.
  */
-function LiveScene({
+export function LiveScene({
   pointer,
   clock,
   tier,
@@ -66,6 +67,7 @@ function LiveScene({
   camera,
   antialias,
   maxDpr,
+  onDemand,
   onSlow,
   notices,
   children,
@@ -92,6 +94,7 @@ function LiveScene({
             camera={camera}
             antialias={antialias}
             maxDpr={maxDpr}
+            onDemand={onDemand}
             onReady={onReady}
             onSlow={onSlow}
             onContextLost={onContextLost}

@@ -274,6 +274,182 @@ export const experimentText: Record<LabId, ExperimentText> = {
       'Een configureerbare 3D-objectgenerator. Draai de vorm door te slepen of met de pijltjestoetsen; stel de parameters in het bedieningspaneel in.',
     ),
   },
+  'model-studio': {
+    description: tri(
+      'Hozz létre alakzatokat, mozgasd, forgasd és méretezd őket, adj nekik anyagot, állítsd be a fényeket, majd mentsd el a jelenetet, exportáld GLB-ként, vagy készíts képernyőképet. Egérrel, érintéssel és billentyűzettel is használható; mobilon külön transzformációs panel dolgozik.',
+      'Create shapes, move, rotate and scale them, give them materials, light the scene, then save it, export it as GLB or take a screenshot. It works with a mouse, a finger or a keyboard; on a phone a separate transform panel does the work.',
+      'Maak vormen, verplaats, draai en schaal ze, geef ze materiaal, belicht de scène en bewaar die, exporteer hem als GLB of maak een schermafbeelding. Het werkt met muis, vinger of toetsenbord; op een telefoon doet een apart transformatiepaneel het werk.',
+    ),
+    interactions: [
+      tri(
+        'Hét alakzat, köztük egy paraméteres egyedi forma',
+        'Seven shapes, one of them a parametric custom form',
+        'Zeven vormen, waarvan één parametrische eigen vorm',
+      ),
+      tri(
+        'Mozgatás, forgatás és méretezés pontos tengelyek mentén',
+        'Move, rotate and scale along exact axes',
+        'Verplaatsen, draaien en schalen langs exacte assen',
+      ),
+      tri(
+        'Hét anyag és öt fénybeállítás',
+        'Seven materials and five lighting rigs',
+        'Zeven materialen en vijf lichtopstellingen',
+      ),
+      tri(
+        'Mentés, visszatöltés, GLB-export és képernyőkép',
+        'Save, reload, GLB export and screenshot',
+        'Bewaren, terugladen, GLB-export en schermafbeelding',
+      ),
+    ],
+    hint: tri(
+      'Adj hozzá egy alakzatot, és húzd a fogantyúit. Az üres helyen húzva forgathatod a nézetet.',
+      'Add a shape, then drag its handles. Drag empty space to orbit.',
+      'Voeg een vorm toe en sleep aan de handvatten. Sleep over lege ruimte om te draaien.',
+    ),
+    hintTouch: tri(
+      'Adj hozzá egy alakzatot. Az üres helyen húzva forgatsz, két ujjal nagyítasz.',
+      'Add a shape. Drag empty space to orbit, pinch to zoom.',
+      'Voeg een vorm toe. Sleep over lege ruimte om te draaien, knijp om te zoomen.',
+    ),
+    stageLabel: tri(
+      'Interaktív 3D nézet. Az objektumokat a panelekkel hozod létre és módosítod; billentyűzettel a nézetre lépve a nyílbillentyűk forgatnak, a + és a − nagyít, a pontos értékeket a transzformációs panel adja.',
+      'An interactive 3D viewport. Create and change objects with the panels; with a keyboard, Tab to the viewport: the arrow keys orbit, + and − zoom, and the transform panel gives exact values.',
+      'Een interactieve 3D-weergave. Maak en wijzig objecten met de panelen; met een toetsenbord ga je met Tab naar de weergave: de pijltjestoetsen draaien, + en − zoomen en het transformatiepaneel geeft exacte waarden.',
+    ),
+  },
+  racing: {
+    description: tri(
+      'Valóban vezethető arcade-szimulátor: a gyorsulás, a fékezés, a kormányzás, a tapadás és a súlyáthelyeződés számított, nem lejátszott. Időmérő és szabad gyakorlás, három kamera, és a saját pályád ugyanitt vezethető. Billentyűzettel vagy érintőgombokkal.',
+      'A drivable arcade simulator: acceleration, braking, steering, grip and weight transfer are calculated, not played back. Time Trial and free Practice, three cameras, and your own track from the Track Architect drives here too. With a keyboard or touch pads.',
+      'Een bestuurbare arcadesimulator: acceleratie, remmen, sturen, grip en gewichtsverplaatsing worden berekend, niet afgespeeld. Tijdrit en vrij oefenen, drie camera’s, en je eigen baan uit de Track Architect rijdt hier ook. Met een toetsenbord of aanraakknoppen.',
+    ),
+    interactions: [
+      tri(
+        'W A S D vagy nyilak: gyorsítás, fékezés, kormányzás',
+        'W A S D or arrows: accelerate, brake, steer',
+        'W A S D of pijltjes: gas, rem, sturen',
+      ),
+      tri(
+        'Három kamera, kézifék és újraindítás',
+        'Three cameras, handbrake and reset',
+        'Drie camera’s, handrem en reset',
+      ),
+      tri(
+        'Időmérő: köridő, szakaszidők, legjobb kör',
+        'Time Trial: lap time, sector checks, best lap',
+        'Tijdrit: rondetijd, sectorcontroles, beste ronde',
+      ),
+      tri(
+        'Mobilon nagy érintőgombok; a saját pályád és a Performance Lab beállításai itt futnak',
+        'Big touch pads on a phone; your own track and the Performance Lab setup run here',
+        'Grote aanraakknoppen op een telefoon; je eigen baan en de Performance Lab-setup rijden hier',
+      ),
+    ],
+    hint: tri(
+      'W A S D vagy a nyilak a vezetéshez. C: kamera, R: újraindítás.',
+      'W A S D or the arrow keys to drive. C changes the camera, R resets.',
+      'W A S D of de pijltjestoetsen om te rijden. C wisselt de camera, R reset.',
+    ),
+    hintTouch: tri(
+      'Balra kormányzás, jobbra gáz és fék. A kamera gombja váltja a nézetet.',
+      'Steer on the left, throttle and brake on the right. The camera button changes the view.',
+      'Links sturen, rechts gas en rem. De camera-knop wisselt het beeld.',
+    ),
+    stageLabel: tri(
+      'Vezethető 3D versenyautó. Billentyűzettel: W A S D vagy a nyilak, Space kézifék, C kamera, R újraindítás. Érintőképernyőn a képernyő alsó részén lévő gombok.',
+      'A drivable 3D race car. Keyboard: W A S D or the arrows, Space handbrake, C camera, R reset. On a touch screen: the buttons at the bottom of the screen.',
+      'Een bestuurbare 3D-raceauto. Toetsenbord: W A S D of de pijltjes, spatie handrem, C camera, R reset. Op een touchscreen: de knoppen onderaan het scherm.',
+    ),
+  },
+  'track-architect': {
+    description: tri(
+      'Rajzold meg a pálya középvonalát felülnézetben: tegyél le pontokat, mozgasd őket, illessz be kanyarsablonokat, állítsd a szélességet és a szintkülönbséget, zárd le a kört. A szerkesztő folyamatosan ellenőrzi a pályát, és élőben építi belőle a 3D geometriát, amelyet a Racing Experience-ben azonnal ki is próbálhatsz.',
+      'Draw the centreline of a circuit from above: place points, move them, insert corner templates, set width and elevation, close the loop. The editor checks the track as you go and builds its 3D geometry live, which you can drive at once in the Racing Experience.',
+      'Teken de middellijn van een circuit van bovenaf: plaats punten, verplaats ze, voeg bochtsjablonen in, stel breedte en hoogte in en sluit de lus. De editor controleert de baan terwijl je werkt en bouwt er live 3D-geometrie van, die je meteen in de Racing Experience kunt rijden.',
+    ),
+    interactions: [
+      tri(
+        'Pontok lerakása, húzása, törlése; sima ívek',
+        'Place, drag and delete points; smooth curves',
+        'Punten plaatsen, slepen en verwijderen; vloeiende bochten',
+      ),
+      tri(
+        'Egyenes, kanyar, hajtű, S-kanyar, emelkedő, lejtő sablonok',
+        'Templates: straight, corners, hairpin, S-bend, climb, descent',
+        'Sjablonen: rechte stukken, bochten, haarspeldbocht, S-bocht, klim, daling',
+      ),
+      tri(
+        'Élő validáció: zártság, önmetszés, éles kanyar, szélesség',
+        'Live validation: closed loop, self-overlap, sharp corners, width',
+        'Live validatie: gesloten lus, zelfoverlap, scherpe bochten, breedte',
+      ),
+      tri(
+        'Mentés, visszatöltés, JSON-export és azonnali kipróbálás',
+        'Save, reload, JSON export and an instant test drive',
+        'Bewaren, terugladen, JSON-export en meteen een proefrit',
+      ),
+    ],
+    hint: tri(
+      'Koppints a rajzterületre pont lerakásához, húzd a pontokat, vagy illessz be egy sablont.',
+      'Click the map to place a point, drag points, or insert a template.',
+      'Klik op de kaart om een punt te plaatsen, sleep punten of voeg een sjabloon in.',
+    ),
+    hintTouch: tri(
+      'Koppints a térképre pont lerakásához, húzd a pontokat, vagy illessz be egy sablont.',
+      'Tap the map to place a point, drag points, or insert a template.',
+      'Tik op de kaart om een punt te plaatsen, sleep punten of voeg een sjabloon in.',
+    ),
+    stageLabel: tri(
+      'Pályaszerkesztő felülnézeti térképpel és 3D előnézettel. A pontok billentyűzettel is kijelölhetők (Tab) és mozgathatók (nyilak), a Delete töröl.',
+      'A track editor with a top-down map and a 3D preview. Points can be selected with the keyboard (Tab) and moved (arrow keys); Delete removes one.',
+      'Een baaneditor met een kaart van bovenaf en een 3D-voorbeeld. Punten selecteer je met het toetsenbord (Tab) en verplaats je (pijltjestoetsen); Delete verwijdert er een.',
+    ),
+  },
+  'performance-lab': {
+    description: tri(
+      'Állítsd a leszorítóerőt, a légellenállást, a felfüggesztést, a hasmagasságot, a fékeloszlást, az áttételt, a gumik tapadását és a tömeget, majd hasonlítsd össze az A és a B beállítást. A számok egy egyszerűsített tömegpontos köridő-szimulációból jönnek, nem mérésből; a légáramlás ábrája szemléltetés, nem CFD. A beállítás egy gombbal átkerül a Racing Experience-be.',
+      'Set downforce, drag, suspension, ride height, brake balance, gearing, tyre grip and mass, then compare setup A with setup B. The numbers come from a simplified point-mass lap simulation, not from measurement; the airflow drawing is an illustration, not CFD. One button hands the setup to the Racing Experience.',
+      'Stel downforce, luchtweerstand, vering, rijhoogte, remverdeling, overbrenging, bandengrip en massa in en vergelijk setup A met setup B. De getallen komen uit een vereenvoudigde puntmassa-rondesimulatie, niet uit metingen; de luchtstroomtekening is een illustratie, geen CFD. Eén knop geeft de setup door aan de Racing Experience.',
+    ),
+    interactions: [
+      tri(
+        'Nyolc korlátozott tartományú paraméter',
+        'Eight parameters with sensible limits',
+        'Acht parameters met zinnige grenzen',
+      ),
+      tri(
+        'A és B beállítás: értékek, különbségek, becsült teljesítmény',
+        'Setups A and B: values, differences, estimated performance',
+        'Setups A en B: waarden, verschillen, geschatte prestaties',
+      ),
+      tri(
+        'Szemléltető légáramlás, leszorítás és légellenállás jelzés',
+        'Illustrative airflow, downforce and drag markers',
+        'Illustratieve luchtstroom, downforce- en weerstandsmarkeringen',
+      ),
+      tri(
+        'Kipróbálás a Racing Experience pályáján ugyanazzal a beállítással',
+        'Test the setup on the Racing Experience circuit',
+        'Test de setup op het circuit van de Racing Experience',
+      ),
+    ],
+    hint: tri(
+      'Állíts egy paramétert, és figyeld a számokat és az áramlást.',
+      'Change a parameter and watch the numbers and the airflow.',
+      'Wijzig een parameter en kijk naar de getallen en de luchtstroom.',
+    ),
+    hintTouch: tri(
+      'Nyisd le a paramétereket, állíts egyet, és figyeld a számokat.',
+      'Open the parameters, change one and watch the numbers.',
+      'Open de parameters, wijzig er een en kijk naar de getallen.',
+    ),
+    stageLabel: tri(
+      'Versenyautó 3D nézete szemléltető légáramlással. A beállítások és az eredmények a panelen szöveges, táblázatos formában is olvashatók.',
+      'A 3D view of the race car with an illustrative airflow. The settings and the results are also given as text and tables in the panels.',
+      'Een 3D-weergave van de raceauto met een illustratieve luchtstroom. De instellingen en resultaten staan ook als tekst en tabellen in de panelen.',
+    ),
+  },
 }
 
 /** Words shared by every part of the Lab. */
@@ -318,24 +494,30 @@ export const labText = {
       'Lab: een experimenteel digitaal universum',
     ),
     description: tri(
-      'Hat interaktív WebGL-kísérlet: részecskék, folyékony anyag, tipográfia a térben, végtelen tér, kromatikus torzulás és generatív objektumok.',
-      'Six interactive WebGL experiments: particles, liquid matter, type in space, infinite space, chromatic distortion and generative objects.',
-      'Zes interactieve WebGL-experimenten: deeltjes, vloeibare materie, typografie in de ruimte, oneindige ruimte, chromatische vervorming en generatieve objecten.',
+      'Hat interaktív WebGL-kísérlet és négy teljes 3D élmény: modellezőstúdió, versenyautós vezetés, pályatervező és járműhangoló labor.',
+      'Six interactive WebGL experiments and four full 3D experiences: a modelling studio, a driving experience, a track designer and a car tuning lab.',
+      'Zes interactieve WebGL-experimenten en vier volledige 3D-ervaringen: een modelleerstudio, een rij-ervaring, een baanontwerper en een afstemlab voor auto’s.',
     ),
   },
 
   gallery: {
     title: tri('A kísérletek', 'The experiments', 'De experimenten'),
     intro: tri(
-      'Hat önálló kísérlet. Mindegyik saját fényt, saját szabályokat és saját módot kapott arra, hogy válaszoljon neked.',
-      'Six separate experiments. Each has its own light, its own rules and its own way of answering you.',
-      'Zes afzonderlijke experimenten. Elk heeft zijn eigen licht, zijn eigen regels en zijn eigen manier om je te antwoorden.',
+      'Hat önálló kísérlet. Mindegyik saját fényt, saját szabályokat és saját módot kapott arra, hogy válaszoljon neked. Alattuk négy teljes értékű élmény vár.',
+      'Six separate experiments. Each has its own light, its own rules and its own way of answering you. Below them wait four full experiences.',
+      'Zes afzonderlijke experimenten. Elk heeft zijn eigen licht, zijn eigen regels en zijn eigen manier om je te antwoorden. Daaronder wachten vier volledige ervaringen.',
     ),
     open: tri('Kísérlet megnyitása', 'Open the experiment', 'Experiment openen'),
     technology: tri('Technológia', 'Technology', 'Technologie'),
     interaction: tri('Interakció', 'Interaction', 'Interactie'),
     status: tri('Állapot', 'Status', 'Status'),
     listLabel: tri('Kísérletek listája', 'List of experiments', 'Lijst van experimenten'),
+    experiencesTitle: tri('A négy élmény', 'The four experiences', 'De vier ervaringen'),
+    experiencesIntro: tri(
+      'Négy kis alkalmazás, nem csak látvány: modellezz, vezess, tervezz pályát és hangolj autót. Egymással is összekapcsolódnak: a saját pályád és a hangolt autód a Racing Experience-ben fut.',
+      'Four small applications, not only visuals: model, drive, design a circuit and tune a car. They connect: your own track and your tuned car run in the Racing Experience.',
+      'Vier kleine toepassingen, niet alleen beeld: modelleer, rijd, ontwerp een circuit en stem een auto af. Ze zijn gekoppeld: je eigen baan en afgestelde auto rijden in de Racing Experience.',
+    ),
     noPage: tri('Még nincs megnyitható oldala', 'No page to open yet', 'Nog geen pagina om te openen'),
   },
 
@@ -425,6 +607,47 @@ export const labText = {
       'De grafische context ging even verloren. Herstellen…',
     ),
     tryLive: tri('Élő nézet újra', 'Try the live view again', 'Live weergave opnieuw proberen'),
+  },
+
+  experience: {
+    settings: tri('Beállítások', 'Settings', 'Instellingen'),
+    menu: tri('Menü', 'Menu', 'Menu'),
+    close: tri('Bezárás', 'Close', 'Sluiten'),
+    qualityLabel: tri('Grafikai minőség', 'Graphics quality', 'Grafische kwaliteit'),
+    quality: {
+      auto: tri('Automatikus', 'Automatic', 'Automatisch'),
+      high: tri('Magas', 'High', 'Hoog'),
+      balanced: tri('Kiegyensúlyozott', 'Balanced', 'Gebalanceerd'),
+      performance: tri('Teljesítmény', 'Performance', 'Prestaties'),
+    },
+    qualityHelp: tri(
+      'Az automatikus beállítás az eszközödhöz igazodik, és magától csökkent, ha a képfrissítés lassul.',
+      'Automatic follows your device and lowers itself when the frame rate drops.',
+      'Automatisch past zich aan je apparaat aan en gaat zelf omlaag als de beeldsnelheid zakt.',
+    ),
+    qualityNow: tri('Most: {name}', 'Now: {name}', 'Nu: {name}'),
+    noWebglTitle: tri('A 3D nézet itt nem érhető el', 'The 3D view is not available here', 'De 3D-weergave is hier niet beschikbaar'),
+    noWebglText: tri(
+      'Ez a böngésző nem tud WebGL 2-t futtatni, ezért ez az élmény itt nem indulhat el. A Lab többi része (a kísérletek és a leírások) továbbra is használható.',
+      'This browser cannot run WebGL 2, so this experience cannot start here. The rest of the Lab, the experiments and the descriptions, still works.',
+      'Deze browser kan geen WebGL 2 draaien, dus deze ervaring kan hier niet starten. De rest van het Lab, de experimenten en de beschrijvingen, werkt nog.',
+    ),
+    failedTitle: tri('Az élő nézet leállt', 'The live view stopped', 'De live weergave is gestopt'),
+    failedText: tri(
+      'A 3D nézet nem tudott egyenletes képfrissítést tartani, vagy elveszett a grafikus környezet. Próbáld újra, vagy válassz alacsonyabb grafikai minőséget.',
+      'The 3D view could not hold a steady frame rate or lost its graphics context. Try again, or choose a lower graphics quality.',
+      'De 3D-weergave kon geen vlotte beeldsnelheid halen of verloor de grafische context. Probeer opnieuw of kies een lagere grafische kwaliteit.',
+    ),
+    retry: tri('Újrapróbálom', 'Try again', 'Opnieuw proberen'),
+    backToLab: tri('Vissza a Labhoz', 'Back to the Lab', 'Terug naar het Lab'),
+    loading: tri('Betöltés…', 'Loading…', 'Laden…'),
+    reducedMotion: tri(
+      'Csökkentett mozgás: a nézet csak a te műveleteidre frissül, a kameramozgások finomabbak.',
+      'Reduced motion: the view redraws only when you act, and camera movements are gentler.',
+      'Verminderde beweging: het beeld ververst alleen als jij iets doet en cameraverplaatsingen zijn rustiger.',
+    ),
+    openIn: tri('Megnyitás: {name}', 'Open in {name}', 'Openen in {name}'),
+    kindLabel: tri('Élmény', 'Experience', 'Ervaring'),
   },
 
   crash: {

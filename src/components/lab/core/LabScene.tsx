@@ -1,4 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { PCFShadowMap } from 'three'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { FramePacer, stepScaleDown } from '../../hero/framePacing'
 import { blendPalette, createBlended } from '../../hero/fieldUniforms'
@@ -191,6 +192,9 @@ function Runtime({
   return <SceneContext.Provider value={context}>{children}</SceneContext.Provider>
 }
 
+/** Shadows are off until a scene turns them on. This keeps react-three-fiber from setting a shadow-map type that three no longer has. */
+const SHADOWS = { enabled: false, type: PCFShadowMap } as const
+
 export interface LabCanvasProps {
   pointer: LabPointer
   clock: LabClock
@@ -202,6 +206,8 @@ export interface LabCanvasProps {
   camera: { fov: number; position: [number, number, number]; near?: number; far?: number }
   /** Multisampling. It is fixed when the context is created, so changing it re-creates the canvas. */
   antialias?: boolean
+  /** Draw only when something asks (an editor at rest costs nothing); the scene calls `invalidate()` or reports itself busy. */
+  onDemand?: boolean
   /** A pixel-ratio ceiling of this experiment's own, below the tier's (a full-screen shader pays for every pixel). */
   maxDpr?: number
   onReady: () => void
@@ -226,6 +232,7 @@ export function LabCanvas({
   camera,
   antialias = false,
   maxDpr,
+  onDemand = false,
   onReady,
   onSlow,
   onContextLost,
@@ -241,12 +248,13 @@ export function LabCanvas({
   const hasAntialias = antialias && tier !== 'low'
 
   // Not drawing at all while hidden; continuous when live; on demand when calm.
-  const frameloop = !active ? 'never' : view === 'live' ? 'always' : 'demand'
+  const frameloop = !active ? 'never' : view === 'live' && !onDemand ? 'always' : 'demand'
 
   return (
     <Canvas
       // No tone mapping: the scene's background must come out as exactly the page colour in both themes.
       flat
+      shadows={SHADOWS}
       key={hasAntialias ? 'antialiased' : 'plain'}
       frameloop={frameloop}
       dpr={[1, profile.maxDpr]}
@@ -260,7 +268,7 @@ export function LabCanvas({
         pointer={pointer}
         clock={clock}
         profile={profile}
-        view={view}
+        view={onDemand ? 'calm' : view}
         target={target}
         onReady={onReady}
         onSlow={onSlow}

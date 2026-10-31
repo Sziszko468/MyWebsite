@@ -3,6 +3,7 @@ import { getDeviceHints, supportsWebGL, useReducedMotion } from '../../hero/capa
 import { UNUSABLE_FRAME_MS, type QualityTier } from '../../hero/velocityHeroConfig'
 import { decideView, readViewPreference, storeViewPreference, type LabView, type StillReason } from './labMode'
 import { lowerTier, pickLabTier } from './labProfile'
+import { readQuality, resolveTier, storeQuality, type LabQuality } from './quality'
 
 interface DevOverride {
   still: boolean
@@ -31,6 +32,14 @@ function sessionStorageOrNull(): Storage | null {
   }
 }
 
+function localStorageOrNull(): Storage | null {
+  try {
+    return window.localStorage
+  } catch {
+    return null
+  }
+}
+
 export interface LabViewState {
   /** How the stage is shown right now. */
   view: LabView
@@ -42,7 +51,11 @@ export interface LabViewState {
   preference: LabView | null
   /** Picks a view; picking `live` or `calm` also gives a stage that failed another try. */
   choose: (view: LabView) => void
+  /** The tier in use: the visitor's quality choice, or the one the device and the frame rate settled on. */
   tier: QualityTier
+  /** The visitor's graphics-quality choice (`auto` follows the device). */
+  quality: LabQuality
+  setQuality: (quality: LabQuality) => void
   /** For the canvas: the frame rate cannot hold at this tier. Lowers the tier; at the lowest, falls back to the still view. */
   onSlow: (averageMs: number) => void
   /** For the boundary: the scene threw or lost its context for good. */
@@ -55,14 +68,18 @@ export interface LabViewState {
  * choose: Live, Calm or Still. Under reduced motion the default is Calm, which keeps the stage
  * interactive without anything moving by itself.
  */
-export function useLabView(): LabViewState {
+export function useLabView(options: { respectPreference?: boolean } = {}): LabViewState {
+  const { respectPreference = true } = options
   const reducedMotion = useReducedMotion()
   const [override] = useState(readDevOverride)
   const [webgl] = useState(() => supportsWebGL() && !readDevOverride().still)
-  const [preference, setPreference] = useState<LabView | null>(() => readViewPreference(sessionStorageOrNull()))
+  const [preference, setPreference] = useState<LabView | null>(() => (respectPreference ? readViewPreference(sessionStorageOrNull()) : null))
   const [failed, setFailed] = useState(false)
-  const [tier, setTier] = useState<QualityTier>(() => override.tier ?? pickLabTier(getDeviceHints()))
-  const tierRef = useRef(tier)
+  const [automaticTier, setTier] = useState<QualityTier>(() => override.tier ?? pickLabTier(getDeviceHints()))
+  const [quality, setQualityState] = useState<LabQuality>(() => readQuality(localStorageOrNull()))
+  const tierRef = useRef(automaticTier)
+  const qualityRef = useRef(quality)
+  const tier = override.tier ?? resolveTier(quality, automaticTier)
 
   const { view, reason } = useMemo(
     () => decideView({ preference, reducedMotion, webgl, failed }),
@@ -75,7 +92,20 @@ export function useLabView(): LabViewState {
     if (next !== 'still') setFailed(false)
   }, [])
 
+  const setQuality = useCallback((next: LabQuality) => {
+    qualityRef.current = next
+    setQualityState(next)
+    storeQuality(localStorageOrNull(), next)
+    // Choosing again also gives a stage that gave up another try.
+    setFailed(false)
+  }, [])
+
   const onSlow = useCallback((averageMs: number) => {
+    // A visitor who picked a quality keeps it: only the resolution adapts (in the canvas), the tier does not.
+    if (qualityRef.current !== 'auto') {
+      if (averageMs > UNUSABLE_FRAME_MS * 1.6) setFailed(true)
+      return
+    }
     const lower = lowerTier(tierRef.current)
     if (lower) {
       tierRef.current = lower
@@ -87,5 +117,5 @@ export function useLabView(): LabViewState {
 
   const onFail = useCallback(() => setFailed(true), [])
 
-  return { view, reason, reducedMotion, preference, choose, tier, onSlow, onFail }
+  return { view, reason, reducedMotion, preference, choose, tier, quality, setQuality, onSlow, onFail }
 }

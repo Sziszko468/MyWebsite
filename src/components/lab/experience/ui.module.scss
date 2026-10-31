@@ -1,0 +1,347 @@
+@use '../../../styles/mixins' as m;
+
+/* ── Tool buttons ───────────────────────────────────────────────────────── */
+
+.tool {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: var(--size-touch);
+  min-height: var(--size-touch);
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.68rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+  }
+
+  @include m.pressed {
+    background-color: var(--color-surface-active);
+  }
+
+  &[aria-pressed='true'] {
+    border-color: var(--color-text);
+    background-color: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  &:disabled {
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.accent {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+
+  @include m.hover {
+    border-color: var(--color-accent-hover);
+    background-color: var(--color-accent-hover);
+    color: var(--color-on-accent);
+  }
+}
+
+.danger {
+  @include m.hover {
+    border-color: var(--color-accent-text);
+    color: var(--color-accent-text);
+  }
+}
+
+.toolIcon {
+  display: inline-flex;
+}
+
+.toolLabel {
+  max-width: 6.5em;
+  overflow-wrap: break-word;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* ── Stepper ────────────────────────────────────────────────────────────── */
+
+.stepper {
+  display: grid;
+  grid-template-columns: 1.6rem var(--size-touch) minmax(0, 1fr) var(--size-touch) auto;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.stepperLabel {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+
+  &[data-axis='x'] {
+    color: var(--color-accent-text);
+  }
+
+  &[data-axis='y'] {
+    color: var(--color-text);
+  }
+
+  &[data-axis='z'] {
+    color: var(--color-secondary-text);
+  }
+}
+
+.stepButton {
+  min-width: var(--size-touch);
+  min-height: var(--size-touch);
+  padding: 0;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  color: var(--color-text);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+
+  @include m.pressed {
+    background-color: var(--color-surface-active);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.stepInput {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--size-touch);
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    margin: 0;
+    appearance: none;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.unit {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+/* ── Tabs ───────────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.tab {
+  display: inline-flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: var(--size-touch);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    border-bottom-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: -3px;
+  }
+}
+
+.tabIcon {
+  display: inline-flex;
+}
+
+/* ── Sections ───────────────────────────────────────────────────────────── */
+
+.section {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.sectionTitle,
+.sectionToggle {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.sectionToggle {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--size-touch);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.chevron {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.sectionToggle[aria-expanded='true'] .chevron {
+  transform: rotate(225deg) translate(-2px, 0);
+}
+
+.sectionBody {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+/* ── Toast ──────────────────────────────────────────────────────────────── */
+
+.toast {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-bg) 86%, transparent);
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-normal);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.warning {
+  border-left-color: var(--color-secondary);
+}
+
+.error {
+  border-left-color: var(--color-accent-text);
+  color: var(--color-accent-text);
+}
+
+/* ── Meter ──────────────────────────────────────────────────────────────── */
+
+.meter {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+}
+
+.meterLabel {
+  color: var(--color-text-muted);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.meterBar {
+  display: block;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--color-text) 14%, transparent);
+  overflow: hidden;
+
+  & > span {
+    display: block;
+    height: 100%;
+    background-color: var(--color-accent);
+    transition: width var(--dur-base) var(--ease-out);
+  }
+
+  &[data-tone='blue'] > span {
+    background-color: var(--color-secondary);
+  }
+}
+
+.meterValue {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
+}

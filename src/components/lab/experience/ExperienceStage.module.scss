@@ -1,0 +1,27 @@
+/* The canvas fills the stage; its HUD and pads sit over it. */
+.stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--scene-bg);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: calc(var(--focus-ring-width) * -2);
+  }
+
+  & > div[aria-hidden='true'] {
+    position: absolute;
+    inset: 0;
+  }
+
+  & canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}

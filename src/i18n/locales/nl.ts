@@ -385,7 +385,7 @@ export const nl: Dictionary = {
     },
     lab: {
       title: 'Het lab',
-      intro: 'Een experimentele ruimte voor creatieve oplossingen: zes werkende, interactieve WebGL-experimenten. Drie voorbeelden hier, de rest wacht in het Lab.',
+      intro: 'Een experimentele ruimte voor creatieve oplossingen: zes werkende, interactieve WebGL-experimenten en vier volledige 3D-ervaringen. Drie voorbeelden hier, de rest wacht in het Lab.',
       enter: 'Het Lab binnengaan',
       open: 'Openen',
     },

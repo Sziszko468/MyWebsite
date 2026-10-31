@@ -1,0 +1,793 @@
+@use '../../../../styles/mixins' as m;
+
+/*
+ * The race is the stage with a cockpit laid over it. Three layouts, each its own design rather than
+ * a squeezed version of another:
+ *  - wide (a laptop or desktop, or a tablet held wide): timing bottom left, the speedometer bottom
+ *    centre, the map and the track status bottom right, the keys written out under them
+ *  - compact (a phone, upright): the instruments sit under the top bar, the thumbs get the bottom
+ *  - a short landscape screen: the same, with the top bar on one line and the map between the pads
+ * The instrument panels are dark glass with paper-white type whatever the theme, because they sit
+ * on the picture of the road, not on the page.
+ */
+.race {
+  --top-h: 3.6rem;
+  --glass: color-mix(in srgb, #0b0b0d 66%, transparent);
+  --paper: #f4f0e8;
+  --pad: clamp(3.6rem, 17vw, 5.2rem);
+
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+
+  @media (max-width: 36rem) and (orientation: portrait) {
+    --top-h: 6.4rem;
+  }
+}
+
+.stage {
+  flex: 1 1 auto;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Top bar ──────────────────────────────────────────────────────────── */
+
+.top {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  left: var(--space-2);
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-bg) 86%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: auto;
+}
+
+.segment {
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    background-color: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 1px;
+  }
+}
+
+.cameraName {
+  display: none;
+  padding: 0 var(--space-2) 0 var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+
+  .race[data-wide='true'] & {
+    display: inline;
+  }
+}
+
+/* ── Menu, notices, result ────────────────────────────────────────────── */
+
+.menu,
+.problem,
+.result {
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-bg) 95%, transparent);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-text);
+  pointer-events: auto;
+}
+
+.menu {
+  position: absolute;
+  top: var(--top-h);
+  left: var(--space-2);
+  z-index: 4;
+  display: grid;
+  gap: var(--space-3);
+  width: min(25rem, calc(100% - var(--space-4)));
+  max-height: calc(100% - var(--top-h) - var(--space-3));
+  padding: var(--space-4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  & h2 {
+    margin: 0;
+    font-size: var(--fs-md);
+    font-stretch: var(--fstretch-expanded);
+    text-transform: uppercase;
+  }
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+.fact {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+
+  & span {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-touch);
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.problem {
+  position: absolute;
+  top: var(--top-h);
+  right: var(--space-2);
+  left: var(--space-2);
+  z-index: 2;
+  display: grid;
+  gap: var(--space-1);
+  max-width: 34rem;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-accent);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+
+  & span {
+    color: var(--color-text-secondary);
+  }
+}
+
+.result {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  display: grid;
+  gap: var(--space-3);
+  width: min(26rem, calc(100% - var(--space-5)));
+  max-height: calc(100% - var(--space-5));
+  padding: var(--space-5);
+  overflow-y: auto;
+  transform: translate(-50%, -50%);
+
+  & h2 {
+    margin: 0;
+    font-size: var(--fs-lg);
+    font-stretch: var(--fstretch-expanded);
+    text-transform: uppercase;
+  }
+
+  & ol {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  & li {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: space-between;
+    padding: var(--space-1) 0;
+    border-bottom: var(--border-width) solid var(--color-divider);
+    font-weight: var(--fw-semibold);
+
+    & em {
+      color: var(--color-accent-text);
+      font-size: var(--fs-xs);
+      font-style: normal;
+      text-transform: uppercase;
+    }
+
+    &[data-clean='false'] span:last-of-type {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+  }
+}
+
+.resultTotal {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-black);
+
+  & span {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+}
+
+/* ── Instruments ──────────────────────────────────────────────────────── */
+
+.speedo,
+.timing,
+.readouts {
+  position: absolute;
+  z-index: 1;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--glass);
+  color: var(--paper);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Compact: the instruments hang under the top bar, the bottom is for thumbs. */
+.speedo {
+  top: var(--top-h);
+  right: var(--space-2);
+  display: grid;
+  gap: 4px;
+  min-width: 8.2rem;
+}
+
+.speedRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.speed {
+  min-width: 2.6ch;
+  font-size: 1.9rem;
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  line-height: 1;
+  text-align: right;
+}
+
+.unit {
+  font-size: 0.65rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.gearBox {
+  display: grid;
+  margin-left: auto;
+  text-align: center;
+}
+
+.gearLabel {
+  font-size: 0.55rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  opacity: 0.65;
+  text-transform: uppercase;
+}
+
+.gear {
+  color: var(--color-accent-text);
+  font-size: 1.3rem;
+  font-weight: var(--fw-black);
+  line-height: 1;
+}
+
+.rpm {
+  --rpm: 0;
+
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background-color: color-mix(in srgb, var(--paper) 18%, transparent);
+
+  & span {
+    display: block;
+    width: calc(var(--rpm) * 100%);
+    height: 100%;
+    background-color: var(--paper);
+  }
+
+  &[data-redline='true'] span {
+    background-color: #ff161f;
+  }
+}
+
+.timing {
+  top: var(--top-h);
+  left: var(--space-2);
+  display: grid;
+  gap: 2px;
+  min-width: 8rem;
+  max-width: 11rem;
+}
+
+.lap {
+  font-size: 0.62rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  line-height: 1.3;
+  opacity: 0.75;
+  text-transform: uppercase;
+}
+
+.time {
+  font-size: 1.35rem;
+  font-weight: var(--fw-black);
+  line-height: 1.1;
+}
+
+.times {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+
+  & div {
+    display: grid;
+  }
+
+  & dt {
+    font-size: 0.55rem;
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wider);
+    opacity: 0.6;
+    text-transform: uppercase;
+  }
+
+  & dd {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: var(--fw-semibold);
+  }
+}
+
+.splits {
+  margin: 0;
+  font-size: 0.7rem;
+  opacity: 0.8;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.invalid {
+  color: #ff6a6f;
+  font-size: 0.65rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.readouts {
+  display: none;
+}
+
+.status {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+
+  &[data-state='grass'],
+  &[data-state='gravel'],
+  &[data-state='wall'] {
+    color: #ff6a6f;
+  }
+
+  &[data-state='kerb'] {
+    color: #ffd166;
+  }
+}
+
+.force {
+  margin-left: var(--space-3);
+  font-size: var(--fs-xs);
+  opacity: 0.8;
+}
+
+.countdown {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  z-index: 2;
+  color: var(--paper);
+  font-size: clamp(3.5rem, 18vmin, 8rem);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  line-height: 1;
+  text-shadow: 0 4px 30px rgb(0 0 0 / 55%);
+  transform: translate(-50%, -50%);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.toasts {
+  position: absolute;
+  top: calc(var(--top-h) + 6.6rem);
+  left: 50%;
+  z-index: 2;
+  width: min(30rem, calc(100% - var(--space-5)));
+  transform: translateX(-50%);
+  pointer-events: none;
+
+  & p {
+    margin: 0;
+    text-align: center;
+  }
+}
+
+.mapBox {
+  display: none;
+}
+
+.map {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  color: var(--paper);
+}
+
+.keys {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-2);
+  left: var(--space-3);
+  margin: 0;
+  color: var(--paper);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+  opacity: 0.8;
+  text-align: center;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 60%);
+}
+
+/* ── Touch pads ───────────────────────────────────────────────────────── */
+
+.pads {
+  position: absolute;
+  right: var(--space-3);
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  left: var(--space-3);
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.padsLeft,
+.padsRight {
+  display: flex;
+  gap: var(--space-2);
+  pointer-events: auto;
+}
+
+.padsRight {
+  align-items: flex-end;
+}
+
+.pad {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--pad);
+  height: var(--pad);
+  border: 2px solid color-mix(in srgb, var(--paper) 55%, transparent);
+  border-radius: var(--radius-lg);
+  background-color: color-mix(in srgb, #0b0b0d 58%, transparent);
+  color: var(--paper);
+  font-size: 0.78rem;
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wide);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  & svg {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  &:active {
+    background-color: color-mix(in srgb, var(--paper) 40%, transparent);
+    transform: scale(0.96);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.padSmall {
+  width: calc(var(--pad) * 0.62);
+  height: calc(var(--pad) * 0.62);
+  font-size: 0.6rem;
+}
+
+.padBrake {
+  border-color: #ff6a6f;
+}
+
+.padGas {
+  width: calc(var(--pad) * 1.22);
+  height: calc(var(--pad) * 1.5);
+  border-color: #ff161f;
+  background-color: color-mix(in srgb, #ff161f 62%, #0b0b0d 38%);
+  font-size: 0.95rem;
+
+  &:active {
+    background-color: #ff161f;
+  }
+}
+
+/* Pads in a column of two: the handbrake over the brake. */
+.padsRight {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: end;
+  justify-items: center;
+  column-gap: var(--space-2);
+
+  & > :nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  & > :nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  & > :nth-child(3) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+/* ── Wide: the instruments move to the bottom ─────────────────────────── */
+
+.race[data-wide='true'] {
+  --top-h: 3.6rem;
+
+  .speedo {
+    top: auto;
+    right: auto;
+    bottom: 2.4rem;
+    left: 50%;
+    min-width: 13rem;
+    padding: var(--space-3) var(--space-5);
+    transform: translateX(-50%);
+  }
+
+  .speed {
+    font-size: 3.4rem;
+  }
+
+  .unit {
+    font-size: 0.75rem;
+  }
+
+  .gear {
+    font-size: 2rem;
+  }
+
+  .gearLabel {
+    font-size: 0.62rem;
+  }
+
+  .rpm {
+    height: 8px;
+  }
+
+  .timing {
+    top: auto;
+    bottom: var(--space-3);
+    left: var(--space-3);
+    gap: 4px;
+    min-width: 11rem;
+    max-width: 16rem;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .lap {
+    font-size: 0.72rem;
+  }
+
+  .time {
+    font-size: 2rem;
+  }
+
+  .times dd {
+    font-size: 0.95rem;
+  }
+
+  .times dt {
+    font-size: 0.62rem;
+  }
+
+  .splits {
+    font-size: 0.78rem;
+  }
+
+  .readouts {
+    right: var(--space-3);
+    bottom: var(--space-3);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    width: 10.5rem;
+  }
+
+  .mapBox {
+    position: absolute;
+    right: var(--space-3);
+    bottom: 3.6rem;
+    z-index: 1;
+    display: block;
+    width: 10.5rem;
+    padding: var(--space-1);
+    border-radius: var(--radius-md);
+    background-color: var(--glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .toasts {
+    top: calc(var(--top-h) + 0.5rem);
+  }
+
+  .pads {
+    bottom: 5.5rem;
+  }
+}
+
+/* A tablet with touch pads: the pads take the bottom corners, so the panels go up under the bar. */
+.race[data-wide='true'][data-touch='true'] {
+  .timing {
+    top: var(--top-h);
+    bottom: auto;
+  }
+
+  .mapBox {
+    top: var(--top-h);
+    right: var(--space-3);
+    bottom: auto;
+    width: 8.5rem;
+  }
+
+  .readouts {
+    top: calc(var(--top-h) + 8.6rem);
+    right: var(--space-3);
+    bottom: auto;
+    width: 8.5rem;
+  }
+
+  .pads {
+    bottom: var(--space-3);
+  }
+
+  .speedo {
+    bottom: var(--space-3);
+  }
+
+  .toasts {
+    top: calc(var(--top-h) + 0.5rem);
+  }
+}
+
+/* ── Short landscape screens (a phone on its side) ────────────────────── */
+
+@media (orientation: landscape) and (max-height: 32rem) {
+  .race {
+    --top-h: 3.4rem;
+    --pad: clamp(3.2rem, 20vh, 4.4rem);
+  }
+
+  .speedo {
+    top: var(--space-2);
+    right: auto;
+    left: 50%;
+    min-width: 9rem;
+    transform: translateX(-50%);
+  }
+
+  .race[data-wide='false'] .top {
+    right: auto;
+    left: var(--space-2);
+    max-width: calc(50% - 5rem);
+  }
+
+  .timing {
+    top: var(--top-h);
+  }
+
+  .toasts {
+    top: auto;
+    bottom: 38%;
+  }
+
+  .mapBox {
+    position: absolute;
+    bottom: var(--space-3);
+    left: 50%;
+    z-index: 1;
+    display: block;
+    width: 5.6rem;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 36rem) and (orientation: portrait) {
+  .mapBox {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pad:active {
+    transform: none;
+  }
+}
