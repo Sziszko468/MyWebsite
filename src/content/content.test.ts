@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { LANGUAGES } from '../i18n/config'
 import { dictionaries } from '../i18n/dictionaries'
-import { findPage } from '../routes/pages'
+import { PAGES, findPage } from '../routes/pages'
 import { siteStack } from './about'
 import { experiments } from './lab'
+import { experimentText } from './labText'
 import { offerings } from './offerings'
 import { packages } from './packages'
 import { projects } from './projects'
@@ -75,22 +76,36 @@ describe('"What I build"', () => {
 })
 
 describe('the Lab', () => {
-  it('has three experiments', () => {
-    expect(experiments.map((e) => e.id)).toEqual(['particles', 'liquid', 'motion'])
+  it('has six experiments in order', () => {
+    expect(experiments.map((e) => e.id)).toEqual([
+      'particle-universe',
+      'liquid-matter',
+      'type-in-motion',
+      'infinite-space',
+      'chromatic-distortion',
+      'generative-objects',
+    ])
+    expect(experiments.map((e) => e.number)).toEqual(['01', '02', '03', '04', '05', '06'])
   })
 
-  it('offers no demo for an experiment that is not built', () => {
+  it('gives a page only to an experiment that is ready', () => {
     for (const experiment of experiments) {
-      if (experiment.status === 'concept' || experiment.status === 'in-progress') {
-        expect(experiment.demoUrl, experiment.name).toBeNull()
-      }
-      if (experiment.demoUrl !== null) expect(experiment.demoUrl, experiment.name).toMatch(HTTPS)
+      const hasPage = PAGES.some((page) => page.id === `lab-${experiment.id}`)
+      expect(hasPage, experiment.name).toBe(experiment.status === 'ready')
     }
+  })
+
+  it('names the technology of every experiment', () => {
+    for (const experiment of experiments) expect(experiment.tech.length, experiment.name).toBeGreaterThan(0)
   })
 
   it.each(LANGUAGES)('describes every experiment in %s', (lang) => {
     for (const experiment of experiments) {
-      expect(dictionaries[lang].home.lab.items[experiment.id].text.trim(), experiment.id).not.toBe('')
+      const copy = experimentText[experiment.id]
+      expect(experiment.tagline[lang].trim(), experiment.id).not.toBe('')
+      expect(copy.description[lang].trim(), experiment.id).not.toBe('')
+      expect(copy.interactions.length, experiment.id).toBeGreaterThan(0)
+      for (const item of copy.interactions) expect(item[lang].trim(), experiment.id).not.toBe('')
     }
   })
 })

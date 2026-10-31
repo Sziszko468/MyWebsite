@@ -1,0 +1,92 @@
+/*
+ * A live stage: the input surface, the picture that stands in for the scene and the canvas that
+ * replaces it. The canvas never reflows the page: it fills the stage, which its owner sizes.
+ */
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background-color: var(--scene-bg);
+  contain: paint;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: calc(var(--focus-ring-width) * -2);
+  }
+}
+
+.poster,
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.poster {
+  pointer-events: none;
+}
+
+.canvas {
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-out);
+
+  /* The canvas is a picture of the scene; the stage element takes the input. */
+  & canvas {
+    width: 100% !important;
+    height: 100% !important;
+    touch-action: inherit;
+  }
+}
+
+.canvasVisible {
+  opacity: 1;
+}
+
+.status {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-5);
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  transform: translateX(-50%);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-header-bg);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* The hint says how to begin and goes away with the first touch; it never blocks input. */
+.hint {
+  position: absolute;
+  left: var(--hint-left, 50%);
+  /* Above the dock and the closed panel on a phone; the stage's owner may move it. */
+  bottom: var(--hint-bottom, 10.5rem);
+  max-width: min(88%, 30rem);
+  margin: 0;
+  transform: translateX(-50%);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-align: center;
+  text-transform: uppercase;
+  text-wrap: balance;
+  pointer-events: none;
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+
+.stage[data-touched='true'] .hint {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas {
+    transition: none;
+  }
+}

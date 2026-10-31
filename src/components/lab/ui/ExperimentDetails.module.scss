@@ -1,0 +1,176 @@
+@use '../../../styles/mixins' as m;
+
+.details {
+  padding-block: var(--space-section);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-8);
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--space-9);
+  }
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-4);
+  color: var(--color-accent-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.title {
+  /* The longest word of the three languages (KÍSÉRLETRŐL, EXPERIMENT) must fit its column at 1024 px. */
+  font-size: clamp(1.6rem, 0.9rem + 2.6vw, 2.75rem);
+  font-stretch: var(--fstretch-expanded);
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+}
+
+.tagline {
+  max-width: 28ch;
+  margin-top: var(--space-5);
+  color: var(--color-text);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+}
+
+.description {
+  max-width: 62ch;
+  margin-top: var(--space-5);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+}
+
+.keyboard {
+  max-width: 62ch;
+  margin-top: var(--space-6);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--color-accent);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+}
+
+.facts {
+  display: grid;
+  align-content: start;
+  gap: 0;
+  margin: 0;
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.fact {
+  display: grid;
+  gap: var(--space-3);
+  padding-block: var(--space-5);
+  border-bottom: var(--border-width) solid var(--color-divider);
+
+  & dt {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+
+  & dd {
+    margin: 0;
+    min-width: 0;
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  & li {
+    padding: var(--space-1) var(--space-3);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    overflow-wrap: anywhere;
+  }
+}
+
+.list {
+  display: grid;
+  gap: var(--space-2);
+
+  & li {
+    position: relative;
+    padding-left: var(--space-5);
+    color: var(--color-text-secondary);
+    line-height: var(--lh-normal);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.62em;
+      left: 0;
+      width: 0.75rem;
+      height: 2px;
+      background-color: var(--color-accent);
+    }
+  }
+}
+
+.more {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-9);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.moreLink {
+  display: grid;
+  gap: var(--space-2);
+  min-height: var(--size-touch);
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    var(--transition-colors),
+    transform var(--dur-base) var(--ease-out);
+
+  @include m.hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+}
+
+.moreHint {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.moreName {
+  font-size: var(--fs-lg);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-snug);
+  text-transform: uppercase;
+}
+
+.moreNumber {
+  color: var(--color-accent-text);
+}

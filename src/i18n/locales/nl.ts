@@ -385,21 +385,9 @@ export const nl: Dictionary = {
     },
     lab: {
       title: 'Het lab',
-      intro: "Een experimenteel vlak voor creatieve oplossingen. De richtingen hieronder zijn concepten, nog geen werkende demo's.",
-      items: {
-        particles: {
-          title: 'Particle Playground',
-          text: 'Deeltjes die op jouw beweging reageren: ze verdichten, verspreiden zich en tekenen patronen.',
-        },
-        liquid: {
-          title: 'Liquid Geometry',
-          text: 'Geometrische vormen die als vloeistof in elkaar overlopen.',
-        },
-        motion: {
-          title: 'Motion Experiments',
-          text: 'Timing, easing en ritme: experimenten met de taal van beweging.',
-        },
-      },
+      intro: 'Een experimentele ruimte voor creatieve oplossingen: zes werkende, interactieve WebGL-experimenten. Drie voorbeelden hier, de rest wacht in het Lab.',
+      enter: 'Het Lab binnengaan',
+      open: 'Openen',
     },
     packages: {
       title: 'Zo kunnen we samenwerken',

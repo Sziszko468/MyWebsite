@@ -1,0 +1,77 @@
+@use '../../../styles/mixins' as m;
+
+/*
+ * The dock sits at the bottom edge of the stage, centred, one row of 44px targets. On a phone it
+ * is icon-only and within thumb reach; from `md` the two leaving links carry their names.
+ */
+.dock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: calc(100% - var(--gutter) * 2);
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--color-bg) 84%, transparent);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: var(--size-touch);
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    background-color: var(--color-surface-hover);
+  }
+
+  @include m.pressed {
+    background-color: var(--color-surface-active);
+  }
+}
+
+.icon {
+  flex: none;
+}
+
+/* The words appear when there is room; the icons and their accessible names are always there. */
+.label {
+  display: none;
+
+  @include m.up('md') {
+    display: inline;
+  }
+}
+
+.rule {
+  flex: none;
+  width: 1px;
+  height: 1.5rem;
+  margin-inline: var(--space-1);
+  background-color: var(--color-border-strong);
+}
+
+.position {
+  margin: 0;
+  padding: 0 var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  white-space: nowrap;
+}

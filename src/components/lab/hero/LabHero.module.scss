@@ -1,0 +1,280 @@
+@use '../../../styles/mixins' as m;
+
+/*
+ * The Lab's first screen. Wide: the stage fills the whole hero behind the type, the core sits to
+ * the right of it. Narrow: the type comes first and the stage is its own block under it, so a
+ * finger on the object never fights the page's scroll (the stage lets vertical swipes through).
+ */
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--scene-bg);
+  color: var(--color-text);
+  @include m.under-header;
+
+  @include m.up('lg') {
+    display: block;
+    min-height: 100svh;
+  }
+}
+
+.stageBox {
+  position: relative;
+  order: 1;
+  /* Narrow screens: the object comes first, under the transparent header, and the words follow it. */
+  height: calc(var(--header-height) + min(42svh, 24rem));
+  min-height: 17rem;
+
+  @include m.up('lg') {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-base);
+    height: auto;
+  }
+}
+
+/* Keeps the type readable over the brightest part of the field, and only there. */
+.scrim {
+  display: none;
+
+  @include m.up('lg') {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-base);
+    background: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--scene-bg) 86%, transparent) 0%,
+      color-mix(in srgb, var(--scene-bg) 60%, transparent) 34%,
+      transparent 58%
+    );
+    pointer-events: none;
+  }
+}
+
+.content {
+  position: relative;
+  z-index: var(--z-content);
+  order: 2;
+  display: grid;
+  gap: var(--space-6);
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-6);
+  pointer-events: none;
+
+  & a,
+  & button,
+  & input,
+  & label,
+  & fieldset {
+    pointer-events: auto;
+  }
+
+  @include m.up('lg') {
+    align-content: end;
+    min-height: calc(100svh - var(--header-height));
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+}
+
+.copy {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-5);
+  width: min(100%, 44rem);
+  /* The headline's size comes from the column it sits in (see .title). */
+  container-type: inline-size;
+}
+
+/* The hint sits under the object, not in the middle of the type. */
+.stage {
+  top: var(--header-height);
+  --hint-bottom: var(--space-4);
+
+  @include m.up('lg') {
+    --hint-left: 70%;
+    --hint-bottom: 8.5rem;
+    top: 0;
+  }
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--color-accent-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.title {
+  /* The longest word (--longest characters, about one em each in this width) fills the column and no more. */
+  font-size: clamp(1.4rem, calc(100cqi / (var(--longest, 10) + 0.4)), 5.4rem);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.035em;
+  line-height: 0.96;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+.line {
+  display: inline-block;
+  animation: rise 700ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 120ms + 80ms);
+}
+
+.accent {
+  color: var(--color-accent-text);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.4em);
+  }
+}
+
+.lead {
+  max-width: 34rem;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-normal);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* The Lab's signature: three words, each with its own colour mark. */
+.signature {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+}
+
+.word {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  &::before {
+    content: '';
+    width: 0.55rem;
+    height: 0.55rem;
+    background-color: var(--brand-red);
+  }
+
+  &[data-tone='1']::before {
+    background-color: var(--color-text);
+  }
+
+  &[data-tone='2']::before {
+    background-color: var(--brand-blue);
+  }
+}
+
+.view {
+  max-width: 21rem;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-bg) 78%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  @include m.up('lg') {
+    position: absolute;
+    right: var(--gutter);
+    bottom: var(--space-6);
+    width: 21rem;
+    max-width: calc(100% - var(--gutter) * 2);
+  }
+}
+
+.notice {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+/* ── The picture: what shows before the scene and instead of it ─────────── */
+
+.poster {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+
+  @include m.up('lg') {
+    justify-items: center;
+    padding-left: 44%;
+  }
+}
+
+.posterCore,
+.posterRing,
+.posterRingOuter {
+  grid-area: 1 / 1;
+  border-radius: 50%;
+}
+
+.posterCore {
+  width: min(52vh, 26rem);
+  aspect-ratio: 1;
+  background:
+    repeating-linear-gradient(
+      172deg,
+      transparent 0 14px,
+      color-mix(in srgb, var(--scene-ink) 38%, transparent) 14px 15px
+    ),
+    radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--scene-ink) 14%, var(--scene-bg)), var(--scene-bg) 70%);
+  box-shadow:
+    inset -26px -10px 60px -20px color-mix(in srgb, var(--brand-red) 70%, transparent),
+    inset 26px 10px 60px -24px color-mix(in srgb, var(--brand-blue) 70%, transparent);
+}
+
+.posterRing,
+.posterRingOuter {
+  border: 1px solid color-mix(in srgb, var(--scene-ink) 28%, transparent);
+}
+
+.posterRing {
+  width: min(70vh, 35rem);
+  aspect-ratio: 1;
+  transform: rotateX(70deg) rotateZ(12deg);
+}
+
+.posterRingOuter {
+  width: min(86vh, 43rem);
+  aspect-ratio: 1;
+  transform: rotateX(62deg) rotateZ(-26deg);
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .word::before {
+    background-color: CanvasText;
+  }
+}

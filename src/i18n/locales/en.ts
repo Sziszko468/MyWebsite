@@ -384,21 +384,9 @@ export const en: Dictionary = {
     },
     lab: {
       title: 'The Lab',
-      intro: 'An experimental space for creative solutions. The directions below are concepts, not working demos yet.',
-      items: {
-        particles: {
-          title: 'Particle Playground',
-          text: 'Particles that respond to your movement: they gather, scatter and draw patterns.',
-        },
-        liquid: {
-          title: 'Liquid Geometry',
-          text: 'Geometric forms that melt into one another like liquid.',
-        },
-        motion: {
-          title: 'Motion Experiments',
-          text: 'Timing, easing and rhythm: experiments in the language of movement.',
-        },
-      },
+      intro: 'An experimental space for creative solutions: six working, interactive WebGL experiments. Three samples here, the full set waits in the Lab.',
+      enter: 'Enter the Lab',
+      open: 'Open',
     },
     packages: {
       title: 'How we can work together',

@@ -1,0 +1,98 @@
+@use '../../../styles/mixins' as m;
+
+/*
+ * A glass sheet over the scene. The scene is dark in the dark theme and paper in the light one, so
+ * the sheet takes the page colour at high opacity (never less than 78%, so text on it keeps its
+ * contrast over any frame of the scene) and a hairline.
+ */
+.panel {
+  --_sheet: color-mix(in srgb, var(--color-bg) 82%, transparent);
+
+  display: grid;
+  width: min(100%, 21rem);
+  max-height: 100%;
+  min-height: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--_sheet);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  overflow: hidden;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--size-touch);
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: -4px;
+  }
+}
+
+.toggleLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.chevron {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.open .chevron {
+  transform: rotate(225deg) translate(-2px, 0);
+}
+
+.body {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+  border-top: var(--border-width) solid var(--color-divider);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.scroll {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  min-height: 0;
+  padding: var(--space-4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.footer {
+  padding: var(--space-4);
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+@media (forced-colors: active) {
+  .panel {
+    border-color: CanvasText;
+    background-color: Canvas;
+    backdrop-filter: none;
+  }
+}

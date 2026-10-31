@@ -1,0 +1,350 @@
+@use '../../../styles/mixins' as m;
+
+/*
+ * Controls for the Lab's panels. They sit on a glass surface over a scene, so every colour is a
+ * semantic token (it follows the theme) and every state is carried by more than colour: the
+ * selected option is filled and bold, the focused one is ringed, a switch moves its thumb.
+ */
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fieldHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.label {
+  padding: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.value {
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+}
+
+/* On a device with a precise pointer the controls need not be a finger wide, which keeps a panel inside a laptop screen. */
+.range,
+.optionFace,
+.action,
+.toggle {
+  @media (pointer: fine) {
+    --size-touch: 2.5rem;
+  }
+}
+
+/* ── Slider ─────────────────────────────────────────────────────────────── */
+
+.range {
+  --_track: 3px;
+  --_thumb: 1.125rem;
+
+  appearance: none;
+  width: 100%;
+  height: var(--size-touch);
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+
+  &::-webkit-slider-runnable-track {
+    height: var(--_track);
+    border-radius: var(--radius-pill);
+    background: linear-gradient(
+      to right,
+      var(--color-accent) var(--fill, 0%),
+      color-mix(in srgb, var(--color-text) 26%, transparent) var(--fill, 0%)
+    );
+  }
+
+  &::-moz-range-track {
+    height: var(--_track);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--color-text) 26%, transparent);
+  }
+
+  &::-moz-range-progress {
+    height: var(--_track);
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+  }
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: var(--_thumb);
+    height: var(--_thumb);
+    margin-top: calc((var(--_track) - var(--_thumb)) / 2);
+    border: 2px solid var(--color-bg);
+    border-radius: 50%;
+    background-color: var(--color-text);
+    box-shadow: 0 0 0 1px var(--color-border-strong);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  &::-moz-range-thumb {
+    width: var(--_thumb);
+    height: var(--_thumb);
+    border: 2px solid var(--color-bg);
+    border-radius: 50%;
+    background-color: var(--color-text);
+    box-shadow: 0 0 0 1px var(--color-border-strong);
+  }
+
+  &:active::-webkit-slider-thumb {
+    transform: scale(1.18);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus-visible::-webkit-slider-thumb {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  &:focus-visible::-moz-range-thumb {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}
+
+/* ── Choice (radio group) ───────────────────────────────────────────────── */
+
+.options {
+  /* As many columns as fit at a width in which the longest label stays whole; fewer, never a word cut in two. */
+  --_min: 8rem;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--_min), 1fr));
+  gap: var(--space-1);
+
+  &[data-columns='3'] {
+    --_min: 5.9rem;
+  }
+
+  &[data-columns='4'] {
+    --_min: 4.4rem;
+  }
+}
+
+.option {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.optionInput {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.optionFace {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-touch);
+  padding: var(--space-2) var(--space-2);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  transition: var(--transition-colors);
+}
+
+.optionInput:checked + .optionFace {
+  border-color: var(--color-text);
+  background-color: var(--color-text);
+  color: var(--color-bg);
+}
+
+.optionInput:focus-visible + .optionFace {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .optionInput:not(:checked):hover + .optionFace {
+    border-color: var(--color-text);
+    color: var(--color-text);
+  }
+}
+
+/* ── Switch ─────────────────────────────────────────────────────────────── */
+
+.toggle {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: var(--size-touch);
+}
+
+.switch {
+  appearance: none;
+  position: relative;
+  width: 2.75rem;
+  height: 1.5rem;
+  margin: 0;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  cursor: pointer;
+  transition: var(--transition-colors);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 50%;
+    background-color: var(--color-text-secondary);
+    transform: translateY(-50%);
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+
+  &:checked {
+    border-color: var(--color-accent);
+    background-color: color-mix(in srgb, var(--color-accent) 24%, transparent);
+  }
+
+  &:checked::after {
+    background-color: var(--color-accent);
+    transform: translate(1.2rem, -50%);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}
+
+/* ── Actions ────────────────────────────────────────────────────────────── */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.action {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--size-touch);
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  line-height: 1.2;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    var(--transition-colors),
+    transform var(--dur-fast) var(--ease-out);
+
+  @include m.hover {
+    border-color: var(--color-text);
+  }
+
+  @include m.pressed {
+    transform: translateY(1px);
+  }
+
+  &[aria-pressed='true'] {
+    border-color: var(--color-text);
+    background-color: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  &:disabled {
+    border-color: var(--color-disabled-border);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+  }
+}
+
+.primary {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+
+  @include m.hover {
+    border-color: var(--color-accent-hover);
+    background-color: var(--color-accent-hover);
+  }
+}
+
+/* ── Note ───────────────────────────────────────────────────────────────── */
+
+.note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  overflow-wrap: anywhere;
+}
+
+/* ── Group ──────────────────────────────────────────────────────────────── */
+
+.group {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-divider);
+
+  &:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+.groupTitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+@media (forced-colors: active) {
+  .optionInput:checked + .optionFace {
+    border-width: 3px;
+  }
+}

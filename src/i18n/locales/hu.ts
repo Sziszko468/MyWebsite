@@ -384,21 +384,9 @@ export const hu = {
     },
     lab: {
       title: 'A Lab',
-      intro: 'Kísérleti felület kreatív megoldásoknak. Az alábbi irányok koncepciók, még nem működő demók.',
-      items: {
-        particles: {
-          title: 'Particle Playground',
-          text: 'Részecskék, amelyek a mozdulatodra reagálnak: sűrűsödnek, szétszóródnak, mintázatot rajzolnak.',
-        },
-        liquid: {
-          title: 'Liquid Geometry',
-          text: 'Geometrikus formák, amelyek folyadékként olvadnak egymásba.',
-        },
-        motion: {
-          title: 'Motion Experiments',
-          text: 'Időzítés, könnyítés és ritmus: a mozgás nyelvének kísérletei.',
-        },
-      },
+      intro: 'Kísérleti felület kreatív megoldásoknak: hat működő, interaktív WebGL-kísérlet. Három ízelítő itt, a teljes választék a Labban vár.',
+      enter: 'Belépés a Labba',
+      open: 'Megnyitás',
     },
     packages: {
       title: 'Hogyan dolgozhatunk együtt',

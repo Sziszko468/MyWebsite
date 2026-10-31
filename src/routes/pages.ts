@@ -1,3 +1,4 @@
+import { experimentPath, playableExperiments, type LabId } from '../content/lab'
 import { projects, type ProjectId } from '../content/projects'
 import { LANGUAGES, type Language } from '../i18n/config'
 
@@ -10,7 +11,9 @@ import { LANGUAGES, type Language } from '../i18n/config'
 export type NavPageId = 'home' | 'work' | 'services' | 'about' | 'lab' | 'contact'
 /** A project's details page: `project-spendly`, `project-bookinghub`... */
 export type ProjectPageId = `project-${ProjectId}`
-export type PageId = NavPageId | ProjectPageId | 'designSystem'
+/** An experiment's own page: `lab-particle-universe`, `lab-liquid-matter`... */
+export type LabPageId = `lab-${LabId}`
+export type PageId = NavPageId | ProjectPageId | LabPageId | 'designSystem'
 
 export interface PageDef<Id extends PageId = PageId> {
   id: Id
@@ -49,10 +52,24 @@ export function projectIdOfPage(id: PageId): ProjectId | null {
   return id.startsWith('project-') ? (id.slice('project-'.length) as ProjectId) : null
 }
 
+/**
+ * One page per experiment that is ready (content/lab.ts), under /lab. They are not in the
+ * navigation (the Lab has its own) and exist in every language. An experiment that is not ready
+ * has no page at all.
+ */
+export const LAB_PAGES: readonly PageDef<LabPageId>[] = playableExperiments.map((experiment) =>
+  page<LabPageId>(`lab-${experiment.id}`, experimentPath(experiment.id)),
+)
+
+/** The experiment a page shows, or `null` when the page is not an experiment's. */
+export function labIdOfPage(id: PageId): LabId | null {
+  return id.startsWith('lab-') ? (id.slice('lab-'.length) as LabId) : null
+}
+
 /** Dev-only reference page; absent from production builds. */
 const DEV_PAGES: readonly PageDef[] = import.meta.env.DEV ? [page('designSystem', '/design-system')] : []
 
-export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...PROJECT_PAGES, ...DEV_PAGES]
+export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...DEV_PAGES]
 
 function normalize(path: string): string {
   const trimmed = path.replace(/\/+$/, '')

@@ -1,0 +1,151 @@
+/* The seed field, the saved objects: the parts of the generator's panel that are not standard controls. */
+
+.seed {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.seedLabel {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.seedRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.seedInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--color-accent-text);
+  }
+}
+
+.seedApply {
+  flex: none;
+}
+
+.seedHelp,
+.seedError {
+  margin: 0;
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+.seedHelp {
+  color: var(--color-text-muted);
+}
+
+.seedError {
+  color: var(--color-accent-text);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── The collection: up to six small pictures ───────────────────────────── */
+
+.saved {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.savedItem {
+  position: relative;
+  min-width: 0;
+}
+
+.savedOpen {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--scene-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  overflow: hidden;
+
+  &:hover {
+    border-color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.savedPicture,
+.savedBlank {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.savedBlank {
+  background: linear-gradient(135deg, var(--color-surface-raised), var(--color-surface));
+}
+
+.savedName {
+  padding: 0 var(--space-1) var(--space-1);
+  font-size: 0.65rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.savedRemove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--color-bg) 82%, transparent);
+  color: var(--color-text);
+  font-size: var(--fs-md);
+  line-height: 1;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 1px;
+  }
+
+  /* A small control still has a finger-sized target on a touch screen. */
+  @media (pointer: coarse) {
+    width: 2rem;
+    height: 2rem;
+  }
+}

@@ -1,0 +1,131 @@
+.svg {
+  width: 100%;
+  height: 100%;
+}
+
+.bg {
+  fill: var(--scene-bg);
+}
+
+.red {
+  fill: var(--brand-red);
+}
+
+.ink {
+  fill: var(--scene-ink);
+}
+
+.blue {
+  fill: var(--brand-blue);
+}
+
+.redLine {
+  stroke: var(--brand-red);
+}
+
+.inkLine {
+  stroke: var(--scene-ink);
+}
+
+.blueLine {
+  stroke: var(--brand-blue);
+}
+
+.highlight {
+  stroke: var(--brand-paper);
+}
+
+.shadow {
+  fill: var(--scene-ink);
+  opacity: 0.12;
+}
+
+.type {
+  font-family: var(--font-sans);
+  font-stretch: 118%;
+}
+
+.extrudeA {
+  fill: var(--brand-red);
+}
+
+.extrudeB {
+  fill: color-mix(in srgb, var(--brand-red) 55%, var(--scene-bg));
+}
+
+.front {
+  fill: var(--scene-ink);
+}
+
+.caption {
+  fill: var(--scene-ink);
+  opacity: 0.6;
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+/* Three colour channels drawn apart; where they overlap they add up to the ink colour. */
+.channels > g {
+  isolation: auto;
+}
+
+.channelRed,
+.channelGreen,
+.channelBlue {
+  mix-blend-mode: screen;
+}
+
+.channelRed {
+  fill: #ff1620;
+  stroke: #ff1620;
+}
+
+.channelGreen {
+  fill: #20ff6a;
+  stroke: #20ff6a;
+}
+
+.channelBlue {
+  fill: #3c58ff;
+  stroke: #3c58ff;
+}
+
+:global([data-theme='light']) {
+  .channelRed,
+  .channelGreen,
+  .channelBlue {
+    mix-blend-mode: multiply;
+  }
+
+  .channelRed {
+    fill: #ff3a58;
+    stroke: #ff3a58;
+  }
+
+  .channelGreen {
+    fill: #ffd400;
+    stroke: #ffd400;
+  }
+
+  .channelBlue {
+    fill: #00b2ff;
+    stroke: #00b2ff;
+  }
+}
+
+.facetInk {
+  fill: var(--scene-ink);
+  stroke: var(--scene-bg);
+}
+
+.facetRed {
+  fill: var(--brand-red);
+  stroke: var(--scene-bg);
+}
+
+.facetBlue {
+  fill: var(--brand-blue);
+  stroke: var(--scene-bg);
+}

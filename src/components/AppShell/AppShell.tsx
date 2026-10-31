@@ -15,14 +15,18 @@ function SkipLink() {
   )
 }
 
-/** The frame around every page of every language: skip link, header, main content, footer. */
-export function AppShell({ children }: { children: ReactNode }) {
+/**
+ * The frame around every page of every language: skip link, header, main content, footer.
+ * An `immersive` page (a Lab experiment) brings its own navigation and fills the screen, so the
+ * site header and footer step aside; the skip link and the main landmark stay.
+ */
+export function AppShell({ children, immersive = false }: { children: ReactNode; immersive?: boolean }) {
   return (
-    <div className={styles.shell}>
+    <div className={styles.shell} data-immersive={immersive}>
       <SkipLink />
-      <SiteHeader />
+      {!immersive && <SiteHeader />}
       <MainContent>{children}</MainContent>
-      <SiteFooter />
+      {!immersive && <SiteFooter />}
       <VelocityIntro />
     </div>
   )

@@ -5,7 +5,7 @@ import { localizedPath } from './i18n/paths'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
-import { PAGES, projectIdOfPage, type NavPageId, type PageDef } from './routes/pages'
+import { PAGES, labIdOfPage, projectIdOfPage, type NavPageId, type PageDef } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
 import { IntroProvider } from './components/intro/IntroProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
@@ -27,10 +27,17 @@ const ServicesPage = lazy(() => import('./pages/ServicesPage').then((module) => 
 const AboutPage = lazy(() => import('./pages/AboutPage').then((module) => ({ default: module.AboutPage })))
 const ContactPage = lazy(() => import('./pages/ContactPage').then((module) => ({ default: module.ContactPage })))
 
+// The Lab (its interactive first screen, the gallery) and each experiment are chunks of their own;
+// Three.js loads only once a Lab stage is on screen, and the home page never pays for any of it.
+const LabPage = lazy(() => import('./pages/LabPage').then((module) => ({ default: module.LabPage })))
+const LabExperimentPage = lazy(() =>
+  import('./pages/LabExperimentPage').then((module) => ({ default: module.LabExperimentPage })),
+)
+
 const PageFallback = () => <div style={{ minHeight: '70svh' }} aria-hidden="true" />
 
 // What renders at each registered page. Paths and languages live in routes/pages.ts.
-// Work and Lab are placeholders until their pages are built; a project's
+// Work is a placeholder until its page is built; a project's
 // details page is the same component for every project, fed by content/projectDetails.
 const PAGE_ELEMENTS: Record<NavPageId | 'designSystem', ReactElement | null> = {
   home: <HomePage />,
@@ -45,7 +52,11 @@ const PAGE_ELEMENTS: Record<NavPageId | 'designSystem', ReactElement | null> = {
       <AboutPage />
     </Suspense>
   ),
-  lab: <PlaceholderPage pageId="lab" />,
+  lab: (
+    <Suspense fallback={<PageFallback />}>
+      <LabPage />
+    </Suspense>
+  ),
   contact: (
     <Suspense fallback={<PageFallback />}>
       <ContactPage />
@@ -64,6 +75,14 @@ function elementFor(page: PageDef): ReactElement | null {
     return (
       <Suspense fallback={<PageFallback />}>
         <ProjectPage projectId={project} />
+      </Suspense>
+    )
+  }
+  const experiment = labIdOfPage(page.id)
+  if (experiment) {
+    return (
+      <Suspense fallback={<PageFallback />}>
+        <LabExperimentPage id={experiment} />
       </Suspense>
     )
   }

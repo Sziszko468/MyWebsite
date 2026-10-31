@@ -1,7 +1,9 @@
+import { findExperiment } from '../content/lab'
+import { labText } from '../content/labText'
 import { projectMeta } from '../content/projectDetails/meta'
 import type { Language } from '../i18n/config'
 import type { Dictionary } from '../i18n/locales/hu'
-import { projectIdOfPage, type NavPageId, type PageDef } from './pages'
+import { labIdOfPage, projectIdOfPage, type NavPageId, type PageDef } from './pages'
 
 const NAV_IDS: readonly string[] = ['work', 'services', 'about', 'lab', 'contact']
 
@@ -26,7 +28,8 @@ export function ogLocale(lang: Language): string {
 }
 
 /**
- * The title and description of a page in a language. A project's page has its own, written in
+ * The title and description of a page in a language. An experiment's page and the Lab's are titled
+ * from the Lab's words (content/labText.ts). A project's page has its own, written in
  * content/projectDetails/meta.ts; the services, About and contact pages have their own title and description in the
  * dictionary; the other navigation pages are titled by their navigation label; the home page by
  * the brand and the site's tagline; an unknown path says so.
@@ -44,6 +47,20 @@ export function buildDocumentMeta(
   const own = projectId ? projectMeta[projectId] : undefined
   if (own) {
     return { title: `${own.title[lang]} — ${brandName}`, description: own.description[lang], ogType: 'article' }
+  }
+
+  // An experiment is titled by its name; the Lab's own page by its statement.
+  const labId = labIdOfPage(page.id)
+  const experiment = labId ? findExperiment(labId) : undefined
+  if (labId && experiment) {
+    return {
+      ...site,
+      title: `${experiment.name} — ${t.nav.lab} — ${brandName}`,
+      description: experiment.tagline[lang],
+    }
+  }
+  if (page.id === 'lab') {
+    return { ...site, title: `${labText.meta.title[lang]} — ${brandName}`, description: labText.meta.description[lang] }
   }
 
   // These pages describe themselves: what they offer is worth more in a search result than a menu label.

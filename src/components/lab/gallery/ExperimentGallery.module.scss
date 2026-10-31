@@ -1,0 +1,333 @@
+@use '../../../styles/mixins' as m;
+
+.section {
+  padding-block: var(--space-section);
+}
+
+.head {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 56rem;
+}
+
+.title {
+  font-size: var(--fs-display);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.intro {
+  max-width: 40rem;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-normal);
+}
+
+/* A quick way in: every ready experiment, one tap away. */
+.index {
+  margin-top: var(--space-8);
+  padding-block: var(--space-4);
+  border-block: var(--border-width) solid var(--color-divider);
+
+  & ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-6);
+  }
+}
+
+.indexLink {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: var(--size-touch);
+  padding-block: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-decoration: none;
+  text-transform: uppercase;
+
+  @include m.hover {
+    color: var(--color-accent-text);
+  }
+
+  &[data-off] {
+    color: var(--color-text-muted);
+  }
+}
+
+.indexNumber {
+  color: var(--color-accent-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── The spread ──────────────────────────────────────────────────────────── */
+
+.list {
+  display: grid;
+  gap: var(--space-9);
+  margin-top: var(--space-9);
+
+  @include m.up('lg') {
+    gap: var(--space-10);
+  }
+}
+
+.item {
+  min-width: 0;
+  scroll-margin-top: calc(var(--header-height) + var(--space-5));
+}
+
+.reveal {
+  min-width: 0;
+}
+
+.entry {
+  position: relative;
+  display: grid;
+  gap: var(--space-6);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-5);
+    align-items: start;
+  }
+}
+
+.art {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--art-ratio, 4 / 3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--scene-bg);
+  box-shadow: var(--shadow-lg);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    transform var(--dur-slow) var(--ease-out);
+
+  & svg {
+    transition: transform 900ms var(--ease-out);
+  }
+
+  @include m.up('lg') {
+    grid-column: var(--art-column);
+    grid-row: 1;
+  }
+
+  [data-playable='true']:hover & {
+    border-color: var(--color-accent);
+  }
+
+  /* The picture drifts a little against the pointer, like a print on a table. */
+  [data-pointer='active'] & svg {
+    transform: scale(1.04) translate(calc(var(--px, 0) * -10px), calc(var(--py, 0) * -8px));
+  }
+}
+
+.numeral {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-5);
+  color: transparent;
+  font-size: clamp(3rem, 2rem + 6vw, 7rem);
+  font-stretch: var(--fstretch-expanded);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-black);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+
+.copy {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: var(--space-4);
+  min-width: 0;
+
+  @include m.up('lg') {
+    grid-column: var(--copy-column);
+    grid-row: 1;
+    padding-top: var(--space-6);
+  }
+
+  /* The odd entries drop: the spread has a rhythm, not a baseline. */
+  [data-drop='1'] & {
+    @include m.up('lg') {
+      padding-top: var(--space-10);
+    }
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.number {
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+}
+
+.name {
+  font-size: var(--fs-2xl);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.tagline {
+  color: var(--color-text);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+}
+
+.description {
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+.facts {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+  margin: 0;
+
+  & > div {
+    display: grid;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: var(--border-width) solid var(--color-divider);
+  }
+
+  & dt {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+
+  & dd {
+    margin: 0;
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  & li {
+    padding: 2px var(--space-2);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-xs);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    overflow-wrap: anywhere;
+  }
+}
+
+.moves {
+  display: grid;
+  gap: var(--space-1);
+
+  & li {
+    position: relative;
+    padding-left: var(--space-4);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-normal);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.7em;
+      left: 0;
+      width: 0.6rem;
+      height: 2px;
+      background-color: var(--color-accent);
+    }
+  }
+}
+
+/* The link covers the whole entry, so the artwork opens it too, while the words stay selectable text. */
+.open {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--size-touch);
+  margin-top: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-decoration: none;
+  text-transform: uppercase;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus-visible::after {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 6px;
+    border-radius: var(--radius-lg);
+  }
+
+  @include m.hover {
+    color: var(--color-accent-text);
+  }
+}
+
+.arrow {
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.entry:hover .arrow {
+  transform: translateX(6px);
+}
+
+.noPage {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-style: italic;
+}
+
+.entry[data-playable='false'] .art {
+  filter: grayscale(0.85);
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art,
+  .art svg,
+  .arrow {
+    transition: none;
+  }
+
+  [data-pointer='active'] .art svg {
+    transform: none;
+  }
+}

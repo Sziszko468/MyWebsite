@@ -1,0 +1,277 @@
+@use '../../../styles/mixins' as m;
+
+/*
+ * One experiment's screen. The stage fills it; the chrome is a grid laid over the stage whose own
+ * box ignores the pointer, so only the controls take input and every other pixel reaches the scene:
+ *
+ *   top      title (left), theme and language (right)
+ *   middle   notice (left) and the control panel (right on wide screens, a sheet above the dock on a phone)
+ *   bottom   the dock, centred, and the way down to the details
+ */
+.frame {
+  position: relative;
+  isolation: isolate;
+  height: 100svh;
+  min-height: 34rem;
+  overflow: hidden;
+  background-color: var(--scene-bg);
+  color: var(--color-text);
+}
+
+/*
+ * The stage fills the frame, except where the control panel is open on a wide screen: the panel
+ * never covers the scene, so the scene gives it its own column (the canvas is simply narrower).
+ */
+.stageArea {
+  --panel-space: 0px;
+  /* On a wide screen the dock is the only thing under the hint, on a phone the closed panel is too. */
+  --hint-bottom: 10.5rem;
+
+  position: absolute;
+  inset: 0;
+
+  @include m.up('md') {
+    --hint-bottom: 6rem;
+
+    right: var(--panel-space);
+  }
+}
+
+.frame:has([data-lab-panel][data-open='true']) .stageArea {
+  --panel-space: calc(21rem + var(--gutter) * 2);
+
+  @include m.up('md') {
+    border-right: var(--border-width) solid var(--color-divider);
+  }
+}
+
+.chrome {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-content);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--gutter) var(--space-4);
+  pointer-events: none;
+
+  & > * {
+    min-width: 0;
+  }
+
+  /* Only the controls take input. */
+  & a,
+  & button,
+  & input,
+  & label,
+  & [data-lab-ui] {
+    pointer-events: auto;
+  }
+}
+
+/*
+ * On a phone the switches take most of the first row, so the title gets a row of its own below
+ * them and is never squeezed into a sliver. From `md` it is one row: the title left, the switches right.
+ */
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'crumb utils'
+    'title title';
+  align-items: start;
+  column-gap: var(--space-4);
+
+  @include m.up('md') {
+    grid-template-areas: 'heading utils';
+  }
+}
+
+.heading {
+  display: contents;
+
+  @include m.up('md') {
+    display: grid;
+    grid-area: heading;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+}
+
+.crumb {
+  grid-area: crumb;
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  gap: var(--space-2);
+  min-height: var(--size-touch);
+  margin-top: calc(var(--space-2) * -1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-decoration: none;
+  text-transform: uppercase;
+  width: fit-content;
+
+  @include m.up('md') {
+    grid-area: auto;
+  }
+
+  @include m.hover {
+    color: var(--color-text);
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-normal);
+  line-height: 1.1;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  grid-area: title;
+
+  @include m.up('md') {
+    font-size: var(--fs-xl);
+    grid-area: auto;
+  }
+}
+
+.number {
+  color: var(--color-accent-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.utils {
+  grid-area: utils;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: none;
+}
+
+/* ── Middle: notice and panel ─────────────────────────────────────────── */
+
+.middle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  min-height: 0;
+
+  @include m.up('md') {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+.notice {
+  align-self: flex-start;
+  max-width: 24rem;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 2px solid var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+  pointer-events: auto;
+}
+
+.retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-weight: var(--fw-bold);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.side {
+  display: flex;
+  justify-content: flex-start;
+  min-height: 0;
+  max-height: 100%;
+
+  /* A phone: the closed panel is a pill, the open one a sheet that leaves the top half of the stage free. */
+  &:has([aria-expanded='true']) > * {
+    width: 100%;
+    max-height: 62svh;
+  }
+
+  @include m.up('md') {
+    margin-left: auto;
+    max-height: 100%;
+
+    &:has([aria-expanded='true']) > * {
+      width: 21rem;
+      max-height: 100%;
+    }
+  }
+}
+
+/* ── Bottom: dock and the cue to the details ──────────────────────────── */
+
+.bottom {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scrollCue {
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-decoration: none;
+  text-transform: uppercase;
+
+  @include m.up('md') {
+    display: inline-flex;
+  }
+
+  @include m.hover {
+    color: var(--color-text);
+  }
+}
+
+/* The clean view gives the stage the whole frame. */
+.frame[data-clean='true'] .stageArea {
+  right: 0;
+  border-right: 0;
+}
+
+/* The clean view (the generative full view): the stage and nothing else but the way out. */
+.frame[data-clean='true'] {
+  & .heading,
+  & .middle,
+  & .bottom {
+    visibility: hidden;
+  }
+
+  & .utils > :not([data-keep]) {
+    visibility: hidden;
+  }
+}
+
+@supports not (height: 100svh) {
+  .frame {
+    height: 100vh;
+  }
+}

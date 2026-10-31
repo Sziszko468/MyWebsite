@@ -7,7 +7,7 @@ import { I18nProvider } from '../i18n/I18nProvider'
 import { localizedPath, splitLanguage } from '../i18n/paths'
 import { useI18n } from '../i18n/useI18n'
 import { buildDocumentMeta, ogLocale } from './documentMeta'
-import { findPage, type PageDef } from './pages'
+import { findPage, labIdOfPage, type PageDef } from './pages'
 
 /** Sets (or creates) one <meta> tag in the head. */
 function setMeta(attribute: 'name' | 'property', key: string, content: string) {
@@ -95,7 +95,7 @@ export function LanguageLayout() {
     <I18nProvider lang={lang}>
       <DocumentMeta page={page} />
       <ScrollToTarget path={rest} hash={hash} />
-      <AppShell>
+      <AppShell immersive={page ? labIdOfPage(page.id) !== null : false}>
         <Outlet />
       </AppShell>
     </I18nProvider>
