@@ -1,0 +1,444 @@
+@use '../../../../styles/mixins' as m;
+
+/*
+ * The Performance Lab is a bench: the car on a turntable in the middle, the dials on its left, the
+ * measurements on its right. Narrow screens keep the car at the top and put the dials, the airflow
+ * picture, the results and the saved setups in tabs under it; the car is never covered. A short
+ * landscape screen puts that dock beside the car.
+ */
+.lab {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+
+  &[data-wide='true'] {
+    flex-direction: row;
+  }
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    flex-direction: row;
+  }
+}
+
+.side {
+  flex: none;
+  width: 20rem;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--color-bg);
+  scrollbar-width: thin;
+
+  &:first-child {
+    border-right: var(--border-width) solid var(--color-divider);
+  }
+
+  &:last-child {
+    width: 25rem;
+    border-left: var(--border-width) solid var(--color-divider);
+  }
+}
+
+.viewport {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 12rem;
+}
+
+.caption {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  left: var(--space-2);
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-bg) 82%, transparent);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+  pointer-events: none;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+.sub {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.which {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.segments {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+}
+
+.segment {
+  min-height: var(--size-touch);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.param {
+  display: grid;
+  gap: 2px;
+}
+
+.help {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+/* ── The airflow illustration ───────────────────────────────────────── */
+
+.aero {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  background-color: #0d1020;
+
+  @keyframes flow {
+    to {
+      stroke-dashoffset: -36;
+    }
+  }
+}
+
+.road {
+  fill: #1c1c24;
+}
+
+.stream,
+.under {
+  stroke: #6f86ff;
+  stroke-width: 1.8;
+  stroke-dasharray: 10 8;
+  animation: flow 1.6s linear infinite;
+  opacity: 0.85;
+}
+
+.under {
+  stroke: #ff6a6f;
+  stroke-width: 2.2;
+  animation-duration: var(--under, 1.6s);
+}
+
+.carShape {
+  fill: #ff161f;
+  stroke: #f4f0e8;
+  stroke-width: 1.2;
+
+  & circle {
+    fill: #0b0b0d;
+    stroke: #f4f0e8;
+  }
+
+  & rect {
+    fill: #f4f0e8;
+    stroke: none;
+  }
+}
+
+.arrow {
+  stroke: #f4f0e8;
+  stroke-width: 2.4;
+  fill: none;
+  stroke-linecap: round;
+
+  & path {
+    fill: #f4f0e8;
+  }
+
+  & text {
+    fill: #f4f0e8;
+    stroke: none;
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.gapText {
+  fill: #c9c6bf;
+  font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stream,
+  .under {
+    animation: none;
+  }
+}
+
+/* ── Results ────────────────────────────────────────────────────────── */
+
+.facts {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+
+  & div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    align-items: baseline;
+  }
+
+  & dt {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-xs);
+  }
+
+  & dd {
+    margin: 0;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+
+  & th,
+  & td {
+    padding: var(--space-1) var(--space-1);
+    border-bottom: var(--border-width) solid var(--color-divider);
+    text-align: right;
+    vertical-align: top;
+  }
+
+  & thead th {
+    color: var(--color-text-muted);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+  }
+
+  & tbody th {
+    color: var(--color-text-secondary);
+    font-weight: var(--fw-semibold);
+    text-align: left;
+  }
+
+  & th:first-child {
+    text-align: left;
+  }
+
+  & td[data-trend='better'] {
+    color: #1f9d55;
+    font-weight: var(--fw-bold);
+  }
+
+  & td[data-trend='worse'] {
+    color: var(--color-accent-text);
+    font-weight: var(--fw-bold);
+  }
+}
+
+.profile {
+  margin: 0;
+
+  & svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  & figcaption {
+    margin-top: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  & text {
+    fill: var(--color-text-muted);
+    font-size: 8px;
+  }
+}
+
+.axis {
+  stroke: var(--color-border-strong);
+}
+
+.lineA {
+  stroke: var(--color-text);
+  stroke-width: 1.6;
+}
+
+.lineB {
+  stroke: var(--color-accent);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 3;
+}
+
+.keyA,
+.keyB {
+  font-weight: var(--fw-bold);
+}
+
+.keyB {
+  color: var(--color-accent-text);
+}
+
+.verdict {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+
+  &[data-ok='true'] span {
+    color: #1f9d55;
+  }
+}
+
+/* ── Saved setups ───────────────────────────────────────────────────── */
+
+.nameField {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  & input {
+    min-height: var(--size-touch);
+    padding: 0 var(--space-2);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--fs-sm);
+    text-transform: none;
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.4rem, 1fr));
+  gap: var(--space-1);
+}
+
+.slots {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  & li {
+    display: flex;
+    align-items: center;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+}
+
+.slotName {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  overflow: hidden;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: -2px;
+  }
+}
+
+/* ── The dock ───────────────────────────────────────────────────────── */
+
+.dock {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  min-height: 0;
+  border-top: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg);
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    width: min(48%, 26rem);
+    border-top: 0;
+    border-left: var(--border-width) solid var(--color-divider);
+  }
+}
+
+.dockTabs {
+  flex: none;
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.dockBody {
+  max-height: min(48dvh, 28rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+}

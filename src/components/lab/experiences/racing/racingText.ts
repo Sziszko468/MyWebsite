@@ -7,7 +7,7 @@ export const racingText = {
     practice: tri('Gyakorlás', 'Practice', 'Oefenen'),
     trial: tri('Időfutam', 'Time Trial', 'Tijdrit'),
     restart: tri('Újraindítás', 'Restart', 'Opnieuw'),
-    menu: tri('Menü', 'Menu', 'Menu'),
+    menu: tri('Futambeállítások', 'Race settings', 'Raceinstellingen'),
     camera: tri('Kamera', 'Camera', 'Camera'),
     reset: tri('Vissza a pályára', 'Back on track', 'Terug op de baan'),
     soundOn: tri('Hang be', 'Sound on', 'Geluid aan'),

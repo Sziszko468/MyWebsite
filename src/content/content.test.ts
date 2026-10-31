@@ -44,7 +44,8 @@ describe('projects', () => {
   it('link only to addresses that exist: https demos and real routes', () => {
     for (const project of projects) {
       if (project.demoUrl !== null) expect(project.demoUrl, project.id).toMatch(HTTPS)
-      if (project.detailPath !== null) expect(findPage(project.detailPath), `${project.id} → ${project.detailPath}`).toBeDefined()
+      if (project.detailPath !== null)
+        expect(findPage(project.detailPath), `${project.id} → ${project.detailPath}`).toBeDefined()
     }
   })
 
@@ -76,7 +77,7 @@ describe('"What I build"', () => {
 })
 
 describe('the Lab', () => {
-  it('has six experiments in order', () => {
+  it('has ten experiments in order: the six experiments, then the four immersive experiences', () => {
     expect(experiments.map((e) => e.id)).toEqual([
       'particle-universe',
       'liquid-matter',
@@ -84,8 +85,12 @@ describe('the Lab', () => {
       'infinite-space',
       'chromatic-distortion',
       'generative-objects',
+      'model-studio',
+      'racing',
+      'track-architect',
+      'performance-lab',
     ])
-    expect(experiments.map((e) => e.number)).toEqual(['01', '02', '03', '04', '05', '06'])
+    expect(experiments.map((e) => e.number)).toEqual(['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'])
   })
 
   it('gives a page only to an experiment that is ready', () => {
@@ -142,7 +147,12 @@ describe('packages', () => {
     for (const lang of LANGUAGES) {
       const text = [
         dictionaries[lang].home.packages.intro,
-        ...packages.flatMap((p) => [p.tagline[lang], p.audience[lang], ...p.fits.map((f) => f[lang]), ...p.includes.map((i) => i[lang])]),
+        ...packages.flatMap((p) => [
+          p.tagline[lang],
+          p.audience[lang],
+          ...p.fits.map((f) => f[lang]),
+          ...p.includes.map((i) => i[lang]),
+        ]),
       ]
       for (const line of text) expect(line, `${lang}: ${line}`).not.toMatch(promise)
     }

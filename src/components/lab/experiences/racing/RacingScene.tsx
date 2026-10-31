@@ -276,8 +276,9 @@ export default function RacingScene({
     if (frozen) {
       drive.throttle = 0
       drive.steer = 0
-      drive.handbrake = false
-      drive.brake = 1
+      // Held on the grid by the handbrake: the brake pedal alone would reverse the car.
+      drive.handbrake = true
+      drive.brake = 0
     }
 
     const { params: p, samples: lap, onEvent: emit } = latest.current

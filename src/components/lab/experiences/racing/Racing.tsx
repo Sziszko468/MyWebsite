@@ -8,6 +8,7 @@ import { HoldButton, useKeyState } from '../../experience/input'
 import { useStore } from '../../experience/store'
 import { Glyph, Toast, ToolButton } from '../../experience/ui'
 import { useMedia } from '../../experience/useMedia'
+import { award } from '../../progress/progress'
 import { LabAction, LabChoice } from '../../ui/LabControls'
 import { activeSetup } from './carSetup'
 import { formatLapTime } from './lapSim'
@@ -373,10 +374,6 @@ function RacingApp() {
     }
   }, [])
 
-  useEffect(() => {
-    ;(window as unknown as { __raceUi?: unknown }).__raceUi = { engaged }
-  })
-
   const say = useCallback(
     (text: string, tone: Message['tone'] = 'info') => setMessage({ id: Date.now() + Math.random(), text, tone }),
     [],
@@ -398,6 +395,8 @@ function RacingApp() {
           say(fill(t.toast.sector, { n: event.gate, time: formatLapTime(event.time) }))
           break
         case 'lap':
+          // A lap that was really driven (through both gates) is the First Lap; nothing is paid for opening the page.
+          award('lap:first', 20, 'first-lap')
           laps.current.push({ time: event.time, clean: event.clean })
           say(
             fill(event.best ? t.toast.best : event.clean ? t.toast.lap : t.toast.notClean, {

@@ -20,8 +20,6 @@ export const AIR = 1.2
 
 // The car that every setup modifies.
 const WHEELBASE = 3.4
-/** Share of the weight on the front axle at rest. */
-export const FRONT_WEIGHT = 0.46
 const WHEEL_RADIUS = 0.33
 const POWER = 420_000
 const DRIVELINE = 0.93
@@ -58,6 +56,8 @@ export interface CarParams {
   /** Centre of gravity to the rear axle, m. */
   b: number
   inertia: number
+  /** Share of the weight on the front axle at rest, 0 to 1. */
+  frontWeight: number
   cgHeight: number
   /** Tyre friction coefficient, with the springs' effect on it already in. */
   mu: number
@@ -94,6 +94,8 @@ function ratiosFor(finalDrive: number): readonly number[] {
  *  - springs have a best value for grip near 115 N/mm; softer ones roll, stiffer ones skip
  *  - stiff, low cars lose grip on kerbs
  *  - gearing sets the ratio of every gear; tyre grip and mass are the friction coefficient and the weight
+ *  - the weight distribution moves the centre of gravity between the axles: more on the front axle
+ *    steadies braking and bites into corners, less puts more load on the driven rear tyres
  */
 export function deriveCarParams(setup: CarSetup): CarParams {
   const ride = 55 - setup.rideHeight
@@ -105,8 +107,9 @@ export function deriveCarParams(setup: CarSetup): CarParams {
   return {
     mass,
     wheelbase: WHEELBASE,
-    a: WHEELBASE * (1 - FRONT_WEIGHT),
-    b: WHEELBASE * FRONT_WEIGHT,
+    a: WHEELBASE * (1 - setup.weightFront / 100),
+    b: WHEELBASE * (setup.weightFront / 100),
+    frontWeight: setup.weightFront / 100,
     inertia: mass * Math.pow(0.34 * WHEELBASE, 2),
     cgHeight: 0.29 + setup.rideHeight * 0.0005,
     mu: setup.tyreGrip * platform,
@@ -165,7 +168,7 @@ export function topSpeed(params: CarParams): number {
 
 /** The share of the braking that should go to the front for both axles to reach their limit together. */
 export function idealBrakeBias(params: CarParams): number {
-  return FRONT_WEIGHT + (params.mu * params.cgHeight) / params.wheelbase
+  return params.frontWeight + (params.mu * params.cgHeight) / params.wheelbase
 }
 
 /** How much of the best possible braking a bias gives, 0 to 1: the axle that locks first sets the limit. */

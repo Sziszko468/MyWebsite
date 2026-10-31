@@ -24,6 +24,8 @@ export interface CarSetup {
   tyreGrip: number
   /** Mass of the car with the driver, kg. */
   mass: number
+  /** Share of the weight on the front axle, %. */
+  weightFront: number
 }
 
 export type SetupKey = keyof CarSetup
@@ -45,6 +47,7 @@ export const SETUP_RANGES: Record<SetupKey, SetupRange> = {
   gearing: { min: 3.4, max: 5.6, step: 0.05, digits: 2, unit: ':1' },
   tyreGrip: { min: 1.1, max: 1.9, step: 0.02, digits: 2, unit: 'μ' },
   mass: { min: 680, max: 950, step: 5, digits: 0, unit: 'kg' },
+  weightFront: { min: 40, max: 54, step: 0.5, digits: 1, unit: '%' },
 }
 
 export const SETUP_KEYS = Object.keys(SETUP_RANGES) as SetupKey[]
@@ -58,6 +61,7 @@ export const DEFAULT_SETUP: Readonly<CarSetup> = {
   gearing: 4.4,
   tyreGrip: 1.5,
   mass: 780,
+  weightFront: 46,
 }
 
 /** Brings any record inside the ranges: a stored or imported setup may carry anything. */

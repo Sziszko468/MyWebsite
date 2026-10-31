@@ -24,7 +24,7 @@
   width: 100%;
 
   @media (max-width: 36rem) and (orientation: portrait) {
-    --top-h: 6.4rem;
+    --top-h: 7.5rem;
   }
 }
 
@@ -752,12 +752,6 @@
     left: 50%;
     min-width: 9rem;
     transform: translateX(-50%);
-  }
-
-  .race[data-wide='false'] .top {
-    right: auto;
-    left: var(--space-2);
-    max-width: calc(50% - 5rem);
   }
 
   .timing {

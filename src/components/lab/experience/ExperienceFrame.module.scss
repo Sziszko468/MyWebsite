@@ -10,7 +10,8 @@
   display: flex;
   flex-direction: column;
   height: 100svh;
-  min-height: 30rem;
+  /* A usable stage even in a small window, but never taller than the screen: a phone on its side must show the whole application. */
+  min-height: min(30rem, 100svh);
   overflow: hidden;
   background-color: var(--scene-bg);
   color: var(--color-text);

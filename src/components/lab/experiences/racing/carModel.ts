@@ -26,6 +26,11 @@ export interface CarModel {
   body: Group
   helmet: Mesh
   update(pose: CarPose): void
+  /**
+   * Shows a setup on the car: the wings tilt and grow with the downforce, the body sits lower or higher
+   * on its wheels (the ride height, exaggerated four times so it can be seen).
+   */
+  applySetup(setup: { downforce: number; rideHeight: number }): void
   dispose(): void
 }
 
@@ -128,13 +133,19 @@ export function createCarModel(): CarModel {
   helmet.add(visorMesh)
   visorMesh.position.set(0.12, 0.02, 0)
 
-  // Wings.
-  add(body, geo(new BoxGeometry(0.55, 0.03, 1.95)), carbon, 2.1, 0.13, 0)
-  add(body, geo(new BoxGeometry(0.42, 0.025, 1.95)), paint, 2.0, 0.2, 0)
-  for (const side of [-1, 1]) add(body, geo(new BoxGeometry(0.62, 0.22, 0.025)), paint, 2.05, 0.18, side * 0.98)
-  add(body, geo(new BoxGeometry(0.5, 0.035, 1.25)), carbon, -2.12, 0.92, 0)
-  add(body, geo(new BoxGeometry(0.4, 0.03, 1.25)), paint, -2.07, 1.05, 0)
-  for (const side of [-1, 1]) add(body, geo(new BoxGeometry(0.72, 0.52, 0.025)), paint, -2.1, 0.88, side * 0.63)
+  // Wings: groups, so the Performance Lab can tilt and size them with the setup.
+  const frontWing = new Group()
+  frontWing.position.set(2.05, 0.15, 0)
+  body.add(frontWing)
+  add(frontWing, geo(new BoxGeometry(0.55, 0.03, 1.95)), carbon, 0.05, -0.02, 0)
+  add(frontWing, geo(new BoxGeometry(0.42, 0.025, 1.95)), paint, -0.05, 0.05, 0)
+  for (const side of [-1, 1]) add(frontWing, geo(new BoxGeometry(0.62, 0.22, 0.025)), paint, 0, 0.03, side * 0.98)
+  const rearWing = new Group()
+  rearWing.position.set(-2.1, 0.9, 0)
+  body.add(rearWing)
+  add(rearWing, geo(new BoxGeometry(0.5, 0.035, 1.25)), carbon, -0.02, 0.02, 0)
+  add(rearWing, geo(new BoxGeometry(0.4, 0.03, 1.25)), paint, 0.03, 0.15, 0)
+  for (const side of [-1, 1]) add(rearWing, geo(new BoxGeometry(0.72, 0.52, 0.025)), paint, 0, -0.02, side * 0.63)
   add(body, geo(new BoxGeometry(0.1, 0.5, 0.08)), carbon, -2.0, 0.65, 0)
   add(body, geo(new BoxGeometry(0.04, 0.09, 0.22)), brakeLight, -2.25, 0.62, 0, false)
 
@@ -173,15 +184,24 @@ export function createCarModel(): CarModel {
     body.add(arm)
   }
 
+  // How far the body stands off its wheels because of the ride height.
+  let lift = 0
   return {
     root,
     body,
     helmet,
+    applySetup(setup) {
+      const load = (setup.downforce - 3) / 2
+      rearWing.rotation.z = -0.16 * load
+      rearWing.scale.set(1, 1 + 0.18 * load, 1 + 0.06 * load)
+      frontWing.rotation.z = -0.1 * load
+      lift = ((setup.rideHeight - 55) / 1000) * 4
+    },
     update(pose) {
       // Nose dips under braking, squats under power; the body leans out of a corner.
       body.rotation.z = -Math.max(-0.045, Math.min(0.045, pose.ax * 0.0034))
       body.rotation.x = -Math.max(-0.06, Math.min(0.06, pose.ay * 0.0042))
-      body.position.y = 0.02 + Math.min(0.03, Math.abs(pose.ay) * 0.0012)
+      body.position.y = 0.02 + lift + Math.min(0.03, Math.abs(pose.ay) * 0.0012)
       brakeLight.emissiveIntensity = pose.braking ? 5 : 0.5
       for (const wheel of wheels) {
         wheel.spin.rotation.z = -pose.wheelAngle

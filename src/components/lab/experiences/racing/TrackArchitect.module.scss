@@ -1,0 +1,534 @@
+@use '../../../../styles/mixins' as m;
+
+/*
+ * The Architect is a drawing board: a blueprint-dark plan in the middle (it stays dark in both
+ * themes, like paper under a lamp), the elements and the numbers at its sides. Wide: build on the
+ * left, the plan and the live 3D preview in the middle (side by side when there is room), point,
+ * check and project on the right. Narrow: the plan takes the screen, a toolbar over it, the
+ * panels as tabs in a dock under it, and the 3D preview one tap away (it replaces the plan).
+ */
+.architect {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+
+  &[data-wide='true'] {
+    flex-direction: row;
+  }
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    flex-direction: row;
+  }
+}
+
+.side {
+  flex: none;
+  width: 19rem;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--color-bg);
+  scrollbar-width: thin;
+
+  &:first-child {
+    border-right: var(--border-width) solid var(--color-divider);
+  }
+
+  &:last-child {
+    width: 21rem;
+    border-left: var(--border-width) solid var(--color-divider);
+  }
+}
+
+.center {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-bottom: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg);
+}
+
+.toolGroup {
+  gap: 0;
+  padding: 2px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.panes {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+
+  &[data-both='true'] {
+    gap: 2px;
+  }
+}
+
+.pane {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.preview {
+  flex: 1 1 auto;
+}
+
+.help {
+  flex: none;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-left: 2px solid #445cff;
+  background-color: #0d1020;
+  color: #e9e6df;
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    display: none;
+  }
+}
+
+.keys {
+  flex: none;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-top: var(--border-width) solid var(--color-divider);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+/* ── The plan ───────────────────────────────────────────────────────── */
+
+.plan {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background-color: #0d1020;
+  background-image: radial-gradient(circle at 50% 40%, #151a33, #0d1020 70%);
+  color: #f4f0e8;
+}
+
+.planSvg {
+  display: block;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+
+  .plan[data-tool='add'] & {
+    cursor: crosshair;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: -4px;
+  }
+}
+
+.grid {
+  stroke: #445cff;
+  opacity: 0.22;
+
+  & line[data-axis='true'] {
+    stroke: #ff161f;
+    opacity: 1;
+  }
+}
+
+.gravel {
+  stroke: #b9a98a;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+  opacity: 0.38;
+}
+
+.road {
+  fill: #2c2c36;
+  stroke: #f4f0e8;
+  stroke-opacity: 0.75;
+  stroke-linejoin: round;
+}
+
+.kerbRed {
+  stroke: #ff161f;
+  stroke-dasharray: 2.5 2.5;
+}
+
+.kerbWhite {
+  stroke: #f4f0e8;
+  stroke-dasharray: 2.5 2.5;
+  stroke-dashoffset: 2.5;
+}
+
+.centre {
+  stroke: #f4f0e8;
+  stroke-opacity: 0.35;
+}
+
+.arrow {
+  fill: #6f86ff;
+  opacity: 0.9;
+}
+
+.gate {
+  stroke: #445cff;
+  stroke-linecap: round;
+}
+
+.finishA {
+  stroke: #f4f0e8;
+}
+
+.finishB {
+  stroke: #0b0b0d;
+}
+
+.sketch {
+  stroke: #6f86ff;
+}
+
+.issue {
+  fill: #ffb020;
+  stroke: #0b0b0d;
+  stroke-width: 1;
+
+  &[data-severity='error'] {
+    fill: #ff161f;
+  }
+
+  & text {
+    fill: #fff;
+    stroke: none;
+    font-size: 15px;
+    font-weight: 900;
+  }
+}
+
+.point {
+  cursor: pointer;
+}
+
+.hit {
+  fill: transparent;
+}
+
+.dot {
+  fill: #445cff;
+  stroke: #f4f0e8;
+
+  .point[data-selected='true'] & {
+    fill: #ff161f;
+  }
+}
+
+.startRing {
+  stroke: #f4f0e8;
+  stroke-dasharray: 3 3;
+}
+
+/* ── Panels ─────────────────────────────────────────────────────────── */
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+.segments {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+}
+
+.segment {
+  min-height: var(--size-touch);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: var(--color-text);
+    background-color: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.elements,
+.actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.2rem, 1fr));
+  gap: var(--space-1);
+}
+
+.which {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.fieldset {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  & > legend {
+    padding: 0;
+    margin-bottom: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+}
+
+.coords {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.verdict {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+
+  &[data-ok='true'] span {
+    color: #1f9d55;
+  }
+
+  &[data-ok='false'] span {
+    color: var(--color-accent-text);
+  }
+}
+
+.issues,
+.rules,
+.slots {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.issues li {
+  display: grid;
+  gap: 2px;
+  padding-left: var(--space-3);
+  border-left: 3px solid var(--color-border-strong);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+
+  &[data-severity='error'] {
+    border-left-color: var(--color-accent);
+  }
+}
+
+.badge {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.link {
+  justify-self: start;
+  min-height: var(--size-touch);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent-text);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+
+  & div {
+    display: grid;
+  }
+
+  & dt {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+  }
+
+  & dd {
+    margin: 0;
+    font-size: var(--fs-md);
+    font-weight: var(--fw-black);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.rules li {
+  display: flex;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+
+  &[data-pass='true'] {
+    color: var(--color-text);
+  }
+
+  &[data-pass='false'] {
+    color: var(--color-text-secondary);
+  }
+
+  & em {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-style: normal;
+  }
+}
+
+.nameField {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  & input {
+    min-height: var(--size-touch);
+    padding: 0 var(--space-2);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--fs-sm);
+    text-transform: none;
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.sub {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.slots li {
+  display: flex;
+  align-items: center;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.slotName {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  overflow: hidden;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: -2px;
+  }
+}
+
+/* ── The dock ───────────────────────────────────────────────────────── */
+
+.dock {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  min-height: 0;
+  border-top: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg);
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    width: min(48%, 24rem);
+    border-top: 0;
+    border-left: var(--border-width) solid var(--color-divider);
+  }
+}
+
+.dockTabs {
+  flex: none;
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.dockBody {
+  max-height: min(42dvh, 24rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+}

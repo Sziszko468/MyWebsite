@@ -2,7 +2,6 @@ import {
   AERO_FRONT,
   AIR,
   BRAKE_FORCE,
-  FRONT_WEIGHT,
   G,
   bestDriveForce,
   brakeEfficiency,
@@ -69,7 +68,7 @@ export function simulateLap(track: TrackSamples, params: CarParams): LapEstimate
 
   // What the car can add to its speed in a step, m/s² (positive accelerating, negative braking).
   const accelerate = (v: number, i: number) => {
-    const rearShare = 1 - FRONT_WEIGHT
+    const rearShare = 1 - params.frontWeight
     // Traction: the rear tyres, with the weight the acceleration moves onto them.
     const tractionAcc =
       (mu * (G * rearShare + downPerSquare * v * v * (1 - AERO_FRONT))) / Math.max(0.3, 1 - mu * reach)
@@ -128,7 +127,7 @@ export function simulateLap(track: TrackSamples, params: CarParams): LapEstimate
   while (v < target && zeroTo100 < 30) {
     const drive = bestDriveForce(params, Math.max(v, 1)) / m
     const traction =
-      (mu * (G * (1 - FRONT_WEIGHT) + downPerSquare * v * v * (1 - AERO_FRONT))) / Math.max(0.3, 1 - mu * reach)
+      (mu * (G * (1 - params.frontWeight) + downPerSquare * v * v * (1 - AERO_FRONT))) / Math.max(0.3, 1 - mu * reach)
     const a = Math.min(drive, traction) - dragPerSquare * v * v - roll
     v += Math.max(a, 0.5) * 0.01
     zeroTo100 += 0.01
