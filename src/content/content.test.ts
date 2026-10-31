@@ -77,7 +77,7 @@ describe('"What I build"', () => {
 })
 
 describe('the Lab', () => {
-  it('has eleven experiments in order: the six experiments, then the immersive experiences', () => {
+  it('has twelve experiments in order: the six experiments, then the immersive experiences', () => {
     expect(experiments.map((e) => e.id)).toEqual([
       'particle-universe',
       'liquid-matter',
@@ -90,8 +90,22 @@ describe('the Lab', () => {
       'track-architect',
       'performance-lab',
       'generative-art',
+      'sound-world',
     ])
-    expect(experiments.map((e) => e.number)).toEqual(['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'])
+    expect(experiments.map((e) => e.number)).toEqual([
+      '01',
+      '02',
+      '03',
+      '04',
+      '05',
+      '06',
+      '07',
+      '08',
+      '09',
+      '10',
+      '11',
+      '12',
+    ])
   })
 
   it('gives a page only to an experiment that is ready', () => {

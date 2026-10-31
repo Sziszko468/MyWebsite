@@ -67,7 +67,7 @@
   left: var(--hint-left, 50%);
   /* Above the dock and the closed panel on a phone; the stage's owner may move it. */
   bottom: var(--hint-bottom, 10.5rem);
-  max-width: min(88%, 30rem);
+  max-width: min(88%, var(--hint-max, 30rem));
   margin: 0;
   transform: translateX(-50%);
   color: var(--color-text-secondary);

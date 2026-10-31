@@ -384,7 +384,7 @@ export const en: Dictionary = {
     },
     lab: {
       title: 'The Lab',
-      intro: 'An experimental space for creative solutions: six working, interactive WebGL experiments and four full 3D experiences. Three samples here, the full set waits in the Lab.',
+      intro: 'An experimental space for creative solutions: six working, interactive WebGL experiments and six full 3D experiences. Three samples here, the full set waits in the Lab.',
       enter: 'Enter the Lab',
       open: 'Open',
     },

@@ -23,6 +23,7 @@ export type LabId =
   | 'track-architect'
   | 'performance-lab'
   | 'generative-art'
+  | 'sound-world'
 
 /**
  * `experiment` is a short piece of art that answers the pointer; `experience` is a small
@@ -197,6 +198,20 @@ export const experiments: readonly LabExperiment[] = [
     status: 'ready',
     accent: 'red',
     tech: ['Three.js', 'CPU particle simulation', 'Seeded generation', 'PNG export'],
+  },
+  {
+    id: 'sound-world',
+    kind: 'experience',
+    number: '12',
+    name: 'Sound Reactive World',
+    tagline: tri(
+      'Hangra mozgó 3D világ: a basszus formál, a magas hangok fényt gyújtanak.',
+      'A 3D world that moves with sound: the bass shapes it, the high notes light it.',
+      'Een 3D-wereld die met geluid beweegt: de bas vormt, de hoge tonen geven licht.',
+    ),
+    status: 'ready',
+    accent: 'blue',
+    tech: ['Web Audio API', 'FFT analysis', 'GPU-driven particles', 'Synthesised loop'],
   },
 ]
 

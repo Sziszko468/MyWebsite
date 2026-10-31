@@ -21,6 +21,8 @@ import { useLabFrame, useLabScene } from '../core/sceneContext'
 import { useDisposable, createIcoSphere } from '../core/resources'
 import { createSurfaceUniforms, SurfaceDriver } from '../core/surface'
 import { CORE_FRAGMENT, CORE_VERTEX, DUST_FRAGMENT, DUST_VERTEX } from './heroShaders'
+import { Zones, type ZoneBridge } from './LabZonesScene'
+import { ZONE_CAMERA } from './zones'
 
 /** Where the core sits in its stage, set by the page from its layout. */
 export interface HeroLayout {
@@ -29,9 +31,11 @@ export interface HeroLayout {
   shiftY: number
   /** The core fills this fraction of the smaller half-extent of the view. */
   fit: number
+  /** How far behind the origin the core stands (it keeps its place and size on screen). Default 0. */
+  z?: number
 }
 
-const HERO_CAMERA = { fov: 40, position: [0, 0, 6.4] as [number, number, number] }
+const HERO_CAMERA = ZONE_CAMERA
 const CAMERA_Z = HERO_CAMERA.position[2]
 /** The undisturbed sphere is radius 1; waves and noise push it out to about this. */
 const HEADROOM = 1.38
@@ -74,8 +78,11 @@ function Core({ layout }: { layout: RefObject<HeroLayout> }) {
     // Where the core sits and how big it is: it fills `fit` of the smaller half-extent of the view.
     const halfHeight = Math.tan(MathUtils.degToRad(HERO_CAMERA.fov) / 2) * CAMERA_Z
     const halfWidth = halfHeight * s.aspect
-    g.scale.setScalar((Math.min(halfWidth, halfHeight) * place.fit) / HEADROOM)
-    g.position.set(place.shiftX * halfWidth, place.shiftY * halfHeight, 0)
+    // Further back it needs more world units to look the same size and stay where the layout puts it.
+    const z = place.z ?? 0
+    const depth = (CAMERA_Z - z) / CAMERA_Z
+    g.scale.setScalar((Math.min(halfWidth, halfHeight) * place.fit * depth) / HEADROOM)
+    g.position.set(place.shiftX * halfWidth * depth, place.shiftY * halfHeight * depth, z)
 
     // Dragging spins it with inertia; the pointer's position also tilts it a little, like looking at it.
     pointer.takeDrag(st.drag)
@@ -269,13 +276,18 @@ function Orbits() {
   )
 }
 
-/** The Lab hero's scene: a contour-line core that the pointer dents and a click sends waves across, a halo of dust and thin orbits. */
-export default function LabHeroScene({ layout }: { layout: RefObject<HeroLayout> }) {
+/**
+ * The Lab's space: a contour-line core that the pointer dents and a click sends waves across, a
+ * halo of dust and thin orbits, and in front of them the four zones, each the way into one of the
+ * four applications.
+ */
+export default function LabHeroScene({ layout, zones }: { layout: RefObject<HeroLayout>; zones: ZoneBridge }) {
   return (
     <>
       <Orbits />
       <Core layout={layout} />
       <Dust />
+      <Zones bridge={zones} layout={layout} />
     </>
   )
 }

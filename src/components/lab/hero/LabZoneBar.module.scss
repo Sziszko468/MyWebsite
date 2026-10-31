@@ -1,0 +1,150 @@
+@use '../../../styles/mixins' as m;
+
+/*
+ * The four zones as links. Wide: one row of four, each under its object in the 3D space. Narrow:
+ * two columns, then one, in the page's flow, with everything written out (there is no object
+ * above each to say the rest).
+ */
+.bar {
+  width: 100%;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include m.up('sm') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+.item {
+  display: flex;
+  min-width: 0;
+}
+
+.link {
+  position: relative;
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    border-color var(--duration-base, 200ms) var(--ease-out),
+    background-color var(--duration-base, 200ms) var(--ease-out),
+    transform var(--duration-base, 200ms) var(--ease-out);
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}
+
+.item[data-active='true'] .link,
+.item[data-opening='true'] .link {
+  border-color: var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-bg) 92%, transparent);
+
+  @media (hover: hover) {
+    transform: translateY(-3px);
+  }
+}
+
+.number {
+  color: var(--color-accent-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+}
+
+.name {
+  font-size: var(--fs-md);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.tagline {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+/* One thing to do there: a preview of the interaction, in words. */
+.preview {
+  padding-left: var(--space-2);
+  border-left: 2px solid var(--color-divider);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+
+  @include m.up('lg') {
+    @media (max-height: 52rem) {
+      display: none;
+    }
+  }
+}
+
+.item[data-active='true'] .preview {
+  border-left-color: var(--color-accent);
+  color: var(--color-text-secondary);
+}
+
+.enter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  color: var(--color-accent-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  & svg {
+    transition: transform var(--duration-base, 200ms) var(--ease-out);
+  }
+}
+
+.item[data-active='true'] .enter svg {
+  transform: translateX(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link,
+  .enter svg {
+    transition: none;
+  }
+
+  .item[data-active='true'] .link,
+  .item[data-opening='true'] .link {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .item[data-active='true'] .link {
+    border-color: Highlight;
+  }
+}

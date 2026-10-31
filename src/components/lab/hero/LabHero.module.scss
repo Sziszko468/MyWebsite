@@ -1,9 +1,11 @@
 @use '../../../styles/mixins' as m;
 
 /*
- * The Lab's first screen. Wide: the stage fills the whole hero behind the type, the core sits to
- * the right of it. Narrow: the type comes first and the stage is its own block under it, so a
- * finger on the object never fights the page's scroll (the stage lets vertical swipes through).
+ * The Lab's first screen, a 3D space with four zones. Wide: the stage fills the whole hero in three
+ * bands: the headline on top, the space in the middle (the four objects stand above their links)
+ * and the links below. Narrow: the space is its own block first, under the transparent header, then
+ * the type, then the links in the page's flow, so a finger on an object never fights the page's
+ * scroll (the stage lets vertical swipes through).
  */
 .hero {
   position: relative;
@@ -16,7 +18,7 @@
 
   @include m.up('lg') {
     display: block;
-    min-height: 100svh;
+    min-height: max(100svh, 40rem);
   }
 }
 
@@ -24,8 +26,8 @@
   position: relative;
   order: 1;
   /* Narrow screens: the object comes first, under the transparent header, and the words follow it. */
-  height: calc(var(--header-height) + min(42svh, 24rem));
-  min-height: 17rem;
+  height: calc(var(--header-height) + clamp(16rem, 48svh, 30rem));
+  min-height: 19rem;
 
   @include m.up('lg') {
     position: absolute;
@@ -35,7 +37,7 @@
   }
 }
 
-/* Keeps the type readable over the brightest part of the field, and only there. */
+/* Keeps the type readable over the field, and only where the type is: the top of the space. */
 .scrim {
   display: none;
 
@@ -45,10 +47,10 @@
     inset: 0;
     z-index: var(--z-base);
     background: linear-gradient(
-      to right,
-      color-mix(in srgb, var(--scene-bg) 86%, transparent) 0%,
-      color-mix(in srgb, var(--scene-bg) 60%, transparent) 34%,
-      transparent 58%
+      to bottom,
+      color-mix(in srgb, var(--scene-bg) 84%, transparent) 0%,
+      color-mix(in srgb, var(--scene-bg) 58%, transparent) 26%,
+      transparent 46%
     );
     pointer-events: none;
   }
@@ -73,11 +75,30 @@
   }
 
   @include m.up('lg') {
-    align-content: end;
-    min-height: calc(100svh - var(--header-height));
-    padding-top: var(--space-8);
-    padding-bottom: var(--space-8);
+    /* The headline on top, the free band for the space in the middle, the four links at the bottom. */
+    grid-template-rows: auto minmax(8rem, 1fr) auto;
+    align-content: stretch;
+    gap: 0;
+    min-height: max(calc(100svh - var(--header-height)), 36rem);
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+
+    & > :nth-child(2) {
+      grid-row: 3;
+    }
   }
+}
+
+.caption {
+  margin: 0;
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  line-height: var(--lh-normal);
+  text-transform: uppercase;
 }
 
 .copy {
@@ -85,19 +106,29 @@
   justify-items: start;
   gap: var(--space-5);
   width: min(100%, 44rem);
+
+  @include m.up('lg') {
+    width: min(100%, 36rem);
+    gap: var(--space-4);
+  }
   /* The headline's size comes from the column it sits in (see .title). */
   container-type: inline-size;
 }
 
-/* The hint sits under the object, not in the middle of the type. */
+/* The hint sits low in the space, above the links, not in the middle of the type. */
 .stage {
   top: var(--header-height);
   --hint-bottom: var(--space-4);
 
   @include m.up('lg') {
-    --hint-left: 70%;
-    --hint-bottom: 8.5rem;
+    --hint-left: 50%;
+    --hint-max: 64rem;
+    --hint-bottom: 14.5rem;
     top: 0;
+  }
+
+  @media (min-width: 64rem) and (max-height: 52rem) {
+    --hint-bottom: 10rem;
   }
 }
 
@@ -144,6 +175,15 @@
   color: var(--color-text-secondary);
   font-size: var(--fs-lg);
   line-height: var(--lh-normal);
+
+  @include m.up('lg') {
+    font-size: var(--fs-md);
+  }
+
+  /* A short screen gives its height to the space; the lead is in the page title and the description. */
+  @media (min-width: 64rem) and (max-height: 52rem) {
+    display: none;
+  }
 }
 
 .actions {
@@ -162,6 +202,10 @@
   font-size: var(--fs-sm);
   font-weight: var(--fw-bold);
   letter-spacing: var(--ls-wider);
+
+  @media (min-width: 64rem) and (max-height: 52rem) {
+    display: none;
+  }
 }
 
 .word {
@@ -196,9 +240,9 @@
 
   @include m.up('lg') {
     position: absolute;
+    top: var(--space-6);
     right: var(--gutter);
-    bottom: var(--space-6);
-    width: 21rem;
+    width: 18rem;
     max-width: calc(100% - var(--gutter) * 2);
   }
 }
@@ -223,7 +267,6 @@
 
   @include m.up('lg') {
     justify-items: center;
-    padding-left: 44%;
   }
 }
 

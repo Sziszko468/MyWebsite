@@ -493,6 +493,53 @@ function ArtEngineArt() {
   )
 }
 
+function SoundArt() {
+  // A ring of bars (the spectrum, bass at the bottom) round a waveform, with the ring a beat sends out.
+  const bars = Array.from({ length: 72 }, (_, i) => i)
+  const wave = Array.from({ length: 49 }, (_, i) => {
+    const x = 150 + (i / 48) * 500
+    const y = 270 + Math.sin(i * 0.9) * 26 * Math.sin((i / 48) * Math.PI) + Math.sin(i * 2.3) * 9
+    return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`
+  }).join(' ')
+  return (
+    <svg className={styles.svg} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" focusable="false">
+      <rect width={W} height={H} className={styles.bg} />
+      <circle cx="400" cy="270" r="220" fill="none" className={styles.inkLine} strokeWidth="1.5" opacity="0.25" />
+      <circle cx="400" cy="270" r="262" fill="none" className={styles.inkLine} strokeWidth="1" opacity="0.14" />
+      {bars.map((i) => {
+        const angle = (i / bars.length) * Math.PI * 2
+        const strength = 0.25 + 0.75 * Math.abs(Math.sin(angle / 2 + 0.4)) * (0.55 + 0.45 * Math.sin(i * 1.7))
+        const inner = 118
+        const outer = inner + 16 + strength * 78
+        return (
+          <line
+            key={i}
+            x1={400 + Math.cos(angle) * inner}
+            y1={270 + Math.sin(angle) * inner}
+            x2={400 + Math.cos(angle) * outer}
+            y2={270 + Math.sin(angle) * outer}
+            className={i % 6 === 0 ? styles.blueLine : styles.redLine}
+            strokeWidth="5"
+            strokeLinecap="round"
+            opacity={0.55 + strength * 0.4}
+          />
+        )
+      })}
+      <circle cx="400" cy="270" r="92" className={styles.ink} opacity="0.12" />
+      <path
+        d={wave}
+        fill="none"
+        className={styles.inkLine}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="610" cy="130" r="9" className={styles.blue} />
+      <circle cx="610" cy="130" r="24" fill="none" className={styles.blueLine} strokeWidth="2" opacity="0.5" />
+    </svg>
+  )
+}
+
 const ART: Record<LabId, () => ReactElement> = {
   'particle-universe': ParticleArt,
   'liquid-matter': LiquidArt,
@@ -505,6 +552,7 @@ const ART: Record<LabId, () => ReactElement> = {
   'track-architect': ArchitectArt,
   'performance-lab': PerformanceArt,
   'generative-art': ArtEngineArt,
+  'sound-world': SoundArt,
 }
 
 export function LabArt({ id }: { id: LabId }) {

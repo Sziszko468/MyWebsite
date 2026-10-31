@@ -1,0 +1,308 @@
+@use '../../../../styles/mixins' as m;
+
+/*
+ * The Sound Reactive World is a picture with a few hands on it. Wide: the world fills the screen and
+ * the three panels (sound, reaction, look) are a column beside it. Narrow: the world above, the panels as
+ * tabs under it, and the main button and the status stay over the picture, within a thumb's reach.
+ * A short landscape screen puts the dock beside the world.
+ */
+.world {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+
+  &[data-wide='true'] {
+    flex-direction: row;
+  }
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    flex-direction: row;
+  }
+}
+
+.viewport {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 12rem;
+  background-color: #0b0b0d;
+  /* The overlays lay themselves out by the width of the world, not of the screen. */
+  container-type: inline-size;
+}
+
+.quick {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 2;
+  display: flex;
+  padding: 2px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-bg) 86%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  & button,
+  & button * {
+    white-space: nowrap;
+  }
+
+  /* The label is as long as it is: the shared button would cut it at a few words' width. */
+  & button > span:last-child {
+    max-width: none;
+  }
+}
+
+/* Says what is listening. With the microphone on it cannot be missed. */
+.badge {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: min(22rem, calc(100% - 9.5rem));
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-bg) 86%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  line-height: 1.3;
+  text-transform: uppercase;
+
+  &[data-state='mic'] {
+    border-color: #ffb020;
+  }
+
+  /* A narrow world: under the main button, not beside it, so neither is squeezed. */
+  @container (max-width: 36rem) {
+    top: 4.4rem;
+    right: auto;
+    left: var(--space-2);
+    max-width: calc(100% - var(--space-4));
+  }
+}
+
+.dot {
+  flex: none;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: var(--color-text-muted);
+
+  .badge[data-state='sound'] & {
+    background-color: var(--color-accent);
+  }
+
+  .badge[data-state='mic'] & {
+    background-color: #ffb020;
+    animation: breathe 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.hint {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  left: var(--space-2);
+  z-index: 1;
+  max-width: 36rem;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  background-color: color-mix(in srgb, #0b0b0d 70%, transparent);
+  color: #f4f0e8;
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+  pointer-events: none;
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    display: none;
+  }
+}
+
+.side {
+  flex: none;
+  width: 21rem;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-left: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg);
+  scrollbar-width: thin;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+/* What the microphone will and will not do, before it is asked for. */
+.consent {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--border-width) solid #ffb020;
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, #ffb020 8%, transparent);
+
+  & h3 {
+    margin: 0;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-black);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+  }
+
+  & ul {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding-left: var(--space-4);
+    list-style: disc;
+    font-size: var(--fs-sm);
+    line-height: var(--lh-normal);
+  }
+}
+
+.consentActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.meters {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.meter {
+  display: grid;
+  grid-template-columns: 4.6rem minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+
+  & i {
+    display: block;
+    height: 0.5rem;
+    overflow: hidden;
+    border-radius: 2px;
+    background-color: var(--color-divider);
+  }
+
+  & b {
+    display: block;
+    height: 100%;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+}
+
+.palettes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-2);
+}
+
+.palette {
+  display: grid;
+  gap: var(--space-1);
+  min-height: var(--size-touch);
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: var(--color-text);
+    background-color: color-mix(in srgb, var(--color-text) 10%, transparent);
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.swatches {
+  display: flex;
+  height: 0.9rem;
+  overflow: hidden;
+  border-radius: 2px;
+
+  & span {
+    flex: 1;
+  }
+}
+
+.dock {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  min-height: 0;
+  border-top: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg);
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    width: min(48%, 24rem);
+    border-top: 0;
+    border-left: var(--border-width) solid var(--color-divider);
+  }
+}
+
+.dockTabs {
+  flex: none;
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.dockBody {
+  max-height: min(42dvh, 24rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none !important;
+  }
+}

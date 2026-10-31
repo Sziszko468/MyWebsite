@@ -494,6 +494,50 @@ export const experimentText: Record<LabId, ExperimentText> = {
       'Een interactief generatief kunstwerk van deeltjes. De aanwijzer of je vinger werkt erop in; met een toetsenbord veranderen de schuifregelaars en de knop Willekeurig de compositie.',
     ),
   },
+  'sound-world': {
+    description: tri(
+      'Fényből épült világ, amely a hanggal mozog. A basszus kifelé tolja a középső formát, a spektrum egy részecskeburkot mozgat, a magas hangok két fényt gyújtanak, minden ütem egy fénygyűrűt indít, a hullámforma pedig körbe és alul látszik. Játszd le a beépített dalt, amelyet az oldal maga szintetizál, vagy hagyd, hogy a mikrofonodon át hallgasson: ez csak akkor történik meg, ha megerősíted, miután elolvastad, mit tesz. Semmit nem rögzít, nem ment és nem küld el.',
+      'A world made of light that moves with sound. The bass pushes out a central form, the spectrum moves a shell of particles, the high notes switch on two lights, every beat sends out a ring of light, and the waveform is drawn round it and along its floor. Play the loop the page synthesises itself, or let it listen through your microphone: that only happens if you confirm, after reading what it does. Nothing is recorded, stored or sent.',
+      'Een wereld van licht die met geluid beweegt. De bas duwt een centrale vorm naar buiten, het spectrum beweegt een schil van deeltjes, de hoge tonen schakelen twee lichten in, elke maat stuurt een lichtring uit en de golfvorm wordt eromheen en over de vloer getekend. Speel de loop die de pagina zelf synthetiseert, of laat hem luisteren via je microfoon: dat gebeurt alleen als je bevestigt, nadat je hebt gelezen wat het doet. Er wordt niets opgenomen, bewaard of verstuurd.',
+    ),
+    interactions: [
+      tri(
+        'Három forrás: néma előnézet, beépített hang, mikrofon (csak megerősítés után)',
+        'Three sources: a silent preview, a built-in sound, the microphone (only after you confirm)',
+        'Drie bronnen: een stille voorvertoning, een ingebouwd geluid, de microfoon (alleen na je bevestiging)',
+      ),
+      tri(
+        'Basszus → forma, spektrum → részecskék, magas hangok → fények',
+        'Bass → form, spectrum → particles, highs → lights',
+        'Bas → vorm, spectrum → deeltjes, hoge tonen → licht',
+      ),
+      tri(
+        'Tempó, hangerő, érzékenység, simítás és négy színpaletta',
+        'Tempo, volume, sensitivity, smoothing and four palettes',
+        'Tempo, volume, gevoeligheid, gladstrijken en vier paletten',
+      ),
+      tri(
+        'Kattintás vagy koppintás: fényimpulzus. A hang soha nem kerül rögzítésre vagy elküldésre',
+        'Click or tap for a pulse of light. Sound is never recorded or sent',
+        'Klik of tik voor een lichtpuls. Geluid wordt nooit opgenomen of verstuurd',
+      ),
+    ],
+    hint: tri(
+      'Kattints a térre egy impulzusért. Indítsd el a néma előnézetet vagy a beépített hangot, hogy mozogjon.',
+      'Click the space for a pulse. Run the silent preview or play the built-in sound to set it moving.',
+      'Klik op de ruimte voor een puls. Start de stille voorvertoning of speel het ingebouwde geluid om hem te laten bewegen.',
+    ),
+    hintTouch: tri(
+      'Koppints a térre egy impulzusért. Indítsd el a néma előnézetet vagy a beépített hangot, hogy mozogjon.',
+      'Tap the space for a pulse. Run the silent preview or play the built-in sound to set it moving.',
+      'Tik op de ruimte voor een puls. Start de stille voorvertoning of speel het ingebouwde geluid om hem te laten bewegen.',
+    ),
+    stageLabel: tri(
+      'Hangra mozgó 3D világ: középen egy forma, körülötte részecskék és két fény, a hullámforma pedig körbe és alul húzódik. A hangforrást és a beállításokat a panel adja; a mikrofon csak a megerősítésed után kapcsol be.',
+      'A 3D world that moves with sound: a form at the middle, particles and two lights round it, the waveform drawn round it and along the floor. The panel gives the sound source and the settings; the microphone only switches on after you confirm.',
+      'Een 3D-wereld die met geluid beweegt: een vorm in het midden, deeltjes en twee lichten eromheen, de golfvorm eromheen en over de vloer. Het paneel geeft de geluidsbron en de instellingen; de microfoon gaat pas aan nadat je bevestigt.',
+    ),
+  },
 }
 
 /** Words shared by every part of the Lab. */
@@ -515,20 +559,31 @@ export const labText = {
     ),
     cta: tri('Fedezd fel a kísérleteket', 'Explore the experiments', 'Ontdek de experimenten'),
     hint: tri(
-      'Mozgasd a pointert az objektumon. Kattints egy impulzushoz.',
-      'Move your pointer over the object. Click for a pulse.',
-      'Beweeg je aanwijzer over het object. Klik voor een puls.',
+      'Mozgasd a pointert egy zóna fölé, hogy felébredjen. Kattints a belépéshez.',
+      'Move over a zone to wake it. Click to enter.',
+      'Beweeg over een zone om hem wakker te maken. Klik om binnen te gaan.',
     ),
     hintTouch: tri(
-      'Húzd az ujjad az objektumon. Koppints egy impulzushoz.',
-      'Drag over the object. Tap for a pulse.',
-      'Sleep over het object. Tik voor een puls.',
+      'Koppints egy zónára a kiválasztáshoz, még egyszer a belépéshez.',
+      'Tap a zone to select it, tap again to enter.',
+      'Tik op een zone om hem te kiezen, tik nog eens om binnen te gaan.',
     ),
     stageLabel: tri(
-      'Interaktív generatív objektum: a pointer deformálja, a kattintás hullámot indít rajta. A nyílbillentyűk és az Enter ugyanezt teszik.',
-      'An interactive generative object: the pointer deforms it and a click sends a wave across it. The arrow keys and Enter do the same.',
-      'Een interactief generatief object: de aanwijzer vervormt het en een klik stuurt er een golf overheen. De pijltjestoetsen en Enter doen hetzelfde.',
+      'Interaktív 3D tér négy zónával: Model Studio, Racing Experience, Track Architect és Performance Lab. A pointer elfordítja a nézőpontot, a kattintás belép a zónába; a nyílbillentyűk és az Enter ugyanezt teszik. A tér alatti linkek ugyanoda visznek.',
+      'An interactive 3D space with four zones: Model Studio, Racing Experience, Track Architect and Performance Lab. The pointer turns the view and a click enters a zone; the arrow keys and Enter do the same. The links under the space lead to the same places.',
+      'Een interactieve 3D-ruimte met vier zones: Model Studio, Racing Experience, Track Architect en Performance Lab. De aanwijzer draait het beeld en een klik gaat een zone binnen; de pijltjestoetsen en Enter doen hetzelfde. De links onder de ruimte leiden naar dezelfde plekken.',
     ),
+  },
+
+  zones: {
+    label: tri('A Lab négy zónája', 'The four zones of the Lab', 'De vier zones van het Lab'),
+    enter: tri('Belépés', 'Enter', 'Betreden'),
+    selected: tri(
+      'Kiválasztva: {name}. Koppints még egyszer a belépéshez.',
+      'Selected: {name}. Tap again to enter.',
+      'Gekozen: {name}. Tik nog eens om binnen te gaan.',
+    ),
+    opening: tri('{name} megnyitása…', 'Opening {name}…', '{name} wordt geopend…'),
   },
 
   meta: {
@@ -538,29 +593,29 @@ export const labText = {
       'Lab: een experimenteel digitaal universum',
     ),
     description: tri(
-      'Hat interaktív WebGL-kísérlet és négy teljes 3D élmény: modellezőstúdió, versenyautós vezetés, pályatervező és járműhangoló labor.',
-      'Six interactive WebGL experiments and four full 3D experiences: a modelling studio, a driving experience, a track designer and a car tuning lab.',
-      'Zes interactieve WebGL-experimenten en vier volledige 3D-ervaringen: een modelleerstudio, een rij-ervaring, een baanontwerper en een afstemlab voor auto’s.',
+      'Hat interaktív WebGL-kísérlet és hat teljes 3D élmény: modellezőstúdió, versenyautós vezetés, pályatervező, járműhangoló labor, generatív művészet és hangra reagáló világ.',
+      'Six interactive WebGL experiments and six full 3D experiences: a modelling studio, a driving experience, a track designer, a car tuning lab, generative art and a world that moves with sound.',
+      'Zes interactieve WebGL-experimenten en zes volledige 3D-ervaringen: een modelleerstudio, een rij-ervaring, een baanontwerper, een afstemlab voor auto’s, generatieve kunst en een wereld die met geluid beweegt.',
     ),
   },
 
   gallery: {
     title: tri('A kísérletek', 'The experiments', 'De experimenten'),
     intro: tri(
-      'Hat önálló kísérlet. Mindegyik saját fényt, saját szabályokat és saját módot kapott arra, hogy válaszoljon neked. Alattuk négy teljes értékű élmény vár.',
-      'Six separate experiments. Each has its own light, its own rules and its own way of answering you. Below them wait four full experiences.',
-      'Zes afzonderlijke experimenten. Elk heeft zijn eigen licht, zijn eigen regels en zijn eigen manier om je te antwoorden. Daaronder wachten vier volledige ervaringen.',
+      'Hat önálló kísérlet. Mindegyik saját fényt, saját szabályokat és saját módot kapott arra, hogy válaszoljon neked. Alattuk hat teljes értékű élmény vár.',
+      'Six separate experiments. Each has its own light, its own rules and its own way of answering you. Below them wait six full experiences.',
+      'Zes afzonderlijke experimenten. Elk heeft zijn eigen licht, zijn eigen regels en zijn eigen manier om je te antwoorden. Daaronder wachten zes volledige ervaringen.',
     ),
     open: tri('Kísérlet megnyitása', 'Open the experiment', 'Experiment openen'),
     technology: tri('Technológia', 'Technology', 'Technologie'),
     interaction: tri('Interakció', 'Interaction', 'Interactie'),
     status: tri('Állapot', 'Status', 'Status'),
     listLabel: tri('Kísérletek listája', 'List of experiments', 'Lijst van experimenten'),
-    experiencesTitle: tri('A négy élmény', 'The four experiences', 'De vier ervaringen'),
+    experiencesTitle: tri('A hat élmény', 'The six experiences', 'De zes ervaringen'),
     experiencesIntro: tri(
-      'Négy kis alkalmazás, nem csak látvány: modellezz, vezess, tervezz pályát és hangolj autót. Egymással is összekapcsolódnak: a saját pályád és a hangolt autód a Racing Experience-ben fut.',
-      'Four small applications, not only visuals: model, drive, design a circuit and tune a car. They connect: your own track and your tuned car run in the Racing Experience.',
-      'Vier kleine toepassingen, niet alleen beeld: modelleer, rijd, ontwerp een circuit en stem een auto af. Ze zijn gekoppeld: je eigen baan en afgestelde auto rijden in de Racing Experience.',
+      'Hat kis alkalmazás, nem csak látvány: modellezz, vezess, tervezz pályát, hangolj autót, alkoss generatív művészetet és játssz a hanggal. Néhány összekapcsolódik: a saját pályád és a hangolt autód a Racing Experience-ben fut.',
+      'Six small applications, not only visuals: model, drive, design a circuit, tune a car, make generative art and play with sound. Some connect: your own track and your tuned car run in the Racing Experience.',
+      'Zes kleine toepassingen, niet alleen beeld: modelleer, rijd, ontwerp een circuit, stem een auto af, maak generatieve kunst en speel met geluid. Sommige zijn gekoppeld: je eigen baan en afgestelde auto rijden in de Racing Experience.',
     ),
     noPage: tri('Még nincs megnyitható oldala', 'No page to open yet', 'Nog geen pagina om te openen'),
   },
