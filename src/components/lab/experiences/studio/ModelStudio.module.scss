@@ -100,6 +100,29 @@
   pointer-events: none;
 }
 
+/*
+ * A group of tools stays on one line: on a narrow screen it scrolls sideways (and its buttons shrink a
+ * little) rather than wrapping into rows that cover the model.
+ */
+.toolbar > .toolGroup {
+  flex-wrap: nowrap;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (max-width: 24rem) {
+    & button {
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+      padding-inline: 0.25rem;
+    }
+  }
+}
+
 .toolGroup {
   gap: 0;
   padding: 2px;
@@ -405,4 +428,52 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
   gap: var(--space-1);
+}
+
+.seedField {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  & input {
+    min-height: var(--size-touch);
+    padding: 0 var(--space-2);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.genRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.genRow button,
+.genRow button * {
+  white-space: nowrap;
+}
+
+button.surprise {
+  flex-direction: row;
+  gap: var(--space-2);
+  width: 100%;
+
+  & > span:last-child {
+    max-width: none;
+  }
 }

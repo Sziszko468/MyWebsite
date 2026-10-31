@@ -12,6 +12,7 @@ export const artifactText = {
     model: tri('3D modell', '3D model', '3D-model'),
     track: tri('Pálya', 'Track design', 'Baanontwerp'),
     setup: tri('Autóbeállítás', 'Vehicle setup', 'Auto-instelling'),
+    artwork: tri('Generatív alkotás', 'Generative artwork', 'Generatief kunstwerk'),
   },
   empty: tri(
     'Még nincs mentett alkotás. A Model Studióban, a Track Architectben és a Performance Labban a „Mentés az alkotások közé” gombbal tehetsz ide egyet.',
@@ -147,6 +148,14 @@ export const artifactText = {
         'Hasonlíts össze két különböző autóbeállítást a Performance Labban.',
         'Compare two different car setups in Performance Lab.',
         'Vergelijk twee verschillende auto-instellingen in Performance Lab.',
+      ),
+    },
+    'creative-explorer': {
+      name: tri('Creative Explorer', 'Creative Explorer', 'Creatieve ontdekker'),
+      how: tri(
+        'Exportálj vagy ments el egy generatív alkotást a Generative Art Engine-ben.',
+        'Export or keep a generative artwork in the Generative Art Engine.',
+        'Exporteer of bewaar een generatief kunstwerk in de Generative Art Engine.',
       ),
     },
     'first-creation': {

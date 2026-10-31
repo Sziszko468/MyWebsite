@@ -27,6 +27,7 @@ export const studioText = {
   tabs: {
     label: tri('Panelek', 'Panels', 'Panelen'),
     add: tri('Hozzáad', 'Add', 'Toevoegen'),
+    generate: tri('Generál', 'Generate', 'Genereer'),
     transform: tri('Transzform', 'Transform', 'Transform'),
     material: tri('Anyag', 'Material', 'Materiaal'),
     light: tri('Fény', 'Light', 'Licht'),
@@ -45,6 +46,44 @@ export const studioText = {
       'A jelenet megtelt: legfeljebb {max} objektum fér bele.',
       'The scene is full: it holds at most {max} objects.',
       'De scène is vol: er passen maximaal {max} objecten in.',
+    ),
+  },
+  generate: {
+    title: tri('Procedurális generátor', 'Procedural generator', 'Procedurele generator'),
+    note: tri(
+      'Néhány számból épít kompozíciót. Ugyanazok a számok mindig ugyanazt a modellt adják; a kézzel rakott objektumokhoz nem nyúl.',
+      'Builds a composition from a few numbers. The same numbers always give the same model, and it leaves the objects you placed by hand alone.',
+      'Bouwt een compositie uit een paar getallen. Dezelfde getallen geven altijd hetzelfde model en je met de hand geplaatste objecten blijven staan.',
+    ),
+    seed: tri('Mag (seed)', 'Seed', 'Seed'),
+    complexity: tri('Geometria összetettsége', 'Geometry complexity', 'Geometrische complexiteit'),
+    variation: tri('Formák változatossága', 'Shape variation', 'Vormvariatie'),
+    scale: tri('Méret', 'Scale', 'Schaal'),
+    rotation: tri('Elforgatás', 'Rotation', 'Rotatie'),
+    distortion: tri('Torzítás', 'Distortion', 'Vervorming'),
+    symmetry: tri('Szimmetria', 'Symmetry', 'Symmetrie'),
+    generate: tri('Generálás', 'Generate', 'Genereren'),
+    randomize: tri('Véletlen', 'Randomize', 'Willekeurig'),
+    unexpected: tri('Valami váratlan', 'Create something unexpected', 'Maak iets onverwachts'),
+    unexpectedNote: tri(
+      'Új jelenet egy gombnyomásra: forma, anyag, szín és fény. A jelenlegit lecseréli, de a Visszavonás visszahozza.',
+      'A new scene in one press: shape, material, colour and light. It replaces the current one, and Undo brings it back.',
+      'Een nieuwe scène met één druk: vorm, materiaal, kleur en licht. Het vervangt de huidige en Ongedaan maken haalt die terug.',
+    ),
+    generated: tri(
+      'Kész: {count} objektum (seed {seed}).',
+      'Done: {count} objects (seed {seed}).',
+      'Klaar: {count} objecten (seed {seed}).',
+    ),
+    surprised: tri(
+      'Új jelenet készült (seed {seed}). A Visszavonás visszahozza a régit.',
+      'A new scene was made (seed {seed}). Undo brings the old one back.',
+      'Een nieuwe scène is gemaakt (seed {seed}). Ongedaan maken haalt de oude terug.',
+    ),
+    noRoom: tri(
+      'Nincs hely: a jelenet megtelt, törölj néhány objektumot.',
+      'No room: the scene is full, delete a few objects.',
+      'Geen ruimte: de scène is vol, verwijder een paar objecten.',
     ),
   },
   hierarchy: {

@@ -450,6 +450,50 @@ export const experimentText: Record<LabId, ExperimentText> = {
       'Een 3D-weergave van de raceauto met een illustratieve luchtstroom. De instellingen en resultaten staan ook als tekst en tabellen in de panelen.',
     ),
   },
+  'generative-art': {
+    description: tri(
+      'Tízezernyi részecske egy alakzat körül, amelyet te formálsz: alakzat, léptékű torzítás, zaj, forgás, gravitáció, turbulencia és szín. A pointer eltaszítja vagy magához húzza őket, a kattintás szétrobbantja, a véletlen gomb új kompozíciót ad. Minden alkotás néhány számból áll, ezért elmentheted, letöltheted, képként exportálhatod.',
+      'Tens of thousands of particles around a shape you form: the formation, distortion, noise, rotation, gravity, turbulence and colour. The pointer pushes or pulls them, a click blasts them apart, and the random button makes a new composition. Every piece is a handful of numbers, so you can keep it, download it or export it as an image.',
+      'Tienduizenden deeltjes rond een vorm die je zelf vormgeeft: formatie, vervorming, ruis, rotatie, zwaartekracht, turbulentie en kleur. De aanwijzer duwt of trekt ze, een klik blaast ze uiteen en de willekeurknop maakt een nieuwe compositie. Elk werk bestaat uit een handvol getallen, dus je kunt het bewaren, downloaden of als beeld exporteren.',
+    ),
+    interactions: [
+      tri(
+        'Tizenegy paraméter: darabszám, sebesség, erő, gravitáció, turbulencia, torzítás, zaj, forgás, méret',
+        'Eleven parameters: count, speed, force, gravity, turbulence, distortion, noise, rotation, scale',
+        'Elf parameters: aantal, snelheid, kracht, zwaartekracht, turbulentie, vervorming, ruis, rotatie, schaal',
+      ),
+      tri(
+        'A pointer taszít vagy vonz, a kattintás szétveti a részecskéket',
+        'The pointer pushes or pulls, a click throws the particles apart',
+        'De aanwijzer duwt of trekt, een klik gooit de deeltjes uiteen',
+      ),
+      tri(
+        'Véletlen kompozíció, visszaállítás, öt színpaletta, hat alakzat',
+        'Random composition, reset, five palettes, six formations',
+        'Willekeurige compositie, reset, vijf paletten, zes formaties',
+      ),
+      tri(
+        'PNG kép, JSON paraméterfájl és mentés a Digitális alkotások közé',
+        'PNG image, a JSON parameter file and saving to Digital Artifacts',
+        'PNG-beeld, een JSON-parameterbestand en opslaan bij Digitale creaties',
+      ),
+    ],
+    hint: tri(
+      'Mozgasd a pointert a részecskék között, kattints, vagy nyomd meg a Véletlen gombot.',
+      'Move the pointer through the particles, click, or press Randomize.',
+      'Beweeg de aanwijzer door de deeltjes, klik of druk op Willekeurig.',
+    ),
+    hintTouch: tri(
+      'Húzd az ujjad a részecskék között, koppints, vagy nyomd meg a Véletlen gombot.',
+      'Drag a finger through the particles, tap, or press Randomize.',
+      'Sleep een vinger door de deeltjes, tik of druk op Willekeurig.',
+    ),
+    stageLabel: tri(
+      'Interaktív generatív alkotás részecskékkel. A pointer vagy az ujjad hat rájuk; billentyűzettel a panel csúszkái és a Véletlen gomb változtatják a kompozíciót.',
+      'An interactive generative artwork made of particles. The pointer or your finger acts on them; with a keyboard, the panel sliders and the Randomize button change the composition.',
+      'Een interactief generatief kunstwerk van deeltjes. De aanwijzer of je vinger werkt erop in; met een toetsenbord veranderen de schuifregelaars en de knop Willekeurig de compositie.',
+    ),
+  },
 }
 
 /** Words shared by every part of the Lab. */
@@ -626,7 +670,11 @@ export const labText = {
       'Automatisch past zich aan je apparaat aan en gaat zelf omlaag als de beeldsnelheid zakt.',
     ),
     qualityNow: tri('Most: {name}', 'Now: {name}', 'Nu: {name}'),
-    noWebglTitle: tri('A 3D nézet itt nem érhető el', 'The 3D view is not available here', 'De 3D-weergave is hier niet beschikbaar'),
+    noWebglTitle: tri(
+      'A 3D nézet itt nem érhető el',
+      'The 3D view is not available here',
+      'De 3D-weergave is hier niet beschikbaar',
+    ),
     noWebglText: tri(
       'Ez a böngésző nem tud WebGL 2-t futtatni, ezért ez az élmény itt nem indulhat el. A Lab többi része (a kísérletek és a leírások) továbbra is használható.',
       'This browser cannot run WebGL 2, so this experience cannot start here. The rest of the Lab, the experiments and the descriptions, still works.',

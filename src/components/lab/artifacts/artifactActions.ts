@@ -26,6 +26,7 @@ export const HOME: Record<ArtifactType, LabId> = {
   model: 'model-studio',
   track: 'track-architect',
   setup: 'performance-lab',
+  artwork: 'generative-art',
 }
 
 /** Puts a work into its experience's store and says which experience to open; null if the work is damaged. */
@@ -44,6 +45,12 @@ export async function openArtifact(artifact: Artifact): Promise<LabId | null> {
     const setup = (artifact.payload as { setup?: unknown }).setup ?? artifact.payload
     replaceCurrent(sanitizeSetup(setup), '')
     return HOME.setup
+  }
+  if (artifact.type === 'artwork') {
+    const { sanitizeParams, setParams } = await import('../experiences/art/artParams')
+    if ((artifact.payload as { version?: unknown }).version !== 1) return null
+    setParams(sanitizeParams(artifact.payload), '')
+    return HOME.artwork
   }
   const { parseStudioDoc } = await import('../experiences/studio/studioDoc')
   const doc = parseStudioDoc(artifact.payload)

@@ -19,7 +19,7 @@ export interface Progress {
 export interface AchievementDef {
   id: string
   /** The experience it belongs to, for the list. */
-  area: 'studio' | 'racing' | 'architect' | 'performance' | 'artifacts'
+  area: 'studio' | 'racing' | 'architect' | 'performance' | 'artifacts' | 'art'
   xp: number
 }
 
@@ -31,6 +31,7 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
   { id: 'track-designer', area: 'architect', xp: 60 },
   { id: 'engineer-mind', area: 'performance', xp: 60 },
   { id: 'first-creation', area: 'artifacts', xp: 30 },
+  { id: 'creative-explorer', area: 'art', xp: 40 },
 ]
 
 const KEY = 'lab:progress'

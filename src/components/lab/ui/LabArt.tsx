@@ -456,6 +456,43 @@ function PerformanceArt() {
   )
 }
 
+function ArtEngineArt() {
+  // Particles round a ring, thrown outwards where a pointer went through.
+  const dots = Array.from({ length: 160 }, (_, i) => i)
+  return (
+    <svg className={styles.svg} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" focusable="false">
+      <rect width={W} height={H} className={styles.bg} />
+      {dots.map((i) => {
+        const angle = (i / dots.length) * Math.PI * 2 * 3 + (i % 7) * 0.05
+        const base = 150 + (i % 5) * 9
+        // Near the "pointer" at the right of the ring the particles are pushed out.
+        const near = Math.max(0, 1 - Math.hypot(Math.cos(angle) - 0.9, Math.sin(angle) + 0.1) / 0.9)
+        const radius = base + near * 80 + ((i * 37) % 11)
+        return (
+          <circle
+            key={i}
+            cx={400 + Math.cos(angle) * radius * 1.35}
+            cy={270 + Math.sin(angle) * radius * 0.78}
+            r={2.4 + (i % 4) * 0.9}
+            className={i % 5 === 0 ? styles.blue : i % 3 === 0 ? styles.ink : styles.red}
+            opacity={0.5 + (i % 4) * 0.12}
+          />
+        )
+      })}
+      <circle
+        cx="660"
+        cy="250"
+        r="34"
+        fill="none"
+        className={styles.inkLine}
+        strokeWidth="2"
+        strokeDasharray="6 8"
+        opacity="0.7"
+      />
+    </svg>
+  )
+}
+
 const ART: Record<LabId, () => ReactElement> = {
   'particle-universe': ParticleArt,
   'liquid-matter': LiquidArt,
@@ -467,6 +504,7 @@ const ART: Record<LabId, () => ReactElement> = {
   racing: RacingArt,
   'track-architect': ArchitectArt,
   'performance-lab': PerformanceArt,
+  'generative-art': ArtEngineArt,
 }
 
 export function LabArt({ id }: { id: LabId }) {

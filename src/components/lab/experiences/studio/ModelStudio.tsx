@@ -35,14 +35,20 @@ import {
   type StudioObject,
   type Vec3,
 } from './studioDoc'
+import { GEN_RANGES, SYMMETRIES, randomGen, type GenParams } from './studioGenerator'
 import {
+  applyGenerator,
   commit,
+  createUnexpected,
+  generator,
+  hasGenerated,
   patchUi,
   readSavedProject,
   redo,
   replaceDoc,
   saveProject,
   select,
+  setGenerator,
   setMessage,
   studio,
   undo,
@@ -57,7 +63,7 @@ const StudioScene = lazy(() => import('./StudioScene'))
 
 const CAMERA = { fov: 42, position: [6, 5, 8] as [number, number, number], near: 0.1, far: 400 }
 
-type TabId = 'add' | 'transform' | 'material' | 'light' | 'project'
+type TabId = 'add' | 'generate' | 'transform' | 'material' | 'light' | 'project'
 type Text = ReturnType<typeof useLocalized<typeof studioText>>
 
 const SHAPE_ICONS: Record<ShapeKind, string> = {
@@ -103,6 +109,135 @@ function AddPanel({ t }: { t: Text }) {
         ))}
       </div>
       {full && <Toast message={fill(t.add.full, { max: MAX_OBJECTS })} tone="warning" />}
+    </PanelSection>
+  )
+}
+
+function GeneratePanel({ t }: { t: Text }) {
+  const params = useStore(generator, (s) => s)
+  const message = useStore(studio, (s) => s.message)
+  const full = useStore(studio, (s) => s.doc.objects.length >= MAX_OBJECTS)
+
+  // Once something has been generated the sliders work on it live, as one undo step.
+  const tweak = (patch: Partial<GenParams>) => {
+    setGenerator(patch)
+    if (hasGenerated()) applyGenerator()
+  }
+  const report = (count: number) =>
+    setMessage(count > 0 ? fill(t.generate.generated, { count, seed: generator.get().seed }) : t.generate.noRoom)
+  const randomize = () => {
+    setGenerator(randomGen(1 + Math.floor(Math.random() * GEN_RANGES.seed.max)))
+    report(applyGenerator())
+  }
+  const surprise = () => {
+    const seed = 1 + Math.floor(Math.random() * GEN_RANGES.seed.max)
+    createUnexpected(seed)
+    setMessage(fill(t.generate.surprised, { seed }))
+  }
+
+  return (
+    <PanelSection title={t.generate.title}>
+      <p className={styles.note}>{t.generate.note}</p>
+      <LabSlider
+        label={t.generate.complexity}
+        value={params.complexity}
+        min={GEN_RANGES.complexity.min}
+        max={GEN_RANGES.complexity.max}
+        step={GEN_RANGES.complexity.step}
+        onChange={(complexity) => tweak({ complexity })}
+      />
+      <LabSlider
+        label={t.generate.variation}
+        value={params.variation}
+        min={GEN_RANGES.variation.min}
+        max={GEN_RANGES.variation.max}
+        step={GEN_RANGES.variation.step}
+        format={(v) => `${Math.round(v * 100)}%`}
+        onChange={(variation) => tweak({ variation })}
+      />
+      <LabSlider
+        label={t.generate.scale}
+        value={params.scale}
+        min={GEN_RANGES.scale.min}
+        max={GEN_RANGES.scale.max}
+        step={GEN_RANGES.scale.step}
+        format={(v) => `${v.toFixed(2)}×`}
+        onChange={(scale) => tweak({ scale })}
+      />
+      <LabSlider
+        label={t.generate.rotation}
+        value={params.rotation}
+        min={GEN_RANGES.rotation.min}
+        max={GEN_RANGES.rotation.max}
+        step={GEN_RANGES.rotation.step}
+        format={(v) => `${Math.round(v * 100)}%`}
+        onChange={(rotation) => tweak({ rotation })}
+      />
+      <LabSlider
+        label={t.generate.distortion}
+        value={params.distortion}
+        min={GEN_RANGES.distortion.min}
+        max={GEN_RANGES.distortion.max}
+        step={GEN_RANGES.distortion.step}
+        format={(v) => `${Math.round(v * 100)}%`}
+        onChange={(distortion) => tweak({ distortion })}
+      />
+      <LabChoice<string>
+        label={t.generate.symmetry}
+        value={String(params.symmetry)}
+        options={SYMMETRIES.map((n) => ({ value: String(n), label: `${n}×` }))}
+        onChange={(value) => tweak({ symmetry: Number(value) })}
+        columns={3}
+      />
+      <label className={styles.seedField}>
+        <span>{t.generate.seed}</span>
+        <input
+          type="number"
+          inputMode="numeric"
+          min={GEN_RANGES.seed.min}
+          max={GEN_RANGES.seed.max}
+          value={params.seed}
+          onChange={(event) => {
+            const seed = Number(event.currentTarget.value)
+            if (Number.isFinite(seed)) tweak({ seed })
+          }}
+        />
+      </label>
+      <div className={styles.genRow}>
+        <ToolButton
+          tone="accent"
+          label={t.generate.generate}
+          icon={
+            <Glyph>
+              <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18 16l.8 2.2L21 19l-2.2.8L18 22l-.8-2.2L15 19l2.2-.8z" />
+            </Glyph>
+          }
+          disabled={full && !hasGenerated()}
+          onClick={() => report(applyGenerator())}
+        />
+        <ToolButton
+          label={t.generate.randomize}
+          icon={
+            <Glyph>
+              <path d="M4 7h4l8 10h4M4 17h4l3-4M13 11l3-4h4M18 5l2 2-2 2M18 15l2 2-2 2" />
+            </Glyph>
+          }
+          disabled={full && !hasGenerated()}
+          onClick={randomize}
+        />
+      </div>
+      <p className={styles.note}>{t.generate.unexpectedNote}</p>
+      <ToolButton
+        className={styles.surprise}
+        label={t.generate.unexpected}
+        icon={
+          <Glyph>
+            <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1M12 8l1.2 2.8L16 12l-2.8 1.2L12 16l-1.2-2.8L8 12l2.8-1.2z" />
+          </Glyph>
+        }
+        onClick={surprise}
+      />
+      {message && <Toast message={message} tone={message === t.generate.noRoom ? 'warning' : 'info'} />}
     </PanelSection>
   )
 }
@@ -854,6 +989,15 @@ function StudioApp() {
       ),
     },
     {
+      id: 'generate' as const,
+      label: t.tabs.generate,
+      icon: (
+        <Glyph>
+          <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18 16l.8 2.2L21 19l-2.2.8L18 22l-.8-2.2L15 19l2.2-.8z" />
+        </Glyph>
+      ),
+    },
+    {
       id: 'transform' as const,
       label: t.tabs.transform,
       icon: (
@@ -909,6 +1053,7 @@ function StudioApp() {
               <HierarchyPanel t={t} />
             </>
           )}
+          {tab === 'generate' && <GeneratePanel t={t} />}
           {tab === 'transform' && <TransformPanel t={t} />}
           {tab === 'material' && <MaterialPanel t={t} />}
           {tab === 'light' && <LightPanel t={t} />}
@@ -947,6 +1092,7 @@ function StudioApp() {
 
       {wide ? (
         <aside className={styles.side} aria-label={t.tabs.label}>
+          <GeneratePanel t={t} />
           <TransformPanel t={t} />
           <MaterialPanel t={t} />
           <LightPanel t={t} />

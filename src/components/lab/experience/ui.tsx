@@ -1,4 +1,4 @@
-import { useId, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { cx } from '../../../utils/cx'
 import styles from './ui.module.scss'
 
@@ -143,13 +143,25 @@ interface TabBarProps<T extends string> {
 /** Tabs with the keyboard behaviour of the platform: arrow keys move, Home and End jump. */
 export function TabBar<T extends string>({ label, tabs, value, onChange, className }: TabBarProps<T>) {
   const base = useId()
+  const row = useRef<HTMLDivElement>(null)
+  // A row that scrolls sideways keeps the selected tab in view, however it was chosen. Only the row
+  // moves: the page never scrolls because a tab was picked.
+  useEffect(() => {
+    const strip = row.current
+    const tab = document.getElementById(`${base}-${value}`)
+    if (!strip || !tab || strip.scrollWidth <= strip.clientWidth) return
+    const from = tab.getBoundingClientRect().left - strip.getBoundingClientRect().left + strip.scrollLeft
+    const to = from + tab.offsetWidth
+    if (from < strip.scrollLeft) strip.scrollLeft = from
+    else if (to > strip.scrollLeft + strip.clientWidth) strip.scrollLeft = to - strip.clientWidth
+  }, [base, value])
   const move = (index: number) => {
     const target = tabs[(index + tabs.length) % tabs.length]
     onChange(target.id)
     document.getElementById(`${base}-${target.id}`)?.focus()
   }
   return (
-    <div className={cx(styles.tabs, className)} role="tablist" aria-label={label}>
+    <div ref={row} className={cx(styles.tabs, className)} role="tablist" aria-label={label}>
       {tabs.map((tab, index) => (
         <button
           key={tab.id}

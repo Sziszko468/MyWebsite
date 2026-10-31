@@ -59,6 +59,10 @@
     border-top: 3px solid var(--color-text);
   }
 
+  &[data-type='artwork'] {
+    border-top: 3px solid #ff6a6f;
+  }
+
   &[data-type='model'] {
     border-top: 3px solid var(--color-accent);
   }

@@ -74,7 +74,7 @@
 }
 
 .toolLabel {
-  max-width: 6.5em;
+  max-width: 8.5em;
   overflow-wrap: break-word;
 }
 
@@ -173,21 +173,32 @@
 
 /* ── Tabs ───────────────────────────────────────────────────────────────── */
 
+/*
+ * The tabs share the row, each at least as wide as its own label. When there are too many for a narrow
+ * screen the row scrolls sideways (the selected tab is scrolled into view) instead of crushing labels.
+ */
 .tabs {
   display: flex;
   gap: 2px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .tab {
   display: inline-flex;
-  flex: 1 1 0;
+  flex: 1 0 auto;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-width: 0;
   min-height: var(--size-touch);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1);
+  white-space: nowrap;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
@@ -197,6 +208,10 @@
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   cursor: pointer;
+
+  @media (min-width: 48rem) {
+    padding-inline: var(--space-2);
+  }
 
   &[aria-selected='true'] {
     border-bottom-color: var(--color-accent);

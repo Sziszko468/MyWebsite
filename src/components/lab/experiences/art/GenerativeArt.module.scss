@@ -1,0 +1,212 @@
+@use '../../../../styles/mixins' as m;
+
+/*
+ * The art engine is a canvas with a few hands on it. Wide: the picture fills the screen and the four
+ * panels (shape, motion, colour, keeping) are a column beside it. Narrow: the picture above, the
+ * panels as tabs below it, and the three actions you reach for most (Randomize, Pause, Reset)
+ * stay over the picture within a thumb's reach. A short landscape screen puts the dock beside it.
+ */
+.art {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+
+  &[data-wide='true'] {
+    flex-direction: row;
+  }
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    flex-direction: row;
+  }
+}
+
+.viewport {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 12rem;
+  background-color: #0b0b0d;
+}
+
+.quick {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 2;
+  display: flex;
+  gap: 0;
+  padding: 2px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-bg) 86%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.quick button,
+.quick button *,
+.randomRow button,
+.randomRow button * {
+  white-space: nowrap;
+}
+
+.quick button {
+  min-width: 4.6rem;
+}
+
+.randomRow button {
+  min-width: 6.2rem;
+}
+
+.seedField {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  & input {
+    min-height: var(--size-touch);
+    padding: 0 var(--space-2);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.hint {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  left: var(--space-2);
+  z-index: 1;
+  max-width: 36rem;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  background-color: color-mix(in srgb, #0b0b0d 70%, transparent);
+  color: #f4f0e8;
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+  pointer-events: none;
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    display: none;
+  }
+}
+
+.side {
+  flex: none;
+  width: 21rem;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-left: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg);
+  scrollbar-width: thin;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+.palettes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-2);
+}
+
+.palette {
+  display: grid;
+  gap: var(--space-1);
+  min-height: var(--size-touch);
+  padding: var(--space-2);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: var(--color-text);
+    background-color: color-mix(in srgb, var(--color-text) 10%, transparent);
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.swatches {
+  display: flex;
+  height: 0.9rem;
+  overflow: hidden;
+  border-radius: 2px;
+
+  & span {
+    flex: 1;
+  }
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: var(--space-1);
+}
+
+.dock {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  min-height: 0;
+  border-top: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg);
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    width: min(48%, 24rem);
+    border-top: 0;
+    border-left: var(--border-width) solid var(--color-divider);
+  }
+}
+
+.dockTabs {
+  flex: none;
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.dockBody {
+  max-height: min(42dvh, 24rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  @media (orientation: landscape) and (max-height: 32rem) {
+    flex: 1 1 auto;
+    max-height: none;
+  }
+}

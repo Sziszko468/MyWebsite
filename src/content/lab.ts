@@ -22,6 +22,7 @@ export type LabId =
   | 'racing'
   | 'track-architect'
   | 'performance-lab'
+  | 'generative-art'
 
 /**
  * `experiment` is a short piece of art that answers the pointer; `experience` is a small
@@ -182,6 +183,20 @@ export const experiments: readonly LabExperiment[] = [
     status: 'ready',
     accent: 'graphite',
     tech: ['Simplified lap simulation', 'Aero flow visualisation', 'A/B comparison', 'Shared car model'],
+  },
+  {
+    id: 'generative-art',
+    kind: 'experience',
+    number: '11',
+    name: 'Generative Art Engine',
+    tagline: tri(
+      'Hozz létre saját generatív alkotást: részecskék, formák, színek.',
+      'Make your own generative artwork: particles, forms, colour.',
+      'Maak je eigen generatieve kunst: deeltjes, vormen, kleur.',
+    ),
+    status: 'ready',
+    accent: 'red',
+    tech: ['Three.js', 'CPU particle simulation', 'Seeded generation', 'PNG export'],
   },
 ]
 

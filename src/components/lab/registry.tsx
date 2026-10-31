@@ -18,4 +18,5 @@ export const EXPERIMENT_COMPONENTS: Partial<Record<LabId, LazyExoticComponent<Co
   racing: lazy(() => import('./experiences/racing/Racing')),
   'track-architect': lazy(() => import('./experiences/racing/TrackArchitect')),
   'performance-lab': lazy(() => import('./experiences/racing/PerformanceLab')),
+  'generative-art': lazy(() => import('./experiences/art/GenerativeArt')),
 }

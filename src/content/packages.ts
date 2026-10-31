@@ -60,8 +60,16 @@ export const packages: readonly ServicePackage[] = [
       'Voor bedrijven en particulieren die een eenvoudige webpresentie willen opzetten.',
     ),
     fits: [
-      tri('Bemutatkozó weboldal vállalkozásnak', 'An introductory website for a business', 'Een introductiewebsite voor een bedrijf'),
-      tri('Személyes vagy szakmai bemutatkozó oldal', 'A personal or professional profile page', 'Een persoonlijke of professionele profielpagina'),
+      tri(
+        'Bemutatkozó weboldal vállalkozásnak',
+        'An introductory website for a business',
+        'Een introductiewebsite voor een bedrijf',
+      ),
+      tri(
+        'Személyes vagy szakmai bemutatkozó oldal',
+        'A personal or professional profile page',
+        'Een persoonlijke of professionele profielpagina',
+      ),
       tri('Kisebb, tartalomközpontú weboldal', 'A small, content-focused website', 'Een kleine, inhoudelijke website'),
     ],
     includes: [
@@ -105,7 +113,11 @@ export const packages: readonly ServicePackage[] = [
         'Extending an existing website with new sections',
         'Een bestaande website uitbreiden met nieuwe secties',
       ),
-      tri('Interaktív elemek és egyedi komponensek', 'Interactive elements and custom components', 'Interactieve elementen en maatwerkcomponenten'),
+      tri(
+        'Interaktív elemek és egyedi komponensek',
+        'Interactive elements and custom components',
+        'Interactieve elementen en maatwerkcomponenten',
+      ),
       tri(
         'Külső szolgáltatás bekötése a projekt keretein belül',
         'Connecting an external service within the project scope',
@@ -144,8 +156,16 @@ export const packages: readonly ServicePackage[] = [
       'Voor opdrachtgevers die een maatwerk-webapplicatie of een complexer digitaal product willen laten bouwen.',
     ),
     fits: [
-      tri('Foglalási, nyilvántartási vagy kezelőfelületű alkalmazás', 'A booking, records or management application', 'Een boekings-, registratie- of beheerapplicatie'),
-      tri('Digitális termék több felhasználói szerepkörrel', 'A digital product with several user roles', 'Een digitaal product met meerdere gebruikersrollen'),
+      tri(
+        'Foglalási, nyilvántartási vagy kezelőfelületű alkalmazás',
+        'A booking, records or management application',
+        'Een boekings-, registratie- of beheerapplicatie',
+      ),
+      tri(
+        'Digitális termék több felhasználói szerepkörrel',
+        'A digital product with several user roles',
+        'Een digitaal product met meerdere gebruikersrollen',
+      ),
       tri(
         'Meglévő folyamat digitalizálása webalkalmazással',
         'Taking an existing process online as a web application',
@@ -161,7 +181,11 @@ export const packages: readonly ServicePackage[] = [
       ),
       tri('Adatbázis-integráció', 'Database integration', 'Database-integratie'),
       tri('API-kapcsolatok', 'API connections', 'API-koppelingen'),
-      tri('Az alkalmazásarchitektúra kialakítása', 'Shaping the application architecture', 'Opzet van de applicatiearchitectuur'),
+      tri(
+        'Az alkalmazásarchitektúra kialakítása',
+        'Shaping the application architecture',
+        'Opzet van de applicatiearchitectuur',
+      ),
     ],
   },
   {
@@ -184,7 +208,11 @@ export const packages: readonly ServicePackage[] = [
       'Voor opdrachtgevers die een bestaande website of applicatie willen laten onderhouden en doorontwikkelen.',
     ),
     fits: [
-      tri('Egy már működő oldal hibáinak javítása', 'Fixing problems on a site that already runs', 'Problemen verhelpen op een site die al draait'),
+      tri(
+        'Egy már működő oldal hibáinak javítása',
+        'Fixing problems on a site that already runs',
+        'Problemen verhelpen op een site die al draait',
+      ),
       tri('Rendszeres kisebb módosítások', 'Regular small changes', 'Regelmatige kleine aanpassingen'),
       tri(
         'Új funkció tervezése egy meglévő alkalmazásba, külön megállapodás szerint',

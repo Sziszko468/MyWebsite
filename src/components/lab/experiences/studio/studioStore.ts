@@ -1,6 +1,15 @@
 import { createStore } from '../../experience/store'
 import { loadJson, saveJson, type SaveResult } from '../../experience/persist'
 import { parseStudioDoc, serializeStudioDoc, starterDoc, type StudioDoc } from './studioDoc'
+import {
+  GEN_DEFAULTS,
+  generate,
+  isGenerated,
+  randomGen,
+  sanitizeGen,
+  unexpected,
+  type GenParams,
+} from './studioGenerator'
 
 /**
  * The studio's state: the document with its undo history, and the few things about the editor that
@@ -117,4 +126,38 @@ export function saveProject(): SaveResult {
 /** The project saved in this browser, if there is one and it is valid. */
 export function readSavedProject(): StudioDoc | null {
   return loadJson(PROJECT_KEY, parseStudioDoc)
+}
+
+/** The generator's numbers: kept here so they survive the panel moving between the side and the dock. */
+export const generator = createStore<GenParams>({ ...GEN_DEFAULTS })
+
+export function setGenerator(patch: Partial<GenParams>): void {
+  generator.set((state) => sanitizeGen({ ...state, ...patch }))
+}
+
+// What the generator last put in the document. While the document is still that very object, the next
+// generation replaces it in place, so a whole session of tweaking sliders is one undo step.
+let lastGenerated: StudioDoc | null = null
+
+/** True while the document holds pieces the generator made, so a slider can regenerate them live. */
+export const hasGenerated = (): boolean => studio.get().doc.objects.some((object) => isGenerated(object.name))
+
+/** Builds the composition from the generator's numbers; returns how many pieces it made. */
+export function applyGenerator(): number {
+  const state = studio.get()
+  const built = generate(state.doc, generator.get())
+  const next = { ...built, selectedId: null }
+  if (state.doc === lastGenerated) transient(next)
+  else commit(next)
+  lastGenerated = next
+  return next.objects.filter((object) => isGenerated(object.name)).length
+}
+
+/** A whole new scene from one seed: replaces the document (Undo brings the old one back). */
+export function createUnexpected(seed: number): StudioDoc {
+  const next = unexpected(seed)
+  setGenerator(randomGen(seed))
+  commit(next)
+  lastGenerated = next
+  return next
 }

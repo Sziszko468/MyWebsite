@@ -1,0 +1,100 @@
+import { tri } from '../../../../content/trilingual'
+
+/** The Generative Art Engine's words. */
+export const artText = {
+  tabs: {
+    label: tri('Panelek', 'Panels', 'Panelen'),
+    shape: tri('Forma', 'Shape', 'Vorm'),
+    motion: tri('Mozgás', 'Motion', 'Beweging'),
+    colour: tri('Szín', 'Colour', 'Kleur'),
+    keep: tri('Mentés', 'Keep', 'Bewaren'),
+  },
+  actions: {
+    randomize: tri('Véletlen', 'Randomize', 'Willekeurig'),
+    reset: tri('Visszaállítás', 'Reset', 'Reset'),
+    pause: tri('Szünet', 'Pause', 'Pauze'),
+    resume: tri('Folytatás', 'Resume', 'Hervatten'),
+    quick: tri('Gyorsgombok', 'Quick actions', 'Snelle acties'),
+  },
+  hint: tri(
+    'A pointer hat a részecskékre, a kattintás szétveti őket. Ugyanezek a számok mindig ugyanazt az alkotást adják.',
+    'The pointer acts on the particles and a click throws them apart. The same numbers always make the same piece.',
+    'De aanwijzer werkt op de deeltjes in en een klik gooit ze uiteen. Dezelfde getallen geven altijd hetzelfde werk.',
+  ),
+  fields: {
+    formation: tri('Alakzat', 'Formation', 'Formatie'),
+    scale: tri('Méret', 'Scale', 'Schaal'),
+    distortion: tri('Torzítás', 'Distortion', 'Vervorming'),
+    count: tri('Részecskék száma', 'Particle count', 'Aantal deeltjes'),
+    seed: tri('Mag (seed)', 'Seed', 'Seed'),
+    speed: tri('Sebesség', 'Speed', 'Snelheid'),
+    force: tri('Pointer ereje', 'Pointer force', 'Aanwijzerkracht'),
+    pointer: tri('A pointer', 'The pointer', 'De aanwijzer'),
+    gravity: tri('Gravitáció', 'Gravity', 'Zwaartekracht'),
+    turbulence: tri('Turbulencia', 'Turbulence', 'Turbulentie'),
+    rotation: tri('Forgás', 'Rotation', 'Rotatie'),
+    noise: tri('Zaj', 'Noise', 'Ruis'),
+    palette: tri('Színpaletta', 'Colour palette', 'Kleurenpalet'),
+  },
+  formations: {
+    sphere: tri('Gömb', 'Sphere', 'Bol'),
+    torus: tri('Tórusz', 'Torus', 'Torus'),
+    spiral: tri('Spirál', 'Spiral', 'Spiraal'),
+    lattice: tri('Rács', 'Lattice', 'Rooster'),
+    wave: tri('Hullám', 'Wave', 'Golf'),
+    galaxy: tri('Galaxis', 'Galaxy', 'Sterrenstelsel'),
+  },
+  palettes: {
+    racing: tri('Racing', 'Racing', 'Racing'),
+    ember: tri('Parázs', 'Ember', 'Gloed'),
+    ocean: tri('Óceán', 'Ocean', 'Oceaan'),
+    mono: tri('Mono', 'Mono', 'Mono'),
+    acid: tri('Sav', 'Acid', 'Zuur'),
+  },
+  pointerModes: {
+    repel: tri('Taszít', 'Repels', 'Duwt weg'),
+    attract: tri('Vonz', 'Attracts', 'Trekt aan'),
+  },
+  keep: {
+    title: tri('Alkotás megőrzése', 'Keep the piece', 'Het werk bewaren'),
+    note: tri(
+      'Egy alkotás néhány szám: a mentés és a fájl is csak ennyi. Minden csak ebben a böngészőben van.',
+      'A piece is a handful of numbers: so are a save and a file. Everything stays in this browser.',
+      'Een werk is een handvol getallen: een opslag en een bestand ook. Alles blijft in deze browser.',
+    ),
+    png: tri('Kép mentése (PNG)', 'Save image (PNG)', 'Beeld opslaan (PNG)'),
+    save: tri('Mentés ebbe a böngészőbe', 'Save in this browser', 'Opslaan in deze browser'),
+    load: tri('Mentett betöltése', 'Load saved', 'Opgeslagen laden'),
+    download: tri('Paraméterek letöltése (JSON)', 'Download parameters (JSON)', 'Parameters downloaden (JSON)'),
+    open: tri('Paraméterfájl megnyitása', 'Open a parameter file', 'Parameterbestand openen'),
+    artifact: tri('Mentés az alkotások közé', 'Save to Digital Artifacts', 'Opslaan bij Digitale creaties'),
+  },
+  messages: {
+    saved: tri('Elmentve.', 'Saved.', 'Opgeslagen.'),
+    saveFailed: tri(
+      'A mentés nem sikerült: a böngésző nem enged tárolni.',
+      'Saving failed: the browser would not store it.',
+      'Opslaan mislukt: de browser wil het niet bewaren.',
+    ),
+    nothing: tri('Még nincs mentett alkotás.', 'Nothing saved yet.', 'Nog niets opgeslagen.'),
+    loaded: tri('Betöltve.', 'Loaded.', 'Geladen.'),
+    downloaded: tri('Letöltve.', 'Downloaded.', 'Gedownload.'),
+    badFile: tri(
+      'Ez a fájl nem érvényes paraméterfájl.',
+      'This file is not a valid parameter file.',
+      'Dit bestand is geen geldig parameterbestand.',
+    ),
+    tooBig: tri('A fájl túl nagy.', 'The file is too large.', 'Het bestand is te groot.'),
+    image: tri('A kép elkészült.', 'The image is ready.', 'Het beeld is klaar.'),
+    imageFailed: tri(
+      'A képet nem sikerült elkészíteni.',
+      'The image could not be made.',
+      'Het beeld kon niet worden gemaakt.',
+    ),
+    random: tri(
+      'Új véletlen kompozíció (seed {seed}).',
+      'A new random composition (seed {seed}).',
+      'Een nieuwe willekeurige compositie (seed {seed}).',
+    ),
+  },
+}
