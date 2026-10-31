@@ -10,6 +10,9 @@ import { downloadJson, readFileText, safeFilename } from '../../experience/persi
 import { useStore } from '../../experience/store'
 import { Glyph, Meter, PanelSection, TabBar, Toast, ToolButton, ToolRow } from '../../experience/ui'
 import { useMedia } from '../../experience/useMedia'
+import { artifactId, saveArtifact } from '../../artifacts/artifactActions'
+import { artifactText } from '../../artifacts/artifactText'
+import { setupThumbnail } from '../../artifacts/thumbnails'
 import { award } from '../../progress/progress'
 import { LabAction, LabSlider } from '../../ui/LabControls'
 import { AeroView } from './AeroView'
@@ -446,6 +449,7 @@ function SavedPanel({ t }: { t: Text }) {
   const message = useStore(perf, (s) => s.message)
   const [slots, setSlots] = useState<SetupSlot[]>(readSetupSlots)
   const [name, setName] = useState('Setup')
+  const a = useLocalized(artifactText)
   const file = useRef<HTMLInputElement>(null)
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -498,6 +502,25 @@ function SavedPanel({ t }: { t: Text }) {
           }}
         />
         <ToolButton
+          label={a.save}
+          icon={
+            <Glyph>
+              <path d="M4 7h16v12H4zM4 7l3-3h10l3 3M9 12h6" />
+            </Glyph>
+          }
+          onClick={async () => {
+            const label = `${name} (${edit.toUpperCase()})`
+            const result = await saveArtifact({
+              id: artifactId('setup', name),
+              type: 'setup',
+              name: label,
+              payload: { version: 1, name, setup } as Record<string, unknown>,
+              thumbnail: setupThumbnail(setup),
+            })
+            setMessage(result.ok ? (result.persistent ? a.saved : a.savedSession) : a.failed[result.reason])
+          }}
+        />
+        <ToolButton
           label={t.saved.open}
           icon={
             <Glyph>
@@ -547,7 +570,11 @@ function SavedPanel({ t }: { t: Text }) {
       <p className={styles.note}>{t.saved.note}</p>
       <Toast
         message={message}
-        tone={message === t.saved.saveFailed || message === t.saved.badFile ? 'error' : 'info'}
+        tone={
+          Object.values(a.failed).includes(message) || message === t.saved.saveFailed || message === t.saved.badFile
+            ? 'error'
+            : 'info'
+        }
       />
     </PanelSection>
   )

@@ -1,4 +1,13 @@
-import { CanvasTexture, Color, DoubleSide, FrontSide, MeshPhysicalMaterial, RepeatWrapping, SRGBColorSpace, type Texture } from 'three'
+import {
+  CanvasTexture,
+  Color,
+  DoubleSide,
+  FrontSide,
+  MeshPhysicalMaterial,
+  RepeatWrapping,
+  SRGBColorSpace,
+  type Texture,
+} from 'three'
 import type { MaterialDef } from './studioDoc'
 
 /**
@@ -24,7 +33,9 @@ export function createCarbonTexture(): CanvasTexture {
       for (let x = 0; x < 8; x++) {
         // Two threads over, two under, stepping one cell each row: a twill.
         const over = ((x + y) >> 1) % 2 === 0
-        const gradient = over ? context.createLinearGradient(x * cell, y * cell, (x + 1) * cell, (y + 1) * cell) : context.createLinearGradient((x + 1) * cell, y * cell, x * cell, (y + 1) * cell)
+        const gradient = over
+          ? context.createLinearGradient(x * cell, y * cell, (x + 1) * cell, (y + 1) * cell)
+          : context.createLinearGradient((x + 1) * cell, y * cell, x * cell, (y + 1) * cell)
         gradient.addColorStop(0, over ? '#5b5b66' : '#17171b')
         gradient.addColorStop(0.5, over ? '#34343b' : '#2c2c33')
         gradient.addColorStop(1, over ? '#17171b' : '#4d4d57')
@@ -46,7 +57,12 @@ export function createStudioMaterial(): MeshPhysicalMaterial {
 }
 
 /** Sets a material from a definition. Safe to call every time the definition changes. */
-export function applyMaterialDef(material: MeshPhysicalMaterial, def: MaterialDef, carbon: Texture | null, forceDouble = false): void {
+export function applyMaterialDef(
+  material: MeshPhysicalMaterial,
+  def: MaterialDef,
+  carbon: Texture | null,
+  forceDouble = false,
+): void {
   material.color.set(def.color)
   material.roughness = def.roughness
   material.metalness = def.metalness
@@ -57,7 +73,8 @@ export function applyMaterialDef(material: MeshPhysicalMaterial, def: MaterialDe
   material.emissiveIntensity = def.emissive
   material.side = def.preset === 'digital-glass' || forceDouble ? DoubleSide : FrontSide
 
-  material.clearcoat = def.preset === 'racing-red' || def.preset === 'carbon-fiber' ? 1 : def.preset === 'ceramic' ? 0.9 : 0
+  material.clearcoat =
+    def.preset === 'racing-red' || def.preset === 'carbon-fiber' ? 1 : def.preset === 'ceramic' ? 0.9 : 0
   material.clearcoatRoughness = def.preset === 'ceramic' ? 0.12 : 0.05
   material.anisotropy = def.preset === 'brushed-metal' ? 0.85 : 0
   material.anisotropyRotation = Math.PI / 2

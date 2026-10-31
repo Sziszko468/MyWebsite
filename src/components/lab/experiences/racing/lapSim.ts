@@ -40,7 +40,7 @@ export function simulateLap(track: TrackSamples, params: CarParams): LapEstimate
   const n = track.count
   const ds = track.spacing
   const m = params.mass
-  const mu = params.mu
+  const mu = params.mu * params.wet
   const vTop = topSpeed(params)
   const downPerSquare = (0.5 * AIR * params.downforce) / m
   const dragPerSquare = (0.5 * AIR * params.drag) / m

@@ -11,6 +11,9 @@ import { downloadJson, readFileText, safeFilename } from '../../experience/persi
 import { useStore } from '../../experience/store'
 import { Glyph, PanelSection, Stepper, TabBar, Toast, ToolButton, ToolRow } from '../../experience/ui'
 import { useMedia } from '../../experience/useMedia'
+import { artifactId, saveArtifact } from '../../artifacts/artifactActions'
+import { artifactText } from '../../artifacts/artifactText'
+import { trackThumbnail } from '../../artifacts/thumbnails'
 import { award } from '../../progress/progress'
 import { LabAction, LabSlider, LabToggle } from '../../ui/LabControls'
 import { architectText } from './architectText'
@@ -414,6 +417,7 @@ function CheckPanel({ t, issues, onShow }: { t: Text; issues: Issues; onShow: (x
 function ProjectPanel({ t }: { t: Text }) {
   const track = useStore(architect, (s) => s.track)
   const message = useStore(architect, (s) => s.message)
+  const a = useLocalized(artifactText)
   const navigate = useNavigate()
   const { lang } = useI18n()
   const report = useMemo(() => validateTrack(track, 4), [track])
@@ -489,6 +493,24 @@ function ProjectPanel({ t }: { t: Text }) {
           }}
         />
         <ToolButton
+          label={a.save}
+          icon={
+            <Glyph>
+              <path d="M4 7h16v12H4zM4 7l3-3h10l3 3M9 12h6" />
+            </Glyph>
+          }
+          onClick={async () => {
+            const result = await saveArtifact({
+              id: artifactId('track', track.name),
+              type: 'track',
+              name: track.name,
+              payload: serializeTrack(track) as unknown as Record<string, unknown>,
+              thumbnail: report.samples ? trackThumbnail(report.samples) : undefined,
+            })
+            setMessage(result.ok ? (result.persistent ? a.saved : a.savedSession) : a.failed[result.reason])
+          }}
+        />
+        <ToolButton
           label={t.project.open}
           icon={
             <Glyph>
@@ -541,6 +563,7 @@ function ProjectPanel({ t }: { t: Text }) {
       <Toast
         message={message}
         tone={
+          Object.values(a.failed).includes(message) ||
           message === t.project.saveFailed ||
           message === t.project.badFile ||
           message === t.project.tooBig ||

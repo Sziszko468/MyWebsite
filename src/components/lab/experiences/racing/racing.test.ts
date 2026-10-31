@@ -18,6 +18,7 @@ import {
   type DriverInput,
 } from './carPhysics'
 import { DEFAULT_SETUP, SETUP_KEYS, SETUP_RANGES, sanitizeSetup, sameSetup, type CarSetup } from './carSetup'
+import { GhostRecorder, ghostTimeAt, newPlace, sampleGhost, type Ghost } from './ghost'
 import { createLapTimer, updateLapTimer, TRIAL_LAPS, type LapEvent, type LapTimer } from './lapTimer'
 import { formatLapTime, simulateLap } from './lapSim'
 import { defaultTrack, gridSlot, sampleTrack, type TrackSamples } from './trackModel'
@@ -357,9 +358,21 @@ describe('a driver can lap the circuit', () => {
     let wall = 0
     let outside = 0
     let finishedAt = -1
+    let k = 0
     let t = 0
     const events: LapEvent[] = []
-    const emit = (event: LapEvent) => events.push(event)
+    const recorder = new GhostRecorder()
+    const ghosts: Ghost[] = []
+    const places: Array<{ since: number; x: number; z: number }> = []
+    let lastSince = 0
+    const emit = (event: LapEvent) => {
+      events.push(event)
+      // As the scene does: the lap just finished is kept before the recorder starts again.
+      if (event.type === 'lap') {
+        const driven = recorder.finish(event.time)
+        if (driven) ghosts.push(driven)
+      }
+    }
     while (t < 240 && finishedAt < 0) {
       const speed = Math.hypot(car.u, car.v)
       // Aim at a point ahead on the centre line.
@@ -378,13 +391,20 @@ describe('a driver can lap the circuit', () => {
       input.brake = Math.max(0, Math.min(1, (speed - want) / 6))
       stepCar(car, input, p, track, DT)
       updateLapTimer(timer, DT, car.place.s, track.length, speed, car.outside, emit)
+      if (timer.sinceLine >= 0 && timer.phase === 'running') {
+        if (timer.sinceLine < lastSince) recorder.reset()
+        recorder.add(timer.sinceLine, car.x, car.z, car.psi, car.place.s)
+        lastSince = timer.sinceLine
+        if (ghosts.length === 1 && places.length < 4000 && k++ % 60 === 0)
+          places.push({ since: timer.sinceLine, x: car.x, z: car.z })
+      }
       if (car.impact > 3) wall++
       car.impact = 0
       if (car.outside) outside++
       if (timer.phase === 'finished') finishedAt = t
       t += DT
     }
-    return { timer, estimate, wall, outside, finished: finishedAt >= 0, events }
+    return { timer, estimate, wall, outside, finished: finishedAt >= 0, events, ghosts, places }
   }
 
   it('completes a three-lap time trial at a sensible pace without hitting anything hard', () => {
@@ -406,5 +426,31 @@ describe('a driver can lap the circuit', () => {
     expect(Math.min(...quick.timer.laps.map((l) => l.time))).toBeLessThan(
       Math.min(...slow.timer.laps.map((l) => l.time)),
     )
+  })
+
+  it('records each lap as a ghost that follows the car, and gives the same gap as the lap times', () => {
+    const result = lap(DEFAULT_SETUP, 0.9)
+    expect(result.ghosts.length).toBe(3)
+    const [, second, third] = result.ghosts
+    // A ghost lasts as long as the lap it recorded (the first lap of a trial starts behind the line, so it is skipped).
+    expect(second.time).toBeCloseTo(result.timer.laps[1].time, 0)
+    // And it is where the car was: replayed samples sit on the places the car passed (second lap only: they were taken then).
+    const place = newPlace()
+    let worst = 0
+    for (const p of result.places) {
+      if (!sampleGhost(second, p.since, place)) continue
+      worst = Math.max(worst, Math.hypot(place.x - p.x, place.z - p.z))
+    }
+    expect(result.places.length).toBeGreaterThan(20)
+    expect(worst).toBeLessThan(1.5)
+    // The gap at a point of the lap is the difference of the times the two laps took to get there: it adds up to the difference of the laps.
+    const distance = track.length * 0.5
+    const gap = ghostTimeAt(third, distance)! - ghostTimeAt(second, distance)!
+    expect(Math.abs(gap)).toBeLessThan(0.8)
+    expect(Math.abs(third.time - second.time)).toBeLessThan(1.2)
+    const total = third.time - second.time
+    expect(
+      Math.abs(ghostTimeAt(third, track.length - 5)! - ghostTimeAt(second, track.length - 5)! - total),
+    ).toBeLessThan(0.6)
   })
 })

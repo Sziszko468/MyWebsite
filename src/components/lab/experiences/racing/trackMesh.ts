@@ -36,6 +36,8 @@ export interface BuiltTrack {
   groundY: number
   /** Lights the five start lights, 0 to 5, and turns them green when `go`. */
   setLights(count: number, go: boolean): void
+  /** A wet road: darker and shinier, so it reflects the sky. */
+  setWet(wet: boolean): void
   dispose(): void
 }
 
@@ -279,10 +281,8 @@ export function buildTrack(track: TrackSamples, look: TrackLook): BuiltTrack {
     runoff.tri(4 * i + 2, 4 * i + 3, 4 * j + 2)
     runoff.tri(4 * i + 3, 4 * j + 3, 4 * j + 2)
   }
-  const runoffMesh = new Mesh(
-    own(runoff.toGeometry()),
-    own(new MeshStandardMaterial({ vertexColors: true, map: grain, roughness: 1, metalness: 0 })),
-  )
+  const runoffMaterial = own(new MeshStandardMaterial({ vertexColors: true, map: grain, roughness: 1, metalness: 0 }))
+  const runoffMesh = new Mesh(own(runoff.toGeometry()), runoffMaterial)
   runoffMesh.receiveShadow = true
   runoffMesh.name = 'runoff'
   group.add(runoffMesh)
@@ -418,6 +418,12 @@ export function buildTrack(track: TrackSamples, look: TrackLook): BuiltTrack {
   return {
     root: group,
     groundY,
+    setWet(wet) {
+      roadMaterial.roughness = wet ? 0.28 : 0.9
+      roadMaterial.metalness = wet ? 0.18 : 0
+      roadMaterial.color.setScalar(wet ? 0.6 : 1)
+      runoffMaterial.color.setScalar(wet ? 0.72 : 1)
+    },
     setLights(n, go) {
       for (let k = 0; k < lights.length; k++) {
         const on = go || k < n

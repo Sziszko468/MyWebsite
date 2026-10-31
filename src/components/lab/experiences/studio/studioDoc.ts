@@ -11,7 +11,15 @@
 export const SHAPE_KINDS = ['cube', 'sphere', 'cylinder', 'cone', 'torus', 'plane', 'custom'] as const
 export type ShapeKind = (typeof SHAPE_KINDS)[number]
 
-export const MATERIAL_PRESETS = ['chrome', 'matte-black', 'racing-red', 'digital-glass', 'brushed-metal', 'ceramic', 'carbon-fiber'] as const
+export const MATERIAL_PRESETS = [
+  'chrome',
+  'matte-black',
+  'racing-red',
+  'digital-glass',
+  'brushed-metal',
+  'ceramic',
+  'carbon-fiber',
+] as const
 export type MaterialPreset = (typeof MATERIAL_PRESETS)[number]
 
 export const LIGHT_RIGS = ['studio', 'dramatic-red', 'cold-blue', 'soft-white', 'high-contrast'] as const
@@ -97,10 +105,24 @@ export const PRESETS: Record<MaterialPreset, PresetDef> = {
   chrome: { color: '#e8eaf0', roughness: 0.04, metalness: 1, opacity: 1, emissive: 0, supportsOpacity: false },
   'matte-black': { color: '#121214', roughness: 0.82, metalness: 0, opacity: 1, emissive: 0, supportsOpacity: false },
   'racing-red': { color: '#ff161f', roughness: 0.3, metalness: 0.25, opacity: 1, emissive: 0, supportsOpacity: false },
-  'digital-glass': { color: '#8aa0ff', roughness: 0.05, metalness: 0, opacity: 0.38, emissive: 0.15, supportsOpacity: true },
+  'digital-glass': {
+    color: '#8aa0ff',
+    roughness: 0.05,
+    metalness: 0,
+    opacity: 0.38,
+    emissive: 0.15,
+    supportsOpacity: true,
+  },
   'brushed-metal': { color: '#c9ccd4', roughness: 0.42, metalness: 1, opacity: 1, emissive: 0, supportsOpacity: false },
   ceramic: { color: '#f4f0e8', roughness: 0.22, metalness: 0, opacity: 1, emissive: 0, supportsOpacity: false },
-  'carbon-fiber': { color: '#c4c4cc', roughness: 0.34, metalness: 0.5, opacity: 1, emissive: 0, supportsOpacity: false },
+  'carbon-fiber': {
+    color: '#c4c4cc',
+    roughness: 0.34,
+    metalness: 0.5,
+    opacity: 1,
+    emissive: 0,
+    supportsOpacity: false,
+  },
 }
 
 export function materialFromPreset(preset: MaterialPreset): MaterialDef {
@@ -109,7 +131,8 @@ export function materialFromPreset(preset: MaterialPreset): MaterialDef {
 }
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
-const finite = (value: unknown, fallback: number) => (typeof value === 'number' && Number.isFinite(value) ? value : fallback)
+const finite = (value: unknown, fallback: number) =>
+  typeof value === 'number' && Number.isFinite(value) ? value : fallback
 
 export function clampVec(value: Vec3, min: number, max: number): Vec3 {
   return [clamp(value[0], min, max), clamp(value[1], min, max), clamp(value[2], min, max)]
@@ -124,7 +147,10 @@ export function safeColor(value: unknown, fallback: string): string {
 export function safeName(value: unknown, fallback: string): string {
   if (typeof value !== 'string') return fallback
   // eslint-disable-next-line no-control-regex
-  const cleaned = value.replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, MAX_NAME)
+  const cleaned = value
+    .replace(/[\u0000-\u001f\u007f<>]/g, '')
+    .trim()
+    .slice(0, MAX_NAME)
   return cleaned || fallback
 }
 
@@ -138,7 +164,9 @@ export function sanitizeCustom(custom: Partial<CustomParams> | undefined): Custo
 }
 
 export function sanitizeMaterial(material: Partial<MaterialDef> | undefined): MaterialDef {
-  const preset = MATERIAL_PRESETS.includes(material?.preset as MaterialPreset) ? (material!.preset as MaterialPreset) : 'racing-red'
+  const preset = MATERIAL_PRESETS.includes(material?.preset as MaterialPreset)
+    ? (material!.preset as MaterialPreset)
+    : 'racing-red'
   const base = PRESETS[preset]
   return {
     preset,
@@ -154,7 +182,11 @@ export function sanitizeObject(raw: Partial<StudioObject>, fallbackId: string, f
   const kind = SHAPE_KINDS.includes(raw.kind as ShapeKind) ? (raw.kind as ShapeKind) : 'cube'
   const vec = (value: unknown, fallback: Vec3, min: number, max: number): Vec3 => {
     const list = Array.isArray(value) ? value : []
-    return [clamp(finite(list[0], fallback[0]), min, max), clamp(finite(list[1], fallback[1]), min, max), clamp(finite(list[2], fallback[2]), min, max)]
+    return [
+      clamp(finite(list[0], fallback[0]), min, max),
+      clamp(finite(list[1], fallback[1]), min, max),
+      clamp(finite(list[2], fallback[2]), min, max),
+    ]
   }
   return {
     id: typeof raw.id === 'string' && /^[\w-]{1,24}$/.test(raw.id) ? raw.id : fallbackId,
@@ -178,7 +210,14 @@ export function emptyDoc(): StudioDoc {
 export function starterDoc(): StudioDoc {
   const red = materialFromPreset('racing-red')
   const chrome = materialFromPreset('chrome')
-  const base = (id: string, name: string, kind: ShapeKind, position: Vec3, scale: Vec3, material: MaterialDef): StudioObject => ({
+  const base = (
+    id: string,
+    name: string,
+    kind: ShapeKind,
+    position: Vec3,
+    scale: Vec3,
+    material: MaterialDef,
+  ): StudioObject => ({
     id,
     name,
     kind,
@@ -212,7 +251,11 @@ export function parseStudioDoc(raw: unknown): StudioDoc | null {
   const objects: StudioObject[] = []
   for (const item of record.objects.slice(0, MAX_OBJECTS)) {
     if (typeof item !== 'object' || item === null) continue
-    const object = sanitizeObject(item as Partial<StudioObject>, `o${objects.length + 1}`, `Object ${objects.length + 1}`)
+    const object = sanitizeObject(
+      item as Partial<StudioObject>,
+      `o${objects.length + 1}`,
+      `Object ${objects.length + 1}`,
+    )
     // Two objects must never share an id, whatever the file says.
     let id = object.id
     let n = objects.length + 1
@@ -298,7 +341,10 @@ export function updateMaterial(doc: StudioDoc, id: string, patch: Partial<Materi
   const object = doc.objects.find((item) => item.id === id)
   if (!object) return doc
   // Choosing another preset starts from that preset's values; anything else changes just what was touched.
-  const material = patch.preset && patch.preset !== object.material.preset ? { ...materialFromPreset(patch.preset), ...patch } : { ...object.material, ...patch }
+  const material =
+    patch.preset && patch.preset !== object.material.preset
+      ? { ...materialFromPreset(patch.preset), ...patch }
+      : { ...object.material, ...patch }
   return updateObject(doc, id, { material: sanitizeMaterial(material) })
 }
 
@@ -317,7 +363,11 @@ export function duplicateObject(doc: StudioDoc, id: string): StudioDoc {
     ...source,
     id: nextId(doc),
     name: uniqueName(doc, source.name.replace(/ \d+$/, '')),
-    position: clampVec([source.position[0] + 0.8, source.position[1], source.position[2] + 0.8], -POSITION_LIMIT, POSITION_LIMIT),
+    position: clampVec(
+      [source.position[0] + 0.8, source.position[1], source.position[2] + 0.8],
+      -POSITION_LIMIT,
+      POSITION_LIMIT,
+    ),
     material: { ...source.material },
     custom: { ...source.custom },
     locked: false,

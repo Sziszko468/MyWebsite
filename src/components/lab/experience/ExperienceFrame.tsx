@@ -52,7 +52,8 @@ export function ExperienceFrame({ id, children, barExtra }: ExperienceFrameProps
 
   const failed = view.view === 'still'
   const qualityNow = qualityOfTier(view.tier)
-  const qualityLabel = (quality: LabQuality) => (quality === 'auto' ? text.experience.quality.auto : text.experience.quality[quality])
+  const qualityLabel = (quality: LabQuality) =>
+    quality === 'auto' ? text.experience.quality.auto : text.experience.quality[quality]
 
   return (
     <>
@@ -123,7 +124,10 @@ export function ExperienceFrame({ id, children, barExtra }: ExperienceFrameProps
             </div>
             <label className={styles.quality}>
               <span className={styles.qualityLabel}>{text.experience.qualityLabel}</span>
-              <select value={view.quality} onChange={(event) => view.setQuality(event.currentTarget.value as LabQuality)}>
+              <select
+                value={view.quality}
+                onChange={(event) => view.setQuality(event.currentTarget.value as LabQuality)}
+              >
                 {QUALITY_OPTIONS.map((quality) => (
                   <option key={quality} value={quality}>
                     {qualityLabel(quality)}

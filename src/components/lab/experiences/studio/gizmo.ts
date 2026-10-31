@@ -61,7 +61,13 @@ export class Gizmo {
   }
 
   private material(colour: number, opacity = 1): MeshBasicMaterial {
-    const material = new MeshBasicMaterial({ color: colour, transparent: true, opacity, depthTest: false, depthWrite: false })
+    const material = new MeshBasicMaterial({
+      color: colour,
+      transparent: true,
+      opacity,
+      depthTest: false,
+      depthWrite: false,
+    })
     this.materials.push(material)
     return material
   }
@@ -112,7 +118,10 @@ export class Gizmo {
       this.groups.move.add(holder)
       hit.userData.handle = { tool: 'move', axis } satisfies HandleInfo
       hit.userData.key = `move-${axis}`
-      this.visuals.set(`move-${axis}`, [shaft, tip].map((mesh) => ({ material: mesh.material as MeshBasicMaterial, base: colour })))
+      this.visuals.set(
+        `move-${axis}`,
+        [shaft, tip].map((mesh) => ({ material: mesh.material as MeshBasicMaterial, base: colour })),
+      )
       shaft.renderOrder = tip.renderOrder = 999
       ;(hit.material as MeshBasicMaterial).visible = false
       this.handles.move.push(hit)
@@ -158,7 +167,10 @@ export class Gizmo {
       shaft.renderOrder = box.renderOrder = 999
       hit.userData.handle = { tool: 'scale', axis } satisfies HandleInfo
       hit.userData.key = `scale-${axis}`
-      this.visuals.set(`scale-${axis}`, [shaft, box].map((mesh) => ({ material: mesh.material as MeshBasicMaterial, base: colour })))
+      this.visuals.set(
+        `scale-${axis}`,
+        [shaft, box].map((mesh) => ({ material: mesh.material as MeshBasicMaterial, base: colour })),
+      )
       ;(hit.material as MeshBasicMaterial).visible = false
       this.handles.scale.push(hit)
     }

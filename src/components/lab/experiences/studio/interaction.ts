@@ -74,7 +74,10 @@ export class StudioInteraction {
 
   private setRay(event: PointerEvent): Ray {
     const rect = this.host.element.getBoundingClientRect()
-    this.ndc.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -(((event.clientY - rect.top) / rect.height) * 2 - 1))
+    this.ndc.set(
+      ((event.clientX - rect.left) / rect.width) * 2 - 1,
+      -(((event.clientY - rect.top) / rect.height) * 2 - 1),
+    )
     this.raycaster.setFromCamera(this.ndc, this.host.getCamera())
     return this.raycaster.ray
   }
@@ -129,7 +132,13 @@ export class StudioInteraction {
     }
 
     const picked = this.raycaster.intersectObjects(this.host.getPickables(), false)[0]
-    this.pending = { pointerId: event.pointerId, id: (picked?.object.userData.id as string | undefined) ?? null, x: event.clientX, y: event.clientY, moved: false }
+    this.pending = {
+      pointerId: event.pointerId,
+      id: (picked?.object.userData.id as string | undefined) ?? null,
+      x: event.clientX,
+      y: event.clientY,
+      moved: false,
+    }
   }
 
   private startDrag(event: PointerEvent, info: HandleInfo, key: string, object: StudioObject, ray: Ray): boolean {
@@ -191,7 +200,8 @@ export class StudioInteraction {
       return
     }
     if (this.pending && this.pending.pointerId === event.pointerId && !this.pending.moved) {
-      if (Math.hypot(event.clientX - this.pending.x, event.clientY - this.pending.y) > TAP_DISTANCE) this.pending.moved = true
+      if (Math.hypot(event.clientX - this.pending.x, event.clientY - this.pending.y) > TAP_DISTANCE)
+        this.pending.moved = true
     }
     // Hover feedback on a mouse: the handle under the pointer lights up.
     if (event.pointerType === 'mouse' && event.buttons === 0) {
@@ -225,7 +235,8 @@ export class StudioInteraction {
         const hit = planeHit(ray, drag.origin, drag.axis)
         if (!hit || !drag.hit) return
         position = drag.origin.clone().add(hit.sub(drag.hit))
-        if (snapping) position.set(snap(position.x, MOVE_SNAP), snap(position.y, MOVE_SNAP), snap(position.z, MOVE_SNAP))
+        if (snapping)
+          position.set(snap(position.x, MOVE_SNAP), snap(position.y, MOVE_SNAP), snap(position.z, MOVE_SNAP))
         readout = `X ${position.x.toFixed(2)}  Y ${position.y.toFixed(2)}  Z ${position.z.toFixed(2)}`
       } else if (info.axis !== 'uniform') {
         const t = axisParameter(ray, drag.origin, drag.axis)
@@ -250,13 +261,23 @@ export class StudioInteraction {
       const scale: Vec3 = [...object.scale]
       if (info.axis === 'uniform') {
         const factor = Math.exp((drag.screenY - event.clientY) * 0.008)
-        for (let i = 0; i < 3; i++) scale[i] = Math.min(SCALE_MAX, Math.max(SCALE_MIN, snap(object.scale[i] * factor, snapping ? SCALE_SNAP : 0)))
+        for (let i = 0; i < 3; i++)
+          scale[i] = Math.min(SCALE_MAX, Math.max(SCALE_MIN, snap(object.scale[i] * factor, snapping ? SCALE_SNAP : 0)))
         readout = `× ${factor.toFixed(2)}`
       } else if (info.axis !== 'free') {
         const t = axisParameter(ray, drag.origin, drag.axis)
         if (t === null) return
         const index = AXIS_INDEX[info.axis]
-        scale[index] = Math.min(SCALE_MAX, Math.max(SCALE_MIN, snap(scaledByDrag(object.scale[index], drag.parameter || 1, t, SCALE_MIN, SCALE_MAX), snapping ? SCALE_SNAP : 0)))
+        scale[index] = Math.min(
+          SCALE_MAX,
+          Math.max(
+            SCALE_MIN,
+            snap(
+              scaledByDrag(object.scale[index], drag.parameter || 1, t, SCALE_MIN, SCALE_MAX),
+              snapping ? SCALE_SNAP : 0,
+            ),
+          ),
+        )
         readout = `${info.axis.toUpperCase()} ${scale[index].toFixed(2)}`
       }
       patch = { scale }

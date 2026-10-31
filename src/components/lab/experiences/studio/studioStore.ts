@@ -28,14 +28,29 @@ const HISTORY_LIMIT = 60
 export const PROJECT_KEY = 'lab:studio:project'
 
 export function createStudioState(doc: StudioDoc = starterDoc()): StudioState {
-  return { doc, past: [], future: [], tool: 'move', snap: false, ortho: false, grid: true, axes: true, message: '', drag: '' }
+  return {
+    doc,
+    past: [],
+    future: [],
+    tool: 'move',
+    snap: false,
+    ortho: false,
+    grid: true,
+    axes: true,
+    message: '',
+    drag: '',
+  }
 }
 
 export const studio = createStore<StudioState>(createStudioState())
 
 /** Replaces the document and remembers the old one, so Undo can bring it back. */
 export function commit(next: StudioDoc): void {
-  studio.set((state) => (next === state.doc ? state : { ...state, doc: next, past: [...state.past, state.doc].slice(-HISTORY_LIMIT), future: [] }))
+  studio.set((state) =>
+    next === state.doc
+      ? state
+      : { ...state, doc: next, past: [...state.past, state.doc].slice(-HISTORY_LIMIT), future: [] },
+  )
 }
 
 /** Changes the document without a history step: for a drag in progress, which is one step when it ends. */
@@ -45,7 +60,9 @@ export function transient(next: StudioDoc): void {
 
 /** Records `before` as an undo step if the document is different now. */
 export function pushHistory(before: StudioDoc): void {
-  studio.set((state) => (before === state.doc ? state : { ...state, past: [...state.past, before].slice(-HISTORY_LIMIT), future: [] }))
+  studio.set((state) =>
+    before === state.doc ? state : { ...state, past: [...state.past, before].slice(-HISTORY_LIMIT), future: [] },
+  )
 }
 
 /** Selection is not an edit: it never enters the history. */
@@ -57,7 +74,12 @@ export function undo(): void {
   studio.set((state) => {
     const previous = state.past[state.past.length - 1]
     if (!previous) return state
-    return { ...state, doc: previous, past: state.past.slice(0, -1), future: [state.doc, ...state.future].slice(0, HISTORY_LIMIT) }
+    return {
+      ...state,
+      doc: previous,
+      past: state.past.slice(0, -1),
+      future: [state.doc, ...state.future].slice(0, HISTORY_LIMIT),
+    }
   })
 }
 
@@ -65,7 +87,12 @@ export function redo(): void {
   studio.set((state) => {
     const next = state.future[0]
     if (!next) return state
-    return { ...state, doc: next, past: [...state.past, state.doc].slice(-HISTORY_LIMIT), future: state.future.slice(1) }
+    return {
+      ...state,
+      doc: next,
+      past: [...state.past, state.doc].slice(-HISTORY_LIMIT),
+      future: state.future.slice(1),
+    }
   })
 }
 

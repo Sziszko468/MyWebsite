@@ -400,6 +400,38 @@
   }
 }
 
+.modeSelect {
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.chain[data-active='true'] {
+  color: #6fe0a0;
+}
+
+.times [data-trend='behind'] {
+  color: #ff6a6f;
+}
+
+.times [data-trend='ahead'] {
+  color: #6fe0a0;
+}
+
 .splits {
   margin: 0;
   font-size: 0.7rem;
@@ -408,6 +440,14 @@
   &:empty {
     display: none;
   }
+}
+
+.conditions {
+  color: #9fc2ff;
+  font-size: 0.65rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
 }
 
 .invalid {
@@ -783,5 +823,79 @@
 @media (prefers-reduced-motion: reduce) {
   .pad:active {
     transform: none;
+  }
+}
+
+/* ── Replay ───────────────────────────────────────────────────────────── */
+
+.replay {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  left: var(--space-2);
+  z-index: 3;
+  display: grid;
+  gap: var(--space-2);
+  max-width: 34rem;
+  margin-inline: auto;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-bg) 94%, transparent);
+  color: var(--color-text);
+  pointer-events: auto;
+}
+
+.replayTitle {
+  margin: 0;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.replayRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scrub {
+  flex: 1 1 8rem;
+  min-width: 0;
+  min-height: var(--size-touch);
+  accent-color: var(--color-accent);
+}
+
+.replayClock {
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
+}
+
+.rates {
+  display: flex;
+  gap: 2px;
+
+  & .segment {
+    border: var(--border-width) solid var(--color-border-strong);
+  }
+}
+
+/* While a lap is being watched the driving instruments and pads step aside. */
+.race[data-replay='true'] {
+  .pads,
+  .timing,
+  .readouts,
+  .gearBox,
+  .rpm,
+  .keys {
+    display: none;
+  }
+
+  .speedo {
+    min-width: 6rem;
   }
 }

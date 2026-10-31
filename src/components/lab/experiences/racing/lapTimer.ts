@@ -5,7 +5,7 @@
  * counts only if the car passed both gates in order (so driving backwards over the line, or
  * cutting the course, earns nothing) and a lap that left the track is kept but not counted as best.
  */
-export type RaceMode = 'practice' | 'trial'
+export type RaceMode = 'practice' | 'trial' | 'drift' | 'checkpoint' | 'precision'
 
 export const TRIAL_LAPS = 3
 export const COUNTDOWN = 3.2
@@ -33,6 +33,8 @@ export interface LapTimer {
   laps: Array<{ time: number; clean: boolean }>
   /** Time of the whole trial, s. */
   total: number
+  /** Seconds since the car last crossed the line, or -1 before the first crossing: the clock of a ghost. */
+  sinceLine: number
   /** Distance along the track at the previous update. */
   previous: number
   /** Gate times of the current lap, s. */
@@ -50,8 +52,9 @@ export type LapEvent =
 export function createLapTimer(mode: RaceMode, startS: number, best: number | null = null): LapTimer {
   return {
     mode,
-    phase: mode === 'trial' ? 'countdown' : 'running',
-    countdown: mode === 'trial' ? COUNTDOWN : 0,
+    // Practice starts at once; the timed modes start from the lights.
+    phase: mode === 'practice' ? 'running' : 'countdown',
+    countdown: mode === 'practice' ? 0 : COUNTDOWN,
     timing: false,
     time: 0,
     lap: 1,
@@ -61,6 +64,7 @@ export function createLapTimer(mode: RaceMode, startS: number, best: number | nu
     best,
     laps: [],
     total: 0,
+    sinceLine: -1,
     previous: startS,
     splits: [],
   }
@@ -104,6 +108,7 @@ export function updateLapTimer(
     timer.time += dt
     timer.total += dt
   }
+  if (timer.sinceLine >= 0) timer.sinceLine += dt
 
   // Moved forward over the line (the distance wraps from near the end to near the start).
   const crossed = timer.previous > length * 0.7 && s < length * 0.3
@@ -128,6 +133,7 @@ export function updateLapTimer(
   if (crossed) {
     // Where between the two frames the car crossed: the metres it was past the line over its speed.
     const overshoot = Math.min(dt, s / Math.max(speed, 1))
+    if (timer.timing || timer.phase === 'running') timer.sinceLine = overshoot
     if (!timer.timing) {
       timer.timing = true
       timer.time = overshoot

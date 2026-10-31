@@ -3,6 +3,7 @@ import { useEffect, useMemo, type RefObject } from 'react'
 import { Box3, Color, Fog, Vector3, type PerspectiveCamera } from 'three'
 import { createEnvironment } from '../../experience/environment'
 import { OrbitController } from '../../experience/orbit'
+import { useSettle } from '../../experience/useSettle'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { buildTrack } from './trackMesh'
 import type { TrackSamples } from './trackModel'
@@ -25,6 +26,7 @@ export default function ArchitectScene({
   apiRef: RefObject<ArchitectApi | null>
 }) {
   const lab = useLabScene()
+  useSettle()
   const gl = useThree((state) => state.gl)
   const scene = useThree((state) => state.scene)
   const camera = useThree((state) => state.camera) as PerspectiveCamera

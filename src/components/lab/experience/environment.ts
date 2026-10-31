@@ -33,7 +33,12 @@ function panel(width: number, height: number, colour: number, strength: number):
   return new Mesh(new PlaneGeometry(width, height), material)
 }
 
-export function createEnvironment(renderer: WebGLRenderer, kind: EnvironmentKind, strength = 1, dark = true): Environment {
+export function createEnvironment(
+  renderer: WebGLRenderer,
+  kind: EnvironmentKind,
+  strength = 1,
+  dark = true,
+): Environment {
   const scene = new Scene()
   const disposables: Array<{ dispose(): void }> = []
 
@@ -47,18 +52,25 @@ export function createEnvironment(renderer: WebGLRenderer, kind: EnvironmentKind
           uHorizon: { value: new Color(dark ? 0xff6a4f : 0xf4e8d4) },
           uGround: { value: new Color(dark ? 0x0b0b0d : 0x8a8478) },
         },
-        vertexShader: 'varying vec3 vDir; void main() { vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        vertexShader:
+          'varying vec3 vDir; void main() { vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
         fragmentShader:
           'uniform vec3 uTop, uHorizon, uGround; varying vec3 vDir; void main() { float h = vDir.y; vec3 c = h > 0.0 ? mix(uHorizon, uTop, pow(h, 0.55)) : mix(uHorizon, uGround, pow(-h, 0.4)); gl_FragColor = vec4(c, 1.0); }',
       }),
     )
     scene.add(dome)
-    const sun = new Mesh(new SphereGeometry(4, 12, 8), new MeshBasicMaterial({ color: new Color(dark ? 0xff9a6b : 0xfff3d6).multiplyScalar(8 * strength) }))
+    const sun = new Mesh(
+      new SphereGeometry(4, 12, 8),
+      new MeshBasicMaterial({ color: new Color(dark ? 0xff9a6b : 0xfff3d6).multiplyScalar(8 * strength) }),
+    )
     sun.position.set(-26, 16, -30)
     scene.add(sun)
     disposables.push(dome.geometry, dome.material as ShaderMaterial, sun.geometry, sun.material as MeshBasicMaterial)
   } else {
-    const room = new Mesh(new SphereGeometry(30, 24, 12), new MeshBasicMaterial({ color: dark ? 0x1c1c24 : 0xc9c4b8, side: BackSide }))
+    const room = new Mesh(
+      new SphereGeometry(30, 24, 12),
+      new MeshBasicMaterial({ color: dark ? 0x1c1c24 : 0xc9c4b8, side: BackSide }),
+    )
     scene.add(room)
     disposables.push(room.geometry, room.material as MeshBasicMaterial)
 
@@ -83,7 +95,8 @@ export function createEnvironment(renderer: WebGLRenderer, kind: EnvironmentKind
     frontLeft.position.set(-18, 4, 18)
     frontLeft.rotation.y = Math.PI / 3
     scene.add(top, red, blue, back, floor, front, frontLeft)
-    for (const mesh of [top, red, blue, back, floor, front, frontLeft]) disposables.push(mesh.geometry, mesh.material as MeshBasicMaterial)
+    for (const mesh of [top, red, blue, back, floor, front, frontLeft])
+      disposables.push(mesh.geometry, mesh.material as MeshBasicMaterial)
   }
 
   const generator = new PMREMGenerator(renderer)

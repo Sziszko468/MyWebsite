@@ -79,3 +79,42 @@ export function saveBest(key: string, time: number): void {
   for (const old of keys.slice(0, Math.max(0, keys.length - MAX_BESTS))) delete bests[old]
   saveJson(BEST_KEY, bests)
 }
+
+// ── Drift Challenge bests ───────────────────────────────────────────────────────────────
+
+const DRIFT_KEY = 'lab:racing:drift'
+
+function readDrifts(): Record<string, number> {
+  return (
+    loadJson<Record<string, number>>(DRIFT_KEY, (raw) => {
+      if (typeof raw !== 'object' || raw === null) return null
+      const result: Record<string, number> = {}
+      for (const [key, value] of Object.entries(raw as Record<string, unknown>).slice(0, MAX_BESTS)) {
+        if (
+          /^[\w:-]{1,40}$/.test(key) &&
+          typeof value === 'number' &&
+          Number.isFinite(value) &&
+          value >= 0 &&
+          value < 1e7
+        )
+          result[key] = value
+      }
+      return result
+    }) ?? {}
+  )
+}
+
+/** The best Drift Challenge score in this browser on this track. */
+export function readDriftBest(key: string): number {
+  return readDrifts()[key] ?? 0
+}
+
+export function saveDriftBest(key: string, score: number): void {
+  const all = readDrifts()
+  if ((all[key] ?? 0) >= score) return
+  delete all[key]
+  all[key] = Math.round(score)
+  const keys = Object.keys(all)
+  for (const old of keys.slice(0, Math.max(0, keys.length - MAX_BESTS))) delete all[old]
+  saveJson(DRIFT_KEY, all)
+}

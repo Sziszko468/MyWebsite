@@ -24,7 +24,17 @@ interface ToolButtonProps {
   className?: string
 }
 
-export function ToolButton({ label, icon, pressed, disabled, onClick, iconOnly, shortcut, tone = 'default', className }: ToolButtonProps) {
+export function ToolButton({
+  label,
+  icon,
+  pressed,
+  disabled,
+  onClick,
+  iconOnly,
+  shortcut,
+  tone = 'default',
+  className,
+}: ToolButtonProps) {
   return (
     <button
       type="button"
@@ -69,7 +79,17 @@ interface StepperProps {
  * A number with a minus and a plus: exact values from a finger, where dragging a handle is
  * clumsy. The number itself can also be typed.
  */
-export function Stepper({ label, value, onChange, step = 1, min = -Infinity, max = Infinity, digits = 2, unit, axis }: StepperProps) {
+export function Stepper({
+  label,
+  value,
+  onChange,
+  step = 1,
+  min = -Infinity,
+  max = Infinity,
+  digits = 2,
+  unit,
+  axis,
+}: StepperProps) {
   const id = useId()
   const clamp = (next: number) => Math.min(max, Math.max(min, Number(next.toFixed(digits))))
   return (
@@ -77,7 +97,12 @@ export function Stepper({ label, value, onChange, step = 1, min = -Infinity, max
       <label htmlFor={id} className={styles.stepperLabel} data-axis={axis}>
         {label}
       </label>
-      <button type="button" className={styles.stepButton} aria-label={`${label} −`} onClick={() => onChange(clamp(value - step))}>
+      <button
+        type="button"
+        className={styles.stepButton}
+        aria-label={`${label} −`}
+        onClick={() => onChange(clamp(value - step))}
+      >
         −
       </button>
       <input
@@ -94,7 +119,12 @@ export function Stepper({ label, value, onChange, step = 1, min = -Infinity, max
           if (event.currentTarget.value !== '' && Number.isFinite(parsed)) onChange(clamp(parsed))
         }}
       />
-      <button type="button" className={styles.stepButton} aria-label={`${label} +`} onClick={() => onChange(clamp(value + step))}>
+      <button
+        type="button"
+        className={styles.stepButton}
+        aria-label={`${label} +`}
+        onClick={() => onChange(clamp(value + step))}
+      >
         +
       </button>
       {unit && <span className={styles.unit}>{unit}</span>}
@@ -157,7 +187,14 @@ interface SectionProps {
   actions?: ReactNode
 }
 
-export function PanelSection({ title, children, collapsible = false, defaultOpen = true, className, actions }: SectionProps) {
+export function PanelSection({
+  title,
+  children,
+  collapsible = false,
+  defaultOpen = true,
+  className,
+  actions,
+}: SectionProps) {
   const [open, setOpen] = useState(defaultOpen)
   const id = useId()
   return (
@@ -197,7 +234,19 @@ export function Toast({ message, tone = 'info' }: { message: string; tone?: 'inf
   )
 }
 
-export function Meter({ label, value, max, text, tone }: { label: string; value: number; max: number; text: string; tone?: 'red' | 'blue' }) {
+export function Meter({
+  label,
+  value,
+  max,
+  text,
+  tone,
+}: {
+  label: string
+  value: number
+  max: number
+  text: string
+  tone?: 'red' | 'blue'
+}) {
   const fraction = Math.max(0, Math.min(1, value / max))
   return (
     <div className={styles.meter}>

@@ -10,6 +10,7 @@ import {
   TorusGeometry,
   type Material,
 } from 'three'
+import type { CarLook } from './carLook'
 
 /**
  * The race car, built from primitives: a tapered nose and tub, side pods, an engine cover, front
@@ -26,6 +27,8 @@ export interface CarModel {
   body: Group
   helmet: Mesh
   update(pose: CarPose): void
+  /** Paint, finish, stripe and rims. The light under the floor is the scene's (`glow`). */
+  applyLook(look: CarLook): void
   /**
    * Shows a setup on the car: the wings tilt and grow with the downforce, the body sits lower or higher
    * on its wheels (the ride height, exaggerated four times so it can be seen).
@@ -72,6 +75,7 @@ export function createCarModel(): CarModel {
     }),
   )
   const paper = mat(new MeshStandardMaterial({ color: 0xf4f0e8, roughness: 0.5 }))
+  const stripeMaterial = mat(new MeshStandardMaterial({ color: 0xf4f0e8, roughness: 0.5 }))
   const carbon = mat(new MeshStandardMaterial({ color: 0x17171b, metalness: 0.55, roughness: 0.42 }))
   const rubber = mat(new MeshStandardMaterial({ color: 0x0f0f11, roughness: 0.95 }))
   const metal = mat(new MeshStandardMaterial({ color: 0xc9ccd6, metalness: 1, roughness: 0.28 }))
@@ -113,8 +117,20 @@ export function createCarModel(): CarModel {
   cover.scale.set(1, 1, 0.85)
   // The airbox over the driver's head, and the stripe down the middle.
   add(body, geo(new BoxGeometry(0.55, 0.3, 0.3)), carbon, -0.55, 0.82, 0)
-  add(body, geo(new BoxGeometry(2.2, 0.015, 0.14)), paper, 1.0, 0.655, 0, false)
-  add(body, geo(new BoxGeometry(1.7, 0.015, 0.14)), paper, -1.2, 0.84, 0, false)
+  // The stripes: three arrangements, all there, one shown.
+  const stripes: Mesh[] = []
+  const stripe = (name: string, width: number, length: number, x: number, y: number, z: number) => {
+    const mesh = add(body, geo(new BoxGeometry(length, 0.015, width)), stripeMaterial, x, y, z, false)
+    mesh.name = `stripe-${name}`
+    stripes.push(mesh)
+  }
+  stripe('centre', 0.14, 2.2, 1.0, 0.655, 0)
+  stripe('centre', 0.14, 1.7, -1.2, 0.84, 0)
+  for (const side of [-1, 1]) {
+    stripe('twin', 0.06, 2.2, 1.0, 0.655, side * 0.17)
+    stripe('twin', 0.06, 1.7, -1.2, 0.84, side * 0.12)
+    stripe('sides', 0.07, 1.4, -0.25, 0.505, side * 0.6)
+  }
   // Side pods.
   for (const side of [-1, 1]) {
     const pod = add(body, geo(new BoxGeometry(1.5, 0.36, 0.42)), paint, -0.25, 0.32, side * 0.6)
@@ -190,6 +206,25 @@ export function createCarModel(): CarModel {
     root,
     body,
     helmet,
+    applyLook(look) {
+      paint.color.set(look.paint)
+      stripeMaterial.color.set(look.stripe)
+      metal.color.set(look.rims)
+      if (look.finish === 'matte') {
+        paint.metalness = 0.1
+        paint.roughness = 0.85
+        paint.clearcoat = 0
+      } else if (look.finish === 'metallic') {
+        paint.metalness = 0.85
+        paint.roughness = 0.25
+        paint.clearcoat = 0.8
+      } else {
+        paint.metalness = 0.3
+        paint.roughness = 0.3
+        paint.clearcoat = 1
+      }
+      for (const mesh of stripes) mesh.visible = mesh.name === `stripe-${look.stripeStyle}`
+    },
     applySetup(setup) {
       const load = (setup.downforce - 3) / 2
       rearWing.rotation.z = -0.16 * load

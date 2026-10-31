@@ -4,6 +4,9 @@ import { CircleGeometry, Color, Mesh, MeshStandardMaterial, Vector3, type Perspe
 import { createEnvironment } from '../../experience/environment'
 import { OrbitController } from '../../experience/orbit'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
+import { useStore } from '../../experience/store'
+import { useSettle } from '../../experience/useSettle'
+import { carLook } from './carLook'
 import { createCarModel } from './carModel'
 import type { CarSetup } from './carSetup'
 
@@ -14,6 +17,7 @@ import type { CarSetup } from './carSetup'
  */
 export default function PerfScene({ setup }: { setup: CarSetup }) {
   const lab = useLabScene()
+  useSettle()
   const gl = useThree((state) => state.gl)
   const scene = useThree((state) => state.scene)
   const camera = useThree((state) => state.camera) as PerspectiveCamera
@@ -23,6 +27,12 @@ export default function PerfScene({ setup }: { setup: CarSetup }) {
 
   const model = useMemo(() => createCarModel(), [])
   useEffect(() => () => model.dispose(), [model])
+
+  const look = useStore(carLook, (value) => value)
+  useEffect(() => {
+    model.applyLook(look)
+    invalidate()
+  }, [model, look, invalidate])
 
   useEffect(() => {
     model.applySetup(setup)

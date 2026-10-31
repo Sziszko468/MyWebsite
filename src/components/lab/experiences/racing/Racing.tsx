@@ -1,4 +1,4 @@
-import { lazy, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { lazy, useCallback, useEffect, useId, useMemo, useRef, useState, type RefObject } from 'react'
 import { experimentPath } from '../../../../content/lab'
 import { LocalizedLink } from '../../../LocalizedLink/LocalizedLink'
 import { fill, useLabText, useLocalized } from '../../core/useLabText'
@@ -6,16 +6,28 @@ import { ExperienceFrame } from '../../experience/ExperienceFrame'
 import { ExperienceStage } from '../../experience/ExperienceStage'
 import { HoldButton, useKeyState } from '../../experience/input'
 import { useStore } from '../../experience/store'
-import { Glyph, Toast, ToolButton } from '../../experience/ui'
+import { Glyph, PanelSection, Toast, ToolButton } from '../../experience/ui'
 import { useMedia } from '../../experience/useMedia'
 import { award } from '../../progress/progress'
 import { LabAction, LabChoice } from '../../ui/LabControls'
+import { LookPanel } from './LookPanel'
 import { activeSetup } from './carSetup'
+import { slalomFits } from './challenges'
 import { formatLapTime } from './lapSim'
 import type { RaceMode } from './lapTimer'
 import { CAMERA_MODES, type CameraMode } from './racingCamera'
 import { racingText } from './racingText'
 import type { RacingApi } from './RacingScene'
+import {
+  DEFAULT_CONDITIONS,
+  RAIN_GRIP,
+  SKIES,
+  TIMES,
+  parseConditions,
+  type Conditions,
+  type Sky,
+  type TimeChoice,
+} from './weather'
 import { createControls, createTelemetry, type RaceEvent, type Telemetry } from './telemetry'
 import { describeIssue, issueText } from './trackIssues'
 import { defaultTrack, sampleTrack, validateTrack, type TrackSamples } from './trackModel'
@@ -36,7 +48,17 @@ const setText = (element: HTMLElement | null, value: string) => {
 
 // ── The instruments ─────────────────────────────────────────────────────────────────────
 
-function Hud({ telemetry, t, mode }: { telemetry: Telemetry; t: Text; mode: RaceMode }) {
+function Hud({
+  telemetry,
+  t,
+  mode,
+  conditionsText,
+}: {
+  telemetry: Telemetry
+  t: Text
+  mode: RaceMode
+  conditionsText: string
+}) {
   const speed = useRef<HTMLSpanElement>(null)
   const gear = useRef<HTMLSpanElement>(null)
   const rpm = useRef<HTMLDivElement>(null)
@@ -44,6 +66,19 @@ function Hud({ telemetry, t, mode }: { telemetry: Telemetry; t: Text; mode: Race
   const lap = useRef<HTMLSpanElement>(null)
   const last = useRef<HTMLSpanElement>(null)
   const best = useRef<HTMLSpanElement>(null)
+  const ghostRef = useRef<HTMLSpanElement>(null)
+  const driftScore = useRef<HTMLSpanElement>(null)
+  const ckptMain = useRef<HTMLSpanElement>(null)
+  const ckptLeft = useRef<HTMLElement>(null)
+  const ckptNext = useRef<HTMLElement>(null)
+  const ckptMissed = useRef<HTMLElement>(null)
+  const precMain = useRef<HTMLSpanElement>(null)
+  const precGate = useRef<HTMLElement>(null)
+  const precHits = useRef<HTMLElement>(null)
+  const precMissed = useRef<HTMLElement>(null)
+  const driftChain = useRef<HTMLElement>(null)
+  const driftLeft = useRef<HTMLElement>(null)
+  const driftBest = useRef<HTMLElement>(null)
   const splits = useRef<HTMLParagraphElement>(null)
   const status = useRef<HTMLSpanElement>(null)
   const invalid = useRef<HTMLSpanElement>(null)
@@ -75,6 +110,37 @@ function Hud({ telemetry, t, mode }: { telemetry: Telemetry; t: Text; mode: Race
       )
       setText(last.current, formatLapTime(d.last))
       setText(best.current, formatLapTime(d.best))
+      if (current === 'checkpoint') {
+        setText(ckptMain.current, `${d.ckptPassed} / ${d.ckptTotal}`)
+        setText(ckptLeft.current, `${Math.max(0, d.ckptRemaining).toFixed(1)} s`)
+        setText(ckptNext.current, d.phase === 'running' ? `${Math.round(d.ckptDistance)} m` : '–')
+        setText(ckptMissed.current, String(d.ckptMissed))
+      }
+      if (current === 'precision') {
+        setText(precMain.current, `${d.precTime.toFixed(1)} s`)
+        setText(precGate.current, `${d.precGate} / ${d.precTotal}`)
+        setText(precHits.current, String(d.precHits))
+        setText(precMissed.current, String(d.precMissed))
+      }
+      if (current === 'drift') {
+        setText(driftScore.current, String(d.driftScore))
+        setText(driftChain.current, d.driftChain > 0 ? `${Math.round(d.driftChain)} ×${d.driftCombo}` : '–')
+        if (driftChain.current) driftChain.current.dataset.active = d.driftOn ? 'true' : 'false'
+        setText(driftLeft.current, `${Math.ceil(d.driftRemaining)} s`)
+        setText(driftBest.current, String(Math.max(d.driftBest, d.driftScore)))
+      }
+      if (ghostRef.current) {
+        const gap = d.ghostDelta
+        setText(
+          ghostRef.current,
+          d.ghostTime === null
+            ? words.hud.ghostNone
+            : gap === null
+              ? formatLapTime(d.ghostTime)
+              : `${gap > 0 ? '+' : '−'}${Math.abs(gap).toFixed(2)} s`,
+        )
+        ghostRef.current.dataset.trend = gap === null ? 'none' : gap > 0 ? 'behind' : 'ahead'
+      }
       setText(splits.current, d.splits.map((split, i) => `S${i + 1} ${formatLapTime(split)}`).join('  ·  '))
       setText(status.current, words.hud.status[d.surface])
       if (status.current) status.current.dataset.state = d.surface
@@ -115,24 +181,93 @@ function Hud({ telemetry, t, mode }: { telemetry: Telemetry; t: Text; mode: Race
         </div>
       </div>
 
-      <div className={styles.timing} role="group" aria-label={t.hud.time}>
-        <span ref={lap} className={styles.lap} />
-        <span ref={time} className={styles.time} />
-        <dl className={styles.times}>
-          <div>
-            <dt>{t.hud.last}</dt>
-            <dd ref={last} />
-          </div>
-          <div>
-            <dt>{t.hud.best}</dt>
-            <dd ref={best} />
-          </div>
-        </dl>
-        <p ref={splits} className={styles.splits} />
-        <span ref={invalid} className={styles.invalid} hidden>
-          {t.hud.invalid}
-        </span>
-      </div>
+      {mode === 'checkpoint' ? (
+        <div className={styles.timing} role="group" aria-label={t.challenges.checkpoint.title}>
+          <span className={styles.lap}>{t.challenges.checkpoint.title}</span>
+          <span ref={ckptMain} className={styles.time} />
+          <dl className={styles.times}>
+            <div>
+              <dt>{t.challenges.checkpoint.left}</dt>
+              <dd ref={ckptLeft} />
+            </div>
+            <div>
+              <dt>{t.challenges.checkpoint.next}</dt>
+              <dd ref={ckptNext} />
+            </div>
+            <div>
+              <dt>{t.challenges.checkpoint.missedLabel}</dt>
+              <dd ref={ckptMissed} />
+            </div>
+          </dl>
+          {conditionsText && <span className={styles.conditions}>{conditionsText}</span>}
+        </div>
+      ) : mode === 'precision' ? (
+        <div className={styles.timing} role="group" aria-label={t.challenges.precision.title}>
+          <span className={styles.lap}>{t.challenges.precision.time}</span>
+          <span ref={precMain} className={styles.time} />
+          <dl className={styles.times}>
+            <div>
+              <dt>{t.challenges.precision.gate}</dt>
+              <dd ref={precGate} />
+            </div>
+            <div>
+              <dt>{t.challenges.precision.hits}</dt>
+              <dd ref={precHits} />
+            </div>
+            <div>
+              <dt>{t.challenges.precision.missed}</dt>
+              <dd ref={precMissed} />
+            </div>
+          </dl>
+          {conditionsText && <span className={styles.conditions}>{conditionsText}</span>}
+        </div>
+      ) : mode === 'drift' ? (
+        <div className={styles.timing} role="group" aria-label={t.drift.title}>
+          <span className={styles.lap}>{t.drift.title}</span>
+          <span ref={driftScore} className={styles.time} />
+          <dl className={styles.times}>
+            <div>
+              <dt>{t.drift.chain}</dt>
+              <dd ref={driftChain} className={styles.chain} />
+            </div>
+            <div>
+              <dt>{t.drift.left}</dt>
+              <dd ref={driftLeft} />
+            </div>
+            <div>
+              <dt>{t.hud.best}</dt>
+              <dd ref={driftBest} />
+            </div>
+          </dl>
+          {conditionsText && <span className={styles.conditions}>{conditionsText}</span>}
+        </div>
+      ) : (
+        <div className={styles.timing} role="group" aria-label={t.hud.time}>
+          <span ref={lap} className={styles.lap} />
+          <span ref={time} className={styles.time} />
+          <dl className={styles.times}>
+            <div>
+              <dt>{t.hud.last}</dt>
+              <dd ref={last} />
+            </div>
+            <div>
+              <dt>{t.hud.best}</dt>
+              <dd ref={best} />
+            </div>
+            <div>
+              <dt>{t.hud.ghost}</dt>
+              <dd>
+                <span ref={ghostRef} data-trend="none" />
+              </dd>
+            </div>
+          </dl>
+          <p ref={splits} className={styles.splits} />
+          {conditionsText && <span className={styles.conditions}>{conditionsText}</span>}
+          <span ref={invalid} className={styles.invalid} hidden>
+            {t.hud.invalid}
+          </span>
+        </div>
+      )}
 
       <div className={styles.readouts}>
         <span ref={status} className={styles.status} data-state="asphalt" />
@@ -141,6 +276,101 @@ function Hud({ telemetry, t, mode }: { telemetry: Telemetry; t: Text; mode: Race
 
       <div ref={big} className={styles.countdown} aria-hidden="true" hidden />
     </>
+  )
+}
+
+function ReplayBar({
+  t,
+  telemetry,
+  api,
+  title,
+  onExit,
+}: {
+  t: Text
+  telemetry: Telemetry
+  api: RefObject<RacingApi | null>
+  title: string
+  onExit: () => void
+}) {
+  const range = useRef<HTMLInputElement>(null)
+  const clock = useRef<HTMLSpanElement>(null)
+  const dragging = useRef(false)
+  const seen = useRef(false)
+  const [rate, setRate] = useState(1)
+  const [paused, setPaused] = useState(false)
+
+  useEffect(() => {
+    const born = performance.now()
+    const id = window.setInterval(() => {
+      // The scene says when it is playing; if it stops (a restart, a new run) the bar goes with it.
+      if (telemetry.replay) seen.current = true
+      else if (seen.current || performance.now() - born > 4000) return onExit()
+      if (range.current && !dragging.current) {
+        range.current.max = String(Math.round(telemetry.replayDuration * 100))
+        range.current.value = String(Math.round(telemetry.replayTime * 100))
+      }
+      setText(clock.current, `${formatLapTime(telemetry.replayTime)} / ${formatLapTime(telemetry.replayDuration)}`)
+    }, 80)
+    return () => window.clearInterval(id)
+  }, [telemetry, onExit])
+
+  const rates = [0.25, 0.5, 1, 2]
+  return (
+    <section className={styles.replay} aria-label={t.replay.group}>
+      <p className={styles.replayTitle}>{title}</p>
+      <div className={styles.replayRow}>
+        <ToolButton
+          iconOnly
+          label={paused ? t.replay.play : t.replay.pause}
+          pressed={paused}
+          icon={
+            <Glyph>
+              <path d={paused ? 'M8 5l11 7-11 7z' : 'M8 5v14M16 5v14'} />
+            </Glyph>
+          }
+          onClick={() => {
+            api.current?.setReplay({ paused: !paused })
+            setPaused(!paused)
+          }}
+        />
+        <input
+          ref={range}
+          className={styles.scrub}
+          type="range"
+          min={0}
+          defaultValue={0}
+          step={1}
+          aria-label={t.replay.scrub}
+          onPointerDown={() => (dragging.current = true)}
+          onPointerUp={() => (dragging.current = false)}
+          onBlur={() => (dragging.current = false)}
+          onChange={(event) => api.current?.setReplay({ time: Number(event.currentTarget.value) / 100 })}
+        />
+        <span ref={clock} className={styles.replayClock} />
+      </div>
+      <div className={styles.replayRow}>
+        <div className={styles.rates} role="group" aria-label={t.replay.speed}>
+          {rates.map((value) => (
+            <button
+              key={value}
+              type="button"
+              className={styles.segment}
+              aria-pressed={rate === value}
+              onClick={() => {
+                api.current?.setReplay({ rate: value })
+                setRate(value)
+              }}
+            >
+              {value}×
+            </button>
+          ))}
+        </div>
+        <LabAction variant="primary" onClick={onExit}>
+          {t.replay.exit}
+        </LabAction>
+      </div>
+      <p className={styles.note}>{t.replay.hint}</p>
+    </section>
   )
 }
 
@@ -295,6 +525,8 @@ function TouchPads({ t, touch }: { t: Text; touch: ReturnType<typeof createContr
 
 type TouchPref = 'auto' | 'on' | 'off'
 
+const MODES = ['practice', 'trial', 'drift', 'checkpoint', 'precision'] as const
+
 interface Message {
   id: number
   text: string
@@ -316,6 +548,7 @@ function RacingApp() {
   const [telemetry] = useState(createTelemetry)
   const coarse = useMedia('(pointer: coarse)')
   const wide = useMedia('(min-width: 48rem) and (min-height: 34rem)')
+  const broad = useMedia('(min-width: 64rem)')
 
   const active = useStore(activeTrack, (value) => value)
   const setupState = useStore(activeSetup, (value) => value)
@@ -325,8 +558,46 @@ function RacingApp() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [touchPref, setTouchPref] = useState<TouchPref>('auto')
   const [soundOn, setSoundOn] = useState(false)
+  const [conditions, setConditions] = useState<Conditions>(() => {
+    try {
+      return parseConditions(JSON.parse(window.localStorage.getItem('lab:racing:conditions') ?? 'null'))
+    } catch {
+      return DEFAULT_CONDITIONS
+    }
+  })
+  const changeConditions = (patch: Partial<Conditions>) =>
+    setConditions((current) => {
+      const next = { ...current, ...patch }
+      try {
+        window.localStorage.setItem('lab:racing:conditions', JSON.stringify(next))
+      } catch {
+        // The choice just is not remembered.
+      }
+      return next
+    })
+  const [ghostOn, setGhostOn] = useState(() => {
+    try {
+      return window.localStorage.getItem('lab:racing:ghost') !== '0'
+    } catch {
+      return true
+    }
+  })
+  const toggleGhost = () =>
+    setGhostOn((on) => {
+      try {
+        window.localStorage.setItem('lab:racing:ghost', on ? '0' : '1')
+      } catch {
+        // The choice just is not remembered.
+      }
+      return !on
+    })
   const [message, setMessage] = useState<Message | null>(null)
   const [result, setResult] = useState<Result | null>(null)
+  const [canReplay, setCanReplay] = useState(false)
+  const [replaying, setReplaying] = useState(false)
+  const [lapInfo, setLapInfo] = useState({ lap: 1, time: 0 })
+  const [driftResult, setDriftResult] = useState<{ score: number; record: boolean } | null>(null)
+  const [challengeResult, setChallengeResult] = useState<Extract<RaceEvent, { type: 'challengeEnd' }> | null>(null)
   const [engaged, setEngaged] = useState(false)
   const laps = useRef<Result['laps']>([])
 
@@ -346,7 +617,10 @@ function RacingApp() {
     [],
   )
   const held = useKeyState(engaged, CLAIM, (code) => {
-    if (code === 'KeyC') cycleCamera()
+    if (code === 'Escape') {
+      api.current?.stopReplay()
+      setReplaying(false)
+    } else if (code === 'KeyC') cycleCamera()
     else if (code === 'KeyR') api.current?.reset()
   })
   useEffect(() => {
@@ -395,6 +669,8 @@ function RacingApp() {
           say(fill(t.toast.sector, { n: event.gate, time: formatLapTime(event.time) }))
           break
         case 'lap':
+          setCanReplay(true)
+          setLapInfo({ lap: event.lap, time: event.time })
           // A lap that was really driven (through both gates) is the First Lap; nothing is paid for opening the page.
           award('lap:first', 20, 'first-lap')
           laps.current.push({ time: event.time, clean: event.clean })
@@ -418,9 +694,43 @@ function RacingApp() {
         case 'reset':
           say(t.toast.reset, 'warning')
           break
+        case 'drift':
+          say(fill(t.toast.drift, { points: event.points }))
+          break
+        case 'checkpoint':
+          say(
+            event.passed
+              ? fill(t.challenges.checkpoint.passed, {
+                  n: event.index + 1,
+                  total: event.total,
+                  bonus: event.bonus.toFixed(1),
+                })
+              : fill(t.challenges.checkpoint.missed, { n: event.index + 1, total: event.total }),
+            event.passed ? 'info' : 'warning',
+          )
+          break
+        case 'cone':
+          say(t.challenges.precision.cone, 'warning')
+          break
+        case 'slalomGate':
+          if (event.result === 'missed') say(t.challenges.precision.gateMissed, 'warning')
+          break
+        case 'challengeEnd':
+          setChallengeResult(event)
+          break
+        case 'driftEnd':
+          setDriftResult({ score: event.score, record: event.record })
+          break
+        case 'ghost':
+          say(fill(t.toast.ghost, { time: formatLapTime(event.time) }))
+          break
         case 'restart':
+          setCanReplay(false)
+          setReplaying(false)
           laps.current = []
           setResult(null)
+          setDriftResult(null)
+          setChallengeResult(null)
           say(t.toast.restart)
           break
         case 'finish':
@@ -436,12 +746,18 @@ function RacingApp() {
 
   const restart = useCallback(() => {
     setResult(null)
+    setDriftResult(null)
+    setChallengeResult(null)
     setRunId((id) => id + 1)
   }, [])
   const changeMode = (next: RaceMode) => {
     if (next === mode) return restart()
     setMode(next)
+    setCanReplay(false)
+    setReplaying(false)
     setResult(null)
+    setDriftResult(null)
+    setChallengeResult(null)
     laps.current = []
   }
 
@@ -472,6 +788,15 @@ function RacingApp() {
     }
   }, [soundOn, telemetry])
 
+  const conditionsText = [
+    conditions.sky === 'rain' ? `${t.weather.sky.rain} · ${t.weather.grip} ${Math.round(RAIN_GRIP * 100)} %` : '',
+    conditions.sky === 'fog' ? `${t.weather.sky.fog} · ${t.weather.short}` : '',
+    conditions.time !== 'auto' ? t.weather.time[conditions.time] : '',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+  const gridStart = samples.length - Math.round(6 / samples.spacing) * samples.spacing
+  const slalomOk = useMemo(() => slalomFits(samples, gridStart), [samples, gridStart])
   const showTouch = touchPref === 'on' || (touchPref === 'auto' && coarse)
   const setupName = { default: t.menu.setupDefault, a: t.menu.setupA, b: t.menu.setupB, custom: t.menu.setupCustom }[
     setupState.source
@@ -482,7 +807,7 @@ function RacingApp() {
       : t.menu.labCircuit
 
   return (
-    <div className={styles.race} data-touch={showTouch} data-wide={wide}>
+    <div className={styles.race} data-touch={showTouch} data-wide={wide} data-replay={replaying}>
       <ExperienceStage
         label={experiments.racing.stageLabel}
         camera={CAMERA}
@@ -495,22 +820,37 @@ function RacingApp() {
           <div className={styles.overlay}>
             <div className={styles.top}>
               <div className={styles.group} role="group" aria-label={t.bar.mode}>
-                <button
-                  type="button"
-                  className={styles.segment}
-                  aria-pressed={mode === 'practice'}
-                  onClick={() => changeMode('practice')}
-                >
-                  {t.bar.practice}
-                </button>
-                <button
-                  type="button"
-                  className={styles.segment}
-                  aria-pressed={mode === 'trial'}
-                  onClick={() => changeMode('trial')}
-                >
-                  {t.bar.trial}
-                </button>
+                {broad ? (
+                  MODES.map((id) => (
+                    <button
+                      key={id}
+                      type="button"
+                      className={styles.segment}
+                      aria-pressed={mode === id}
+                      disabled={id === 'precision' && !slalomOk}
+                      title={id === 'precision' && !slalomOk ? t.challenges.precision.unfit : undefined}
+                      onClick={() => changeMode(id)}
+                    >
+                      {t.bar[id]}
+                    </button>
+                  ))
+                ) : (
+                  <select
+                    className={styles.modeSelect}
+                    aria-label={t.bar.modeSelect}
+                    value={mode}
+                    onChange={(event) => changeMode(event.currentTarget.value as RaceMode)}
+                  >
+                    {MODES.map((id) => (
+                      <option key={id} value={id} disabled={id === 'precision' && !slalomOk}>
+                        {t.bar[id]}
+                        {id === 'precision' && !slalomOk ? ` (${t.challenges.precision.unfit})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              <div className={styles.group} role="group" aria-label={t.bar.camera}>
                 <ToolButton
                   iconOnly
                   label={t.bar.restart}
@@ -532,8 +872,6 @@ function RacingApp() {
                   }
                   onClick={() => setMenuOpen((open) => !open)}
                 />
-              </div>
-              <div className={styles.group} role="group" aria-label={t.bar.camera}>
                 <ToolButton
                   iconOnly
                   label={`${t.bar.camera}: ${t.cameras[cameraMode]}`}
@@ -561,6 +899,30 @@ function RacingApp() {
                 />
                 <ToolButton
                   iconOnly
+                  label={t.bar.replay}
+                  disabled={!canReplay || replaying}
+                  icon={
+                    <Glyph>
+                      <path d="M12 5a7 7 0 1 1-6.7 5M5 4v6h6M10.5 9.5l4 2.5-4 2.5z" />
+                    </Glyph>
+                  }
+                  onClick={() => {
+                    if (api.current?.startReplay()) setReplaying(true)
+                  }}
+                />
+                <ToolButton
+                  iconOnly
+                  label={ghostOn ? t.bar.ghostOff : t.bar.ghostOn}
+                  pressed={ghostOn}
+                  icon={
+                    <Glyph>
+                      <path d="M6 20V11a6 6 0 0 1 12 0v9l-3-2-3 2-3-2zM10 11h.01M14 11h.01" />
+                    </Glyph>
+                  }
+                  onClick={toggleGhost}
+                />
+                <ToolButton
+                  iconOnly
                   label={soundOn ? t.bar.soundOff : t.bar.soundOn}
                   pressed={soundOn}
                   icon={
@@ -583,6 +945,9 @@ function RacingApp() {
               <section className={styles.menu} id={menuId} aria-label={t.menu.title}>
                 <h2>{t.menu.title}</h2>
                 <p className={styles.note}>{t.menu.modeHelp}</p>
+                {mode === 'drift' && <p className={styles.note}>{t.drift.hint}</p>}
+                {mode === 'checkpoint' && <p className={styles.note}>{t.challenges.checkpoint.hint}</p>}
+                {mode === 'precision' && <p className={styles.note}>{t.challenges.precision.hint}</p>}
                 <p className={styles.fact}>
                   <span>{t.menu.track}</span> {trackName}
                 </p>
@@ -613,6 +978,25 @@ function RacingApp() {
                   onChange={setTouchPref}
                   columns={3}
                 />
+                <LabChoice<Sky>
+                  label={t.weather.skyLabel}
+                  value={conditions.sky}
+                  options={SKIES.map((sky) => ({ value: sky, label: t.weather.sky[sky] }))}
+                  onChange={(sky) => changeConditions({ sky })}
+                  columns={3}
+                />
+                <LabChoice<TimeChoice>
+                  label={t.weather.timeLabel}
+                  value={conditions.time}
+                  options={TIMES.map((time) => ({ value: time, label: t.weather.time[time] }))}
+                  onChange={(time) => changeConditions({ time })}
+                  columns={2}
+                />
+                <PanelSection title={t.look.title} collapsible defaultOpen={false}>
+                  <LookPanel />
+                </PanelSection>
+                <p className={styles.note}>{fill(t.weather.note, { percent: Math.round(RAIN_GRIP * 100) })}</p>
+                <p className={styles.note}>{t.menu.ghostNote}</p>
                 <p className={styles.note}>{t.menu.soundNote}</p>
                 <p className={styles.note}>{t.menu.bestNote}</p>
                 <p className={styles.note}>{t.menu.physicsNote}</p>
@@ -629,7 +1013,7 @@ function RacingApp() {
               </div>
             )}
 
-            <Hud telemetry={telemetry} t={t} mode={mode} />
+            <Hud telemetry={telemetry} t={t} mode={mode} conditionsText={conditionsText} />
             <div className={styles.toasts}>
               <Toast message={message?.text ?? ''} tone={message?.tone ?? 'info'} />
             </div>
@@ -637,6 +1021,74 @@ function RacingApp() {
               <MiniMap samples={samples} telemetry={telemetry} label={t.hud.map} />
             </div>
             {!showTouch && wide && <p className={styles.keys}>{t.keys}</p>}
+
+            {challengeResult && (
+              <section className={styles.result} aria-labelledby={`${menuId}-challenge`}>
+                <h2 id={`${menuId}-challenge`}>
+                  {challengeResult.kind === 'checkpoint'
+                    ? challengeResult.won
+                      ? t.challenges.checkpoint.won
+                      : t.challenges.checkpoint.lost
+                    : challengeResult.won
+                      ? t.challenges.precision.done
+                      : t.challenges.precision.timedOut}
+                </h2>
+                <p className={styles.resultTotal}>
+                  <span>
+                    {challengeResult.kind === 'checkpoint'
+                      ? t.challenges.checkpoint.score
+                      : t.challenges.precision.time}
+                  </span>{' '}
+                  {challengeResult.kind === 'checkpoint'
+                    ? challengeResult.score
+                    : `${challengeResult.score.toFixed(1)} s`}
+                </p>
+                <p className={styles.note}>
+                  {challengeResult.kind === 'checkpoint'
+                    ? fill(t.challenges.checkpoint.count, {
+                        passed: challengeResult.passed,
+                        total: challengeResult.total,
+                      })
+                    : fill(t.challenges.precision.gates, {
+                        passed: challengeResult.passed,
+                        total: challengeResult.total,
+                        hits: challengeResult.hits,
+                        missed: challengeResult.missed,
+                      })}
+                </p>
+                {challengeResult.record && (
+                  <p className={styles.note}>
+                    {challengeResult.kind === 'checkpoint'
+                      ? t.challenges.checkpoint.record
+                      : t.challenges.precision.record}
+                  </p>
+                )}
+                <div className={styles.links}>
+                  <LabAction variant="primary" onClick={restart}>
+                    {t.result.again}
+                  </LabAction>
+                  <LabAction onClick={() => changeMode('practice')}>{t.result.practice}</LabAction>
+                </div>
+              </section>
+            )}
+
+            {driftResult && (
+              <section className={styles.result} aria-labelledby={`${menuId}-drift`}>
+                <h2 id={`${menuId}-drift`}>{t.drift.resultTitle}</h2>
+                <p className={styles.resultTotal}>
+                  <span>{t.drift.score}</span> {driftResult.score}
+                </p>
+                <p className={styles.note}>
+                  {driftResult.record ? t.drift.record : fill(t.drift.best, { score: telemetry.driftBest })}
+                </p>
+                <div className={styles.links}>
+                  <LabAction variant="primary" onClick={restart}>
+                    {t.result.again}
+                  </LabAction>
+                  <LabAction onClick={() => changeMode('practice')}>{t.result.practice}</LabAction>
+                </div>
+              </section>
+            )}
 
             {result && (
               <section className={styles.result} aria-labelledby={`${menuId}-result`}>
@@ -667,6 +1119,19 @@ function RacingApp() {
               </section>
             )}
 
+            {replaying && (
+              <ReplayBar
+                t={t}
+                telemetry={telemetry}
+                api={api}
+                title={fill(t.replay.title, { lap: lapInfo.lap, time: formatLapTime(lapInfo.time) })}
+                onExit={() => {
+                  api.current?.stopReplay()
+                  setReplaying(false)
+                }}
+              />
+            )}
+
             {showTouch && <TouchPads t={t} touch={controls.touch} />}
           </div>
         }
@@ -677,6 +1142,8 @@ function RacingApp() {
           mode={mode}
           runId={runId}
           cameraMode={cameraMode}
+          ghostOn={ghostOn}
+          conditions={conditions}
           controls={controls}
           telemetry={telemetry}
           apiRef={api}

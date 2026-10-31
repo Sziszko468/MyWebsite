@@ -99,8 +99,8 @@ function corner(params: CarParams): { g: number; slid: boolean } {
   return { g: peak, slid }
 }
 
-export function runBench(setup: CarSetup): BenchResult {
-  const params = deriveCarParams(setup)
+export function runBench(setup: CarSetup, wet = 1): BenchResult {
+  const params = deriveCarParams(setup, wet)
   const run = accelerate(params)
   const turn = corner(params)
   return { ...run, braking: brake(params), cornering: turn.g, slid: turn.slid }

@@ -233,7 +233,9 @@ export class OrbitController {
     this.phi += (this.goalPhi - this.phi) * k
 
     const sinPhi = Math.sin(this.phi)
-    this.offset.set(sinPhi * Math.sin(this.theta), Math.cos(this.phi), sinPhi * Math.cos(this.theta)).multiplyScalar(this.radius)
+    this.offset
+      .set(sinPhi * Math.sin(this.theta), Math.cos(this.phi), sinPhi * Math.cos(this.theta))
+      .multiplyScalar(this.radius)
     camera.position.copy(this.target).add(this.offset)
     camera.lookAt(this.target)
 

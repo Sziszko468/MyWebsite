@@ -68,6 +68,8 @@ export interface CarParams {
   brakeBias: number
   /** Gear ratio times final drive, for each gear. */
   ratios: readonly number[]
+  /** The share of its dry grip the road keeps: 1 dry, less in rain. */
+  wet: number
   /** How quickly the load follows the car's acceleration, s. */
   transferTau: number
   /** Grip the springs and the ride height take away on a kerb. */
@@ -97,7 +99,7 @@ function ratiosFor(finalDrive: number): readonly number[] {
  *  - the weight distribution moves the centre of gravity between the axles: more on the front axle
  *    steadies braking and bites into corners, less puts more load on the driven rear tyres
  */
-export function deriveCarParams(setup: CarSetup): CarParams {
+export function deriveCarParams(setup: CarSetup, wet = 1): CarParams {
   const ride = 55 - setup.rideHeight
   const downforce = setup.downforce * (1 + 0.0035 * ride)
   const drag = setup.drag * (1 + 0.0015 * ride) + 0.07 * downforce
@@ -113,6 +115,7 @@ export function deriveCarParams(setup: CarSetup): CarParams {
     inertia: mass * Math.pow(0.34 * WHEELBASE, 2),
     cgHeight: 0.29 + setup.rideHeight * 0.0005,
     mu: setup.tyreGrip * platform,
+    wet,
     downforce,
     drag,
     brakeBias: setup.brakeBias / 100,
@@ -329,15 +332,17 @@ export function maxSteerAngle(speed: number): number {
   return 0.45 / (1 + k * k)
 }
 
-const grip = (surface: Surface) => SURFACE_GRIP[surface]
+/** Grip of a surface: a wet road loses all of the share it loses, rough ground only half of it. */
+const gripOn = (surface: Surface, wet: number) =>
+  SURFACE_GRIP[surface] * (surface === 'asphalt' || surface === 'kerb' ? wet : 1 - (1 - wet) * 0.5)
 
 /** Advances the car by `dt` seconds (call with a small, fixed step). */
 export function stepCar(state: CarState, input: DriverInput, params: CarParams, track: TrackSamples, dt: number): void {
   const { mass, a, b, wheelbase } = params
   const [fl, fr, rl, rr] = state.corners
   const place = state.place
-  const gripFront = (grip(fl.surface) + grip(fr.surface)) / 2
-  const gripRear = (grip(rl.surface) + grip(rr.surface)) / 2
+  const gripFront = (gripOn(fl.surface, params.wet) + gripOn(fr.surface, params.wet)) / 2
+  const gripRear = (gripOn(rl.surface, params.wet) + gripOn(rr.surface, params.wet)) / 2
   const kerb = fl.surface === 'kerb' || fr.surface === 'kerb' || rl.surface === 'kerb' || rr.surface === 'kerb'
   const resistance =
     (SURFACE_DRAG[fl.surface] + SURFACE_DRAG[fr.surface] + SURFACE_DRAG[rl.surface] + SURFACE_DRAG[rr.surface]) / 4
@@ -348,7 +353,10 @@ export function stepCar(state: CarState, input: DriverInput, params: CarParams, 
   const rate = input.steer === 0 ? 5 : 3.4
   const toward = input.steer - state.steerInput
   state.steerInput += Math.sign(toward) * Math.min(Math.abs(toward), rate * dt)
-  state.steerAngle = state.steerInput * maxSteerAngle(speed)
+  // At speed the wheel turns only a little, which keeps a straight line steady; in a slide it opens up
+  // as far as the slide needs, so the car can be caught and held (counter-steering) instead of spun.
+  const slideAngle = state.u > 3 ? Math.abs(Math.atan2(state.v, state.u)) : 0
+  state.steerAngle = state.steerInput * Math.max(maxSteerAngle(speed), Math.min(0.45, 0.9 * slideAngle))
   const delta = state.steerAngle
 
   // Driving or reversing, braking or not.

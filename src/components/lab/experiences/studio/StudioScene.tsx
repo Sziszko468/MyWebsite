@@ -20,6 +20,7 @@ import {
 import { downloadBlob, safeFilename } from '../../experience/persist'
 import { createEnvironment } from '../../experience/environment'
 import { OrbitController } from '../../experience/orbit'
+import { useSettle } from '../../experience/useSettle'
 import { useStore } from '../../experience/store'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { Gizmo } from './gizmo'
@@ -86,7 +87,10 @@ function StudioMesh({ object, selected, cache, carbon, shadows, registry, helper
     geometry.computeBoundingBox()
     return boxEdges(geometry.boundingBox ?? new Box3())
   }, [geometry])
-  const markerMaterial = useMemo(() => new LineBasicMaterial({ color: 0xff161f, depthTest: false, transparent: true, opacity: 0.95 }), [])
+  const markerMaterial = useMemo(
+    () => new LineBasicMaterial({ color: 0xff161f, depthTest: false, transparent: true, opacity: 0.95 }),
+    [],
+  )
   const selection = useRef<LineSegments>(null)
 
   useLayoutEffect(() => {
@@ -130,6 +134,7 @@ function StudioMesh({ object, selected, cache, carbon, shadows, registry, helper
 
 export default function StudioScene({ apiRef }: { apiRef: RefObject<StudioApi | null> }) {
   const labScene = useLabScene()
+  useSettle()
   const gl = useThree((state) => state.gl)
   const scene = useThree((state) => state.scene)
   const size = useThree((state) => state.size)
@@ -232,7 +237,12 @@ export default function StudioScene({ apiRef }: { apiRef: RefObject<StudioApi | 
       },
       frame: frameSelection,
       view: (name) => {
-        const views = { front: [0, Math.PI / 2], right: [Math.PI / 2, Math.PI / 2], top: [0, 0.001], iso: [HOME.theta, HOME.phi] } as const
+        const views = {
+          front: [0, Math.PI / 2],
+          right: [Math.PI / 2, Math.PI / 2],
+          top: [0, 0.001],
+          iso: [HOME.theta, HOME.phi],
+        } as const
         const [theta, phi] = views[name]
         orbit.goTo(orbit.target.clone(), orbit.radius, theta, phi)
       },
@@ -255,7 +265,11 @@ export default function StudioScene({ apiRef }: { apiRef: RefObject<StudioApi | 
           group.add(node)
         }
         try {
-          const buffer = (await new GLTFExporter().parseAsync(group, { binary: true, onlyVisible: true, maxTextureSize: 512 })) as ArrayBuffer
+          const buffer = (await new GLTFExporter().parseAsync(group, {
+            binary: true,
+            onlyVisible: true,
+            maxTextureSize: 512,
+          })) as ArrayBuffer
           downloadBlob(new Blob([buffer], { type: 'model/gltf-binary' }), safeFilename('model-studio', 'glb'))
           return true
         } finally {
@@ -319,7 +333,10 @@ export default function StudioScene({ apiRef }: { apiRef: RefObject<StudioApi | 
       ),
     [],
   )
-  const axesMaterial = useMemo(() => new LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.75, depthWrite: false }), [])
+  const axesMaterial = useMemo(
+    () => new LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.75, depthWrite: false }),
+    [],
+  )
   useEffect(
     () => () => {
       gridMaterials.minor.dispose()
@@ -392,8 +409,16 @@ export default function StudioScene({ apiRef }: { apiRef: RefObject<StudioApi | 
         shadow-bias={-0.0004}
         shadow-radius={plan.rig.hardShadows ? 1.5 : 7}
       />
-      <directionalLight color={plan.rig.fill.color} intensity={plan.rig.fill.intensity * plan.gain} position={[plan.fill[0] * 12, plan.fill[1] * 12, plan.fill[2] * 12]} />
-      <directionalLight color={plan.rig.rim.color} intensity={plan.rig.rim.intensity * plan.gain} position={[plan.rim[0] * 12, plan.rim[1] * 12, plan.rim[2] * 12]} />
+      <directionalLight
+        color={plan.rig.fill.color}
+        intensity={plan.rig.fill.intensity * plan.gain}
+        position={[plan.fill[0] * 12, plan.fill[1] * 12, plan.fill[2] * 12]}
+      />
+      <directionalLight
+        color={plan.rig.rim.color}
+        intensity={plan.rig.rim.intensity * plan.gain}
+        position={[plan.rim[0] * 12, plan.rim[1] * 12, plan.rim[2] * 12]}
+      />
 
       {shadows && (
         <mesh rotation-x={-Math.PI / 2} position-y={-0.002} receiveShadow>

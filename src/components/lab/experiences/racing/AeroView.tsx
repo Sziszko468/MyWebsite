@@ -47,9 +47,8 @@ export function AeroView({ downforce, drag, rideHeight, label, downforceLabel, d
     const under = (floor + 180) / 2
     const underPoints: string[] = []
     for (let x = 0; x <= 600; x += 10) {
-      const squeeze = Math.exp(-(((x - 300) / 120) ** 2)) * 0
       underPoints.push(
-        `${x} ${(under + squeeze + (x > 430 ? Math.sin(x / 9) * (1 + 7 * dragNorm) * Math.min(1, (x - 430) / 90) : 0)).toFixed(1)}`,
+        `${x} ${(under + (x > 430 ? Math.sin(x / 9) * (1 + 7 * dragNorm) * Math.min(1, (x - 430) / 90) : 0)).toFixed(1)}`,
       )
     }
     paths.push(`M${underPoints.join('L')}`)

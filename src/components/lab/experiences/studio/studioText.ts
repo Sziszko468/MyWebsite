@@ -41,11 +41,19 @@ export const studioText = {
     torus: tri('Tórusz', 'Torus', 'Torus'),
     plane: tri('Sík', 'Plane', 'Vlak'),
     custom: tri('Egyedi', 'Custom', 'Eigen'),
-    full: tri('A jelenet megtelt: legfeljebb {max} objektum fér bele.', 'The scene is full: it holds at most {max} objects.', 'De scène is vol: er passen maximaal {max} objecten in.'),
+    full: tri(
+      'A jelenet megtelt: legfeljebb {max} objektum fér bele.',
+      'The scene is full: it holds at most {max} objects.',
+      'De scène is vol: er passen maximaal {max} objecten in.',
+    ),
   },
   hierarchy: {
     title: tri('Jelenet', 'Scene', 'Scène'),
-    empty: tri('Nincs objektum. Adj hozzá egy alakzatot.', 'No objects. Add a shape.', 'Geen objecten. Voeg een vorm toe.'),
+    empty: tri(
+      'Nincs objektum. Adj hozzá egy alakzatot.',
+      'No objects. Add a shape.',
+      'Geen objecten. Voeg een vorm toe.',
+    ),
     rename: tri('Átnevezés: {name}', 'Rename {name}', 'Hernoem {name}'),
     select: tri('Kijelölés: {name}', 'Select {name}', 'Selecteer {name}'),
     hide: tri('Elrejtés: {name}', 'Hide {name}', 'Verberg {name}'),
@@ -58,11 +66,19 @@ export const studioText = {
   },
   transform: {
     title: tri('Transzformáció', 'Transform', 'Transformatie'),
-    none: tri('Jelölj ki egy objektumot a transzformációhoz.', 'Select an object to transform it.', 'Selecteer een object om het te transformeren.'),
+    none: tri(
+      'Jelölj ki egy objektumot a transzformációhoz.',
+      'Select an object to transform it.',
+      'Selecteer een object om het te transformeren.',
+    ),
     position: tri('Pozíció', 'Position', 'Positie'),
     rotation: tri('Forgatás (°)', 'Rotation (°)', 'Rotatie (°)'),
     scale: tri('Méret', 'Scale', 'Schaal'),
-    locked: tri('Az objektum zárolt: oldd fel a szerkesztéshez.', 'The object is locked: unlock it to edit.', 'Het object is vergrendeld: ontgrendel om te bewerken.'),
+    locked: tri(
+      'Az objektum zárolt: oldd fel a szerkesztéshez.',
+      'The object is locked: unlock it to edit.',
+      'Het object is vergrendeld: ontgrendel om te bewerken.',
+    ),
     duplicate: tri('Duplikálás', 'Duplicate', 'Dupliceren'),
     delete: tri('Törlés', 'Delete', 'Verwijderen'),
     hide: tri('Elrejtés', 'Hide', 'Verbergen'),
@@ -78,7 +94,11 @@ export const studioText = {
   },
   material: {
     title: tri('Anyagok', 'Materials', 'Materialen'),
-    none: tri('Jelölj ki egy objektumot az anyag módosításához.', 'Select an object to change its material.', 'Selecteer een object om het materiaal te wijzigen.'),
+    none: tri(
+      'Jelölj ki egy objektumot az anyag módosításához.',
+      'Select an object to change its material.',
+      'Selecteer een object om het materiaal te wijzigen.',
+    ),
     chrome: tri('Króm', 'Chrome', 'Chroom'),
     'matte-black': tri('Matt fekete', 'Matte Black', 'Mat zwart'),
     'racing-red': tri('Racing Red', 'Racing Red', 'Racing Red'),
@@ -90,7 +110,11 @@ export const studioText = {
     roughness: tri('Érdesség', 'Roughness', 'Ruwheid'),
     metalness: tri('Fémesség', 'Metalness', 'Metaalgehalte'),
     opacity: tri('Átlátszatlanság', 'Opacity', 'Dekking'),
-    opacityOff: tri('Csak az üveg anyagnál állítható.', 'Only adjustable for the glass material.', 'Alleen instelbaar voor het glasmateriaal.'),
+    opacityOff: tri(
+      'Csak az üveg anyagnál állítható.',
+      'Only adjustable for the glass material.',
+      'Alleen instelbaar voor het glasmateriaal.',
+    ),
     emissive: tri('Saját fény', 'Emissive glow', 'Eigen gloed'),
   },
   light: {
@@ -128,16 +152,40 @@ export const studioText = {
   },
   messages: {
     saved: tri('Elmentve ebben a böngészőben.', 'Saved in this browser.', 'Bewaard in deze browser.'),
-    saveFailed: tri('A mentés nem sikerült: a böngésző megtelt vagy letiltotta a tárolást.', 'Saving failed: the browser is full or blocks storage.', 'Bewaren mislukt: de browser is vol of blokkeert opslag.'),
+    saveFailed: tri(
+      'A mentés nem sikerült: a böngésző megtelt vagy letiltotta a tárolást.',
+      'Saving failed: the browser is full or blocks storage.',
+      'Bewaren mislukt: de browser is vol of blokkeert opslag.',
+    ),
     loaded: tri('Betöltve.', 'Loaded.', 'Geladen.'),
-    nothingSaved: tri('Ebben a böngészőben még nincs mentett projekt.', 'No project is saved in this browser yet.', 'In deze browser is nog geen project bewaard.'),
-    badFile: tri('Ez a fájl nem érvényes projekt.', 'This file is not a valid project.', 'Dit bestand is geen geldig project.'),
-    tooBig: tri('A fájl túl nagy (legfeljebb 1 MB).', 'The file is too large (1 MB at most).', 'Het bestand is te groot (maximaal 1 MB).'),
+    nothingSaved: tri(
+      'Ebben a böngészőben még nincs mentett projekt.',
+      'No project is saved in this browser yet.',
+      'In deze browser is nog geen project bewaard.',
+    ),
+    badFile: tri(
+      'Ez a fájl nem érvényes projekt.',
+      'This file is not a valid project.',
+      'Dit bestand is geen geldig project.',
+    ),
+    tooBig: tri(
+      'A fájl túl nagy (legfeljebb 1 MB).',
+      'The file is too large (1 MB at most).',
+      'Het bestand is te groot (maximaal 1 MB).',
+    ),
     exported: tri('A GLB letöltődött.', 'The GLB was downloaded.', 'De GLB is gedownload.'),
-    nothingToExport: tri('Nincs látható objektum, amit exportálni lehetne.', 'There is no visible object to export.', 'Er is geen zichtbaar object om te exporteren.'),
+    nothingToExport: tri(
+      'Nincs látható objektum, amit exportálni lehetne.',
+      'There is no visible object to export.',
+      'Er is geen zichtbaar object om te exporteren.',
+    ),
     exportFailed: tri('Az exportálás nem sikerült.', 'The export failed.', 'De export is mislukt.'),
     screenshot: tri('A képernyőkép elkészült.', 'The screenshot was taken.', 'De schermafbeelding is gemaakt.'),
-    downloaded: tri('A projektfájl letöltődött.', 'The project file was downloaded.', 'Het projectbestand is gedownload.'),
+    downloaded: tri(
+      'A projektfájl letöltődött.',
+      'The project file was downloaded.',
+      'Het projectbestand is gedownload.',
+    ),
     newScene: tri('Új, üres jelenet.', 'A new, empty scene.', 'Een nieuwe, lege scène.'),
   },
   keys: tri(

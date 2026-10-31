@@ -73,7 +73,9 @@ export function useLabView(options: { respectPreference?: boolean } = {}): LabVi
   const reducedMotion = useReducedMotion()
   const [override] = useState(readDevOverride)
   const [webgl] = useState(() => supportsWebGL() && !readDevOverride().still)
-  const [preference, setPreference] = useState<LabView | null>(() => (respectPreference ? readViewPreference(sessionStorageOrNull()) : null))
+  const [preference, setPreference] = useState<LabView | null>(() =>
+    respectPreference ? readViewPreference(sessionStorageOrNull()) : null,
+  )
   const [failed, setFailed] = useState(false)
   const [automaticTier, setTier] = useState<QualityTier>(() => override.tier ?? pickLabTier(getDeviceHints()))
   const [quality, setQualityState] = useState<LabQuality>(() => readQuality(localStorageOrNull()))

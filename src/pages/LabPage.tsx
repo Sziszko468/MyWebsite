@@ -1,3 +1,4 @@
+import { ArtifactsPanel } from '../components/lab/artifacts/ArtifactsPanel'
 import { ExperimentGallery } from '../components/lab/gallery/ExperimentGallery'
 import { LabHero } from '../components/lab/hero/LabHero'
 import { useLabText } from '../components/lab/core/useLabText'
@@ -14,6 +15,7 @@ export function LabPage() {
     <>
       <LabHero />
       <ExperimentGallery />
+      <ArtifactsPanel />
       <FinalCta
         id="exit"
         tone="dark"
