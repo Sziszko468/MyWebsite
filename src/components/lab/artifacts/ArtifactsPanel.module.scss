@@ -47,10 +47,6 @@
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
 
-  &[data-type='creation'] {
-    border-top: 3px solid var(--color-accent);
-  }
-
   &[data-type='typography'] {
     border-top: 3px solid #f4c64a;
   }

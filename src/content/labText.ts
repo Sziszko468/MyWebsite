@@ -234,50 +234,6 @@ export const experimentText: Record<LabId, ExperimentText> = {
       'Een interactieve chromatische vervorming. De aanwijzer of de pijltjestoetsen bewegen de lens; Enter of spatie versterkt het effect.',
     ),
   },
-  'generative-objects': {
-    description: tri(
-      'Írd le vagy mondd el, mit szeretnél látni, és egy szöveg-3D motor (AI) valódi 3D-modellt épít belőle. Előbb az alakzat készül el textúra nélkül; megnézheted minden oldalról, és csak ha kéred, jönnek a textúrák. A modellt forgathatod, nagyíthatod, elmentheted a böngésződben, és GLB-ként letöltheted. Ha a szerveren nincs motor bekötve, az oldal ezt mondja meg, nem helyettesíti mással. Külön, jól megjelölt módban a gyors, szabályos építő (nem AI) továbbra is épít vicces tárgyakat a böngészőben.',
-      'Describe or dictate what you want to see, and a text-to-3D engine (AI) builds a real 3D model from it. The shape comes first, untextured; you look at it from every side, and the textures follow only if you ask. Turn it, zoom, keep it in your browser, download it as a GLB. If no engine is connected on the server the page says so instead of substituting something else. In a separate, clearly labelled mode the quick rule-based builder (not AI) still builds funny objects in the browser.',
-      'Beschrijf of dicteer wat je wilt zien en een tekst-naar-3D-engine (AI) bouwt er een echt 3D-model van. Eerst de vorm, zonder textuur; je bekijkt hem van alle kanten en de texturen volgen alleen als je erom vraagt. Draai hem, zoom, bewaar hem in je browser, download hem als GLB. Is er op de server geen engine gekoppeld, dan zegt de pagina dat in plaats van iets anders te tonen. In een aparte, duidelijk gemarkeerde modus bouwt de snelle regelgebaseerde bouwer (geen AI) nog steeds grappige voorwerpen in de browser.',
-    ),
-    interactions: [
-      tri(
-        'Írj, vagy mondd el magyarul, angolul vagy hollandul (a mikrofon csak kattintásra indul, hangot nem rögzít)',
-        'Type, or dictate in Hungarian, English or Dutch (the microphone starts only on a click and nothing is recorded)',
-        'Typ of dicteer in het Hongaars, Engels of Nederlands (de microfoon start alleen na een klik en er wordt niets opgenomen)',
-      ),
-      tri(
-        'Az AI-motor előbb az alakzatot építi, textúra nélkül; te döntesz a textúrákról',
-        'The AI engine builds the shape first, untextured; you decide about the textures',
-        'De AI-engine bouwt eerst de vorm, zonder textuur; jij beslist over de texturen',
-      ),
-      tri(
-        'Forgatás, nagyítás, eltolás, rács, teljes képernyő, fény, háttér és kamera',
-        'Rotate, zoom, pan, grid, full screen, light, background and camera',
-        'Draaien, zoomen, verschuiven, raster, volledig scherm, licht, achtergrond en camera',
-      ),
-      tri(
-        'Mentés a böngészőben, GLB-letöltés; külön mód a gyors, szabályos építőnek (nem AI)',
-        'Saved in your browser, GLB download; a separate mode for the quick rule-based builder (not AI)',
-        'Bewaren in je browser, GLB-download; een aparte modus voor de snelle regelgebaseerde bouwer (geen AI)',
-      ),
-    ],
-    hint: tri(
-      'Írd le, mit építsek. Aztán forgasd, és szabd a kedvedre.',
-      'Describe what to build. Then turn it and make it yours.',
-      'Beschrijf wat ik moet bouwen. Draai het daarna en maak het van jou.',
-    ),
-    hintTouch: tri(
-      'Írd le, mit építsek. Egy ujjal forgathatod.',
-      'Describe what to build. One finger turns it.',
-      'Beschrijf wat ik moet bouwen. Met één vinger draai je het.',
-    ),
-    stageLabel: tri(
-      'Háromdimenziós előnézet az elkészült alkotásról. Húzással vagy a nyílbillentyűkkel forgatható, a + és a − nagyít.',
-      'A three-dimensional preview of the creation. Drag or use the arrow keys to turn it; + and − zoom.',
-      'Een driedimensionaal voorbeeld van de creatie. Sleep of gebruik de pijltjestoetsen om te draaien; + en − zoomen.',
-    ),
-  },
 }
 
 /** Words shared by every part of the Lab. */

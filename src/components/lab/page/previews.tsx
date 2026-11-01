@@ -210,46 +210,8 @@ function TypePreview() {
   )
 }
 
-const EXAMPLE_PICTURES = [
-  { file: 'example-banana.jpg', turn: -9 },
-  { file: 'example-croissant.jpg', turn: 3 },
-  { file: 'example-frog.jpg', turn: 10 },
-]
-
-/** The object generator's tile: pictures of what it built, which fan out with the pointer. */
-function ObjectsPreview() {
-  const root = useRef<HTMLDivElement>(null)
-  const [spread, setSpread] = useState(0)
-  return (
-    <div
-      ref={root}
-      className={styles.objects}
-      aria-hidden="true"
-      onPointerMove={(event) => {
-        const box = root.current?.getBoundingClientRect()
-        if (box) setSpread((event.clientX - box.left) / box.width - 0.5)
-      }}
-      onPointerLeave={() => setSpread(0)}
-    >
-      {EXAMPLE_PICTURES.map((picture, index) => (
-        <img
-          key={picture.file}
-          src={`${import.meta.env.BASE_URL}lab/${picture.file}`}
-          alt=""
-          width={640}
-          height={400}
-          loading="lazy"
-          decoding="async"
-          style={{ '--turn': `${picture.turn + spread * (index - 1) * 14}deg`, '--shift': `${(index - 1) * 26 + spread * (index - 1) * 30}%`, '--lift': `${index === 1 ? -6 : 4}%` } as CSSProperties}
-        />
-      ))}
-    </div>
-  )
-}
-
 export function Preview({ id }: { id: LabId }) {
   if (id === 'type-in-motion') return <TypePreview />
-  if (id === 'generative-objects') return <ObjectsPreview />
   return <CanvasPreview id={id} />
 }
 

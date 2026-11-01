@@ -8,7 +8,7 @@ describe('the artifact record', () => {
   it('accepts a good one and cleans the name', () => {
     const artifact = parseArtifact({
       id: 'a1',
-      type: 'creation',
+      type: 'typography',
       name: '<b>My "track"</b>',
       createdAt: 5,
       updatedAt: 6,
@@ -24,18 +24,18 @@ describe('the artifact record', () => {
 
   it('refuses what is not one, and drops a preview that is not a small PNG', () => {
     expect(parseArtifact(null)).toBeNull()
-    expect(parseArtifact({ id: '../x', type: 'creation', payload: {} })).toBeNull()
+    expect(parseArtifact({ id: '../x', type: 'typography', payload: {} })).toBeNull()
     expect(parseArtifact({ id: 'a', type: 'virus', payload: {} })).toBeNull()
-    expect(parseArtifact({ id: 'a', type: 'creation', payload: [1] })).toBeNull()
-    expect(parseArtifact({ id: 'a', type: 'creation', payload: { big: 'x'.repeat(LIMITS.payload) } })).toBeNull()
+    expect(parseArtifact({ id: 'a', type: 'typography', payload: [1] })).toBeNull()
+    expect(parseArtifact({ id: 'a', type: 'typography', payload: { big: 'x'.repeat(LIMITS.payload) } })).toBeNull()
     expect(
-      parseArtifact({ id: 'a', type: 'creation', payload: {}, thumbnail: 'javascript:alert(1)' })!.thumbnail,
+      parseArtifact({ id: 'a', type: 'typography', payload: {}, thumbnail: 'javascript:alert(1)' })!.thumbnail,
     ).toBeUndefined()
     expect(
-      parseArtifact({ id: 'a', type: 'creation', payload: {}, thumbnail: PNG + 'A'.repeat(LIMITS.thumbnail) })!.thumbnail,
+      parseArtifact({ id: 'a', type: 'typography', payload: {}, thumbnail: PNG + 'A'.repeat(LIMITS.thumbnail) })!.thumbnail,
     ).toBeUndefined()
     expect(
-      parseArtifact({ id: 'a', type: 'creation', payload: {}, thumbnail: 'data:text/html;base64,AAAA' })!.thumbnail,
+      parseArtifact({ id: 'a', type: 'typography', payload: {}, thumbnail: 'data:text/html;base64,AAAA' })!.thumbnail,
     ).toBeUndefined()
   })
 })
@@ -48,7 +48,7 @@ describe('the service', () => {
 
   it('saves, lists the newest first, renames and deletes', async () => {
     const service = make()
-    const a = await service.save({ type: 'creation', name: 'First', payload: { n: 1 } })
+    const a = await service.save({ type: 'typography', name: 'First', payload: { n: 1 } })
     const b = await service.save({ type: 'material', name: 'Second', payload: { n: 2 }, thumbnail: PNG })
     expect(a.ok && b.ok).toBe(true)
     expect((await service.list()).map((item) => item.name)).toEqual(['Second', 'First'])
@@ -75,7 +75,7 @@ describe('the service', () => {
   it('says why it could not save: too large, full, invalid, no room', async () => {
     const service = make()
     expect(
-      await service.save({ type: 'creation', name: 'Big', payload: { big: 'x'.repeat(LIMITS.payload + 10) } }),
+      await service.save({ type: 'typography', name: 'Big', payload: { big: 'x'.repeat(LIMITS.payload + 10) } }),
     ).toEqual({ ok: false, reason: 'too-large' })
     expect(await service.save({ type: 'virus' as never, name: 'Bad', payload: {} })).toEqual({
       ok: false,
@@ -95,20 +95,20 @@ describe('the service', () => {
       },
       remove: async () => {},
     }
-    expect(await make(noRoom).save({ type: 'creation', name: 'x', payload: {} })).toEqual({ ok: false, reason: 'quota' })
+    expect(await make(noRoom).save({ type: 'typography', name: 'x', payload: {} })).toEqual({ ok: false, reason: 'quota' })
     const broken: Backend = {
       ...noRoom,
       put: async () => {
         throw new Error('closed')
       },
     }
-    expect(await make(broken).save({ type: 'creation', name: 'x', payload: {} })).toEqual({ ok: false, reason: 'blocked' })
+    expect(await make(broken).save({ type: 'typography', name: 'x', payload: {} })).toEqual({ ok: false, reason: 'blocked' })
   })
 
   it('ignores anything in the store that is not a valid work, and reports whether it lasts', async () => {
     const backend: Backend = {
       persistent: true,
-      all: async () => [{ id: 'ok', type: 'creation', name: 'Fine', payload: {} }, { id: 5 }, null, 'x'],
+      all: async () => [{ id: 'ok', type: 'typography', name: 'Fine', payload: {} }, { id: 5 }, null, 'x'],
       put: async () => {},
       remove: async () => {},
     }

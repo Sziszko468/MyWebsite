@@ -124,7 +124,7 @@ function KineticHeadline({ id, text, onFind, dotLabel }: { id: string; text: str
 /**
  * The Lab's first screen: carbon black, a field of Racing Red lines that lean towards the pointer, the
  * headline in letters that stretch under it, one line of promise and the way into the experiments. It
- * is plain markup and a small 2D canvas: nothing here waits for WebGL, so the way into the six
+ * is plain markup and a small 2D canvas: nothing here waits for WebGL, so the way into the five
  * experiments is there at once.
  */
 export function LabHero({ onFind }: { onFind(): void }) {
@@ -141,7 +141,7 @@ export function LabHero({ onFind }: { onFind(): void }) {
         <KineticHeadline id="lab-hero-title" text={t.hero.headline} onFind={onFind} dotLabel={egg.dotLabel} />
         <p className={styles.lead}>{t.hero.lead}</p>
         <div className={styles.actions}>
-          <Button to={experimentPath('generative-objects')} size="lg" arrow>
+          <Button to={experimentPath('particle-universe')} size="lg" arrow>
             {t.hero.create}
           </Button>
           <Button href="#experiments" variant="secondary" size="lg">

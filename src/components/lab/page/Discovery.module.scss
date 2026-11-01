@@ -36,7 +36,7 @@
 
 /*
  * One column on a phone, two on a tablet, a twelve-column spread from a laptop up. Each tile has its own
- * proportions on purpose: the generator is tall, the type tile is narrow, the chromatic one is wide.
+ * proportions on purpose: the first is tall, the others each take their own width.
  */
 .grid {
   display: grid;
@@ -68,15 +68,11 @@
     }
 
     & > [data-place='d'] {
-      grid-column: 1 / span 4;
+      grid-column: 1 / span 6;
     }
 
     & > [data-place='e'] {
-      grid-column: 5 / span 4;
-    }
-
-    & > [data-place='f'] {
-      grid-column: 9 / span 4;
+      grid-column: 7 / span 6;
     }
   }
 }
@@ -123,7 +119,7 @@
   overflow: hidden;
   background-color: #0b0b0d;
 
-  .tile[data-featured='true'] & {
+  .tile[data-large='true'] & {
     min-height: 18rem;
 
     @include m.up('lg') {
@@ -144,21 +140,6 @@
   font-size: var(--fs-2xl);
   font-weight: var(--fw-black);
   line-height: 1;
-  pointer-events: none;
-}
-
-.flag {
-  position: absolute;
-  top: var(--space-3);
-  left: var(--space-3);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  background-color: var(--color-accent);
-  color: var(--color-on-accent);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-black);
-  letter-spacing: var(--ls-wider);
-  text-transform: uppercase;
   pointer-events: none;
 }
 

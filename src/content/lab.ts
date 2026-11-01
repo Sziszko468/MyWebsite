@@ -1,5 +1,5 @@
 /**
- * The six experiments of the Lab: the one list the Lab is built from. The gallery, the routes
+ * The five experiments of the Lab: the one list the Lab is built from. The gallery, the routes
  * (`/lab/<id>`), the Lab's own navigation, the previous/next links and the home page's teaser are
  * all derived from it, so adding an experiment is: one entry here, its words in content/labText.ts
  * and its component in components/lab/registry.tsx.
@@ -17,7 +17,6 @@ export type LabId =
   | 'type-in-motion'
   | 'infinite-space'
   | 'chromatic-distortion'
-  | 'generative-objects'
 
 export type LabStatus = 'ready' | 'in-progress' | 'concept'
 
@@ -95,19 +94,6 @@ export const experiments: readonly LabExperiment[] = [
     status: 'ready',
     accent: 'red',
     tech: ['GLSL fragment shader', 'Signed distance fields', 'Per-channel sampling'],
-  },
-  {
-    id: 'generative-objects',
-    number: '06',
-    name: 'Generative Objects',
-    tagline: tri(
-      'Írj le vagy mondj el egy tárgyat, és egy AI-motor valódi 3D-modellt épít belőle.',
-      'Describe or dictate an object, and an AI engine builds it as a real 3D model.',
-      'Beschrijf of dicteer een voorwerp en een AI-engine bouwt er een echt 3D-model van.',
-    ),
-    status: 'ready',
-    accent: 'red',
-    tech: ['Text-to-3D (Meshy)', 'Speech recognition', 'Three.js', 'GLB export'],
   },
 ]
 

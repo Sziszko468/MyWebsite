@@ -20,8 +20,6 @@ import {
 import { MATTERS } from '../experiments/liquid/liquidMaterials'
 import { FONTS, MOTIONS, TYPE_DEFAULTS, TYPE_RANGES, sanitizeTypeWork, typeHandoff, typeWork } from '../experiments/type/typeControls'
 import { MAX_LETTERS, PHRASES } from '../experiments/type/typeLayout'
-import { creationHandoff, sanitizeCreation } from '../experiments/generative/creation'
-import { DEFAULT_LOOK, defaultSpec } from '../experiments/generative/spec'
 
 const artifact = (type: ArtifactType, payload: Record<string, unknown>): Artifact => ({
   id: `${type}-test`,
@@ -35,7 +33,6 @@ const artifact = (type: ArtifactType, payload: Record<string, unknown>): Artifac
 beforeEach(() => {
   typeHandoff.clear()
   liquidHandoff.clear()
-  creationHandoff.clear()
 })
 
 describe('a typography artwork', () => {
@@ -224,9 +221,8 @@ describe('whatever is thrown at the readers', () => {
 })
 
 describe('the store keeps them', () => {
-  it('knows exactly the three kinds of work the six experiences keep, and each has a home experience', () => {
-    expect([...ARTIFACT_TYPES].sort()).toEqual(['creation', 'material', 'typography'])
-    expect(HOME.creation).toBe('generative-objects')
+  it('knows exactly the two kinds of work the experiences keep, and each has a home experience', () => {
+    expect([...ARTIFACT_TYPES].sort()).toEqual(['material', 'typography'])
     expect(HOME.typography).toBe('type-in-motion')
     expect(HOME.material).toBe('liquid-matter')
     for (const type of ARTIFACT_TYPES) expect(HOME[type], type).toBeTruthy()
@@ -296,7 +292,6 @@ describe('opening a kept work', () => {
       broken: true,
     })
     expect(liquidHandoff.peek()).toBeNull()
-    expect(creationHandoff.peek()).toBeNull()
   })
 
   it('hands a material preset to its experience', async () => {
@@ -306,17 +301,6 @@ describe('opening a kept work', () => {
     expect(target).toBe('liquid-matter')
     expect(liquidHandoff.peek()).toMatchObject({ matter: 'molten', deformation: 1.5, flow: 0, light: 1.2, tint: '#00ffaa' })
     expect(typeHandoff.peek()).toBeNull()
-  })
-
-  it('hands a 3D creation to the generator, and refuses a damaged one', async () => {
-    const creation = { version: 2, prompt: 'a sad robot', title: 'Sad robot', source: 'quick', spec: defaultSpec('robot'), seed: 12, look: DEFAULT_LOOK, ai: null }
-    expect(await openArtifact(artifact('creation', creation))).toBe('generative-objects')
-    expect(creationHandoff.peek()).toMatchObject({ prompt: 'a sad robot', spec: { main: 'robot' } })
-    creationHandoff.clear()
-    for (const broken of [{}, { ...creation, version: 3 }, { ...creation, prompt: '' }, { ...creation, spec: { main: 'unicorn' } }, { ...creation, spec: null }, { ...creation, source: 'ai', ai: null }]) {
-      expect(await openArtifact(artifact('creation', broken as never)), JSON.stringify(broken).slice(0, 60)).toBeNull()
-    }
-    expect(creationHandoff.peek()).toBeNull()
   })
 
   it('refuses a damaged one and hands nothing over', async () => {
@@ -332,46 +316,6 @@ describe('opening a kept work', () => {
     await openArtifact(artifact('typography', { version: 2, text: 'first' }))
     await openArtifact(artifact('typography', { version: 2, text: 'second' }))
     expect(typeHandoff.peek()?.text).toBe('SECOND')
-  })
-})
-
-describe('a 3D creation, as it is kept', () => {
-  const base = { version: 2, prompt: 'A golden frog wearing sunglasses.', title: 'Frog', source: 'quick', spec: { ...defaultSpec('frog'), accessories: ['sunglasses'] }, seed: 5, look: { ...DEFAULT_LOOK, material: 'gold' }, ai: null }
-  const ai = { provider: 'Meshy', simulated: false, prepared: 'A golden frog.', enhanced: true, job: 'job-1', tasks: { preview: 'p-1', final: null }, stage: 'preview', format: 'glb', bytes: 4_200_000, createdAt: 1_700_000_000_000, model: { store: 'indexeddb', key: 'mabc123' } }
-
-  it('reads back what it wrote and keeps nothing it does not know', () => {
-    const back = sanitizeCreation(JSON.parse(JSON.stringify({ ...base, extra: 1 })))!
-    expect(back).toMatchObject({ version: 2, prompt: base.prompt, seed: 5, source: 'quick', look: { material: 'gold' }, spec: { main: 'frog', accessories: ['sunglasses'] }, ai: null })
-    expect('extra' in back).toBe(false)
-  })
-
-  it('still reads a version 1 Quick creation, and opens an old AI one as Quick (those never came from a real engine)', () => {
-    const old = { version: 1, prompt: base.prompt, title: 'Frog', source: 'quick', spec: base.spec, seed: 5, look: base.look, glb: null, provider: null }
-    expect(sanitizeCreation(old)).toMatchObject({ version: 2, source: 'quick', ai: null })
-    expect(sanitizeCreation({ ...old, source: 'ai', glb: 'Z2xURg==', provider: 'Meshy' })).toMatchObject({ source: 'quick', ai: null })
-  })
-
-  it('keeps the record of an AI model: engine, prompt, task numbers, stage, file and where it is kept', () => {
-    const kept = sanitizeCreation({ ...base, source: 'ai', spec: null, ai })!
-    expect(kept).toMatchObject({ source: 'ai', spec: null, ai: { provider: 'Meshy', prepared: 'A golden frog.', enhanced: true, job: 'job-1', tasks: { preview: 'p-1', final: null }, stage: 'preview', format: 'glb', bytes: 4_200_000, model: { store: 'indexeddb', key: 'mabc123' } } })
-    // A record that names no engine is not an AI creation; a bad file key or task number is dropped, not trusted.
-    expect(sanitizeCreation({ ...base, source: 'ai', spec: null, ai: { ...ai, provider: '' } })).toBeNull()
-    expect(sanitizeCreation({ ...base, source: 'ai', spec: null, ai: null })).toBeNull()
-    const wild = sanitizeCreation({ ...base, source: 'ai', spec: null, ai: { ...ai, model: { store: 'indexeddb', key: '../x' }, tasks: { preview: 'a b', final: 5 }, bytes: -1, stage: 'weird', prepared: '<b>x</b>' } })!
-    expect(wild.ai).toMatchObject({ model: null, tasks: { preview: null, final: null }, bytes: 0, stage: 'preview' })
-    expect(wild.ai!.prepared).not.toMatch(/[<>]/)
-  })
-
-  it('cleans the words and survives anything thrown at it', () => {
-    const wild = sanitizeCreation({ ...base, prompt: '  <script>x</script>\u0000 hi  ', title: 'x'.repeat(500), seed: -3.7, look: { scale: 99, colour: 'red', rotation: -90 } })!
-    // eslint-disable-next-line no-control-regex
-    expect(wild.prompt).not.toMatch(/[<>\u0000]/)
-    expect(wild.title.length).toBeLessThanOrEqual(60)
-    expect(wild.seed).toBe(4)
-    expect(wild.look.scale).toBe(2.2)
-    expect(wild.look.colour).toBeNull()
-    expect(wild.look.rotation).toBe(270)
-    for (const raw of [null, 1, 'x', [], undefined, { version: 1 }]) expect(sanitizeCreation(raw)).toBeNull()
   })
 })
 

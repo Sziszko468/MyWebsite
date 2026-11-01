@@ -37,8 +37,6 @@ export interface LabProfile {
   chromaticDpr: number
   chromaticLayers: 1 | 2 | 3
 
-  /** Generative Objects: most vertices one generated object may have. */
-  genVertices: number
 }
 
 export const LAB_PROFILES: Record<QualityTier, LabProfile> = {
@@ -58,7 +56,6 @@ export const LAB_PROFILES: Record<QualityTier, LabProfile> = {
     spaceRings: 14,
     chromaticDpr: 1.5,
     chromaticLayers: 3,
-    genVertices: 90_000,
   },
   medium: {
     tier: 'medium',
@@ -76,7 +73,6 @@ export const LAB_PROFILES: Record<QualityTier, LabProfile> = {
     spaceRings: 10,
     chromaticDpr: 1.15,
     chromaticLayers: 2,
-    genVertices: 45_000,
   },
   low: {
     tier: 'low',
@@ -94,7 +90,6 @@ export const LAB_PROFILES: Record<QualityTier, LabProfile> = {
     spaceRings: 6,
     chromaticDpr: 0.85,
     chromaticLayers: 1,
-    genVertices: 20_000,
   },
 }
 

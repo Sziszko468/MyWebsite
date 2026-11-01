@@ -236,71 +236,12 @@ function ChromaticArt() {
   )
 }
 
-function GenerativeArt() {
-  const facets = useMemo(() => {
-    const outer = (k: number) => [
-      CX + Math.cos(((k * 45 + 22.5) * Math.PI) / 180) * 215,
-      CY + Math.sin(((k * 45 + 22.5) * Math.PI) / 180) * 215 * 0.92,
-    ]
-    const inner = (k: number) => [
-      CX + Math.cos((k * 45 * Math.PI) / 180) * 112,
-      CY + Math.sin((k * 45 * Math.PI) / 180) * 112 * 0.92,
-    ]
-    const light = (angleDeg: number) => 0.18 + 0.72 * Math.max(0, Math.cos(((angleDeg - 235) * Math.PI) / 180))
-    const list: Array<{ points: string; shade: number; hue: 'ink' | 'red' | 'blue' }> = []
-    for (let k = 0; k < 8; k++) {
-      const a = inner(k)
-      const b = inner((k + 1) % 8)
-      const c = outer(k)
-      const d = outer((k + 1) % 8)
-      const mid = k * 45 + 22.5
-      list.push({
-        points: [a, b, c].map((p) => p.map((n) => n.toFixed(1)).join(',')).join(' '),
-        shade: light(mid),
-        hue: k === 5 ? 'red' : k === 2 ? 'blue' : 'ink',
-      })
-      list.push({
-        points: [c, d, b].map((p) => p.map((n) => n.toFixed(1)).join(',')).join(' '),
-        shade: light(mid + 22.5),
-        hue: 'ink',
-      })
-    }
-    list.push({
-      points: Array.from({ length: 8 }, (_, k) =>
-        inner(k)
-          .map((n) => n.toFixed(1))
-          .join(','),
-      ).join(' '),
-      shade: 0.9,
-      hue: 'ink',
-    })
-    return list
-  }, [])
-
-  return (
-    <svg className={styles.svg} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" focusable="false">
-      <rect width={W} height={H} className={styles.bg} />
-      <ellipse cx={CX} cy="540" rx="210" ry="16" className={styles.shadow} />
-      {facets.map((facet, index) => (
-        <polygon
-          key={index}
-          points={facet.points}
-          className={facet.hue === 'red' ? styles.facetRed : facet.hue === 'blue' ? styles.facetBlue : styles.facetInk}
-          style={{ fillOpacity: facet.shade }}
-          strokeWidth="1.5"
-        />
-      ))}
-    </svg>
-  )
-}
-
 const ART: Record<LabId, () => ReactElement> = {
   'particle-universe': ParticleArt,
   'liquid-matter': LiquidArt,
   'type-in-motion': TypeArt,
   'infinite-space': SpaceArt,
   'chromatic-distortion': ChromaticArt,
-  'generative-objects': GenerativeArt,
 }
 
 export function LabArt({ id }: { id: LabId }) {

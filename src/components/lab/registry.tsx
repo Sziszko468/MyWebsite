@@ -13,5 +13,4 @@ export const EXPERIMENT_COMPONENTS: Partial<Record<LabId, LazyExoticComponent<Co
   'type-in-motion': lazy(() => import('./experiments/type/TypeInMotion')),
   'infinite-space': lazy(() => import('./experiments/space/InfiniteSpace')),
   'chromatic-distortion': lazy(() => import('./experiments/chromatic/ChromaticDistortion')),
-  'generative-objects': lazy(() => import('./experiments/generative/GenerativeObjects')),
 }

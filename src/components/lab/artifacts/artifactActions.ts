@@ -19,7 +19,6 @@ export async function saveArtifact(input: {
 
 /** The experiment a type of work belongs to. */
 export const HOME: Record<ArtifactType, LabId> = {
-  creation: 'generative-objects',
   typography: 'type-in-motion',
   material: 'liquid-matter',
 }
@@ -33,18 +32,12 @@ export async function openArtifact(artifact: Artifact): Promise<LabId | null> {
     typeHandoff.put(controls)
     return HOME.typography
   }
-  if (artifact.type === 'material') {
-    const { sanitizeMaterialWork, liquidHandoff } = await import('../experiments/liquid/liquidControls')
-    const controls = sanitizeMaterialWork(artifact.payload)
-    if (!controls) return null
-    liquidHandoff.put(controls)
-    return HOME.material
-  }
-  const { sanitizeCreation, creationHandoff } = await import('../experiments/generative/creation')
-  const creation = sanitizeCreation(artifact.payload)
-  if (!creation) return null
-  creationHandoff.put(creation)
-  return HOME.creation
+  // The only other kind is a material preset.
+  const { sanitizeMaterialWork, liquidHandoff } = await import('../experiments/liquid/liquidControls')
+  const controls = sanitizeMaterialWork(artifact.payload)
+  if (!controls) return null
+  liquidHandoff.put(controls)
+  return HOME.material
 }
 
 /** A stable id for a work of a type with a name, so keeping it again replaces it rather than piling up copies. */

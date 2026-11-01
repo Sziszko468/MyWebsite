@@ -25,7 +25,6 @@ describe('the Lab quality profiles', () => {
       'typeLayers',
       'spaceStreaks',
       'spaceDust',
-      'genVertices',
     ] as const) {
       expect(high[key], key).toBeGreaterThan(medium[key])
       expect(medium[key], key).toBeGreaterThan(low[key])
@@ -46,7 +45,6 @@ describe('the Lab quality profiles', () => {
         'spaceDust',
         'spacePlanes',
         'spaceRings',
-        'genVertices',
       ] as const) {
         expect(Number.isInteger(profile[key]), `${profile.tier}.${key}`).toBe(true)
       }

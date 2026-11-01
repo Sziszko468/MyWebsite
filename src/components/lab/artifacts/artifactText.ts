@@ -4,19 +4,18 @@ import { tri } from '../../../content/trilingual'
 export const artifactText = {
   title: tri('Mentett alkotásaid', 'Your saved works', 'Je bewaarde werken'),
   intro: tri(
-    'Amit a kísérletekben alkotsz és elmentesz, itt gyűlik: 3D-alkotások, tipográfiai kompozíciók és anyagbeállítások. Regisztráció nélkül, csak ebben a böngészőben. Bármelyiket letöltheted fájlként.',
-    'Whatever you make and keep in the experiments gathers here: 3D creations, typographic compositions and material presets. No account, in this browser only. You can download any of it as a file.',
-    'Wat je in de experimenten maakt en bewaart, verzamelt zich hier: 3D-creaties, typografische composities en materiaalinstellingen. Zonder account, alleen in deze browser. Je kunt alles als bestand downloaden.',
+    'Amit a kísérletekben alkotsz és elmentesz, itt gyűlik: tipográfiai kompozíciók és anyagbeállítások. Regisztráció nélkül, csak ebben a böngészőben. Bármelyiket letöltheted fájlként.',
+    'Whatever you make and keep in the experiments gathers here: typographic compositions and material presets. No account, in this browser only. You can download any of it as a file.',
+    'Wat je in de experimenten maakt en bewaart, verzamelt zich hier: typografische composities en materiaalinstellingen. Zonder account, alleen in deze browser. Je kunt alles als bestand downloaden.',
   ),
   types: {
-    creation: tri('3D alkotás', '3D creation', '3D-creatie'),
     typography: tri('Tipográfiai alkotás', 'Typography artwork', 'Typografisch werk'),
     material: tri('Anyagbeállítás', 'Material preset', 'Materiaalinstelling'),
   },
   empty: tri(
-    'Még nincs mentett alkotás. A Generative Objectsben, a Type in Motionben és a Liquid Matterben a „Mentés” gombbal tehetsz ide egyet.',
-    'Nothing kept yet. In Generative Objects, Type in Motion and Liquid Matter, use “Save” to put one here.',
-    'Nog niets bewaard. Gebruik in Generative Objects, Type in Motion en Liquid Matter “Opslaan” om er een neer te zetten.',
+    'Még nincs mentett alkotás. A Type in Motionben és a Liquid Matterben a „Mentés” gombbal tehetsz ide egyet.',
+    'Nothing kept yet. In Type in Motion and Liquid Matter, use “Save” to put one here.',
+    'Nog niets bewaard. Gebruik in Type in Motion en Liquid Matter “Opslaan” om er een neer te zetten.',
   ),
   loading: tri('Betöltés…', 'Loading…', 'Laden…'),
   open: tri('Megnyitás: {name}', 'Open {name}', 'Open {name}'),

@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest'
 import { LANGUAGES } from '../../i18n/config'
 import { artifactText } from './artifacts/artifactText'
 import { eggText } from './easter/eggText'
-import { genText } from './experiments/generative/genText'
-import * as lexicon from './experiments/generative/lexicon'
 import { chromaticText } from './experiments/chromatic/chromaticControls'
 import { liquidText } from './experiments/liquid/liquidControls'
 import { MATTER_NAMES } from './experiments/liquid/liquidMaterials'
@@ -26,7 +24,6 @@ function triples(value: unknown, path: string, found: Array<[string, Record<stri
 
 const TABLES: Record<string, unknown> = {
   pageText,
-  genText,
   eggText,
   artifactText,
   typeText,
@@ -35,11 +32,6 @@ const TABLES: Record<string, unknown> = {
   particleText,
   spaceText,
   chromaticText,
-  STYLE_NAMES: lexicon.STYLE_NAMES,
-  LIGHT_NAMES: lexicon.LIGHT_NAMES,
-  BACKGROUND_NAMES: lexicon.BACKGROUND_NAMES,
-  CAMERA_NAMES: lexicon.CAMERA_NAMES,
-  POSE_NAMES: lexicon.POSE_NAMES,
 }
 
 const placeholders = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort()
@@ -68,11 +60,9 @@ describe('the Lab’s words, in every table', () => {
   it('speaks the brief’s words: the headline and its supporting line in Hungarian, English and Dutch', () => {
     expect(pageText.hero.headline.en).toBe('ENTER THE EXPERIMENTAL SIDE')
     expect(pageText.hero.headline.hu).toBe('LÉPJ BE A KÍSÉRLETI DIGITÁLIS VILÁGBA')
-    expect(pageText.hero.lead.en).toBe('Six interactive environments. Endless possibilities. One digital playground.')
-    expect(pageText.hero.lead.hu).toBe('Hat interaktív élmény. Végtelen lehetőség. Egy digitális játszótér.')
-    expect(pageText.feature.title.en).toBe('DESCRIBE SOMETHING IMPOSSIBLE.')
-    expect(pageText.feature.lead.en).toBe('Turn strange ideas into strange 3D creations.')
-    expect(pageText.feature.cta.en.toUpperCase()).toBe('CREATE SOMETHING WEIRD')
+    expect(pageText.hero.lead.en).toBe('Five interactive environments. Endless possibilities. One digital playground.')
+    expect(pageText.hero.lead.hu).toBe('Öt interaktív élmény. Végtelen lehetőség. Egy digitális játszótér.')
+    expect(pageText.hero.lead.nl).toBe('Vijf interactieve omgevingen. Eindeloze mogelijkheden. Eén digitale speeltuin.')
     expect(pageText.closing.title.en).toBe('THE ONLY LIMIT IS WHAT YOU CAN IMAGINE.')
     expect(pageText.closing.cta.en.toUpperCase()).toBe('START EXPERIMENTING')
   })
