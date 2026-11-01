@@ -4,20 +4,22 @@ import { tri } from '../../../content/trilingual'
 export const artifactText = {
   title: tri('Digitális alkotások', 'Digital artifacts', 'Digitale creaties'),
   intro: tri(
-    'Minden, amit a kísérletekben alkotsz és elmentesz, itt gyűlik: modellek, pályák, autóbeállítások. Regisztráció nélkül, csak ebben a böngészőben. Bármelyiket letöltheted fájlként.',
-    'Everything you make and keep in the experiments gathers here: models, tracks, car setups. No account, in this browser only. You can download any of it as a file.',
-    'Alles wat je in de experimenten maakt en bewaart, verzamelt zich hier: modellen, banen, auto-instellingen. Zonder account, alleen in deze browser. Je kunt alles als bestand downloaden.',
+    'Minden, amit a kísérletekben alkotsz és elmentesz, itt gyűlik: modellek, pályák, autóbeállítások, generatív alkotások, tipográfiai kompozíciók és anyagbeállítások. Regisztráció nélkül, csak ebben a böngészőben. Bármelyiket letöltheted fájlként.',
+    'Everything you make and keep in the experiments gathers here: models, tracks, car setups, generative artworks, typographic compositions and material presets. No account, in this browser only. You can download any of it as a file.',
+    'Alles wat je in de experimenten maakt en bewaart, verzamelt zich hier: modellen, banen, auto-instellingen, generatieve kunstwerken, typografische composities en materiaalinstellingen. Zonder account, alleen in deze browser. Je kunt alles als bestand downloaden.',
   ),
   types: {
     model: tri('3D modell', '3D model', '3D-model'),
     track: tri('Pálya', 'Track design', 'Baanontwerp'),
     setup: tri('Autóbeállítás', 'Vehicle setup', 'Auto-instelling'),
     artwork: tri('Generatív alkotás', 'Generative artwork', 'Generatief kunstwerk'),
+    typography: tri('Tipográfiai alkotás', 'Typography artwork', 'Typografisch werk'),
+    material: tri('Anyagbeállítás', 'Material preset', 'Materiaalinstelling'),
   },
   empty: tri(
-    'Még nincs mentett alkotás. A Model Studióban, a Track Architectben és a Performance Labban a „Mentés az alkotások közé” gombbal tehetsz ide egyet.',
-    'Nothing kept yet. In Model Studio, Track Architect and Performance Lab, use “Save to Digital Artifacts” to put one here.',
-    'Nog niets bewaard. Gebruik in Model Studio, Track Architect en Performance Lab “Opslaan bij Digitale creaties” om er een neer te zetten.',
+    'Még nincs mentett alkotás. A Model Studióban, a Track Architectben, a Performance Labban, a Generative Art Engine-ben, a Type in Motionben és a Liquid Matterben a „Mentés az alkotások közé” gombbal tehetsz ide egyet.',
+    'Nothing kept yet. In Model Studio, Track Architect, Performance Lab, the Generative Art Engine, Type in Motion and Liquid Matter, use “Save to Digital Artifacts” to put one here.',
+    'Nog niets bewaard. Gebruik in Model Studio, Track Architect, Performance Lab, de Generative Art Engine, Type in Motion en Liquid Matter “Opslaan bij Digitale creaties” om er een neer te zetten.',
   ),
   loading: tri('Betöltés…', 'Loading…', 'Laden…'),
   open: tri('Megnyitás: {name}', 'Open {name}', 'Open {name}'),
@@ -83,6 +85,35 @@ export const artifactText = {
     'Deze browser bewaart geen gegevens: werken blijven alleen tijdens dit bezoek.',
   ),
   save: tri('Mentés az alkotások közé', 'Save to Digital Artifacts', 'Opslaan bij Digitale creaties'),
+  keep: {
+    title: tri('Megőrzés', 'Keep', 'Bewaren'),
+    png: tri('Kép mentése (PNG)', 'Save image (PNG)', 'Beeld opslaan (PNG)'),
+    imageReady: tri(
+      'A kép elkészült és letöltődött.',
+      'The image is ready and downloaded.',
+      'Het beeld is klaar en gedownload.',
+    ),
+    imageFailed: tri(
+      'A képet nem sikerült elkészíteni.',
+      'The image could not be made.',
+      'Het beeld kon niet worden gemaakt.',
+    ),
+    noPicture: tri(
+      'Álló nézetben nincs mit lefényképezni: a beállításokat így is elmentem, kép nélkül.',
+      'The still view has nothing to photograph: the settings are kept anyway, without a picture.',
+      'De statische weergave heeft niets om te fotograferen: de instellingen worden toch bewaard, zonder beeld.',
+    ),
+    typography: tri(
+      'A mondat és a beállítások egy tipográfiai alkotásként mentődnek, a képpel együtt.',
+      'The sentence and its settings are kept as a typography artwork, with the picture.',
+      'De zin en zijn instellingen worden bewaard als typografisch werk, met het beeld.',
+    ),
+    material: tri(
+      'Az anyagállapot és a beállításai anyagbeállításként mentődnek, a képpel együtt.',
+      'The state of matter and its settings are kept as a material preset, with the picture.',
+      'De toestand en zijn instellingen worden bewaard als materiaalinstelling, met het beeld.',
+    ),
+  },
   progress: {
     title: tri('Haladás', 'Progress', 'Voortgang'),
     level: tri('{level}. szint', 'Level {level}', 'Niveau {level}'),

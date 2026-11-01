@@ -8,8 +8,8 @@
  * Where IndexedDB is missing or blocked (some private windows), a memory store takes its place for
  * the visit and the service says so, so the page can tell the visitor their work will not survive a reload.
  */
-export type ArtifactType = 'model' | 'track' | 'setup' | 'artwork'
-export const ARTIFACT_TYPES: readonly ArtifactType[] = ['model', 'track', 'setup', 'artwork']
+export type ArtifactType = 'model' | 'track' | 'setup' | 'artwork' | 'typography' | 'material'
+export const ARTIFACT_TYPES: readonly ArtifactType[] = ['model', 'track', 'setup', 'artwork', 'typography', 'material']
 
 export interface Artifact {
   id: string
@@ -17,7 +17,7 @@ export interface Artifact {
   name: string
   createdAt: number
   updatedAt: number
-  /** The experience's own project data (a TrackDef, a CarSetup, a StudioDoc), checked again on opening. */
+  /** The experience's own project data (a TrackDef, a CarSetup, a StudioDoc, a composition), checked again on opening. */
   payload: Record<string, unknown>
   /** A small PNG as a data URL, if the experience can draw one. */
   thumbnail?: string

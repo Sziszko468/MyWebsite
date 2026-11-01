@@ -17,6 +17,7 @@ import {
 import { clamp, damp, lerp } from '../../../hero/heroMath'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { useDisposable } from '../../core/resources'
+import { useStageCapture, type StageCapture } from '../../core/useStageCapture'
 import type { TypeControls } from './typeControls'
 import { CAP_HEIGHT, fontSizeFor, layoutPhrase, LINE_HEIGHT, MARGIN, PHRASES, type PhraseLayout } from './typeLayout'
 import { DOF, LetterField, MAX } from './typeSim'
@@ -303,6 +304,20 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
   return <mesh ref={mesh} geometry={geometry} material={material} frustumCulled={false} />
 }
 
-export default function TypeScene({ controls }: { controls: RefObject<TypeControls> }) {
+export default function TypeScene({
+  controls,
+  stage,
+}: {
+  controls: RefObject<TypeControls>
+  /** Where the scene hands the page its picture (see useStageCapture). */
+  stage: RefObject<StageCapture | null>
+}) {
+  const capture = useStageCapture()
+  useEffect(() => {
+    stage.current = { capture }
+    return () => {
+      stage.current = null
+    }
+  }, [stage, capture])
   return <Sentence controls={controls} />
 }

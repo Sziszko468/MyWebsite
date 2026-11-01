@@ -27,6 +27,8 @@ export const HOME: Record<ArtifactType, LabId> = {
   track: 'track-architect',
   setup: 'performance-lab',
   artwork: 'generative-art',
+  typography: 'type-in-motion',
+  material: 'liquid-matter',
 }
 
 /** Puts a work into its experience's store and says which experience to open; null if the work is damaged. */
@@ -51,6 +53,20 @@ export async function openArtifact(artifact: Artifact): Promise<LabId | null> {
     if ((artifact.payload as { version?: unknown }).version !== 1) return null
     setParams(sanitizeParams(artifact.payload), '')
     return HOME.artwork
+  }
+  if (artifact.type === 'typography') {
+    const { sanitizeTypeWork, typeHandoff } = await import('../experiments/type/typeControls')
+    const controls = sanitizeTypeWork(artifact.payload)
+    if (!controls) return null
+    typeHandoff.put(controls)
+    return HOME.typography
+  }
+  if (artifact.type === 'material') {
+    const { sanitizeMaterialWork, liquidHandoff } = await import('../experiments/liquid/liquidControls')
+    const controls = sanitizeMaterialWork(artifact.payload)
+    if (!controls) return null
+    liquidHandoff.put(controls)
+    return HOME.material
   }
   const { parseStudioDoc } = await import('../experiences/studio/studioDoc')
   const doc = parseStudioDoc(artifact.payload)

@@ -1,4 +1,4 @@
-import { useFrame, useThree } from '@react-three/fiber'
+import { useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import {
   AdditiveBlending,
@@ -11,6 +11,7 @@ import {
   Vector3,
 } from 'three'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
+import { useStageCapture } from '../../core/useStageCapture'
 import { useStore } from '../../experience/store'
 import { useSettle } from '../../experience/useSettle'
 import { art, type ArtParams } from './artParams'
@@ -181,15 +182,11 @@ export default function ArtScene({ apiRef }: { apiRef: RefObject<ArtApi | null> 
     }
   }, [gl, camera, field, pointer, invalidate])
 
-  // Pictures: taken right after a frame has been drawn.
-  const captures = useRef<Array<{ kind: 'full' | 'thumb'; resolve: (value: string | null) => void }>>([])
+  // Pictures: taken by the shared hook, after the scene has been drawn into the canvas again.
+  const capture = useStageCapture()
   useEffect(() => {
     apiRef.current = {
-      capture: (kind) =>
-        new Promise((resolve) => {
-          captures.current.push({ kind, resolve })
-          invalidate()
-        }),
+      capture,
       burst: () => {
         field.impulse(0, 0, 0, Math.max(0.8, latest.current.params.force))
         invalidate()
@@ -198,51 +195,7 @@ export default function ArtScene({ apiRef }: { apiRef: RefObject<ArtApi | null> 
     return () => {
       apiRef.current = null
     }
-  }, [apiRef, field, invalidate])
-  useFrame(() => {
-    if (captures.current.length === 0) return
-    const waiting = captures.current.splice(0)
-    for (const { kind, resolve } of waiting) {
-      try {
-        if (kind === 'full') resolve(gl.domElement.toDataURL('image/png'))
-        else {
-          // A small picture for a preview, made smaller until it is light enough to keep.
-          let width = 200
-          let url = ''
-          for (let attempt = 0; attempt < 4; attempt++) {
-            const canvas = document.createElement('canvas')
-            canvas.width = width
-            canvas.height = Math.round(width * 0.6)
-            const g = canvas.getContext('2d')
-            if (!g) break
-            g.fillStyle = '#0b0b0d'
-            g.fillRect(0, 0, canvas.width, canvas.height)
-            const source = gl.domElement
-            const ratio = Math.min(source.width / canvas.width, source.height / canvas.height)
-            const w = canvas.width * ratio
-            const h = canvas.height * ratio
-            g.drawImage(
-              source,
-              (source.width - w) / 2,
-              (source.height - h) / 2,
-              w,
-              h,
-              0,
-              0,
-              canvas.width,
-              canvas.height,
-            )
-            url = canvas.toDataURL('image/png')
-            if (url.length < 120_000) break
-            width = Math.round(width * 0.7)
-          }
-          resolve(url || null)
-        }
-      } catch {
-        resolve(null)
-      }
-    }
-  }, 2)
+  }, [apiRef, capture, field, invalidate])
 
   // The art is made of light: it is drawn on carbon in both themes, because added light on paper turns to white.
   const backdrop = useMemo(() => new Color(0x0b0b0d), [])

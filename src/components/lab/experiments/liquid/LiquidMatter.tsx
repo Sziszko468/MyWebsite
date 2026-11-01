@@ -1,16 +1,27 @@
-import { lazy, useRef, useState, type RefObject } from 'react'
+import { lazy, useEffect, useRef, useState, type RefObject } from 'react'
+import { KeepWork } from '../../artifacts/KeepWork'
+import type { StageCapture } from '../../core/useStageCapture'
 import { useLabText, useLocalized } from '../../core/useLabText'
 import { ExperimentFrame } from '../../ui/ExperimentFrame'
 import { LabAction, LabActions, LabChoice, LabGroup, LabSlider } from '../../ui/LabControls'
-import { LIQUID_DEFAULTS, liquidText, type LiquidControls } from './liquidControls'
+import { LIQUID_DEFAULTS, liquidHandoff, liquidText, materialWork, type LiquidControls } from './liquidControls'
 import { MATTER_NAMES, MATTERS, type MatterId } from './liquidMaterials'
 
 // The scene (Three.js, the shaders) loads after the page's words and controls.
 const LiquidScene = lazy(() => import('./LiquidScene'))
 
+/** The time, short, to tell one kept work from another. */
+const stamp = () => new Date().toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
+
 const CAMERA = { fov: 40, position: [0, 0, 6.2] as [number, number, number] }
 
-function LiquidPanel({ controls }: { controls: RefObject<LiquidControls> }) {
+function LiquidPanel({
+  controls,
+  stage,
+}: {
+  controls: RefObject<LiquidControls>
+  stage: RefObject<StageCapture | null>
+}) {
   const t = useLocalized(liquidText)
   const names = useLocalized(MATTER_NAMES)
   const { text } = useLabText()
@@ -71,21 +82,33 @@ function LiquidPanel({ controls }: { controls: RefObject<LiquidControls> }) {
           {text.panel.reset}
         </LabAction>
       </LabActions>
+
+      <KeepWork
+        type="material"
+        stage={stage}
+        name={() => `${names[controls.current.matter]} ${stamp()}`}
+        payload={() => materialWork(controls.current) as unknown as Record<string, unknown>}
+      />
     </>
   )
 }
 
 /** Liquid Matter: one form, four states of matter. */
 export default function LiquidMatter() {
-  const controls = useRef<LiquidControls>({ ...LIQUID_DEFAULTS })
+  // A material opened from Digital Artifacts arrives through the handoff; otherwise the defaults.
+  const controls = useRef<LiquidControls>({ ...(liquidHandoff.peek() ?? LIQUID_DEFAULTS) })
+  const stage = useRef<StageCapture | null>(null)
+  useEffect(() => {
+    liquidHandoff.clear()
+  }, [])
 
   return (
     <ExperimentFrame
       id="liquid-matter"
       camera={CAMERA}
       antialias
-      scene={<LiquidScene controls={controls} />}
-      panel={<LiquidPanel controls={controls} />}
+      scene={<LiquidScene controls={controls} stage={stage} />}
+      panel={<LiquidPanel controls={controls} stage={stage} />}
     />
   )
 }

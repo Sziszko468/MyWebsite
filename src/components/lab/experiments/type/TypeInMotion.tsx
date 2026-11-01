@@ -1,16 +1,21 @@
-import { lazy, useRef, useState, type RefObject } from 'react'
+import { lazy, useEffect, useRef, useState, type RefObject } from 'react'
+import { KeepWork } from '../../artifacts/KeepWork'
+import type { StageCapture } from '../../core/useStageCapture'
 import { fill, useLabText, useLocalized } from '../../core/useLabText'
 import { ExperimentFrame } from '../../ui/ExperimentFrame'
 import { LabAction, LabActions, LabChoice, LabGroup, LabNote, LabSlider } from '../../ui/LabControls'
-import { TYPE_DEFAULTS, typeText, type TypeControls } from './typeControls'
+import { TYPE_DEFAULTS, typeHandoff, typeText, typeWork, type TypeControls } from './typeControls'
 import { PHRASES } from './typeLayout'
 
 // The scene (Three.js, the shaders, the glyph texture) loads after the page's words and controls.
 const TypeScene = lazy(() => import('./TypeScene'))
 
+/** The time, short, to tell one kept work from another. */
+const stamp = () => new Date().toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
+
 const CAMERA = { fov: 36, position: [0, 0, 17] as [number, number, number] }
 
-function TypePanel({ controls }: { controls: RefObject<TypeControls> }) {
+function TypePanel({ controls, stage }: { controls: RefObject<TypeControls>; stage: RefObject<StageCapture | null> }) {
   const t = useLocalized(typeText)
   const { text } = useLabText()
   const [state, setState] = useState<TypeControls>(() => ({ ...controls.current }))
@@ -78,21 +83,33 @@ function TypePanel({ controls }: { controls: RefObject<TypeControls> }) {
           {text.panel.reset}
         </LabAction>
       </LabActions>
+
+      <KeepWork
+        type="typography"
+        stage={stage}
+        name={() => `${PHRASES[controls.current.phrase].lines[0]} ${stamp()}`}
+        payload={() => typeWork(controls.current) as unknown as Record<string, unknown>}
+      />
     </>
   )
 }
 
 /** Type in Motion: letters that live in space. */
 export default function TypeInMotion() {
-  const controls = useRef<TypeControls>({ ...TYPE_DEFAULTS })
+  // A work opened from Digital Artifacts arrives through the handoff; otherwise the defaults.
+  const controls = useRef<TypeControls>({ ...(typeHandoff.peek() ?? TYPE_DEFAULTS) })
+  const stage = useRef<StageCapture | null>(null)
+  useEffect(() => {
+    typeHandoff.clear()
+  }, [])
 
   return (
     <ExperimentFrame
       id="type-in-motion"
       camera={CAMERA}
       antialias
-      scene={<TypeScene controls={controls} />}
-      panel={<TypePanel controls={controls} />}
+      scene={<TypeScene controls={controls} stage={stage} />}
+      panel={<TypePanel controls={controls} stage={stage} />}
     />
   )
 }

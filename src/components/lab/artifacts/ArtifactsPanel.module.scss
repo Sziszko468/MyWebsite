@@ -66,6 +66,14 @@
   &[data-type='model'] {
     border-top: 3px solid var(--color-accent);
   }
+
+  &[data-type='typography'] {
+    border-top: 3px solid #f4c64a;
+  }
+
+  &[data-type='material'] {
+    border-top: 3px solid #4ad0b8;
+  }
 }
 
 .thumb {

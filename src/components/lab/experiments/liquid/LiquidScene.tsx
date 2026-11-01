@@ -1,10 +1,11 @@
 import { useThree } from '@react-three/fiber'
-import { useMemo, useRef, useState, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { Color, Group, MathUtils, ShaderMaterial, Vector3 } from 'three'
 import { clamp, lerp } from '../../../hero/heroMath'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { createIcoSphere, useDisposable } from '../../core/resources'
 import { Spin } from '../../core/spin'
+import { useStageCapture, type StageCapture } from '../../core/useStageCapture'
 import { createSurfaceUniforms, SurfaceDriver } from '../../core/surface'
 import type { LiquidControls } from './liquidControls'
 import { cloneParams, easeMatter, MATTER_PARAMS } from './liquidMaterials'
@@ -123,6 +124,20 @@ function Blob({ controls }: { controls: RefObject<LiquidControls> }) {
   )
 }
 
-export default function LiquidScene({ controls }: { controls: RefObject<LiquidControls> }) {
+export default function LiquidScene({
+  controls,
+  stage,
+}: {
+  controls: RefObject<LiquidControls>
+  /** Where the scene hands the page its picture (see useStageCapture). */
+  stage: RefObject<StageCapture | null>
+}) {
+  const capture = useStageCapture()
+  useEffect(() => {
+    stage.current = { capture }
+    return () => {
+      stage.current = null
+    }
+  }, [stage, capture])
   return <Blob controls={controls} />
 }
