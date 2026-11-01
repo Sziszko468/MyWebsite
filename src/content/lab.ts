@@ -1,5 +1,5 @@
 /**
- * The experiments of the Lab: the one list the Lab is built from. The gallery, the routes
+ * The six experiments of the Lab: the one list the Lab is built from. The gallery, the routes
  * (`/lab/<id>`), the Lab's own navigation, the previous/next links and the home page's teaser are
  * all derived from it, so adding an experiment is: one entry here, its words in content/labText.ts
  * and its component in components/lab/registry.tsx.
@@ -18,19 +18,6 @@ export type LabId =
   | 'infinite-space'
   | 'chromatic-distortion'
   | 'generative-objects'
-  | 'model-studio'
-  | 'racing'
-  | 'track-architect'
-  | 'performance-lab'
-  | 'generative-art'
-  | 'sound-world'
-
-/**
- * `experiment` is a short piece of art that answers the pointer; `experience` is a small
- * application: it has tools, a state the visitor builds and, where it makes sense, a way to hand
- * that state to another experience (a track, a car setup).
- */
-export type LabKind = 'experiment' | 'experience'
 
 export type LabStatus = 'ready' | 'in-progress' | 'concept'
 
@@ -39,7 +26,6 @@ export type LabAccent = 'red' | 'blue' | 'paper' | 'graphite'
 
 export interface LabExperiment {
   id: LabId
-  kind: LabKind
   /** Its place in the Lab, shown on the page and in the gallery. */
   number: string
   /** The experiment's name: a proper noun, shown as is in every language. */
@@ -55,7 +41,6 @@ export interface LabExperiment {
 export const experiments: readonly LabExperiment[] = [
   {
     id: 'particle-universe',
-    kind: 'experiment',
     number: '01',
     name: 'Particle Universe',
     tagline: tri(
@@ -69,7 +54,6 @@ export const experiments: readonly LabExperiment[] = [
   },
   {
     id: 'liquid-matter',
-    kind: 'experiment',
     number: '02',
     name: 'Liquid Matter',
     tagline: tri(
@@ -83,7 +67,6 @@ export const experiments: readonly LabExperiment[] = [
   },
   {
     id: 'type-in-motion',
-    kind: 'experiment',
     number: '03',
     name: 'Type in Motion',
     tagline: tri('Betűk, amelyek a térben élnek.', 'Letters that live in space.', 'Letters die in de ruimte leven.'),
@@ -93,7 +76,6 @@ export const experiments: readonly LabExperiment[] = [
   },
   {
     id: 'infinite-space',
-    kind: 'experiment',
     number: '04',
     name: 'Infinite Space',
     tagline: tri('Végtelen fényalagút.', 'A tunnel of light with no end.', 'Een tunnel van licht zonder einde.'),
@@ -103,7 +85,6 @@ export const experiments: readonly LabExperiment[] = [
   },
   {
     id: 'chromatic-distortion',
-    kind: 'experiment',
     number: '05',
     name: 'Chromatic Distortion',
     tagline: tri(
@@ -117,101 +98,16 @@ export const experiments: readonly LabExperiment[] = [
   },
   {
     id: 'generative-objects',
-    kind: 'experiment',
     number: '06',
     name: 'Generative Objects',
     tagline: tri(
-      'Absztrakt objektumok néhány paraméterből.',
-      'Abstract objects from a handful of parameters.',
-      'Abstracte objecten uit een handvol parameters.',
-    ),
-    status: 'ready',
-    accent: 'graphite',
-    tech: ['Three.js', 'Parametric surfaces', 'Seeded random', 'GLSL'],
-  },
-  {
-    id: 'model-studio',
-    kind: 'experience',
-    number: '07',
-    name: 'Model Studio',
-    tagline: tri(
-      'Interaktív 3D modellezőstúdió a böngészőben.',
-      'An interactive 3D modelling studio in your browser.',
-      'Een interactieve 3D-modelleerstudio in je browser.',
-    ),
-    status: 'ready',
-    accent: 'paper',
-    tech: ['Three.js', 'Custom transform gizmos', 'PBR materials', 'GLB export'],
-  },
-  {
-    id: 'racing',
-    kind: 'experience',
-    number: '08',
-    name: 'Racing Experience',
-    tagline: tri(
-      'Vezess egy 3D versenyautót egy valódi pályán.',
-      'Drive a 3D race car round a real circuit.',
-      'Bestuur een 3D-raceauto over een echt circuit.',
+      'Írj le vagy mondj el egy tárgyat, és egy AI-motor valódi 3D-modellt épít belőle.',
+      'Describe or dictate an object, and an AI engine builds it as a real 3D model.',
+      'Beschrijf of dicteer een voorwerp en een AI-engine bouwt er een echt 3D-model van.',
     ),
     status: 'ready',
     accent: 'red',
-    tech: ['Three.js', 'Bicycle-model car physics', 'Spline track generation', 'Touch controls'],
-  },
-  {
-    id: 'track-architect',
-    kind: 'experience',
-    number: '09',
-    name: 'Track Architect',
-    tagline: tri(
-      'Tervezd meg a saját versenypályádat, és vezesd végig.',
-      'Design your own circuit, then drive it.',
-      'Ontwerp je eigen circuit en bestuur het.',
-    ),
-    status: 'ready',
-    accent: 'blue',
-    tech: ['SVG editor', 'Catmull-Rom splines', 'Track validation', 'Procedural 3D geometry'],
-  },
-  {
-    id: 'performance-lab',
-    kind: 'experience',
-    number: '10',
-    name: 'Performance Lab',
-    tagline: tri(
-      'Hangold a versenyautót, és hasonlítsd össze a beállításokat.',
-      'Tune the race car and compare setups.',
-      'Stem de raceauto af en vergelijk setups.',
-    ),
-    status: 'ready',
-    accent: 'graphite',
-    tech: ['Simplified lap simulation', 'Aero flow visualisation', 'A/B comparison', 'Shared car model'],
-  },
-  {
-    id: 'generative-art',
-    kind: 'experience',
-    number: '11',
-    name: 'Generative Art Engine',
-    tagline: tri(
-      'Hozz létre saját generatív alkotást: részecskék, formák, színek.',
-      'Make your own generative artwork: particles, forms, colour.',
-      'Maak je eigen generatieve kunst: deeltjes, vormen, kleur.',
-    ),
-    status: 'ready',
-    accent: 'red',
-    tech: ['Three.js', 'CPU particle simulation', 'Seeded generation', 'PNG export'],
-  },
-  {
-    id: 'sound-world',
-    kind: 'experience',
-    number: '12',
-    name: 'Sound Reactive World',
-    tagline: tri(
-      'Hangra mozgó 3D világ: a basszus formál, a magas hangok fényt gyújtanak.',
-      'A 3D world that moves with sound: the bass shapes it, the high notes light it.',
-      'Een 3D-wereld die met geluid beweegt: de bas vormt, de hoge tonen geven licht.',
-    ),
-    status: 'ready',
-    accent: 'blue',
-    tech: ['Web Audio API', 'FFT analysis', 'GPU-driven particles', 'Synthesised loop'],
+    tech: ['Text-to-3D (Meshy)', 'Speech recognition', 'Three.js', 'GLB export'],
   },
 ]
 

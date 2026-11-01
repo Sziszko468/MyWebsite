@@ -72,15 +72,14 @@
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
-  overflow: hidden;
   font-size: var(--fs-sm);
   font-stretch: var(--fstretch-expanded);
   font-weight: var(--fw-black);
   letter-spacing: var(--ls-normal);
   line-height: 1.1;
-  text-overflow: ellipsis;
   text-transform: uppercase;
-  white-space: nowrap;
+  /* A long name (Generative Objects) takes a second line rather than being cut short. */
+  text-wrap: balance;
 
   @include m.up('md') {
     font-size: var(--fs-md);

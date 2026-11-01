@@ -1,0 +1,119 @@
+/*
+ * The hidden racing experience is a short transition in Racing Red and carbon, the same in either theme:
+ * a red wipe with speed lines that covers the screen and stays until the visitor is taken to the other
+ * site. Under reduced motion it is a plain red screen that appears at once.
+ */
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  overflow: hidden;
+  background: #0b0b0d;
+  color: #f4f0e8;
+
+  &:focus {
+    outline: none;
+  }
+
+  @supports (height: 100dvh) {
+    height: 100dvh;
+  }
+}
+
+.intro {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  overflow: hidden;
+  background-color: var(--brand-red, #ff161f);
+  animation: wipe 1250ms cubic-bezier(0.7, 0, 0.2, 1) both;
+}
+
+.streaks {
+  position: absolute;
+  inset: -20% -10%;
+  background: repeating-linear-gradient(100deg, transparent 0 38px, rgb(11 11 13 / 0.35) 38px 41px, transparent 41px 120px);
+  animation: streak 1250ms linear both;
+}
+
+.title {
+  position: relative;
+  margin: 0;
+  padding: 0 var(--space-4);
+  color: #0b0b0d;
+  font-size: clamp(2rem, 1rem + 6vw, 6rem);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-tight);
+  text-align: center;
+  text-transform: uppercase;
+  animation: title 1250ms ease both;
+}
+
+.note {
+  position: relative;
+  max-width: 28rem;
+  margin: 0;
+  padding: 0 var(--space-4);
+  color: #0b0b0d;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  text-align: center;
+  animation: note 1250ms ease both;
+}
+
+@keyframes wipe {
+  0% {
+    clip-path: polygon(0 0, 0 0, -20% 100%, -20% 100%);
+  }
+  40%,
+  100% {
+    clip-path: polygon(0 0, 120% 0, 100% 100%, -20% 100%);
+  }
+}
+
+@keyframes streak {
+  from {
+    transform: translateX(-12%);
+  }
+  to {
+    transform: translateX(14%);
+  }
+}
+
+@keyframes title {
+  0%,
+  20% {
+    opacity: 0;
+    transform: translateX(-8%) skewX(-8deg);
+  }
+  45%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes note {
+  0%,
+  50% {
+    opacity: 0;
+  }
+  80%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  .streaks,
+  .title,
+  .note {
+    animation: none;
+  }
+}

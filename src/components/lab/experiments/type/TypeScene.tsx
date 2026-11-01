@@ -18,8 +18,9 @@ import { clamp, damp, lerp } from '../../../hero/heroMath'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { useDisposable } from '../../core/resources'
 import { useStageCapture, type StageCapture } from '../../core/useStageCapture'
-import type { TypeControls } from './typeControls'
-import { CAP_HEIGHT, fontSizeFor, layoutPhrase, LINE_HEIGHT, MARGIN, PHRASES, type PhraseLayout } from './typeLayout'
+import type { FontId, TypeControls } from './typeControls'
+import { presetOffset } from './typeMotion'
+import { CAP_HEIGHT, fontSizeFor, layoutPhrase, linesOf, LINE_HEIGHT, MARGIN, textSeed, type PhraseLayout } from './typeLayout'
 import { DOF, LetterField, MAX } from './typeSim'
 import { TYPE_FRAGMENT, TYPE_VERTEX } from './typeShaders'
 
@@ -43,24 +44,35 @@ interface Loaded {
   height: number
 }
 
-function configureContext(context: CanvasRenderingContext2D, fontPx: number): void {
-  context.font = `900 ${fontPx}px ${FONT_FAMILY}`
-  if ('fontStretch' in context) (context as unknown as { fontStretch: string }).fontStretch = 'semi-expanded'
+/** The typefaces the panel offers, as canvas fonts. The two widths of the page's own face use its width axis. */
+const FONT_CSS: Record<FontId, { family: string; weight: number; stretch: string }> = {
+  archivo: { family: FONT_FAMILY, weight: 900, stretch: 'semi-expanded' },
+  condensed: { family: FONT_FAMILY, weight: 900, stretch: 'condensed' },
+  serif: { family: 'Georgia, "Times New Roman", serif', weight: 900, stretch: 'normal' },
+  mono: { family: 'ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace', weight: 800, stretch: 'normal' },
+}
+
+function configureContext(context: CanvasRenderingContext2D, fontPx: number, font: FontId): void {
+  const css = FONT_CSS[font]
+  context.font = `${css.weight} ${fontPx}px ${css.family}`
+  if ('fontStretch' in context) (context as unknown as { fontStretch: string }).fontStretch = css.stretch
   context.textBaseline = 'alphabetic'
 }
 
 /** Draws a sentence into the glyph canvas and returns where every letter is. */
-function drawPhrase(canvas: HTMLCanvasElement, lines: readonly string[]): PhraseLayout {
+function drawPhrase(canvas: HTMLCanvasElement, lines: readonly string[], font: FontId): PhraseLayout {
   const context = canvas.getContext('2d')
   if (!context) throw new Error('A 2D canvas is needed to set the type')
   context.clearRect(0, 0, canvas.width, canvas.height)
 
-  configureContext(context, 100)
+  configureContext(context, 100, font)
   const reference = (text: string) => context.measureText(text).width
   const wanted = fontSizeFor(lines, TEXTURE_W - 2 * MARGIN * 230, 100, reference)
-  const fontPx = Math.min(wanted, 230)
+  // The block must also fit the texture's height: four lines need a smaller letter than one.
+  const byHeight = TEXTURE_H / (lines.length * LINE_HEIGHT + 2 * MARGIN)
+  const fontPx = Math.min(wanted, 230, byHeight)
 
-  configureContext(context, fontPx)
+  configureContext(context, fontPx, font)
   const layout = layoutPhrase(lines, fontPx, (text) => context.measureText(text).width)
 
   context.fillStyle = '#ffffff'
@@ -141,7 +153,8 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
 
   const field = useMemo(() => new LetterField(), [])
   const [fontReady, setFontReady] = useState(false)
-  const loaded = useRef<{ phrase: number; info: Loaded | null }>({ phrase: -1, info: null })
+  const loaded = useRef<{ key: string; info: Loaded | null }>({ key: '', info: null })
+  const phase = useRef(0)
   const seen = useRef({ scatter: controls.current.scatterVersion, reset: controls.current.resetVersion, pulses: -1 })
   const look = useRef({ x: 0, y: 0, opacity: 0 })
 
@@ -160,9 +173,9 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
   }, [])
 
   /** Draws a sentence, cuts it into letter quads and sends the letters in. */
-  const load = (phraseIndex: number, scattered: boolean) => {
-    const lines = PHRASES[phraseIndex].lines
-    const layout = drawPhrase(canvas, lines)
+  const load = (text: string, font: FontId, scattered: boolean) => {
+    const lines = linesOf(text)
+    const layout = drawPhrase(canvas, lines, font)
     texture.needsUpdate = true
 
     const unit = BLOCK_WIDTH / (layout.width - 2 * MARGIN * layout.fontPx)
@@ -204,12 +217,12 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
     meta.needsUpdate = true
     geometry.instanceCount = count * layers
 
-    field.setLetters(homes, count, scattered, phraseIndex + 1)
-    loaded.current = { phrase: phraseIndex, info: { layout, unit, width, height } }
+    field.setLetters(homes, count, scattered, textSeed(text) + 1)
+    loaded.current = { key: `${font}|${text}`, info: { layout, unit, width, height } }
   }
 
   useEffect(() => {
-    if (fontReady) loaded.current = { phrase: -1, info: null }
+    if (fontReady) loaded.current = { key: '', info: null }
   }, [fontReady])
 
   const forces = useMemo(() => ({ x: 0, y: 0, vx: 0, vy: 0, presence: 0, radius: 3.4, strength: 1, broken: false }), [])
@@ -221,9 +234,9 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
     const dt = clock.dt
     const ctl = controls.current
 
-    if (loaded.current.phrase !== ctl.phrase || !loaded.current.info) {
+    if (loaded.current.key !== `${ctl.font}|${ctl.text}` || !loaded.current.info) {
       // The first sentence is already in place; a new one arrives scattered and assembles itself.
-      load(ctl.phrase, loaded.current.info !== null)
+      load(ctl.text, ctl.font, loaded.current.info !== null)
     }
     const info = loaded.current.info
     if (!info) return
@@ -231,12 +244,13 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
     // Fit the block in the view.
     const halfHeight = Math.tan(MathUtils.degToRad(TYPE_CAMERA.fov) / 2) * CAMERA_Z
     const halfWidth = halfHeight * s.aspect
-    const fit = clamp(Math.min((halfWidth * 2 * 0.9) / info.width, (halfHeight * 2 * 0.74) / info.height), 0.2, 2)
+    const fit =
+      clamp(Math.min((halfWidth * 2 * 0.9) / info.width, (halfHeight * 2 * 0.74) / info.height), 0.2, 2) * ctl.size
     group.scale.setScalar(fit)
 
     if (seen.current.reset !== ctl.resetVersion) {
       seen.current.reset = ctl.resetVersion
-      load(ctl.phrase, false)
+      load(ctl.text, ctl.font, false)
     }
     if (seen.current.scatter !== ctl.scatterVersion) {
       seen.current.scatter = ctl.scatterVersion
@@ -262,7 +276,10 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
     forces.strength = ctl.distortion * (0.55 + 0.45 * motion)
     forces.broken = ctl.broken
     forces.radius = 3.4
-    field.step(dt, forces)
+    // The speed slider is the animation's clock: the letters' springs and the preset's time both follow it.
+    const tick = dt * ctl.speed
+    phase.current += tick
+    field.step(tick, forces)
 
     // Every layer of a letter takes its letter's pose.
     const pose = geometry.getAttribute('aPose') as InstancedBufferAttribute
@@ -272,8 +289,9 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
       const base = (layers - 1 - layer) * count
       for (let i = 0; i < count; i++) {
         const at = i * DOF
-        pose.setXYZW(base + i, field.pose[at], field.pose[at + 1], field.pose[at + 2], 1)
-        pose2.setXYZW(base + i, field.pose[at + 3], field.pose[at + 4], field.pose[at + 5], field.split)
+        const o = presetOffset(ctl.motion, i, field.homes[i * 2], phase.current, autonomous ? motion : 0)
+        pose.setXYZW(base + i, field.pose[at] + o.x, field.pose[at + 1] + o.y, field.pose[at + 2] + o.z, o.scale)
+        pose2.setXYZW(base + i, field.pose[at + 3] + o.rx, field.pose[at + 4] + o.ry, field.pose[at + 5] + o.rz, field.split)
       }
     }
     pose.needsUpdate = true
@@ -289,7 +307,8 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
     uniforms.uExtrude.value = lerp(0.1, 1.5, ctl.depth)
     uniforms.uPointer.value.set(forces.x, forces.y)
     uniforms.uLens.value = 0.2 * ctl.distortion * pointer.presence * motion
-    uniforms.uInk.value.copy(palette.ink)
+    if (ctl.colour) uniforms.uInk.value.set(ctl.colour)
+    else uniforms.uInk.value.copy(palette.ink)
     uniforms.uRed.value.copy(palette.red)
     uniforms.uShadow.value.copy(palette.red).multiplyScalar(0.16).lerp(palette.bg, 0.25)
 
@@ -297,7 +316,8 @@ function Sentence({ controls }: { controls: RefObject<TypeControls> }) {
       look.current.opacity < 0.99 ||
       field.unrest > 0.02 ||
       Math.abs(field.split - (ctl.broken ? 1 : 0)) > 0.01 ||
-      pointer.presence > 0.02
+      pointer.presence > 0.02 ||
+      (autonomous && ctl.motion !== 'none')
     )
   })
 

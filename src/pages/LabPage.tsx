@@ -1,27 +1,40 @@
-import { ArtifactsPanel } from '../components/lab/artifacts/ArtifactsPanel'
-import { ExperimentGallery } from '../components/lab/gallery/ExperimentGallery'
-import { LabHero } from '../components/lab/hero/LabHero'
-import { useLabText } from '../components/lab/core/useLabText'
+import { useState } from 'react'
 import { FinalCta } from '../components/home/FinalCta'
+import { ArtifactsPanel } from '../components/lab/artifacts/ArtifactsPanel'
+import { useLocalized } from '../components/lab/core/useLabText'
+import { RacingEggLayer } from '../components/lab/easter/RacingEgg'
+import { useSecretSequence } from '../components/lab/easter/useSecretSequence'
+import { Discovery } from '../components/lab/page/Discovery'
+import { Feature } from '../components/lab/page/Feature'
+import { LabHero } from '../components/lab/page/LabHero'
+import { pageText } from '../components/lab/page/pageText'
+import { Philosophy } from '../components/lab/page/Philosophy'
+import { experimentPath } from '../content/lab'
 
 /**
- * The Lab: an interactive first screen, then the experiments as a magazine spread, then the way
- * back to the portfolio. The words are in content/labText.ts; the experiments in content/lab.ts.
+ * The Lab: a first screen in Racing Red and carbon, the six experiences as a spread with live
+ * miniatures, the object generator as the featured one, why the Lab exists, what the visitor kept,
+ * and a closing line. The hidden racing experience hangs off the red full stop of the headline (or
+ * N F S U 2 on the keyboard); it is not in the navigation and not in the list.
  */
 export function LabPage() {
-  const { text } = useLabText()
+  const t = useLocalized(pageText)
+  const [egg, setEgg] = useState(false)
+  useSecretSequence(() => setEgg(true), !egg)
 
   return (
     <>
-      <LabHero />
-      <ExperimentGallery />
+      <LabHero onFind={() => setEgg(true)} />
+      <Discovery />
+      <Feature />
+      <Philosophy />
       <ArtifactsPanel />
       <FinalCta
-        id="exit"
-        tone="dark"
-        copy={{ title: text.exit.title, text: text.exit.text, cta: text.exit.contact }}
-        action={{ to: '/contact' }}
+        id="start"
+        copy={{ title: t.closing.title, text: t.closing.text, cta: t.closing.cta }}
+        action={{ to: experimentPath('generative-objects') }}
       />
+      <RacingEggLayer open={egg} onClose={() => setEgg(false)} />
     </>
   )
 }

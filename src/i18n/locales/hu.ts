@@ -384,7 +384,7 @@ export const hu = {
     },
     lab: {
       title: 'A Lab',
-      intro: 'Kísérleti felület kreatív megoldásoknak: hat működő, interaktív WebGL-kísérlet és hat teljes 3D élmény. Három ízelítő itt, a teljes választék a Labban vár.',
+      intro: 'Kísérleti digitális játszótér: hat interaktív WebGL-élmény, a részecskéktől a generátorig, amely egyetlen mondatból épít 3D-objektumot. Három ízelítő itt, mind a hat a Labban vár.',
       enter: 'Belépés a Labba',
       open: 'Megnyitás',
     },

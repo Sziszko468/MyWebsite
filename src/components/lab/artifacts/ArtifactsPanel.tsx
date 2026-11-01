@@ -7,18 +7,16 @@ import { Container } from '../../Container/Container'
 import { Section } from '../../Section/Section'
 import { fill, useLocalized } from '../core/useLabText'
 import { downloadBlob, downloadJson, safeFilename } from '../experience/persist'
-import { useStore } from '../experience/store'
-import { Meter, Toast } from '../experience/ui'
-import { ACHIEVEMENTS, levelOf, progress, resetProgress } from '../progress/progress'
+import { Toast } from '../experience/ui'
 import { artifacts, storageUsage, type Artifact } from './artifactDb'
 import { openArtifact } from './artifactActions'
 import { artifactText } from './artifactText'
 import styles from './ArtifactsPanel.module.scss'
 
 /**
- * Digital Artifacts on the Lab's page: every work the visitor kept, with a picture, a name and its
- * actions (open it in its experience, rename it, download it as JSON or PNG, delete it), and the
- * progress earned by really doing things. Everything here lives in this browser.
+ * The saved works on the Lab's page: every work the visitor kept, with a picture, a name and its
+ * actions (open it in its experience, rename it, download it as JSON or PNG, delete it). Everything
+ * here lives in this browser.
  */
 export function ArtifactsPanel() {
   const t = useLocalized(artifactText)
@@ -31,9 +29,6 @@ export function ArtifactsPanel() {
   const [message, setMessage] = useState('')
   const [renaming, setRenaming] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
-  const [confirmReset, setConfirmReset] = useState(false)
-  const state = useStore(progress, (value) => value)
-  const level = levelOf(state.xp)
 
   const refresh = useCallback(async () => {
     const service = await artifacts()
@@ -203,59 +198,6 @@ export function ArtifactsPanel() {
             </p>
             <Toast message={message} />
           </div>
-
-          <aside className={styles.progress} aria-label={t.progress.title}>
-            <h3>{t.progress.title}</h3>
-            <p className={styles.level}>{fill(t.progress.level, { level: level.level })}</p>
-            <Meter
-              label="XP"
-              value={level.into}
-              max={level.needed}
-              text={`${level.into} / ${level.needed}`}
-              tone="red"
-            />
-            <p className={styles.note}>{fill(t.progress.xp, { xp: state.xp, left: level.needed - level.into })}</p>
-            <ul className={styles.achievements}>
-              {ACHIEVEMENTS.map((achievement) => {
-                const text = t.achievements[achievement.id as keyof typeof t.achievements]
-                const earned = state.achievements[achievement.id] !== undefined
-                return (
-                  <li key={achievement.id} data-earned={earned}>
-                    <span className={styles.mark} aria-hidden="true">
-                      {earned ? '✓' : '○'}
-                    </span>
-                    <span>
-                      <strong>{text.name}</strong> · {earned ? t.progress.unlocked : t.progress.locked}
-                      <small>{text.how}</small>
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
-            <p className={styles.note}>{t.progress.note}</p>
-            {confirmReset ? (
-              <div className={styles.confirm} role="group" aria-label={t.progress.confirmReset}>
-                <p>{t.progress.confirmReset}</p>
-                <button
-                  type="button"
-                  className={styles.danger}
-                  onClick={() => {
-                    resetProgress()
-                    setConfirmReset(false)
-                  }}
-                >
-                  {t.yes}
-                </button>
-                <button type="button" onClick={() => setConfirmReset(false)}>
-                  {t.no}
-                </button>
-              </div>
-            ) : (
-              <button type="button" className={styles.reset} onClick={() => setConfirmReset(true)}>
-                {t.progress.reset}
-              </button>
-            )}
-          </aside>
         </div>
       </Container>
     </Section>

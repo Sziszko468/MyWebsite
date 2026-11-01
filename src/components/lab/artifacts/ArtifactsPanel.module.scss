@@ -29,10 +29,6 @@
   display: grid;
   gap: var(--space-7);
 
-  @include m.up('lg') {
-    grid-template-columns: minmax(0, 1fr) 21rem;
-    align-items: start;
-  }
 }
 
 .grid {
@@ -51,19 +47,7 @@
   border-radius: var(--radius-md);
   background-color: var(--color-surface);
 
-  &[data-type='track'] {
-    border-top: 3px solid #445cff;
-  }
-
-  &[data-type='setup'] {
-    border-top: 3px solid var(--color-text);
-  }
-
-  &[data-type='artwork'] {
-    border-top: 3px solid #ff6a6f;
-  }
-
-  &[data-type='model'] {
+  &[data-type='creation'] {
     border-top: 3px solid var(--color-accent);
   }
 
@@ -213,69 +197,4 @@
 .note {
   font-size: var(--fs-xs);
   color: var(--color-text-muted);
-}
-
-.progress {
-  display: grid;
-  gap: var(--space-3);
-  padding: var(--space-5);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-
-  & h3 {
-    margin: 0;
-    font-size: var(--fs-xs);
-    letter-spacing: var(--ls-wider);
-    text-transform: uppercase;
-  }
-}
-
-.level {
-  margin: 0;
-  font-size: var(--fs-xl);
-  font-stretch: var(--fstretch-expanded);
-  font-weight: var(--fw-black);
-}
-
-.achievements {
-  display: grid;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-
-  & li {
-    display: flex;
-    gap: var(--space-2);
-    font-size: var(--fs-sm);
-    line-height: var(--lh-normal);
-
-    &[data-earned='false'] {
-      color: var(--color-text-secondary);
-    }
-  }
-
-  & small {
-    display: block;
-    color: var(--color-text-muted);
-    font-size: var(--fs-xs);
-  }
-}
-
-.mark {
-  flex: none;
-  width: 1.2em;
-}
-
-.reset {
-  justify-self: start;
-  min-height: var(--size-touch);
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--color-text-muted);
-  font: inherit;
-  font-size: var(--fs-xs);
-  text-decoration: underline;
-  cursor: pointer;
 }

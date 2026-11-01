@@ -1,0 +1,87 @@
+@use '../../../styles/mixins' as m;
+
+.section {
+  padding-block: var(--space-8);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+
+  @include m.up('lg') {
+    padding-block: var(--space-9);
+  }
+}
+
+.head {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 40rem;
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-snug);
+  text-transform: uppercase;
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-5) var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  & li > div {
+    display: grid;
+    gap: var(--space-2);
+    height: 100%;
+    padding-top: var(--space-3);
+    border-top: 3px solid var(--color-accent);
+  }
+}
+
+.number {
+  color: var(--color-accent-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+}
+
+.name {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight);
+  text-transform: uppercase;
+}
+
+.text {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+}
+
+.hint {
+  margin: var(--space-7) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-style: italic;
+}

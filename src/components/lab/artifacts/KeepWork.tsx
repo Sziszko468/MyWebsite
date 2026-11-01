@@ -20,7 +20,7 @@ interface KeepWorkProps {
 
 /**
  * "Keep" for the two experiments that have no panels of their own: save the picture as a PNG, or
- * keep the work (its settings and a preview) in Digital Artifacts. In the still view, where nothing
+ * keep the work (its settings and a preview) among the saved works. In the still view, where nothing
  * is drawn, the settings are still kept: a work does not need a picture to be a work.
  */
 export function KeepWork({ type, name, payload, stage }: KeepWorkProps) {

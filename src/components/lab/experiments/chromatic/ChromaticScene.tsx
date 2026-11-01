@@ -1,9 +1,10 @@
 import { useThree } from '@react-three/fiber'
-import { useMemo, useRef, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { BufferGeometry, Color, Float32BufferAttribute, ShaderMaterial, Vector2 } from 'three'
 import { clamp, damp } from '../../../hero/heroMath'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { useDisposable } from '../../core/resources'
+import { useStageCapture, type StageCapture } from '../../core/useStageCapture'
 import type { ChromaticControls } from './chromaticControls'
 import { CHROMATIC_FRAGMENT, CHROMATIC_VERTEX } from './chromaticShaders'
 
@@ -31,6 +32,10 @@ function Field({ controls }: { controls: RefObject<ChromaticControls> }) {
       uWave: { value: 1 },
       uBoost: { value: 0 },
       uLayers: { value: 3 },
+      uGlitch: { value: 0 },
+      uNoise: { value: 0 },
+      uAngle: { value: 0.245 },
+      uTime: { value: 0 },
       uEnergy: { value: 0 },
       uBg: { value: new Color() },
       uInk: { value: new Color() },
@@ -101,17 +106,35 @@ function Field({ controls }: { controls: RefObject<ChromaticControls> }) {
     uniforms.uWave.value = ctl.waves * (0.45 + 0.55 * motion)
     uniforms.uBoost.value = st.boost * (0.55 + 0.45 * motion)
     uniforms.uLayers.value = s.profile.chromaticLayers
+    // Glitch moves only where the view may move by itself; grain is still, so it stays.
+    uniforms.uGlitch.value = ctl.glitch * (autonomous ? 1 : 0)
+    uniforms.uNoise.value = ctl.noise
+    uniforms.uAngle.value = (ctl.angle * Math.PI) / 180
+    uniforms.uTime.value = clock.t
     uniforms.uBg.value.copy(palette.bg)
     uniforms.uInk.value.copy(palette.ink)
     uniforms.uRed.value.copy(palette.red)
     uniforms.uBlue.value.copy(palette.blue)
 
-    return st.energy > 0.01 || st.boost > 0.01 || st.attack > 0 || pointer.presence > 0.02
+    return st.energy > 0.01 || st.boost > 0.01 || st.attack > 0 || pointer.presence > 0.02 || (autonomous && ctl.glitch > 0)
   })
 
   return <mesh geometry={geometry} material={material} frustumCulled={false} />
 }
 
-export default function ChromaticScene({ controls }: { controls: RefObject<ChromaticControls> }) {
+export default function ChromaticScene({
+  controls,
+  stage,
+}: {
+  controls: RefObject<ChromaticControls>
+  stage: RefObject<StageCapture | null>
+}) {
+  const capture = useStageCapture()
+  useEffect(() => {
+    stage.current = { capture }
+    return () => {
+      stage.current = null
+    }
+  }, [stage, capture])
   return <Field controls={controls} />
 }

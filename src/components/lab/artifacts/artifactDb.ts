@@ -1,5 +1,5 @@
 /**
- * Digital Artifacts: the one place the visitor's work from every experience is kept. A work is a
+ * Saved works: the one place the visitor's work from the experiences is kept. A work is a
  * small record (a type, a name, a preview picture and the experience's own JSON) in the browser's
  * IndexedDB. There is no account and no server: it is private to this browser, and the visitor can
  * download any work as a file. Everything that comes back out of the store is checked again, because
@@ -8,8 +8,8 @@
  * Where IndexedDB is missing or blocked (some private windows), a memory store takes its place for
  * the visit and the service says so, so the page can tell the visitor their work will not survive a reload.
  */
-export type ArtifactType = 'model' | 'track' | 'setup' | 'artwork' | 'typography' | 'material'
-export const ARTIFACT_TYPES: readonly ArtifactType[] = ['model', 'track', 'setup', 'artwork', 'typography', 'material']
+export type ArtifactType = 'creation' | 'typography' | 'material'
+export const ARTIFACT_TYPES: readonly ArtifactType[] = ['creation', 'typography', 'material']
 
 export interface Artifact {
   id: string
@@ -17,7 +17,7 @@ export interface Artifact {
   name: string
   createdAt: number
   updatedAt: number
-  /** The experience's own project data (a TrackDef, a CarSetup, a StudioDoc, a composition), checked again on opening. */
+  /** The experience's own project data (a creation's description, a typography or material setting), checked again on opening. */
   payload: Record<string, unknown>
   /** A small PNG as a data URL, if the experience can draw one. */
   thumbnail?: string
@@ -74,12 +74,39 @@ export function parseArtifact(raw: unknown): Artifact | null {
 export type FailReason = 'too-large' | 'full' | 'quota' | 'blocked' | 'invalid'
 export type SaveOutcome = { ok: true; artifact: Artifact; persistent: boolean } | { ok: false; reason: FailReason }
 
+/**
+ * Binary files that belong to a work (an AI model is several megabytes: far too big for the work's own
+ * record). Kept under a key the work names; a full browser says so by rejecting with a QuotaExceededError.
+ */
+export interface BlobStore {
+  put(key: string, data: ArrayBuffer): Promise<void>
+  get(key: string): Promise<ArrayBuffer | null>
+  remove(key: string): Promise<void>
+}
+
 /** Where artifacts physically live. */
 export interface Backend {
   readonly persistent: boolean
   all(): Promise<unknown[]>
   put(artifact: Artifact): Promise<void>
   remove(id: string): Promise<void>
+  /** Where binary files go; a backend without it keeps them in memory for the visit. */
+  blobs?: BlobStore
+}
+
+const BLOB_KEY = /^[\w-]{1,80}$/
+
+export function createMemoryBlobs(): BlobStore {
+  const files = new Map<string, ArrayBuffer>()
+  const checked = (key: string) => {
+    if (!BLOB_KEY.test(key)) throw new Error('Not a file key.')
+    return key
+  }
+  return {
+    put: async (key, data) => void files.set(checked(key), data.slice(0)),
+    get: async (key) => files.get(checked(key))?.slice(0) ?? null,
+    remove: async (key) => void files.delete(checked(key)),
+  }
 }
 
 export function createMemoryBackend(): Backend {
@@ -89,11 +116,13 @@ export function createMemoryBackend(): Backend {
     all: async () => [...items.values()].map((item) => structuredClone(item)),
     put: async (artifact) => void items.set(artifact.id, structuredClone(artifact)),
     remove: async (id) => void items.delete(id),
+    blobs: createMemoryBlobs(),
   }
 }
 
 const DB_NAME = 'lab-artifacts'
 const STORE = 'artifacts'
+const BLOBS = 'models'
 
 function request<T>(req: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -115,9 +144,10 @@ export async function openIndexedDb(): Promise<Backend | null> {
   if (typeof indexedDB === 'undefined') return null
   try {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const open = indexedDB.open(DB_NAME, 1)
+      const open = indexedDB.open(DB_NAME, 2)
       open.onupgradeneeded = () => {
         if (!open.result.objectStoreNames.contains(STORE)) open.result.createObjectStore(STORE, { keyPath: 'id' })
+        if (!open.result.objectStoreNames.contains(BLOBS)) open.result.createObjectStore(BLOBS)
       }
       open.onsuccess = () => resolve(open.result)
       open.onerror = () => reject(open.error)
@@ -138,6 +168,25 @@ export async function openIndexedDb(): Promise<Backend | null> {
         tx.objectStore(STORE).delete(id)
         await done(tx)
       },
+      blobs: {
+        async put(key, data) {
+          if (!BLOB_KEY.test(key)) throw new Error('Not a file key.')
+          const tx = db.transaction(BLOBS, 'readwrite')
+          tx.objectStore(BLOBS).put(data, key)
+          await done(tx)
+        },
+        async get(key) {
+          if (!BLOB_KEY.test(key)) return null
+          const found: unknown = await request(db.transaction(BLOBS).objectStore(BLOBS).get(key))
+          return found instanceof ArrayBuffer ? found : null
+        },
+        async remove(key) {
+          if (!BLOB_KEY.test(key)) return
+          const tx = db.transaction(BLOBS, 'readwrite')
+          tx.objectStore(BLOBS).delete(key)
+          await done(tx)
+        },
+      },
     }
   } catch {
     return null
@@ -146,6 +195,8 @@ export async function openIndexedDb(): Promise<Backend | null> {
 
 export interface ArtifactService {
   readonly persistent: boolean
+  /** Binary files belonging to works. */
+  readonly files: BlobStore
   list(): Promise<Artifact[]>
   save(input: {
     id?: string
@@ -163,8 +214,10 @@ export function createService(backend: Backend, now: () => number = Date.now): A
     const found = (await backend.all()).map(parseArtifact).filter((item): item is Artifact => item !== null)
     return found.sort((a, b) => b.updatedAt - a.updatedAt)
   }
+  const files = backend.blobs ?? createMemoryBlobs()
   return {
     persistent: backend.persistent,
+    files,
     list,
     async save(input) {
       const candidate = parseArtifact({

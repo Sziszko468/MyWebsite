@@ -108,5 +108,54 @@ export function fontSizeFor(
   return (targetWidth / widest) * referencePx
 }
 
-/** The most letters any phrase has, so buffers are sized once. */
-export const MAX_LETTERS = Math.max(...PHRASES.map((phrase) => phrase.lines.join('').replace(/ /g, '').length))
+/** The most letters (spaces do not count) a sentence may have, so buffers are sized once. */
+export const MAX_LETTERS = 36
+/** The most lines a sentence is set in. */
+export const MAX_LINES = 4
+
+/**
+ * What is typed, made safe to set: capitals, single spaces, letters, digits and common punctuation only
+ * (a damaged or hostile string cannot carry anything else in), cut at the most letters the scene has room for.
+ */
+export function sanitizeText(raw: unknown, fallback = PHRASES[0].lines.join(' ')): string {
+  if (typeof raw !== 'string') return fallback
+  let out = ''
+  let letters = 0
+  for (const char of raw.normalize('NFC')) {
+    if (/\s/u.test(char)) {
+      if (out && !out.endsWith(' ')) out += ' '
+      continue
+    }
+    if (!/[\p{L}\p{N}.,!?'’:;&@#%+\-–—*/()]/u.test(char)) continue
+    if (letters >= MAX_LETTERS) break
+    out += char.toLocaleUpperCase()
+    letters++
+  }
+  return out.trim() || fallback
+}
+
+/**
+ * The lines a sentence is set in: one word to a line, as the three given sentences are, and when there are
+ * more words than lines the two neighbours that make the shortest line are joined, again and again.
+ */
+export function linesOf(text: string): string[] {
+  const lines = sanitizeText(text).split(' ').filter(Boolean)
+  while (lines.length > MAX_LINES) {
+    let best = 0
+    for (let i = 1; i < lines.length - 1; i++) {
+      if (lines[i].length + lines[i + 1].length < lines[best].length + lines[best + 1].length) best = i
+    }
+    lines.splice(best, 2, `${lines[best]} ${lines[best + 1]}`)
+  }
+  return lines
+}
+
+/** A number for a sentence, so the same words always scatter the same way. */
+export function textSeed(text: string): number {
+  let h = 2166136261
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return (h >>> 0) % 100_000
+}

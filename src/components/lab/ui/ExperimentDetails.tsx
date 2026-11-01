@@ -38,13 +38,13 @@ export function ExperimentDetails({ id }: { id: LabId }) {
 
           <dl className={styles.facts}>
             <div className={styles.fact}>
-              <dt>{text.gallery.status}</dt>
+              <dt>{text.details.status}</dt>
               <dd>
                 <LabStatusBadge status={experiment.status} />
               </dd>
             </div>
             <div className={styles.fact}>
-              <dt>{text.gallery.technology}</dt>
+              <dt>{text.details.technology}</dt>
               <dd>
                 <ul className={styles.tags}>
                   {experiment.tech.map((item) => (
@@ -54,7 +54,7 @@ export function ExperimentDetails({ id }: { id: LabId }) {
               </dd>
             </div>
             <div className={styles.fact}>
-              <dt>{text.gallery.interaction}</dt>
+              <dt>{text.details.interaction}</dt>
               <dd>
                 <ul className={styles.list}>
                   {copy.interactions.map((item) => (

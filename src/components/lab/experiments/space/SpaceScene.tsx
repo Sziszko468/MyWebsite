@@ -1,5 +1,5 @@
 import { useThree } from '@react-three/fiber'
-import { useMemo, useRef, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import {
   BufferGeometry,
   Color,
@@ -8,6 +8,7 @@ import {
   Float32BufferAttribute,
   InstancedBufferAttribute,
   InstancedBufferGeometry,
+  type Mesh,
   OneFactor,
   OneMinusSrcAlphaFactor,
   PerspectiveCamera,
@@ -18,6 +19,8 @@ import {
 import { clamp, damp, lerp, seededRandom } from '../../../hero/heroMath'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { useDisposable } from '../../core/resources'
+import { useStageCapture, type StageCapture } from '../../core/useStageCapture'
+import { PALETTE_COLOURS } from '../particles/particleControls'
 import type { SpaceControls } from './spaceControls'
 import {
   DUST_FRAGMENT,
@@ -106,7 +109,17 @@ function createQuadInstances(count: number, attributes: Record<string, Float32Ar
   return result
 }
 
-function Streaks({ shared }: { shared: SharedUniforms }) {
+/** Shows or hides one of the tunnel's systems as the panel's pattern choice says. */
+function useLayer(controls: RefObject<SpaceControls>, id: 'streaks' | 'rings' | 'planes') {
+  const ref = useRef<Mesh>(null)
+  useLabFrame(() => {
+    if (ref.current) ref.current.visible = controls.current.layer === 'full' || controls.current.layer === id
+  })
+  return ref
+}
+
+function Streaks({ shared, controls }: { shared: SharedUniforms; controls: RefObject<SpaceControls> }) {
+  const layer = useLayer(controls, 'streaks')
   const { profile } = useLabScene()
   const count = profile.spaceStreaks
   const geometry = useDisposable(() => {
@@ -124,10 +137,11 @@ function Streaks({ shared }: { shared: SharedUniforms }) {
   useLabFrame(() => {
     uniforms.uWidth.value = 1.9 * gl.getPixelRatio()
   })
-  return <mesh geometry={geometry} material={material} frustumCulled={false} />
+  return <mesh ref={layer} geometry={geometry} material={material} frustumCulled={false} />
 }
 
-function Planes({ shared }: { shared: SharedUniforms }) {
+function Planes({ shared, controls }: { shared: SharedUniforms; controls: RefObject<SpaceControls> }) {
+  const layer = useLayer(controls, 'planes')
   const { profile } = useLabScene()
   const count = profile.spacePlanes
   const geometry = useDisposable(() => {
@@ -141,10 +155,11 @@ function Planes({ shared }: { shared: SharedUniforms }) {
     return createQuadInstances(count, { aPlace: place, aShape: shape })
   }, [count])
   const material = useDisposable(() => lightMaterial(shared, PLANE_VERTEX, PLANE_FRAGMENT), [shared])
-  return <mesh geometry={geometry} material={material} frustumCulled={false} />
+  return <mesh ref={layer} geometry={geometry} material={material} frustumCulled={false} />
 }
 
-function Rings({ shared }: { shared: SharedUniforms }) {
+function Rings({ shared, controls }: { shared: SharedUniforms; controls: RefObject<SpaceControls> }) {
+  const layer = useLayer(controls, 'rings')
   const { profile } = useLabScene()
   const count = profile.spaceRings
   const geometry = useDisposable(() => {
@@ -159,7 +174,7 @@ function Rings({ shared }: { shared: SharedUniforms }) {
     return createQuadInstances(count, { aRing: ring })
   }, [count])
   const material = useDisposable(() => lightMaterial(shared, RING_VERTEX, RING_FRAGMENT), [shared])
-  return <mesh geometry={geometry} material={material} frustumCulled={false} />
+  return <mesh ref={layer} geometry={geometry} material={material} frustumCulled={false} />
 }
 
 function Dust({ shared }: { shared: SharedUniforms }) {
@@ -202,6 +217,7 @@ function Rig({ controls, shared }: { controls: RefObject<SpaceControls>; shared:
     roll: 0,
     energy: 0,
     pulses: controls.current.pulseVersion,
+    warps: controls.current.warpVersion,
     seenPointerPulses: -1,
   })
 
@@ -211,6 +227,12 @@ function Rig({ controls, shared }: { controls: RefObject<SpaceControls>; shared:
     const ctl = controls.current
     const st = state.current
 
+    // A warp jump from the panel: the tunnel pulls away for a moment.
+    if (st.warps !== ctl.warpVersion) {
+      st.warps = ctl.warpVersion
+      st.boost = Math.max(st.boost, 1.6)
+      pointer.pulse(0, 0, clock.t, 1)
+    }
     // A pulse, from the click or tap or the panel's button.
     if (st.pulses !== ctl.pulseVersion) {
       st.pulses = ctl.pulseVersion
@@ -230,16 +252,16 @@ function Rig({ controls, shared }: { controls: RefObject<SpaceControls>; shared:
     st.energy = damp(st.energy, pointer.energy, 0.18, dt)
     const speed =
       ctl.drift * DRIFT_SPEED * (autonomous ? 1 : 0) +
-      st.energy * ENERGY_SPEED * (0.4 + 0.6 * motion) +
+      st.energy * ENERGY_SPEED * (0.4 + 0.6 * motion) * ctl.intensity +
       st.boost * 55 * motion
     st.travel += speed * dt
     st.boost = damp(st.boost, 0, 0.55, dt)
 
     // Where the camera looks: the pointer's direction turns it, its movement rolls it.
     const present = pointer.presence
-    st.yaw = damp(st.yaw, -pointer.x * 0.5 * motion * present, 0.22, dt)
-    st.pitch = damp(st.pitch, pointer.y * 0.32 * motion * present, 0.22, dt)
-    st.roll = damp(st.roll, clamp(-pointer.vx * 0.06, -0.12, 0.12) * motion, 0.3, dt)
+    st.yaw = damp(st.yaw, -pointer.x * 0.5 * ctl.intensity * motion * present, 0.22, dt)
+    st.pitch = damp(st.pitch, pointer.y * 0.32 * ctl.intensity * motion * present, 0.22, dt)
+    st.roll = damp(st.roll, clamp(-pointer.vx * 0.06, -0.12, 0.12) * ctl.intensity * motion, 0.3, dt)
     camera.rotation.set(st.pitch, st.yaw, st.roll, 'YXZ')
     // The faster you move, the wider the lens opens: the tunnel pulls away at the edges.
     const fov = SPACE_CAMERA.fov + st.energy * 14 * motion + st.boost * 12 * motion
@@ -255,9 +277,17 @@ function Rig({ controls, shared }: { controls: RefObject<SpaceControls>; shared:
     shared.uPxNdc.value = 2 / Math.max(gl.domElement.height, 1)
     shared.uBright.value = lerp(1.3, 0.8, palette.additive)
     shared.uAdd.value = palette.additive
-    shared.uRed.value.copy(palette.red)
-    shared.uBlue.value.copy(palette.blue)
-    shared.uInk.value.copy(palette.ink)
+    if (ctl.palette === 'racing') {
+      shared.uRed.value.copy(palette.red)
+      shared.uBlue.value.copy(palette.blue)
+      shared.uInk.value.copy(palette.ink)
+    } else {
+      const chosen = PALETTE_COLOURS[ctl.palette]
+      shared.uRed.value.set(chosen.hot)
+      shared.uBlue.value.set(chosen.cool)
+      shared.uInk.value.set(chosen.base)
+      if (palette.additive < 0.5) shared.uInk.value.multiplyScalar(0.3)
+    }
     shared.uStretch.value = (0.1 + st.energy * 0.9) * ctl.streak * (0.5 + 0.5 * motion) + st.boost * 0.5
     shared.uPulseGlow.value = Math.max(0, 1 - (clock.t - shared.uPulseT.value) / 1.6) * 0.8
 
@@ -267,15 +297,28 @@ function Rig({ controls, shared }: { controls: RefObject<SpaceControls>; shared:
   return null
 }
 
-export default function SpaceScene({ controls }: { controls: RefObject<SpaceControls> }) {
+export default function SpaceScene({
+  controls,
+  stage,
+}: {
+  controls: RefObject<SpaceControls>
+  stage: RefObject<StageCapture | null>
+}) {
   const shared = useMemo(() => createSharedUniforms(), [])
+  const capture = useStageCapture()
+  useEffect(() => {
+    stage.current = { capture }
+    return () => {
+      stage.current = null
+    }
+  }, [stage, capture])
   return (
     <>
       <Rig controls={controls} shared={shared} />
       <Glow shared={shared} />
-      <Rings shared={shared} />
-      <Planes shared={shared} />
-      <Streaks shared={shared} />
+      <Rings shared={shared} controls={controls} />
+      <Planes shared={shared} controls={controls} />
+      <Streaks shared={shared} controls={controls} />
       <Dust shared={shared} />
     </>
   )

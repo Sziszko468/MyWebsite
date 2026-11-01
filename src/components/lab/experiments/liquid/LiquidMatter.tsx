@@ -3,7 +3,7 @@ import { KeepWork } from '../../artifacts/KeepWork'
 import type { StageCapture } from '../../core/useStageCapture'
 import { useLabText, useLocalized } from '../../core/useLabText'
 import { ExperimentFrame } from '../../ui/ExperimentFrame'
-import { LabAction, LabActions, LabChoice, LabGroup, LabSlider } from '../../ui/LabControls'
+import { LabAction, LabActions, LabChoice, LabColour, LabGroup, LabSlider } from '../../ui/LabControls'
 import { LIQUID_DEFAULTS, liquidHandoff, liquidText, materialWork, type LiquidControls } from './liquidControls'
 import { MATTER_NAMES, MATTERS, type MatterId } from './liquidMaterials'
 
@@ -65,6 +65,13 @@ function LiquidPanel({
           format={percent}
           onChange={(flow) => update({ flow })}
         />
+        <LabColour
+          label={t.tint}
+          value={state.tint}
+          fallback="#ff3b43"
+          clearLabel={t.ownColours}
+          onChange={(tint) => update({ tint })}
+        />
         <LabSlider
           label={t.light}
           value={state.light}
@@ -78,6 +85,19 @@ function LiquidPanel({
 
       <LabActions>
         <LabAction onClick={() => update({ pulseVersion: controls.current.pulseVersion + 1 })}>{t.pulse}</LabAction>
+        <LabAction
+          onClick={() =>
+            update({
+              matter: MATTERS[Math.floor(Math.random() * MATTERS.length)],
+              deformation: 0.5 + Math.random() * 1.1,
+              flow: Math.random() * 1.8,
+              tint: Math.random() < 0.6 ? `#${[0, 1, 2].map(() => Math.floor(60 + Math.random() * 195).toString(16).padStart(2, '0')).join('')}` : null,
+              pulseVersion: controls.current.pulseVersion + 1,
+            })
+          }
+        >
+          {t.randomise}
+        </LabAction>
         <LabAction onClick={() => update({ ...LIQUID_DEFAULTS, pulseVersion: controls.current.pulseVersion })}>
           {text.panel.reset}
         </LabAction>
@@ -95,7 +115,7 @@ function LiquidPanel({
 
 /** Liquid Matter: one form, four states of matter. */
 export default function LiquidMatter() {
-  // A material opened from Digital Artifacts arrives through the handoff; otherwise the defaults.
+  // A material opened from the saved works arrives through the handoff; otherwise the defaults.
   const controls = useRef<LiquidControls>({ ...(liquidHandoff.peek() ?? LIQUID_DEFAULTS) })
   const stage = useRef<StageCapture | null>(null)
   useEffect(() => {

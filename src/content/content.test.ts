@@ -77,7 +77,7 @@ describe('"What I build"', () => {
 })
 
 describe('the Lab', () => {
-  it('has twelve experiments in order: the six experiments, then the immersive experiences', () => {
+  it('has exactly six experiments, in order, and nothing else', () => {
     expect(experiments.map((e) => e.id)).toEqual([
       'particle-universe',
       'liquid-matter',
@@ -85,27 +85,15 @@ describe('the Lab', () => {
       'infinite-space',
       'chromatic-distortion',
       'generative-objects',
-      'model-studio',
-      'racing',
-      'track-architect',
-      'performance-lab',
-      'generative-art',
-      'sound-world',
     ])
-    expect(experiments.map((e) => e.number)).toEqual([
-      '01',
-      '02',
-      '03',
-      '04',
-      '05',
-      '06',
-      '07',
-      '08',
-      '09',
-      '10',
-      '11',
-      '12',
-    ])
+    expect(experiments.map((e) => e.number)).toEqual(['01', '02', '03', '04', '05', '06'])
+  })
+
+  it('does not list the removed experiences anywhere: no id, no page, no component, no route', () => {
+    for (const removed of ['model-studio', 'racing', 'track-architect', 'performance-lab', 'generative-art', 'sound-world']) {
+      expect(experiments.some((e) => e.id === removed), removed).toBe(false)
+      expect(PAGES.some((page) => page.path.includes(removed)), removed).toBe(false)
+    }
   })
 
   it('gives a page only to an experiment that is ready', () => {

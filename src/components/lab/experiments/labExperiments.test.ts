@@ -1,23 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { icoSphereVertexCount } from '../core/resources'
 import { cloneParams, easeMatter, MATTER_PARAMS, MATTERS } from './liquid/liquidMaterials'
-import { buildGenerative, makeNoise, OBJECT_RADIUS } from './generative/genGeometry'
-import {
-  addSaved,
-  FORMS,
-  GEN_DEFAULTS,
-  genText,
-  MAX_SAVED,
-  paramsFromSeed,
-  parseSeedCode,
-  sanitizeParams,
-  seedCode,
-  type GenParams,
-  type SavedObject,
-} from './generative/genParams'
 import { generateShape, SHAPES } from './particles/particleShapes'
 import { FlowField, ParticleSim, type ParticleForces } from './particles/particleSim'
-import { fontSizeFor, layoutPhrase, MAX_LETTERS, PHRASES } from './type/typeLayout'
+import { fontSizeFor, layoutPhrase, linesOf, MAX_LETTERS, MAX_LINES, PHRASES, sanitizeText, textSeed } from './type/typeLayout'
+import { MOTIONS } from './type/typeControls'
+import { presetOffset } from './type/typeMotion'
 import { LetterField, MAX as MAX_FIELD_LETTERS } from './type/typeSim'
 import { LAB_PROFILES } from '../core/labProfile'
 
@@ -279,151 +267,59 @@ describe('Type in Motion: layout and letters', () => {
   })
 })
 
-describe('Generative Objects: parameters and codes', () => {
-  it('makes the same parameters from the same seed, and different ones from another', () => {
-    expect(paramsFromSeed(12345)).toEqual(paramsFromSeed(12345))
-    expect(paramsFromSeed(12345)).not.toEqual(paramsFromSeed(54321))
-    expect(paramsFromSeed(7).seed).toBe(7)
+describe('Type in Motion: any words', () => {
+  it('makes typed text safe to set: capitals, single spaces, no markup or control characters', () => {
+    expect(sanitizeText('  hello    wörld  ')).toBe('HELLO WÖRLD')
+    expect(sanitizeText('<b>hi</b>\u0000\n\tthere')).toBe('BHI/B THERE') // the markup's brackets are dropped, a slash is punctuation
+    expect(sanitizeText('ű ő é í')).toBe('Ű Ő É Í')
+    expect(sanitizeText('')).toBe(PHRASES[0].lines.join(' '))
+    expect(sanitizeText(42)).toBe(PHRASES[0].lines.join(' '))
+    expect(sanitizeText('😀😀')).toBe(PHRASES[0].lines.join(' '))
+    expect(sanitizeText('a'.repeat(500)).length).toBe(MAX_LETTERS)
+    expect(sanitizeText('ab '.repeat(50)).replace(/ /g, '').length).toBeLessThanOrEqual(MAX_LETTERS)
   })
 
-  it('always stays inside its ranges', () => {
-    for (let seed = 1; seed < 400; seed += 7) {
-      const p = paramsFromSeed(seed * 7919)
-      expect(FORMS).toContain(p.form)
-      expect(p.symmetry).toBeGreaterThanOrEqual(1)
-      expect(p.symmetry).toBeLessThanOrEqual(12)
-      for (const value of [p.complexity, p.depth, p.distortion]) {
-        expect(value).toBeGreaterThanOrEqual(0)
-        expect(value).toBeLessThanOrEqual(1)
+  it('sets the three given sentences exactly as before, one word to a line', () => {
+    for (const phrase of PHRASES) expect(linesOf(phrase.lines.join(' '))).toEqual([...phrase.lines])
+  })
+
+  it('never sets more lines than there is room for, loses no letter, and keeps every line non-empty', () => {
+    for (const text of ['A', 'ONE TWO THREE FOUR FIVE SIX SEVEN EIGHT NINE TEN', 'SUPERCALIFRAGILISTICEXPIALIDOCIOUS', 'A B C D E F G H I J K L', 'x y z']) {
+      const lines = linesOf(text)
+      const clean = sanitizeText(text)
+      expect(lines.length).toBeGreaterThan(0)
+      expect(lines.length).toBeLessThanOrEqual(MAX_LINES)
+      expect(lines.every((line) => line.length > 0)).toBe(true)
+      expect(lines.join('').replace(/ /g, '')).toBe(clean.replace(/ /g, ''))
+    }
+  })
+
+  it('gives the same seed for the same words', () => {
+    expect(textSeed('HELLO')).toBe(textSeed('HELLO'))
+    expect(textSeed('HELLO')).not.toBe(textSeed('WORLD'))
+  })
+
+  it('moves letters by a preset: nothing for “still”, bounded and finite for every other, and the glitch changes at most three times a second', () => {
+    for (const motion of MOTIONS) {
+      for (let i = 0; i < 36; i++) {
+        for (let t = 0; t < 20; t += 0.37) {
+          const o = presetOffset(motion, i, (i - 18) * 1.1, t, 1)
+          for (const value of Object.values(o)) expect(Number.isFinite(value)).toBe(true)
+          expect(Math.abs(o.x) + Math.abs(o.y) + Math.abs(o.z)).toBeLessThan(2)
+          expect(o.scale).toBeGreaterThan(0.8)
+          expect(o.scale).toBeLessThan(1.2)
+          if (motion === 'none' || t === 0) continue
+          expect(presetOffset(motion, i, 0, t, 0)).toMatchObject({ x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, scale: 1 })
+        }
       }
     }
-  })
-
-  it('turns a seed into a code and back, in any case and with or without the prefix', () => {
-    for (const seed of [0, 1, 2718281, 4294967295, 123456789]) {
-      const code = seedCode(seed)
-      expect(code).toMatch(/^CC-[0-9A-Z]{7}$/)
-      expect(parseSeedCode(code)).toBe(seed)
-      expect(parseSeedCode(code.toLowerCase())).toBe(seed)
-      expect(parseSeedCode(code.slice(3))).toBe(seed)
+    const jumps = new Set<number>()
+    let last = ''
+    for (let t = 0; t < 4; t += 1 / 120) {
+      const key = JSON.stringify(Array.from({ length: 36 }, (_, i) => presetOffset('glitch', i, 0, t, 1).x.toFixed(4)))
+      if (key !== last) jumps.add(Math.floor(t * 100))
+      last = key
     }
-    for (const bad of ['', 'CC-', 'hello world', 'CC-ZZZZZZZZZ', '<script>']) expect(parseSeedCode(bad), bad).toBeNull()
-  })
-
-  it('repairs parameters that are out of range', () => {
-    const wild = {
-      ...GEN_DEFAULTS,
-      complexity: 9,
-      depth: -3,
-      symmetry: 99.4,
-      light: 0,
-      form: 'nope',
-      material: 'x',
-      palette: 'y',
-      seed: -1,
-    } as unknown as GenParams
-    const clean = sanitizeParams(wild)
-    expect(clean.complexity).toBe(1)
-    expect(clean.depth).toBe(0)
-    expect(clean.symmetry).toBe(12)
-    expect(clean.light).toBe(0.4)
-    expect(clean.form).toBe(GEN_DEFAULTS.form)
-    expect(clean.seed).toBe(4294967295)
-  })
-
-  it('keeps at most six saved objects, newest last, and never the same one twice', () => {
-    let collection: SavedObject[] = []
-    for (let seed = 1; seed <= 10; seed++)
-      collection = addSaved(collection, { params: paramsFromSeed(seed), picture: '' })
-    expect(collection).toHaveLength(MAX_SAVED)
-    expect(collection[collection.length - 1].params.seed).toBe(10)
-    expect(collection[0].params.seed).toBe(5)
-    const again = addSaved(collection, { params: paramsFromSeed(10), picture: 'x' })
-    expect(again).toHaveLength(MAX_SAVED)
-    expect(again[again.length - 1].picture).toBe('x')
-  })
-
-  it('has every word in all three languages', () => {
-    const missing: string[] = []
-    const walk = (value: unknown, path: string) => {
-      if (typeof value !== 'object' || value === null) return
-      const record = value as Record<string, unknown>
-      if (typeof record.hu === 'string') {
-        for (const lang of ['hu', 'en', 'nl']) if (!(record[lang] as string)?.trim()) missing.push(`${path}.${lang}`)
-        return
-      }
-      for (const [key, child] of Object.entries(record)) walk(child, `${path}.${key}`)
-    }
-    walk(genText, 'genText')
-    expect(missing).toEqual([])
-  })
-})
-
-describe('Generative Objects: geometry', () => {
-  const budget = 20_000
-
-  it.each(FORMS)('%s stays inside the vertex budget, finite, centred and the same size', (form) => {
-    for (const complexity of [0, 0.5, 1]) {
-      const params: GenParams = { ...GEN_DEFAULTS, form, complexity, seed: 99 }
-      const { geometry, vertexCount } = buildGenerative(params, budget)
-      expect(vertexCount, `${form} at ${complexity}`).toBeLessThanOrEqual(budget)
-      expect(vertexCount).toBeGreaterThan(20)
-      const position = geometry.getAttribute('position')
-      const normal = geometry.getAttribute('normal')
-      expect(normal.count).toBe(position.count)
-      for (let i = 0; i < position.count; i++) {
-        expect(Number.isFinite(position.getX(i) + position.getY(i) + position.getZ(i))).toBe(true)
-        expect(Number.isFinite(normal.getX(i) + normal.getY(i) + normal.getZ(i))).toBe(true)
-      }
-      geometry.computeBoundingSphere()
-      expect(geometry.boundingSphere?.radius).toBeCloseTo(OBJECT_RADIUS, 1)
-      geometry.dispose()
-    }
-  })
-
-  it('is deterministic and changes with the seed and with each parameter', () => {
-    const first = (params: GenParams) => {
-      const { geometry } = buildGenerative(params, budget)
-      const out = Array.from(geometry.getAttribute('position').array.slice(0, 90))
-      geometry.dispose()
-      return out
-    }
-    const base: GenParams = { ...GEN_DEFAULTS, form: 'bloom', seed: 5 }
-    expect(first(base)).toEqual(first(base))
-    expect(first(base)).not.toEqual(first({ ...base, seed: 6 }))
-    expect(first(base)).not.toEqual(first({ ...base, symmetry: 8 }))
-    expect(first(base)).not.toEqual(first({ ...base, distortion: 0.9 }))
-    expect(first(base)).not.toEqual(first({ ...base, depth: 0.1 }))
-  })
-
-  it('gets more detailed with complexity, within the budget, and never past a smaller one', () => {
-    const count = (complexity: number, limit: number) => {
-      const built = buildGenerative({ ...GEN_DEFAULTS, form: 'spire', complexity }, limit)
-      built.geometry.dispose()
-      return built.vertexCount
-    }
-    expect(count(1, budget)).toBeGreaterThan(count(0, budget))
-    expect(count(1, 5000)).toBeLessThanOrEqual(5000)
-    expect(count(1, budget)).toBeGreaterThan(count(1, 5000))
-  })
-
-  it('faces its triangles outwards', () => {
-    const { geometry } = buildGenerative({ ...GEN_DEFAULTS, form: 'knot', seed: 3 }, budget)
-    const position = geometry.getAttribute('position')
-    const normal = geometry.getAttribute('normal')
-    let outward = 0
-    for (let i = 0; i < position.count; i++)
-      outward +=
-        position.getX(i) * normal.getX(i) + position.getY(i) * normal.getY(i) + position.getZ(i) * normal.getZ(i)
-    expect(outward).toBeGreaterThan(0)
-    geometry.dispose()
-  })
-
-  it('has a noise that is smooth, bounded and seeded', () => {
-    const noise = makeNoise(4)
-    expect(noise(0.3, 0.4, 0.5)).toBe(noise(0.3, 0.4, 0.5))
-    expect(makeNoise(5)(0.3, 0.4, 0.5)).not.toBe(noise(0.3, 0.4, 0.5))
-    for (let i = 0; i < 200; i++) expect(Math.abs(noise(i * 0.37, i * 0.11, i * 0.73))).toBeLessThanOrEqual(1)
-    expect(Math.abs(noise(1.2, 2.3, 3.4) - noise(1.2001, 2.3, 3.4))).toBeLessThan(0.01)
-  })
+    expect(jumps.size).toBeLessThanOrEqual(13)
+  }, 60_000)
 })

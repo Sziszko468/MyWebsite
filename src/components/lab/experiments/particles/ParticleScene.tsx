@@ -15,7 +15,8 @@ import {
 import { clamp, damp, lerp } from '../../../hero/heroMath'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { useDisposable } from '../../core/resources'
-import type { ParticleControls } from './particleControls'
+import { useStageCapture, type StageCapture } from '../../core/useStageCapture'
+import { PALETTE_COLOURS, type ParticleControls } from './particleControls'
 import { PARTICLE_FRAGMENT, PARTICLE_VERTEX } from './particleShaders'
 import { FlowField, ParticleSim } from './particleSim'
 import { SHAPE_EXTENT } from './particleShapes'
@@ -159,8 +160,10 @@ function Cloud({ controls }: { controls: RefObject<ParticleControls> }) {
     if (pointer.presence > 0.05 && pointer.speed > 0.015) {
       flow.splat(forces.x, forces.y, forces.vx * 0.55, forces.vy * 0.55, POINTER_RADIUS * 1.1, Math.min(1, dt * 14))
     }
-    flow.step(dt)
-    sim.step(dt, forces, flow)
+    // The speed slider is the simulation's clock.
+    const tick = dt * ctl.speed
+    flow.step(tick)
+    sim.step(tick, forces, flow)
 
     const position = geometry.getAttribute('position') as BufferAttribute
     const heat = geometry.getAttribute('aHeat') as BufferAttribute
@@ -177,9 +180,18 @@ function Cloud({ controls }: { controls: RefObject<ParticleControls> }) {
     uniforms.uSize.value = 0.021 * clamp(Math.sqrt(36_000 / capacity), 1, 2.1) * fit
     uniforms.uAdd.value = palette.additive
     uniforms.uIntensity.value = ctl.intensity * lerp(0.9, 0.5, palette.additive)
-    uniforms.uRed.value.copy(palette.red)
-    uniforms.uBlue.value.copy(palette.blue)
-    uniforms.uInk.value.copy(palette.ink)
+    if (ctl.palette === 'racing') {
+      uniforms.uRed.value.copy(palette.red)
+      uniforms.uBlue.value.copy(palette.blue)
+      uniforms.uInk.value.copy(palette.ink)
+    } else {
+      const chosen = PALETTE_COLOURS[ctl.palette]
+      uniforms.uRed.value.set(chosen.hot)
+      uniforms.uBlue.value.set(chosen.cool)
+      uniforms.uInk.value.set(chosen.base)
+      // On a light page the particles are drawn dark on light, so the resting colour must be dark too.
+      if (palette.additive < 0.5) uniforms.uInk.value.multiplyScalar(0.3)
+    }
 
     // A calm (on-demand) canvas draws on while anything is still moving.
     return !autonomous && (sim.loosen > 0 || flow.peak > 0.01 || sim.disorder() > 0.015)
@@ -188,6 +200,19 @@ function Cloud({ controls }: { controls: RefObject<ParticleControls> }) {
   return <points ref={points} geometry={geometry} material={material} frustumCulled={false} />
 }
 
-export default function ParticleScene({ controls }: { controls: RefObject<ParticleControls> }) {
+export default function ParticleScene({
+  controls,
+  stage,
+}: {
+  controls: RefObject<ParticleControls>
+  stage: RefObject<StageCapture | null>
+}) {
+  const capture = useStageCapture()
+  useEffect(() => {
+    stage.current = { capture }
+    return () => {
+      stage.current = null
+    }
+  }, [stage, capture])
   return <Cloud controls={controls} />
 }

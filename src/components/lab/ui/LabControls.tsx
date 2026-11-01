@@ -184,3 +184,73 @@ export function LabNote({ children, live = false }: { children: ReactNode; live?
     </p>
   )
 }
+
+interface TextFieldProps {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  maxLength?: number
+  placeholder?: string
+  /** A line under the field, linked to it for assistive technology. */
+  help?: string
+  className?: string
+}
+
+/** One line of text. It changes the scene as the visitor types, so nothing has to be confirmed. */
+export function LabTextField({ label, value, onChange, maxLength, placeholder, help, className }: TextFieldProps) {
+  const id = useId()
+  return (
+    <div className={cx(styles.field, className)}>
+      <label htmlFor={id} className={styles.label}>
+        {label}
+      </label>
+      <input
+        id={id}
+        className={styles.text}
+        type="text"
+        value={value}
+        maxLength={maxLength}
+        placeholder={placeholder}
+        autoComplete="off"
+        spellCheck={false}
+        aria-describedby={help ? `${id}-help` : undefined}
+        onChange={(event) => onChange(event.currentTarget.value)}
+      />
+      {help && (
+        <p id={`${id}-help`} className={styles.note}>
+          {help}
+        </p>
+      )}
+    </div>
+  )
+}
+
+interface ColourProps {
+  label: string
+  /** `#rrggbb`, or null for the experiment's own colours. */
+  value: string | null
+  /** What the picker shows while the value is null. */
+  fallback: string
+  onChange: (value: string | null) => void
+  /** The name of the button that goes back to the experiment's own colours. */
+  clearLabel: string
+  className?: string
+}
+
+/** A colour picker with a way back to the default. */
+export function LabColour({ label, value, fallback, onChange, clearLabel, className }: ColourProps) {
+  const id = useId()
+  return (
+    <div className={cx(styles.field, className)}>
+      <label htmlFor={id} className={styles.label}>
+        {label}
+      </label>
+      <div className={styles.colour}>
+        <input id={id} type="color" value={value ?? fallback} onChange={(event) => onChange(event.currentTarget.value)} />
+        <button type="button" className={styles.action} aria-pressed={value === null} onClick={() => onChange(null)}>
+          {clearLabel}
+        </button>
+      </div>
+    </div>
+  )
+}

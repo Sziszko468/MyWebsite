@@ -14,10 +14,4 @@ export const EXPERIMENT_COMPONENTS: Partial<Record<LabId, LazyExoticComponent<Co
   'infinite-space': lazy(() => import('./experiments/space/InfiniteSpace')),
   'chromatic-distortion': lazy(() => import('./experiments/chromatic/ChromaticDistortion')),
   'generative-objects': lazy(() => import('./experiments/generative/GenerativeObjects')),
-  'model-studio': lazy(() => import('./experiences/studio/ModelStudio')),
-  racing: lazy(() => import('./experiences/racing/Racing')),
-  'track-architect': lazy(() => import('./experiences/racing/TrackArchitect')),
-  'performance-lab': lazy(() => import('./experiences/racing/PerformanceLab')),
-  'generative-art': lazy(() => import('./experiences/art/GenerativeArt')),
-  'sound-world': lazy(() => import('./experiences/sound/SoundWorld')),
 }

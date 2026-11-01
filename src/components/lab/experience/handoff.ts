@@ -1,5 +1,5 @@
 /**
- * A work that is about to be opened. Digital Artifacts opens a kept work by putting its settings
+ * A work that is about to be opened. The saved works open a kept work by putting its settings
  * here and sending the visitor to the experience; the experience, which keeps its controls in a
  * mutable object of its own, starts from them if there are any. One slot: whatever is put in is
  * what the next page picks up, and the page clears it once it has.

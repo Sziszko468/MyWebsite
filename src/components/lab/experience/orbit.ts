@@ -39,6 +39,8 @@ export class OrbitController {
   minPhi: number
   maxPhi: number
   enabled = true
+  /** When true one pointer pans instead of orbiting (a phone has no right button or Shift). */
+  primaryPans = false
   /** Called whenever the goal changes, so an on-demand canvas can ask for a frame. */
   onChange: (() => void) | null = null
   /** Return false to refuse a press (something else, like a gizmo handle, has it). */
@@ -113,6 +115,8 @@ export class OrbitController {
 
     const onDown = (event: PointerEvent) => {
       if (!this.enabled) return
+      // A button, link or field laid over the stage keeps its own press: capturing the pointer here would send the click to the stage instead.
+      if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea, label, summary, [role="button"]')) return
       if (this.shouldStart && !this.shouldStart(event)) return
       if (event.pointerType === 'mouse' && ![0, 1, 2].includes(event.button)) return
       this.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
@@ -122,7 +126,7 @@ export class OrbitController {
         // The pointer may already be gone.
       }
       if (this.pointers.size === 1) {
-        this.mode = event.button === 1 || event.button === 2 || event.shiftKey ? 'pan' : 'orbit'
+        this.mode = event.button === 1 || event.button === 2 || event.shiftKey || this.primaryPans ? 'pan' : 'orbit'
       } else if (this.pointers.size === 2) {
         this.mode = 'pinch'
         const [a, b] = [...this.pointers.values()]

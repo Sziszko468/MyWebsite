@@ -13,7 +13,7 @@ import { seededRandom } from '../../../hero/heroMath'
  */
 
 export const DOF = 6
-export const MAX = 24
+export const MAX = 36
 
 const SPRING = 34
 const DAMPING = 6.4

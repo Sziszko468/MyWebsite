@@ -11,6 +11,8 @@ export interface LiquidControls {
   flow: number
   /** 0.4..1.6: how bright the studio light is. */
   light: number
+  /** `#rrggbb` that recolours the light the surface gives back, or null for the state's own colours. */
+  tint: string | null
   /** Bumped by the panel to send a pulse through the form from the middle. */
   pulseVersion: number
 }
@@ -20,6 +22,7 @@ export const LIQUID_DEFAULTS: Readonly<LiquidControls> = {
   deformation: 1,
   flow: 1,
   light: 1,
+  tint: null,
   pulseVersion: 0,
 }
 
@@ -31,20 +34,22 @@ export const LIQUID_RANGES = {
 
 /** What is kept of a material: the state of matter and the three numbers that tune it. */
 export interface MaterialWork {
-  version: 1
+  version: 2
   matter: MatterId
   deformation: number
   flow: number
   light: number
+  tint: string | null
 }
 
 export function materialWork(controls: LiquidControls): MaterialWork {
   return {
-    version: 1,
+    version: 2,
     matter: controls.matter,
     deformation: controls.deformation,
     flow: controls.flow,
     light: controls.light,
+    tint: controls.tint,
   }
 }
 
@@ -55,7 +60,7 @@ const within = (value: unknown, min: number, max: number, fallback: number): num
 export function sanitizeMaterialWork(raw: unknown): LiquidControls | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null
   const r = raw as Record<string, unknown>
-  if (r.version !== 1) return null
+  if (r.version !== 1 && r.version !== 2) return null
   if (!MATTERS.includes(r.matter as MatterId)) return null
   return {
     ...LIQUID_DEFAULTS,
@@ -68,6 +73,7 @@ export function sanitizeMaterialWork(raw: unknown): LiquidControls | null {
     ),
     flow: within(r.flow, LIQUID_RANGES.flow.min, LIQUID_RANGES.flow.max, LIQUID_DEFAULTS.flow),
     light: within(r.light, LIQUID_RANGES.light.min, LIQUID_RANGES.light.max, LIQUID_DEFAULTS.light),
+    tint: r.version === 2 && typeof r.tint === 'string' && /^#[0-9a-fA-F]{6}$/.test(r.tint) ? r.tint.toLowerCase() : null,
   }
 }
 
@@ -79,5 +85,8 @@ export const liquidText = {
   deformation: tri('Deformáció', 'Deformation', 'Vervorming'),
   flow: tri('Áramlás sebessége', 'Flow speed', 'Stroomsnelheid'),
   light: tri('Fényerő', 'Light', 'Licht'),
+  tint: tri('Szín', 'Colour', 'Kleur'),
+  ownColours: tri('Az állapot színei', 'State’s own colours', 'Eigen kleuren'),
+  randomise: tri('Véletlen anyag', 'Random material', 'Willekeurig materiaal'),
   pulse: tri('Impulzus', 'Pulse', 'Puls'),
 } as const

@@ -26,6 +26,8 @@ function Blob({ controls }: { controls: RefObject<LiquidControls> }) {
       ...createSurfaceUniforms(),
       uQuant: { value: 0 },
       uBase: { value: new Color() },
+      uTint: { value: new Color() },
+      uTintAmount: { value: 0 },
       uLightDir: { value: new Vector3(0.4, 0.6, 0.7) },
       uMetal: { value: 1 },
       uRough: { value: 0 },
@@ -95,6 +97,8 @@ function Blob({ controls }: { controls: RefObject<LiquidControls> }) {
     uniforms.uQuant.value = shown.quant
     uniforms.uBase.value.setRGB(shown.baseR, shown.baseG, shown.baseB)
     uniforms.uMetal.value = shown.metal
+    if (ctl.tint) uniforms.uTint.value.set(ctl.tint)
+    uniforms.uTintAmount.value = lerp(uniforms.uTintAmount.value, ctl.tint ? 0.86 : 0, 1 - Math.pow(0.5, dt / 0.12))
     uniforms.uRough.value = shown.rough
     uniforms.uFres.value = shown.fres
     uniforms.uGlass.value = shown.glass

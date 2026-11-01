@@ -43,7 +43,8 @@ export const LIQUID_VERTEX = /* glsl */ `
 
 export const LIQUID_FRAGMENT = /* glsl */ `
   ${STUDIO}
-  uniform vec3 uBase, uLightDir;
+  uniform vec3 uBase, uLightDir, uTint;
+  uniform float uTintAmount;
   uniform float uMetal, uRough, uFres, uGlass, uDisp, uFacet, uMolten, uSheen, uAdd;
 
   varying vec3 vNormalW;
@@ -115,6 +116,13 @@ export const LIQUID_FRAGMENT = /* glsl */ `
 
     // Light the pointer carries across the surface, faint but present.
     col += uBlue * pow(max(dot(N, L), 0.0), 24.0) * 0.1 * (1.0 - uGlass);
+
+    // A chosen colour recolours the light the surface gives back: its shadows, its glints and its glow keep their shape.
+    if (uTintAmount > 0.001) {
+      float l = dot(col, vec3(0.3, 0.59, 0.11));
+      vec3 tinted = mix(uTint, vec3(1.0), smoothstep(0.9, 2.6, l)) * (0.12 + l * 1.45);
+      col = mix(col, tinted, uTintAmount);
+    }
 
     // The studio is brighter than the screen can show: compress it so highlights stay shaped instead of white.
     col = vec3(1.0) - exp(-col * 1.35);

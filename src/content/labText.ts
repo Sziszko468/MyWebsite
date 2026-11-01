@@ -236,306 +236,46 @@ export const experimentText: Record<LabId, ExperimentText> = {
   },
   'generative-objects': {
     description: tri(
-      'Egy kis generátor absztrakt 3D objektumokhoz. Válassz formacsaládot, alakítsd összetettséggel, mélységgel, torzulással és szimmetriával, válassz anyagot és palettát, majd dobj egy magot egy új formához. Ugyanaz a mag mindig ugyanazt az objektumot adja, a geometria pedig a helyén épül újra, így nem halmozódik memória.',
-      'A small generator for abstract 3D objects. Pick a family, shape it with complexity, depth, distortion and symmetry, choose a material and a palette, and roll a seed for a new form. The same seed always makes the same object, and the geometry is rebuilt in place, so no memory piles up.',
-      'Een kleine generator voor abstracte 3D-objecten. Kies een familie, vorm hem met complexiteit, diepte, vervorming en symmetrie, kies materiaal en palet en gooi een seed voor een nieuwe vorm. Dezelfde seed maakt altijd hetzelfde object en de geometrie wordt ter plekke herbouwd, zodat er geen geheugen ophoopt.',
+      'Írd le vagy mondd el, mit szeretnél látni, és egy szöveg-3D motor (AI) valódi 3D-modellt épít belőle. Előbb az alakzat készül el textúra nélkül; megnézheted minden oldalról, és csak ha kéred, jönnek a textúrák. A modellt forgathatod, nagyíthatod, elmentheted a böngésződben, és GLB-ként letöltheted. Ha a szerveren nincs motor bekötve, az oldal ezt mondja meg, nem helyettesíti mással. Külön, jól megjelölt módban a gyors, szabályos építő (nem AI) továbbra is épít vicces tárgyakat a böngészőben.',
+      'Describe or dictate what you want to see, and a text-to-3D engine (AI) builds a real 3D model from it. The shape comes first, untextured; you look at it from every side, and the textures follow only if you ask. Turn it, zoom, keep it in your browser, download it as a GLB. If no engine is connected on the server the page says so instead of substituting something else. In a separate, clearly labelled mode the quick rule-based builder (not AI) still builds funny objects in the browser.',
+      'Beschrijf of dicteer wat je wilt zien en een tekst-naar-3D-engine (AI) bouwt er een echt 3D-model van. Eerst de vorm, zonder textuur; je bekijkt hem van alle kanten en de texturen volgen alleen als je erom vraagt. Draai hem, zoom, bewaar hem in je browser, download hem als GLB. Is er op de server geen engine gekoppeld, dan zegt de pagina dat in plaats van iets anders te tonen. In een aparte, duidelijk gemarkeerde modus bouwt de snelle regelgebaseerde bouwer (geen AI) nog steeds grappige voorwerpen in de browser.',
     ),
     interactions: [
       tri(
-        'Nyolc paraméter, mind élőben állítható',
-        'Eight parameters, all adjustable live',
-        'Acht parameters, allemaal live aan te passen',
+        'Írj, vagy mondd el magyarul, angolul vagy hollandul (a mikrofon csak kattintásra indul, hangot nem rögzít)',
+        'Type, or dictate in Hungarian, English or Dutch (the microphone starts only on a click and nothing is recorded)',
+        'Typ of dicteer in het Hongaars, Engels of Nederlands (de microfoon start alleen na een klik en er wordt niets opgenomen)',
       ),
       tri(
-        'Új forma egy magból, ugyanaz a mag ugyanazt adja',
-        'A new form from a seed; the same seed gives the same form',
-        'Een nieuwe vorm uit een seed; dezelfde seed geeft dezelfde vorm',
+        'Az AI-motor előbb az alakzatot építi, textúra nélkül; te döntesz a textúrákról',
+        'The AI engine builds the shape first, untextured; you decide about the textures',
+        'De AI-engine bouwt eerst de vorm, zonder textuur; jij beslist over de texturen',
       ),
-      tri('Legfeljebb hat kedvenc elmenthető', 'Keep up to six favourites', 'Bewaar maximaal zes favorieten'),
       tri(
-        'Teljes nézet a kezelőfelület nélkül',
-        'A full view without the interface',
-        'Een volledig beeld zonder interface',
+        'Forgatás, nagyítás, eltolás, rács, teljes képernyő, fény, háttér és kamera',
+        'Rotate, zoom, pan, grid, full screen, light, background and camera',
+        'Draaien, zoomen, verschuiven, raster, volledig scherm, licht, achtergrond en camera',
+      ),
+      tri(
+        'Mentés a böngészőben, GLB-letöltés; külön mód a gyors, szabályos építőnek (nem AI)',
+        'Saved in your browser, GLB download; a separate mode for the quick rule-based builder (not AI)',
+        'Bewaren in je browser, GLB-download; een aparte modus voor de snelle regelgebaseerde bouwer (geen AI)',
       ),
     ],
     hint: tri(
-      'Húzd a formát a forgatáshoz. Dobj új magot a Generálás gombbal.',
-      'Drag the form to turn it. Roll a new seed with Generate.',
-      'Sleep de vorm om te draaien. Gooi een nieuwe seed met Genereren.',
+      'Írd le, mit építsek. Aztán forgasd, és szabd a kedvedre.',
+      'Describe what to build. Then turn it and make it yours.',
+      'Beschrijf wat ik moet bouwen. Draai het daarna en maak het van jou.',
     ),
     hintTouch: tri(
-      'Húzd a formát a forgatáshoz. Dobj új magot a Generálás gombbal.',
-      'Drag the form to turn it. Roll a new seed with Generate.',
-      'Sleep de vorm om te draaien. Gooi een nieuwe seed met Genereren.',
+      'Írd le, mit építsek. Egy ujjal forgathatod.',
+      'Describe what to build. One finger turns it.',
+      'Beschrijf wat ik moet bouwen. Met één vinger draai je het.',
     ),
     stageLabel: tri(
-      'Konfigurálható 3D objektumgenerátor. A forma húzással vagy a nyílbillentyűkkel forgatható, a paraméterek a vezérlőpanelen állíthatók.',
-      'A configurable 3D object generator. Turn the form by dragging or with the arrow keys; set the parameters in the control panel.',
-      'Een configureerbare 3D-objectgenerator. Draai de vorm door te slepen of met de pijltjestoetsen; stel de parameters in het bedieningspaneel in.',
-    ),
-  },
-  'model-studio': {
-    description: tri(
-      'Hozz létre alakzatokat, mozgasd, forgasd és méretezd őket, adj nekik anyagot, állítsd be a fényeket, majd mentsd el a jelenetet, exportáld GLB-ként, vagy készíts képernyőképet. Egérrel, érintéssel és billentyűzettel is használható; mobilon külön transzformációs panel dolgozik.',
-      'Create shapes, move, rotate and scale them, give them materials, light the scene, then save it, export it as GLB or take a screenshot. It works with a mouse, a finger or a keyboard; on a phone a separate transform panel does the work.',
-      'Maak vormen, verplaats, draai en schaal ze, geef ze materiaal, belicht de scène en bewaar die, exporteer hem als GLB of maak een schermafbeelding. Het werkt met muis, vinger of toetsenbord; op een telefoon doet een apart transformatiepaneel het werk.',
-    ),
-    interactions: [
-      tri(
-        'Hét alakzat, köztük egy paraméteres egyedi forma',
-        'Seven shapes, one of them a parametric custom form',
-        'Zeven vormen, waarvan één parametrische eigen vorm',
-      ),
-      tri(
-        'Mozgatás, forgatás és méretezés pontos tengelyek mentén',
-        'Move, rotate and scale along exact axes',
-        'Verplaatsen, draaien en schalen langs exacte assen',
-      ),
-      tri(
-        'Hét anyag és öt fénybeállítás',
-        'Seven materials and five lighting rigs',
-        'Zeven materialen en vijf lichtopstellingen',
-      ),
-      tri(
-        'Mentés, visszatöltés, GLB-export és képernyőkép',
-        'Save, reload, GLB export and screenshot',
-        'Bewaren, terugladen, GLB-export en schermafbeelding',
-      ),
-    ],
-    hint: tri(
-      'Adj hozzá egy alakzatot, és húzd a fogantyúit. Az üres helyen húzva forgathatod a nézetet.',
-      'Add a shape, then drag its handles. Drag empty space to orbit.',
-      'Voeg een vorm toe en sleep aan de handvatten. Sleep over lege ruimte om te draaien.',
-    ),
-    hintTouch: tri(
-      'Adj hozzá egy alakzatot. Az üres helyen húzva forgatsz, két ujjal nagyítasz.',
-      'Add a shape. Drag empty space to orbit, pinch to zoom.',
-      'Voeg een vorm toe. Sleep over lege ruimte om te draaien, knijp om te zoomen.',
-    ),
-    stageLabel: tri(
-      'Interaktív 3D nézet. Az objektumokat a panelekkel hozod létre és módosítod; billentyűzettel a nézetre lépve a nyílbillentyűk forgatnak, a + és a − nagyít, a pontos értékeket a transzformációs panel adja.',
-      'An interactive 3D viewport. Create and change objects with the panels; with a keyboard, Tab to the viewport: the arrow keys orbit, + and − zoom, and the transform panel gives exact values.',
-      'Een interactieve 3D-weergave. Maak en wijzig objecten met de panelen; met een toetsenbord ga je met Tab naar de weergave: de pijltjestoetsen draaien, + en − zoomen en het transformatiepaneel geeft exacte waarden.',
-    ),
-  },
-  racing: {
-    description: tri(
-      'Valóban vezethető arcade-szimulátor: a gyorsulás, a fékezés, a kormányzás, a tapadás és a súlyáthelyeződés számított, nem lejátszott. Időmérő és szabad gyakorlás, három kamera, és a saját pályád ugyanitt vezethető. Billentyűzettel vagy érintőgombokkal.',
-      'A drivable arcade simulator: acceleration, braking, steering, grip and weight transfer are calculated, not played back. Time Trial and free Practice, three cameras, and your own track from the Track Architect drives here too. With a keyboard or touch pads.',
-      'Een bestuurbare arcadesimulator: acceleratie, remmen, sturen, grip en gewichtsverplaatsing worden berekend, niet afgespeeld. Tijdrit en vrij oefenen, drie camera’s, en je eigen baan uit de Track Architect rijdt hier ook. Met een toetsenbord of aanraakknoppen.',
-    ),
-    interactions: [
-      tri(
-        'W A S D vagy nyilak: gyorsítás, fékezés, kormányzás',
-        'W A S D or arrows: accelerate, brake, steer',
-        'W A S D of pijltjes: gas, rem, sturen',
-      ),
-      tri(
-        'Három kamera, kézifék és újraindítás',
-        'Three cameras, handbrake and reset',
-        'Drie camera’s, handrem en reset',
-      ),
-      tri(
-        'Időmérő: köridő, szakaszidők, legjobb kör',
-        'Time Trial: lap time, sector checks, best lap',
-        'Tijdrit: rondetijd, sectorcontroles, beste ronde',
-      ),
-      tri(
-        'Mobilon nagy érintőgombok; a saját pályád és a Performance Lab beállításai itt futnak',
-        'Big touch pads on a phone; your own track and the Performance Lab setup run here',
-        'Grote aanraakknoppen op een telefoon; je eigen baan en de Performance Lab-setup rijden hier',
-      ),
-    ],
-    hint: tri(
-      'W A S D vagy a nyilak a vezetéshez. C: kamera, R: újraindítás.',
-      'W A S D or the arrow keys to drive. C changes the camera, R resets.',
-      'W A S D of de pijltjestoetsen om te rijden. C wisselt de camera, R reset.',
-    ),
-    hintTouch: tri(
-      'Balra kormányzás, jobbra gáz és fék. A kamera gombja váltja a nézetet.',
-      'Steer on the left, throttle and brake on the right. The camera button changes the view.',
-      'Links sturen, rechts gas en rem. De camera-knop wisselt het beeld.',
-    ),
-    stageLabel: tri(
-      'Vezethető 3D versenyautó. Billentyűzettel: W A S D vagy a nyilak, Space kézifék, C kamera, R újraindítás. Érintőképernyőn a képernyő alsó részén lévő gombok.',
-      'A drivable 3D race car. Keyboard: W A S D or the arrows, Space handbrake, C camera, R reset. On a touch screen: the buttons at the bottom of the screen.',
-      'Een bestuurbare 3D-raceauto. Toetsenbord: W A S D of de pijltjes, spatie handrem, C camera, R reset. Op een touchscreen: de knoppen onderaan het scherm.',
-    ),
-  },
-  'track-architect': {
-    description: tri(
-      'Rajzold meg a pálya középvonalát felülnézetben: tegyél le pontokat, mozgasd őket, illessz be kanyarsablonokat, állítsd a szélességet és a szintkülönbséget, zárd le a kört. A szerkesztő folyamatosan ellenőrzi a pályát, és élőben építi belőle a 3D geometriát, amelyet a Racing Experience-ben azonnal ki is próbálhatsz.',
-      'Draw the centreline of a circuit from above: place points, move them, insert corner templates, set width and elevation, close the loop. The editor checks the track as you go and builds its 3D geometry live, which you can drive at once in the Racing Experience.',
-      'Teken de middellijn van een circuit van bovenaf: plaats punten, verplaats ze, voeg bochtsjablonen in, stel breedte en hoogte in en sluit de lus. De editor controleert de baan terwijl je werkt en bouwt er live 3D-geometrie van, die je meteen in de Racing Experience kunt rijden.',
-    ),
-    interactions: [
-      tri(
-        'Pontok lerakása, húzása, törlése; sima ívek',
-        'Place, drag and delete points; smooth curves',
-        'Punten plaatsen, slepen en verwijderen; vloeiende bochten',
-      ),
-      tri(
-        'Egyenes, kanyar, hajtű, S-kanyar, emelkedő, lejtő sablonok',
-        'Templates: straight, corners, hairpin, S-bend, climb, descent',
-        'Sjablonen: rechte stukken, bochten, haarspeldbocht, S-bocht, klim, daling',
-      ),
-      tri(
-        'Élő validáció: zártság, önmetszés, éles kanyar, szélesség',
-        'Live validation: closed loop, self-overlap, sharp corners, width',
-        'Live validatie: gesloten lus, zelfoverlap, scherpe bochten, breedte',
-      ),
-      tri(
-        'Mentés, visszatöltés, JSON-export és azonnali kipróbálás',
-        'Save, reload, JSON export and an instant test drive',
-        'Bewaren, terugladen, JSON-export en meteen een proefrit',
-      ),
-    ],
-    hint: tri(
-      'Koppints a rajzterületre pont lerakásához, húzd a pontokat, vagy illessz be egy sablont.',
-      'Click the map to place a point, drag points, or insert a template.',
-      'Klik op de kaart om een punt te plaatsen, sleep punten of voeg een sjabloon in.',
-    ),
-    hintTouch: tri(
-      'Koppints a térképre pont lerakásához, húzd a pontokat, vagy illessz be egy sablont.',
-      'Tap the map to place a point, drag points, or insert a template.',
-      'Tik op de kaart om een punt te plaatsen, sleep punten of voeg een sjabloon in.',
-    ),
-    stageLabel: tri(
-      'Pályaszerkesztő felülnézeti térképpel és 3D előnézettel. A pontok billentyűzettel is kijelölhetők (Tab) és mozgathatók (nyilak), a Delete töröl.',
-      'A track editor with a top-down map and a 3D preview. Points can be selected with the keyboard (Tab) and moved (arrow keys); Delete removes one.',
-      'Een baaneditor met een kaart van bovenaf en een 3D-voorbeeld. Punten selecteer je met het toetsenbord (Tab) en verplaats je (pijltjestoetsen); Delete verwijdert er een.',
-    ),
-  },
-  'performance-lab': {
-    description: tri(
-      'Állítsd a leszorítóerőt, a légellenállást, a felfüggesztést, a hasmagasságot, a fékeloszlást, az áttételt, a gumik tapadását és a tömeget, majd hasonlítsd össze az A és a B beállítást. A számok egy egyszerűsített tömegpontos köridő-szimulációból jönnek, nem mérésből; a légáramlás ábrája szemléltetés, nem CFD. A beállítás egy gombbal átkerül a Racing Experience-be.',
-      'Set downforce, drag, suspension, ride height, brake balance, gearing, tyre grip and mass, then compare setup A with setup B. The numbers come from a simplified point-mass lap simulation, not from measurement; the airflow drawing is an illustration, not CFD. One button hands the setup to the Racing Experience.',
-      'Stel downforce, luchtweerstand, vering, rijhoogte, remverdeling, overbrenging, bandengrip en massa in en vergelijk setup A met setup B. De getallen komen uit een vereenvoudigde puntmassa-rondesimulatie, niet uit metingen; de luchtstroomtekening is een illustratie, geen CFD. Eén knop geeft de setup door aan de Racing Experience.',
-    ),
-    interactions: [
-      tri(
-        'Nyolc korlátozott tartományú paraméter',
-        'Eight parameters with sensible limits',
-        'Acht parameters met zinnige grenzen',
-      ),
-      tri(
-        'A és B beállítás: értékek, különbségek, becsült teljesítmény',
-        'Setups A and B: values, differences, estimated performance',
-        'Setups A en B: waarden, verschillen, geschatte prestaties',
-      ),
-      tri(
-        'Szemléltető légáramlás, leszorítás és légellenállás jelzés',
-        'Illustrative airflow, downforce and drag markers',
-        'Illustratieve luchtstroom, downforce- en weerstandsmarkeringen',
-      ),
-      tri(
-        'Kipróbálás a Racing Experience pályáján ugyanazzal a beállítással',
-        'Test the setup on the Racing Experience circuit',
-        'Test de setup op het circuit van de Racing Experience',
-      ),
-    ],
-    hint: tri(
-      'Állíts egy paramétert, és figyeld a számokat és az áramlást.',
-      'Change a parameter and watch the numbers and the airflow.',
-      'Wijzig een parameter en kijk naar de getallen en de luchtstroom.',
-    ),
-    hintTouch: tri(
-      'Nyisd le a paramétereket, állíts egyet, és figyeld a számokat.',
-      'Open the parameters, change one and watch the numbers.',
-      'Open de parameters, wijzig er een en kijk naar de getallen.',
-    ),
-    stageLabel: tri(
-      'Versenyautó 3D nézete szemléltető légáramlással. A beállítások és az eredmények a panelen szöveges, táblázatos formában is olvashatók.',
-      'A 3D view of the race car with an illustrative airflow. The settings and the results are also given as text and tables in the panels.',
-      'Een 3D-weergave van de raceauto met een illustratieve luchtstroom. De instellingen en resultaten staan ook als tekst en tabellen in de panelen.',
-    ),
-  },
-  'generative-art': {
-    description: tri(
-      'Tízezernyi részecske egy alakzat körül, amelyet te formálsz: alakzat, léptékű torzítás, zaj, forgás, gravitáció, turbulencia és szín. A pointer eltaszítja vagy magához húzza őket, a kattintás szétrobbantja, a véletlen gomb új kompozíciót ad. Minden alkotás néhány számból áll, ezért elmentheted, letöltheted, képként exportálhatod.',
-      'Tens of thousands of particles around a shape you form: the formation, distortion, noise, rotation, gravity, turbulence and colour. The pointer pushes or pulls them, a click blasts them apart, and the random button makes a new composition. Every piece is a handful of numbers, so you can keep it, download it or export it as an image.',
-      'Tienduizenden deeltjes rond een vorm die je zelf vormgeeft: formatie, vervorming, ruis, rotatie, zwaartekracht, turbulentie en kleur. De aanwijzer duwt of trekt ze, een klik blaast ze uiteen en de willekeurknop maakt een nieuwe compositie. Elk werk bestaat uit een handvol getallen, dus je kunt het bewaren, downloaden of als beeld exporteren.',
-    ),
-    interactions: [
-      tri(
-        'Tizenegy paraméter: darabszám, sebesség, erő, gravitáció, turbulencia, torzítás, zaj, forgás, méret',
-        'Eleven parameters: count, speed, force, gravity, turbulence, distortion, noise, rotation, scale',
-        'Elf parameters: aantal, snelheid, kracht, zwaartekracht, turbulentie, vervorming, ruis, rotatie, schaal',
-      ),
-      tri(
-        'A pointer taszít vagy vonz, a kattintás szétveti a részecskéket',
-        'The pointer pushes or pulls, a click throws the particles apart',
-        'De aanwijzer duwt of trekt, een klik gooit de deeltjes uiteen',
-      ),
-      tri(
-        'Véletlen kompozíció, visszaállítás, öt színpaletta, hat alakzat',
-        'Random composition, reset, five palettes, six formations',
-        'Willekeurige compositie, reset, vijf paletten, zes formaties',
-      ),
-      tri(
-        'PNG kép, JSON paraméterfájl és mentés a Digitális alkotások közé',
-        'PNG image, a JSON parameter file and saving to Digital Artifacts',
-        'PNG-beeld, een JSON-parameterbestand en opslaan bij Digitale creaties',
-      ),
-    ],
-    hint: tri(
-      'Mozgasd a pointert a részecskék között, kattints, vagy nyomd meg a Véletlen gombot.',
-      'Move the pointer through the particles, click, or press Randomize.',
-      'Beweeg de aanwijzer door de deeltjes, klik of druk op Willekeurig.',
-    ),
-    hintTouch: tri(
-      'Húzd az ujjad a részecskék között, koppints, vagy nyomd meg a Véletlen gombot.',
-      'Drag a finger through the particles, tap, or press Randomize.',
-      'Sleep een vinger door de deeltjes, tik of druk op Willekeurig.',
-    ),
-    stageLabel: tri(
-      'Interaktív generatív alkotás részecskékkel. A pointer vagy az ujjad hat rájuk; billentyűzettel a panel csúszkái és a Véletlen gomb változtatják a kompozíciót.',
-      'An interactive generative artwork made of particles. The pointer or your finger acts on them; with a keyboard, the panel sliders and the Randomize button change the composition.',
-      'Een interactief generatief kunstwerk van deeltjes. De aanwijzer of je vinger werkt erop in; met een toetsenbord veranderen de schuifregelaars en de knop Willekeurig de compositie.',
-    ),
-  },
-  'sound-world': {
-    description: tri(
-      'Fényből épült világ, amely a hanggal mozog. A basszus kifelé tolja a középső formát, a spektrum egy részecskeburkot mozgat, a magas hangok két fényt gyújtanak, minden ütem egy fénygyűrűt indít, a hullámforma pedig körbe és alul látszik. Játszd le a beépített dalt, amelyet az oldal maga szintetizál, vagy hagyd, hogy a mikrofonodon át hallgasson: ez csak akkor történik meg, ha megerősíted, miután elolvastad, mit tesz. Semmit nem rögzít, nem ment és nem küld el.',
-      'A world made of light that moves with sound. The bass pushes out a central form, the spectrum moves a shell of particles, the high notes switch on two lights, every beat sends out a ring of light, and the waveform is drawn round it and along its floor. Play the loop the page synthesises itself, or let it listen through your microphone: that only happens if you confirm, after reading what it does. Nothing is recorded, stored or sent.',
-      'Een wereld van licht die met geluid beweegt. De bas duwt een centrale vorm naar buiten, het spectrum beweegt een schil van deeltjes, de hoge tonen schakelen twee lichten in, elke maat stuurt een lichtring uit en de golfvorm wordt eromheen en over de vloer getekend. Speel de loop die de pagina zelf synthetiseert, of laat hem luisteren via je microfoon: dat gebeurt alleen als je bevestigt, nadat je hebt gelezen wat het doet. Er wordt niets opgenomen, bewaard of verstuurd.',
-    ),
-    interactions: [
-      tri(
-        'Három forrás: néma előnézet, beépített hang, mikrofon (csak megerősítés után)',
-        'Three sources: a silent preview, a built-in sound, the microphone (only after you confirm)',
-        'Drie bronnen: een stille voorvertoning, een ingebouwd geluid, de microfoon (alleen na je bevestiging)',
-      ),
-      tri(
-        'Basszus → forma, spektrum → részecskék, magas hangok → fények',
-        'Bass → form, spectrum → particles, highs → lights',
-        'Bas → vorm, spectrum → deeltjes, hoge tonen → licht',
-      ),
-      tri(
-        'Tempó, hangerő, érzékenység, simítás és négy színpaletta',
-        'Tempo, volume, sensitivity, smoothing and four palettes',
-        'Tempo, volume, gevoeligheid, gladstrijken en vier paletten',
-      ),
-      tri(
-        'Kattintás vagy koppintás: fényimpulzus. A hang soha nem kerül rögzítésre vagy elküldésre',
-        'Click or tap for a pulse of light. Sound is never recorded or sent',
-        'Klik of tik voor een lichtpuls. Geluid wordt nooit opgenomen of verstuurd',
-      ),
-    ],
-    hint: tri(
-      'Kattints a térre egy impulzusért. Indítsd el a néma előnézetet vagy a beépített hangot, hogy mozogjon.',
-      'Click the space for a pulse. Run the silent preview or play the built-in sound to set it moving.',
-      'Klik op de ruimte voor een puls. Start de stille voorvertoning of speel het ingebouwde geluid om hem te laten bewegen.',
-    ),
-    hintTouch: tri(
-      'Koppints a térre egy impulzusért. Indítsd el a néma előnézetet vagy a beépített hangot, hogy mozogjon.',
-      'Tap the space for a pulse. Run the silent preview or play the built-in sound to set it moving.',
-      'Tik op de ruimte voor een puls. Start de stille voorvertoning of speel het ingebouwde geluid om hem te laten bewegen.',
-    ),
-    stageLabel: tri(
-      'Hangra mozgó 3D világ: középen egy forma, körülötte részecskék és két fény, a hullámforma pedig körbe és alul húzódik. A hangforrást és a beállításokat a panel adja; a mikrofon csak a megerősítésed után kapcsol be.',
-      'A 3D world that moves with sound: a form at the middle, particles and two lights round it, the waveform drawn round it and along the floor. The panel gives the sound source and the settings; the microphone only switches on after you confirm.',
-      'Een 3D-wereld die met geluid beweegt: een vorm in het midden, deeltjes en twee lichten eromheen, de golfvorm eromheen en over de vloer. Het paneel geeft de geluidsbron en de instellingen; de microfoon gaat pas aan nadat je bevestigt.',
+      'Háromdimenziós előnézet az elkészült alkotásról. Húzással vagy a nyílbillentyűkkel forgatható, a + és a − nagyít.',
+      'A three-dimensional preview of the creation. Drag or use the arrow keys to turn it; + and − zoom.',
+      'Een driedimensionaal voorbeeld van de creatie. Sleep of gebruik de pijltjestoetsen om te draaien; + en − zoomen.',
     ),
   },
 }
@@ -545,79 +285,17 @@ export const labText = {
   /** The Lab's own signature line; deliberately not translated. */
   signature: 'MOVE. DISTORT. EXPLORE.',
 
-  hero: {
-    eyebrow: tri(
-      'Kísérleti digitális univerzum',
-      'An experimental digital universe',
-      'Een experimenteel digitaal universum',
-    ),
-    title: tri('Üdvözöllek a váratlan világban.', 'Welcome to the unexpected.', 'Welkom in het onverwachte.'),
-    lead: tri(
-      'Ahol a kód formává válik. A forma mozgássá. A mozgás pedig élménnyé.',
-      'Where code becomes form. Form becomes motion. And motion becomes experience.',
-      'Waar code vorm wordt. Vorm beweging. En beweging een ervaring.',
-    ),
-    cta: tri('Fedezd fel a kísérleteket', 'Explore the experiments', 'Ontdek de experimenten'),
-    hint: tri(
-      'Mozgasd a pointert egy zóna fölé, hogy felébredjen. Kattints a belépéshez.',
-      'Move over a zone to wake it. Click to enter.',
-      'Beweeg over een zone om hem wakker te maken. Klik om binnen te gaan.',
-    ),
-    hintTouch: tri(
-      'Koppints egy zónára a kiválasztáshoz, még egyszer a belépéshez.',
-      'Tap a zone to select it, tap again to enter.',
-      'Tik op een zone om hem te kiezen, tik nog eens om binnen te gaan.',
-    ),
-    stageLabel: tri(
-      'Interaktív 3D tér négy zónával: Model Studio, Racing Experience, Track Architect és Performance Lab. A pointer elfordítja a nézőpontot, a kattintás belép a zónába; a nyílbillentyűk és az Enter ugyanezt teszik. A tér alatti linkek ugyanoda visznek.',
-      'An interactive 3D space with four zones: Model Studio, Racing Experience, Track Architect and Performance Lab. The pointer turns the view and a click enters a zone; the arrow keys and Enter do the same. The links under the space lead to the same places.',
-      'Een interactieve 3D-ruimte met vier zones: Model Studio, Racing Experience, Track Architect en Performance Lab. De aanwijzer draait het beeld en een klik gaat een zone binnen; de pijltjestoetsen en Enter doen hetzelfde. De links onder de ruimte leiden naar dezelfde plekken.',
-    ),
-  },
-
-  zones: {
-    label: tri('A Lab négy zónája', 'The four zones of the Lab', 'De vier zones van het Lab'),
-    enter: tri('Belépés', 'Enter', 'Betreden'),
-    selected: tri(
-      'Kiválasztva: {name}. Koppints még egyszer a belépéshez.',
-      'Selected: {name}. Tap again to enter.',
-      'Gekozen: {name}. Tik nog eens om binnen te gaan.',
-    ),
-    opening: tri('{name} megnyitása…', 'Opening {name}…', '{name} wordt geopend…'),
-  },
-
   meta: {
     title: tri(
-      'Lab: kísérleti digitális univerzum',
-      'Lab: an experimental digital universe',
-      'Lab: een experimenteel digitaal universum',
+      'Lab: kísérleti digitális játszótér',
+      'Lab: an experimental digital playground',
+      'Lab: een experimentele digitale speeltuin',
     ),
     description: tri(
-      'Hat interaktív WebGL-kísérlet és hat teljes 3D élmény: modellezőstúdió, versenyautós vezetés, pályatervező, járműhangoló labor, generatív művészet és hangra reagáló világ.',
-      'Six interactive WebGL experiments and six full 3D experiences: a modelling studio, a driving experience, a track designer, a car tuning lab, generative art and a world that moves with sound.',
-      'Zes interactieve WebGL-experimenten en zes volledige 3D-ervaringen: een modelleerstudio, een rij-ervaring, een baanontwerper, een afstemlab voor auto’s, generatieve kunst en een wereld die met geluid beweegt.',
+      'Hat interaktív WebGL-élmény egy helyen: részecskék, folyékony anyag, mozgó tipográfia, végtelen tér, kromatikus torzítás, és egy 3D-objektumgenerátor, amely szöveges leírásból épít.',
+      'Six interactive WebGL experiences in one place: particles, liquid matter, kinetic type, endless space, chromatic distortion and a 3D object generator that builds from a written description.',
+      'Zes interactieve WebGL-ervaringen op één plek: deeltjes, vloeibare materie, bewegende typografie, eindeloze ruimte, chromatische vervorming en een 3D-objectgenerator die bouwt vanuit een beschrijving.',
     ),
-  },
-
-  gallery: {
-    title: tri('A kísérletek', 'The experiments', 'De experimenten'),
-    intro: tri(
-      'Hat önálló kísérlet. Mindegyik saját fényt, saját szabályokat és saját módot kapott arra, hogy válaszoljon neked. Alattuk hat teljes értékű élmény vár.',
-      'Six separate experiments. Each has its own light, its own rules and its own way of answering you. Below them wait six full experiences.',
-      'Zes afzonderlijke experimenten. Elk heeft zijn eigen licht, zijn eigen regels en zijn eigen manier om je te antwoorden. Daaronder wachten zes volledige ervaringen.',
-    ),
-    open: tri('Kísérlet megnyitása', 'Open the experiment', 'Experiment openen'),
-    technology: tri('Technológia', 'Technology', 'Technologie'),
-    interaction: tri('Interakció', 'Interaction', 'Interactie'),
-    status: tri('Állapot', 'Status', 'Status'),
-    listLabel: tri('Kísérletek listája', 'List of experiments', 'Lijst van experimenten'),
-    experiencesTitle: tri('A hat élmény', 'The six experiences', 'De zes ervaringen'),
-    experiencesIntro: tri(
-      'Hat kis alkalmazás, nem csak látvány: modellezz, vezess, tervezz pályát, hangolj autót, alkoss generatív művészetet és játssz a hanggal. Néhány összekapcsolódik: a saját pályád és a hangolt autód a Racing Experience-ben fut.',
-      'Six small applications, not only visuals: model, drive, design a circuit, tune a car, make generative art and play with sound. Some connect: your own track and your tuned car run in the Racing Experience.',
-      'Zes kleine toepassingen, niet alleen beeld: modelleer, rijd, ontwerp een circuit, stem een auto af, maak generatieve kunst en speel met geluid. Sommige zijn gekoppeld: je eigen baan en afgestelde auto rijden in de Racing Experience.',
-    ),
-    noPage: tri('Még nincs megnyitható oldala', 'No page to open yet', 'Nog geen pagina om te openen'),
   },
 
   exit: {
@@ -749,8 +427,6 @@ export const labText = {
       'Reduced motion: the view redraws only when you act, and camera movements are gentler.',
       'Verminderde beweging: het beeld ververst alleen als jij iets doet en cameraverplaatsingen zijn rustiger.',
     ),
-    openIn: tri('Megnyitás: {name}', 'Open in {name}', 'Openen in {name}'),
-    kindLabel: tri('Élmény', 'Experience', 'Ervaring'),
   },
 
   crash: {
@@ -769,6 +445,9 @@ export const labText = {
 
   details: {
     title: tri('A kísérletről', 'About this experiment', 'Over dit experiment'),
+    status: tri('Állapot', 'Status', 'Status'),
+    technology: tri('Technológia', 'Technology', 'Technologie'),
+    interaction: tri('Interakció', 'Interaction', 'Interactie'),
     more: tri('További kísérletek', 'More experiments', 'Meer experimenten'),
     keyboard: tri(
       'Billentyűzet: a Tab a vezérlők között léptet, a nyílbillentyűk a színpadon mozgatják a pointert, az Enter vagy a szóköz kattintást helyettesít.',

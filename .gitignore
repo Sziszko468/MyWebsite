@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Settings and keys: only the documented example is committed
+.env
+.env.*
+!.env.example
+ai3d-data/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

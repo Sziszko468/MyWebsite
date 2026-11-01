@@ -5,7 +5,7 @@ import { useSyncExternalStore } from 'react'
  * documents (a model, a track, a car setup) in stores rather than in component state, so a
  * scene and a panel can read the same thing, a pointer drag can change it dozens of times a
  * second without re-rendering the page around it, and one experience can hand its value to
- * another (the Track Architect's track is the Racing Experience's track).
+ * another (a saved creation is opened by the generator through the same kind of slot).
  */
 export interface Store<T> {
   get(): T

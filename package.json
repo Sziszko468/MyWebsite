@@ -9,9 +9,11 @@
     "typecheck": "tsc -b",
     "lint": "oxlint",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "ai3d": "node server/ai3d/standalone.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
     "@fontsource-variable/archivo": "^5.3.0",
     "@react-three/fiber": "^9.8.2",
     "react": "^19.3.1",

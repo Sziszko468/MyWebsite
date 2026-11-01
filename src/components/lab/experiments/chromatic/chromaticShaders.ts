@@ -26,10 +26,15 @@ export const CHROMATIC_VERTEX = /* glsl */ `
 export const CHROMATIC_FRAGMENT = /* glsl */ `
   uniform vec2 uRes, uMouse, uVel;
   uniform float uAspect, uPhase, uSep, uLocal, uLensR, uWave, uBoost, uLayers, uEnergy;
+  uniform float uGlitch, uNoise, uAngle, uTime;
   uniform vec3 uBg, uInk, uRed, uBlue;
   varying vec2 vP;
 
   float aa;
+
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+  }
 
   mat2 rot(float a) {
     float c = cos(a);
@@ -110,6 +115,17 @@ export const CHROMATIC_FRAGMENT = /* glsl */ `
     );
     p += warp * 0.016 * uWave;
 
+    // Glitch: now and then a few horizontal slices slip sideways, and the next moment they are back. Three changes a second at most,
+    // and only the picture moves: nothing flashes.
+    float slip = 0.0;
+    if (uGlitch > 0.001) {
+      float step3 = floor(uTime * 3.0);
+      float band = floor((vP.y * 0.5 + 0.5) * 26.0);
+      float on = step(0.92, hash(vec2(band, step3)));
+      slip = (hash(vec2(band + 7.0, step3)) - 0.5) * 0.07 * uGlitch * on;
+      p.x += slip;
+    }
+
     vec2 toMouse = p - uMouse;
     float distanceToMouse = length(toMouse) + 1e-4;
     vec2 radial = toMouse / distanceToMouse;
@@ -119,10 +135,10 @@ export const CHROMATIC_FRAGMENT = /* glsl */ `
 
     // Where each channel is read: red one way, blue the other.
     float surge = 1.0 + 1.8 * uBoost;
-    vec2 drift = normalize(vec2(1.0, 0.25) + uVel * 2.0);
+    vec2 drift = normalize(vec2(cos(uAngle), sin(uAngle)) + uVel * 2.0);
     float global = uSep * (0.005 + 0.016 * uEnergy) * surge;
     float local = uSep * uLocal * lens * (0.012 + 0.028 * uEnergy) * surge;
-    vec2 offset = drift * global + radial * local;
+    vec2 offset = drift * global + radial * local + vec2(slip * 0.6, 0.0);
 
     vec3 fr = forms(p + offset);
     vec3 fg = forms(p);
@@ -134,6 +150,9 @@ export const CHROMATIC_FRAGMENT = /* glsl */ `
       channel(bg.g, uInk.g, uRed.g, uBlue.g, fg),
       channel(bg.b, uInk.b, uRed.b, uBlue.b, fb)
     );
+
+    // Film grain, a new pattern about twelve times a second and never brighter than a whisper.
+    colour += (hash(gl_FragCoord.xy + floor(uTime * 12.0) * 17.0) - 0.5) * 0.1 * uNoise;
 
     gl_FragColor = vec4(colour, 1.0);
     #include <colorspace_fragment>
