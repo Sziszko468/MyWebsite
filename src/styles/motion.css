@@ -1,0 +1,30 @@
+/*
+ * Global motion rules that belong to no single component. Everything else that moves lives in the
+ * component that owns it and reads the motion tokens (tokens.css); this file holds the few things that
+ * act on the page as a whole. Only opacity and transform are animated, and every one of them is off
+ * or instant under reduced motion.
+ */
+
+/* A language change: <main> dips in opacity for a moment (the page frame sets and clears the attribute). */
+@keyframes language-cue {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+html[data-lang-switch] main {
+  animation: language-cue var(--dur-base) var(--ease-in-out);
+}
+
+/* Pressing anything that is a button or a link gives at once; the cue never waits for an animation. */
+@media (hover: none) {
+  :where(a, button, summary, label):active {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-lang-switch] main {
+    animation: none;
+  }
+}

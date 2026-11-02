@@ -53,9 +53,13 @@
 
   span {
     display: block;
+    width: 100%;
     height: 100%;
     background-color: var(--color-accent);
-    transition: width var(--dur-base) var(--ease-out);
+    /* A scale, not a width: it moves on the compositor and lays nothing out. */
+    transform: scaleX(var(--p, 0));
+    transform-origin: left;
+    transition: transform var(--dur-base) var(--ease-out);
   }
 }
 
@@ -369,6 +373,25 @@ button.stepItem {
   color: var(--color-accent-text);
   font-weight: var(--fw-bold);
   letter-spacing: var(--ls-wide);
+}
+
+/* The mark of a success: a Racing Red disc with a tick that pops in with a slight overshoot. */
+.sentMark {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  animation: mark-pop var(--dur-slow) var(--ease-elastic);
+}
+
+@keyframes mark-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
 }
 
 .sentActions {

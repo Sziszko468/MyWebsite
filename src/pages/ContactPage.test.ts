@@ -9,10 +9,11 @@ import { I18nContext } from '../i18n/context'
 import { dictionaries } from '../i18n/dictionaries'
 import { ThemeContext } from '../theme/context'
 import { ContactPage } from './ContactPage'
+import { flattenKinetic } from '../test/markup'
 
 /** The contact page rendered on the server, with the real providers. */
 function render(lang: Language, url = '/contact', theme: 'dark' | 'light' = 'dark'): string {
-  return renderToStaticMarkup(
+  return flattenKinetic(renderToStaticMarkup(
     createElement(
       ThemeContext.Provider,
       { value: { theme, setTheme: () => undefined, toggleTheme: () => undefined } },
@@ -22,7 +23,7 @@ function render(lang: Language, url = '/contact', theme: 'dark' | 'light' = 'dar
         createElement(I18nContext.Provider, { value: { lang, t: dictionaries[lang] } }, createElement(ContactPage)),
       ),
     ),
-  )
+  ))
 }
 
 const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;')

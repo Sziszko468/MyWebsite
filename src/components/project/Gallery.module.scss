@@ -143,6 +143,50 @@
   &::backdrop {
     background-color: rgb(0 0 0 / 80%);
   }
+
+  /* In: the backdrop fades and the picture settles from slightly smaller. Out: the same, quicker, and
+     only then is the dialog closed (motion/dialog.ts). Opacity and transform only. */
+  &[open] {
+    animation: lightbox-in var(--dur-base) var(--ease-out);
+
+    &::backdrop {
+      animation: backdrop-in var(--dur-base) var(--ease-out);
+    }
+  }
+
+  &[data-closing] {
+    animation: lightbox-out var(--dur-fast) var(--ease-accelerate) both;
+
+    &::backdrop {
+      animation: backdrop-out var(--dur-fast) var(--ease-accelerate) both;
+    }
+  }
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: scale(calc(1 - 0.03 * var(--motion-intensity)));
+  }
+}
+
+@keyframes lightbox-out {
+  to {
+    opacity: 0;
+    transform: scale(calc(1 - 0.02 * var(--motion-intensity)));
+  }
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes backdrop-out {
+  to {
+    opacity: 0;
+  }
 }
 
 .panel {

@@ -27,7 +27,7 @@ function Tile({ experiment }: { experiment: LabExperiment }) {
   return (
     <div className={styles.cell} data-place={PLACE[experiment.id]}>
       <Reveal className={styles.reveal}>
-      <article className={styles.tile} data-id={experiment.id} data-accent={experiment.accent} data-large={large} aria-labelledby={titleId}>
+      <article className={styles.tile} data-cursor={t.discovery.open} data-id={experiment.id} data-accent={experiment.accent} data-large={large} aria-labelledby={titleId}>
         <div className={styles.preview}>
           <Preview id={experiment.id} />
           <span className={styles.numeral} aria-hidden="true">

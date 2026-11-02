@@ -1,0 +1,10 @@
+.image {
+  transition:
+    opacity var(--dur-slow) var(--ease-out),
+    transform calc(var(--dur-slow) * 1.4) var(--ease-out);
+
+  &[data-state='loading'] {
+    opacity: 0;
+    transform: scale(calc(1 - 0.03 * var(--motion-intensity)));
+  }
+}

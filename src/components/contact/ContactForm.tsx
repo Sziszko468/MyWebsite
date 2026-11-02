@@ -166,8 +166,8 @@ export function ContactForm({ draft, onChange, onReset, transport: given }: Cont
         />
 
         <div className={styles.actions}>
-          <Button type="submit" arrow disabled={sending} className={styles.primary}>
-            {sending ? c.actions.sending : transport.id === 'none' ? c.actions.prepare : c.actions.send}
+          <Button type="submit" arrow loading={sending} loadingLabel={c.actions.sending} className={styles.primary}>
+            {transport.id === 'none' ? c.actions.prepare : c.actions.send}
           </Button>
         </div>
       </form>

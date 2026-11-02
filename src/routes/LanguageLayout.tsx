@@ -1,12 +1,16 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router'
 import { AppShell } from '../components/AppShell/AppShell'
+import { ShopFallback } from '../components/shop/ShopFallback'
 import { siteConfig } from '../config/site'
 import { DEFAULT_LANGUAGE, isLanguage } from '../i18n/config'
 import { I18nProvider } from '../i18n/I18nProvider'
 import { localizedPath, splitLanguage } from '../i18n/paths'
 import { useI18n } from '../i18n/useI18n'
 import { buildDocumentMeta, ogLocale } from './documentMeta'
+import { PageTransition } from '../motion/PageTransition'
+import { scopeOfPage } from '../motion/config'
+import { ScrollManager } from '../motion/ScrollManager'
 import { findPage, labIdOfPage, type PageDef } from './pages'
 
 /** Sets (or creates) one <meta> tag in the head. */
@@ -46,30 +50,33 @@ function DocumentMeta({ page }: { page: PageDef | undefined }) {
 }
 
 /**
- * A new page starts at the top; switching language on the same page keeps the scroll position.
- * An address with a #fragment scrolls to that element once the page has rendered it (the browser
- * itself cannot, because the page is drawn by script after it has looked for the target).
+ * A short, quiet dip in the page's opacity when the language changes, so the swap of every word reads
+ * as one deliberate change rather than a flicker. It is a CSS animation on <main> started by an
+ * attribute on <html> (styles/motion.css) and removed again at once; it moves nothing and shifts
+ * nothing, and reduced motion drops it.
  */
-function ScrollToTarget({ path, hash }: { path: string; hash: string }) {
+function LanguageSwitchCue({ lang }: { lang: string }) {
+  const previous = useRef(lang)
   useEffect(() => {
-    if (!hash) {
-      window.scrollTo({ top: 0, behavior: 'instant' })
-      return
+    if (previous.current === lang) return
+    previous.current = lang
+    const root = document.documentElement
+    root.dataset.langSwitch = ''
+    const timer = window.setTimeout(() => delete root.dataset.langSwitch, 320)
+    return () => {
+      window.clearTimeout(timer)
+      delete root.dataset.langSwitch
     }
-
-    const id = decodeURIComponent(hash.slice(1))
-    let frame = 0
-    let attempts = 0
-    const seek = () => {
-      const target = document.getElementById(id)
-      if (target) target.scrollIntoView({ block: 'start' })
-      else if (attempts++ < 30) frame = requestAnimationFrame(seek)
-    }
-    seek()
-    return () => cancelAnimationFrame(frame)
-  }, [path, hash])
+  }, [lang])
   return null
 }
+
+/**
+ * What a page's code shows when a visit starts on it, before it has arrived: a screen tall, so the footer
+ * is below the fold and does not jump when the page replaces it (the layout matrix found
+ * a shift of about 0.2 with a shorter one).
+ */
+const PageFallback = () => <div style={{ minHeight: '100svh' }} aria-hidden="true" />
 
 /**
  * Layout for every /:lang/* route. It validates the language, supplies translations and wraps
@@ -86,6 +93,7 @@ export function LanguageLayout() {
 
   const { rest } = splitLanguage(pathname)
   const page = findPage(rest)
+  const scope = scopeOfPage(page?.id)
 
   if (page && !page.languages.includes(lang)) {
     return <Navigate to={`${localizedPath(DEFAULT_LANGUAGE, page.path)}${search}${hash}`} replace />
@@ -94,9 +102,20 @@ export function LanguageLayout() {
   return (
     <I18nProvider lang={lang}>
       <DocumentMeta page={page} />
-      <ScrollToTarget path={rest} hash={hash} />
-      <AppShell immersive={page ? labIdOfPage(page.id) !== null : false}>
-        <Outlet />
+      <ScrollManager path={rest} hash={hash} />
+      <LanguageSwitchCue lang={lang} />
+      <AppShell immersive={page ? labIdOfPage(page.id) !== null : false} motionScope={scope}>
+        {/*
+          One boundary for every lazy page, mounted for the whole visit and above the page's own key. The
+          router navigates in a React transition, so while the next page's code is on its way the current
+          page stays on screen (the loading bar says so after a moment) and the swap happens once it can
+          be drawn; the fallback appears only when a visit starts on a page that has not arrived.
+        */}
+        <Suspense fallback={scope === 'shop' || scope === 'checkout' ? <ShopFallback /> : <PageFallback />}>
+          <PageTransition routeKey={rest} scope={scope}>
+            <Outlet />
+          </PageTransition>
+        </Suspense>
       </AppShell>
     </I18nProvider>
   )

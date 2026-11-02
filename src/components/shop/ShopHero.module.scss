@@ -104,30 +104,6 @@
   text-wrap: balance;
 }
 
-/* Each line rises out of a mask. The words are in the page from the first paint; only their position animates. */
-.rise {
-  display: block;
-  overflow: clip;
-  /* Room above the capitals for an accent (Ó, Ű) and below for the baseline, so the mask never cuts a letter. */
-  padding-block: 0.16em 0.08em;
-  margin-top: -0.16em;
-
-  > * {
-    animation: rise var(--dur-slow) var(--ease-out) both;
-    animation-delay: calc(var(--i) * 90ms);
-  }
-}
-
-@keyframes rise {
-  from {
-    transform: translateY(70%);
-  }
-
-  to {
-    transform: none;
-  }
-}
-
 .lead {
   max-width: 36rem;
   color: var(--color-text-secondary);

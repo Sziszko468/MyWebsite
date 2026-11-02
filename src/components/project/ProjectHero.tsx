@@ -8,6 +8,8 @@ import { Button } from '../Button/Button'
 import { Container } from '../Container/Container'
 import { ProjectMockup } from '../home/ProjectMockup'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
+import { KineticText } from '../motion/KineticText'
+import { ScrollLinked } from '../motion/ScrollLinked'
 import { usePointerField } from '../motion/usePointerField'
 import { fill } from '../../utils/format'
 import styles from './ProjectHero.module.scss'
@@ -101,7 +103,10 @@ export function ProjectHero({ entry, detail, image, onOpenImage }: ProjectHeroPr
 
   return (
     <section ref={rootRef} className={cx(styles.hero, styles[detail.hero])} aria-labelledby={titleId} data-hero={detail.hero}>
-      <HeroArt variant={detail.hero} />
+      {/* The backdrop drifts a little against the scroll: depth, nothing that carries information. */}
+      <ScrollLinked range="-28px" className={styles.artLayer}>
+        <HeroArt variant={detail.hero} />
+      </ScrollLinked>
 
       <Container size="wide" className={styles.inner}>
         <div className={styles.copy}>
@@ -115,7 +120,7 @@ export function ProjectHero({ entry, detail, image, onOpenImage }: ProjectHeroPr
           </div>
 
           <h1 id={titleId} className={styles.title}>
-            {entry.name}
+            <KineticText text={entry.name} variant="chars" trigger="mount" />
           </h1>
           {detail.repoName && <p className={styles.repoName}>{fill(t.project.repoName, { name: detail.repoName })}</p>}
 

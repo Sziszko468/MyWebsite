@@ -77,11 +77,11 @@ export function FinalCta({ copy: given, action = { to: '/contact' }, id = 'start
             <p className={styles.text}>{copy.text}</p>
             <div className={styles.actions}>
               {'href' in action ? (
-                <Button href={action.href} size="lg" arrow>
+                <Button href={action.href} size="lg" arrow magnetic>
                   {copy.cta}
                 </Button>
               ) : (
-                <Button to={action.to} size="lg" arrow>
+                <Button to={action.to} size="lg" arrow magnetic>
                   {copy.cta}
                 </Button>
               )}

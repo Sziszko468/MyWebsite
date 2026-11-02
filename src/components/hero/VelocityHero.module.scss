@@ -33,6 +33,11 @@
 }
 
 /* The scene's container: the stage below the text, or the whole hero on wide screens. */
+/* Once the scene is drawing, the drifting streaks of the fallback underneath it are hidden by an opaque canvas: stop animating them. */
+.hero[data-hero-ready='true'] {
+  --fallback-play: paused;
+}
+
 .hero .stage {
   --hero-layout: stacked;
   --hero-shift: 0px;

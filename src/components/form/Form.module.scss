@@ -46,7 +46,9 @@
   color: var(--color-text);
   font: inherit;
   line-height: var(--lh-normal);
-  transition: var(--transition-colors);
+  transition:
+    var(--transition-colors),
+    box-shadow var(--dur-fast) var(--ease-out);
 
   &::placeholder {
     color: var(--color-text-muted);
@@ -56,10 +58,29 @@
     border-color: var(--color-text);
   }
 
+  /* Focus: the field's own frame firms up as the ring arrives, so the eye lands on it. */
+  &:focus-visible {
+    border-color: var(--color-focus);
+  }
+
   /* A frame that is thicker as well as red, so an error is not told by colour alone. */
   &[aria-invalid='true'] {
     border-color: var(--color-accent-text);
     box-shadow: inset 0 0 0 1px var(--color-accent-text);
+    animation: field-shake var(--dur-slow) var(--ease-out);
+  }
+}
+
+/* A field that has just been marked wrong shakes once, a couple of pixels (none under reduced motion, where the frame and the message say it). */
+@keyframes field-shake {
+  20%,
+  60% {
+    translate: calc(-3px * var(--motion-intensity)) 0;
+  }
+
+  40%,
+  80% {
+    translate: calc(3px * var(--motion-intensity)) 0;
   }
 }
 
@@ -83,6 +104,15 @@ textarea.control {
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
   line-height: var(--lh-normal);
+  animation: error-in var(--dur-base) var(--ease-out);
+}
+
+/* The message arrives with a short fade and drop, so a change in the form is seen, not just found. */
+@keyframes error-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(var(--motion-distance-sm) * -0.5 * var(--motion-intensity)), 0);
+  }
 }
 
 .errorIcon {
@@ -147,7 +177,10 @@ textarea.control {
   font-size: var(--fs-base);
   line-height: var(--lh-snug);
   overflow-wrap: anywhere;
-  transition: var(--transition-colors);
+  transition:
+    var(--transition-colors),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 
   /* The ring is the unchosen state, the filled ring the chosen one. */
   &::before {
@@ -194,6 +227,11 @@ textarea.control {
   }
 }
 
+/* Pressed: the choice gives under the finger, at once. */
+.choice input:active + .chip {
+  transform: scale(0.985);
+}
+
 .choice input:focus-visible + .chip {
   outline: var(--focus-ring-width) solid var(--color-focus);
   outline-offset: var(--focus-ring-offset);
@@ -224,6 +262,14 @@ textarea.control {
     padding-block: 0.125rem;
     cursor: pointer;
     line-height: var(--lh-normal);
+  }
+
+  input {
+    transition: transform var(--dur-fast) var(--ease-elastic);
+  }
+
+  input:active {
+    transform: scale(0.9);
   }
 
   input[aria-invalid='true'] {

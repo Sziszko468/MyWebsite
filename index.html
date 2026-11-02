@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!--
+      The brand typeface, asked for as soon as the HTML is read rather than when the first headline needs it.
+      Without this the font arrived seconds after the first paint on a slow connection and the swap moved the
+      hero (layout shift 0.15 to 0.4 in the emulated-phone run). Vite gives the file its hashed name.
+    -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2" />
     <title>Your Name</title>
     <meta name="description" content="Átgondolt weboldalakat és webalkalmazásokat tervezek és fejlesztek." />
     <meta name="theme-color" content="#0b0b0d" />

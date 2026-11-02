@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react'
 import type { GalleryImage } from '../../content/projectDetails/types'
 import { useI18n } from '../../i18n/useI18n'
+import { closeDialog } from '../../motion/dialog'
 import { cx } from '../../utils/cx'
 import { Reveal } from '../motion/Reveal'
+import { RevealImage } from '../motion/RevealImage'
 import { fill } from '../../utils/format'
 import styles from './Gallery.module.scss'
 
@@ -27,7 +29,7 @@ function Thumbnails({
             <Reveal delay={Math.min(position, 4) * 60}>
               <figure className={styles.figure}>
                 <button type="button" className={styles.thumb} onClick={() => onOpenImage(image.id)}>
-                  <img
+                  <RevealImage
                     src={image.src}
                     width={image.width}
                     height={image.height}
@@ -97,7 +99,7 @@ export function Lightbox({
     const dialog = ref.current
     if (!dialog) return
     if (open && !dialog.open) dialog.showModal()
-    if (!open && dialog.open) dialog.close()
+    if (!open && dialog.open) closeDialog(dialog)
   }, [open])
 
   const go = (step: number) => {
@@ -111,6 +113,11 @@ export function Lightbox({
       className={styles.lightbox}
       aria-label={t.project.gallery.dialog}
       onClose={() => onChange(null)}
+      // Escape leaves with the same exit as the close button.
+      onCancel={(event) => {
+        event.preventDefault()
+        onChange(null)
+      }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onChange(null)
       }}
@@ -137,7 +144,7 @@ export function Lightbox({
             )}
           </div>
           <figure className={styles.large}>
-            <img key={image.id} src={image.src} width={image.width} height={image.height} alt={image.alt[lang]} decoding="async" />
+            <RevealImage key={image.id} src={image.src} width={image.width} height={image.height} alt={image.alt[lang]} decoding="async" />
             <figcaption>
               {image.caption[lang]}
               <span className={styles.counter}>{fill(t.project.gallery.counter, { current: index + 1, total: images.length })}</span>

@@ -1,0 +1,37 @@
+/*
+ * The contextual cursor label. It sits above everything, takes no input and has no animation of its
+ * own beyond a short fade: it is positioned by a transform written from script, one write per frame.
+ * It is drawn in the text colour on the page colour (and the reverse in the other theme), with a frame,
+ * so it reads on any band in either theme.
+ */
+.label {
+  position: fixed;
+  z-index: var(--z-toast);
+  top: 0;
+  left: 0;
+  padding: 0.3rem 0.7rem;
+  border: var(--border-width) solid var(--color-text);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  user-select: none;
+
+  &[data-visible] {
+    opacity: 1;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .label {
+    display: none;
+  }
+}

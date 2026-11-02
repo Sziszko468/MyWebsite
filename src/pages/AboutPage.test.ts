@@ -9,10 +9,11 @@ import { I18nContext } from '../i18n/context'
 import { dictionaries } from '../i18n/dictionaries'
 import { ThemeContext } from '../theme/context'
 import { AboutPage } from './AboutPage'
+import { flattenKinetic } from '../test/markup'
 
 /** The About page rendered on the server, with the real providers: a crash, a missing word or a leaked template shows here. */
 function render(lang: Language, theme: 'dark' | 'light' = 'dark'): string {
-  return renderToStaticMarkup(
+  return flattenKinetic(renderToStaticMarkup(
     createElement(
       ThemeContext.Provider,
       { value: { theme, setTheme: () => undefined, toggleTheme: () => undefined } },
@@ -22,7 +23,7 @@ function render(lang: Language, theme: 'dark' | 'light' = 'dark'): string {
         createElement(I18nContext.Provider, { value: { lang, t: dictionaries[lang] } }, createElement(AboutPage)),
       ),
     ),
-  )
+  ))
 }
 
 const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;')

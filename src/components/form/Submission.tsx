@@ -137,6 +137,11 @@ export function SentPanel({
 }) {
   return (
     <div className={styles.sent} role="status">
+      <span className={styles.sentMark} aria-hidden="true">
+        <svg viewBox="0 0 16 16" width="1.25rem" height="1.25rem" focusable="false">
+          <path d="M3 8.5l3.2 3.2L13 4.6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
       <h3 ref={headingRef} tabIndex={-1} className={styles.sentTitle}>
         {title}
       </h3>

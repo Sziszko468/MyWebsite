@@ -13,6 +13,14 @@ export function useHeroDriver(
 ): { driver: HeroDriver; inView: boolean } {
   const [driver] = useState(() => new HeroDriver())
   const [inView, setInView] = useState(true)
+  const [tabVisible, setTabVisible] = useState(() => typeof document === 'undefined' || !document.hidden)
+
+  // A hidden tab draws nothing: the scene waits instead of relying on the browser to starve its loop.
+  useEffect(() => {
+    const onVisibility = () => setTabVisible(!document.hidden)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
 
   useEffect(() => {
     const sectionElement = section.current
@@ -33,5 +41,5 @@ export function useHeroDriver(
     }
   }, [driver, section, stage, root, motion])
 
-  return { driver, inView }
+  return { driver, inView: inView && tabVisible }
 }

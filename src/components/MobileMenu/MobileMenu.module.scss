@@ -51,6 +51,18 @@
   }
 }
 
+/* The way out: quicker than the way in, accelerating, opacity and a short lift only. */
+.dialog[data-closing] {
+  animation: menu-out var(--dur-fast) var(--ease-accelerate) both;
+}
+
+@keyframes menu-out {
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--motion-distance-sm) * -1 * var(--motion-intensity)));
+  }
+}
+
 @keyframes menu-in {
   from {
     opacity: 0;

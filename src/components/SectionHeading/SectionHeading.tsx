@@ -1,4 +1,5 @@
 import { cx } from '../../utils/cx'
+import { KineticText } from '../motion/KineticText'
 import styles from './SectionHeading.module.scss'
 
 interface SectionHeadingProps {
@@ -32,7 +33,8 @@ export function SectionHeading({
         </span>
       )}
       <Heading id={id} className={styles.title}>
-        {title}
+        {/* The words rise out of their masks as the heading scrolls into view: real text, no shift, still when motion is reduced. */}
+        <KineticText text={title} variant="mask" trigger="view" />
       </Heading>
       {description && <p className={styles.description}>{description}</p>}
     </header>

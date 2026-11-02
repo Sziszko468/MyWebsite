@@ -45,6 +45,19 @@
   overflow-wrap: anywhere;
 }
 
+/* The idle and the waiting label share one cell, so the button is as wide as the longer one and never resizes. */
+.swap {
+  display: inline-grid;
+}
+
+.slot {
+  grid-area: 1 / 1;
+
+  &:not([data-showing]) {
+    visibility: hidden;
+  }
+}
+
 .arrow {
   flex: none;
   transition: transform var(--dur-base) var(--ease-out);
@@ -68,7 +81,7 @@
     --_bg: var(--color-accent-active);
     --_border: var(--color-accent-active);
     box-shadow: none;
-    transform: translateY(0);
+    transform: translateY(0) scale(0.985);
   }
 }
 
@@ -83,6 +96,7 @@
   @include m.pressed {
     --_bg: var(--color-surface-active);
     --_border: var(--color-text);
+    transform: scale(0.985);
   }
 }
 
@@ -138,6 +152,56 @@
 .fullWidth {
   display: flex;
   width: 100%;
+}
+
+/* ── States that are not hover or press ─────────────────────────────── */
+
+/* A large call to action that leans toward a mouse (motion/useMagnetic.ts) uses `translate`, so it composes with the hover lift. */
+.magnetic {
+  translate: var(--mag-x, 0px) var(--mag-y, 0px);
+  transition:
+    var(--transition-colors),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    translate var(--dur-base) var(--ease-out);
+}
+
+/* Waiting: the colours do not change (it is not disabled), the cursor says so, the spinner takes the arrow's place. */
+.button[data-loading] {
+  cursor: progress;
+}
+
+.spinner {
+  flex: none;
+}
+
+/* Done: a tick pops in with a slight overshoot; wrong: one short shake, once. */
+.tick {
+  flex: none;
+  animation: tick-pop var(--dur-base) var(--ease-elastic);
+}
+
+@keyframes tick-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+.button[data-status='error'] {
+  animation: shake var(--dur-slow) var(--ease-out);
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    translate: calc(-4px * var(--motion-intensity)) 0;
+  }
+
+  40%,
+  80% {
+    translate: calc(4px * var(--motion-intensity)) 0;
+  }
 }
 
 /* Disabled — declared last; `:disabled` / `[aria-disabled]` outrank the variant classes. */

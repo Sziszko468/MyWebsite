@@ -9,6 +9,7 @@ import { pad } from '../../utils/format'
 import { Button } from '../Button/Button'
 import { Container } from '../Container/Container'
 import { Reveal } from '../motion/Reveal'
+import { ScrollLinked } from '../motion/ScrollLinked'
 import { Section } from '../Section/Section'
 import { SectionHeading } from '../SectionHeading/SectionHeading'
 import { Disclosure } from './Disclosure'
@@ -74,7 +75,7 @@ export function ProcessBand() {
           <SectionHeading id={titleId} index="04" title={copy.title} description={copy.intro} />
         </Reveal>
 
-        <ol className={styles.steps}>
+        <ScrollLinked as="ol" mode="fill" className={styles.steps}>
           {processSteps.map((step, position) => (
             <li key={step.title.hu} className={styles.step}>
               <Reveal delay={position * 50}>
@@ -86,7 +87,7 @@ export function ProcessBand() {
               </Reveal>
             </li>
           ))}
-        </ol>
+        </ScrollLinked>
         <p className={styles.note}>{processNote[lang]}</p>
 
         <div className={styles.twoUp}>

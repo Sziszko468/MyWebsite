@@ -49,7 +49,7 @@ export function ProjectNav({ id, tone }: { id: ProjectId; tone: SectionTone }) {
             <Button to="/#work" variant="secondary">
               {t.project.backToPortfolio}
             </Button>
-            <Button to="/contact" size="lg" arrow>
+            <Button to="/contact" size="lg" arrow magnetic>
               {t.hero.ctaSecondary}
             </Button>
           </div>

@@ -1,0 +1,72 @@
+/*
+ * The loading system's two pieces. A loader has to run for as long as the wait does, so these two
+ * keep their own durations (a sweep of 1.1 s, a turn of 0.8 s) instead of the tokens, which collapse
+ * to nothing under reduced motion; there they are replaced by a still line and a slow pulse, so a
+ * wait never looks like a frozen page. Only transform and opacity move.
+ */
+
+.bar {
+  position: fixed;
+  z-index: var(--z-toast);
+  inset: 0 0 auto;
+  height: 3px;
+  overflow: clip;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+
+  &[data-active] {
+    opacity: 1;
+  }
+}
+
+.line {
+  display: block;
+  width: 38%;
+  height: 100%;
+  background-color: var(--color-accent);
+}
+
+/* The sweep runs only while the bar is shown: a loop on an invisible element is still work. */
+.bar[data-active] .line {
+  animation: sweep 1.1s var(--ease-racing) infinite;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(265%);
+  }
+}
+
+.spinner {
+  flex: none;
+  animation: turn 0.8s linear infinite;
+}
+
+@keyframes turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line {
+    width: 100%;
+    opacity: 0.6;
+    animation: none;
+  }
+
+  .spinner {
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}

@@ -203,6 +203,12 @@
   }
 }
 
+.artLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .artFinance {
   position: absolute;
   z-index: 0;

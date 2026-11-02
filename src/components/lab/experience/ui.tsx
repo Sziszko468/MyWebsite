@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { cx } from '../../../utils/cx'
 import styles from './ui.module.scss'
 
@@ -264,7 +264,7 @@ export function Meter({
     <div className={styles.meter}>
       <span className={styles.meterLabel}>{label}</span>
       <span className={styles.meterBar} data-tone={tone}>
-        <span style={{ width: `${fraction * 100}%` }} />
+        <span style={{ '--v': fraction } as CSSProperties} />
       </span>
       <span className={styles.meterValue}>{text}</span>
     </div>

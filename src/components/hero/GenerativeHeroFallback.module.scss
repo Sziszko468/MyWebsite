@@ -61,6 +61,8 @@ path {
 @media (prefers-reduced-motion: no-preference) {
   .flow {
     animation: drift 2.6s linear infinite;
+    /* The hero pauses the streaks while the scene covers them (VelocityHero.module.scss). */
+    animation-play-state: var(--fallback-play, running);
   }
 }
 

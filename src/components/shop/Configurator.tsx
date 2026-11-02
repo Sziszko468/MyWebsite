@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import { quoteConfig } from '../../config/quote'
 import { siteConfig } from '../../config/site'
 import { getPackage } from '../../content/packages'
@@ -138,6 +138,11 @@ export function Configurator() {
     return (
       <div className={styles.card}>
         <div className={styles.sent} role="status">
+          <span className={styles.sentMark} aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="1.25rem" height="1.25rem" focusable="false">
+              <path d="M3 8.5l3.2 3.2L13 4.6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
           <h2 ref={sentRef} tabIndex={-1} className={styles.stepTitle}>
             {c.sent.title}
           </h2>
@@ -184,7 +189,7 @@ export function Configurator() {
             {c.steps[step]}
           </p>
           <div className={styles.bar} aria-hidden="true">
-            <span style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }} />
+            <span style={{ '--p': (stepIndex + 1) / STEPS.length } as CSSProperties} />
           </div>
         </div>
         <ol className={styles.list} aria-label={c.progressLabel}>
@@ -508,8 +513,8 @@ export function Configurator() {
               <span className={styles.backText}>{c.actions.back}</span>
             </Button>
           )}
-          <Button type="submit" arrow disabled={sending} className={styles.primary}>
-            {isLast ? (sending ? c.actions.sending : transport.id === 'none' ? c.actions.prepare : c.actions.send) : c.actions.next}
+          <Button type="submit" arrow loading={sending} loadingLabel={isLast ? c.actions.sending : undefined} className={styles.primary}>
+            {isLast ? (transport.id === 'none' ? c.actions.prepare : c.actions.send) : c.actions.next}
           </Button>
         </div>
       </form>

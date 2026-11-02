@@ -21,7 +21,6 @@
   display: grid;
   gap: var(--space-2) var(--space-5);
   padding-block: var(--space-5);
-  transition: padding-left var(--dur-base) var(--ease-out);
 
   @include m.up('lg') {
     grid-template-columns: 3rem minmax(0, 7fr) minmax(0, 5fr);
@@ -29,8 +28,21 @@
     padding-block: var(--space-6);
   }
 
+  /* On hover the row's words step in a little: a translate (compositor only), not a padding. */
+  .number,
+  .title,
+  .text {
+    transition:
+      color var(--dur-base) var(--ease-out),
+      translate var(--dur-base) var(--ease-out);
+  }
+
   @include m.hover {
-    padding-left: var(--space-4);
+    .number,
+    .title,
+    .text {
+      translate: var(--space-3) 0;
+    }
 
     .number {
       color: var(--color-accent-text);
@@ -65,7 +77,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .row {
-    padding-left: 0 !important;
+  .row .number,
+  .row .title,
+  .row .text {
+    translate: none !important;
   }
 }

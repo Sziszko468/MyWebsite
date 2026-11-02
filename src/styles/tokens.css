@@ -90,6 +90,24 @@
   --dur-theme: 320ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* The rest of the motion identity (src/motion/config.ts keeps a copy for scripts; a test keeps the two equal).
+     Controlled acceleration, smooth deceleration, an asymmetric "racing" curve (late launch, long brake) and a
+     slight elastic settle that only small, deliberate moments use. */
+  --ease-accelerate: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-racing: cubic-bezier(0.7, 0, 0.1, 1);
+  --ease-elastic: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --dur-scene: 700ms;
+  --motion-stagger: 60ms;
+  /* Distances are plain lengths; whoever moves something multiplies by --motion-intensity, which the
+     page's motion scope sets (below) and reduced motion sets to 0. */
+  --motion-distance-sm: 8px;
+  --motion-distance-md: 16px;
+  --motion-distance-lg: 32px;
+  --motion-intensity: 1;
+  /* How long the entrances of a scope take, as a factor on --dur-*; the shop's are quicker, the Lab's more drawn out. */
+  --motion-time: 1;
+  /* How far scroll-linked parallax may move things, as a factor; halved on touch screens (below). */
+  --motion-parallax: 1;
   --transition-colors: color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out);
@@ -230,14 +248,51 @@
   --scene-light-blue: var(--brand-blue);
 }
 
-/* Reduced motion: collapse every duration at the token level so no component
-   needs its own override. */
-@media (prefers-reduced-motion: reduce) {
+/* ── 4. Motion scopes ─────────────────────────────────────────────────
+   The page frame sets data-motion-scope from the route (src/motion/config.ts: scopeOfPage). A scope is
+   a different intensity of the same language: the portfolio is refined, the shop is fast, the cart and
+   the request builder are plain, the Lab is experimental. */
+[data-motion-scope='portfolio'] {
+  --motion-intensity: 1;
+  --motion-time: 1;
+}
+
+[data-motion-scope='shop'] {
+  --motion-intensity: 0.5;
+  --motion-time: 0.6;
+}
+
+[data-motion-scope='checkout'] {
+  --motion-intensity: 0.25;
+  --motion-time: 0.4;
+}
+
+[data-motion-scope='lab'] {
+  --motion-intensity: 1.35;
+  --motion-time: 1.25;
+}
+
+/* A touch screen gets simpler parallax and no pointer-driven movement (those are mouse-only anyway). */
+@media (pointer: coarse) {
   :root {
+    --motion-parallax: 0.5;
+  }
+}
+
+/* Reduced motion: collapse every duration at the token level so no component
+   needs its own override, and take the distance out of every movement. Declared after the scopes
+   and on the same selectors, so no scope can switch it back on. */
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  [data-motion-scope] {
     --dur-instant: 0.01ms;
     --dur-fast: 0.01ms;
     --dur-base: 0.01ms;
     --dur-slow: 0.01ms;
+    --dur-scene: 0.01ms;
     --dur-theme: 0.01ms;
+    --motion-stagger: 0ms;
+    --motion-intensity: 0;
+    --motion-parallax: 0;
   }
 }

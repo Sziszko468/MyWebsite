@@ -20,6 +20,7 @@ import { Section } from '../components/Section/Section'
 import { SectionHeading } from '../components/SectionHeading/SectionHeading'
 import { SERVICE_ART } from '../components/shop/ServiceArt'
 import { StickyCta } from '../components/shop/StickyCta'
+import { ScrollLinked } from '../components/motion/ScrollLinked'
 import { usePointerField } from '../components/motion/usePointerField'
 import { useI18n } from '../i18n/useI18n'
 import { normalizeExtras, findLine } from '../shop/cart'
@@ -132,9 +133,11 @@ export function ServiceDetailPage({ serviceId }: { serviceId: ServiceId }) {
               )}
             </div>
           </div>
-          <div className={styles.heroArt} aria-hidden="true">
-            <BuildArt kind={SERVICE_ART[serviceId]} />
-          </div>
+          <ScrollLinked range="-18px">
+            <div className={styles.heroArt} aria-hidden="true">
+              <BuildArt kind={SERVICE_ART[serviceId]} />
+            </div>
+          </ScrollLinked>
         </Container>
 
         <Container size="wide">

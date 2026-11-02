@@ -1,0 +1,107 @@
+/*
+ * Kinetic type. The words are inline boxes that hold the line exactly as plain text would: the mask
+ * variant clips each word to its own box, padded above and below for accents and descenders and
+ * pulled back by the same margins, so the line's height and width never change while it plays.
+ * Only transform and opacity animate. Every number is a token: the rise is a share of the box (scaled
+ * by --motion-intensity, so it is 0 under reduced motion), the delay is the capped stagger from the
+ * script, the time is --dur-slow and the curve is the brand's asymmetric one.
+ */
+
+.word {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.inner {
+  display: inline-block;
+}
+
+.char {
+  display: inline-block;
+}
+
+/* The mask: a word rises out of its own box. */
+[data-kinetic='mask'] .word {
+  overflow: clip;
+  padding-block: 0.16em 0.1em;
+  margin-block: -0.16em -0.1em;
+}
+
+/* ── On mount: a CSS animation, so no script has to run for it ───────── */
+
+@keyframes mask-rise {
+  from {
+    transform: translate3d(0, calc(105% * var(--motion-intensity)), 0);
+  }
+}
+
+@keyframes word-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(var(--motion-distance-md) * var(--motion-intensity)), 0);
+  }
+}
+
+@keyframes char-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(0.5em * var(--motion-intensity)), 0);
+  }
+}
+
+[data-trigger='mount'][data-kinetic='mask'] .inner {
+  animation: mask-rise calc(var(--dur-slow) * var(--motion-time)) var(--ease-racing) both;
+  animation-delay: var(--d);
+}
+
+[data-trigger='mount'][data-kinetic='words'] .inner {
+  animation: word-rise calc(var(--dur-slow) * var(--motion-time)) var(--ease-out) both;
+  animation-delay: var(--d);
+}
+
+[data-trigger='mount'][data-kinetic='chars'] .char {
+  animation: char-rise var(--dur-base) var(--ease-out) both;
+  animation-delay: calc(var(--d) + var(--c));
+}
+
+/* ── On view: a transition from the hidden state the script sets only when the text starts below the fold ── */
+
+[data-trigger='view'][data-kinetic='mask'] .inner {
+  transition: transform calc(var(--dur-slow) * var(--motion-time)) var(--ease-racing) calc(var(--d) * var(--motion-time));
+}
+
+[data-trigger='view'][data-kinetic='words'] .inner {
+  transition:
+    opacity calc(var(--dur-slow) * var(--motion-time)) var(--ease-out) calc(var(--d) * var(--motion-time)),
+    transform calc(var(--dur-slow) * var(--motion-time)) var(--ease-out) calc(var(--d) * var(--motion-time));
+}
+
+[data-trigger='view'][data-kinetic='chars'] .char {
+  transition:
+    opacity var(--dur-base) var(--ease-out) calc(var(--d) + var(--c)),
+    transform var(--dur-base) var(--ease-out) calc(var(--d) + var(--c));
+}
+
+[data-trigger='view'][data-state='hidden'][data-kinetic='mask'] .inner {
+  transform: translate3d(0, calc(105% * var(--motion-intensity)), 0);
+}
+
+[data-trigger='view'][data-state='hidden'][data-kinetic='words'] .inner {
+  opacity: 0;
+  transform: translate3d(0, calc(var(--motion-distance-md) * var(--motion-intensity)), 0);
+}
+
+[data-trigger='view'][data-state='hidden'][data-kinetic='chars'] .char {
+  opacity: 0;
+  transform: translate3d(0, calc(0.5em * var(--motion-intensity)), 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-trigger] .inner,
+  [data-trigger] .char {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}

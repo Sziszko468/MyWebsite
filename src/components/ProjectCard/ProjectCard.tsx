@@ -3,6 +3,7 @@ import { useI18n } from '../../i18n/useI18n'
 import { cx } from '../../utils/cx'
 import { Badge, type ProjectStatus } from '../Badge/Badge'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
+import { RevealImage } from '../motion/RevealImage'
 import { usePointerField } from '../motion/usePointerField'
 import styles from './ProjectCard.module.scss'
 
@@ -76,11 +77,11 @@ export function ProjectCard({
   const pointer = usePointerField<HTMLElement>()
 
   return (
-    <article ref={pointer} className={cx(styles.card, styles[layout], linked && styles.linked, className)}>
+    <article ref={pointer} className={cx(styles.card, styles[layout], linked && styles.linked, className)} data-cursor={linked ? detailsLabel : undefined}>
       <div className={styles.media}>
         <div className={styles.stage}>
           {image ? (
-            <img
+            <RevealImage
               className={styles.image}
               src={image.src}
               alt={image.alt}

@@ -114,7 +114,7 @@ export function LabSection() {
         </ul>
 
         <p className={styles.enter}>
-          <Button to="/lab" size="lg" arrow>
+          <Button to="/lab" size="lg" arrow magnetic>
             {t.home.lab.enter}
           </Button>
         </p>

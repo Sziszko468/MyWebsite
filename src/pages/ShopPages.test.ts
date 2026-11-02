@@ -23,6 +23,7 @@ import { CartPage } from './CartPage'
 import { ConfiguratorPage } from './ConfiguratorPage'
 import { ServiceDetailPage } from './ServiceDetailPage'
 import { ServicesPage } from './ServicesPage'
+import { flattenKinetic } from '../test/markup'
 
 /**
  * Renders the shop's pages on the server, as markup, with the real providers. It cannot click (the
@@ -31,7 +32,7 @@ import { ServicesPage } from './ServicesPage'
  * appeared from nowhere.
  */
 function render(element: ReactElement, lang: Language, theme: 'dark' | 'light' = 'dark', url = '/services'): string {
-  return renderToStaticMarkup(
+  return flattenKinetic(renderToStaticMarkup(
     createElement(
       ThemeContext.Provider,
       { value: { theme, setTheme: () => undefined, toggleTheme: () => undefined } },
@@ -41,7 +42,7 @@ function render(element: ReactElement, lang: Language, theme: 'dark' | 'light' =
         createElement(I18nContext.Provider, { value: { lang, t: dictionaries[lang] } }, element),
       ),
     ),
-  )
+  ))
 }
 
 const escape = (text: string) =>

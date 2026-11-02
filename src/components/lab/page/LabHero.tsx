@@ -141,7 +141,7 @@ export function LabHero({ onFind }: { onFind(): void }) {
         <KineticHeadline id="lab-hero-title" text={t.hero.headline} onFind={onFind} dotLabel={egg.dotLabel} />
         <p className={styles.lead}>{t.hero.lead}</p>
         <div className={styles.actions}>
-          <Button to={experimentPath('particle-universe')} size="lg" arrow>
+          <Button to={experimentPath('particle-universe')} size="lg" arrow magnetic>
             {t.hero.create}
           </Button>
           <Button href="#experiments" variant="secondary" size="lg">

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
 import { useI18n } from '../../i18n/useI18n'
+import { closeDialog } from '../../motion/dialog'
 import { cx } from '../../utils/cx'
 import { BrandMark } from '../BrandMark/BrandMark'
 import { Button } from '../Button/Button'
@@ -48,7 +49,9 @@ export function MobileMenu() {
     closeRef.current?.focus()
   }
 
-  const closeMenu = useCallback(() => dialogRef.current?.close(), [])
+  // Closing plays a short exit (motion/dialog.ts) while a tapped link has already navigated: nothing
+  // waits for it, and a timer closes the dialog anyway if the animation never reports its end.
+  const closeMenu = useCallback(() => closeDialog(dialogRef.current), [])
 
   // Fires for every way of closing: Escape, a link, the close button, route change, resize.
   const handleClosed = () => {
@@ -88,7 +91,13 @@ export function MobileMenu() {
         <MenuIcon />
       </button>
 
-      <dialog ref={dialogRef} id={dialogId} className={styles.dialog} aria-label={t.nav.primary} onClose={handleClosed}>
+      <dialog ref={dialogRef} id={dialogId} className={styles.dialog} aria-label={t.nav.primary} onClose={handleClosed}
+        // Escape closes with the same exit as the close button, not with a jump.
+        onCancel={(event) => {
+          event.preventDefault()
+          closeMenu()
+        }}
+      >
         <div className={styles.top}>
           <BrandMark onNavigate={closeMenu} />
           <button ref={closeRef} type="button" className={styles.button} aria-label={t.nav.menuClose} onClick={closeMenu}>

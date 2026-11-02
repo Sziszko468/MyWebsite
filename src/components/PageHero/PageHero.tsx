@@ -1,13 +1,22 @@
 import { useId, type ReactNode } from 'react'
 import { cx } from '../../utils/cx'
 import { Container } from '../Container/Container'
+import { KineticText } from '../motion/KineticText'
 import { SpeedLines } from '../motion/SpeedLines'
 import { usePointerField } from '../motion/usePointerField'
 import styles from './PageHero.module.scss'
 
-/** One line of the headline, on a line of its own; `accent` sets it in the brand red. */
+/**
+ * One line of the headline, on a line of its own; `accent` sets it in the brand red. A line given as
+ * text moves in word by word (kinetic type, motion/kinetic.ts: real text, nothing shifts, reduced
+ * motion shows it at once); anything else is drawn as it is.
+ */
 export function HeroLine({ accent = false, className, children }: { accent?: boolean; className?: string; children: ReactNode }) {
-  return <span className={cx(styles.line, accent && styles.accent, className)}>{children}</span>
+  return (
+    <span className={cx(styles.line, accent && styles.accent, className)}>
+      {typeof children === 'string' ? <KineticText text={children} variant="mask" trigger="mount" /> : children}
+    </span>
+  )
 }
 
 interface PageHeroProps {

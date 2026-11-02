@@ -1,0 +1,8 @@
+/*
+ * Parallax is a transform only. The distance is the element's own `--range`, scaled by the page's
+ * motion intensity (the shop is quieter, the Lab bolder) and by --motion-parallax (half on a touch
+ * screen, none under reduced motion).
+ */
+.shift {
+  transform: translate3d(0, calc(var(--sp-c, 0) * var(--range, -24px) * var(--motion-parallax) * var(--motion-intensity)), 0);
+}

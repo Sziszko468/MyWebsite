@@ -1,12 +1,43 @@
-/* The hidden state is set by script, only for content that starts below the fold. */
+/*
+ * The hidden state is set by script, only for content that starts below the fold. Everything that
+ * can be tuned is a token: the distance and its scale (--motion-distance-lg × --motion-intensity,
+ * which the page's motion scope sets and reduced motion zeroes), the duration (--dur-slow) and the
+ * curve (--ease-out). Only opacity and transform are ever animated.
+ */
 .reveal {
+  --_dist: calc(var(--motion-distance-lg) * var(--motion-intensity));
+  --_x: 0px;
+  --_y: var(--_dist);
+  --_scale: 1;
+
+  --_t: var(--motion-time);
+
   transition:
-    opacity var(--dur-slow) var(--ease-out) var(--reveal-delay, 0ms),
-    transform 0.8s var(--ease-out) var(--reveal-delay, 0ms);
+    opacity calc(var(--dur-slow) * var(--_t)) var(--ease-out) calc(var(--reveal-delay, 0ms) * var(--_t)),
+    transform calc(var(--dur-slow) * 1.6 * var(--_t)) var(--ease-out) calc(var(--reveal-delay, 0ms) * var(--_t));
 
   &[data-reveal='hidden'] {
     opacity: 0;
-    transform: translate3d(0, 1.5rem, 0);
+    transform: translate3d(var(--_x), var(--_y), 0) scale(var(--_scale));
+  }
+
+  &[data-variant='fade'] {
+    --_y: 0px;
+  }
+
+  &[data-variant='scale'] {
+    --_y: 0px;
+    --_scale: calc(1 - 0.04 * var(--motion-intensity));
+  }
+
+  &[data-variant='left'] {
+    --_x: calc(var(--_dist) * -1);
+    --_y: 0px;
+  }
+
+  &[data-variant='right'] {
+    --_x: var(--_dist);
+    --_y: 0px;
   }
 
   @media (prefers-reduced-motion: reduce) {

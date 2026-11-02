@@ -20,6 +20,7 @@
   border-radius: var(--radius-sm);
   background-color: var(--color-bg-subtle);
   line-height: var(--lh-normal);
+  animation: panel-in var(--dur-base) var(--ease-out);
 
   &[data-tone='error'] {
     border-color: var(--color-accent-text);
@@ -81,11 +82,39 @@
   line-height: var(--lh-normal);
 }
 
+/* A result arrives with a short fade and rise; it is announced by its heading taking focus, not by the motion. */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(var(--motion-distance-sm) * var(--motion-intensity)), 0);
+  }
+}
+
 /* The confirmation, shown in place of the form. */
 .sent {
   display: grid;
   justify-items: start;
   gap: var(--space-4);
+  animation: panel-in var(--dur-base) var(--ease-out);
+}
+
+/* The mark of a success: a Racing Red disc with a tick that pops in with a slight overshoot. */
+.sentMark {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  animation: mark-pop var(--dur-slow) var(--ease-elastic);
+}
+
+@keyframes mark-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
 }
 
 .sentTitle {

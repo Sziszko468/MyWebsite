@@ -34,7 +34,7 @@ export function CategoryCard({ area, position }: { area: ServiceArea; position: 
   const name = area.name[lang]
 
   return (
-    <article ref={ref} className={styles.card} data-service={area.id} aria-labelledby={titleId}>
+    <article ref={ref} className={styles.card} data-service={area.id} data-cursor={common.action.viewService} aria-labelledby={titleId}>
       <div className={styles.art} aria-hidden="true">
         <BuildArt kind={SERVICE_ART[area.id]} />
       </div>

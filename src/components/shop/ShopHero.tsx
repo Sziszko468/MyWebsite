@@ -8,6 +8,7 @@ import { Container } from '../Container/Container'
 import { BuildArt } from '../home/BuildArt'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
 import { SpeedLines } from '../motion/SpeedLines'
+import { ScrollLinked } from '../motion/ScrollLinked'
 import { usePointerField } from '../motion/usePointerField'
 import { HeroLine } from '../PageHero/PageHero'
 import { SERVICE_ART } from './ServiceArt'
@@ -37,16 +38,11 @@ export function ShopHero() {
         <div className={styles.copy}>
           <p className={styles.eyebrow}>{t.nav.services}</p>
           <h1 id={titleId} className={styles.title}>
-            <span className={styles.rise} style={{ '--i': 0 } as CSSProperties}>
-              <HeroLine>{hero.titleLine1}</HeroLine>
-            </span>{' '}
-            <span className={styles.rise} style={{ '--i': 1 } as CSSProperties}>
-              <HeroLine accent>{hero.titleLine2}</HeroLine>
-            </span>
+            <HeroLine>{hero.titleLine1}</HeroLine> <HeroLine accent>{hero.titleLine2}</HeroLine>
           </h1>
           <p className={styles.lead}>{hero.lead}</p>
           <div className={styles.actions}>
-            <Button href="#services" size="lg" arrow>
+            <Button href="#services" size="lg" arrow magnetic>
               {hero.ctaPrimary}
             </Button>
             <Button to="/contact" size="lg" variant="secondary">
@@ -56,7 +52,7 @@ export function ShopHero() {
           <p className={styles.note}>{hero.note}</p>
         </div>
 
-        <nav className={styles.stack} aria-label={hero.glance}>
+        <ScrollLinked as="nav" range="-36px" className={styles.stack} aria-label={hero.glance}>
           <ul className={styles.tiles} aria-label={hero.compositionLabel}>
             {serviceAreas.map((area, position) => (
               <li key={area.id} className={styles.tile} style={{ '--depth': 6 + position * 4 } as CSSProperties} data-position={position}>
@@ -69,7 +65,7 @@ export function ShopHero() {
               </li>
             ))}
           </ul>
-        </nav>
+        </ScrollLinked>
       </Container>
     </section>
   )

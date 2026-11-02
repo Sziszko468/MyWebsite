@@ -34,7 +34,7 @@ export function AboutHero() {
       lead={copy.lead}
       actions={
         <>
-          <Button to="/#work" size="lg" arrow>
+          <Button to="/#work" size="lg" arrow magnetic>
             {copy.ctaPrimary}
           </Button>
           <Button to="/contact" size="lg" variant="secondary">

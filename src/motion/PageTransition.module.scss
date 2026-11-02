@@ -1,0 +1,49 @@
+/*
+ * The page's entrance. It plays on the wrapper that the router mounts for a new page, ends in the
+ * wrapper's ordinary style (no fill forwards: nothing stays clipped, faded or stacked afterwards) and
+ * moves only opacity and clip-path. The durations come from the scope (--page-enter-dur, set by the
+ * script from motion/config.ts); Back and Forward use 40% of it. Under reduced motion there is none.
+ */
+
+.page {
+  /* A block formatting context, as <main> was for the page's own children before the wrapper existed:
+     a hero that runs under the header by a negative margin behaves exactly as it did. */
+  display: flow-root;
+  min-width: 0;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The Lab: a wipe along the brand's diagonal. Both polygons have four points, so the browser can interpolate them. */
+@keyframes page-wipe {
+  from {
+    clip-path: polygon(0 0, 0 0, -14% 100%, 0 100%);
+  }
+
+  to {
+    clip-path: polygon(0 0, 114% 0, 100% 100%, 0 100%);
+  }
+}
+
+.page[data-enter='fade'] {
+  animation: page-fade var(--page-enter-dur) var(--ease-out) backwards;
+}
+
+.page[data-enter='wipe'] {
+  animation: page-wipe var(--page-enter-dur) var(--ease-racing) backwards;
+}
+
+.page[data-nav='pop'][data-enter='fade'],
+.page[data-nav='pop'][data-enter='wipe'] {
+  animation-duration: calc(var(--page-enter-dur) * 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page[data-enter] {
+    animation: none;
+  }
+}

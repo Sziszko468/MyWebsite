@@ -82,7 +82,7 @@ export function VelocityHero() {
             <KineticTypography id={titleId} lines={[t.hero.titleLine1, t.hero.titleLine2]} />
             <p className={styles.lead}>{t.hero.description}</p>
             <div className={styles.actions}>
-              <Button href="#work" size="lg" arrow className={styles.cta}>
+              <Button href="#work" size="lg" arrow className={styles.cta} magnetic>
                 {t.hero.ctaPrimary}
               </Button>
               <Button to="/contact" size="lg" variant="secondary" className={styles.cta}>

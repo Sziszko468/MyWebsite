@@ -54,11 +54,56 @@
   .active .label::after {
     transform: scaleX(1);
   }
+
+  /* Once the sliding indicator is placed (data-indicator='on'), it replaces the per-label underline. */
+  position: relative;
+
+  &[data-indicator='on'] .label::after {
+    display: none;
+  }
+
+  /* One red bar, 1px wide and scaled to the label, glides to the current page's label: a transform only, on the brand's racing curve. */
+  .indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 2px;
+    background-color: var(--color-accent);
+    opacity: 0;
+    transform: translate3d(var(--ind-x, 0px), var(--ind-y, 0px), 0) scaleX(var(--ind-w, 1));
+    transform-origin: left;
+    pointer-events: none;
+  }
+
+  &[data-indicator='on'] .indicator {
+    opacity: 1;
+  }
+
+  &[data-ready] .indicator {
+    transition:
+      transform var(--dur-slow) var(--ease-racing),
+      opacity var(--dur-base) var(--ease-out);
+  }
 }
 
 /* ── Mobile menu panel ────────────────────────────────────────────── */
 
+/* The items arrive one after another when the menu opens (the dialog is display:none while closed, so this
+   plays on every opening); the delay is capped by the six items and is zero under reduced motion. */
+@keyframes menu-item-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(var(--motion-distance-sm) * var(--motion-intensity)), 0);
+  }
+}
+
 .panel {
+  .list > li {
+    animation: menu-item-in var(--dur-base) var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * var(--motion-stagger) * 0.5 + var(--dur-fast));
+  }
+
   .link {
     gap: var(--space-4);
     min-height: 3.75rem;
