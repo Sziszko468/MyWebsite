@@ -36,7 +36,7 @@ interface FinalCtaProps {
  * The closing statement: one headline, one sentence, one button, on Racing Red. Text and the button
  * are black and paper on red (the contrast is tested). The lines behind lean a little with the
  * pointer and stay still otherwise. On the home page the button goes to the contact page; the
- * services page points it at its own quote request. The e-mail address appears only once it is
+ * shop's pages point it at the request builder. The e-mail address appears only once it is
  * set in config/site.ts.
  */
 export function FinalCta({ copy: given, action = { to: '/contact' }, id = 'start', tone = homeTone('start') }: FinalCtaProps = {}) {

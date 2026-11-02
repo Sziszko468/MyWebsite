@@ -5,6 +5,8 @@ import { LANGUAGES } from '../i18n/config'
 import { dictionaries } from '../i18n/dictionaries'
 import { buildDocumentMeta, ogLocale } from './documentMeta'
 import { NAV_PAGES, PAGES, PROJECT_PAGES, findPage, projectIdOfPage } from './pages'
+import { serviceAreas } from '../content/services/areas'
+import { shopMeta } from '../content/shop/meta'
 
 const BRAND = 'Test Brand'
 
@@ -59,10 +61,19 @@ describe('buildDocumentMeta', () => {
   it.each(LANGUAGES)('gives the services page its own title and description in %s', (lang) => {
     const t = dictionaries[lang]
     const meta = buildDocumentMeta(findPage('/services'), lang, t, BRAND)
-    expect(meta.title).toBe(`${t.servicesPage.meta.title} — ${BRAND}`)
-    expect(meta.description).toBe(t.servicesPage.meta.description)
+    expect(meta.title).toBe(`${shopMeta.landing.title[lang]} — ${BRAND}`)
+    expect(meta.description).toBe(shopMeta.landing.description[lang])
     expect(meta.title).not.toBe(`${t.nav.services} — ${BRAND}`)
     expect(meta.ogType).toBe('website')
+  })
+
+  it.each(LANGUAGES)('titles a service by its name, and the request builder and the cart by their own words, in %s', (lang) => {
+    const t = dictionaries[lang]
+    const service = buildDocumentMeta(findPage('/services/webapp'), lang, t, BRAND)
+    expect(service.title).toBe(`${serviceAreas.find((area) => area.id === 'webapp')!.name[lang]} — ${t.nav.services} — ${BRAND}`)
+    expect(service.description).toBe(serviceAreas.find((area) => area.id === 'webapp')!.summary[lang])
+    expect(buildDocumentMeta(findPage('/services/configure'), lang, t, BRAND).title).toBe(`${shopMeta.configurator.title[lang]} — ${BRAND}`)
+    expect(buildDocumentMeta(findPage('/services/cart'), lang, t, BRAND).description).toBe(shopMeta.cart.description[lang])
   })
 
   it.each(LANGUAGES)('gives the About and contact pages their own title and description in %s', (lang) => {

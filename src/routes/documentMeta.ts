@@ -1,9 +1,11 @@
 import { findExperiment } from '../content/lab'
 import { labText } from '../content/labText'
 import { projectMeta } from '../content/projectDetails/meta'
+import { serviceAreas } from '../content/services/areas'
+import { shopMeta } from '../content/shop/meta'
 import type { Language } from '../i18n/config'
 import type { Dictionary } from '../i18n/locales/hu'
-import { labIdOfPage, projectIdOfPage, type NavPageId, type PageDef } from './pages'
+import { labIdOfPage, projectIdOfPage, serviceIdOfPage, type NavPageId, type PageDef } from './pages'
 
 const NAV_IDS: readonly string[] = ['work', 'services', 'about', 'lab', 'contact']
 
@@ -16,7 +18,6 @@ export interface DocumentMeta {
 }
 
 const OWN_META: Partial<Record<PageDef['id'], (t: Dictionary) => { title: string; description: string }>> = {
-  services: (t) => t.servicesPage.meta,
   about: (t) => t.aboutPage.meta,
   contact: (t) => t.contactPage.meta,
 }
@@ -30,8 +31,9 @@ export function ogLocale(lang: Language): string {
 /**
  * The title and description of a page in a language. An experiment's page and the Lab's are titled
  * from the Lab's words (content/labText.ts). A project's page has its own, written in
- * content/projectDetails/meta.ts; the services, About and contact pages have their own title and description in the
- * dictionary; the other navigation pages are titled by their navigation label; the home page by
+ * content/projectDetails/meta.ts; the shop's front page, request builder and cart have theirs in content/shop/meta.ts and a
+ * service page is titled by the service's name and described by its summary; the About and contact pages have their own
+ * title and description in the dictionary; the other navigation pages are titled by their navigation label; the home page by
  * the brand and the site's tagline; an unknown path says so.
  */
 export function buildDocumentMeta(
@@ -62,6 +64,14 @@ export function buildDocumentMeta(
   if (page.id === 'lab') {
     return { ...site, title: `${labText.meta.title[lang]} — ${brandName}`, description: labText.meta.description[lang] }
   }
+
+  // The shop: the front page, the request builder and the cart have their own words, and a service is
+  // titled by its name and described by its summary.
+  const serviceId = serviceIdOfPage(page.id)
+  const area = serviceId ? serviceAreas.find((candidate) => candidate.id === serviceId) : undefined
+  if (area) return { ...site, title: `${area.name[lang]} — ${t.nav.services} — ${brandName}`, description: area.summary[lang] }
+  const shop = page.id === 'services' ? shopMeta.landing : page.id === 'configure' ? shopMeta.configurator : page.id === 'cart' ? shopMeta.cart : undefined
+  if (shop) return { ...site, title: `${shop.title[lang]} — ${brandName}`, description: shop.description[lang] }
 
   // These pages describe themselves: what they offer is worth more in a search result than a menu label.
   const pageMeta = OWN_META[page.id]?.(t)

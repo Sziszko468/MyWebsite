@@ -1,0 +1,240 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The shop's first screen. Same family as the other pages' heroes (faint light field, speed lines
+ * that lean towards a mouse and stay out of the words), with the four services as tiles at the
+ * side instead of an index below. On a phone the words come first, the tiles follow in two
+ * columns, and nothing is wider than the screen.
+ */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+
+  @include m.under-header;
+  padding-top: calc(var(--header-height) + var(--space-7));
+  padding-bottom: var(--space-8);
+
+  @include m.up('lg') {
+    padding-top: calc(var(--header-height) + var(--space-9));
+    padding-bottom: var(--space-9);
+  }
+}
+
+.glow {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: radial-gradient(
+    circle 26rem at var(--mx, 74%) var(--my, 28%),
+    color-mix(in srgb, var(--brand-red) 15%, transparent),
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.lines {
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 0 auto;
+  width: min(100%, 90rem);
+  height: 100%;
+  opacity: 0.35;
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 55%);
+  pointer-events: none;
+
+  @include m.up('lg') {
+    opacity: 0.8;
+    mask-image: linear-gradient(to right, transparent 40%, #000 80%);
+  }
+}
+
+.inner {
+  position: relative;
+  z-index: var(--z-content);
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: var(--space-8);
+  }
+}
+
+.copy {
+  container-type: inline-size;
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    width: 1.5rem;
+    height: 3px;
+    background-color: var(--color-accent);
+    transform: skewX(-32deg);
+  }
+}
+
+.title {
+  /* Sized so the longest word of the headline in any language ("MARADANDÓT.") fits the column in one piece. */
+  font-size: clamp(1.6rem, 10cqw, 6.4rem);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.045em;
+  line-height: 0.92;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/* Each line rises out of a mask. The words are in the page from the first paint; only their position animates. */
+.rise {
+  display: block;
+  overflow: clip;
+  /* Room above the capitals for an accent (Ó, Ű) and below for the baseline, so the mask never cuts a letter. */
+  padding-block: 0.16em 0.08em;
+  margin-top: -0.16em;
+
+  > * {
+    animation: rise var(--dur-slow) var(--ease-out) both;
+    animation-delay: calc(var(--i) * 90ms);
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(70%);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+.lead {
+  max-width: 36rem;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+
+  @include m.up('md') {
+    font-size: var(--fs-lg);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.note {
+  max-width: 34rem;
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* ── The composition ──────────────────────────────────────────────── */
+
+.stack {
+  min-width: 0;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+
+  @include m.up('md') {
+    gap: var(--space-4);
+  }
+}
+
+.tile {
+  min-width: 0;
+  /* The pointer moves each tile a little, further for the ones in front. Rest values are zero. */
+  translate: calc(var(--px, 0) * var(--depth) * -1px) calc(var(--py, 0) * var(--depth) * -1px);
+  transition: translate var(--dur-base) var(--ease-out);
+
+  @include m.up('lg') {
+    &[data-position='1'] {
+      margin-top: var(--space-6);
+    }
+
+    &[data-position='2'] {
+      margin-top: calc(var(--space-6) * -1);
+    }
+  }
+}
+
+.tileLink {
+  display: grid;
+  overflow: clip;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+
+  @include m.hover {
+    border-color: var(--color-text);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  @include m.pressed {
+    transform: scale(0.985);
+  }
+}
+
+.art {
+  display: block;
+  aspect-ratio: 360 / 220;
+  background-color: var(--color-bg-subtle);
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.tileName {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  border-top: var(--border-width) solid var(--color-border);
+
+  @include m.up('md') {
+    font-size: var(--fs-base);
+  }
+}
+
+@media (forced-colors: active) {
+  .lines,
+  .glow {
+    display: none;
+  }
+}

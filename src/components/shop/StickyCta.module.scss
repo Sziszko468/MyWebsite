@@ -1,0 +1,51 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * Phones only. The bar is opaque (so the words under it never show through), clears the home
+ * indicator with the safe-area inset, and sits below the menu dialog and the intro in the stacking
+ * order. It is part of the document only while visible; hidden, it is translated away and inert.
+ */
+.bar {
+  position: fixed;
+  z-index: var(--z-sticky);
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--gutter) calc(var(--space-3) + env(safe-area-inset-bottom));
+  border-top: var(--border-width) solid var(--color-border-strong);
+  background-color: var(--color-surface-raised);
+  box-shadow: 0 -10px 24px -14px color-mix(in srgb, var(--brand-black) 60%, transparent);
+  transform: translateY(100%);
+  visibility: hidden;
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    visibility 0s linear var(--dur-base);
+
+  &[data-visible] {
+    transform: none;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  @include m.up('md') {
+    display: none;
+  }
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* While the bar is up, a focused field scrolls clear of it. */
+:global(html[data-sticky-cta]) {
+  scroll-padding-bottom: 6rem;
+}

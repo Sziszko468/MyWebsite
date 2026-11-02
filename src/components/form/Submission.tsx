@@ -1,6 +1,6 @@
 import { useState, type ReactNode, type RefObject } from 'react'
 import { siteConfig } from '../../config/site'
-import { mailtoHref } from '../../quote/summary'
+import { mailtoHref } from '../../forms/mailto'
 import { Button } from '../Button/Button'
 import type { SubmissionPhase } from './useSubmission'
 import styles from './Submission.module.scss'

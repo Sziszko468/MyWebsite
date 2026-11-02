@@ -1,4 +1,6 @@
 import type { IntroConfig } from '../../config/intro'
+import { splitLanguage } from '../../i18n/paths'
+import { isShopPath } from '../../shop/paths'
 
 /**
  * Whether the intro should be shown, and how that is remembered. Pure apart from the storage it
@@ -60,9 +62,16 @@ export function writeSkipPreference(stores: IntroStores, skip: boolean): void {
   write(stores.persistent, INTRO_KEYS.skip, skip ? '1' : null)
 }
 
-export function shouldShowIntro(config: IntroConfig, stores: IntroStores, override: IntroOverride = undefined): boolean {
+/**
+ * Whether the intro is shown on this page load. `entryPath` is the address the visitor arrived at:
+ * the shop (the services page and everything beneath it) is a buying flow, so it never opens with
+ * the intro and its 3D scene. Skipping it there does not use it up: the next visit to the home page
+ * still shows it.
+ */
+export function shouldShowIntro(config: IntroConfig, stores: IntroStores, override: IntroOverride = undefined, entryPath = ''): boolean {
   if (override === 'show') return true
   if (override === 'hide') return false
+  if (isShopPath(splitLanguage(entryPath).rest)) return false
   if (config.frequency === 'never') return false
   if (config.allowSkip && readSkipPreference(stores)) return false
 

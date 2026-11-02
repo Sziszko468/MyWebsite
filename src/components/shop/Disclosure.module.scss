@@ -1,0 +1,83 @@
+@use '../../styles/mixins' as m;
+
+.root {
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.heading {
+  font-size: inherit;
+  letter-spacing: normal;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 3.5rem;
+  padding: var(--space-3) 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  @include m.hover {
+    color: var(--color-accent-text);
+  }
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  flex: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+
+.icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--color-accent-text);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.open .icon {
+  transform: rotate(180deg);
+}
+
+/* The panel's height animates from 0fr to 1fr; hidden content also leaves the accessibility tree. */
+.panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--dur-base) var(--ease-out),
+    visibility 0s linear var(--dur-base);
+}
+
+.open .panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.inner {
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.open .inner {
+  padding-bottom: var(--space-4);
+}

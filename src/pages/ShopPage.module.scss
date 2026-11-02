@@ -1,0 +1,71 @@
+@use '../styles/mixins' as m;
+
+/* The frame of the shop's working pages (request builder, cart): a header-height offset, a title, then the tool. */
+
+.page {
+  padding-top: calc(var(--space-4));
+  padding-bottom: var(--space-9);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+
+  @include m.up('md') {
+    padding-top: var(--space-6);
+  }
+}
+
+.wide {
+  max-width: none;
+}
+
+.head {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 var(--space-6);
+
+  @include m.up('md') {
+    margin-top: var(--space-5);
+  }
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    width: 1.5rem;
+    height: 3px;
+    background-color: var(--color-accent);
+    transform: skewX(-32deg);
+  }
+}
+
+.title {
+  /* Smaller on a phone: the question the page asks should be near the top of the screen. */
+  font-size: clamp(2rem, 1.4rem + 3vw, 5rem);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.intro {
+  max-width: 44rem;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+
+  @include m.up('md') {
+    font-size: var(--fs-md);
+    line-height: var(--lh-relaxed);
+  }
+}

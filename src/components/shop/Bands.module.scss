@@ -1,0 +1,230 @@
+@use '../../styles/mixins' as m;
+
+/* ── Configure ─────────────────────────────────────────────────────── */
+
+.configure {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: var(--space-9);
+  }
+}
+
+.configureText {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.configureTitle {
+  font-size: var(--fs-3xl);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.lead {
+  max-width: 38rem;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.stepsPreview {
+  display: grid;
+  gap: var(--space-2);
+  counter-reset: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 3.25rem;
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    font-weight: var(--fw-bold);
+
+    &:nth-child(even) {
+      margin-left: var(--space-5);
+    }
+  }
+}
+
+.stepNumber {
+  flex: none;
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+}
+
+/* ── Process ───────────────────────────────────────────────────────── */
+
+.steps {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-7);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  @include m.up('xl') {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.step {
+  min-width: 0;
+  padding-top: var(--space-4);
+  border-top: 3px solid var(--color-accent);
+}
+
+.stepTitle {
+  margin: var(--space-2) 0;
+  font-size: var(--fs-md);
+  line-height: var(--lh-snug);
+  overflow-wrap: anywhere;
+}
+
+.stepText {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+.note {
+  max-width: 48rem;
+  margin-top: var(--space-6);
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.twoUp {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-7);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--space-8);
+  }
+}
+
+.small {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.after {
+  display: grid;
+  gap: var(--space-4);
+
+  li {
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  strong {
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+}
+
+.collab {
+  display: grid;
+  gap: var(--space-4);
+
+  strong {
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+}
+
+/* ── Support ───────────────────────────────────────────────────────── */
+
+.cards {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-7);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+}
+
+.card {
+  min-width: 0;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+
+.cardTitle {
+  margin-bottom: var(--space-2);
+  font-size: var(--fs-lg);
+}
+
+/* ── Work ──────────────────────────────────────────────────────────── */
+
+.work {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-7);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+
+  > li {
+    min-width: 0;
+  }
+}
+
+/* ── Questions ─────────────────────────────────────────────────────── */
+
+.faq {
+  display: grid;
+  gap: var(--space-7);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-6);
+    align-items: start;
+  }
+}
+
+.faqLead {
+  min-width: 0;
+
+  @include m.up('lg') {
+    grid-column: 1 / span 4;
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-5));
+  }
+}
+
+.faq > ul {
+  @include m.up('lg') {
+    grid-column: 6 / span 7;
+  }
+}

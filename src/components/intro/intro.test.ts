@@ -48,6 +48,19 @@ describe('intro frequency', () => {
     expect(introConfig.allowSkip).toBe(true)
   })
 
+  it('never opens the shop: a buying flow does not start with the intro, and skipping it there does not use it up', () => {
+    const stores = freshStores()
+    for (const path of ['/hu/services', '/en/services/', '/nl/services/webapp', '/hu/services/configure', '/en/services/cart']) {
+      expect(shouldShowIntro(config(), stores, undefined, path), path).toBe(false)
+    }
+    // Still shown on the pages that are not the shop, and still there for the next visit to the home page.
+    expect(shouldShowIntro(config(), stores, undefined, '/hu/')).toBe(true)
+    expect(shouldShowIntro(config(), stores, undefined, '/en/about')).toBe(true)
+    expect(stores.persistent.data.size).toBe(0)
+    // The development override still wins, so the intro can be tested anywhere.
+    expect(shouldShowIntro(config(), stores, 'show', '/hu/services')).toBe(true)
+  })
+
   it('shows on the first visit and not again once entered', () => {
     const stores = freshStores()
     const first = config({ frequency: 'first-visit' })

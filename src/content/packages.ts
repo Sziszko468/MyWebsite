@@ -1,3 +1,5 @@
+import type { ExtraId } from './services/addons'
+import type { NeedId } from './services/ids'
 import type { ServicePrice, Timeline, VatMode } from './pricing'
 import { tri, type Trilingual } from './trilingual'
 
@@ -37,6 +39,20 @@ export interface ServicePackage {
   fits: readonly Trilingual[]
   /** What it can include; the exact list is settled in the quote. */
   includes: readonly Trilingual[]
+
+  /**
+   * The shop's view of the package. `needs` are the things a visitor may say they need that this
+   * package suits: it drives the "suggested" hint and nothing more (a suggestion is not a claim of
+   * being the best fit). `deliverables` are the three main things the client holds at the end,
+   * and `scope`, `customization` and `support` are the comparison's rows. `extras` are the add-ons
+   * (content/services/addons.ts) that can be put on it.
+   */
+  needs: readonly NeedId[]
+  deliverables: readonly Trilingual[]
+  scope: Trilingual
+  customization: Trilingual
+  support: Trilingual
+  extras: readonly ExtraId[]
 }
 
 export const packages: readonly ServicePackage[] = [
@@ -87,6 +103,32 @@ export const packages: readonly ServicePackage[] = [
         'Basismetadata en technische SEO-instellingen',
       ),
     ],
+    needs: ['website'],
+    deliverables: [
+      tri('Kész, reszponzív weboldal', 'A finished, responsive website', 'Een afgeronde, responsieve website'),
+      tri(
+        'Oldalszerkezet és navigáció, amely telefonon is működik',
+        'A page structure and navigation that work on a phone',
+        'Een paginastructuur en navigatie die ook op een telefoon werken',
+      ),
+      tri(
+        'Beállított metaadatok és technikai SEO-alapok',
+        'Metadata and technical SEO basics set up',
+        'Ingestelde metadata en technische SEO-basis',
+      ),
+    ],
+    scope: tri('Kisebb, áttekinthető weboldal.', 'A small, easy-to-grasp website.', 'Een kleine, overzichtelijke website.'),
+    customization: tri(
+      'Egyedi megjelenés az alapszerkezeten belül.',
+      'A distinctive look within the basic structure.',
+      'Een eigen uitstraling binnen de basisstructuur.',
+    ),
+    support: tri(
+      'Átadás a megállapodás szerint; a folyamatos karbantartás külön megállapodás (Care).',
+      'Handover as agreed; ongoing maintenance is a separate agreement (Care).',
+      'Oplevering zoals afgesproken; doorlopend onderhoud is een aparte afspraak (Care).',
+    ),
+    extras: ['pages', 'motion', 'languages', 'custom', 'care'],
   },
   {
     id: 'grow',
@@ -135,6 +177,36 @@ export const packages: readonly ServicePackage[] = [
         'Integraties met derden binnen de projectomvang',
       ),
     ],
+    needs: ['improve', 'website', 'ui', 'integrations'],
+    deliverables: [
+      tri('Továbbfejlesztett, bővített weboldal', 'A developed, extended website', 'Een doorontwikkelde, uitgebreide website'),
+      tri(
+        'Testreszabott komponensek és interaktív felületek',
+        'Custom components and interactive interfaces',
+        'Maatwerkcomponenten en interactieve interfaces',
+      ),
+      tri(
+        'Az egyeztetett külső szolgáltatások bekötve',
+        'The agreed external services connected',
+        'De afgesproken externe diensten gekoppeld',
+      ),
+    ],
+    scope: tri(
+      'Meglévő vagy összetettebb weboldal bővítése.',
+      'Extending an existing or more complex website.',
+      'Een bestaande of complexere website uitbreiden.',
+    ),
+    customization: tri(
+      'Testreszabott komponensek és interaktív elemek.',
+      'Custom components and interactive elements.',
+      'Maatwerkcomponenten en interactieve elementen.',
+    ),
+    support: tri(
+      'Átadás a megállapodás szerint; a folyamatos karbantartás külön megállapodás (Care).',
+      'Handover as agreed; ongoing maintenance is a separate agreement (Care).',
+      'Oplevering zoals afgesproken; doorlopend onderhoud is een aparte afspraak (Care).',
+    ),
+    extras: ['pages', 'responsive', 'motion', 'api', 'performance', 'languages', 'custom', 'care'],
   },
   {
     id: 'build',
@@ -187,6 +259,36 @@ export const packages: readonly ServicePackage[] = [
         'Opzet van de applicatiearchitectuur',
       ),
     ],
+    needs: ['webapp', 'integrations'],
+    deliverables: [
+      tri(
+        'Működő webalkalmazás az első használható verzióig',
+        'A working web application, up to a first usable version',
+        'Een werkende webapplicatie, tot een eerste bruikbare versie',
+      ),
+      tri(
+        'Frontend és backend a megállapodott terjedelemben',
+        'Frontend and back end within the agreed scope',
+        'Frontend en back-end binnen de afgesproken omvang',
+      ),
+      tri('Adatbázis- és API-kapcsolatok', 'Database and API connections', 'Database- en API-koppelingen'),
+    ],
+    scope: tri(
+      'Egyedi webalkalmazás vagy összetettebb digitális termék.',
+      'A custom web application or a more complex digital product.',
+      'Een maatwerk-webapplicatie of een complexer digitaal product.',
+    ),
+    customization: tri(
+      'Egyedi felhasználói folyamatok és architektúra.',
+      'Custom user flows and architecture.',
+      'Maatwerk gebruikersflows en architectuur.',
+    ),
+    support: tri(
+      'Átadás a megállapodás szerint; a további fejlesztés külön megállapodás.',
+      'Handover as agreed; further development is a separate agreement.',
+      'Oplevering zoals afgesproken; verdere ontwikkeling is een aparte afspraak.',
+    ),
+    extras: ['motion', 'api', 'performance', 'languages', 'custom', 'care'],
   },
   {
     id: 'care',
@@ -231,6 +333,28 @@ export const packages: readonly ServicePackage[] = [
         'Nieuwe functies ontwerpen en bouwen volgens aparte afspraak',
       ),
     ],
+    needs: ['improve', 'website', 'webapp'],
+    deliverables: [
+      tri('Az egyeztetett karbantartási feladatok elvégezve', 'The agreed maintenance tasks carried out', 'De afgesproken onderhoudstaken uitgevoerd'),
+      tri('Felderített és javított hibák', 'Problems found and fixed', 'Gevonden en verholpen problemen'),
+      tri('Teljesítményellenőrzés', 'A performance check', 'Een prestatiecontrole'),
+    ],
+    scope: tri(
+      'Egy már működő weboldal vagy alkalmazás folyamatos gondozása.',
+      'Ongoing care of a website or application that already runs.',
+      'Doorlopende zorg voor een website of applicatie die al draait.',
+    ),
+    customization: tri(
+      'Kisebb módosítások a meglévő megoldáson.',
+      'Small changes to what already exists.',
+      'Kleine aanpassingen aan wat er al is.',
+    ),
+    support: tri(
+      'Az egyeztetett karbantartás maga a csomag lényege; a terjedelmet az ajánlat rögzíti.',
+      'The agreed maintenance is the point of the package; the scope is written in the quote.',
+      'Het afgesproken onderhoud is de kern van het pakket; de omvang staat in de offerte.',
+    ),
+    extras: ['pages', 'responsive', 'performance', 'languages', 'custom'],
   },
 ]
 

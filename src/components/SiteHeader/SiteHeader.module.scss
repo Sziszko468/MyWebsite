@@ -49,3 +49,14 @@
   justify-self: end;
   gap: var(--space-3);
 }
+
+/* Below the `nav` breakpoint the cart (when it has something to show) and the menu button sit together at the right. */
+.mobile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  @include m.up('nav') {
+    display: none;
+  }
+}

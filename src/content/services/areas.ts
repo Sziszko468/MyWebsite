@@ -1,6 +1,6 @@
 import type { ProjectId } from '../projects'
 import { tri, type Trilingual } from '../trilingual'
-import type { ServiceAreaId } from '../../quote/types'
+import type { ServiceId } from './ids'
 
 /**
  * The service areas on the services page, in this order. Remove an entry to hide its block, edit
@@ -9,11 +9,11 @@ import type { ServiceAreaId } from '../../quote/types'
  * An area describes what is offered, not proven experience in it. A feature belongs on the list
  * only if the owner is willing to take it on; the API & Integrations summary says outright that
  * what can be connected is settled together before a quote. Each id doubles as the project type
- * that the area's quote button selects in the form.
+ * that the area's quote button selects in the configurator.
  */
 
 export interface ServiceArea {
-  id: ServiceAreaId
+  id: ServiceId
   name: Trilingual
   summary: Trilingual
   features: readonly Trilingual[]

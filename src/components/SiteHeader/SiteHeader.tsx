@@ -6,6 +6,8 @@ import { Container } from '../Container/Container'
 import { LanguageSwitcher } from '../LanguageSwitcher/LanguageSwitcher'
 import { MainNav } from '../MainNav/MainNav'
 import { MobileMenu } from '../MobileMenu/MobileMenu'
+import { CartAnnouncer } from '../shop/CartAnnouncer'
+import { CartLink } from '../shop/CartLink'
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import styles from './SiteHeader.module.scss'
 import { useScrolled } from './useScrolled'
@@ -29,6 +31,7 @@ export function SiteHeader() {
         </div>
 
         <div className={styles.actions}>
+          <CartLink />
           <ThemeToggle />
           <LanguageSwitcher />
           <Button to="/contact" size="sm">
@@ -36,7 +39,11 @@ export function SiteHeader() {
           </Button>
         </div>
 
-        <MobileMenu />
+        <div className={styles.mobile}>
+          <CartLink />
+          <MobileMenu />
+        </div>
+        <CartAnnouncer />
       </Container>
     </header>
   )

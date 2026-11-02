@@ -33,8 +33,8 @@ function Package({ pkg, position }: { pkg: ServicePackage; position: number }) {
         priceNote={pkg.priceNote?.[lang]}
         featured={pkg.featured}
         action={
-          // The quote request lives on the services page; the package travels with the visitor.
-          <Button to={`/services?package=${pkg.id}#quote`} size="sm" variant={pkg.featured ? 'primary' : 'secondary'} arrow>
+          // The packages are presented on the services page; the one chosen here arrives selected there.
+          <Button to={`/services?package=${pkg.id}#packages`} size="sm" variant={pkg.featured ? 'primary' : 'secondary'} arrow>
             {t.home.packages.cta}
             <span className="visually-hidden"> — {pkg.name}</span>
           </Button>
@@ -63,8 +63,8 @@ function Package({ pkg, position }: { pkg: ServicePackage; position: number }) {
  * The collaboration packages, with a clear order of weight: Build is the large dark card, Launch
  * and Grow flank it, Care is a wider card with its parts side by side. Words and prices come from
  * content/packages.ts, the same source as the services page, and a price reads "request a custom
- * quote" until a real figure is set. The call to action opens the quote request on the services
- * page with the package already chosen.
+ * quote" until a real figure is set. The call to action opens the services page at the packages,
+ * with the package already chosen.
  */
 export function ServicePackages() {
   const { t } = useI18n()

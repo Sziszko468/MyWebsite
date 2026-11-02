@@ -1,0 +1,378 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The request builder's card. One question group per screen on a phone: a short progress line and
+ * a bar, large choice cards, and Back / Next at the end of the step. They are in the flow of the card,
+ * not stuck to the screen: a bar fixed over a form would sit on top of the very fields it belongs to
+ * (the layout matrix measured that), and every step is short enough to reach its end with one scroll.
+ * From `md` the steps are listed across the top.
+ */
+
+.card {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+
+  @include m.up('md') {
+    padding: var(--space-7);
+  }
+}
+
+/* ── Progress ─────────────────────────────────────────────────────── */
+
+.progress {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.compact {
+  display: grid;
+  gap: var(--space-2);
+
+  @include m.up('md') {
+    display: none;
+  }
+}
+
+.compactText {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+.bar {
+  height: 4px;
+  overflow: clip;
+  border-radius: 4px;
+  background-color: var(--color-border);
+
+  span {
+    display: block;
+    height: 100%;
+    background-color: var(--color-accent);
+    transition: width var(--dur-base) var(--ease-out);
+  }
+}
+
+.list {
+  display: none;
+
+  @include m.up('md') {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  li {
+    min-width: 0;
+    border-top: 3px solid var(--color-border-strong);
+
+    &[data-state='done'] {
+      border-top-color: var(--color-accent);
+    }
+
+    &[data-state='current'] {
+      border-top-color: var(--color-text);
+    }
+  }
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--size-touch);
+  padding: var(--space-2) 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  text-align: left;
+
+  li[data-state='current'] & {
+    color: var(--color-text);
+  }
+}
+
+button.stepItem {
+  cursor: pointer;
+
+  @include m.hover {
+    color: var(--color-accent-text);
+  }
+}
+
+.stepMark {
+  flex: none;
+  color: var(--color-accent-text);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: var(--ls-wide);
+}
+
+/* ── The step ─────────────────────────────────────────────────────── */
+
+.stepTitle {
+  font-size: var(--fs-2xl);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.help {
+  max-width: 44rem;
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+.fields {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+}
+
+.subTitle {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.empty,
+.noExtras p,
+.skip {
+  color: var(--color-text-secondary);
+}
+
+.noExtras {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.consent {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.privacy {
+  justify-self: start;
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.pending,
+.memory {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+/* ── Review ───────────────────────────────────────────────────────── */
+
+.review {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.reviewBlock {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.reviewList {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.reviewLine {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+
+  @include m.up('md') {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+}
+
+.reviewText {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.reviewName {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--size-touch);
+    color: inherit;
+  }
+}
+
+.reviewLabel {
+  color: var(--color-text-secondary);
+  font-weight: var(--fw-semibold);
+}
+
+.reviewButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.reviewNote {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.facts {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+
+  > div {
+    display: grid;
+    gap: var(--space-1);
+
+    @include m.up('sm') {
+      grid-template-columns: 11rem minmax(0, 1fr);
+      gap: var(--space-4);
+    }
+  }
+
+  dt {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+}
+
+/* ── Back / Next ──────────────────────────────────────────────────── */
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.primary {
+  flex: 1;
+  padding-inline: var(--space-4);
+
+  @include m.up('md') {
+    flex: none;
+    margin-left: auto;
+  }
+}
+
+/* ── Sent ─────────────────────────────────────────────────────────── */
+
+.back {
+  flex: none;
+  padding-inline: var(--space-3);
+
+  @include m.up('sm') {
+    padding-inline: var(--space-5);
+  }
+}
+
+.backIcon {
+  display: inline-grid;
+  margin-right: 0;
+
+  @include m.up('sm') {
+    margin-right: var(--space-2);
+  }
+}
+
+/* On a narrow phone Back is the arrow alone (its name is still read), which leaves Next the room for its words. */
+.backText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+
+  @include m.up('sm') {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+}
+
+.sent {
+  display: grid;
+  gap: var(--space-4);
+
+  p {
+    max-width: 44rem;
+    color: var(--color-text-secondary);
+  }
+}
+
+.after {
+  display: grid;
+  gap: var(--space-3);
+
+  li {
+    display: flex;
+    gap: var(--space-3);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+  }
+
+  strong {
+    color: var(--color-text);
+  }
+}
+
+.afterNumber {
+  flex: none;
+  color: var(--color-accent-text);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+}
+
+.sentActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

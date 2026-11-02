@@ -1,0 +1,377 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * Each package has its own mark and accent (--accent): Launch and Build in Racing Red, Grow in
+ * Cobalt, Care in the neutral ink. The tile row chooses; the stage presents. Nothing here is a
+ * table: the facts are blocks that reflow from one column on a phone to three on a wide screen.
+ */
+
+.tile[data-package='launch'],
+.tile[data-package='build'],
+.stage[data-package='launch'],
+.stage[data-package='build'] {
+  --accent: var(--color-accent);
+  --accent-text: var(--color-accent-text);
+}
+
+.tile[data-package='grow'],
+.stage[data-package='grow'] {
+  --accent: var(--color-secondary);
+  --accent-text: var(--color-secondary-text);
+}
+
+.tile[data-package='care'],
+.stage[data-package='care'] {
+  --accent: var(--color-text-secondary);
+  --accent-text: var(--color-text);
+}
+
+.chooser {
+  min-width: 0;
+  margin: var(--space-7) 0 var(--space-5);
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+.tile {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: 7rem;
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+
+  input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+
+  @include m.hover {
+    border-color: var(--color-text);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: scale(0.985);
+  }
+
+  &:has(input:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* The chosen tile: heavier frame, raised face and an accent bar, so it is not told by colour alone. */
+  &[data-checked] {
+    border-color: var(--color-text);
+    background-color: var(--color-surface-raised);
+    box-shadow:
+      0 0 0 1px var(--color-text),
+      var(--shadow-md);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: auto var(--space-4) -1px;
+      height: 4px;
+      border-radius: 4px 4px 0 0;
+      background-color: var(--accent);
+    }
+  }
+}
+
+.glyph {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  color: var(--accent-text);
+}
+
+.tileText {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.tileIndex {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+}
+
+.tileName {
+  font-size: var(--fs-lg);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.tileTagline {
+  display: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+
+  @include m.up('lg') {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+}
+
+/* ── The stage ────────────────────────────────────────────────────── */
+
+.stage {
+  position: relative;
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-5);
+  overflow: clip;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  animation: stage-in var(--dur-base) var(--ease-out);
+
+  /* The package's accent runs along the top edge. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background-color: var(--accent);
+  }
+
+  &[data-featured] {
+    background-color: var(--color-surface-raised);
+  }
+
+  @include m.up('md') {
+    padding: var(--space-7);
+  }
+}
+
+@keyframes stage-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.head {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+
+  @include m.up('md') {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+.bigGlyph {
+  display: block;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0.6rem;
+  border-radius: var(--radius-lg);
+  background-color: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent-text);
+
+  @include m.up('md') {
+    width: 5.5rem;
+    height: 5.5rem;
+    padding: 1rem;
+  }
+}
+
+.headText {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--fs-3xl);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.tagline {
+  max-width: 44rem;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+
+  @include m.up('md') {
+    font-size: var(--fs-lg);
+  }
+}
+
+.featured {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.facts {
+  display: grid;
+  gap: var(--space-5);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  @include m.up('xl') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.fact {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-normal);
+}
+
+.label {
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.slashes {
+  display: grid;
+  gap: var(--space-2);
+
+  li {
+    position: relative;
+    padding-left: var(--space-4);
+
+    &::before {
+      content: '/';
+      position: absolute;
+      left: 0;
+      color: var(--accent-text);
+      font-weight: var(--fw-black);
+    }
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  li {
+    padding: 0.25rem var(--space-3);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    color: var(--color-text);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+  }
+}
+
+.foot {
+  display: grid;
+  gap: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: var(--border-width) solid var(--color-border);
+
+  @include m.up('md') {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+
+.priceBox {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text);
+
+  h4:not(:first-child) {
+    margin-top: var(--space-3);
+  }
+}
+
+.timeline {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.custom {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+
+  @include m.up('md') {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-6);
+  }
+}
+
+.customTitle {
+  font-size: var(--fs-lg);
+}
+
+.customText {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+}

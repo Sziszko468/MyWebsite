@@ -1,0 +1,204 @@
+@use '../../styles/mixins' as m;
+
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+}
+
+.hint {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.two {
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+
+  svg {
+    flex: none;
+    margin-top: 0.15em;
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: 3.5rem;
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+
+  @include m.hover {
+    border-color: var(--color-text);
+    background-color: var(--color-surface-hover);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  &:has(.input:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* The chosen card: a heavier frame, a raised face and the tick, all at once. */
+  &[data-checked] {
+    border-color: var(--color-text);
+    background-color: var(--color-surface-raised);
+    box-shadow: 0 0 0 1px var(--color-text);
+  }
+
+  &[data-disabled] {
+    cursor: not-allowed;
+    border-color: var(--color-disabled-border);
+    background-color: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+  }
+}
+
+.compact {
+  min-height: 3rem;
+  padding: var(--space-3);
+}
+
+/* The input covers the card, so a tap anywhere on it lands on the input itself. */
+.input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0.1rem;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: transparent;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.round {
+  border-radius: var(--radius-pill);
+}
+
+.card[data-checked] .mark {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  animation: pop var(--dur-base) var(--ease-out);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.7);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.body {
+  display: grid;
+  flex: 1;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.title {
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  overflow-wrap: anywhere;
+}
+
+.tag {
+  padding: 0.1rem var(--space-2);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.text {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+.meta {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.card[data-disabled] .text,
+.card[data-disabled] .meta {
+  color: inherit;
+}

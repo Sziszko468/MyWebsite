@@ -1,7 +1,7 @@
 import { tri, type Trilingual } from '../trilingual'
 
 /**
- * The questions at the bottom of the services page, in this order. The answers are general and
+ * The questions on the services page and, by id, on each service's page, in this order. The answers are general and
  * meant to be edited: they set no binding price, guarantee or contract term, and they should keep
  * that character when they are rewritten. If a package gets a published price, revisit the second
  * answer.
@@ -18,18 +18,18 @@ export const faq: readonly FaqItem[] = [
     id: 'start',
     question: tri('Hogyan indul egy projekt?', 'How does a project start?', 'Hoe begint een project?'),
     answer: tri(
-      'Az ajánlatkérő űrlap kitöltésével: megírod, mit szeretnél, és hogyan érhetlek el. Ezután egyeztetünk az ötletről és a célokról; ha a terjedelem tisztázódott, ajánlatot tudok adni.',
-      'By filling in the quote request form: you tell me what you would like and how to reach you. Then we talk through the idea and the goals; once the scope is clear, I can give you a quote.',
-      'Door het offerteformulier in te vullen: je vertelt wat je wilt en hoe ik je kan bereiken. Daarna bespreken we het idee en de doelen; als de omvang duidelijk is, kan ik een offerte geven.',
+      'Az ajánlatkérés összeállításával: kiválasztod, mire van szükséged, megírod, mit szeretnél, és megadod, hogyan érhetlek el. Ezután egyeztetünk az ötletről és a célokról; ha a terjedelem tisztázódott, ajánlatot tudok adni.',
+      'By putting together a quote request: you choose what you need, tell me what you would like and how to reach you. Then we talk through the idea and the goals; once the scope is clear, I can give you a quote.',
+      'Door een offerteaanvraag samen te stellen: je kiest wat je nodig hebt, vertelt wat je wilt en hoe ik je kan bereiken. Daarna bespreken we het idee en de doelen; als de omvang duidelijk is, kan ik een offerte geven.',
     ),
   },
   {
     id: 'cost',
     question: tri('Mennyibe kerül egy weboldal?', 'How much does a website cost?', 'Wat kost een website?'),
     answer: tri(
-      'Ez a terjedelemtől függ: az oldalak és funkciók számától, a tartalom előkészítettségétől, az integrációktól és attól, hogy kell-e háttérrendszer. Ezért előre nem mondok fix árat; a projekt ismeretében készítek ajánlatot. A költségkeretedet az ajánlatkérésnél megadhatod, de nem kötelező.',
-      'It depends on the scope: the number of pages and features, how ready the content is, any integrations, and whether a back end is needed. That is why I do not name a fixed price up front; I prepare a quote once I know the project. You can mention a budget in the quote request, but you do not have to.',
-      'Dat hangt af van de omvang: het aantal pagina’s en functies, hoe ver de inhoud al is, eventuele integraties en of er een back-end nodig is. Daarom noem ik vooraf geen vaste prijs; ik maak een offerte zodra ik het project ken. Je kunt een budget noemen bij de offerteaanvraag, maar dat hoeft niet.',
+      'Ez a terjedelemtől függ: az oldalak és funkciók számától, a tartalom előkészítettségétől, az integrációktól és attól, hogy kell-e háttérrendszer. Ezért előre nem mondok fix árat; a projekt ismeretében készítek ajánlatot. A költségkeretedet az ajánlatkérés kiegészítő követelményeinél megadhatod, de nem kötelező.',
+      'It depends on the scope: the number of pages and features, how ready the content is, any integrations, and whether a back end is needed. That is why I do not name a fixed price up front; I prepare a quote once I know the project. You can mention a budget in the additional requirements of the quote request, but you do not have to.',
+      'Dat hangt af van de omvang: het aantal pagina’s en functies, hoe ver de inhoud al is, eventuele integraties en of er een back-end nodig is. Daarom noem ik vooraf geen vaste prijs; ik maak een offerte zodra ik het project ken. Je kunt een budget noemen bij de aanvullende eisen van de offerteaanvraag, maar dat hoeft niet.',
     ),
   },
   {

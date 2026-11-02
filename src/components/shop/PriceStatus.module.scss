@@ -1,0 +1,27 @@
+.price {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.value {
+  font-weight: var(--fw-bold);
+}
+
+.vat {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+
+.hint {
+  flex-basis: 100%;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}

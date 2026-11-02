@@ -1,0 +1,74 @@
+@use '../../styles/mixins' as m;
+
+.group {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.heading {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.list {
+  display: grid;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  border-bottom: var(--border-width) solid var(--color-divider);
+  color: var(--color-text);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+
+  @include m.hover {
+    color: var(--color-accent-text);
+  }
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-touch);
+  padding-inline: var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+
+  @include m.hover {
+    border-color: var(--color-text);
+    background-color: var(--color-surface-hover);
+  }
+}
+
+.count {
+  display: grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding-inline: 0.25rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+}

@@ -1,0 +1,15 @@
+.list {
+  min-width: 0;
+  border-top: var(--border-width) solid var(--color-border-strong);
+
+  > li > div {
+    border-bottom-color: var(--color-border-strong);
+  }
+}
+
+.answer {
+  max-width: 44rem;
+  padding-right: var(--space-6);
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}

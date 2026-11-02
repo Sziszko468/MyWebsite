@@ -1,0 +1,71 @@
+@use '../../styles/mixins' as m;
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+
+  /* The slash between crumbs, as in the brand's mark. */
+  & + &::before {
+    content: '/';
+    color: var(--color-border-strong);
+  }
+
+  &[data-last] {
+    color: var(--color-text);
+    font-weight: var(--fw-bold);
+  }
+
+  /* On a phone only the parent is shown, as the way back. */
+  &:not([data-parent]) {
+    display: none;
+  }
+
+  & + &::before {
+    display: none;
+  }
+
+  @include m.up('md') {
+    &:not([data-parent]) {
+      display: flex;
+    }
+
+    & + &::before {
+      display: inline;
+    }
+  }
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-touch);
+  color: var(--color-text);
+  text-decoration: none;
+
+  @include m.hover {
+    color: var(--color-accent-text);
+  }
+
+}
+
+/* The arrow belongs to the phone's back link; the full trail needs none. */
+.arrow {
+  display: inline-grid;
+
+  @include m.up('md') {
+    display: none;
+  }
+}

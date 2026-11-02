@@ -6,6 +6,7 @@ import { BrandMark } from '../BrandMark/BrandMark'
 import { Button } from '../Button/Button'
 import { LanguageSwitcher } from '../LanguageSwitcher/LanguageSwitcher'
 import { MainNav } from '../MainNav/MainNav'
+import { ShopMenuGroup } from '../shop/ShopMenuGroup'
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import styles from './MobileMenu.module.scss'
 
@@ -97,6 +98,7 @@ export function MobileMenu() {
 
         <div className={styles.body}>
           <MainNav variant="panel" onNavigate={closeMenu} />
+          <ShopMenuGroup onNavigate={closeMenu} />
 
           <div className={styles.footer}>
             <div className={styles.switches}>

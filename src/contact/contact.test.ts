@@ -7,6 +7,8 @@ import { contactErrorText } from './messages'
 import { buildContactSummary } from './summary'
 import { CONTACT_KINDS, EMPTY_CONTACT, PATH_KIND, isContactPath, type ContactDraft, type ContactField, type ContactRequest } from './types'
 import { CONTACT_FIELD_ORDER, CONTACT_LIMITS, toContactRequest, validateContact, type ContactErrorCode } from './validation'
+import { shopText } from '../content/shop'
+import { localize } from '../content/trilingual'
 
 const options = { requireConsent: true }
 
@@ -199,7 +201,7 @@ describe('the words of the page', () => {
         else if (value && typeof value === 'object') Object.values(value).forEach(walk)
       }
       walk(dictionaries[lang].contactPage)
-      walk(dictionaries[lang].servicesPage)
+      walk(localize(shopText, lang))
       for (const text of strings) expect(text, lang).not.toMatch(/[\w.+-]+@[\w-]+\.[\w.]+/)
     }
   })

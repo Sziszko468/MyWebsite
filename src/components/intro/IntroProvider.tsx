@@ -11,7 +11,7 @@ import { browserStores, markIntroSeen, readIntroOverride, shouldShowIntro } from
  */
 export function IntroProvider({ children, config = introConfig }: { children: ReactNode; config?: IntroConfig }) {
   const [phase, setPhase] = useState<IntroPhase>(() =>
-    shouldShowIntro(config, browserStores(), readIntroOverride(window.location.search)) ? 'ready' : 'completed',
+    shouldShowIntro(config, browserStores(), readIntroOverride(window.location.search), window.location.pathname) ? 'ready' : 'completed',
   )
   // The same value, readable synchronously, so two quick events cannot both pass a guard.
   const current = useRef(phase)

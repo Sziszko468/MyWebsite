@@ -1,5 +1,5 @@
 import type { Language } from '../i18n/config'
-import { isEmail } from '../quote/validation'
+import { isEmail } from '../forms/validate'
 import { CONTACT_KINDS, type ContactDraft, type ContactField, type ContactRequest } from './types'
 
 /** What counts as a good answer. The form and the tests use these same rules. */

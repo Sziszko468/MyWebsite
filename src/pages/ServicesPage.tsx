@@ -1,51 +1,46 @@
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { useLocation } from 'react-router'
-import { isPackageId } from '../content/packages'
+import { isPackageId, packages, type PackageId } from '../content/packages'
 import { FinalCta } from '../components/home/FinalCta'
-import { Faq } from '../components/services/Faq'
-import { PackagePicker } from '../components/services/PackagePicker'
-import { Process } from '../components/services/Process'
-import { QuoteSection } from '../components/services/QuoteSection'
-import { servicesTone } from '../components/services/rhythm'
-import { ServiceAreas } from '../components/services/ServiceAreas'
-import { ServicesHero } from '../components/services/ServicesHero'
-import { useI18n } from '../i18n/useI18n'
-import type { QuoteDraft } from '../quote/types'
-import { useQuoteDraft } from '../quote/useQuoteDraft'
+import { ConfigureBand, FaqBand, ProcessBand, SupportBand, WorkBand } from '../components/shop/Bands'
+import { Discovery } from '../components/shop/Discovery'
+import { PackageSelector } from '../components/shop/PackageSelector'
+import { shopTone } from '../components/shop/rhythm'
+import { ShopHero } from '../components/shop/ShopHero'
+import { SHOP_PATHS } from '../shop/paths'
+import { useShopText } from '../shop/useShopText'
 
 /** The package named in the address (`?package=build`), if it is one of ours. */
-function packageFromSearch(search: string): Partial<QuoteDraft> {
+function packageFromSearch(search: string): PackageId | null {
   const wanted = new URLSearchParams(search).get('package')
-  return isPackageId(wanted) ? { package: wanted } : {}
+  return isPackageId(wanted) ? wanted : null
 }
 
 /**
- * The services page: a hero, the four areas of work, the four packages, the quote request, how we
- * work, the questions and a closing call to action. One draft ties the page together: choosing a
- * package or a kind of project above fills in the form below, and a link from another page can
- * arrive with a package already chosen (`/services?package=build#quote`).
+ * The shop's front page: a hero that says what is offered, the four services (with a search over
+ * the whole catalogue), the four packages as products with an optional comparison, the way into
+ * the request builder, how a project runs and what follows an inquiry, the support options, real
+ * work, the questions and a closing call to action. A package named in the address
+ * (`/services?package=build#packages`) arrives chosen.
  */
 export function ServicesPage() {
-  const { t } = useI18n()
+  const { landing } = useShopText()
   const { search } = useLocation()
-  const quote = useQuoteDraft(packageFromSearch(search))
-  const { set } = quote
-
-  // The same page can be reached again with another package in the address.
-  useEffect(() => {
-    const { package: wanted } = packageFromSearch(search)
-    if (wanted) set('package', wanted)
-  }, [search, set])
+  // The visitor's own choice holds for the address it was made at; a different `?package=` in the address wins again.
+  const [picked, setPicked] = useState<{ address: string; id: PackageId } | null>(null)
+  const selected = picked?.address === search ? picked.id : (packageFromSearch(search) ?? packages[0].id)
 
   return (
     <>
-      <ServicesHero />
-      <ServiceAreas onChoose={(type) => set('projectType', type)} />
-      <PackagePicker value={quote.draft.package} onChange={(id) => set('package', id)} />
-      <QuoteSection quote={quote} />
-      <Process />
-      <Faq />
-      <FinalCta id="start" tone={servicesTone('start')} copy={t.servicesPage.final} action={{ href: '#quote' }} />
+      <ShopHero />
+      <Discovery />
+      <PackageSelector value={selected} onChange={(id) => setPicked({ address: search, id })} />
+      <ConfigureBand />
+      <ProcessBand />
+      <SupportBand />
+      <WorkBand />
+      <FaqBand />
+      <FinalCta id="start" tone={shopTone('start')} copy={landing.final} action={{ to: SHOP_PATHS.configure }} />
     </>
   )
 }

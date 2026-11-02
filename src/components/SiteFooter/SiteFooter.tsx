@@ -99,7 +99,7 @@ export function SiteFooter() {
             </nav>
           )}
 
-          <LanguageSwitcher />
+          <LanguageSwitcher label={`${t.language.label}: ${t.footer.navLabel}`} />
         </div>
       </Container>
     </footer>

@@ -12,7 +12,8 @@
   display: grid;
   place-items: center;
   min-width: var(--size-touch);
-  min-height: 2.25rem;
+  /* A thumb-sized target in the mobile menu; the slimmer pill is for the header bar. */
+  min-height: var(--size-touch);
   padding-inline: var(--space-2);
   border-radius: var(--radius-pill);
   color: var(--color-text-secondary);
@@ -25,6 +26,10 @@
 
   @include m.up('md') {
     min-width: 2.5rem;
+  }
+
+  @include m.up('nav') {
+    min-height: 2.25rem;
   }
 
   @include m.hover {
