@@ -1,50 +1,31 @@
 import { Suspense, useEffect, useRef } from 'react'
 import { Navigate, Outlet, useLocation, useParams } from 'react-router'
 import { AppShell } from '../components/AppShell/AppShell'
+import { RouteErrorBoundary } from '../components/ErrorBoundary/RouteErrorBoundary'
 import { ShopFallback } from '../components/shop/ShopFallback'
-import { siteConfig } from '../config/site'
 import { DEFAULT_LANGUAGE, isLanguage } from '../i18n/config'
 import { I18nProvider } from '../i18n/I18nProvider'
 import { localizedPath, splitLanguage } from '../i18n/paths'
 import { useI18n } from '../i18n/useI18n'
-import { buildDocumentMeta, ogLocale } from './documentMeta'
+import { applyHead } from '../seo/apply'
+import { buildHead } from '../seo/head'
 import { PageTransition } from '../motion/PageTransition'
 import { scopeOfPage } from '../motion/config'
 import { ScrollManager } from '../motion/ScrollManager'
 import { findPage, labIdOfPage, type PageDef } from './pages'
 
-/** Sets (or creates) one <meta> tag in the head. */
-function setMeta(attribute: 'name' | 'property', key: string, content: string) {
-  let tag = document.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`)
-  if (!tag) {
-    tag = document.createElement('meta')
-    tag.setAttribute(attribute, key)
-    document.head.appendChild(tag)
-  }
-  tag.setAttribute('content', content)
-}
-
 /**
- * Keeps <html lang>, the title, the description and the Open Graph tags in step with the language
- * and page. Open Graph is set from script, so it reaches crawlers that run scripts; one that reads
- * only the static HTML sees the site-wide tags in index.html.
+ * Keeps <html lang> and the head (title, description, indexing rule, canonical address, language
+ * alternates, Open Graph, Twitter, structured data) in step with the language and page. The build
+ * already printed the same tags into each page's HTML (src/seo/); this updates them as the visitor
+ * moves around, from the one function (`buildHead`) both use.
  */
 function DocumentMeta({ page }: { page: PageDef | undefined }) {
-  const { lang, t } = useI18n()
-  const { brandName } = siteConfig
+  const { lang } = useI18n()
 
   useEffect(() => {
-    const meta = buildDocumentMeta(page, lang, t, brandName)
-    document.documentElement.lang = lang
-    document.title = meta.title
-    setMeta('name', 'description', meta.description)
-    setMeta('property', 'og:title', meta.title)
-    setMeta('property', 'og:description', meta.description)
-    setMeta('property', 'og:type', meta.ogType)
-    setMeta('property', 'og:locale', ogLocale(lang))
-    setMeta('property', 'og:site_name', brandName)
-    setMeta('property', 'og:url', window.location.href)
-  }, [lang, t, page, brandName])
+    applyHead(buildHead(page, lang))
+  }, [lang, page])
 
   return null
 }
@@ -111,11 +92,13 @@ export function LanguageLayout() {
           page stays on screen (the loading bar says so after a moment) and the swap happens once it can
           be drawn; the fallback appears only when a visit starts on a page that has not arrived.
         */}
-        <Suspense fallback={scope === 'shop' || scope === 'checkout' ? <ShopFallback /> : <PageFallback />}>
-          <PageTransition routeKey={rest} scope={scope}>
-            <Outlet />
-          </PageTransition>
-        </Suspense>
+        <RouteErrorBoundary resetKey={rest}>
+          <Suspense fallback={scope === 'shop' || scope === 'checkout' ? <ShopFallback /> : <PageFallback />}>
+            <PageTransition routeKey={rest} scope={scope}>
+              <Outlet />
+            </PageTransition>
+          </Suspense>
+        </RouteErrorBoundary>
       </AppShell>
     </I18nProvider>
   )

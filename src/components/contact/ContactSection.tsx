@@ -33,7 +33,8 @@ export function ContactSection({ draft, onChange, onReset }: ContactSectionProps
           <Reveal className={styles.lead}>
             <SectionHeading id={titleId} index="01" title={copy.title} description={copy.intro} size="stacked" />
 
-            <aside className={styles.aside} aria-labelledby={asideId}>
+            {/* A group, not an <aside>: it sits inside the page's own section, and a complementary landmark must not be nested in another landmark. */}
+            <div className={styles.aside} role="group" aria-labelledby={asideId}>
               <h3 id={asideId} className={styles.asideTitle}>
                 {copy.aside.title}
               </h3>
@@ -42,7 +43,7 @@ export function ContactSection({ draft, onChange, onReset }: ContactSectionProps
                   <li key={item}>{item}</li>
                 ))}
               </ul>
-            </aside>
+            </div>
 
             <ProfileLinks />
           </Reveal>

@@ -178,6 +178,10 @@ button.stepItem {
 
 .privacy {
   justify-self: start;
+  /* A stand-alone link, not a word in a sentence: at least 24 CSS px tall (WCAG 2.5.8). */
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
   color: var(--color-text);
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);

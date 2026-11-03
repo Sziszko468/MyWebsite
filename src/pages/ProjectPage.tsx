@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { track } from '../analytics/tracker'
 import { getProjectDetail } from '../content/projectDetails'
 import { projects, type ProjectId } from '../content/projects'
 import { ArchitectureDiagram } from '../components/project/ArchitectureDiagram'
@@ -28,6 +29,7 @@ interface BandSpec {
  */
 export function ProjectPage({ projectId }: { projectId: ProjectId }) {
   const { lang, t } = useI18n()
+  useEffect(() => track('project_opened', { project: projectId }), [projectId])
   const entry = projects.find((project) => project.id === projectId)
   const detail = getProjectDetail(projectId)
   const [activeImage, setActiveImage] = useState<string | null>(null)

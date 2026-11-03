@@ -6,7 +6,7 @@ import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { lazyRoute } from './motion/loading'
-import { PAGES, labIdOfPage, projectIdOfPage, serviceIdOfPage, type NavPageId, type PageDef, type ShopPageId } from './routes/pages'
+import { PAGES, labIdOfPage, projectIdOfPage, serviceIdOfPage, type LegalPageId, type NavPageId, type PageDef, type ShopPageId } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
 import { IntroProvider } from './components/intro/IntroProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
@@ -32,6 +32,9 @@ const CartPage = lazyRoute(() => import('./pages/CartPage').then((module) => ({ 
 const AboutPage = lazyRoute(() => import('./pages/AboutPage').then((module) => ({ default: module.AboutPage })))
 const ContactPage = lazyRoute(() => import('./pages/ContactPage').then((module) => ({ default: module.ContactPage })))
 
+// The privacy and cookie notice carries its text in three languages: its own chunk too.
+const PrivacyPage = lazyRoute(() => import('./pages/PrivacyPage').then((module) => ({ default: module.PrivacyPage })))
+
 // The Lab (its interactive first screen, the gallery) and each experiment are chunks of their own;
 // Three.js loads only once a Lab stage is on screen, and the home page never pays for any of it.
 const LabPage = lazyRoute(() => import('./pages/LabPage').then((module) => ({ default: module.LabPage })))
@@ -45,7 +48,7 @@ const LabExperimentPage = lazyRoute(() =>
 // The pages that are chunks carry no Suspense of their own: the one boundary above the page frame
 // (routes/LanguageLayout.tsx) stays mounted from page to page, so a navigation keeps the page on
 // screen until the next one's code has arrived instead of swapping it for a blank placeholder.
-const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | 'designSystem', ReactElement | null> = {
+const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | 'designSystem', ReactElement | null> = {
   home: <HomePage />,
   work: <PlaceholderPage pageId="work" />,
   services: <ServicesPage />,
@@ -54,6 +57,7 @@ const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | 'designSystem', ReactElemen
   about: <AboutPage />,
   lab: <LabPage />,
   contact: <ContactPage />,
+  privacy: <PrivacyPage />,
   designSystem: DesignSystemPage && <DesignSystemPage />,
 }
 
@@ -64,7 +68,7 @@ function elementFor(page: PageDef): ReactElement | null {
   if (service) return <ServiceDetailPage serviceId={service} />
   const experiment = labIdOfPage(page.id)
   if (experiment) return <LabExperimentPage id={experiment} />
-  return PAGE_ELEMENTS[page.id as NavPageId | ShopPageId | 'designSystem']
+  return PAGE_ELEMENTS[page.id as NavPageId | ShopPageId | LegalPageId | 'designSystem']
 }
 
 export default function App() {

@@ -167,7 +167,7 @@ export const en: Dictionary = {
     },
     lab: {
       title: 'The Lab',
-      intro: 'An experimental digital playground: six interactive WebGL experiences, from particles to a generator that builds a 3D object from one sentence. Three samples here, all six wait in the Lab.',
+      intro: 'An experimental digital playground: five interactive WebGL experiences, from particles to chromatic distortion. Three samples here, all five wait in the Lab.',
       enter: 'Enter the Lab',
       open: 'Open',
     },
@@ -427,8 +427,28 @@ export const en: Dictionary = {
   placeholder: {
     description: 'This page is coming soon.',
   },
+  consent: {
+    region: 'Measurement and privacy',
+    title: 'May we measure what works on this site?',
+    text: 'We would send anonymous events, such as which page was opened. They carry no personal data, and what you type into a form is never sent.',
+    accept: 'Accept',
+    decline: 'No, thanks',
+    details: 'Details in the privacy notice',
+    settings: 'Measurement settings',
+    saved: 'Your choice was saved on this device.',
+  },
   notFound: {
     title: 'Page not found',
     description: "This address doesn't exist, or the page has moved.",
+    suggestions: 'You can carry on from here:',
+  },
+  errors: {
+    title: "This page didn't load",
+    text: 'Something went wrong while loading the page. Try again; if that does not help, reload the page.',
+    offline: 'You seem to be offline. Check your connection, then try again.',
+    outdated: 'The site was updated while this page was open, so this part is not available. Reload the page.',
+    retry: 'Try again',
+    reload: 'Reload the page',
+    home: 'Back to the home page',
   },
 }

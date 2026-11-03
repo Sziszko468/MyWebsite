@@ -1,4 +1,5 @@
 import type { LabId } from './lab'
+import { labMeta } from './labMeta'
 import { tri, type Trilingual } from './trilingual'
 
 /**
@@ -241,18 +242,7 @@ export const labText = {
   /** The Lab's own signature line; deliberately not translated. */
   signature: 'MOVE. DISTORT. EXPLORE.',
 
-  meta: {
-    title: tri(
-      'Lab: kísérleti digitális játszótér',
-      'Lab: an experimental digital playground',
-      'Lab: een experimentele digitale speeltuin',
-    ),
-    description: tri(
-      'Hat interaktív WebGL-élmény egy helyen: részecskék, folyékony anyag, mozgó tipográfia, végtelen tér, kromatikus torzítás, és egy 3D-objektumgenerátor, amely szöveges leírásból épít.',
-      'Six interactive WebGL experiences in one place: particles, liquid matter, kinetic type, endless space, chromatic distortion and a 3D object generator that builds from a written description.',
-      'Zes interactieve WebGL-ervaringen op één plek: deeltjes, vloeibare materie, bewegende typografie, eindeloze ruimte, chromatische vervorming en een 3D-objectgenerator die bouwt vanuit een beschrijving.',
-    ),
-  },
+  meta: labMeta,
 
   exit: {
     title: tri('Vissza a valóságba.', 'Back to reality.', 'Terug naar de realiteit.'),

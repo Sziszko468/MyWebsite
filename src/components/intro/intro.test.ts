@@ -55,10 +55,22 @@ describe('intro frequency', () => {
     }
     // Still shown on the pages that are not the shop, and still there for the next visit to the home page.
     expect(shouldShowIntro(config(), stores, undefined, '/hu/')).toBe(true)
-    expect(shouldShowIntro(config(), stores, undefined, '/en/about')).toBe(true)
+    expect(shouldShowIntro(config({ onlyOnHome: false }), stores, undefined, '/en/about')).toBe(true)
     expect(stores.persistent.data.size).toBe(0)
     // The development override still wins, so the intro can be tested anywhere.
     expect(shouldShowIntro(config(), stores, 'show', '/hu/services')).toBe(true)
+  })
+
+  it('opens only on the home page by default: a visitor who arrives on any other page gets that page', () => {
+    const stores = freshStores()
+    expect(introConfig.onlyOnHome).toBe(true)
+    for (const path of ['/hu/', '/en', '/nl/', '/']) expect(shouldShowIntro(config(), stores, undefined, path), path).toBe(true)
+    for (const path of ['/hu/about', '/en/work/spendly', '/nl/lab/liquid-matter', '/hu/contact/', '/hu/lab']) {
+      expect(shouldShowIntro(config(), stores, undefined, path), path).toBe(false)
+    }
+    // Skipped, not used up: the next visit to the home page still shows it.
+    expect(stores.persistent.data.size).toBe(0)
+    expect(shouldShowIntro(config({ onlyOnHome: false }), stores, undefined, '/hu/contact')).toBe(true)
   })
 
   it('shows on the first visit and not again once entered', () => {

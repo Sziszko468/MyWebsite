@@ -1,0 +1,48 @@
+@use '../../styles/mixins' as m;
+
+/* A quiet band at the bottom edge: it is not a dialog and takes no focus, so nothing is blocked while it waits. */
+.banner {
+  position: fixed;
+  inset-inline: var(--space-4);
+  bottom: var(--space-4);
+  z-index: var(--z-toast, 60);
+  display: grid;
+  gap: var(--space-4);
+  max-width: 44rem;
+  margin-inline: auto;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-raised, var(--color-bg));
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+
+  @include m.up('md') {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    inset-inline: auto var(--space-5);
+    bottom: var(--space-5);
+    margin-inline: 0;
+  }
+}
+
+.title {
+  font-weight: 600;
+}
+
+.text {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.link {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: var(--fs-sm);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

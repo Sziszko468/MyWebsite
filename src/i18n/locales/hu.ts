@@ -167,7 +167,7 @@ export const hu = {
     },
     lab: {
       title: 'A Lab',
-      intro: 'Kísérleti digitális játszótér: hat interaktív WebGL-élmény, a részecskéktől a generátorig, amely egyetlen mondatból épít 3D-objektumot. Három ízelítő itt, mind a hat a Labban vár.',
+      intro: 'Kísérleti digitális játszótér: öt interaktív WebGL-élmény, a részecskéktől a kromatikus torzításig. Három ízelítő itt, mind az öt a Labban vár.',
       enter: 'Belépés a Labba',
       open: 'Megnyitás',
     },
@@ -427,9 +427,29 @@ export const hu = {
   placeholder: {
     description: 'Ez az oldal hamarosan elkészül.',
   },
+  consent: {
+    region: 'Mérés és adatvédelem',
+    title: 'Mérhetjük, mi működik az oldalon?',
+    text: 'Névtelen eseményeket küldenénk, például hogy melyik oldalt nyitották meg. Nem tartalmaznak személyes adatot, és soha nem küldjük el, amit beírsz egy űrlapba.',
+    accept: 'Elfogadom',
+    decline: 'Nem, köszönöm',
+    details: 'Részletek az adatvédelmi tájékoztatóban',
+    settings: 'Mérési beállítások',
+    saved: 'A választásodat elmentettük ezen az eszközön.',
+  },
   notFound: {
     title: 'Az oldal nem található',
     description: 'Ez a cím nem létezik, vagy az oldal időközben máshová költözött.',
+    suggestions: 'Innen tovább tudsz lépni:',
+  },
+  errors: {
+    title: 'Az oldal nem töltött be',
+    text: 'Valami félrement az oldal betöltésekor. Próbáld újra; ha nem segít, töltsd újra az oldalt.',
+    offline: 'Úgy tűnik, nincs internetkapcsolatod. Ellenőrizd a kapcsolatot, majd próbáld újra.',
+    outdated: 'Az oldal közben megújult, ezért ez a rész nem érhető el. Töltsd újra az oldalt.',
+    retry: 'Próbáld újra',
+    reload: 'Oldal újratöltése',
+    home: 'Vissza a nyitóoldalra',
   },
 }
 

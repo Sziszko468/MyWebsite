@@ -25,6 +25,7 @@ export function ContactHero({ onChoose }: { onChoose: (path: ContactPath) => voi
       <div className={styles.doors} role="group" aria-label={copy.doorsLabel}>
         <PathDoors
           size="long"
+          headingLevel={2}
           career={{ ...copy.employers, action: { href: '#message', onClick: () => onChoose('employers') } }}
           clients={{ ...copy.clients, action: { href: '#message', onClick: () => onChoose('clients') } }}
         />

@@ -68,8 +68,8 @@ describe('resolveLanguageSwitch', () => {
 
   it('falls back to home when the page has no translation in the target language', () => {
     const pages: PageDef[] = [
-      { id: 'home', path: '/', languages: LANGUAGES },
-      { id: 'about', path: '/about', languages: ['hu', 'en'] },
+      { id: 'home', path: '/', languages: LANGUAGES, indexable: true },
+      { id: 'about', path: '/about', languages: ['hu', 'en'], indexable: true },
     ]
     expect(resolveLanguageSwitch('/hu/about', 'nl', pages)).toEqual({ path: '/nl/', samePage: false })
     expect(resolveLanguageSwitch('/hu/about', 'en', pages)).toEqual({ path: '/en/about', samePage: true })

@@ -10,14 +10,13 @@
       hero (layout shift 0.15 to 0.4 in the emulated-phone run). Vite gives the file its hashed name.
     -->
     <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2" />
-    <title>Your Name</title>
-    <meta name="description" content="Átgondolt weboldalakat és webalkalmazásokat tervezek és fejlesztek." />
     <meta name="theme-color" content="#0b0b0d" />
-    <!-- Site-wide Open Graph tags. The app replaces them per page and language once it runs (src/routes/documentMeta.ts). -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Your Name" />
-    <meta property="og:title" content="Your Name" />
-    <meta property="og:description" content="Átgondolt weboldalakat és webalkalmazásokat tervezek és fejlesztek." />
+    <!--
+      The title, description, robots rule, canonical address, language alternates, Open Graph and Twitter tags and
+      structured data of each page. The build (scripts/prerender.mjs, src/seo/) writes a copy of this page for every
+      route with its own head here; while the app runs, src/seo/apply.ts keeps the same tags in step with the page shown.
+    -->
+    <!--seo:head-->
 
     <!--
       Pre-paint theme: runs before first paint so the page never flashes the wrong theme.
@@ -42,6 +41,7 @@
   </head>
   <body>
     <div id="root"></div>
+    <!--seo:body-->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

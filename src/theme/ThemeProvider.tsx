@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { flushSync } from 'react-dom'
 import { ThemeContext } from './context'
 import {
   THEME_STORAGE_KEY,
@@ -23,8 +24,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const change = useCallback((next: Theme) => {
-    applyTheme(next, { animate: true })
-    setThemeState(next)
+    // The state is committed together with the attribute, so a view transition's new picture has both.
+    applyTheme(next, { animate: true, commit: () => flushSync(() => setThemeState(next)) })
   }, [])
 
   const setTheme = useCallback(

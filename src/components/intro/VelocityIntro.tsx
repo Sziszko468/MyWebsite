@@ -7,6 +7,7 @@ import type { ExitSignal } from '../hero/fieldMotion'
 import { GenerativeHeroFallback } from '../hero/GenerativeHeroFallback'
 import { KineticTypography } from '../hero/KineticTypography'
 import { useHeroDriver } from '../hero/useHeroDriver'
+import { useStartAfterFirstScreen } from '../hero/startDeferral'
 import { useSceneHealth } from '../hero/useSceneHealth'
 import { LanguageSwitcher } from '../LanguageSwitcher/LanguageSwitcher'
 import { SceneLayer } from '../SceneLayer/SceneLayer'
@@ -48,6 +49,8 @@ function IntroDialog() {
   const { theme } = useTheme()
   const { phase, config, engage, enter, finish } = useIntro()
   const health = useSceneHealth()
+  // Its headline and button are plain HTML; the scene's code waits for the first screen to settle (hero/startDeferral.ts).
+  const sceneMayStart = useStartAfterFirstScreen()
   const touchFirst = useTouchFirst()
 
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -163,7 +166,7 @@ function IntroDialog() {
     >
       <SceneLayer ref={stageRef} className={styles.stage} fallback={<GenerativeHeroFallback />} onError={health.onError}>
         <GenerativeHeroFallback />
-        {mode === 'scene' && (
+        {mode === 'scene' && sceneMayStart && (
           <div className={cx(styles.canvas, sceneVisible && styles.canvasVisible)}>
             <Suspense fallback={null}>
               <VelocityHeroScene

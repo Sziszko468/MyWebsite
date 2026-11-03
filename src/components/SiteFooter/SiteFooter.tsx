@@ -4,6 +4,8 @@ import { useI18n } from '../../i18n/useI18n'
 import { BrandMark } from '../BrandMark/BrandMark'
 import { Button } from '../Button/Button'
 import { Container } from '../Container/Container'
+import { measurementIsOffered } from '../../analytics/offer'
+import { MeasurementSettingsButton } from '../Consent/ConsentBanner'
 import { LanguageSwitcher } from '../LanguageSwitcher/LanguageSwitcher'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
 import { MainNav } from '../MainNav/MainNav'
@@ -81,7 +83,7 @@ export function SiteFooter() {
             © {CURRENT_YEAR} {brandName}. {t.footer.rights}
           </p>
 
-          {legalItems.length > 0 && (
+          {(legalItems.length > 0 || measurementIsOffered()) && (
             <nav aria-label={t.footer.legalLabel}>
               <ul className={styles.legal}>
                 {legalItems.map((link) => (
@@ -95,6 +97,11 @@ export function SiteFooter() {
                     )}
                   </li>
                 ))}
+                {measurementIsOffered() && (
+                  <li>
+                    <MeasurementSettingsButton className={styles.link} />
+                  </li>
+                )}
               </ul>
             </nav>
           )}

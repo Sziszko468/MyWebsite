@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from 'react'
+import { track } from '../../analytics/tracker'
 import { quoteConfig } from '../../config/quote'
 import { siteConfig } from '../../config/site'
 import { getPackage } from '../../content/packages'
@@ -83,6 +84,13 @@ export function Configurator() {
     if (movedRef.current) headingRef.current?.focus()
   }, [step])
 
+  // The builder was taken all the way to its last step: one count, never what was answered.
+  const reachedLast = step === 'send'
+  const requested = cart.lines.length
+  useEffect(() => {
+    if (reachedLast) track('configurator_completed', { needs: requested })
+  }, [reachedLast, requested])
+
   useEffect(() => {
     if (attempts > 0) formRef.current?.querySelector<HTMLElement>(FIRST_INVALID)?.focus()
   }, [attempts])
@@ -112,7 +120,9 @@ export function Configurator() {
       setAttempts((count) => count + 1)
       return
     }
+    const items = cart.lines.length
     await submit(toRequest(cart, details, lang), () => {
+      track('quote_request_submitted', { form: 'inquiry', items })
       cartStore.update(clearCart)
       inquiryActions.reset()
       setTried(new Set())

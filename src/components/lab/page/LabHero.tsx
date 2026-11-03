@@ -148,7 +148,10 @@ export function LabHero({ onFind }: { onFind(): void }) {
             {t.hero.explore}
           </Button>
         </div>
-        <p className={styles.signature}>{labText.signature}</p>
+        {/* The signature line is English on every page; saying so lets a screen reader pronounce it as English (WCAG 3.1.2). */}
+        <p className={styles.signature} lang="en">
+          {labText.signature}
+        </p>
       </Container>
     </section>
   )

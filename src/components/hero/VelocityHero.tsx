@@ -9,6 +9,7 @@ import { SceneLayer } from '../SceneLayer/SceneLayer'
 import { GenerativeHeroFallback } from './GenerativeHeroFallback'
 import { KineticTypography } from './KineticTypography'
 import { useHeroDriver } from './useHeroDriver'
+import { useStartAfterFirstScreen } from './startDeferral'
 import { useSceneHealth } from './useSceneHealth'
 import styles from './VelocityHero.module.scss'
 
@@ -38,6 +39,8 @@ export function VelocityHero() {
   // The scene waits until the intro is entirely gone, exit included: until then the intro holds the page's one WebGL context.
   const sceneHeld = phase !== 'completed'
   const health = useSceneHealth()
+  // The scene's code is fetched only after the first screen has settled, so it never competes with it (startDeferral.ts).
+  const sceneMayStart = useStartAfterFirstScreen(!sceneHeld)
   const { mode, tier, sceneVisible, sceneHandlers } = health
 
   const rootRef = useRef<HTMLDivElement>(null)
@@ -58,7 +61,7 @@ export function VelocityHero() {
       >
         <SceneLayer ref={stageRef} className={styles.stage} fallback={<GenerativeHeroFallback />} onError={health.onError}>
           <GenerativeHeroFallback />
-          {mode === 'scene' && !sceneHeld && (
+          {mode === 'scene' && !sceneHeld && sceneMayStart && (
             <div className={cx(styles.canvas, sceneVisible && styles.canvasVisible)}>
               <Suspense fallback={null}>
                 <VelocityHeroScene

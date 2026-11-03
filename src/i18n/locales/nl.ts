@@ -167,7 +167,7 @@ export const nl: Dictionary = {
     },
     lab: {
       title: 'Het lab',
-      intro: 'Een experimentele digitale speeltuin: zes interactieve WebGL-ervaringen, van deeltjes tot een generator die uit één zin een 3D-object bouwt. Drie voorbeelden hier, alle zes wachten in het Lab.',
+      intro: 'Een experimentele digitale speeltuin: vijf interactieve WebGL-ervaringen, van deeltjes tot chromatische vervorming. Drie voorbeelden hier, alle vijf wachten in het Lab.',
       enter: 'Het Lab binnengaan',
       open: 'Openen',
     },
@@ -427,8 +427,28 @@ export const nl: Dictionary = {
   placeholder: {
     description: 'Deze pagina komt binnenkort.',
   },
+  consent: {
+    region: 'Meting en privacy',
+    title: 'Mogen we meten wat er op deze site werkt?',
+    text: 'We zouden anonieme gebeurtenissen sturen, bijvoorbeeld welke pagina is geopend. Ze bevatten geen persoonsgegevens en wat je in een formulier typt wordt nooit verstuurd.',
+    accept: 'Accepteren',
+    decline: 'Nee, bedankt',
+    details: 'Details in de privacyverklaring',
+    settings: 'Meetinstellingen',
+    saved: 'Je keuze is op dit apparaat opgeslagen.',
+  },
   notFound: {
     title: 'Pagina niet gevonden',
     description: 'Dit adres bestaat niet, of de pagina is verplaatst.',
+    suggestions: 'Je kunt hier verder:',
+  },
+  errors: {
+    title: 'Deze pagina is niet geladen',
+    text: 'Er ging iets mis bij het laden van de pagina. Probeer het opnieuw; helpt dat niet, laad de pagina dan opnieuw.',
+    offline: 'Je lijkt offline te zijn. Controleer je verbinding en probeer het opnieuw.',
+    outdated: 'De site is vernieuwd terwijl deze pagina openstond, dus dit onderdeel is niet beschikbaar. Laad de pagina opnieuw.',
+    retry: 'Opnieuw proberen',
+    reload: 'Pagina opnieuw laden',
+    home: 'Terug naar de startpagina',
   },
 }

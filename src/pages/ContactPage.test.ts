@@ -61,9 +61,10 @@ describe.each(LANGUAGES)('the contact page in %s', (lang) => {
     expect(html).toMatch(/type="email"[^>]*autoComplete="email"|autoComplete="email"[^>]*type="email"/)
   })
 
-  it('asks for the acknowledgement, with no link to a privacy page that has not been set', () => {
+  it('asks for the acknowledgement, and links the privacy notice, which exists', () => {
     expect(html).toContain(escape(c.form.fields.consent.label))
-    expect(html).not.toContain(escape(c.form.fields.consent.privacy))
+    expect(html).toContain(escape(c.form.fields.consent.privacy))
+    expect(html).toMatch(new RegExp(`href="/${lang}/privacy"`))
   })
 
   it('says up front that nothing can be sent yet, because no endpoint is configured, and offers no success', () => {

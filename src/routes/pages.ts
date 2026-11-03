@@ -19,7 +19,9 @@ export type LabPageId = `lab-${LabId}`
 export type ServicePageId = `service-${ServiceId}`
 /** The shop's two working pages, under /services. */
 export type ShopPageId = 'configure' | 'cart'
-export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | ShopPageId | 'designSystem'
+/** The privacy and cookie notice, linked from the footer. */
+export type LegalPageId = 'privacy'
+export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | ShopPageId | LegalPageId | 'designSystem'
 
 export interface PageDef<Id extends PageId = PageId> {
   id: Id
@@ -27,18 +29,31 @@ export interface PageDef<Id extends PageId = PageId> {
   path: string
   /** Languages that have a translated version of this page. Always includes the default. */
   languages: readonly Language[]
+  /**
+   * Whether search engines should list the page. The cart and the request builder are a visitor's
+   * own working state, not content: they say `noindex` and stay out of the sitemap.
+   */
+  indexable: boolean
 }
 
-const page = <Id extends PageId>(id: Id, path: string, languages: readonly Language[] = LANGUAGES): PageDef<Id> => ({
+const page = <Id extends PageId>(
+  id: Id,
+  path: string,
+  languages: readonly Language[] = LANGUAGES,
+  indexable = true,
+): PageDef<Id> => ({
   id,
   path,
   languages,
+  indexable,
 })
 
 /** Shown in the header and footer navigation, in this order. */
 export const NAV_PAGES: readonly PageDef<NavPageId>[] = [
   page('home', '/'),
-  page('work', '/work'),
+  // A placeholder until the Work page is built (pages/PlaceholderPage.tsx): it stays out of the search index
+  // and the sitemap, and the projects are reached from the home page. Make it indexable together with its content.
+  page('work', '/work', LANGUAGES, false),
   page('services', '/services'),
   page('about', '/about'),
   page('lab', '/lab'),
@@ -78,8 +93,8 @@ export function labIdOfPage(id: PageId): LabId | null {
  */
 export const SHOP_PAGES: readonly PageDef<ServicePageId | ShopPageId>[] = [
   ...SERVICE_IDS.map((id) => page<ServicePageId>(`service-${id}`, servicePath(id))),
-  page<ShopPageId>('configure', SHOP_PATHS.configure),
-  page<ShopPageId>('cart', SHOP_PATHS.cart),
+  page<ShopPageId>('configure', SHOP_PATHS.configure, LANGUAGES, false),
+  page<ShopPageId>('cart', SHOP_PATHS.cart, LANGUAGES, false),
 ]
 
 /** The service a page shows, or `null` when the page is not a service's. */
@@ -87,10 +102,13 @@ export function serviceIdOfPage(id: PageId): ServiceId | null {
   return id.startsWith('service-') ? (id.slice('service-'.length) as ServiceId) : null
 }
 
-/** Dev-only reference page; absent from production builds. */
-const DEV_PAGES: readonly PageDef[] = import.meta.env.DEV ? [page('designSystem', '/design-system')] : []
+/** The legal pages the footer links to (config/site.ts `legal`). They are not in the navigation and exist in every language. */
+export const LEGAL_PAGES: readonly PageDef<LegalPageId>[] = [page<LegalPageId>('privacy', '/privacy')]
 
-export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...DEV_PAGES]
+/** Dev-only reference page; absent from production builds. */
+const DEV_PAGES: readonly PageDef[] = import.meta.env.DEV ? [page('designSystem', '/design-system', LANGUAGES, false)] : []
+
+export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...LEGAL_PAGES, ...DEV_PAGES]
 
 function normalize(path: string): string {
   const trimmed = path.replace(/\/+$/, '')

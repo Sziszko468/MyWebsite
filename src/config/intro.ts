@@ -18,6 +18,13 @@ export interface IntroConfig {
    * from then on, whatever `frequency` says. It is stored in this browser only.
    */
   allowSkip: boolean
+  /**
+   * Show the intro only when the visit starts on the home page. A visitor who arrives on a project, the
+   * About page or a Lab experience (from a search result or a shared link) wants that page, not a full
+   * screen in front of it; it also costs every such entry the intro's 3D scene (measured: about 250 kB of
+   * code and a long task on a phone). Set it to `false` to open the intro on any page except the shop.
+   */
+  onlyOnHome: boolean
   /** Length of the leaving transition, in milliseconds. */
   exitMs: number
   /** The same under prefers-reduced-motion: a short, plain fade. */
@@ -27,6 +34,7 @@ export interface IntroConfig {
 export const introConfig: IntroConfig = {
   frequency: 'first-visit',
   allowSkip: true,
+  onlyOnHome: true,
   exitMs: 1000,
   exitMsReduced: 320,
 }

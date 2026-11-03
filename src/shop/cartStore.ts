@@ -14,6 +14,7 @@ import {
   type Cart,
   type CartLine,
 } from './cart'
+import { track } from '../analytics/tracker'
 import { createStore } from './store'
 
 /**
@@ -90,6 +91,7 @@ export const cartActions = {
     const existed = findLine(cartStore.get(), need) !== undefined
     cartStore.update((cart) => upsertLine(cart, { need, ...choices }))
     announce(existed ? 'updated' : 'added', need)
+    if (choices.plan) track('package_selected', { need, plan: choices.plan })
   },
   remove(need: NeedId) {
     const cart = cartStore.get()
@@ -105,7 +107,10 @@ export const cartActions = {
     cartStore.update((cart) => restoreLine(cart, undo.line, undo.index))
     announce('updated', undo.line.need)
   },
-  setPlan: (need: NeedId, plan: PlanId | null) => cartStore.update((cart) => setPlan(cart, need, plan)),
+  setPlan(need: NeedId, plan: PlanId | null) {
+    cartStore.update((cart) => setPlan(cart, need, plan))
+    if (plan) track('package_selected', { need, plan })
+  },
   toggleExtra: (need: NeedId, extra: ExtraId, on?: boolean) => cartStore.update((cart) => toggleExtra(cart, need, extra, on)),
   setNeeds: (needs: readonly NeedId[], planFor?: (need: NeedId) => PlanId | null) =>
     cartStore.update((cart) => setNeeds(cart, needs, planFor)),

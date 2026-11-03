@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { track } from '../../analytics/tracker'
 import { contactConfig } from '../../config/contact'
 import { siteConfig } from '../../config/site'
 import { contactErrorText } from '../../contact/messages'
@@ -67,7 +68,10 @@ export function ContactForm({ draft, onChange, onReset, transport: given }: Cont
       setAttempts((count) => count + 1)
       return
     }
-    await submission.submit(toContactRequest(draft, lang), onReset)
+    await submission.submit(toContactRequest(draft, lang), () => {
+      track('quote_request_submitted', { form: 'contact', items: 0 })
+      onReset()
+    })
   }
 
   const startAgain = () => {

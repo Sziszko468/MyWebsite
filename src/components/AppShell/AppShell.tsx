@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useI18n } from '../../i18n/useI18n'
 import type { MotionScope } from '../../motion/config'
+import { ConsentBanner } from '../Consent/ConsentBanner'
 import { CursorLabel } from '../motion/CursorLabel'
 import { LoadingBar } from '../motion/Loading'
 import { VelocityIntro } from '../intro/VelocityIntro'
@@ -34,6 +35,7 @@ export function AppShell({ children, immersive = false, motionScope = 'site' }: 
       <MainContent>{children}</MainContent>
       {!immersive && <SiteFooter />}
       <VelocityIntro />
+      <ConsentBanner />
       <CursorLabel />
     </div>
   )

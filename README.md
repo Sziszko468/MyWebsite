@@ -4,7 +4,8 @@ React + TypeScript + Vite. Racing Red edition: Dark and Light themes, three lang
 
 ```bash
 npm run dev        # dev server; /hu/design-system shows every token and component
-npm run build      # type-check + production build
+npm run build      # type-check + production build + one HTML file per page, sitemap, robots.txt, _headers (VITE_SITE_URL: see "Search, speed, accessibility and security")
+npm run check:seo  # after a build: reads dist/ like a crawler (titles, canonicals, hreflang, sitemap, structured data, CSP hashes)
 npm run typecheck  # tsc -b
 npm run lint       # oxlint
 npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition, home-page content, rhythm and link targets, project-page content, pictures and meta, services content and wording, quote-form validation and sending, the services, About and contact pages rendered in three languages, the About content's honesty rules, the contact form's validation and sending, the configured links, the motion system (config against the CSS tokens, the engine's modules, its components rendered to markup, every stylesheet's animations)
@@ -45,10 +46,17 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 | `src/components/about/`, `src/components/contact/`, `src/pages/AboutPage.tsx`, `src/pages/ContactPage.tsx` | The About page's bands and the contact page's hero, doors, form and links. Each page is loaded as its own chunk. |
 | `src/components/PageHero/` | The shell of a page's first screen (eyebrow, headline, sentence, buttons over a faint light field), used by the About and contact pages (the shop has its own hero). |
 | `src/pages/` | Home, the shop's four pages, About, contact, project pages, the Lab and its experiments, a placeholder page (Work), 404. `DesignSystemPage` exists in dev builds only. |
-| `src/config/site.ts` | Brand name, monogram, contact email, social profiles, legal pages. Every `null` is a placeholder. |
+| `src/config/site.ts` | The site address (`VITE_SITE_URL`), brand name, monogram, contact email, social profiles, legal pages. Every `null` is a placeholder. |
 | `src/config/links.ts`, `src/config/contact.ts` | The links the contact page shows (read from `site.ts`), and where the contact message is sent. |
 | `src/config/quote.ts` | Where the request builder's inquiry is sent (`VITE_QUOTE_ENDPOINT`) and whether the visitor has to tick the acknowledgement of how the data is used. |
-| `src/config/intro.ts` | When the intro appears (`first-visit`, `every-session`, `never`), whether visitors can skip it, how long the exit lasts. |
+| `src/config/intro.ts` | When the intro appears (`first-visit`, `every-session`, `never`), whether it opens only on the home page, whether visitors can skip it, how long the exit lasts. |
+| `src/seo/` | The head of every page (title, description, robots, canonical, hreflang, Open Graph, structured data), as data: applied by the browser (`apply.ts`) and printed into each page's HTML by the build (`html.ts`, `entry.ts`); `sitemap.ts`, `siteUrl.ts`. See "Search, speed, accessibility and security". |
+| `src/security/headers.ts` | The Content-Security-Policy and the other headers the site should be served with, written to `dist/_headers`. |
+| `src/analytics/`, `src/components/Consent/` | Consent-gated, provider-independent measurement (off unless `VITE_ANALYTICS_ENDPOINT` is set) and its question. |
+| `src/components/ErrorBoundary/` | What a visitor sees when a page's code cannot be fetched or a page throws. |
+| `src/content/privacy.ts`, `src/pages/PrivacyPage.tsx` | The privacy and cookie notice (`/privacy`). |
+| `scripts/` | `prerender.mjs` (per-page HTML, sitemap, robots, headers), `check-seo.mjs` (checks the built files), `make-og-image.mjs` (draws `public/og/default.png`). |
+| `docs/technical-audit.md` | The PROMPT 11 audit: issues found, fixes, measured results, limits. |
 
 ## Conventions
 
@@ -60,7 +68,7 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 - **Placeholders:** Work currently renders `PlaceholderPage`. Social profiles and legal links without a real address are hidden in production and shown as muted labels in development; they never render as links.
 - **Header:** sticky, `--header-height` tall. Pages own their vertical padding (`<main>` adds none), and anchors respect the header via `scroll-padding-top`.
 - **Scene layer:** the hero's 3D canvas lives inside `SceneLayer` (behind content, never captures input, isolated by an error boundary). A section that should run under the header uses the `under-header` mixin from `_mixins.scss`.
-- **Hosting:** the site is a single-page app, so the host must serve `index.html` for every path.
+- **Hosting:** the build writes one HTML file for every page and language (`dist/hu/services/index.html`, …), `404.html` and the headers; the app still works behind a host that answers every address with `index.html`. See "Serving the site".
 
 ## Motion
 
@@ -539,3 +547,64 @@ All browser checks below are **Chrome driven by Playwright on one PC: emulated v
 **Verified** (Chrome driven by Playwright against the dev server and the production build; a local stand-in for the endpoint for the sending paths): no horizontal overflow, text spilling or clipping on the home, services, About and contact pages at 320, 360, 390, 768, 1024, 1120, 1440 and 1920 px in Hungarian, English and Dutch, in both themes (it found and fixed one: the contact doors' sentence-length titles spilled out of their doors); the doors, the form, the errors and focus, the language switch with the draft and the subject, a real POST, a 500, a double click, the deep links, reduced motion and a touch screen; the production build in all three languages (titles, descriptions, Open Graph tags, no console output, no failed request, no development notes); the configured links (checked once with example addresses set temporarily, then removed). The suite covers the About content's honesty rules, the form's validation, the transport, the links and both pages rendered in three languages.
 
 **Not verified.** Safari and Firefox; real phones; a screen reader (the markup uses native radios, fieldsets, labels and lists, but it was not listened to); forced-colours mode (written, not seen); a real form service or backend (none exists yet); the Open Graph tags for a crawler that does not run scripts.
+
+## Search, speed, accessibility and security
+
+The site is a single-page app, so what a search engine or a link preview sees first is the HTML file the host serves, not the page the script builds. This section says how that HTML, the speed work, accessibility, security and measurement are set up, what is configured where, and what was and was not checked. The measured results, the issues found and the limits are in [`docs/technical-audit.md`](docs/technical-audit.md).
+
+### Before launch (the owner's list)
+
+1. **Set the site address.** Build with `VITE_SITE_URL=https://your-domain` (the origin only). Until it is set, every page says `noindex, nofollow` and the build prints a warning: no canonical address, language alternate, sitemap or structured data can be written without the real address, so none is guessed. This is the switch that lets search engines list the site.
+2. Set the brand name in `src/config/site.ts`. While it is the template's "Your Name", structured data does not describe a person or a website by it.
+3. Serve the files the way "Serving the site" says (the headers file, compression, `404.html`).
+4. Set `VITE_CONTACT_ENDPOINT` / `VITE_QUOTE_ENDPOINT` (and make the handler reject what it does not expect, rate-limit, and allow this site's origin: CORS, validation and rate limiting live on the handler, not here).
+5. Read `/privacy` ("Adatvédelem és sütik"). It states only what the code does; it is not legal advice and says nothing about how long the owner keeps a message or on what legal basis. Add what the law needs for the owner's situation (the owner's identity and contact details, retention, rights).
+6. Decide whether the Work page ships as a placeholder. It is `noindex` and out of the sitemap while it is one (`routes/pages.ts`); make it indexable together with its content.
+7. If measurement is wanted, set `VITE_ANALYTICS_ENDPOINT` (see "Measurement"). Without it the site measures nothing and asks nothing.
+
+### Search engines (`src/seo/`, `scripts/`)
+
+- **One head, built once.** `seo/head.ts` builds a page's head from the registry and the content: title, description, robots rule, canonical address, `hreflang` alternates (and `x-default`), Open Graph and Twitter tags, structured data. The browser applies it as the visitor moves (`seo/apply.ts`, from `routes/LanguageLayout.tsx`); the build prints it into each page's HTML (`seo/html.ts`). Titles and descriptions come from the pages' own content (`routes/documentMeta.ts`, `content/shop/meta.ts`, `content/projectDetails/meta.ts`, `content/labMeta.ts`, `content/privacyMeta.ts`), so every project, service and experiment has its own, in three languages, and a test refuses duplicates and lengths a search result would cut.
+- **One HTML file per page and language** (`npm run build` → `scripts/prerender.mjs`): `dist/hu/index.html`, `dist/en/services/website/index.html`, …: 21 pages × 3 languages = 63 files, plus `index.html` for `/` (canonical: `/hu/`), `404.html`, `sitemap.xml`, `robots.txt` and `_headers`. Each carries its own `<html lang>`, head and a small `<noscript>` (the page's way to the main pages and the other languages). The page body is still drawn by script: a crawler that runs script (Google, Bing) sees the page; one that does not sees the head and the noscript.
+- **Canonical addresses** are directory style (`/hu/services/`), absolute, without query or fragment: the only query parameters the site knows are development switches, and a query address names the same page. **Language versions** are real addresses (`/hu/…`, `/en/…`, `/nl/…`) linked from every page by real links (`LanguageSwitcher`) and by `hreflang`; nothing redirects by location or `Accept-Language`, crawlers included. `/` moves to `/hu/` (the default), the same for everyone.
+- **Indexing rules** live in the registry (`PageDef.indexable`): the cart, the request builder, the 404 page and the Work placeholder are `noindex, follow` and not in the sitemap. `robots.txt` allows crawling (a crawler has to be able to read a `noindex`) and names the sitemap.
+- **Structured data** (`seo/jsonLd.ts`): `WebSite` and `Person` once the brand is real; `WebPage` (or `AboutPage`, `ContactPage`, `CollectionPage`) with a `BreadcrumbList`; `CreativeWork` for a project (its stack as keywords, its lead screenshot) and for a Lab experience; `Service` for a service (name and summary). Nothing else: no rating, review, price, address, registration or certificate exists on the site, and a test refuses those words. `SoftwareApplication` was not used: the projects are portfolio case studies, not published products.
+- **Shared picture:** `public/og/default.png` (1200×630, abstract, no words, so it never needs to change with a title or the brand). `node scripts/make-og-image.mjs` redraws it.
+- **Checks:** `npm test` (the head, sitemap, structured data and build files), and after a build `npm run check:seo`, which reads the written files like a crawler: unique titles and descriptions, canonical = own address, hreflang reciprocity, sitemap = the indexable pages, JSON-LD parses and its references resolve, the CSP hashes match the page.
+
+### Serving the site
+
+`dist/` is static files. Every page exists as `…/index.html`; an unknown address should get `404.html` with status 404 (the app also shows its own 404 page and says `noindex` if a host answers every address with `index.html`). `dist/_headers` is written for Netlify and Cloudflare Pages; for another host, copy its values:
+
+| Header | Why |
+| --- | --- |
+| `Content-Security-Policy` | `default-src 'self'`; scripts: self plus the hash of the one inline theme script; styles: self plus the hash of the one inline style; images `data:`/`blob:` (the Lab's saved pictures); `connect-src` self plus the origins of the form and measurement endpoints; no frames, no objects, `frame-ancestors 'none'`. Generated from `src/security/headers.ts`. |
+| `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Cross-Origin-Opener-Policy`, `Strict-Transport-Security`, `Permissions-Policy` | Standard hardening; `Permissions-Policy` switches off every browser feature the site never uses (camera, microphone, location, …). |
+| `Cache-Control` | `/assets/*` (content-hashed): one year, immutable. Pictures and the shared image: one day, then revalidate. HTML: revalidate every time (the host's default). |
+
+Canonical addresses end in a slash (`/hu/about/`); a host that redirects `/hu/about` to it, or serves both, is fine (the canonical decides), though the redirect costs a visitor who arrives on the slash-less form one extra round trip. Serve text files with gzip or Brotli (the host's default almost everywhere). No page of the site is served from another host: fonts and pictures are its own, and the CSP would refuse anything else.
+
+### Speed
+
+- Measured, not claimed: the numbers, the method and what could not be measured are in `docs/technical-audit.md`.
+- Code is split per page; Three.js is its own chunk and loads only where a scene is shown: the hero and the intro (home), and one experience's own scene on its page. The shop, About, Contact, a project page, the privacy notice and the Lab overview load none of it.
+- **The scene waits for the first screen** (`components/hero/startDeferral.ts`): the page has loaded and no larger paint has arrived for 300 ms (3 s at most) before the scene's code is requested. The generated graphic is on screen until then, as it is while the scene loads.
+- **The intro opens only on the home page** (`config/intro.ts` `onlyOnHome`): a visitor who arrives on a project, About or a Lab experience from a search result gets that page. Set it to `false` to open the intro on any page except the shop.
+- **The theme toggle cross-fades two pictures of the page** (View Transitions, `theme/theme.ts`) instead of transitioning the colour of every element: on an emulated phone the toggle took 1.2-1.6 s to respond before and about 0.15 s after. Browsers without View Transitions, and reduced motion, keep the old path (a colour transition) or switch at once.
+- The brand font is preloaded (latin subset only); tried without the preload and with a low-priority preload, and the preload stayed: without it the services page shifted by 0.18.
+
+### Errors
+
+`components/ErrorBoundary/` keeps one failed page from becoming a blank screen: a page that throws, or whose code cannot be fetched (a connection that dropped, or a file replaced by a new deployment while the page was open), shows a panel in the visitor's language with "Try again" or "Reload", the header and footer stay, and moving on clears it. The Lab has its own boundaries below that (one experiment failing never reaches the site), the scenes fall back to the generated graphic or the still view on any failure or context loss, and the forms say plainly when nothing was sent (`forms/submit.ts`: success only after a 2xx, never otherwise). The 404 page lists the main pages.
+
+### Measurement (`src/analytics/`)
+
+Off unless `VITE_ANALYTICS_ENDPOINT` is set at build time (an https address; it receives each event as a JSON `POST`, no cookie, no credential, no referrer). With it set, a question appears (`components/Consent/`), and nothing is sent until the visitor accepts; "No, thanks" and a browser's Global Privacy Control or Do Not Track signal mean never; the footer's "Measurement settings" asks again. `track('project_opened', { project })` is the only call the site makes; the events are `service_viewed`, `package_selected`, `configurator_completed`, `quote_request_submitted`, `project_opened`, `lab_experience_opened`, and they can carry only ids, counts and yes/no (`analytics/events.ts`; `sanitize` drops anything else, so a typed description, an e-mail address or a recording cannot leak). To use a vendor's script instead of the endpoint, register a provider in `analytics/setup.ts` (`{ id, send(event) }`); the site knows no vendor, and a test refuses vendor hosts in the sources. There was no "generative object created" event because that experience was removed.
+
+### Re-running the checks
+
+`tools/audit/` holds the browser audits (head and CSP of every built page, axe, keyboard-only walk, layout matrix, WebGL failures, vitals, interaction latency, forms and measurement against a mock endpoint); its README says how to point it at a Playwright and axe-core installation. They test the built site, not the dev server (except `devharness.cjs`).
+
+### What the audit did not touch, and why
+
+There is no backend in this repository, so there is no authentication, rate limiting, upload endpoint, CORS configuration or AI provider to review: the earlier Generative Objects experience (and with it the Meshy integration and its server) was deleted on 2026-11-01, so no Meshy key exists anywhere (the built files were searched for key patterns; none). The hidden racing experience is a link that takes the whole tab to nfsu2.xyz with `noreferrer noopener`; the site never frames it (that site forbids it).

@@ -103,7 +103,14 @@ button {
   outline: none;
 }
 
-/* Smooth theme change: html[data-theme-transition] is set only while the user
+/* Where View Transitions exist (src/theme/theme.ts) the theme change is a cross-fade of two pictures of the page. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-theme);
+  animation-timing-function: var(--ease-out);
+}
+
+/* Fallback: smooth theme change: html[data-theme-transition] is set only while the user
    toggles the theme, so first paint and navigation never animate colours. */
 html[data-theme-transition],
 html[data-theme-transition] *,

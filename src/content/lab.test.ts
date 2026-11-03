@@ -14,6 +14,7 @@ import {
   playableExperiments,
   statusLabels,
 } from './lab'
+import { experimentSummary } from './labMeta'
 import { experimentText, labText } from './labText'
 
 /** Every Trilingual inside a structure, with where it is. */
@@ -111,7 +112,7 @@ describe('the Lab: its words', () => {
         const id = labIdOfPage(page.id)!
         const meta = buildDocumentMeta(page, lang, t, 'Brand')
         expect(meta.title).toContain(findExperiment(id)!.name)
-        expect(meta.description).toBe(findExperiment(id)!.tagline[lang])
+        expect(meta.description).toBe(experimentSummary[id][lang])
       }
     }
   })

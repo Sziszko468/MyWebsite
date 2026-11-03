@@ -1,4 +1,5 @@
-import { Component, Suspense, type ReactNode } from 'react'
+import { Component, Suspense, useEffect, type ReactNode } from 'react'
+import { track } from '../analytics/tracker'
 import { Button } from '../components/Button/Button'
 import { Container } from '../components/Container/Container'
 import { useLabText } from '../components/lab/core/useLabText'
@@ -42,6 +43,7 @@ class CrashBoundary extends Component<{ children: ReactNode }, { failed: boolean
 /** The page of one experiment, from the registry. */
 export function LabExperimentPage({ id }: { id: LabId }) {
   const Experiment = EXPERIMENT_COMPONENTS[id]
+  useEffect(() => track('lab_experience_opened', { experiment: id }), [id])
   if (!Experiment) return <Crash />
 
   return (

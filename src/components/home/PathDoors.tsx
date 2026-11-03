@@ -47,7 +47,19 @@ function DoorButton({ action, variant, size, className, children }: { action: Do
  * contact page to ask what the visit is about. `size="long"` is for titles that are whole sentences:
  * they are set smaller and may break inside a long word rather than spill out of the door.
  */
-export function PathDoors({ career, clients, size = 'default' }: { career: DoorProps; clients: DoorProps; size?: 'default' | 'long' }) {
+export function PathDoors({
+  career,
+  clients,
+  size = 'default',
+  headingLevel = 3,
+}: {
+  career: DoorProps
+  clients: DoorProps
+  size?: 'default' | 'long'
+  /** The level of the two titles: 3 under the home page's section heading, 2 where they follow the page's `h1` directly (the contact page). */
+  headingLevel?: 2 | 3
+}) {
+  const Heading = `h${headingLevel}` as const
   const careerTitle = useId()
   const clientsTitle = useId()
   const careerRef = usePointerField<HTMLElement>()
@@ -69,9 +81,9 @@ export function PathDoors({ career, clients, size = 'default' }: { career: DoorP
             <span aria-hidden="true">A</span>
             {career.label}
           </p>
-          <h3 id={careerTitle} className={styles.careerTitle}>
+          <Heading id={careerTitle} className={styles.careerTitle}>
             {career.title}
-          </h3>
+          </Heading>
           {career.text && <p className={styles.careerText}>{career.text}</p>}
           <DoorButton action={career.action} variant="secondary" className={styles.cta}>
             {career.cta}
@@ -92,9 +104,9 @@ export function PathDoors({ career, clients, size = 'default' }: { career: DoorP
             <span aria-hidden="true">B</span>
             {clients.label}
           </p>
-          <h3 id={clientsTitle} className={styles.clientsTitle}>
+          <Heading id={clientsTitle} className={styles.clientsTitle}>
             {clients.title}
-          </h3>
+          </Heading>
           {clients.text && <p className={styles.clientsText}>{clients.text}</p>}
           <DoorButton action={clients.action} variant="primary" size="lg" className={styles.cta}>
             {clients.cta}

@@ -1,0 +1,21 @@
+.panel {
+  padding-block: var(--space-section);
+}
+
+.title {
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-snug);
+}
+
+.text {
+  margin-top: var(--space-4);
+  max-width: 46ch;
+  color: var(--color-text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}

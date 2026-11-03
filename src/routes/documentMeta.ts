@@ -1,5 +1,6 @@
 import { findExperiment } from '../content/lab'
-import { labText } from '../content/labText'
+import { experimentSummary, labMeta } from '../content/labMeta'
+import { privacyMeta } from '../content/privacyMeta'
 import { projectMeta } from '../content/projectDetails/meta'
 import { serviceAreas } from '../content/services/areas'
 import { shopMeta } from '../content/shop/meta'
@@ -58,11 +59,11 @@ export function buildDocumentMeta(
     return {
       ...site,
       title: `${experiment.name} — ${t.nav.lab} — ${brandName}`,
-      description: experiment.tagline[lang],
+      description: experimentSummary[experiment.id][lang],
     }
   }
   if (page.id === 'lab') {
-    return { ...site, title: `${labText.meta.title[lang]} — ${brandName}`, description: labText.meta.description[lang] }
+    return { ...site, title: `${labMeta.title[lang]} — ${brandName}`, description: labMeta.description[lang] }
   }
 
   // The shop: the front page, the request builder and the cart have their own words, and a service is
@@ -72,6 +73,8 @@ export function buildDocumentMeta(
   if (area) return { ...site, title: `${area.name[lang]} — ${t.nav.services} — ${brandName}`, description: area.summary[lang] }
   const shop = page.id === 'services' ? shopMeta.landing : page.id === 'configure' ? shopMeta.configurator : page.id === 'cart' ? shopMeta.cart : undefined
   if (shop) return { ...site, title: `${shop.title[lang]} — ${brandName}`, description: shop.description[lang] }
+
+  if (page.id === 'privacy') return { ...site, title: `${privacyMeta.title[lang]} — ${brandName}`, description: privacyMeta.description[lang] }
 
   // These pages describe themselves: what they offer is worth more in a search result than a menu label.
   const pageMeta = OWN_META[page.id]?.(t)

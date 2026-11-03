@@ -84,7 +84,7 @@ function LabTile({ id, kind }: { id: LabId; kind: 'particles' | 'liquid' | 'moti
 /**
  * Three of the Lab's experiments as three different shapes in saturated colour, bolder than the
  * rest of the page and the same in either theme. Each opens its own page; the button under them
- * enters the Lab, where all six are. The picture on each only answers the pointer.
+ * enters the Lab, where all five are. The picture on each only answers the pointer.
  */
 export function LabSection() {
   const { t } = useI18n()
