@@ -310,6 +310,7 @@ describe('the inquiry', () => {
       name: 'Ada',
       email: 'ada@example.com',
       phone: null,
+      consent: true,
     })
     expect(() => toRequest(cartOf({ need: 'website' }), GOOD, 'hu')).toThrow()
     expect(Object.values(request).every((value) => value !== '')).toBe(true)

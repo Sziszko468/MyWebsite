@@ -1,3 +1,4 @@
+import { overlayFaq } from '../catalogOverlay'
 import { tri, type Trilingual } from '../trilingual'
 
 /**
@@ -13,7 +14,8 @@ export interface FaqItem {
   answer: Trilingual
 }
 
-export const faq: readonly FaqItem[] = [
+/** The questions as written in this file: what the backend is seeded from (content/catalogExport.ts). */
+export const baseFaq: readonly FaqItem[] = [
   {
     id: 'start',
     question: tri('Hogyan indul egy projekt?', 'How does a project start?', 'Hoe begint een project?'),
@@ -77,3 +79,6 @@ export const faq: readonly FaqItem[] = [
     ),
   },
 ]
+
+/** What the website shows: the list as edited in the administration when there is one (content/catalogOverlay.ts), otherwise the one above. */
+export const faq: readonly FaqItem[] = overlayFaq(baseFaq)

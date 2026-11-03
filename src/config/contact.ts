@@ -1,4 +1,5 @@
 import { normalizeEndpoint } from '../forms/submit'
+import { apiEndpoint } from './api'
 
 /**
  * How the contact form behaves. Everything the owner has to decide before it can send anything is
@@ -9,7 +10,7 @@ export interface ContactConfig {
   /**
    * Where the message is posted as JSON. Set it at build time with the environment variable
    * `VITE_CONTACT_ENDPOINT` (an https:// address of a form handler or backend that allows requests
-   * from this site). While it is empty the form cannot send: it says so and offers the message to
+   * from this site), or by `VITE_API_URL` (the backend in server/, config/api.ts). While it is empty the form cannot send: it says so and offers the message to
    * copy, and it never shows a success message.
    */
   endpoint: string | null
@@ -22,6 +23,6 @@ export interface ContactConfig {
 }
 
 export const contactConfig: ContactConfig = {
-  endpoint: normalizeEndpoint(import.meta.env.VITE_CONTACT_ENDPOINT, import.meta.env.DEV),
+  endpoint: normalizeEndpoint(import.meta.env.VITE_CONTACT_ENDPOINT, import.meta.env.DEV) ?? apiEndpoint('/api/contact'),
   requireConsent: true,
 }

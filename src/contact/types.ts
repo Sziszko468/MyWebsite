@@ -52,4 +52,6 @@ export interface ContactRequest {
   email: string
   subject: string
   message: string
+  /** Whether the visitor ticked the acknowledgement of how the data is used (the server records when, and can insist: REQUIRE_CONSENT). */
+  consent: boolean
 }

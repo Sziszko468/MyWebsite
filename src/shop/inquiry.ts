@@ -157,6 +157,8 @@ export interface QuoteRequest {
   name: string
   email: string
   phone: string | null
+  /** Whether the visitor ticked the acknowledgement of how the data is used (the server records when, and can insist: REQUIRE_CONSENT). */
+  consent: boolean
 }
 
 const orNull = (value: string): string | null => value.trim() || null
@@ -177,6 +179,7 @@ export function toRequest(cart: Cart, details: Details, language: Language): Quo
     name: details.name.trim(),
     email: details.email.trim(),
     phone: orNull(details.phone),
+    consent: details.consent,
   }
 }
 

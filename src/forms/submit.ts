@@ -26,12 +26,14 @@ export interface Transport<T extends object> {
 const LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\])$/
 
 /**
- * A usable endpoint is an https:// address. A local http:// address is accepted only while
- * developing, so a test server can stand in for the real one. Anything else (empty, malformed,
- * plain http on the internet) is treated as not configured.
+ * A usable endpoint is an https:// address, or a path on the site's own origin (`/api/contact`). A
+ * local http:// address is accepted only while developing, so a test server can stand in for the real
+ * one. Anything else (empty, malformed, plain http on the internet) is treated as not configured.
  */
 export function normalizeEndpoint(value: unknown, allowLocalHttp = false): string | null {
   if (typeof value !== 'string' || !value.trim()) return null
+  // A path on the site's own origin (`/api/contact`), for a deployment where the backend serves the website too.
+  if (/^\/(?!\/)[A-Za-z0-9_\-./]*$/.test(value.trim()) && !value.includes('..')) return value.trim()
   let url: URL
   try {
     url = new URL(value.trim())

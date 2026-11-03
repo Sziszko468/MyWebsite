@@ -1,4 +1,5 @@
 import { normalizeEndpoint } from '../forms/submit'
+import { apiEndpoint } from './api'
 
 /**
  * How the quote request form behaves. Everything the owner has to decide before the form can send
@@ -8,7 +9,7 @@ export interface QuoteConfig {
   /**
    * Where the request is posted as JSON. Set it at build time with the environment variable
    * `VITE_QUOTE_ENDPOINT` (an https:// address of a form handler or backend that allows requests
-   * from this site). While it is empty the form cannot send: it says so and offers the summary to
+   * from this site), or by `VITE_API_URL` (the backend in server/, config/api.ts). While it is empty the form cannot send: it says so and offers the summary to
    * copy, and it never shows a success message.
    */
   endpoint: string | null
@@ -21,6 +22,6 @@ export interface QuoteConfig {
 }
 
 export const quoteConfig: QuoteConfig = {
-  endpoint: normalizeEndpoint(import.meta.env.VITE_QUOTE_ENDPOINT, import.meta.env.DEV),
+  endpoint: normalizeEndpoint(import.meta.env.VITE_QUOTE_ENDPOINT, import.meta.env.DEV) ?? apiEndpoint('/api/quote-requests'),
   requireConsent: true,
 }

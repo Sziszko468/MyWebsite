@@ -1,6 +1,7 @@
 import type { ExtraId } from './services/addons'
 import type { NeedId } from './services/ids'
 import type { ServicePrice, Timeline, VatMode } from './pricing'
+import { overlayPackages } from './catalogOverlay'
 import { tri, type Trilingual } from './trilingual'
 
 /**
@@ -55,7 +56,8 @@ export interface ServicePackage {
   extras: readonly ExtraId[]
 }
 
-export const packages: readonly ServicePackage[] = [
+/** The packages as written in this file: what the backend is seeded from (content/catalogExport.ts). */
+export const basePackages: readonly ServicePackage[] = [
   {
     id: 'launch',
     name: 'Launch',
@@ -357,6 +359,9 @@ export const packages: readonly ServicePackage[] = [
     extras: ['pages', 'responsive', 'performance', 'languages', 'custom'],
   },
 ]
+
+/** What the website shows: the packages above with the prices and texts the owner has edited in the administration laid over them (content/catalogOverlay.ts). */
+export const packages: readonly ServicePackage[] = overlayPackages(basePackages)
 
 export function getPackage(id: PackageId): ServicePackage {
   const found = packages.find((candidate) => candidate.id === id)

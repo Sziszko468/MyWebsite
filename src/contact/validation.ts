@@ -56,5 +56,6 @@ export function toContactRequest(draft: ContactDraft, language: Language): Conta
     email: draft.email.trim(),
     subject: draft.subject.trim(),
     message: draft.message.trim(),
+    consent: draft.consent,
   }
 }

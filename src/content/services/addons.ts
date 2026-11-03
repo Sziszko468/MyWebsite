@@ -1,4 +1,5 @@
 import type { ServicePrice, VatMode } from '../pricing'
+import { overlayAddons } from '../catalogOverlay'
 import { tri, type Trilingual } from '../trilingual'
 import type { NeedId } from './ids'
 
@@ -28,7 +29,8 @@ export interface Addon {
 
 const REAL_NEEDS = ['website', 'webapp', 'improve', 'ui', 'integrations'] as const
 
-export const addons: readonly Addon[] = [
+/** The add-ons as written in this file: what the backend is seeded from (content/catalogExport.ts). */
+export const baseAddons: readonly Addon[] = [
   {
     id: 'pages',
     name: tri('További oldalak', 'Additional pages', 'Extra pagina’s'),
@@ -126,6 +128,9 @@ export const addons: readonly Addon[] = [
     vat: 'unspecified',
   },
 ]
+
+/** What the website shows: the add-ons above with the prices and texts edited in the administration laid over them (content/catalogOverlay.ts). */
+export const addons: readonly Addon[] = overlayAddons(baseAddons)
 
 export function getAddon(id: ExtraId): Addon {
   const found = addons.find((addon) => addon.id === id)

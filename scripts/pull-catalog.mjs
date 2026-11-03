@@ -1,0 +1,110 @@
+// Fetches the backend's catalogue (GET /api/shop/catalog) into src/content/catalog.generated.json, which the website's
+// content modules lay over their static text and prices at build time (src/content/catalogOverlay.ts).
+//
+//   CATALOG_API_URL=https://api.example.com npm run catalog:pull        write the file
+//   CATALOG_API_URL=https://api.example.com npm run catalog:pull -- --check   write nothing; exit 1 when the file is not the backend's current catalogue
+//   npm run catalog:pull -- --remove                                    delete the file (build from the static content only)
+//
+// The address is CATALOG_API_URL, or VITE_API_URL when that is the backend's own origin (from the environment or from
+// .env.production / .env.local / .env). `VITE_API_URL=/` (the backend serves the website) says nothing about where the
+// backend is while building, so CATALOG_API_URL is needed then.
+import { existsSync, readFileSync } from 'node:fs'
+import { rename, rm, writeFile } from 'node:fs/promises'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const target = join(root, 'src', 'content', 'catalog.generated.json')
+const args = new Set(process.argv.slice(2))
+
+function fail(message, code = 1) {
+  console.error(`catalog:pull: ${message}`)
+  process.exit(code)
+}
+
+if (args.has('--remove')) {
+  await rm(target, { force: true })
+  console.log('catalog:pull: removed src/content/catalog.generated.json; the build uses the static content only.')
+  process.exit(0)
+}
+
+/** KEY=value lines of a .env file (no expansion, no export): enough for one address. */
+function readEnvFile(name) {
+  const path = join(root, name)
+  if (!existsSync(path)) return {}
+  const out = {}
+  for (const line of readFileSync(path, 'utf8').split(/\r?\n/)) {
+    const match = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/.exec(line)
+    if (match && !line.trim().startsWith('#')) out[match[1]] = match[2].replace(/^(['"])(.*)\1$/, '$2')
+  }
+  return out
+}
+const fromFiles = { ...readEnvFile('.env'), ...readEnvFile('.env.local'), ...readEnvFile('.env.production') }
+const setting = (name) => (process.env[name] ?? fromFiles[name] ?? '').trim()
+
+const raw = setting('CATALOG_API_URL') || setting('VITE_API_URL')
+if (!raw || raw === '/') fail('set CATALOG_API_URL to the backend origin, for example CATALOG_API_URL=https://api.example.com (VITE_API_URL=/ does not say where the backend is).', 2)
+let base
+try {
+  base = new URL(raw)
+} catch {
+  fail(`"${raw}" is not an address.`, 2)
+}
+const local = ['localhost', '127.0.0.1', '[::1]'].includes(base.hostname)
+if (base.protocol !== 'https:' && !(base.protocol === 'http:' && local)) fail('the backend address must be https (http only for localhost).', 2)
+if (base.username || base.password) fail('the address must not contain a user name or a password.', 2)
+
+let response
+try {
+  response = await fetch(new URL('/api/shop/catalog', base.origin), { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(20_000) })
+} catch (error) {
+  fail(`could not reach ${base.origin}: ${error instanceof Error ? error.message : error}`)
+}
+if (!response.ok) fail(`${base.origin} answered ${response.status} to /api/shop/catalog.`)
+let payload
+try {
+  payload = await response.json()
+} catch {
+  fail('the answer is not JSON.')
+}
+const catalog = payload?.data
+if (!catalog || typeof catalog !== 'object' || typeof catalog.version !== 'string') fail('the answer is not a catalogue (no data.version).')
+
+// The website decides what it can use; ask its own code, loaded through Vite like the seed export does.
+const { createServer } = await import(pathToFileURL(join(root, 'node_modules', 'vite', 'dist', 'node', 'index.js')).href)
+const vite = await createServer({ root, appType: 'custom', server: { middlewareMode: true }, logLevel: 'error' })
+let problems
+try {
+  const { catalogProblems } = await vite.ssrLoadModule('/src/content/catalogOverlay.ts')
+  const { basePackages } = await vite.ssrLoadModule('/src/content/packages.ts')
+  const { baseAddons } = await vite.ssrLoadModule('/src/content/services/addons.ts')
+  problems = catalogProblems(catalog, { packages: basePackages.map((pack) => pack.id), extras: baseAddons.map((addon) => addon.id) })
+} finally {
+  await vite.close()
+}
+
+const document = { generatedAt: new Date().toISOString(), source: base.origin, ...catalog }
+
+if (args.has('--check')) {
+  let current = null
+  try {
+    current = JSON.parse(readFileSync(target, 'utf8'))
+  } catch {
+    // no file, or not JSON: out of date
+  }
+  if (current?.version === catalog.version) {
+    console.log(`catalog:pull: src/content/catalog.generated.json is the backend's current catalogue (version ${catalog.version}).`)
+    process.exit(0)
+  }
+  console.error(`catalog:pull: the website is built from ${current ? `version ${current.version}` : 'the static content'}; the backend is at version ${catalog.version}. Run npm run catalog:pull and rebuild.`)
+  process.exit(1)
+}
+
+const temporary = `${target}.tmp`
+await writeFile(temporary, `${JSON.stringify(document, null, 2)}\n`)
+await rename(temporary, target)
+console.log(`catalog:pull: ${catalog.packages.length} packages, ${catalog.extras.length} add-ons, ${catalog.faq.length} FAQ entries (version ${catalog.version}) from ${base.origin} -> src/content/catalog.generated.json`)
+if (problems.length > 0) {
+  console.warn(`\ncatalog:pull: ${problems.length} thing(s) in the backend will not reach the website:`)
+  for (const problem of problems) console.warn(`  - ${problem}`)
+}

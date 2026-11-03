@@ -15,6 +15,17 @@ dist-ssr
 # Settings and keys
 .env
 .env.*
+!.env.example
+
+# The backend's catalogue as pulled for a build (npm run catalog:pull)
+src/content/catalog.generated.json
+src/content/catalog.generated.json.tmp
+
+# The backend's database and the mail it writes in development
+/data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
 
 # Editor directories and files
 .vscode/*

@@ -90,8 +90,9 @@ describe('the contact request', () => {
       email: 'test.person@example.com',
       subject: 'A new website',
       message: 'Hello there, friend.',
+      consent: true,
     })
-    expect(Object.keys(request).sort()).toEqual(['email', 'form', 'kind', 'language', 'message', 'name', 'subject'])
+    expect(Object.keys(request).sort()).toEqual(['consent', 'email', 'form', 'kind', 'language', 'message', 'name', 'subject'])
   })
 
   it('is not built from an incomplete form', () => {

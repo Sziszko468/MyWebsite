@@ -8,6 +8,7 @@ npm run build      # type-check + production build + one HTML file per page, sit
 npm run check:seo  # after a build: reads dist/ like a crawler (titles, canonicals, hreflang, sitemap, structured data, CSP hashes)
 npm run typecheck  # tsc -b
 npm run lint       # oxlint
+npm run server:start   # the backend (see "Backend"); first: npm run server:admin create you@example.com admin
 npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition, home-page content, rhythm and link targets, project-page content, pictures and meta, services content and wording, quote-form validation and sending, the services, About and contact pages rendered in three languages, the About content's honesty rules, the contact form's validation and sending, the configured links, the motion system (config against the CSS tokens, the engine's modules, its components rendered to markup, every stylesheet's animations)
 ```
 
@@ -57,6 +58,11 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 | `src/content/privacy.ts`, `src/pages/PrivacyPage.tsx` | The privacy and cookie notice (`/privacy`). |
 | `scripts/` | `prerender.mjs` (per-page HTML, sitemap, robots, headers), `check-seo.mjs` (checks the built files), `make-og-image.mjs` (draws `public/og/default.png`). |
 | `docs/technical-audit.md` | The PROMPT 11 audit: issues found, fixes, measured results, limits. |
+| `server/` | The backend (PROMPT 12): a Node program with no runtime dependencies and a SQLite file. `src/` (config, `app.ts`, `http/`, `db/` with the SQL migrations, `modules/` for contact, quotes, catalogue, shop pricing, auth, admin, notifications, system), `seed/catalog.seed.json` (the website's catalogue as data), `test/` (254 tests run by `npm test`). See "Backend" below. |
+| `docs/backend/` | `README.md`: configuration, every endpoint, the administration, e-mail, privacy inventory, deployment, test results and what was not verified. `architecture.md`: the audit and the design, written before the code. |
+| `.env.example` | Every setting of the backend and of the website's build, with descriptions and no secret. |
+| `src/config/api.ts` | `VITE_API_URL`: where the backend is. The forms' endpoints (`config/contact.ts`, `config/quote.ts`) default to its `/api/contact` and `/api/quote-requests`. |
+| `src/content/catalogExport.ts`, `catalogOverlay.ts` | The static catalogue as seed data for the backend, and the overlay that lays the backend's edited prices, texts and FAQ over it at build time (`npm run catalog:pull`). The files with the packages, add-ons and FAQ export their static `base…` lists and the overlaid ones. |
 
 ## Conventions
 
@@ -607,4 +613,20 @@ Off unless `VITE_ANALYTICS_ENDPOINT` is set at build time (an https address; it 
 
 ### What the audit did not touch, and why
 
-There is no backend in this repository, so there is no authentication, rate limiting, upload endpoint, CORS configuration or AI provider to review: the earlier Generative Objects experience (and with it the Meshy integration and its server) was deleted on 2026-11-01, so no Meshy key exists anywhere (the built files were searched for key patterns; none). The hidden racing experience is a link that takes the whole tab to nfsu2.xyz with `noreferrer noopener`; the site never frames it (that site forbids it).
+That audit (PROMPT 11) was made when this repository had no backend; the backend that was added afterwards (PROMPT 12, `server/`, see "Backend" below) has its own tests and its own account of what was and was not verified in `docs/backend/README.md`. There is still no AI provider to review: the earlier Generative Objects experience (and with it the Meshy integration and its server) was deleted on 2026-11-01, so no Meshy key exists anywhere (the built files were searched for key patterns; none). The hidden racing experience is a link that takes the whole tab to nfsu2.xyz with `noreferrer noopener`; the site never frames it (that site forbids it).
+
+## Backend
+
+`server/` is the backend: it receives the contact form and the quote builder, stores them, e-mails the owner, serves the shop's catalogue and has a separate administration at `/admin` for the owner. It is one Node program (22.18 or newer, TypeScript run directly, **no runtime dependencies**) with a SQLite file. Everything about it, in one place: `docs/backend/README.md` (configuration, every endpoint, the administration, e-mail, what is stored about people, deployment, test results, and a list of what was **not** verified). The design and the audit it was built from: `docs/backend/architecture.md`.
+
+```bash
+cp .env.example .env                                   # every setting, described; no secrets in the file
+npm run server:admin create you@example.com admin      # accounts are made here only; there is no sign-up
+npm run server:start                                   # http://127.0.0.1:8787/admin
+VITE_API_URL=http://localhost:8787 npm run dev         # the website's forms now send to it (CORS_ORIGINS=http://localhost:5173 on the server)
+```
+
+- **The forms.** With `VITE_API_URL` set at build time the contact form and the quote builder post to `/api/contact` and `/api/quote-requests`; they still say "sent" only after a 2xx answer, and with no address configured they still say they cannot send. The backend re-checks everything with the same limits (`server/test/contract.test.ts` holds the two sides against each other) and never reads a price from a request.
+- **The catalogue.** This folder's static content (`src/content/`) is the seed of the backend's database; after that the database is the master copy and the owner edits prices, texts and the FAQ in the administration. Edits reach the website at its next build: `CATALOG_API_URL=https://api.example.com npm run catalog:pull`, then `npm run build` (`src/content/catalogOverlay.ts` says exactly what the overlay may and may not change). Which packages, add-ons and services *exist* stays in the source.
+- **No payment, no accounts, no uploads, no AI/3D-generation endpoint.** Every price is still "on request"; the schema and the API can carry a published price and compute a fixed subtotal, and nothing ever trusts a figure from the browser.
+- **Tests:** `npm test` runs the website's and the backend's (the backend's use a real in-process server, a real SQLite database, a mock SMTP server that speaks the protocol, and the real programs started in an empty folder).

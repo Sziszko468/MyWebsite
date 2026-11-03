@@ -1,0 +1,979 @@
+{
+  "extras": [
+    {
+      "code": "pages",
+      "status": "active",
+      "position": 0,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "appliesTo": [
+        "website",
+        "improve"
+      ],
+      "translations": {
+        "hu": {
+          "name": "További oldalak",
+          "summary": "A csomagon felüli oldalak, a megállapodott szerkezetbe illesztve."
+        },
+        "en": {
+          "name": "Additional pages",
+          "summary": "Pages beyond the package, fitted into the agreed structure."
+        },
+        "nl": {
+          "name": "Extra pagina’s",
+          "summary": "Pagina’s bovenop het pakket, ingepast in de afgesproken structuur."
+        }
+      }
+    },
+    {
+      "code": "responsive",
+      "status": "active",
+      "position": 1,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "appliesTo": [
+        "improve",
+        "ui"
+      ],
+      "translations": {
+        "hu": {
+          "name": "Reszponzív átalakítás",
+          "summary": "Meglévő oldal vagy felület átalakítása, hogy mobiltól asztali gépig jól használható legyen."
+        },
+        "en": {
+          "name": "Responsive adaptation",
+          "summary": "Reworking an existing page or interface so it works well from phone to desktop."
+        },
+        "nl": {
+          "name": "Responsieve aanpassing",
+          "summary": "Een bestaande pagina of interface aanpassen zodat die van telefoon tot desktop goed werkt."
+        }
+      }
+    },
+    {
+      "code": "motion",
+      "status": "active",
+      "position": 2,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "appliesTo": [
+        "website",
+        "webapp",
+        "improve",
+        "ui"
+      ],
+      "translations": {
+        "hu": {
+          "name": "Animáció és interakciók",
+          "summary": "Visszafogott, célzott mozgás és interaktív részletek; a használhatóság mindig előbbre való."
+        },
+        "en": {
+          "name": "Animation and interactions",
+          "summary": "Restrained, purposeful motion and interactive details; usability always comes first."
+        },
+        "nl": {
+          "name": "Animatie en interactie",
+          "summary": "Ingetogen, doelgerichte beweging en interactieve details; bruikbaarheid gaat altijd voor."
+        }
+      }
+    },
+    {
+      "code": "api",
+      "status": "active",
+      "position": 3,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "appliesTo": [
+        "website",
+        "webapp",
+        "improve",
+        "integrations"
+      ],
+      "translations": {
+        "hu": {
+          "name": "API-integráció",
+          "summary": "Egy külső szolgáltatás vagy API bekötése; hogy megvalósítható-e, azt az ajánlat előtt tisztázzuk."
+        },
+        "en": {
+          "name": "API integration",
+          "summary": "Connecting an external service or API; whether it can be done is settled before the quote."
+        },
+        "nl": {
+          "name": "API-integratie",
+          "summary": "Een externe dienst of API koppelen; of dat kan, stemmen we af vóór de offerte."
+        }
+      }
+    },
+    {
+      "code": "performance",
+      "status": "active",
+      "position": 4,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "appliesTo": [
+        "website",
+        "webapp",
+        "improve",
+        "ui"
+      ],
+      "translations": {
+        "hu": {
+          "name": "Teljesítmény-optimalizálás",
+          "summary": "Egy meglévő oldal vagy alkalmazás sebességének átvilágítása, és a talált szűk keresztmetszetek javítása."
+        },
+        "en": {
+          "name": "Performance optimization",
+          "summary": "Reviewing how fast an existing site or application is, and fixing the bottlenecks found."
+        },
+        "nl": {
+          "name": "Prestatie-optimalisatie",
+          "summary": "Nagaan hoe snel een bestaande site of applicatie is en de gevonden knelpunten verhelpen."
+        }
+      }
+    },
+    {
+      "code": "languages",
+      "status": "active",
+      "position": 5,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "appliesTo": [
+        "website",
+        "webapp",
+        "improve",
+        "ui"
+      ],
+      "translations": {
+        "hu": {
+          "name": "További nyelv",
+          "summary": "Egy újabb nyelvi változat a meglévő szerkezetben; a szövegek elkészítésének módját az ajánlatban rögzítjük."
+        },
+        "en": {
+          "name": "Additional language",
+          "summary": "An extra language version in the existing structure; how the texts are produced is agreed in the quote."
+        },
+        "nl": {
+          "name": "Extra taal",
+          "summary": "Een extra taalversie in de bestaande structuur; hoe de teksten tot stand komen, leggen we vast in de offerte."
+        }
+      }
+    },
+    {
+      "code": "custom",
+      "status": "active",
+      "position": 6,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "appliesTo": [
+        "website",
+        "webapp",
+        "improve",
+        "ui",
+        "integrations",
+        "unsure"
+      ],
+      "translations": {
+        "hu": {
+          "name": "Egyedi funkció",
+          "summary": "Valami, ami nincs a listán: leírod, és a részletek ismeretében közösen döntjük el, belefér-e."
+        },
+        "en": {
+          "name": "Custom functionality",
+          "summary": "Something that is not on the list: you describe it and, once the details are known, we decide together whether it fits."
+        },
+        "nl": {
+          "name": "Maatwerkfunctionaliteit",
+          "summary": "Iets dat niet op de lijst staat: jij beschrijft het en als de details bekend zijn, beslissen we samen of het past."
+        }
+      }
+    },
+    {
+      "code": "care",
+      "status": "active",
+      "position": 7,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "appliesTo": [
+        "website",
+        "webapp",
+        "improve",
+        "integrations"
+      ],
+      "translations": {
+        "hu": {
+          "name": "Karbantartás",
+          "summary": "Folyamatos karbantartás külön megállapodás szerint (lásd a Care csomagot)."
+        },
+        "en": {
+          "name": "Maintenance",
+          "summary": "Ongoing maintenance by separate agreement (see the Care package)."
+        },
+        "nl": {
+          "name": "Onderhoud",
+          "summary": "Doorlopend onderhoud volgens aparte afspraak (zie het pakket Care)."
+        }
+      }
+    }
+  ],
+  "packages": [
+    {
+      "code": "launch",
+      "status": "active",
+      "featured": false,
+      "position": 0,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "quoteRequired": true,
+      "needs": [
+        "website"
+      ],
+      "extras": [
+        "pages",
+        "motion",
+        "languages",
+        "custom",
+        "care"
+      ],
+      "translations": {
+        "hu": {
+          "name": "Launch",
+          "tagline": "Egy világos, jól használható weboldal, amellyel elindulhatsz.",
+          "audience": "Egyszerűbb webes jelenlétet létrehozni kívánó vállalkozásoknak és magánszemélyeknek.",
+          "scope": "Kisebb, áttekinthető weboldal.",
+          "customization": "Egyedi megjelenés az alapszerkezeten belül.",
+          "support": "Átadás a megállapodás szerint; a folyamatos karbantartás külön megállapodás (Care).",
+          "priceNote": null,
+          "includes": [
+            "Reszponzív bemutatkozó weboldal",
+            "Alapvető oldalszerkezet",
+            "Mobilbarát navigáció",
+            "Kapcsolatfelvételi felület; az üzenetek kezelésének módját projektenként egyeztetjük",
+            "Alapvető metaadatok és technikai SEO-beállítások"
+          ],
+          "fits": [
+            "Bemutatkozó weboldal vállalkozásnak",
+            "Személyes vagy szakmai bemutatkozó oldal",
+            "Kisebb, tartalomközpontú weboldal"
+          ],
+          "deliverables": [
+            "Kész, reszponzív weboldal",
+            "Oldalszerkezet és navigáció, amely telefonon is működik",
+            "Beállított metaadatok és technikai SEO-alapok"
+          ]
+        },
+        "en": {
+          "name": "Launch",
+          "tagline": "A clear, usable website to get you started.",
+          "audience": "For businesses and individuals who want to set up a straightforward web presence.",
+          "scope": "A small, easy-to-grasp website.",
+          "customization": "A distinctive look within the basic structure.",
+          "support": "Handover as agreed; ongoing maintenance is a separate agreement (Care).",
+          "priceNote": null,
+          "includes": [
+            "A responsive introductory website",
+            "A basic page structure",
+            "Mobile-friendly navigation",
+            "A contact section; how messages are handled is agreed per project",
+            "Basic metadata and technical SEO settings"
+          ],
+          "fits": [
+            "An introductory website for a business",
+            "A personal or professional profile page",
+            "A small, content-focused website"
+          ],
+          "deliverables": [
+            "A finished, responsive website",
+            "A page structure and navigation that work on a phone",
+            "Metadata and technical SEO basics set up"
+          ]
+        },
+        "nl": {
+          "name": "Launch",
+          "tagline": "Een heldere, bruikbare website waarmee je van start gaat.",
+          "audience": "Voor bedrijven en particulieren die een eenvoudige webpresentie willen opzetten.",
+          "scope": "Een kleine, overzichtelijke website.",
+          "customization": "Een eigen uitstraling binnen de basisstructuur.",
+          "support": "Oplevering zoals afgesproken; doorlopend onderhoud is een aparte afspraak (Care).",
+          "priceNote": null,
+          "includes": [
+            "Een responsieve introductiewebsite",
+            "Een basisstructuur van de pagina’s",
+            "Mobielvriendelijke navigatie",
+            "Een contactgedeelte; hoe berichten worden afgehandeld spreken we per project af",
+            "Basismetadata en technische SEO-instellingen"
+          ],
+          "fits": [
+            "Een introductiewebsite voor een bedrijf",
+            "Een persoonlijke of professionele profielpagina",
+            "Een kleine, inhoudelijke website"
+          ],
+          "deliverables": [
+            "Een afgeronde, responsieve website",
+            "Een paginastructuur en navigatie die ook op een telefoon werken",
+            "Ingestelde metadata en technische SEO-basis"
+          ]
+        }
+      }
+    },
+    {
+      "code": "grow",
+      "status": "active",
+      "featured": false,
+      "position": 1,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "quoteRequired": true,
+      "needs": [
+        "improve",
+        "website",
+        "ui",
+        "integrations"
+      ],
+      "extras": [
+        "pages",
+        "responsive",
+        "motion",
+        "api",
+        "performance",
+        "languages",
+        "custom",
+        "care"
+      ],
+      "translations": {
+        "hu": {
+          "name": "Grow",
+          "tagline": "Meglévő online jelenlét továbbfejlesztése: új szekciók, jobb élmény, bővítés.",
+          "audience": "Meglévő online jelenlétüket továbbfejleszteni kívánó vállalkozásoknak.",
+          "scope": "Meglévő vagy összetettebb weboldal bővítése.",
+          "customization": "Testreszabott komponensek és interaktív elemek.",
+          "support": "Átadás a megállapodás szerint; a folyamatos karbantartás külön megállapodás (Care).",
+          "priceNote": null,
+          "includes": [
+            "Összetettebb weboldal",
+            "Több tartalmi szekció",
+            "Testreszabott komponensek",
+            "Interaktív felületek",
+            "Harmadik féltől származó integrációk a projekt keretein belül"
+          ],
+          "fits": [
+            "Meglévő weboldal bővítése új szekciókkal",
+            "Interaktív elemek és egyedi komponensek",
+            "Külső szolgáltatás bekötése a projekt keretein belül"
+          ],
+          "deliverables": [
+            "Továbbfejlesztett, bővített weboldal",
+            "Testreszabott komponensek és interaktív felületek",
+            "Az egyeztetett külső szolgáltatások bekötve"
+          ]
+        },
+        "en": {
+          "name": "Grow",
+          "tagline": "Taking an existing online presence further: new sections, a better experience, more features.",
+          "audience": "For businesses that want to develop an existing online presence further.",
+          "scope": "Extending an existing or more complex website.",
+          "customization": "Custom components and interactive elements.",
+          "support": "Handover as agreed; ongoing maintenance is a separate agreement (Care).",
+          "priceNote": null,
+          "includes": [
+            "A more complex website",
+            "More content sections",
+            "Custom components",
+            "Interactive interfaces",
+            "Third-party integrations within the project scope"
+          ],
+          "fits": [
+            "Extending an existing website with new sections",
+            "Interactive elements and custom components",
+            "Connecting an external service within the project scope"
+          ],
+          "deliverables": [
+            "A developed, extended website",
+            "Custom components and interactive interfaces",
+            "The agreed external services connected"
+          ]
+        },
+        "nl": {
+          "name": "Grow",
+          "tagline": "Een bestaande online aanwezigheid verder ontwikkelen: nieuwe secties, een betere ervaring, uitbreiding.",
+          "audience": "Voor bedrijven die een bestaande online aanwezigheid verder willen ontwikkelen.",
+          "scope": "Een bestaande of complexere website uitbreiden.",
+          "customization": "Maatwerkcomponenten en interactieve elementen.",
+          "support": "Oplevering zoals afgesproken; doorlopend onderhoud is een aparte afspraak (Care).",
+          "priceNote": null,
+          "includes": [
+            "Een complexere website",
+            "Meer inhoudelijke secties",
+            "Maatwerkcomponenten",
+            "Interactieve interfaces",
+            "Integraties met derden binnen de projectomvang"
+          ],
+          "fits": [
+            "Een bestaande website uitbreiden met nieuwe secties",
+            "Interactieve elementen en maatwerkcomponenten",
+            "Een externe dienst koppelen binnen de projectomvang"
+          ],
+          "deliverables": [
+            "Een doorontwikkelde, uitgebreide website",
+            "Maatwerkcomponenten en interactieve interfaces",
+            "De afgesproken externe diensten gekoppeld"
+          ]
+        }
+      }
+    },
+    {
+      "code": "build",
+      "status": "active",
+      "featured": true,
+      "position": 2,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "quoteRequired": true,
+      "needs": [
+        "webapp",
+        "integrations"
+      ],
+      "extras": [
+        "motion",
+        "api",
+        "performance",
+        "languages",
+        "custom",
+        "care"
+      ],
+      "translations": {
+        "hu": {
+          "name": "Build",
+          "tagline": "Egyedi webalkalmazás az ötlettől az első használható verzióig.",
+          "audience": "Egyedi webalkalmazást vagy összetettebb digitális terméket fejleszteni kívánó ügyfeleknek.",
+          "scope": "Egyedi webalkalmazás vagy összetettebb digitális termék.",
+          "customization": "Egyedi felhasználói folyamatok és architektúra.",
+          "support": "Átadás a megállapodás szerint; a további fejlesztés külön megállapodás.",
+          "priceNote": null,
+          "includes": [
+            "Egyedi felhasználói folyamatok",
+            "Frontend- és backendfejlesztés a megállapodott terjedelem szerint",
+            "Adatbázis-integráció",
+            "API-kapcsolatok",
+            "Az alkalmazásarchitektúra kialakítása"
+          ],
+          "fits": [
+            "Foglalási, nyilvántartási vagy kezelőfelületű alkalmazás",
+            "Digitális termék több felhasználói szerepkörrel",
+            "Meglévő folyamat digitalizálása webalkalmazással"
+          ],
+          "deliverables": [
+            "Működő webalkalmazás az első használható verzióig",
+            "Frontend és backend a megállapodott terjedelemben",
+            "Adatbázis- és API-kapcsolatok"
+          ]
+        },
+        "en": {
+          "name": "Build",
+          "tagline": "A custom web application, from the idea to a first usable version.",
+          "audience": "For clients building a custom web application or a more complex digital product.",
+          "scope": "A custom web application or a more complex digital product.",
+          "customization": "Custom user flows and architecture.",
+          "support": "Handover as agreed; further development is a separate agreement.",
+          "priceNote": null,
+          "includes": [
+            "Custom user flows",
+            "Frontend and backend development within the agreed scope",
+            "Database integration",
+            "API connections",
+            "Shaping the application architecture"
+          ],
+          "fits": [
+            "A booking, records or management application",
+            "A digital product with several user roles",
+            "Taking an existing process online as a web application"
+          ],
+          "deliverables": [
+            "A working web application, up to a first usable version",
+            "Frontend and back end within the agreed scope",
+            "Database and API connections"
+          ]
+        },
+        "nl": {
+          "name": "Build",
+          "tagline": "Een maatwerk-webapplicatie, van idee tot een eerste bruikbare versie.",
+          "audience": "Voor opdrachtgevers die een maatwerk-webapplicatie of een complexer digitaal product willen laten bouwen.",
+          "scope": "Een maatwerk-webapplicatie of een complexer digitaal product.",
+          "customization": "Maatwerk gebruikersflows en architectuur.",
+          "support": "Oplevering zoals afgesproken; verdere ontwikkeling is een aparte afspraak.",
+          "priceNote": null,
+          "includes": [
+            "Maatwerk gebruikersflows",
+            "Frontend- en backendontwikkeling binnen de afgesproken omvang",
+            "Database-integratie",
+            "API-koppelingen",
+            "Opzet van de applicatiearchitectuur"
+          ],
+          "fits": [
+            "Een boekings-, registratie- of beheerapplicatie",
+            "Een digitaal product met meerdere gebruikersrollen",
+            "Een bestaand proces digitaliseren als webapplicatie"
+          ],
+          "deliverables": [
+            "Een werkende webapplicatie, tot een eerste bruikbare versie",
+            "Frontend en back-end binnen de afgesproken omvang",
+            "Database- en API-koppelingen"
+          ]
+        }
+      }
+    },
+    {
+      "code": "care",
+      "status": "active",
+      "featured": false,
+      "position": 3,
+      "price": {
+        "kind": "quote"
+      },
+      "vat": "unspecified",
+      "quoteRequired": true,
+      "needs": [
+        "improve",
+        "website",
+        "webapp"
+      ],
+      "extras": [
+        "pages",
+        "responsive",
+        "performance",
+        "languages",
+        "custom"
+      ],
+      "translations": {
+        "hu": {
+          "name": "Care",
+          "tagline": "Meglévő weboldalak és alkalmazások karbantartása és továbbfejlesztése.",
+          "audience": "Meglévő weboldalak és alkalmazások karbantartását, továbbfejlesztését igénylő ügyfeleknek.",
+          "scope": "Egy már működő weboldal vagy alkalmazás folyamatos gondozása.",
+          "customization": "Kisebb módosítások a meglévő megoldáson.",
+          "support": "Az egyeztetett karbantartás maga a csomag lényege; a terjedelmet az ajánlat rögzíti.",
+          "priceNote": null,
+          "includes": [
+            "Egyeztetett karbantartási feladatok",
+            "Kisebb módosítások",
+            "Hibakeresés",
+            "Teljesítményellenőrzés",
+            "Új funkciók tervezése és fejlesztése külön megállapodás szerint"
+          ],
+          "fits": [
+            "Egy már működő oldal hibáinak javítása",
+            "Rendszeres kisebb módosítások",
+            "Új funkció tervezése egy meglévő alkalmazásba, külön megállapodás szerint"
+          ],
+          "deliverables": [
+            "Az egyeztetett karbantartási feladatok elvégezve",
+            "Felderített és javított hibák",
+            "Teljesítményellenőrzés"
+          ]
+        },
+        "en": {
+          "name": "Care",
+          "tagline": "Maintaining and developing existing websites and applications.",
+          "audience": "For clients who need an existing website or application maintained and developed further.",
+          "scope": "Ongoing care of a website or application that already runs.",
+          "customization": "Small changes to what already exists.",
+          "support": "The agreed maintenance is the point of the package; the scope is written in the quote.",
+          "priceNote": null,
+          "includes": [
+            "Agreed maintenance tasks",
+            "Small changes",
+            "Troubleshooting",
+            "A performance check",
+            "Planning and building new features by separate agreement"
+          ],
+          "fits": [
+            "Fixing problems on a site that already runs",
+            "Regular small changes",
+            "Planning a new feature for an existing application, by separate agreement"
+          ],
+          "deliverables": [
+            "The agreed maintenance tasks carried out",
+            "Problems found and fixed",
+            "A performance check"
+          ]
+        },
+        "nl": {
+          "name": "Care",
+          "tagline": "Bestaande websites en applicaties onderhouden en doorontwikkelen.",
+          "audience": "Voor opdrachtgevers die een bestaande website of applicatie willen laten onderhouden en doorontwikkelen.",
+          "scope": "Doorlopende zorg voor een website of applicatie die al draait.",
+          "customization": "Kleine aanpassingen aan wat er al is.",
+          "support": "Het afgesproken onderhoud is de kern van het pakket; de omvang staat in de offerte.",
+          "priceNote": null,
+          "includes": [
+            "Afgesproken onderhoudstaken",
+            "Kleine aanpassingen",
+            "Foutopsporing",
+            "Prestatiecontrole",
+            "Nieuwe functies ontwerpen en bouwen volgens aparte afspraak"
+          ],
+          "fits": [
+            "Problemen verhelpen op een site die al draait",
+            "Regelmatige kleine aanpassingen",
+            "Een nieuwe functie plannen voor een bestaande applicatie, volgens aparte afspraak"
+          ],
+          "deliverables": [
+            "De afgesproken onderhoudstaken uitgevoerd",
+            "Gevonden en verholpen problemen",
+            "Een prestatiecontrole"
+          ]
+        }
+      }
+    }
+  ],
+  "services": [
+    {
+      "slug": "website",
+      "category": "web",
+      "status": "active",
+      "position": 0,
+      "packages": [
+        "launch",
+        "grow",
+        "care"
+      ],
+      "translations": {
+        "hu": {
+          "title": "Weboldalfejlesztés",
+          "summary": "Modern, reszponzív weboldalak egyedi vizuális megjelenéssel, átgondolt tartalmi struktúrával és mobilbarát felülettel.",
+          "tagline": "Egyedi megjelenés, érthető felület a látogatónak.",
+          "overview": "A weboldal az első benyomás és a legtöbbször használt felület is: ezért a megjelenést és a használhatóságot együtt tervezem. A tartalomból indulunk ki: kinek szól az oldal, mit kell megtalálnia a látogatónak, és mi a következő lépés számára.",
+          "features": [
+            "Egyedi vizuális megjelenés",
+            "Átgondolt oldal- és tartalomstruktúra",
+            "Reszponzív elrendezés mobiltól asztali gépig",
+            "Alapvető technikai SEO és metaadatok",
+            "Világos és sötét téma, több nyelv, ha a projekt igényli"
+          ]
+        },
+        "en": {
+          "title": "Website Development",
+          "summary": "Modern, responsive websites with a distinctive look, a considered content structure and a mobile-friendly interface.",
+          "tagline": "A distinctive look, a clear interface for the visitor.",
+          "overview": "A website is both the first impression and the interface people use most, so I design the look and the usability together. We start from the content: who the site is for, what a visitor needs to find, and what the visitor’s next step is.",
+          "features": [
+            "A distinctive visual design",
+            "A considered page and content structure",
+            "A responsive layout from phone to desktop",
+            "Basic technical SEO and metadata",
+            "Light and dark themes and several languages, if the project needs them"
+          ]
+        },
+        "nl": {
+          "title": "Website-ontwikkeling",
+          "summary": "Moderne, responsieve websites met een eigen uitstraling, een doordachte inhoudsstructuur en een mobielvriendelijke interface.",
+          "tagline": "Een eigen uitstraling, een heldere interface voor de bezoeker.",
+          "overview": "Een website is zowel de eerste indruk als de interface die mensen het vaakst gebruiken, dus ontwerp ik uitstraling en bruikbaarheid samen. We beginnen bij de inhoud: voor wie de site is, wat een bezoeker moet kunnen vinden en wat de volgende stap van de bezoeker is.",
+          "features": [
+            "Een eigen visuele vormgeving",
+            "Een doordachte pagina- en inhoudsstructuur",
+            "Een responsieve opmaak van telefoon tot desktop",
+            "Basis technische SEO en metadata",
+            "Licht en donker thema en meerdere talen, als het project dat vraagt"
+          ]
+        }
+      }
+    },
+    {
+      "slug": "webapp",
+      "category": "web",
+      "status": "active",
+      "position": 1,
+      "packages": [
+        "build",
+        "grow",
+        "care"
+      ],
+      "translations": {
+        "hu": {
+          "title": "Webalkalmazás-fejlesztés",
+          "summary": "Interaktív webalkalmazások, felhasználói folyamatok, adatkezelés és a projekt követelményeihez igazított frontend–backend megoldások.",
+          "tagline": "Az ötlettől az első használható verzióig.",
+          "overview": "Egy webalkalmazás akkor jó, ha eligazodsz benne anélkül, hogy elmagyaráznák. A felhasználói folyamatokból és az adatokból indulok ki; ebből lesz a felület és a háttérrendszer, és az első használható verziót közösen teszteljük.",
+          "features": [
+            "Egyedi felhasználói folyamatok és felületek",
+            "Adatkezelés és adatbázis-integráció",
+            "Frontend és backend a megállapodott terjedelemben",
+            "Bejelentkezés és szerepkörök, ha a projekt igényli",
+            "Tesztelés az átadás előtt"
+          ]
+        },
+        "en": {
+          "title": "Web Application Development",
+          "summary": "Interactive web applications, user flows, data handling and frontend–backend solutions matched to the project’s requirements.",
+          "tagline": "From the idea to a first usable version.",
+          "overview": "A web application is good when you find your way around without being told how. I start from the user flows and the data; the interface and the back end follow from them, and we test the first usable version together.",
+          "features": [
+            "Custom user flows and interfaces",
+            "Data handling and database integration",
+            "Frontend and backend within the agreed scope",
+            "Sign-in and user roles, if the project needs them",
+            "Testing before handover"
+          ]
+        },
+        "nl": {
+          "title": "Webapplicatie-ontwikkeling",
+          "summary": "Interactieve webapplicaties, gebruikersflows, gegevensbeheer en frontend–backend-oplossingen die aansluiten op de eisen van het project.",
+          "tagline": "Van idee tot een eerste bruikbare versie.",
+          "overview": "Een webapplicatie is goed als je je weg erin vindt zonder uitleg. Ik begin bij de gebruikersflows en de gegevens; de interface en de back-end volgen daaruit, en we testen de eerste bruikbare versie samen.",
+          "features": [
+            "Maatwerk gebruikersflows en interfaces",
+            "Gegevensbeheer en database-integratie",
+            "Frontend en backend binnen de afgesproken omvang",
+            "Inloggen en gebruikersrollen, als het project dat vraagt",
+            "Testen vóór de oplevering"
+          ]
+        }
+      }
+    },
+    {
+      "slug": "ui",
+      "category": "design",
+      "status": "active",
+      "position": 2,
+      "packages": [
+        "grow",
+        "build",
+        "care"
+      ],
+      "translations": {
+        "hu": {
+          "title": "UI-megvalósítás",
+          "summary": "Meglévő designok és tervek minőségi, reszponzív webes megvalósítása.",
+          "tagline": "A terved, pontosan és reszponzívan megvalósítva.",
+          "overview": "Ha van már terved (mockup, vázlat vagy egy meglévő arculat), a feladatom, hogy az a böngészőben is úgy nézzen ki és úgy viselkedjen. Újrahasználható komponensekben és design tokenekben gondolkodom, hogy a felület később is egységes maradjon.",
+          "features": [
+            "Meglévő terv vagy design követése",
+            "Reszponzív megvalósítás mobiltól asztali gépig",
+            "Újrahasználható komponensek és design tokenek",
+            "Hozzáférhetőség: billentyűzet, kontraszt, fókuszállapotok",
+            "Világos és sötét téma, ha a terv tartalmazza"
+          ]
+        },
+        "en": {
+          "title": "UI Implementation",
+          "summary": "Quality, responsive web implementation of existing designs and plans.",
+          "tagline": "Your design, implemented precisely and responsively.",
+          "overview": "If you already have a design (a mockup, a sketch or an existing brand), my job is to make it look and behave the same in the browser. I think in reusable components and design tokens so the interface stays consistent later on.",
+          "features": [
+            "Following an existing design or plan",
+            "Responsive implementation from phone to desktop",
+            "Reusable components and design tokens",
+            "Accessibility: keyboard use, contrast, focus states",
+            "Light and dark themes, if the design includes them"
+          ]
+        },
+        "nl": {
+          "title": "UI-implementatie",
+          "summary": "Hoogwaardige, responsieve webimplementatie van bestaande ontwerpen en plannen.",
+          "tagline": "Jouw ontwerp, nauwkeurig en responsief uitgewerkt.",
+          "overview": "Heb je al een ontwerp (een mockup, een schets of een bestaande huisstijl), dan is het mijn taak om het in de browser hetzelfde te laten ogen en zich hetzelfde te laten gedragen. Ik denk in herbruikbare componenten en designtokens, zodat de interface ook later consistent blijft.",
+          "features": [
+            "Een bestaand ontwerp of plan volgen",
+            "Responsieve implementatie van telefoon tot desktop",
+            "Herbruikbare componenten en designtokens",
+            "Toegankelijkheid: toetsenbord, contrast, focusstatussen",
+            "Licht en donker thema, als het ontwerp dat bevat"
+          ]
+        }
+      }
+    },
+    {
+      "slug": "integrations",
+      "category": "integration",
+      "status": "active",
+      "position": 3,
+      "packages": [
+        "grow",
+        "build",
+        "care"
+      ],
+      "translations": {
+        "hu": {
+          "title": "API-k és integrációk",
+          "summary": "API-k és digitális szolgáltatások összekapcsolása, ha ez a projekt követelményeihez illeszkedik. Hogy egy adott szolgáltatás bekötése megvalósítható-e, azt az ajánlat előtt közösen tisztázzuk.",
+          "tagline": "Rendszerek, amelyek beszélnek egymással.",
+          "overview": "Az integráció ott van értelme, ahol két rendszer között kézzel mozgatnak adatot, vagy egy felületről hiányzik egy szolgáltatás. Először azt tisztázzuk, mit lehet és érdemes összekötni; csak utána készül ajánlat.",
+          "features": [
+            "Külső API-k és szolgáltatások bekötése",
+            "Saját REST API tervezése a projekthez",
+            "Adatok mozgatása a felület és a háttérrendszer között",
+            "Hibák kezelése és érthető visszajelzés a felhasználónak"
+          ]
+        },
+        "en": {
+          "title": "API & Integrations",
+          "summary": "Connecting APIs and digital services where the project calls for it. Whether a particular service can be connected is something we settle together before a quote.",
+          "tagline": "Systems that talk to each other.",
+          "overview": "An integration makes sense where data is moved by hand between two systems, or where an interface lacks a service. We first settle what can and should be connected; only then is there a quote.",
+          "features": [
+            "Connecting external APIs and services",
+            "Designing a REST API for the project",
+            "Moving data between the interface and the back end",
+            "Handling errors and giving the user clear feedback"
+          ]
+        },
+        "nl": {
+          "title": "API’s en integraties",
+          "summary": "API’s en digitale diensten met elkaar verbinden waar het project dat vraagt. Of een bepaalde dienst gekoppeld kan worden, stemmen we samen af vóór een offerte.",
+          "tagline": "Systemen die met elkaar praten.",
+          "overview": "Een integratie heeft zin waar gegevens met de hand tussen twee systemen worden verplaatst, of waar een interface een dienst mist. Eerst stellen we vast wat gekoppeld kan en moet worden; pas daarna volgt een offerte.",
+          "features": [
+            "Externe API’s en diensten koppelen",
+            "Een REST API voor het project ontwerpen",
+            "Gegevens verplaatsen tussen de interface en de back-end",
+            "Fouten afhandelen en de gebruiker duidelijke feedback geven"
+          ]
+        }
+      }
+    }
+  ],
+  "faq": [
+    {
+      "type": "faq",
+      "slug": "start",
+      "status": "active",
+      "position": 0,
+      "translations": {
+        "hu": {
+          "title": "Hogyan indul egy projekt?",
+          "description": "Az ajánlatkérés összeállításával: kiválasztod, mire van szükséged, megírod, mit szeretnél, és megadod, hogyan érhetlek el. Ezután egyeztetünk az ötletről és a célokról; ha a terjedelem tisztázódott, ajánlatot tudok adni."
+        },
+        "en": {
+          "title": "How does a project start?",
+          "description": "By putting together a quote request: you choose what you need, tell me what you would like and how to reach you. Then we talk through the idea and the goals; once the scope is clear, I can give you a quote."
+        },
+        "nl": {
+          "title": "Hoe begint een project?",
+          "description": "Door een offerteaanvraag samen te stellen: je kiest wat je nodig hebt, vertelt wat je wilt en hoe ik je kan bereiken. Daarna bespreken we het idee en de doelen; als de omvang duidelijk is, kan ik een offerte geven."
+        }
+      }
+    },
+    {
+      "type": "faq",
+      "slug": "cost",
+      "status": "active",
+      "position": 1,
+      "translations": {
+        "hu": {
+          "title": "Mennyibe kerül egy weboldal?",
+          "description": "Ez a terjedelemtől függ: az oldalak és funkciók számától, a tartalom előkészítettségétől, az integrációktól és attól, hogy kell-e háttérrendszer. Ezért előre nem mondok fix árat; a projekt ismeretében készítek ajánlatot. A költségkeretedet az ajánlatkérés kiegészítő követelményeinél megadhatod, de nem kötelező."
+        },
+        "en": {
+          "title": "How much does a website cost?",
+          "description": "It depends on the scope: the number of pages and features, how ready the content is, any integrations, and whether a back end is needed. That is why I do not name a fixed price up front; I prepare a quote once I know the project. You can mention a budget in the additional requirements of the quote request, but you do not have to."
+        },
+        "nl": {
+          "title": "Wat kost een website?",
+          "description": "Dat hangt af van de omvang: het aantal pagina’s en functies, hoe ver de inhoud al is, eventuele integraties en of er een back-end nodig is. Daarom noem ik vooraf geen vaste prijs; ik maak een offerte zodra ik het project ken. Je kunt een budget noemen bij de aanvullende eisen van de offerteaanvraag, maar dat hoeft niet."
+        }
+      }
+    },
+    {
+      "type": "faq",
+      "slug": "time",
+      "status": "active",
+      "position": 2,
+      "translations": {
+        "hu": {
+          "title": "Mennyi ideig tart a fejlesztés?",
+          "description": "Attól függ, mekkora és mennyire összetett a projekt, és milyen gyorsan érkezik meg a szükséges tartalom és visszajelzés. Fix határidőt a részletek ismerete nélkül nem ígérek; amiben megállapodunk, az az ajánlatban szerepel."
+        },
+        "en": {
+          "title": "How long does development take?",
+          "description": "It depends on the size and complexity of the project and on how quickly the content and feedback come in. I do not promise a fixed deadline without knowing the details; whatever we agree is written in the quote."
+        },
+        "nl": {
+          "title": "Hoe lang duurt de ontwikkeling?",
+          "description": "Dat hangt af van de grootte en complexiteit van het project en van hoe snel inhoud en feedback binnenkomen. Zonder de details te kennen beloof ik geen vaste deadline; wat we afspreken, staat in de offerte."
+        }
+      }
+    },
+    {
+      "type": "faq",
+      "slug": "custom",
+      "status": "active",
+      "position": 3,
+      "translations": {
+        "hu": {
+          "title": "Lehet egyedi funkciókat kérni?",
+          "description": "Igen, érdemes leírni őket az ajánlatkérésben. Hogy egy funkció belefér-e a projektbe, a részletek ismeretében közösen döntjük el; előfordulhat, hogy valamit egyszerűsíteni vagy egy későbbi szakaszra halasztani kell."
+        },
+        "en": {
+          "title": "Can I ask for custom features?",
+          "description": "Yes, it is worth describing them in the quote request. Whether a feature fits within the project is decided together once the details are known; something may have to be simplified or moved to a later phase."
+        },
+        "nl": {
+          "title": "Kan ik om maatwerkfuncties vragen?",
+          "description": "Ja, beschrijf ze gerust bij de offerteaanvraag. Of een functie binnen het project past, bepalen we samen als de details bekend zijn; soms moet iets worden vereenvoudigd of naar een latere fase worden verschoven."
+        }
+      }
+    },
+    {
+      "type": "faq",
+      "slug": "existing",
+      "status": "active",
+      "position": 4,
+      "translations": {
+        "hu": {
+          "title": "Meglévő weboldalt is tovább tudok fejleszteni?",
+          "description": "Ez a meglévő megoldástól függ: először átnézem, hogyan készült, és mihez van hozzáférésem, majd közösen döntjük el, érdemes-e továbbfejleszteni vagy újraépíteni. A Grow és a Care csomag ilyen esetekre szól."
+        },
+        "en": {
+          "title": "Can an existing website be developed further?",
+          "description": "That depends on what exists: I first look at how it was built and what I would have access to, and then we decide together whether to develop it further or rebuild it. The Grow and Care packages are meant for cases like this."
+        },
+        "nl": {
+          "title": "Kan een bestaande website verder worden ontwikkeld?",
+          "description": "Dat hangt af van wat er al is: ik kijk eerst hoe het is gebouwd en waar ik toegang toe zou hebben, en daarna beslissen we samen of we het verder ontwikkelen of opnieuw opbouwen. De pakketten Grow en Care zijn voor dit soort situaties bedoeld."
+        }
+      }
+    },
+    {
+      "type": "faq",
+      "slug": "handover",
+      "status": "active",
+      "position": 5,
+      "translations": {
+        "hu": {
+          "title": "Hogyan történik az átadás és a karbantartás?",
+          "description": "Az átadás módját és az azt követő támogatást a projekt elején egyeztetjük, és az ajánlatban rögzítjük. A folyamatos karbantartás nem automatikus: külön megállapodás tárgya (erre való a Care csomag)."
+        },
+        "en": {
+          "title": "How do handover and maintenance work?",
+          "description": "How the handover works and what support follows is agreed at the start of the project and written in the quote. Ongoing maintenance is not automatic: it is a separate agreement (that is what the Care package is for)."
+        },
+        "nl": {
+          "title": "Hoe werken oplevering en onderhoud?",
+          "description": "Hoe de oplevering verloopt en welke ondersteuning daarna volgt, spreken we aan het begin van het project af en leggen we vast in de offerte. Doorlopend onderhoud is niet automatisch: het is een aparte afspraak (daar is het pakket Care voor)."
+        }
+      }
+    }
+  ]
+}
