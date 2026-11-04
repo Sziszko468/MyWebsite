@@ -44,7 +44,7 @@ describe('signing in', () => {
     await createUser(server.db, server.clock, { email: 'admin@site.test', password: GOOD_PASSWORD, role: 'admin' })
     const response = await login('Admin@Site.test', GOOD_PASSWORD)
     expect(response.status).toBe(200)
-    expect(response.json.data.user).toEqual({ email: 'admin@site.test', role: 'admin' })
+    expect(response.json.data.user).toMatchObject({ email: 'admin@site.test', role: 'admin', permissions: expect.arrayContaining(['requests:read', 'system:write']), preferences: { language: null, theme: null } })
     const cookie = response.headers.get('set-cookie')!
     expect(cookie).toMatch(/^cc_admin=[\w-]{40,}; Path=\/; HttpOnly; SameSite=Strict; Max-Age=43200$/)
     const token = cookie.split(';')[0].split('=')[1]
@@ -110,22 +110,16 @@ describe('signing in', () => {
     expect(statuses.slice(10)).toEqual([429, 429])
   })
 
-  it('works through the HTML form: a token for the form, a refusal without it, a generic failure, a redirect on success', async () => {
+  it('cannot be started from another site: a sign-in from a foreign page is refused before the password is looked at', async () => {
     await createUser(server.db, server.clock, { email: 'admin@site.test', password: GOOD_PASSWORD, role: 'admin' })
-    const page = await (await server.fetch('/admin/login')).text()
-    const csrf = /name="_csrf" value="([0-9a-f]+)"/.exec(page)![1]
-    const form = (fields: Record<string, string>) => ({ method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(fields).toString() })
-    expect((await server.fetch('/admin/login', form({ email: 'admin@site.test', password: GOOD_PASSWORD }))).status).toBe(403)
-    const wrong = await server.fetch('/admin/login', form({ _csrf: csrf, email: 'admin@site.test', password: 'wrong password!' }))
-    expect(wrong.status).toBe(401)
-    expect(await wrong.text()).toContain('not correct, or the account is temporarily locked')
-    const ok = await server.fetch('/admin/login', form({ _csrf: csrf, email: 'admin@site.test', password: GOOD_PASSWORD }))
-    expect(ok.status).toBe(303)
-    expect(ok.headers.get('location')).toBe('/admin/dashboard')
-    expect(ok.headers.get('set-cookie')).toContain('HttpOnly')
-    // The form's token is good for this hour and the next, not for a day.
-    server.clock.advance(3 * 3_600_000)
-    expect((await server.fetch('/admin/login', form({ _csrf: csrf, email: 'admin@site.test', password: GOOD_PASSWORD }))).status).toBe(403)
+    const foreign: Record<string, string>[] = [{ Origin: 'https://evil.test' }, { 'Sec-Fetch-Site': 'cross-site' }, { 'Sec-Fetch-Site': 'same-site' }]
+    for (const headers of foreign) {
+      const response = await login('admin@site.test', GOOD_PASSWORD, headers)
+      expect(response.status, JSON.stringify(headers)).toBe(403)
+      expect(response.headers.get('set-cookie')).toBeNull()
+    }
+    expect(server.db.get('SELECT COUNT(*) AS n FROM admin_sessions')).toEqual({ n: 0 })
+    expect((await login('admin@site.test', GOOD_PASSWORD, { Origin: server.url, 'Sec-Fetch-Site': 'same-origin' })).status).toBe(200)
   })
 })
 
@@ -182,35 +176,41 @@ describe('staying signed in', () => {
     const two = await login('a@site.test', GOOD_PASSWORD)
     const cookieTwo = two.headers.get('set-cookie')!.split(';')[0]
     const csrfTwo = two.json.data.csrfToken
-    const change = await server.fetch('/admin/account/password', { method: 'POST', headers: { Cookie: cookieTwo, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ _csrf: csrfTwo, current: GOOD_PASSWORD, next: 'another-long-passphrase-2' }).toString() })
-    expect(change.status).toBe(303)
+    const change = (current: string, next: string) => server.api('/api/admin/account/password', { method: 'POST', body: { current, next }, headers: authed(cookieTwo, csrfTwo) })
+    // A wrong current password changes nothing (a stolen session alone is not enough), and neither does a weak new one.
+    const wrong = await change('not the password!', 'third-long-passphrase-3')
+    expect(wrong.status).toBe(422)
+    expect(wrong.json.error.details.fields.current).toBe('invalid')
+    expect((await change(GOOD_PASSWORD, 'short')).json.error.details.fields.next).toBe('invalid')
+    expect((await server.api('/api/admin/session', { headers: authed(one.cookie) })).status).toBe(200)
+    const ok = await change(GOOD_PASSWORD, 'another-long-passphrase-2')
+    expect(ok.status).toBe(200)
+    expect(ok.json.data.otherSessionsClosed).toBe(1)
     expect((await server.api('/api/admin/session', { headers: authed(one.cookie) })).status).toBe(401)
     expect((await server.api('/api/admin/session', { headers: authed(cookieTwo) })).status).toBe(200)
     expect((await login('a@site.test', GOOD_PASSWORD)).status).toBe(401)
     expect((await login('a@site.test', 'another-long-passphrase-2')).status).toBe(200)
-    // A wrong current password changes nothing.
-    const wrong = await server.fetch('/admin/account/password', { method: 'POST', headers: { Cookie: cookieTwo, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ _csrf: csrfTwo, current: 'not the password!', next: 'third-long-passphrase-3' }).toString() })
-    expect(wrong.status).toBe(422)
+    expect(server.db.get("SELECT COUNT(*) AS n FROM audit_log WHERE action = 'account.password'")).toEqual({ n: 1 })
+    expect(JSON.stringify(server.db.all('SELECT detail FROM audit_log'))).not.toMatch(/another-long|third-long/)
+  })
+
+  it('limits password attempts as it limits sign-ins, since a stolen session would try to guess the current password', async () => {
+    await server.close()
+    server = await startServer({ env: { RATE_LIMITS: 'true' } })
+    const { cookie, csrf } = await server.signIn()
+    const statuses: number[] = []
+    for (let i = 0; i < 12; i += 1) statuses.push((await server.api('/api/admin/account/password', { method: 'POST', body: { current: `guess-number-${i}-xx`, next: 'a-new-long-passphrase-9' }, headers: authed(cookie, csrf) })).status)
+    expect(statuses.slice(0, 9).every((status) => status === 422)).toBe(true)
+    expect(statuses.slice(10)).toEqual([429, 429])
   })
 })
 
 describe('who may reach the administration', () => {
-  const adminPaths = [
-    '/admin/dashboard', '/admin/inquiries', '/admin/inquiries/x', '/admin/quote-requests', '/admin/quote-requests/export.csv', '/admin/quote-requests/x', '/admin/quote-requests/x/export.json',
-    '/admin/catalog', '/admin/services/new', '/admin/services/website', '/admin/packages/launch', '/admin/extras/pages', '/admin/content/faq/start', '/admin/system', '/admin/account',
-  ]
   const apiPaths = [
-    '/api/admin/session', '/api/admin/inquiries', '/api/admin/inquiries/x', '/api/admin/quote-requests', '/api/admin/quote-requests/x', '/api/admin/quote-requests/x/export', '/api/admin/services', '/api/admin/services/website',
-    '/api/admin/packages', '/api/admin/packages/launch', '/api/admin/extras', '/api/admin/extras/pages', '/api/admin/content', '/api/admin/content/faq/start', '/api/admin/system',
+    '/api/admin/session', '/api/admin/dashboard', '/api/admin/inquiries', '/api/admin/inquiries/x', '/api/admin/quote-requests', '/api/admin/quote-requests/x', '/api/admin/quote-requests/x/export', '/api/admin/quote-requests/x/export.json',
+    '/api/admin/quote-requests/export.csv', '/api/admin/services', '/api/admin/services/website', '/api/admin/packages', '/api/admin/packages/launch', '/api/admin/extras', '/api/admin/extras/pages', '/api/admin/content',
+    '/api/admin/content/faq/start', '/api/admin/translations', '/api/admin/notifications', '/api/admin/settings', '/api/admin/sessions', '/api/admin/system',
   ]
-
-  it('shows no admin page to a visitor without a session: it sends them to the sign-in', async () => {
-    for (const path of adminPaths) {
-      const response = await server.fetch(path)
-      expect(response.status, path).toBe(303)
-      expect(response.headers.get('location'), path).toBe('/admin/login')
-    }
-  })
 
   it('gives a visitor without a session a 401 envelope from every admin API route, and changes nothing', async () => {
     await server.api('/api/contact', { body: contact() })
@@ -221,11 +221,18 @@ describe('who may reach the administration', () => {
     }
     const id = (server.db.get<{ id: string }>('SELECT id FROM inquiries')!).id
     for (const [method, path, body] of [
-      ['PATCH', `/api/admin/inquiries/${id}`, { status: 'closed' }],
+      ['PATCH', `/api/admin/inquiries/${id}`, { status: 'completed' }],
       ['DELETE', `/api/admin/inquiries/${id}`, undefined],
       ['POST', '/api/admin/services', { slug: 'x1' }],
       ['PUT', '/api/admin/packages/launch', { status: 'disabled' }],
       ['DELETE', '/api/admin/extras/pages', undefined],
+      ['PUT', '/api/admin/order/packages', { keys: ['care', 'build', 'grow', 'launch'] }],
+      ['PUT', '/api/admin/translations/packages/launch/nl', { fields: { name: 'X' } }],
+      ['PUT', '/api/admin/notifications/preferences', { newInquiry: false, newQuote: false }],
+      ['PUT', '/api/admin/settings/preferences', { theme: 'light' }],
+      ['POST', '/api/admin/account/password', { current: 'a', next: 'b' }],
+      ['POST', '/api/admin/sessions/revoke-others', {}],
+      ['POST', '/api/admin/system/maintenance', {}],
     ] as const) {
       const response = await server.api(path, { method, body })
       expect(response.status, `${method} ${path}`).toBe(401)
@@ -235,7 +242,7 @@ describe('who may reach the administration', () => {
   })
 
   it('has no public sign-up, and the public API has no administrative route', async () => {
-    for (const path of ['/admin/register', '/admin/signup', '/api/admin/register', '/api/register', '/api/users', '/api/admin/users']) expect([404, 303, 401]).toContain((await server.fetch(path)).status)
+    for (const path of ['/admin/register', '/admin/signup', '/api/admin/register', '/api/register', '/api/users', '/api/admin/users']) expect([404, 401]).toContain((await server.fetch(path)).status)
     expect((await server.api('/api/inquiries')).status).toBe(404)
     expect((await server.api('/api/quote-requests')).status).toBe(405)
   })
@@ -251,12 +258,15 @@ describe('who may reach the administration', () => {
     expect((await send('DELETE', '/api/admin/extras/pages')).status).toBe(403)
     expect((await send('DELETE', '/api/admin/content/faq/start')).status).toBe(403)
     expect((await send('GET', '/api/admin/system')).status).toBe(403)
-    const page = await server.fetch('/admin/system', { headers: { Cookie: editor.cookie } })
-    expect(page.status).toBe(403)
-    expect(await page.text()).toContain('Your role does not allow that')
     expect(server.db.get('SELECT COUNT(*) AS n FROM inquiries')).toEqual({ n: 1 })
-    // ...and the menu does not offer what the role cannot do.
-    expect(await (await server.fetch('/admin/dashboard', { headers: { Cookie: editor.cookie } })).text()).not.toContain('>System<')
+    // Everything an administrator alone may do is refused to an editor, on the server, whatever the application shows.
+    expect((await send('POST', '/api/admin/system/maintenance', {})).status).toBe(403)
+    expect((await send('POST', '/api/admin/system/publish', {})).status).toBe(403)
+    expect((await send('PUT', '/api/admin/notifications/preferences', { newInquiry: false, newQuote: false })).status).toBe(403)
+    expect((await send('GET', '/api/admin/dashboard')).status).toBe(200)
+    expect((await send('GET', '/api/admin/translations')).status).toBe(200)
+    expect((await send('GET', '/api/admin/notifications')).status).toBe(200)
+    expect((await send('GET', '/api/admin/session')).json.data.user.permissions).not.toContain('system:read')
     const admin = await server.signIn('admin')
     expect((await server.api('/api/admin/system', { headers: authed(admin.cookie) })).status).toBe(200)
     expect((await server.api(`/api/admin/inquiries/${id}`, { method: 'DELETE', headers: authed(admin.cookie, admin.csrf) })).status).toBe(204)
@@ -269,7 +279,7 @@ describe('requests that change something', () => {
     const two = await server.signIn()
     await server.api('/api/contact', { body: contact() })
     const id = server.db.get<{ id: string }>('SELECT id FROM inquiries')!.id
-    const patch = (headers: Record<string, string>) => server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body: { status: 'closed' }, headers })
+    const patch = (headers: Record<string, string>) => server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body: { status: 'completed' }, headers })
     const attempts: Record<string, string>[] = [{ Cookie: one.cookie }, { Cookie: one.cookie, 'X-CSRF-Token': 'wrong' }, { Cookie: one.cookie, 'X-CSRF-Token': two.csrf }]
     for (const headers of attempts) {
       const response = await patch(headers)
@@ -280,18 +290,6 @@ describe('requests that change something', () => {
     expect((await patch({ Cookie: one.cookie, 'X-CSRF-Token': one.csrf })).status).toBe(200)
   })
 
-  it('need the form field on an HTML form, and refuse a form with none', async () => {
-    const { cookie, csrf } = await server.signIn()
-    await server.api('/api/contact', { body: contact() })
-    const id = server.db.get<{ id: string }>('SELECT id FROM inquiries')!.id
-    const post = (fields: Record<string, string>) => server.fetch(`/admin/inquiries/${id}/status`, { method: 'POST', headers: { Cookie: cookie, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(fields).toString() })
-    expect((await post({ status: 'closed' })).status).toBe(403)
-    expect((await post({ _csrf: 'forged', status: 'closed' })).status).toBe(403)
-    expect(server.db.get<{ status: string }>('SELECT status FROM inquiries')?.status).toBe('new')
-    expect((await post({ _csrf: csrf, status: 'closed' })).status).toBe(303)
-    expect(server.db.get<{ status: string }>('SELECT status FROM inquiries')?.status).toBe('closed')
-  })
-
   it('must come from the admin\'s own pages: another origin, or a cross-site fetch, is refused even with the cookie and token', async () => {
     const { cookie, csrf } = await server.signIn()
     await server.api('/api/contact', { body: contact() })
@@ -299,36 +297,26 @@ describe('requests that change something', () => {
     const base = { Cookie: cookie, 'X-CSRF-Token': csrf }
     const foreign: Record<string, string>[] = [{ Origin: 'https://evil.test' }, { Origin: 'https://site.test' }, { 'Sec-Fetch-Site': 'cross-site' }, { 'Sec-Fetch-Site': 'same-site' }]
     for (const extra of foreign) {
-      const response = await server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body: { status: 'closed' }, headers: { ...base, ...extra } })
+      const response = await server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body: { status: 'completed' }, headers: { ...base, ...extra } })
       expect(response.status, JSON.stringify(extra)).toBe(403)
       expect(response.json.error.code).toBe('origin_not_allowed')
     }
     expect(server.db.get<{ status: string }>('SELECT status FROM inquiries')?.status).toBe('new')
-    const same = await server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body: { status: 'closed' }, headers: { ...base, Origin: server.url, 'Sec-Fetch-Site': 'same-origin' } })
+    const same = await server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body: { status: 'completed' }, headers: { ...base, Origin: server.url, 'Sec-Fetch-Site': 'same-origin' } })
     expect(same.status).toBe(200)
   })
 
-  it('are accepted from a real browser, which sends "Origin: null" with a form post from a page served with Referrer-Policy: no-referrer', async () => {
-    await createUser(server.db, server.clock, { email: 'admin@site.test', password: GOOD_PASSWORD, role: 'admin' })
-    const page = await (await server.fetch('/admin/login')).text()
-    const csrf = /name="_csrf" value="([0-9a-f]+)"/.exec(page)![1]
-    const browser = { 'Content-Type': 'application/x-www-form-urlencoded', Origin: 'null', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'navigate' }
-    const body = new URLSearchParams({ _csrf: csrf, email: 'admin@site.test', password: GOOD_PASSWORD }).toString()
-    const signedIn = await server.fetch('/admin/login', { method: 'POST', headers: browser, body })
-    expect(signedIn.status).toBe(303)
-    const cookie = signedIn.headers.get('set-cookie')!.split(';')[0]
-    const session = await server.api('/api/admin/session', { headers: { Cookie: cookie } })
+  it('are accepted from a real browser, which sends "Origin: null" from a page served with Referrer-Policy: no-referrer', async () => {
+    const { cookie, csrf } = await server.signIn()
     await server.api('/api/contact', { body: contact() })
     const id = server.db.get<{ id: string }>('SELECT id FROM inquiries')!.id
-    const change = await server.fetch(`/admin/inquiries/${id}/status`, { method: 'POST', headers: { ...browser, Cookie: cookie }, body: new URLSearchParams({ _csrf: session.json.data.csrfToken, status: 'closed' }).toString() })
-    expect(change.status).toBe(303)
-    expect(server.db.get<{ status: string }>('SELECT status FROM inquiries')?.status).toBe('closed')
-    // "null" with a browser that says the request came from elsewhere is still refused, and so is a missing token.
-    const foreign = await server.fetch(`/admin/inquiries/${id}/status`, { method: 'POST', headers: { ...browser, Cookie: cookie, 'Sec-Fetch-Site': 'cross-site' }, body: new URLSearchParams({ _csrf: session.json.data.csrfToken, status: 'new' }).toString() })
-    expect(foreign.status).toBe(403)
-    const untokened = await server.fetch(`/admin/inquiries/${id}/status`, { method: 'POST', headers: { ...browser, Cookie: cookie }, body: new URLSearchParams({ status: 'new' }).toString() })
-    expect(untokened.status).toBe(403)
-    expect(server.db.get<{ status: string }>('SELECT status FROM inquiries')?.status).toBe('closed')
+    const browser = { Cookie: cookie, 'X-CSRF-Token': csrf, Origin: 'null', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'cors' }
+    const change = await server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body: { status: 'completed' }, headers: browser })
+    expect(change.status).toBe(200)
+    // "null" with a browser that says the request came from elsewhere is still refused, and so is a wrong token.
+    expect((await server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body: { status: 'new' }, headers: { ...browser, 'Sec-Fetch-Site': 'cross-site' } })).status).toBe(403)
+    expect((await server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body: { status: 'new' }, headers: { ...browser, 'X-CSRF-Token': 'forged' } })).status).toBe(403)
+    expect(server.db.get<{ status: string }>('SELECT status FROM inquiries')?.status).toBe('completed')
   })
 
   it('are never answered with CORS headers: the administration is not for other sites', async () => {

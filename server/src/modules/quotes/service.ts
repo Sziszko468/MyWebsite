@@ -177,6 +177,7 @@ export function submitQuote(app: AppContext, input: QuoteInput, ipHash: string):
         timing: input.timing,
         requirements: input.requirements,
         status: 'new',
+        inquiry_id: null,
         archived_at: null,
         consent_at: input.consent ? iso(now) : null,
         ip_hash: ipHash,

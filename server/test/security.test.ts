@@ -144,7 +144,7 @@ describe('what comes back to a browser', () => {
 
   it('sets Strict-Transport-Security only in production, and the admin policy forbids script and framing', async () => {
     const admin = await server.signIn()
-    expect((await server.fetch('/admin/login')).headers.get('strict-transport-security')).toBeNull()
+    expect((await server.fetch('/admin')).headers.get('strict-transport-security')).toBeNull()
     await server.close()
     const directory = scratch()
     server = await startServer({
@@ -152,10 +152,18 @@ describe('what comes back to a browser', () => {
       env: { APP_ENV: 'production', APP_SECRET: 'k'.repeat(40), CORS_ORIGINS: 'https://site.test', EMAIL_PROVIDER: 'none', API_PUBLIC_URL: 'https://api.site.test' },
       mailer: null,
     })
-    const login = await server.fetch('/admin/login')
-    expect(login.headers.get('strict-transport-security')).toBe('max-age=31536000; includeSubDomains')
-    expect(login.headers.get('content-security-policy')).not.toMatch(/script-src|unsafe-inline|unsafe-eval/)
-    expect(login.headers.get('x-robots-tag')).toBe('noindex, nofollow')
+    const shell = await server.fetch('/admin')
+    expect(shell.headers.get('strict-transport-security')).toBe('max-age=31536000; includeSubDomains')
+    // The administration application may run its own script and nothing else: no inline script, no eval, nothing from elsewhere.
+    const policy = shell.headers.get('content-security-policy')!
+    expect(policy).toContain("script-src 'self'")
+    expect(policy).toContain("default-src 'none'")
+    expect(policy).toContain("frame-ancestors 'none'")
+    expect(policy).not.toMatch(/unsafe-inline|unsafe-eval|\*|https?:/)
+    expect(shell.headers.get('x-robots-tag')).toBe('noindex, nofollow')
+    expect(shell.headers.get('cache-control')).toBe('no-store')
+    // The data the application shows comes from the API, which has its own, stricter policy.
+    expect((await server.api('/api/services')).headers.get('content-security-policy')).toBe("default-src 'none'; frame-ancestors 'none'")
     expect(admin.cookie).toMatch(/^cc_admin=/)
     const session = await server.signIn()
     expect(session.cookie).toMatch(/^__Host-cc_admin=/)
@@ -352,11 +360,9 @@ describe('abuse of the public forms', () => {
       ['/api/contact', {}],
       ['/api/quote-requests', {}],
       ['/api/admin/services', { Cookie: admin.cookie, 'X-CSRF-Token': admin.csrf }],
-      ['/admin/services', { Cookie: admin.cookie }],
     ] as const) {
       const response = await server.fetch(path, { method: 'POST', headers: { ...headers, 'Content-Type': 'multipart/form-data; boundary=b' }, body: '--b--' })
-      // The public API says it wants JSON; an admin form without its token in a form body is turned away before that.
-      expect(response.status, path).toBe(path.startsWith('/admin') ? 403 : 415)
+      expect(response.status, path).toBe(415)
     }
     expect(readdirSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'src')).includes('uploads')).toBe(false)
   })
@@ -460,6 +466,7 @@ describe('serving the website from the same process', () => {
     writeFileSync(join(dist, 'index.html'), '<!doctype html><title>Home</title>')
     writeFileSync(join(dist, 'hu', 'index.html'), '<!doctype html><title>Magyar</title>')
     writeFileSync(join(dist, '404.html'), '<!doctype html><title>Not found</title>')
+    writeFileSync(join(dist, 'admin.html'), '<!doctype html><title>Administration</title><div id="root"></div>')
     writeFileSync(join(dist, 'assets', 'app.js'), 'console.log(1)')
     writeFileSync(join(dist, 'assets', 'dump.sqlite'), 'SQLite format 3 and secrets')
     writeFileSync(join(dist, '.env'), 'APP_SECRET=do-not-serve')
@@ -523,13 +530,34 @@ describe('serving the website from the same process', () => {
     const api = await server.api('/api/no-such-thing')
     expect(api.status).toBe(404)
     expect(api.json.error.code).toBe('not_found')
-    const admin = await server.fetch('/admin/no-such-page')
-    expect(admin.status).toBe(404)
-    const adminPage = await admin.text()
-    expect(adminPage).toContain('There is no such page.') // the administration's own page, not the website's 404.html
-    expect(adminPage).not.toContain('<title>Not found</title>')
-    expect(admin.headers.get('content-security-policy')).toContain("style-src 'self'")
+    // `/admin` and everything under it is the administration application, never the website's pages or its 404.
+    for (const path of ['/admin', '/admin/', '/admin/inquiries', '/admin/inquiries/some-id', '/admin/translations?lang=nl']) {
+      const admin = await server.fetch(path)
+      expect(admin.status, path).toBe(200)
+      expect(await admin.text(), path).toContain('<title>Administration</title>')
+      expect(admin.headers.get('content-security-policy'), path).toContain("script-src 'self'")
+      expect(admin.headers.get('cache-control'), path).toBe('no-store')
+      expect(admin.headers.get('x-robots-tag'), path).toBe('noindex, nofollow')
+    }
+    // The shell is not also a page of the website (which would carry the website's policy and could be indexed).
+    expect((await server.fetch('/admin.html')).status).toBe(404)
+    expect((await server.fetch('/admin', { method: 'POST' })).status).toBe(404)
     expect((await server.api('/api/services')).status).toBe(200)
+    expect((await server.api('/api/admin/session')).status).toBe(401)
+  })
+
+  it('says so, plainly, when the administration has not been built into the folder it serves', async () => {
+    const { dist } = site()
+    rmSync(join(dist, 'admin.html'))
+    await serve(dist)
+    const notice = await server.fetch('/admin/anything')
+    expect(notice.status).toBe(404)
+    expect(await notice.text()).toContain('The administration is not installed')
+    await server.close()
+    server = await startServer() // no STATIC_DIR at all
+    const none = await server.fetch('/admin')
+    expect(none.status).toBe(404)
+    expect(await none.text()).toContain('STATIC_DIR')
   })
 })
 

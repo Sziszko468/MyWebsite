@@ -15,6 +15,9 @@ export interface UserRow {
   failed_logins: number
   locked_until: string | null
   last_login_at: string | null
+  /** The language of the administration (`hu`/`en`) and its theme; `null`: not chosen yet. */
+  ui_language: 'hu' | 'en' | null
+  ui_theme: 'light' | 'dark' | null
   created_at: string
   updated_at: string
 }
@@ -43,7 +46,7 @@ export async function createUser(db: Database, clock: Clock, input: { email: str
   const problem = passwordProblem(input.password, email)
   if (problem) throw new Error(problem)
   const now = iso(clock.now())
-  const row: UserRow = { id: newId(), email, password_hash: await hashPassword(input.password), role: input.role, status: 'active', failed_logins: 0, locked_until: null, last_login_at: null, created_at: now, updated_at: now }
+  const row: UserRow = { id: newId(), email, password_hash: await hashPassword(input.password), role: input.role, status: 'active', failed_logins: 0, locked_until: null, last_login_at: null, ui_language: null, ui_theme: null, created_at: now, updated_at: now }
   try {
     db.run('INSERT INTO admin_users (id, email, password_hash, role, status, failed_logins, locked_until, last_login_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
       row.id, row.email, row.password_hash, row.role, row.status, row.failed_logins, row.locked_until, row.last_login_at, row.created_at, row.updated_at,

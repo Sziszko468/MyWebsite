@@ -16,7 +16,7 @@ function render(lang: Language, theme: 'dark' | 'light' = 'dark'): string {
   return flattenKinetic(renderToStaticMarkup(
     createElement(
       ThemeContext.Provider,
-      { value: { theme, setTheme: () => undefined, toggleTheme: () => undefined } },
+      { value: { theme, setTheme: () => undefined, toggleTheme: () => undefined, followSystem: () => undefined } },
       createElement(
         MemoryRouter,
         { initialEntries: [`/${lang}/about`] },

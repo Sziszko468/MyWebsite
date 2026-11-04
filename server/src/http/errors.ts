@@ -19,6 +19,7 @@ export type ErrorCode =
   | 'spam_suspected'
   | 'catalog_unavailable'
   | 'service_unavailable'
+  | 'bad_gateway'
   | 'internal_error'
 
 /** Why a field was refused. Deliberately the same words the website's forms use, so the two can share a translation. */

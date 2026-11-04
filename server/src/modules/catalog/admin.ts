@@ -33,7 +33,7 @@ import {
 const CODE = /^[a-z0-9][a-z0-9-]{1,39}$/
 const statuses: readonly Status[] = ['active', 'disabled']
 
-class Checker {
+export class Checker {
   readonly errors: FieldErrors = {}
   fail(field: string, code: FieldCode): void {
     if (!(field in this.errors)) this.errors[field] = code
@@ -571,4 +571,30 @@ export function findContent(app: AppContext, type: ContentType, slug: string): C
 export function adminCatalog(app: AppContext, session: SessionInfo | null) {
   requirePermission(session, 'requests:read')
   return loadCatalog(app.db, { includeDisabled: true })
+}
+
+// ---- display order ---------------------------------------------------------------------------------------------------
+
+export const ORDERABLE = ['services', 'packages', 'extras', 'faq'] as const
+export type Orderable = (typeof ORDERABLE)[number]
+
+const ORDER_SQL: Record<Orderable, { list: string; update: string }> = {
+  services: { list: 'SELECT slug AS key FROM services', update: 'UPDATE services SET position = ?, updated_at = ? WHERE slug = ?' },
+  packages: { list: 'SELECT code AS key FROM packages', update: 'UPDATE packages SET position = ?, updated_at = ? WHERE code = ?' },
+  extras: { list: 'SELECT code AS key FROM extras', update: 'UPDATE extras SET position = ?, updated_at = ? WHERE code = ?' },
+  faq: { list: "SELECT slug AS key FROM site_content WHERE type = 'faq'", update: "UPDATE site_content SET position = ?, updated_at = ? WHERE slug = ? AND type = 'faq'" },
+}
+
+/** Sets the display order of everything of one kind: `keys` must be exactly the existing slugs/codes, each once, in the new order. */
+export function reorder(app: AppContext, session: SessionInfo | null, kind: Orderable, keys: unknown): void {
+  const actor = requirePermission(session, kind === 'faq' ? 'content:write' : 'catalog:write')
+  if (!Array.isArray(keys) || keys.some((key) => typeof key !== 'string')) throw validationFailed({ keys: 'invalid' })
+  const sql = ORDER_SQL[kind]
+  const existing = app.db.all<{ key: string }>(sql.list).map((row) => row.key)
+  const wanted = keys as string[]
+  if (new Set(wanted).size !== wanted.length || wanted.length !== existing.length || !wanted.every((key) => existing.includes(key))) throw validationFailed({ keys: 'invalid' })
+  app.db.transaction(() => {
+    wanted.forEach((key, position) => app.db.run(sql.update, [position, now(app), key]))
+  })
+  audit(app, actor, 'catalog.reorder', kind, null, { count: wanted.length })
 }

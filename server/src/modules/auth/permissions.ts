@@ -16,6 +16,9 @@ const GRANTS: Record<Role, readonly Permission[]> = {
 
 export const can = (role: Role, permission: Permission): boolean => GRANTS[role].includes(permission)
 
+/** What a role may do, for the administration app to show only the controls that will work (the server checks regardless). */
+export const permissionsOf = (role: Role): readonly Permission[] => GRANTS[role]
+
 /** Throws 401 with no session and 403 with the wrong role; returns the session so a caller can use it. */
 export function requirePermission(session: SessionInfo | null, permission: Permission): SessionInfo {
   if (!session) throw unauthorized()

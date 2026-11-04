@@ -586,10 +586,14 @@ describe('the outbox', () => {
     await server.api('/api/contact', { body: contact() })
     await settle()
     const admin = await server.signIn()
-    const dashboard = await (await server.fetch('/admin/dashboard', { headers: { Cookie: admin.cookie } })).text()
-    expect(dashboard).toContain('“Accepted” means the mail server took the message, not that it reached an inbox.')
-    expect(dashboard).not.toMatch(/delivered/i)
-    expect(JSON.stringify((await server.api('/api/admin/system', { headers: { Cookie: admin.cookie } })).json)).not.toMatch(/delivered/i)
+    const overview = await server.api('/api/admin/notifications', { headers: { Cookie: admin.cookie } })
+    expect(overview.json.data.deliveries).toHaveLength(1)
+    expect(overview.json.data.deliveries[0]).toMatchObject({ kind: 'inquiry_received', status: 'accepted', recipient: 'owner@site.test' })
+    expect(overview.json.data.counts).toEqual({ pending: 0, accepted: 1, failed: 0 })
+    // The strongest word any answer uses for a sent message is "accepted".
+    expect(overview.text).not.toMatch(/delivered/i)
+    expect((await server.api('/api/admin/system', { headers: { Cookie: admin.cookie } })).text).not.toMatch(/delivered/i)
+    expect((await server.api('/api/admin/dashboard', { headers: { Cookie: admin.cookie } })).text).not.toMatch(/delivered/i)
   })
 })
 

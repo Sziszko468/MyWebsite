@@ -92,3 +92,12 @@ Recorded so the plan above is not read as the result. The operating manual (`REA
 - **Added during the work:** `npm run server:backup` (a consistent copy of a live database), the keyed (HMAC) duplicate fingerprint, static serving of hidden or non-website files refused, `Origin: null` handling for the admin's own forms, the same-origin allowance for a website served by this process, `catalog:pull --check/--remove`.
 - **Status e-mails to customers** are one-per-click from the administrator, as planned; nothing is sent automatically to an address a visitor typed.
 - **Not done:** deployment to a host, a real SMTP provider, accessibility audit of the administration, load measurement — see "What was not verified" in `README.md`.
+
+## 9. What PROMPT 13 changed (the administration)
+
+Written after the fact; the design of the administration itself is in [`../admin/README.md`](../admin/README.md).
+
+- **The server-rendered HTML administration is gone** (`modules/admin/layout.ts`, `pages.ts`, `forms.ts` deleted). `/admin` and below now serve the built single-page application from `STATIC_DIR` with its own Content-Security-Policy; everything it does goes through the JSON API under `/api/admin/*`. This replaced the "no JavaScript at all" property of §6 with a different one: a strict CSP that allows only the application's own script, and an application that renders every value as text.
+- **New in the data model:** migration `0002_admin_dashboard.sql` (inquiry statuses `new, in_progress, waiting_client, completed`, a quote → inquiry link, per-account language and theme, a public id for sessions, a `settings` table). The migration runner gained one directive, `-- migration: foreign-keys-off`, for rebuilding a table that others point to.
+- **New in the API:** dashboard, order, translations, notifications (and retry), settings, sessions; lists with filters, sort and paging; details with notes, activity and linked quotes.
+- **Unchanged on purpose:** one process, one SQLite file, no runtime dependency, the same accounts, roles, CSRF rule and rate limits, and the rule that nothing is shown as sent that was not (a delivery is "accepted by the provider", never "delivered").

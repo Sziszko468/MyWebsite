@@ -4,10 +4,12 @@ import { ThemeContext } from './context'
 import {
   THEME_STORAGE_KEY,
   applyTheme,
+  clearStoredTheme,
   getInitialTheme,
   isTheme,
   readStoredTheme,
   storeTheme,
+  systemPrefersLight,
   watchSystemTheme,
   type Theme,
 } from './theme'
@@ -37,6 +39,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [change],
   )
 
+  const followSystem = useCallback(() => {
+    hasChoice.current = false
+    clearStoredTheme()
+    change(systemPrefersLight() ? 'light' : 'dark')
+  }, [change])
+
   const toggleTheme = useCallback(
     () => setTheme(theme === 'dark' ? 'light' : 'dark'),
     [theme, setTheme],
@@ -62,7 +70,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('storage', onStorage)
   }, [change])
 
-  const value = useMemo(() => ({ theme, setTheme, toggleTheme }), [theme, setTheme, toggleTheme])
+  const value = useMemo(() => ({ theme, setTheme, toggleTheme, followSystem }), [theme, setTheme, toggleTheme, followSystem])
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

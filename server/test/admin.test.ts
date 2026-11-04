@@ -14,16 +14,6 @@ afterEach(async () => {
 const headers = (who = admin) => ({ Cookie: who.cookie, 'X-CSRF-Token': who.csrf })
 const get = (path: string) => server.api(path, { headers: { Cookie: admin.cookie } })
 const send = (method: string, path: string, body?: unknown, who = admin) => server.api(path, { method, body, headers: headers(who) })
-const form = (path: string, fields: Record<string, string | string[]>, csrf = admin.csrf) => {
-  const params = new URLSearchParams({ _csrf: csrf })
-  for (const [key, value] of Object.entries(fields)) for (const v of Array.isArray(value) ? value : [value]) params.append(key, v)
-  return server.fetch(path, { method: 'POST', headers: { Cookie: admin.cookie, 'Content-Type': 'application/x-www-form-urlencoded' }, body: params.toString() })
-}
-const page = async (path: string) => {
-  const response = await server.fetch(path, { headers: { Cookie: admin.cookie } })
-  return { status: response.status, headers: response.headers, html: await response.text() }
-}
-
 /** Sends `count` different messages, a minute apart, and returns their ids, oldest first. */
 async function messages(count: number, overrides: (i: number) => Record<string, unknown> = () => ({})): Promise<string[]> {
   for (let i = 0; i < count; i += 1) {
@@ -93,10 +83,10 @@ describe('messages', () => {
 
   it('filters by status, kind and archive, and searches names, e-mails, subjects, text and references', async () => {
     const ids = await messages(4, (i) => ({ kind: i % 2 ? 'job' : 'project', name: i === 2 ? 'Zoltán Teszt' : 'Anna Kovács', email: i === 2 ? 'zoltan@other.example' : 'anna@example.com' }))
-    await send('PATCH', `/api/admin/inquiries/${ids[0]}`, { status: 'answered' })
+    await send('PATCH', `/api/admin/inquiries/${ids[0]}`, { status: 'waiting_client' })
     await send('PATCH', `/api/admin/inquiries/${ids[1]}`, { archived: true })
     const count = async (query: string) => (await get(`/api/admin/inquiries?${query}`)).json.meta.total
-    expect(await count('status=answered')).toBe(1)
+    expect(await count('status=waiting_client')).toBe(1)
     expect(await count('status=new')).toBe(2)
     expect(await count('kind=job')).toBe(1) // the other job message is archived
     expect(await count('archived=only')).toBe(1)
@@ -126,18 +116,18 @@ describe('messages', () => {
 
   it('changes the status through the whole vocabulary and refuses anything else', async () => {
     const [id] = await messages(1)
-    for (const status of ['in_progress', 'answered', 'closed', 'new']) {
+    for (const status of ['in_progress', 'waiting_client', 'completed', 'new']) {
       const response = await send('PATCH', `/api/admin/inquiries/${id}`, { status })
       expect(response.status, status).toBe(200)
       expect(response.json.data.status).toBe(status)
       expect(response.json.meta.notification).toBe('not_requested')
     }
-    for (const body of [{ status: 'done' }, { status: 4 }, { status: null }, {}, { status: 'closed', surprise: 1 }, { surprise: 1 }]) {
+    for (const body of [{ status: 'done' }, { status: 'answered' }, { status: 'closed' }, { status: 4 }, { status: null }, {}, { status: 'completed', surprise: 1 }, { surprise: 1 }]) {
       const response = await send('PATCH', `/api/admin/inquiries/${id}`, body)
       expect(response.status, JSON.stringify(body)).toBe(422)
     }
     expect(server.db.get<{ status: string }>('SELECT status FROM inquiries')?.status).toBe('new')
-    expect((await send('PATCH', '/api/admin/inquiries/nope', { status: 'closed' })).status).toBe(404)
+    expect((await send('PATCH', '/api/admin/inquiries/nope', { status: 'completed' })).status).toBe(404)
     expect((await server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', raw: '', headers: headers() })).status).toBe(400)
     expect((await server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', raw: '{not json', headers: headers() })).status).toBe(400)
     expect((await send('PATCH', `/api/admin/inquiries/${id}`, undefined)).status).toBe(415) // no JSON content type at all
@@ -179,10 +169,10 @@ describe('messages', () => {
   it('e-mails the customer about a status change only when asked, and only if e-mail is on', async () => {
     const [id] = await messages(1)
     server.db.run("DELETE FROM email_deliveries")
-    const quiet = await send('PATCH', `/api/admin/inquiries/${id}`, { status: 'answered' })
+    const quiet = await send('PATCH', `/api/admin/inquiries/${id}`, { status: 'waiting_client' })
     expect(quiet.json.meta.notification).toBe('not_requested')
     expect(server.db.get('SELECT COUNT(*) AS n FROM email_deliveries')).toEqual({ n: 0 })
-    const loud = await send('PATCH', `/api/admin/inquiries/${id}`, { status: 'closed', notify: true, note: 'Thank you for waiting.' })
+    const loud = await send('PATCH', `/api/admin/inquiries/${id}`, { status: 'completed', notify: true, note: 'Thank you for waiting.' })
     expect(loud.json.meta.notification).toBe('queued')
     expect(server.db.all('SELECT kind, recipient, related_type, note FROM email_deliveries')).toEqual([
       { kind: 'inquiry_status', recipient: 'anna@example.com', related_type: 'inquiry', note: 'Thank you for waiting.' },
@@ -191,7 +181,7 @@ describe('messages', () => {
     server = await startServer({ env: { EMAIL_PROVIDER: 'none' }, mailer: null })
     admin = await server.signIn('admin', 'admin@site.test')
     const [other] = await messages(1)
-    const off = await send('PATCH', `/api/admin/inquiries/${other}`, { status: 'closed', notify: true })
+    const off = await send('PATCH', `/api/admin/inquiries/${other}`, { status: 'completed', notify: true })
     expect(off.status).toBe(200)
     expect(off.json.meta.notification).toBe('off')
     expect(server.db.get('SELECT COUNT(*) AS n FROM email_deliveries')).toEqual({ n: 0 })
@@ -199,7 +189,7 @@ describe('messages', () => {
 
   it('writes every change into the audit log, with who did it, and no message text', async () => {
     const [id] = await messages(1, () => ({ message: 'A private sentence that must not be copied into the audit log.' }))
-    await send('PATCH', `/api/admin/inquiries/${id}`, { status: 'closed' })
+    await send('PATCH', `/api/admin/inquiries/${id}`, { status: 'completed' })
     await send('PATCH', `/api/admin/inquiries/${id}`, { addNote: 'A private note.' })
     await send('DELETE', `/api/admin/inquiries/${id}`)
     const rows = server.db.all<{ action: string; entity_id: string; email: string; detail: string | null }>('SELECT a.action, a.entity_id, u.email, a.detail FROM audit_log a JOIN admin_users u ON u.id = a.actor_id ORDER BY a.id')
@@ -262,7 +252,7 @@ describe('quote requests', () => {
     expect(api.status).toBe(200)
     expect(api.json.data).toMatchObject({ reference: expect.stringMatching(/^Q-/), name: 'Anna Kovács', email: 'anna@example.com', items: [{ need: 'website', plan: 'launch' }], pricing: { quotedParts: 2 }, notes: [{ author: 'admin@site.test', body: 'Looks good.' }] })
     expect(api.text).not.toMatch(/ip_hash|content_hash|"id":/)
-    const file = await server.fetch(`/admin/quote-requests/${id}/export.json`, { headers: { Cookie: admin.cookie } })
+    const file = await server.fetch(`/api/admin/quote-requests/${id}/export.json`, { headers: { Cookie: admin.cookie } })
     expect(file.headers.get('content-type')).toBe('application/json; charset=utf-8')
     expect(file.headers.get('content-disposition')).toMatch(/^attachment; filename="Q-[A-Z0-9]{8}\.json"$/)
     expect(JSON.parse(await file.text()).reference).toBe(api.json.data.reference)
@@ -273,7 +263,7 @@ describe('quote requests', () => {
       name: i === 0 ? '=HYPERLINK("http://evil.example","click")' : i === 1 ? '+36 Nagy, Péter' : 'Anna Kovács',
       description: i === 2 ? 'Line one,\nline "two", with a comma.' : `Request number ${i}: a small website with a contact form.`,
     }))
-    const response = await server.fetch('/admin/quote-requests/export.csv', { headers: { Cookie: admin.cookie } })
+    const response = await server.fetch('/api/admin/quote-requests/export.csv', { headers: { Cookie: admin.cookie } })
     expect(response.headers.get('content-type')).toBe('text/csv; charset=utf-8')
     expect(response.headers.get('content-disposition')).toBe('attachment; filename="quote-requests.csv"')
     const csv = await response.text()
@@ -285,7 +275,7 @@ describe('quote requests', () => {
     expect(csv).not.toMatch(/ip_hash|content_hash/)
     // A cell is never left starting with a formula character.
     for (const row of csv.split('\r\n').slice(1)) expect(row).not.toMatch(/(^|,)[=+@]/)
-    const filtered = await (await server.fetch('/admin/quote-requests/export.csv?q=evil.example', { headers: { Cookie: admin.cookie } })).text()
+    const filtered = await (await server.fetch('/api/admin/quote-requests/export.csv?q=evil.example', { headers: { Cookie: admin.cookie } })).text()
     expect(filtered.trim().split('\r\n')).toHaveLength(2)
   })
 
@@ -434,158 +424,5 @@ describe('the catalogue', () => {
     expect(after).not.toBe(before)
     await send('DELETE', '/api/admin/extras/training')
     expect((await server.api('/api/shop/catalog')).json.data.version).toBe(before)
-  })
-})
-
-describe('the administration pages', () => {
-  it('renders every page for a signed-in administrator, with the safe headers and no script', async () => {
-    const [inquiry] = await messages(1)
-    const [request] = await quotes(1)
-    const paths = [
-      '/admin', '/admin/dashboard', '/admin/inquiries', `/admin/inquiries/${inquiry}`, '/admin/quote-requests', `/admin/quote-requests/${request}`, '/admin/catalog', '/admin/services/new', '/admin/services/website',
-      '/admin/packages/new', '/admin/packages/launch', '/admin/extras/new', '/admin/extras/pages', '/admin/content/faq/new', '/admin/content/faq/start', '/admin/system', '/admin/account',
-    ]
-    for (const path of paths) {
-      const response = await server.fetch(path, { headers: { Cookie: admin.cookie } })
-      if (path === '/admin') {
-        expect(response.status).toBe(303)
-        continue
-      }
-      const html = await response.text()
-      expect(response.status, path).toBe(200)
-      expect(response.headers.get('content-type'), path).toBe('text/html; charset=utf-8')
-      expect(response.headers.get('content-security-policy'), path).toBe("default-src 'none'; style-src 'self'; img-src 'self' data:; form-action 'self'; base-uri 'none'; frame-ancestors 'none'")
-      expect(response.headers.get('cache-control'), path).toBe('no-store')
-      expect(response.headers.get('x-frame-options'), path).toBe('DENY')
-      expect(response.headers.get('x-content-type-options'), path).toBe('nosniff')
-      expect(html, path).toMatch(/^<!doctype html>/i)
-      expect(html, path).not.toMatch(/<script|javascript:|\son[a-z]+=|style="/i)
-      expect(html, path).toContain('/admin/assets/admin.css')
-      expect(html, path).toContain('admin@site.test')
-    }
-    const css = await server.fetch('/admin/assets/admin.css')
-    expect(css.status).toBe(200)
-    expect(css.headers.get('content-type')).toBe('text/css; charset=utf-8')
-  })
-
-  it('shows on the dashboard only what the database holds', async () => {
-    const empty = (await page('/admin/dashboard')).html
-    expect(empty).not.toMatch(/Subject number|C-[A-Z0-9]{8}|Q-[A-Z0-9]{8}/)
-    expect(empty).toContain('of 0 in total')
-    await messages(2)
-    await quotes(1)
-    const [id] = server.db.all<{ id: string }>('SELECT id FROM inquiries ORDER BY id').map((row) => row.id)
-    await send('PATCH', `/api/admin/inquiries/${id}`, { status: 'answered' })
-    const html = (await page('/admin/dashboard')).html
-    expect(html).toContain('Subject number 0')
-    expect(html).toContain('Subject number 1')
-    expect(html).toContain('of 2 in total')
-    expect(html).toContain('of 1 in total')
-    expect(html).toMatch(/Q-[A-Z0-9]{8}/)
-    expect(html).not.toMatch(/Revenue|Visitors|Conversion|Page views/i) // nothing is measured that the server does not record
-  })
-
-  it('escapes whatever a stranger typed, on the list, the detail and the CSV-free pages', async () => {
-    const xss = { name: '<script>alert(1)</script>', subject: '"><img src=x onerror=alert(2)>', message: "<svg/onload=alert(3)> & 'quotes' and \"more\" in a sentence." }
-    await server.api('/api/contact', { body: contact(xss) })
-    await server.api('/api/quote-requests', { body: quote({ name: xss.name, description: xss.message.padEnd(30, '.'), requirements: '<b>bold</b>' }) })
-    const [inquiry] = server.db.all<{ id: string }>('SELECT id FROM inquiries').map((row) => row.id)
-    const [request] = server.db.all<{ id: string }>('SELECT id FROM quote_requests').map((row) => row.id)
-    await send('PATCH', `/api/admin/inquiries/${inquiry}`, { addNote: '<iframe src=//evil.example></iframe>' })
-    for (const path of ['/admin/dashboard', '/admin/inquiries', `/admin/inquiries/${inquiry}`, '/admin/quote-requests', `/admin/quote-requests/${request}`]) {
-      const { html } = await page(path)
-      expect(html, path).not.toMatch(/<script>alert|<img src=x|<svg\/onload|<iframe|<b>bold/i)
-    }
-    const detail = (await page(`/admin/inquiries/${inquiry}`)).html
-    expect(detail).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
-    expect(detail).toContain('&lt;iframe src=//evil.example&gt;&lt;/iframe&gt;')
-    expect(detail).toContain('&quot;&gt;&lt;img src=x onerror=alert(2)&gt;')
-  })
-
-  it('changes a message through its forms: status with a note, a note, archive, delete (only when confirmed)', async () => {
-    const [id] = await messages(1)
-    const base = `/admin/inquiries/${id}`
-    const status = await form(`${base}/status`, { status: 'in_progress', note: '' })
-    expect(status.status).toBe(303)
-    expect(status.headers.get('location')).toBe(`${base}?done=status`)
-    expect(server.db.get<{ status: string }>('SELECT status FROM inquiries')?.status).toBe('in_progress')
-    expect((await form(`${base}/status`, { status: 'closed', notify: 'on' })).headers.get('location')).toBe(`${base}?done=status_queued`)
-    expect((await form(`${base}/status`, { status: 'bogus' })).headers.get('location')).toBe(`${base}?done=invalid`)
-    expect((await form(`${base}/notes`, { body: 'A note from the form.' })).headers.get('location')).toBe(`${base}?done=noted`)
-    expect((await form(`${base}/notes`, { body: '' })).headers.get('location')).toBe(`${base}?done=invalid`)
-    expect((await page(base)).html).toContain('A note from the form.')
-    expect((await form(`${base}/archive`, { archived: 'true' })).headers.get('location')).toBe(`${base}?done=archived`)
-    expect(server.db.get<{ archived_at: string | null }>('SELECT archived_at FROM inquiries')?.archived_at).not.toBeNull()
-    expect((await form(`${base}/archive`, { archived: 'false' })).headers.get('location')).toBe(`${base}?done=unarchived`)
-    expect((await form(`${base}/delete`, {})).headers.get('location')).toBe(`${base}?done=invalid`)
-    expect(server.db.get('SELECT COUNT(*) AS n FROM inquiries')).toEqual({ n: 1 })
-    expect((await form(`${base}/delete`, { confirm: 'yes' })).headers.get('location')).toBe('/admin/inquiries?done=deleted')
-    expect(server.db.get('SELECT COUNT(*) AS n FROM inquiries')).toEqual({ n: 0 })
-    expect((await page(base)).status).toBe(404)
-  })
-
-  it('shows a page, not JSON, when a page is missing, and a flash message only from a known list', async () => {
-    const missing = await page('/admin/inquiries/nothing-here')
-    expect(missing.status).toBe(404)
-    expect(missing.html).toMatch(/^<!doctype html>/i)
-    const flash = (await page('/admin/dashboard?done=<script>alert(1)</script>')).html
-    expect(flash).not.toContain('alert(1)')
-    expect((await page('/admin/content/poem/new')).status).toBe(404)
-  })
-
-  it('edits the catalogue through its forms and shows the problems next to the typed values', async () => {
-    const fields = (extra: Record<string, string | string[]> = {}) => {
-      const values: Record<string, string | string[]> = { slug: 'consulting', category: 'web', status: 'active', position: '60', packages: ['launch'] }
-      for (const lang of ['hu', 'en', 'nl']) Object.assign(values, { [`title_${lang}`]: `Consulting ${lang}`, [`summary_${lang}`]: 'Summary', [`tagline_${lang}`]: '', [`overview_${lang}`]: '', [`features_${lang}`]: 'One\nTwo\n\n  Three  ' })
-      return { ...values, ...extra }
-    }
-    const created = await form('/admin/services', fields())
-    expect(created.status).toBe(303)
-    expect(created.headers.get('location')).toBe('/admin/catalog?done=created')
-    expect((await server.api('/api/services/consulting?lang=nl')).json.data).toMatchObject({ title: 'Consulting nl', features: ['One', 'Two', 'Three'] })
-
-    const rejected = await form('/admin/services/consulting', fields({ title_en: '', category: 'Not Valid' }))
-    expect(rejected.status).toBe(422)
-    const html = await rejected.text()
-    expect(html).toContain('value="Consulting hu"') // what was typed is still there
-    expect(html).toMatch(/title_en/)
-    expect((await server.api('/api/services/consulting?lang=en')).json.data.title).toBe('Consulting en')
-
-    expect((await form('/admin/services', fields())).status).toBe(409)
-    expect((await form('/admin/services/consulting', fields({ title_hu: 'Új cím', status: 'disabled' }))).headers.get('location')).toBe('/admin/catalog?done=saved')
-    expect((await get('/api/admin/services/consulting')).json.data).toMatchObject({ status: 'disabled' })
-    expect((await form('/admin/services/consulting/delete', {})).headers.get('location')).toBe('/admin/catalog?done=deleted')
-    expect((await form('/admin/packages/launch/delete', {})).headers.get('location')).toBe('/admin/catalog?done=deleted')
-    // (launch has no request yet, so it really was deletable; a package a request refers to answers "conflict")
-    await quotes(1, () => ({ items: [{ need: 'website', plan: 'grow', extras: [] }] }))
-    expect((await form('/admin/packages/grow/delete', {})).headers.get('location')).toBe('/admin/catalog?done=conflict')
-  })
-
-  it('edits a package price through the form, and refuses a half-published one', async () => {
-    const base: Record<string, string | string[]> = { status: 'active', position: '1', quoteRequired: 'on', needs: ['website'], extras: ['pages'] }
-    for (const lang of ['hu', 'en', 'nl']) Object.assign(base, { [`name_${lang}`]: `Launch ${lang}` })
-    const bad = await form('/admin/packages/launch', { ...base, price_kind: 'from', price_amount: '900', price_currency: 'EUR', vat: 'unspecified' })
-    expect(bad.status).toBe(422)
-    expect(await bad.text()).toMatch(/vat/)
-    expect((await server.api('/api/packages/launch')).json.data.price).toEqual({ kind: 'quote' })
-    const ok = await form('/admin/packages/launch', { ...base, price_kind: 'from', price_amount: '900', price_currency: 'EUR', vat: 'excluded' })
-    expect(ok.status).toBe(303)
-    expect((await server.api('/api/packages/launch')).json.data).toMatchObject({ price: { kind: 'from', amount: 900, currency: 'EUR' }, vat: 'excluded' })
-  })
-
-  it('shows the system page to an administrator with a redacted configuration, and runs maintenance on request', async () => {
-    const { html } = await page('/admin/system')
-    expect(html).toContain('Schema version</dt><dd>1 of 1</dd>')
-    expect(html).toContain('&quot;appSecret&quot;: &quot;set&quot;') // says that it is set, not what it is
-    expect(html).not.toContain(server.config.appSecret)
-    expect(html).toContain('admin.login') // the sign-in is in the audit trail
-    const run = await form('/admin/system/maintenance', {})
-    expect(run.status).toBe(303)
-    expect(run.headers.get('location')).toBe('/admin/system?done=maintenance')
-    expect(server.db.get("SELECT COUNT(*) AS n FROM audit_log WHERE action = 'system.maintenance'")).toEqual({ n: 1 })
-    expect((await get('/api/admin/system')).json.data).toMatchObject({ migrations: expect.anything(), email: expect.anything(), config: expect.anything() })
-    expect((await get('/api/admin/system')).text).not.toContain(server.config.appSecret)
-    const publish = await form('/admin/system/publish', {})
-    expect(publish.headers.get('location')).toBe('/admin/system?done=publish_failed') // no deploy hook is configured
   })
 })

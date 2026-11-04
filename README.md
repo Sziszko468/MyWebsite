@@ -9,6 +9,7 @@ npm run check:seo  # after a build: reads dist/ like a crawler (titles, canonica
 npm run typecheck  # tsc -b
 npm run lint       # oxlint
 npm run server:start   # the backend (see "Backend"); first: npm run server:admin create you@example.com admin
+# the administration is a second page of this project: `npm run dev` serves it at /admin (with the backend running; docs/admin/README.md)
 npm test           # vitest: contrast, i18n parity, page registry, language switching, theme, hero input logic, geometry, intro policy and transition, home-page content, rhythm and link targets, project-page content, pictures and meta, services content and wording, quote-form validation and sending, the services, About and contact pages rendered in three languages, the About content's honesty rules, the contact form's validation and sending, the configured links, the motion system (config against the CSS tokens, the engine's modules, its components rendered to markup, every stylesheet's animations)
 ```
 
@@ -58,7 +59,10 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 | `src/content/privacy.ts`, `src/pages/PrivacyPage.tsx` | The privacy and cookie notice (`/privacy`). |
 | `scripts/` | `prerender.mjs` (per-page HTML, sitemap, robots, headers), `check-seo.mjs` (checks the built files), `make-og-image.mjs` (draws `public/og/default.png`). |
 | `docs/technical-audit.md` | The PROMPT 11 audit: issues found, fixes, measured results, limits. |
-| `server/` | The backend (PROMPT 12): a Node program with no runtime dependencies and a SQLite file. `src/` (config, `app.ts`, `http/`, `db/` with the SQL migrations, `modules/` for contact, quotes, catalogue, shop pricing, auth, admin, notifications, system), `seed/catalog.seed.json` (the website's catalogue as data), `test/` (254 tests run by `npm test`). See "Backend" below. |
+| `server/` | The backend (PROMPT 12): a Node program with no runtime dependencies and a SQLite file. `src/` (config, `app.ts`, `http/`, `db/` with the SQL migrations, `modules/` for contact, quotes, catalogue, shop pricing, auth, admin, notifications, system), `seed/catalog.seed.json` (the website's catalogue as data), `test/` (320 tests run by `npm test`). See "Backend" below. |
+| `src/admin/`, `admin.html` | The administration (PROMPT 13): a React single-page application served by the backend at `/admin` — dashboard, inquiries, quote requests, services and packages, website content (the FAQ), translations, notifications, settings. It reuses the website's tokens, theme and button, talks only to `/api/admin/*`, and is never loaded by the website (a test enforces it). See `docs/admin/README.md`. |
+| `docs/admin/` | `README.md`: information architecture, what each screen does, components, endpoints reused and new, the database change, security, accessibility, tests and what the real-browser run found, and what is not there. |
+| `tools/audit/audit-admin.cjs` | The administration in a real Chrome: every screen × viewport × theme × language, layout and axe-core, the dialog and the phone menu's focus behaviour. |
 | `docs/backend/` | `README.md`: configuration, every endpoint, the administration, e-mail, privacy inventory, deployment, test results and what was not verified. `architecture.md`: the audit and the design, written before the code. |
 | `.env.example` | Every setting of the backend and of the website's build, with descriptions and no secret. |
 | `src/config/api.ts` | `VITE_API_URL`: where the backend is. The forms' endpoints (`config/contact.ts`, `config/quote.ts`) default to its `/api/contact` and `/api/quote-requests`. |
@@ -617,7 +621,7 @@ That audit (PROMPT 11) was made when this repository had no backend; the backend
 
 ## Backend
 
-`server/` is the backend: it receives the contact form and the quote builder, stores them, e-mails the owner, serves the shop's catalogue and has a separate administration at `/admin` for the owner. It is one Node program (22.18 or newer, TypeScript run directly, **no runtime dependencies**) with a SQLite file. Everything about it, in one place: `docs/backend/README.md` (configuration, every endpoint, the administration, e-mail, what is stored about people, deployment, test results, and a list of what was **not** verified). The design and the audit it was built from: `docs/backend/architecture.md`.
+`server/` is the backend: it receives the contact form and the quote builder, stores them, e-mails the owner, serves the shop's catalogue and has an administration at `/admin` for the owner (a single-page application: `docs/admin/README.md`). It is one Node program (22.18 or newer, TypeScript run directly, **no runtime dependencies**) with a SQLite file. Everything about it, in one place: `docs/backend/README.md` (configuration, every endpoint, the administration's access rules, e-mail, what is stored about people, deployment, test results, and a list of what was **not** verified). The design and the audit it was built from: `docs/backend/architecture.md`.
 
 ```bash
 cp .env.example .env                                   # every setting, described; no secrets in the file

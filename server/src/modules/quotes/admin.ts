@@ -1,11 +1,13 @@
 import type { AppContext, SessionInfo } from '../../context.ts'
 import { notFound, validationFailed } from '../../http/errors.ts'
 import { toCsv } from '../../lib/csv.ts'
-import { cleanBlock, cleanLine, length } from '../../lib/text.ts'
+import { cleanBlock, length } from '../../lib/text.ts'
 import { iso } from '../../lib/time.ts'
+import { parseListing, type Listing } from '../admin/listing.ts'
 import { requirePermission } from '../auth/permissions.ts'
-import { PAGE_SIZE } from '../inquiries/admin.ts'
+import { getInquiry } from '../inquiries/repository.ts'
 import { totalsOf } from '../shop/pricing.ts'
+import { activityOf } from '../system/activity.ts'
 import { audit } from '../system/audit.ts'
 import {
   addQuoteNote,
@@ -23,34 +25,59 @@ import {
   type QuoteStatus,
 } from './repository.ts'
 
-/** What an administrator can do with the quote requests: the same shape as the inquiries' (modules/inquiries/admin.ts), plus export. */
+/** What an administrator can do with the quote requests: the same shape as the inquiries' (modules/inquiries/admin.ts), plus linking to an inquiry and export. */
 
-export function parseQuoteQuery(query: URLSearchParams): QuoteFilters & { archived: 'exclude' | 'only' | 'all' } {
-  const page = Math.max(1, Math.min(10_000, Number.parseInt(query.get('page') ?? '1', 10) || 1))
+export function parseQuoteQuery(query: URLSearchParams): QuoteFilters & Listing {
+  const listing = parseListing(query)
   const status = query.get('status') ?? ''
-  const archived = query.get('archived')
-  const q = cleanLine(query.get('q') ?? '').slice(0, 100)
-  return {
-    page,
-    pageSize: PAGE_SIZE,
-    status: (QUOTE_STATUSES as readonly string[]).includes(status) ? status : undefined,
-    archived: archived === 'only' || archived === 'all' ? archived : 'exclude',
-    q: q || undefined,
-  }
+  return { ...listing, status: (QUOTE_STATUSES as readonly string[]).includes(status) ? status : undefined }
 }
 
 export function listForAdmin(app: AppContext, session: SessionInfo | null, query: URLSearchParams) {
   requirePermission(session, 'requests:read')
   const filters = parseQuoteQuery(query)
-  return { filters, ...listQuotes(app.db, filters) }
+  const { rows, total } = listQuotes(app.db, filters)
+  return { filters, rows, total, itemsOf: itemsSummary(app, rows.map((row) => row.id)) }
 }
+
+/** What each listed request asked for, in a word each (the need and the package), fetched for the whole page in one query. */
+function itemsSummary(app: AppContext, ids: string[]): Record<string, { need: string; plan: string }[]> {
+  const out: Record<string, { need: string; plan: string }[]> = {}
+  if (ids.length === 0) return out
+  const placeholders = ids.map(() => '?').join(', ')
+  for (const row of app.db.all<{ quote_request_id: string; need: string; plan: string }>(`SELECT quote_request_id, need, plan FROM quote_request_items WHERE quote_request_id IN (${placeholders}) ORDER BY position`, ids)) {
+    ;(out[row.quote_request_id] ??= []).push({ need: row.need, plan: row.plan })
+  }
+  return out
+}
+
+export interface InquirySummary {
+  id: string
+  reference: string
+  name: string
+  subject: string
+  status: string
+  created_at: string
+}
+
+const SUMMARY = 'SELECT id, reference, name, subject, status, created_at FROM inquiries'
 
 export function detailForAdmin(app: AppContext, session: SessionInfo | null, id: string) {
   requirePermission(session, 'requests:read')
   const quote = getQuote(app.db, id)
   if (!quote) throw notFound('The quote request')
   const items = quoteItems(app.db, id)
-  return { quote, items, notes: listQuoteNotes(app.db, id), pricing: totalsOf(items.map((item) => item.snapshot)) }
+  const linked = quote.inquiry_id ? app.db.get<InquirySummary>(`${SUMMARY} WHERE id = ?`, [quote.inquiry_id]) ?? null : null
+  return {
+    quote,
+    items,
+    notes: listQuoteNotes(app.db, id),
+    pricing: totalsOf(items.map((item) => item.snapshot)),
+    inquiry: linked,
+    // The messages the same address has sent: the likely ones to link this request to.
+    candidates: app.db.all<InquirySummary>(`${SUMMARY} WHERE email = ? ORDER BY created_at DESC LIMIT 10`, [quote.email]),
+    activity: activityOf(app, 'quote_request', id, quote.created_at),
+  }
 }
 
 export function changeStatus(app: AppContext, session: SessionInfo | null, id: string, input: { status: unknown; notify?: boolean; note?: unknown }): { notified: 'queued' | 'off' | 'not_requested' } {
@@ -58,11 +85,24 @@ export function changeStatus(app: AppContext, session: SessionInfo | null, id: s
   if (typeof input.status !== 'string' || !(QUOTE_STATUSES as readonly string[]).includes(input.status)) throw validationFailed({ status: 'invalid' })
   const note = typeof input.note === 'string' ? cleanBlock(input.note) : ''
   if (length(note) > 1000) throw validationFailed({ note: 'tooLong' })
-  if (!getQuote(app.db, id)) throw notFound('The quote request')
+  const existing = getQuote(app.db, id)
+  if (!existing) throw notFound('The quote request')
   updateQuoteStatus(app.db, id, input.status as QuoteStatus, iso(app.clock.now()))
-  audit(app, actor, 'quote.status', 'quote_request', id, { status: input.status })
+  const emailed = input.notify === true ? app.notifier.notifyCustomer('quote_status', id, note || null) !== null : false
+  if (existing.status !== input.status || emailed) audit(app, actor, 'quote.status', 'quote_request', id, { from: existing.status, to: input.status, emailed })
   if (!input.notify) return { notified: 'not_requested' }
-  return { notified: app.notifier.notifyCustomer('quote_status', id, note || null) ? 'queued' : 'off' }
+  return { notified: emailed ? 'queued' : 'off' }
+}
+
+/** Says which inquiry a quote request belongs to, or (with `null`) that it belongs to none. */
+export function linkInquiry(app: AppContext, session: SessionInfo | null, id: string, inquiryId: unknown): void {
+  const actor = requirePermission(session, 'requests:write')
+  if (inquiryId !== null && typeof inquiryId !== 'string') throw validationFailed({ inquiryId: 'invalid' })
+  if (!getQuote(app.db, id)) throw notFound('The quote request')
+  const inquiry = inquiryId === null ? null : getInquiry(app.db, inquiryId)
+  if (inquiryId !== null && !inquiry) throw validationFailed({ inquiryId: 'invalid' })
+  app.db.run('UPDATE quote_requests SET inquiry_id = ?, updated_at = ? WHERE id = ?', [inquiryId, iso(app.clock.now()), id])
+  audit(app, actor, inquiry ? 'quote.link' : 'quote.unlink', 'quote_request', id, { inquiry: inquiry?.reference ?? null })
 }
 
 export function archive(app: AppContext, session: SessionInfo | null, id: string, archived: boolean): void {
@@ -83,11 +123,12 @@ export function addNote(app: AppContext, session: SessionInfo | null, id: string
 
 export function remove(app: AppContext, session: SessionInfo | null, id: string): void {
   const actor = requirePermission(session, 'requests:delete')
+  const reference = getQuote(app.db, id)?.reference
   app.db.transaction(() => {
     app.db.run("DELETE FROM email_deliveries WHERE related_type = 'quote_request' AND related_id = ?", [id])
     if (!deleteQuote(app.db, id)) throw notFound('The quote request')
   })
-  audit(app, actor, 'quote.delete', 'quote_request', id)
+  audit(app, actor, 'quote.delete', 'quote_request', id, { reference: reference ?? null })
 }
 
 export function overview(app: AppContext, session: SessionInfo | null) {
@@ -98,7 +139,7 @@ export function overview(app: AppContext, session: SessionInfo | null) {
 /** One request, complete, as JSON: the thing to hand to whoever writes the quote. */
 export function exportOne(app: AppContext, session: SessionInfo | null, id: string): Record<string, unknown> {
   const { quote, items, notes, pricing } = detailForAdmin(app, session, id)
-  const { id: _id, ip_hash: _ip, content_hash: _hash, ...visible } = quote
+  const { id: _id, ip_hash: _ip, content_hash: _hash, inquiry_id: _inquiry, ...visible } = quote
   return { ...visible, items, pricing, notes: notes.map((note) => ({ author: note.author_email, body: note.body, createdAt: note.created_at })) }
 }
 

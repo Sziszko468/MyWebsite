@@ -16,7 +16,7 @@ function render(lang: Language, url = '/contact', theme: 'dark' | 'light' = 'dar
   return flattenKinetic(renderToStaticMarkup(
     createElement(
       ThemeContext.Provider,
-      { value: { theme, setTheme: () => undefined, toggleTheme: () => undefined } },
+      { value: { theme, setTheme: () => undefined, toggleTheme: () => undefined, followSystem: () => undefined } },
       createElement(
         MemoryRouter,
         { initialEntries: [`/${lang}${url}`] },

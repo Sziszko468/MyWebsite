@@ -58,6 +58,10 @@ describe('the privacy notice', () => {
       .map(posix)
       // The sources whose only mention of storage is a comment or content about another project's code do not count.
       .filter((file) => !file.startsWith('content/projectDetails/') && file !== 'content/privacy.ts')
+      // The administration (src/admin) is not the visitors' site: it is a separate page, behind a sign-in, that only the owner's
+      // administrators ever load. What it keeps (whether the sidebar is collapsed; docs/admin/README.md lists it) is their own
+      // interface preference, so it is not part of the notice to visitors. The visitors' pages never import it.
+      .filter((file) => !file.startsWith('admin/'))
     expect(users.sort()).toEqual([...STORAGE_USERS].sort())
 
     const listed = new Set(storedItems.flatMap((item) => item.name.split(', ')))

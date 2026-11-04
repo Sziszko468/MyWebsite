@@ -13,6 +13,9 @@ import { iso, type Clock } from '../lib/time.ts'
 
 export const MIGRATIONS_DIRECTORY = join(import.meta.dirname, 'migrations')
 
+/** `-- migration: foreign-keys-off` on a line of its own, for a migration that rebuilds a table. */
+const FOREIGN_KEYS_OFF = /^--\s*migration:\s*foreign-keys-off\s*$/m
+
 export class MigrationError extends Error {
   constructor(message: string) {
     super(message)
@@ -85,13 +88,25 @@ export function migrate(db: Database, clock: Clock, directory = MIGRATIONS_DIREC
   const done: number[] = []
   for (const file of files) {
     if (applied.has(file.version)) continue
+    // SQLite cannot change a CHECK constraint in place: the table is rebuilt (create new, copy, drop old, rename), and
+    // dropping a table that others refer to would cascade into them while foreign keys are enforced. A migration that
+    // rebuilds a table says so on a comment line, and the runner follows SQLite's documented procedure: foreign keys
+    // off around the transaction (the pragma does nothing inside one), a foreign-key check before it commits.
+    const rebuilds = FOREIGN_KEYS_OFF.test(file.sql)
+    if (rebuilds) db.exec('PRAGMA foreign_keys = OFF')
     try {
       db.transaction(() => {
         db.exec(file.sql)
+        if (rebuilds) {
+          const broken = db.all('PRAGMA foreign_key_check')
+          if (broken.length > 0) throw new Error(`${broken.length} row(s) would break a foreign key`)
+        }
         db.run('INSERT INTO schema_migrations (version, name, checksum, applied_at) VALUES (?, ?, ?, ?)', [file.version, file.name, file.checksum, iso(clock.now())])
       })
     } catch (error) {
       throw new MigrationError(`Migration ${file.version} (${file.name}) failed and was rolled back: ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+      if (rebuilds) db.exec('PRAGMA foreign_keys = ON')
     }
     done.push(file.version)
   }

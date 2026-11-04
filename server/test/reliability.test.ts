@@ -272,9 +272,9 @@ describe('housekeeping and the right to be forgotten', () => {
     const patchQuote = (id: string, body: unknown) => server.api(`/api/admin/quote-requests/${id}`, { method: 'PATCH', body, headers: { Cookie: admin.cookie, 'X-CSRF-Token': admin.csrf } })
     for (const subject of ['open', 'closed', 'archived', 'answered']) await server.api('/api/contact', { body: contact({ subject, email: `${subject}@example.com` }) })
     const id = (subject: string) => server.db.get<{ id: string }>('SELECT id FROM inquiries WHERE subject = ?', [subject])!.id
-    await patch(id('closed'), { status: 'closed' })
+    await patch(id('closed'), { status: 'completed' })
     await patch(id('archived'), { archived: true })
-    await patch(id('answered'), { status: 'answered' })
+    await patch(id('answered'), { status: 'waiting_client' })
     for (const description of ['open request for the site', 'declined request for the site', 'closed request for the site', 'accepted request for the site']) await server.api('/api/quote-requests', { body: quote({ description, email: `${description.split(' ')[0]}@example.com` }) })
     const quoteId = (word: string) => server.db.get<{ id: string }>('SELECT id FROM quote_requests WHERE description LIKE ?', [`${word}%`])!.id
     await patchQuote(quoteId('declined'), { status: 'declined' })
@@ -302,7 +302,7 @@ describe('housekeeping and the right to be forgotten', () => {
     const result = runMaintenance(ctx())
     expect(result).toMatchObject({ inquiries: 2, quoteRequests: 2, retentionDays: 365 })
     expect(result.deliveries).toBeGreaterThan(0)
-    expect(subjects()).toEqual(['answered', 'open']) // an open or merely answered one is never removed by age
+    expect(subjects()).toEqual(['answered', 'open']) // an open one, or one waiting for the client, is never removed by age
     expect(server.db.all<{ description: string }>('SELECT description FROM quote_requests ORDER BY description').map((row) => row.description.split(' ')[0])).toEqual(['accepted', 'open'])
     expect(server.db.get('SELECT COUNT(*) AS n FROM quote_request_items WHERE quote_request_id NOT IN (SELECT id FROM quote_requests)')).toEqual({ n: 0 })
     expect(server.db.get('SELECT COUNT(*) AS n FROM email_deliveries WHERE related_id NOT IN (SELECT id FROM inquiries UNION SELECT id FROM quote_requests) AND status = \'pending\'')).toEqual({ n: 0 })

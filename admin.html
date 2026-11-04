@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#0b0b0d" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Administration</title>
+    <!--
+      The administration application: its own page, its own bundle, served by the backend at /admin and below (server/).
+      No inline script or style here on purpose: the page's Content-Security-Policy allows scripts from this server only.
+      The theme is applied by src/admin/main.tsx before the first screen is drawn.
+    -->
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/admin/main.tsx"></script>
+  </body>
+</html>

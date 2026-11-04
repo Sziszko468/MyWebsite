@@ -35,7 +35,7 @@ function render(element: ReactElement, lang: Language, theme: 'dark' | 'light' =
   return flattenKinetic(renderToStaticMarkup(
     createElement(
       ThemeContext.Provider,
-      { value: { theme, setTheme: () => undefined, toggleTheme: () => undefined } },
+      { value: { theme, setTheme: () => undefined, toggleTheme: () => undefined, followSystem: () => undefined } },
       createElement(
         MemoryRouter,
         { initialEntries: [`/${lang}${url}`] },

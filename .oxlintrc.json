@@ -9,6 +9,12 @@
   },
   "overrides": [
     {
+      // The administration keeps a provider and the hook that reads it in one file (session, text, toasts, confirmation):
+      // they are one idea, and there is no fast-refresh workflow that depends on splitting them.
+      "files": ["src/admin/**"],
+      "rules": { "react/only-export-components": "off" }
+    },
+    {
       // The 3D scene mutates Three.js objects (cameras, materials, lights) inside per-frame
       // callbacks. That is how React Three Fiber is meant to be used, and re-rendering per frame
       // would defeat the point, so the "no mutation" rule does not apply there.

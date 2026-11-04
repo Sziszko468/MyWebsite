@@ -6,6 +6,7 @@ import { addMs, iso, MINUTE, type Clock } from '../../lib/time.ts'
 import { loadCatalog } from '../catalog/repository.ts'
 import { getInquiry } from '../inquiries/repository.ts'
 import { getQuote, quoteItems } from '../quotes/repository.ts'
+import { notificationPreferences } from '../system/settings.ts'
 import { totalsOf } from '../shop/pricing.ts'
 import { MailError } from './smtp.ts'
 import type { Mailer } from './mailer.ts'
@@ -84,6 +85,12 @@ export class Notifier {
       log.debug('owner notification skipped: no provider or no NOTIFY_TO', { kind })
       return
     }
+    // The owner can switch either notification off in the administration (Notifications); what is already queued is still sent.
+    const wanted = notificationPreferences(this.deps.db)
+    if (kind === 'inquiry_received' ? !wanted.newInquiry : !wanted.newQuote) {
+      log.debug('owner notification skipped: switched off in the administration', { kind })
+      return
+    }
     try {
       this.enqueue({ kind, relatedType: kind === 'inquiry_received' ? 'inquiry' : 'quote_request', relatedId, recipient: config.email.notifyTo, language: config.email.notifyLanguage })
     } catch (error) {
@@ -99,6 +106,15 @@ export class Notifier {
     const row = kind === 'inquiry_status' ? getInquiry(db, relatedId) : getQuote(db, relatedId)
     if (!row) return null
     return this.enqueue({ kind, relatedType: kind === 'inquiry_status' ? 'inquiry' : 'quote_request', relatedId, recipient: row.email, language: row.language, note })
+  }
+
+  /** Puts a failed message back in the queue for another round of attempts, and sends it at once. False when it is not a failed one. */
+  retry(id: string): boolean {
+    const { db, clock } = this.deps
+    const now = iso(clock.now())
+    const changed = db.run("UPDATE email_deliveries SET status = 'pending', attempts = 0, next_attempt_at = ?, last_error = NULL, updated_at = ? WHERE id = ? AND status = 'failed'", [now, now, id]).changes
+    if (changed > 0) this.kick()
+    return changed > 0
   }
 
   private kick(): void {

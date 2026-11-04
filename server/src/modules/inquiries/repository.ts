@@ -3,7 +3,8 @@ import type { Language } from '../../config.ts'
 
 export const INQUIRY_KINDS = ['job', 'collaboration', 'project', 'other'] as const
 export type InquiryKind = (typeof INQUIRY_KINDS)[number]
-export const INQUIRY_STATUSES = ['new', 'in_progress', 'answered', 'closed'] as const
+/** The working states of an inquiry. "Archived" is not one of them: it is `archived_at`, and an archived inquiry keeps its status. */
+export const INQUIRY_STATUSES = ['new', 'in_progress', 'waiting_client', 'completed'] as const
 export type InquiryStatus = (typeof INQUIRY_STATUSES)[number]
 
 export interface InquiryRow {
@@ -32,15 +33,27 @@ export interface NoteRow {
   created_at: string
 }
 
+export const LIST_SORTS = ['created', 'updated', 'name', 'status'] as const
+export type ListSort = (typeof LIST_SORTS)[number]
+const SORT_COLUMN: Record<ListSort, string> = { created: 'created_at', updated: 'updated_at', name: 'name COLLATE NOCASE', status: 'status' }
+
 export interface ListFilters {
   status?: string
   /** `exclude` (default): the working list; `only`: the archive; `all`. */
   archived?: 'exclude' | 'only' | 'all'
   kind?: string
   q?: string
+  /** Received on or after / on or before these UTC instants (inclusive). */
+  from?: string
+  to?: string
+  sort?: ListSort
+  dir?: 'asc' | 'desc'
   page: number
   pageSize: number
 }
+
+/** `ORDER BY` for a list: the chosen column (from a fixed list, never from the request's text), newest first by default, a stable tie-break. */
+export const orderBy = (sort: ListSort = 'created', dir: 'asc' | 'desc' = 'desc'): string => `ORDER BY ${SORT_COLUMN[sort]} ${dir === 'asc' ? 'ASC' : 'DESC'}, created_at DESC, id`
 
 /** Escapes the characters LIKE treats specially, so a search for "50%" finds "50%" and not everything. */
 export const likePattern = (q: string): string => `%${q.replace(/[\\%_]/g, (char) => `\\${char}`)}%`
@@ -72,6 +85,14 @@ function where(filters: ListFilters): { sql: string; params: (string | number)[]
   }
   if (filters.archived === 'only') clauses.push('archived_at IS NOT NULL')
   else if (filters.archived !== 'all') clauses.push('archived_at IS NULL')
+  if (filters.from) {
+    clauses.push('created_at >= ?')
+    params.push(filters.from)
+  }
+  if (filters.to) {
+    clauses.push('created_at <= ?')
+    params.push(filters.to)
+  }
   if (filters.q) {
     const like = likePattern(filters.q)
     clauses.push("(name LIKE ? ESCAPE '\\' OR email LIKE ? ESCAPE '\\' OR subject LIKE ? ESCAPE '\\' OR message LIKE ? ESCAPE '\\' OR reference LIKE ? ESCAPE '\\')")
@@ -83,7 +104,7 @@ function where(filters: ListFilters): { sql: string; params: (string | number)[]
 export function listInquiries(db: Database, filters: ListFilters): { rows: InquiryRow[]; total: number } {
   const { sql, params } = where(filters)
   const total = db.get<{ n: number }>(`SELECT COUNT(*) AS n FROM inquiries ${sql}`, params)?.n ?? 0
-  const rows = db.all<InquiryRow>(`SELECT * FROM inquiries ${sql} ORDER BY created_at DESC, id LIMIT ? OFFSET ?`, [...params, filters.pageSize, (filters.page - 1) * filters.pageSize])
+  const rows = db.all<InquiryRow>(`SELECT * FROM inquiries ${sql} ${orderBy(filters.sort, filters.dir)} LIMIT ? OFFSET ?`, [...params, filters.pageSize, (filters.page - 1) * filters.pageSize])
   return { rows, total }
 }
 

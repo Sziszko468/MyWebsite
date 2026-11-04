@@ -72,8 +72,8 @@ export async function authenticate(app: AppContext, email: string, password: str
   const token = randomToken(32)
   const csrfToken = randomToken(24)
   const lifetimeMs = app.config.adminSessionHours * HOUR
-  db.run('INSERT INTO admin_sessions (token_hash, user_id, csrf_token, created_at, last_seen_at, expires_at, ip_hash, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
-    sha256Hex(token), user.id, csrfToken, iso(now), iso(now), iso(addMs(now, lifetimeMs)), ipHash, userAgent.slice(0, 200),
+  db.run('INSERT INTO admin_sessions (token_hash, user_id, csrf_token, created_at, last_seen_at, expires_at, ip_hash, user_agent, public_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+    sha256Hex(token), user.id, csrfToken, iso(now), iso(now), iso(addMs(now, lifetimeMs)), ipHash, userAgent.slice(0, 200), randomToken(8),
   ])
   audit(app, { userId: user.id }, 'admin.login', 'admin_user', user.id)
   return { token, maxAgeSeconds: Math.floor(lifetimeMs / 1000), csrfToken, user }

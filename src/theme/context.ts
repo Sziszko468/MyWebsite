@@ -5,6 +5,8 @@ export interface ThemeContextValue {
   theme: Theme
   setTheme: (theme: Theme) => void
   toggleTheme: () => void
+  /** Drop the stored choice and let the device's setting decide (and keep following it). */
+  followSystem: () => void
 }
 
 export const ThemeContext = createContext<ThemeContextValue | null>(null)

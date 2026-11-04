@@ -36,6 +36,15 @@ export function storeTheme(theme: Theme): void {
   }
 }
 
+/** Forgets the stored choice, so the system setting decides again. */
+export function clearStoredTheme(): void {
+  try {
+    window.localStorage.removeItem(THEME_STORAGE_KEY)
+  } catch {
+    // Storage can be blocked; there is then nothing stored to forget.
+  }
+}
+
 export function systemPrefersLight(): boolean {
   return window.matchMedia(LIGHT_QUERY).matches
 }

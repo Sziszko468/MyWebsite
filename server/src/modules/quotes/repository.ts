@@ -1,6 +1,6 @@
 import type { Database } from '../../db/database.ts'
 import type { Language } from '../../config.ts'
-import { likePattern, type NoteRow } from '../inquiries/repository.ts'
+import { likePattern, orderBy, type ListSort, type NoteRow } from '../inquiries/repository.ts'
 import type { PriceSnapshot } from '../shop/pricing.ts'
 
 export const QUOTE_STATUSES = ['new', 'in_review', 'quoted', 'accepted', 'declined', 'closed'] as const
@@ -21,6 +21,8 @@ export interface QuoteRow {
   timing: string | null
   requirements: string | null
   status: QuoteStatus
+  /** The inquiry an administrator linked this request to. */
+  inquiry_id: string | null
   archived_at: string | null
   consent_at: string | null
   ip_hash: string | null
@@ -98,6 +100,10 @@ export interface QuoteFilters {
   status?: string
   archived?: 'exclude' | 'only' | 'all'
   q?: string
+  from?: string
+  to?: string
+  sort?: ListSort
+  dir?: 'asc' | 'desc'
   page: number
   pageSize: number
 }
@@ -111,6 +117,14 @@ function where(filters: QuoteFilters): { sql: string; params: (string | number)[
   }
   if (filters.archived === 'only') clauses.push('archived_at IS NOT NULL')
   else if (filters.archived !== 'all') clauses.push('archived_at IS NULL')
+  if (filters.from) {
+    clauses.push('created_at >= ?')
+    params.push(filters.from)
+  }
+  if (filters.to) {
+    clauses.push('created_at <= ?')
+    params.push(filters.to)
+  }
   if (filters.q) {
     const like = likePattern(filters.q)
     clauses.push("(name LIKE ? ESCAPE '\\' OR email LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\' OR requirements LIKE ? ESCAPE '\\' OR reference LIKE ? ESCAPE '\\')")
@@ -122,7 +136,7 @@ function where(filters: QuoteFilters): { sql: string; params: (string | number)[
 export function listQuotes(db: Database, filters: QuoteFilters): { rows: QuoteRow[]; total: number } {
   const { sql, params } = where(filters)
   const total = db.get<{ n: number }>(`SELECT COUNT(*) AS n FROM quote_requests ${sql}`, params)?.n ?? 0
-  const rows = db.all<QuoteRow>(`SELECT * FROM quote_requests ${sql} ORDER BY created_at DESC, id LIMIT ? OFFSET ?`, [...params, filters.pageSize, (filters.page - 1) * filters.pageSize])
+  const rows = db.all<QuoteRow>(`SELECT * FROM quote_requests ${sql} ${orderBy(filters.sort, filters.dir)} LIMIT ? OFFSET ?`, [...params, filters.pageSize, (filters.page - 1) * filters.pageSize])
   return { rows, total }
 }
 

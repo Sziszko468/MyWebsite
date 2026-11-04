@@ -62,6 +62,8 @@ export function serveStatic(directory: string, urlPath: string): Reply | null {
   }
   const segments = decoded.split('/')
   if (decoded.includes('\0') || segments.includes('..')) return null
+  // The administration application's page is served only at /admin (with its own policy), never as a page of the website.
+  if (decoded === '/admin.html') return null
   // A hidden file or folder (`.env`, `.git`) is never part of a website; `.well-known` is the one conventional exception.
   if (segments.some((segment, index) => segment.startsWith('.') && !(index === 1 && segment === '.well-known'))) return null
   let file = normalize(join(root, decoded))
@@ -88,4 +90,26 @@ export function serveStatic(directory: string, urlPath: string): Reply | null {
     headers: { 'Content-Type': TYPES[extname(file).toLowerCase()] ?? 'application/octet-stream', ...headersFor(decoded.endsWith('/') ? `${decoded}index.html` : decoded) },
     body,
   }
+}
+
+/**
+ * The administration application. It is built with the website (`admin.html` and its script and style in `assets/`)
+ * and served here at `/admin` and every address below it, so that it and the API it calls are one origin: the
+ * session cookie is `SameSite=Strict` and the API sends no CORS headers, on purpose. Its own policy allows scripts
+ * from this server only (no inline script, no eval, nothing from elsewhere), and the page is never cached or indexed.
+ */
+export const ADMIN_CSP = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'"
+
+const ADMIN_HEADERS = { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': ADMIN_CSP, 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' }
+
+export function serveAdminApp(directory: string | null): Reply {
+  if (directory) {
+    const file = join(resolve(directory), 'admin.html')
+    if (existsSync(file) && statSync(file).isFile()) return { status: 200, headers: ADMIN_HEADERS, body: readFileSync(file) }
+  }
+  const body =
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Administration not installed</title></head>' +
+    '<body><h1>The administration is not installed</h1>' +
+    '<p>This server has no built website to take it from. Build the website (<code>npm run build</code>) and set <code>STATIC_DIR</code> to the <code>dist</code> folder, then reload this page.</p></body></html>'
+  return { status: 404, headers: ADMIN_HEADERS, body }
 }

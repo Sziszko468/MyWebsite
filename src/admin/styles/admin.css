@@ -1,0 +1,47 @@
+/*
+ * What the administration adds to the website's design tokens (src/styles/tokens.css): the colours a status needs
+ * that the brand palette does not have (a working green and an amber), chosen so their text reads on the surfaces
+ * of both themes (checked in src/admin/tokens.test.ts). Everything else - the red, the carbon, the paper, the
+ * cobalt, type, spacing, radii, focus - comes from the website's tokens, so the two stay one product.
+ */
+:root {
+  --admin-sidebar-width: 15.5rem;
+  --admin-rail-width: 4.5rem;
+  --admin-header-height: 3.75rem;
+  --admin-bottom-nav-height: 3.75rem;
+  --admin-success: #5bd49b;
+  --admin-warning: #f0b84a;
+  --admin-danger: #ff6b72;
+  /* The brand red as text on a tinted badge or a hovered row (the website's own accent text is for plain surfaces). */
+  --admin-accent: #ff5c63;
+  --admin-info: var(--color-secondary-text);
+  --admin-row-hover: var(--color-surface-hover);
+}
+
+:root[data-theme='light'] {
+  --admin-success: #0f6b43;
+  --admin-warning: #7d5200;
+  --admin-danger: #b3121a;
+  --admin-accent: #b80009;
+}
+
+html {
+  /* The admin's pages scroll their own content area under a fixed header; anchors need no header offset. */
+  scroll-padding-top: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Reduced motion: nothing in the administration is allowed to take time. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

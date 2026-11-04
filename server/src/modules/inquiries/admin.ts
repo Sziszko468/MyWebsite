@@ -1,8 +1,10 @@
 import type { AppContext, SessionInfo } from '../../context.ts'
 import { notFound, validationFailed } from '../../http/errors.ts'
 import { iso } from '../../lib/time.ts'
-import { cleanBlock, cleanLine, length } from '../../lib/text.ts'
+import { cleanBlock, length } from '../../lib/text.ts'
+import { parseListing, type Listing } from '../admin/listing.ts'
 import { requirePermission } from '../auth/permissions.ts'
+import { activityOf, type ActivityEvent } from '../system/activity.ts'
 import { audit } from '../system/audit.ts'
 import {
   addInquiryNote,
@@ -23,24 +25,17 @@ import {
 
 /**
  * What an administrator can do with the contact messages. Every function checks the permission itself, so no
- * route (HTML or JSON) can forget to: a missing session is a 401, the wrong role a 403.
+ * route can forget to: a missing session is a 401, the wrong role a 403.
  */
 
-export const PAGE_SIZE = 25
-
-export function parseListQuery(query: URLSearchParams): ListFilters & { archived: 'exclude' | 'only' | 'all' } {
-  const page = Math.max(1, Math.min(10_000, Number.parseInt(query.get('page') ?? '1', 10) || 1))
+export function parseListQuery(query: URLSearchParams): ListFilters & Listing {
+  const listing = parseListing(query)
   const status = query.get('status') ?? ''
   const kind = query.get('kind') ?? ''
-  const archived = query.get('archived')
-  const q = cleanLine(query.get('q') ?? '').slice(0, 100)
   return {
-    page,
-    pageSize: PAGE_SIZE,
+    ...listing,
     status: (INQUIRY_STATUSES as readonly string[]).includes(status) ? status : undefined,
     kind: (INQUIRY_KINDS as readonly string[]).includes(kind) ? kind : undefined,
-    archived: archived === 'only' || archived === 'all' ? archived : 'exclude',
-    q: q || undefined,
   }
 }
 
@@ -50,11 +45,23 @@ export function listForAdmin(app: AppContext, session: SessionInfo | null, query
   return { filters, ...listInquiries(app.db, filters) }
 }
 
-export function detailForAdmin(app: AppContext, session: SessionInfo | null, id: string): { inquiry: InquiryRow; notes: NoteRow[] } {
+export interface LinkedQuote {
+  id: string
+  reference: string
+  status: string
+  created_at: string
+}
+
+export function detailForAdmin(app: AppContext, session: SessionInfo | null, id: string): { inquiry: InquiryRow; notes: NoteRow[]; quotes: LinkedQuote[]; activity: ActivityEvent[] } {
   requirePermission(session, 'requests:read')
   const inquiry = getInquiry(app.db, id)
   if (!inquiry) throw notFound('The message')
-  return { inquiry, notes: listInquiryNotes(app.db, id) }
+  return {
+    inquiry,
+    notes: listInquiryNotes(app.db, id),
+    quotes: app.db.all<LinkedQuote>('SELECT id, reference, status, created_at FROM quote_requests WHERE inquiry_id = ? ORDER BY created_at, id', [id]),
+    activity: activityOf(app, 'inquiry', id, inquiry.created_at),
+  }
 }
 
 export function changeStatus(app: AppContext, session: SessionInfo | null, id: string, input: { status: unknown; notify?: boolean; note?: unknown }): { notified: 'queued' | 'off' | 'not_requested' } {
@@ -62,11 +69,13 @@ export function changeStatus(app: AppContext, session: SessionInfo | null, id: s
   if (typeof input.status !== 'string' || !(INQUIRY_STATUSES as readonly string[]).includes(input.status)) throw validationFailed({ status: 'invalid' })
   const note = typeof input.note === 'string' ? cleanBlock(input.note) : ''
   if (length(note) > 1000) throw validationFailed({ note: 'tooLong' })
-  if (!getInquiry(app.db, id)) throw notFound('The message')
+  const existing = getInquiry(app.db, id)
+  if (!existing) throw notFound('The message')
   updateInquiryStatus(app.db, id, input.status as InquiryStatus, iso(app.clock.now()))
-  audit(app, actor, 'inquiry.status', 'inquiry', id, { status: input.status })
+  const emailed = input.notify === true ? app.notifier.notifyCustomer('inquiry_status', id, note || null) !== null : false
+  if (existing.status !== input.status || emailed) audit(app, actor, 'inquiry.status', 'inquiry', id, { from: existing.status, to: input.status, emailed })
   if (!input.notify) return { notified: 'not_requested' }
-  return { notified: app.notifier.notifyCustomer('inquiry_status', id, note || null) ? 'queued' : 'off' }
+  return { notified: emailed ? 'queued' : 'off' }
 }
 
 export function archive(app: AppContext, session: SessionInfo | null, id: string, archived: boolean): void {
@@ -88,11 +97,12 @@ export function addNote(app: AppContext, session: SessionInfo | null, id: string
 /** Permanent deletion: a record cannot be brought back. Only an `admin`. */
 export function remove(app: AppContext, session: SessionInfo | null, id: string): void {
   const actor = requirePermission(session, 'requests:delete')
+  const reference = getInquiry(app.db, id)?.reference
   app.db.transaction(() => {
     app.db.run("DELETE FROM email_deliveries WHERE related_type = 'inquiry' AND related_id = ?", [id])
     if (!deleteInquiry(app.db, id)) throw notFound('The message')
   })
-  audit(app, actor, 'inquiry.delete', 'inquiry', id)
+  audit(app, actor, 'inquiry.delete', 'inquiry', id, { reference: reference ?? null })
 }
 
 export function overview(app: AppContext, session: SessionInfo | null) {

@@ -6,13 +6,12 @@ import type { Database } from './db/database.ts'
 import { DatabaseUnavailableError, ConstraintError, HttpError, csrfFailed, notFound, unauthorized } from './http/errors.ts'
 import { Limiters } from './http/rateLimit.ts'
 import { clientIp, parseCookies, readForm, readJson } from './http/request.ts'
-import { empty, errorReply, htmlReply, redirect, type Reply } from './http/reply.ts'
+import { empty, errorReply, type Reply } from './http/reply.ts'
 import { Router, type RouteDef } from './http/router.ts'
 import { corsHeaders, PREFLIGHT_HEADERS, securityHeaders } from './http/security.ts'
 import { hmacHex } from './lib/crypto.ts'
 import { redactText, type Logger } from './lib/logger.ts'
 import type { Clock } from './lib/time.ts'
-import { errorPage } from './modules/admin/pages.ts'
 import { adminRoutes } from './modules/admin/routes.ts'
 import { originIsThisHost, resolveSession, sameOrigin, sessionCookieName, verifySessionCsrf } from './modules/auth/sessions.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
@@ -21,7 +20,7 @@ import { Notifier } from './modules/notifications/notifier.ts'
 import type { Mailer } from './modules/notifications/mailer.ts'
 import { quoteRoutes } from './modules/quotes/routes.ts'
 import { healthRoutes } from './modules/system/health.ts'
-import { serveStatic } from './modules/system/static.ts'
+import { serveAdminApp, serveStatic } from './modules/system/static.ts'
 
 /**
  * The composition root: it builds the context (database, clock, limiters, notifier), registers every module's
@@ -89,10 +88,7 @@ export function createApp(deps: AppDeps): App {
     if (def.auth) {
       app.limiters.check('admin', ctx.ip)
       ctx.session = resolveSession(app, ctx.cookies[sessionCookieName(app)])
-      if (!ctx.session) {
-        if (ctx.path.startsWith('/admin')) return redirect('/admin/login', { 'Cache-Control': 'no-store' })
-        throw unauthorized()
-      }
+      if (!ctx.session) throw unauthorized()
       if (!SAFE.has(ctx.method)) {
         const header = ctx.req.headers['x-csrf-token']
         const token = typeof header === 'string' ? header : String((await ctx.form().catch(() => new URLSearchParams())).get('_csrf') ?? '')
@@ -119,7 +115,7 @@ export function createApp(deps: AppDeps): App {
     try {
       if ((req.url ?? '').length > 2048) throw new HttpError(414, 'not_found', 'The address is too long.')
       const url = new URL(req.url ?? '/', 'http://localhost')
-      area = url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/admin') ? 'admin' : url.pathname.startsWith('/api/') ? 'api' : 'static'
+      area = url.pathname === '/admin' || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/api/admin/') ? 'admin' : url.pathname.startsWith('/api/') ? 'api' : 'static'
       limiters.check('global', ip)
 
       let formCache: Promise<URLSearchParams> | null = null
@@ -165,9 +161,10 @@ export function createApp(deps: AppDeps): App {
           reply = served
         } else if (area === 'static' && config.staticDir) {
           throw new HttpError(405, 'method_not_allowed', 'This method is not allowed here.', { headers: { Allow: 'GET, HEAD' } })
-        } else if (area === 'admin' && !url.pathname.startsWith('/api/')) {
-          // An address in the administration that does not exist is a page, like the rest of it, not the API's envelope.
-          reply = htmlReply(errorPage(null, 404, 'There is no such page.'), 404)
+        } else if (area === 'admin' && !url.pathname.startsWith('/api/') && (method === 'GET' || method === 'HEAD')) {
+          // `/admin` and everything below it is the administration application; it routes its own addresses in the browser.
+          label = 'admin-app'
+          reply = serveAdminApp(config.staticDir)
         } else {
           throw notFound('The address')
         }
