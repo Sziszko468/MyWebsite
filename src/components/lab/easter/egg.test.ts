@@ -1,6 +1,9 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { buildCsp } from '../../../security/headers'
 import { LANGUAGES } from '../../../i18n/config'
-import { advanceSequence, ignoresKey, leaveFor, NFSU2, SECRET_KEYS, TRANSITION_MS, TRANSITION_REDUCED_MS } from './eggConfig'
+import { advanceSequence, ignoresKey, NFSU2, SECRET_KEYS, TRANSITION_MS, TRANSITION_REDUCED_MS } from './eggConfig'
 import { eggText } from './eggText'
 
 describe('the hidden racing experience: where it goes', () => {
@@ -10,38 +13,27 @@ describe('the hidden racing experience: where it goes', () => {
     expect(new URL(NFSU2.url).host).toBe(NFSU2.host)
   })
 
-  it('plays a transition first, a short one under reduced motion', () => {
+  it('plays a transition first (the loading state), a short one under reduced motion', () => {
     expect(TRANSITION_MS).toBeGreaterThan(800)
     expect(TRANSITION_MS).toBeLessThan(2500)
     expect(TRANSITION_REDUCED_MS).toBeLessThan(TRANSITION_MS)
   })
 
-  it('leaves through a clicked link that sends no referrer and gives the other page no handle on this one', () => {
-    const made: Array<{ href: string; rel: string; clicked: boolean; removed: boolean; hidden: boolean }> = []
-    const doc = {
-      createElement: () => {
-        const link = {
-          href: '',
-          rel: '',
-          style: { display: '' },
-          clicked: false,
-          removed: false,
-          click() {
-            link.clicked = true
-          },
-          remove() {
-            link.removed = true
-          },
-        }
-        made.push(link as never)
-        return link
-      },
-      body: { appendChild: () => undefined },
-    }
-    leaveFor(NFSU2.url, doc as never)
-    expect(made).toHaveLength(1)
-    expect(made[0]).toMatchObject({ href: 'https://nfsu2.xyz/', rel: 'noreferrer noopener', clicked: true, removed: true })
-    expect(made[0].rel).not.toMatch(/_blank/)
+  it('shows a screen with choices after the transition: it opens the site in a NEW tab and never frames or redirects', () => {
+    const source = readFileSync(join(import.meta.dirname, 'RacingEgg.tsx'), 'utf8')
+    // OPEN NFSU2 is a link to a new tab, with no referrer and no handle on this page.
+    expect(source).toMatch(/target="_blank"/)
+    expect(source).toMatch(/rel="noopener noreferrer"/)
+    // The site forbids framing and this one does not try: no frame, no script into it, no automatic navigation away.
+    expect(source).not.toMatch(/iframe/i)
+    expect(source).not.toMatch(/location\.(href|assign|replace)|window\.open|\.click\(\)/)
+    // A way back and Escape.
+    expect(source).toMatch(/onClick=\{onClose\}/)
+    expect(source).toMatch(/'Escape'/)
+  })
+
+  it('has no frame to bypass: this site refuses frames itself, and the destination answers with a header that forbids them', () => {
+    expect(buildCsp({ scriptHashes: [], styleHashes: [], connectOrigins: [] })).toMatch(/frame-src 'none'/)
   })
 })
 
@@ -76,5 +68,7 @@ describe('the hidden racing experience: its words', () => {
       for (const lang of LANGUAGES) expect(text[lang].trim(), `${key}.${lang}`).not.toBe('')
     }
     for (const lang of LANGUAGES) expect(eggText.leaving[lang]).toMatch(/nfsu2\.xyz/)
+    for (const lang of LANGUAGES) expect(eggText.readyNote[lang]).toMatch(/nfsu2\.xyz/)
+    expect(eggText.open.en).toBe('OPEN NFSU2')
   })
 })

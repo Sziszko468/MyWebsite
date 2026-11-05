@@ -1,3 +1,4 @@
+import { overlayServiceAreas } from '../catalogOverlay'
 import type { ProjectId } from '../projects'
 import { tri, type Trilingual } from '../trilingual'
 import type { ServiceId } from './ids'
@@ -24,7 +25,7 @@ export interface ServiceArea {
   example: { project: ProjectId; note: Trilingual } | null
 }
 
-export const serviceAreas: readonly ServiceArea[] = [
+export const baseServiceAreas: readonly ServiceArea[] = [
   {
     id: 'website',
     name: tri('Weboldalfejlesztés', 'Website Development', 'Website-ontwikkeling'),
@@ -135,3 +136,6 @@ export const serviceAreas: readonly ServiceArea[] = [
     },
   },
 ]
+
+/** The areas as the website shows them: the source's, with what the owner edited in the administration laid over it (content/catalogOverlay.ts). */
+export const serviceAreas: readonly ServiceArea[] = overlayServiceAreas(baseServiceAreas)

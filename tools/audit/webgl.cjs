@@ -46,7 +46,9 @@ const NOISE = /KHR_parallel|X4122|glGetProgramiv|Failed to load resource|GPU sta
     const fresh = await newPage(browser, { seen: false })
     await fresh.page.goto(srv.url + '/hu/', { waitUntil: 'load' }); await fresh.page.waitForTimeout(1500)
     check(await fresh.page.evaluate(() => !!document.querySelector('dialog[open]')), 'the intro opens without WebGL')
-    await fresh.page.keyboard.press('Tab'); await fresh.page.keyboard.press('Enter'); await fresh.page.waitForTimeout(1800)
+    // The dialog opens with the focus already on its entry button, so Enter alone enters (a Tab first would move on to the "do not show again" box).
+    check(await fresh.page.evaluate(() => document.activeElement?.tagName === 'BUTTON'), 'the focus is on the entry button when the intro opens')
+    await fresh.page.keyboard.press('Enter'); await fresh.page.waitForTimeout(1800)
     check(await fresh.page.evaluate(() => !document.querySelector('dialog[open]')), '...and the entry button still lets the visitor in')
     await browser.close()
   }

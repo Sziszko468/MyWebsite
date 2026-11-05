@@ -78,7 +78,12 @@ try {
   const { catalogProblems } = await vite.ssrLoadModule('/src/content/catalogOverlay.ts')
   const { basePackages } = await vite.ssrLoadModule('/src/content/packages.ts')
   const { baseAddons } = await vite.ssrLoadModule('/src/content/services/addons.ts')
-  problems = catalogProblems(catalog, { packages: basePackages.map((pack) => pack.id), extras: baseAddons.map((addon) => addon.id) })
+  const { baseServiceAreas } = await vite.ssrLoadModule('/src/content/services/areas.ts')
+  problems = catalogProblems(catalog, {
+    packages: basePackages.map((pack) => pack.id),
+    extras: baseAddons.map((addon) => addon.id),
+    services: baseServiceAreas.map((area) => area.id),
+  })
 } finally {
   await vite.close()
 }
@@ -103,7 +108,7 @@ if (args.has('--check')) {
 const temporary = `${target}.tmp`
 await writeFile(temporary, `${JSON.stringify(document, null, 2)}\n`)
 await rename(temporary, target)
-console.log(`catalog:pull: ${catalog.packages.length} packages, ${catalog.extras.length} add-ons, ${catalog.faq.length} FAQ entries (version ${catalog.version}) from ${base.origin} -> src/content/catalog.generated.json`)
+console.log(`catalog:pull: ${catalog.services.length} services, ${catalog.packages.length} packages, ${catalog.extras.length} add-ons, ${catalog.faq.length} FAQ entries (version ${catalog.version}) from ${base.origin} -> src/content/catalog.generated.json`)
 if (problems.length > 0) {
   console.warn(`\ncatalog:pull: ${problems.length} thing(s) in the backend will not reach the website:`)
   for (const problem of problems) console.warn(`  - ${problem}`)

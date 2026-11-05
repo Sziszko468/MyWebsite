@@ -1,8 +1,14 @@
 /**
  * The hidden racing experience: where it goes and how it is found. The destination is somebody else's
- * website: after a short transition the visitor is taken there, in the same tab, and this site never reads,
- * scripts or frames it. (nfsu2.xyz forbids being framed anyway: on 2026-11-01 it answered
- * `x-frame-options: DENY` and a `content-security-policy` with `frame-ancestors 'none'`.)
+ * website, and this site never reads, scripts or frames it. After a short transition (the loading state) the
+ * visitor gets a screen with OPEN NFSU2, which opens the site in a NEW tab, and a way back to the Lab.
+ *
+ * Why there is no frame: nfsu2.xyz forbids being framed. On 2026-11-01 and again on 2026-11-05 it answered
+ * `x-frame-options: DENY` and a `content-security-policy` with `frame-ancestors 'none'` (and
+ * `cross-origin-embedder-policy: require-corp`, `cross-origin-resource-policy: same-origin`). A frame could only
+ * ever show the browser's "refused to connect" page, and this site's own policy (`frame-src 'none'`,
+ * src/security/headers.ts) would refuse it first. The protections are respected, not worked around, and the
+ * policy is not loosened for a frame that cannot work.
  */
 export const NFSU2 = {
   url: 'https://nfsu2.xyz/',
@@ -27,20 +33,6 @@ export function ignoresKey(event: Pick<KeyboardEvent, 'ctrlKey' | 'metaKey' | 'a
   return ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable === true
 }
 
-/** How long the transition plays before the visitor is taken away, in milliseconds (a brief fade under reduced motion). */
+/** How long the transition plays before the choices appear, in milliseconds (a brief fade under reduced motion). */
 export const TRANSITION_MS = 1250
 export const TRANSITION_REDUCED_MS = 300
-
-/**
- * Takes the whole tab to the destination. It goes through a link that is clicked, with `noreferrer`, so the
- * destination is not told which page the visitor came from; Back brings them back here.
- */
-export function leaveFor(url: string, doc: Pick<Document, 'createElement' | 'body'> = document): void {
-  const link = doc.createElement('a')
-  link.href = url
-  link.rel = 'noreferrer noopener'
-  link.style.display = 'none'
-  doc.body.appendChild(link)
-  link.click()
-  link.remove()
-}

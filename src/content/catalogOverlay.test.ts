@@ -1,15 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { buildCatalogSeed } from './catalogExport'
-import { catalogProblems, overlayAddons, overlayFaq, overlayPackages } from './catalogOverlay'
+import { catalogProblems, overlayAddons, overlayFaq, overlayPackages, overlayServiceAreas, overlayServiceDetails } from './catalogOverlay'
 import { basePackages } from './packages'
 import { baseAddons } from './services/addons'
+import { baseServiceAreas } from './services/areas'
+import { baseServiceDetails } from './services/detail'
 import { baseFaq } from './services/faq'
 
 /** The catalogue the way the backend serves it (`/api/shop/catalog`): the seed has the same shape for packages and add-ons; the FAQ is spelled question/answer. */
 function served() {
-  const seed = buildCatalogSeed() as unknown as { packages: Record<string, any>[]; extras: Record<string, any>[] }
+  const seed = buildCatalogSeed() as unknown as { services: Record<string, any>[]; packages: Record<string, any>[]; extras: Record<string, any>[] }
   return {
     version: 'abc',
+    services: structuredClone(seed.services),
     packages: structuredClone(seed.packages),
     extras: structuredClone(seed.extras),
     faq: baseFaq.map((item, position) => ({
@@ -160,8 +163,77 @@ describe('the catalogue overlay', () => {
   })
 })
 
+describe('the services: what the owner edits in the administration reaches their block and their page', () => {
+  const website = (catalog: ReturnType<typeof served>) => catalog.services.find((service) => service.slug === 'website')!
+  const areaOf = (catalog: unknown) => overlayServiceAreas(baseServiceAreas, catalog).find((area) => area.id === 'website')!
+  const detailOf = (catalog: unknown) => overlayServiceDetails(baseServiceDetails, catalog).find((detail) => detail.id === 'website')!
+  const staticArea = baseServiceAreas.find((area) => area.id === 'website')!
+  const staticDetail = baseServiceDetails.find((detail) => detail.id === 'website')!
+
+  it('changes nothing when the backend catalogue is the website own, or when there is none', () => {
+    expect(overlayServiceAreas(baseServiceAreas, served())).toEqual(baseServiceAreas)
+    expect(overlayServiceDetails(baseServiceDetails, served())).toEqual(baseServiceDetails)
+    for (const nothing of [null, undefined, 42, [], {}, { services: 'no' }]) {
+      expect(overlayServiceAreas(baseServiceAreas, nothing)).toBe(baseServiceAreas)
+      expect(overlayServiceDetails(baseServiceDetails, nothing)).toBe(baseServiceDetails)
+    }
+  })
+
+  it('takes the name, summary and features of the block, and the tagline and overview of the page', () => {
+    const catalog = served()
+    for (const lang of ['hu', 'en', 'nl'] as const) {
+      Object.assign(website(catalog).translations[lang], {
+        title: `Edited title ${lang}`,
+        summary: `Edited summary ${lang}`,
+        tagline: `Edited tagline ${lang}`,
+        overview: `Edited overview ${lang}`,
+        features: [`First ${lang}`, `Second ${lang}`],
+      })
+    }
+    expect(areaOf(catalog).name).toEqual({ hu: 'Edited title hu', en: 'Edited title en', nl: 'Edited title nl' })
+    expect(areaOf(catalog).summary.en).toBe('Edited summary en')
+    expect(areaOf(catalog).features).toEqual([
+      { hu: 'First hu', en: 'First en', nl: 'First nl' },
+      { hu: 'Second hu', en: 'Second en', nl: 'Second nl' },
+    ])
+    expect(detailOf(catalog).tagline.nl).toBe('Edited tagline nl')
+    expect(detailOf(catalog).overview.hu).toBe('Edited overview hu')
+    // What the website writes itself, and what is not text, stays.
+    expect(areaOf(catalog).example).toEqual(staticArea.example)
+    expect(detailOf(catalog).benefits).toEqual(staticDetail.benefits)
+    expect(detailOf(catalog).packages).toEqual(staticDetail.packages)
+    // The other services are untouched.
+    expect(overlayServiceAreas(baseServiceAreas, catalog).find((area) => area.id === 'webapp')).toEqual(baseServiceAreas.find((area) => area.id === 'webapp'))
+  })
+
+  it('takes a text only when all three languages have it, and an emptied feature list leaves the source list', () => {
+    const catalog = served()
+    website(catalog).translations.nl.title = ''
+    website(catalog).translations.en.summary = '   '
+    for (const lang of ['hu', 'en', 'nl'] as const) website(catalog).translations[lang].features = []
+    expect(areaOf(catalog).name).toEqual(staticArea.name)
+    expect(areaOf(catalog).summary).toEqual(staticArea.summary)
+    expect(areaOf(catalog).features).toEqual(staticArea.features)
+  })
+
+  it('never lets the static content be changed, and ignores a service the website has no page for', () => {
+    const catalog = served()
+    const before = structuredClone(baseServiceAreas)
+    catalog.services.push({ slug: 'consulting', translations: { hu: { title: 'x' }, en: { title: 'x' }, nl: { title: 'x' } } })
+    website(catalog).translations.en.title = 'Changed'
+    const result = overlayServiceAreas(baseServiceAreas, catalog)
+    expect(result.map((area) => area.id)).toEqual(baseServiceAreas.map((area) => area.id))
+    expect(baseServiceAreas).toEqual(before)
+    expect(staticArea.name.en).not.toBe('Changed')
+  })
+})
+
 describe('the report of what will not reach the website', () => {
-  const known = { packages: basePackages.map((pack) => pack.id), extras: baseAddons.map((addon) => addon.id) }
+  const known = {
+    packages: basePackages.map((pack) => pack.id),
+    extras: baseAddons.map((addon) => addon.id),
+    services: baseServiceAreas.map((area) => area.id),
+  }
 
   it('is empty for a catalogue that is the website own', () => {
     expect(catalogProblems(served(), known)).toEqual([])
@@ -179,6 +251,17 @@ describe('the report of what will not reach the website', () => {
     expect(problems).toContain('The package "launch" has a price or VAT mode the website cannot use')
     expect(problems).toContain('The package "launch" has no "tagline" in all three languages')
     expect(problems).toContain('The package "launch" has a "includes" list that is missing or does not line up')
+    // The services are held to the same rules.
+    const withBadService = served()
+    withBadService.services.find((service) => service.slug === 'ui')!.translations.en.overview = ''
+    withBadService.services.find((service) => service.slug === 'ui')!.translations.nl.features = ['one']
+    withBadService.services = withBadService.services.filter((service) => service.slug !== 'integrations')
+    withBadService.services.push({ slug: 'consulting', translations: {} })
+    const serviceProblems = catalogProblems(withBadService, known).join('\n')
+    expect(serviceProblems).toContain('The service "ui" has no "overview" in all three languages')
+    expect(serviceProblems).toContain('The service "ui" has a "features" list that is missing or does not line up')
+    expect(serviceProblems).toContain('The service "integrations" is not in the backend')
+    expect(serviceProblems).toContain('The service "consulting" is in the backend but not in the website')
     expect(problems).toContain('The package "care" is not in the backend')
     expect(problems).toContain('The package "platinum" is in the backend but not in the website')
     expect(problems).toContain('The catalogue has no FAQ entries')

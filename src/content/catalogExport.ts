@@ -1,8 +1,8 @@
 import { LANGUAGES, type Language } from '../i18n/config'
 import { basePackages as packages } from './packages'
 import { baseAddons as addons } from './services/addons'
-import { serviceAreas } from './services/areas'
-import { serviceDetails } from './services/detail'
+import { baseServiceAreas as serviceAreas } from './services/areas'
+import { baseServiceDetails as serviceDetails } from './services/detail'
 import { baseFaq as faq } from './services/faq'
 import type { Trilingual } from './trilingual'
 

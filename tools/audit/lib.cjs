@@ -32,7 +32,8 @@ async function newPage(browser, { width = 1440, height = 900, mobile = false, se
 }
 
 async function axeRun(page, tags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']) {
-  if (!(await page.evaluate(() => !!window.axe))) await page.addScriptTag({ path: axePath() })
+  // Evaluated through the protocol, not added as a <script>: the page keeps its real Content-Security-Policy, which refuses an inline script.
+  if (!(await page.evaluate(() => !!window.axe))) await page.evaluate(fs.readFileSync(axePath(), 'utf8'))
   return page.evaluate(async (tags) => {
     const r = await window.axe.run(document, { runOnly: { type: 'tag', values: tags }, resultTypes: ['violations'] })
     return r.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.slice(0, 4).map((n) => ({ target: n.target.join(' '), html: n.html.slice(0, 140), summary: n.failureSummary?.split('\n').slice(1, 3).join(' ') })), count: v.nodes.length }))

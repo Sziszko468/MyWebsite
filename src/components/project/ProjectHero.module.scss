@@ -146,6 +146,7 @@
 }
 
 .shot {
+  position: relative;
   display: block;
   width: 100%;
   padding: 0;
@@ -157,6 +158,26 @@
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  /*
+   * The frame clips everything outside it (overflow: hidden, for the rounded corners), so the usual ring around a
+   * control would be cut away and a keyboard visitor could not see where the focus is. The ring is drawn INSIDE the
+   * picture instead, in two tones (carbon, then paper) so it reads on a light screenshot and on a dark one.
+   */
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus-visible::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow:
+      inset 0 0 0 3px var(--brand-black),
+      inset 0 0 0 6px var(--brand-paper);
+    pointer-events: none;
   }
 }
 

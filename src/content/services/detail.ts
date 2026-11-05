@@ -1,3 +1,4 @@
+import { overlayServiceDetails } from '../catalogOverlay'
 import type { ProjectId } from '../projects'
 import { getPackage, type PackageId } from '../packages'
 import { tri, type Trilingual } from '../trilingual'
@@ -50,7 +51,7 @@ export interface ServiceDetail {
   faq: { shared: readonly string[]; own: readonly FaqItem[] }
 }
 
-export const serviceDetails: readonly ServiceDetail[] = [
+export const baseServiceDetails: readonly ServiceDetail[] = [
   {
     id: 'website',
     tagline: tri(
@@ -463,6 +464,9 @@ export const serviceDetails: readonly ServiceDetail[] = [
     },
   },
 ]
+
+/** The details as the website shows them: the source's, with the tagline and overview the owner edited laid over them (content/catalogOverlay.ts). */
+export const serviceDetails: readonly ServiceDetail[] = overlayServiceDetails(baseServiceDetails)
 
 export function getServiceDetail(id: ServiceId): ServiceDetail {
   const found = serviceDetails.find((detail) => detail.id === id)

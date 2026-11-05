@@ -37,6 +37,20 @@
   }
 }
 
+/*
+ * On a phone a notice (the calm view's, the still view's, a failure's) stands just above the closed panel, which is
+ * exactly where the hint stands: the hint's last line was hidden under it. With a notice up, the hint rises above it
+ * (room for the longest notice in the three languages, five lines at 320 px). A wide screen puts the notice at the top
+ * left, away from the hint. Measured by tools/audit/audit-lab-overlap.cjs.
+ */
+.frame:has(.notice) .stageArea {
+  --hint-bottom: 18rem;
+
+  @include m.up('md') {
+    --hint-bottom: 6rem;
+  }
+}
+
 .frame:has([data-lab-panel][data-open='true']) .stageArea {
   --panel-space: calc(21rem + var(--gutter) * 2);
 

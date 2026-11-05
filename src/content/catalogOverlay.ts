@@ -1,4 +1,6 @@
 import type { Addon } from './services/addons'
+import type { ServiceArea } from './services/areas'
+import type { ServiceDetail } from './services/detail'
 import type { FaqItem } from './services/faq'
 import type { ServicePackage } from './packages'
 import type { ServicePrice, VatMode } from './pricing'
@@ -16,6 +18,10 @@ import { LANGUAGES } from '../i18n/config'
  *     texts in all three languages, `featured` and `quoteRequired`. A published price is taken only if it is
  *     complete (an amount in whole units, EUR or HUF, a VAT mode that says something): the same rule the
  *     content tests and the database enforce. A half-valid entry is ignored as a whole, never half-applied.
+ *   - the four services the website already knows (matched by slug): the name, summary and feature list of
+ *     their block on the services page (`title`, `summary`, `features`) and the tagline and overview of their
+ *     own page (`tagline`, `overview`). The rest of a service page (benefits, typical projects, the process note,
+ *     its questions) is the website's own writing and stays in the source.
  *   - the FAQ: the list is replaced (entries added, edited, reordered, removed), because nothing in the site's
  *     code depends on a particular entry.
  *   - never: which packages, add-ons and services exist, which need a package suits, which add-ons a package
@@ -115,6 +121,37 @@ export function overlayPackages(base: readonly ServicePackage[], catalog: unknow
   })
 }
 
+/** A service's block on the services page: its name, summary and features. */
+export function overlayServiceAreas(base: readonly ServiceArea[], catalog: unknown = generatedCatalog): readonly ServiceArea[] {
+  const entries = entriesOf(catalog, 'services')
+  if (!entries) return base
+  return base.map((area) => {
+    const entry = entries.find((candidate) => candidate.slug === area.id)
+    if (!entry) return area
+    const features = trilingualList(entry.translations, 'features')
+    return {
+      ...area,
+      ...defined({
+        name: trilingual(entry.translations, 'title') ?? undefined,
+        summary: trilingual(entry.translations, 'summary') ?? undefined,
+        // An emptied list leaves the source's: a service block with no feature at all is not something the page is built for.
+        features: features && features.length > 0 ? features : undefined,
+      }),
+    }
+  })
+}
+
+/** What a service's own page says first: its one-line promise and its overview. */
+export function overlayServiceDetails(base: readonly ServiceDetail[], catalog: unknown = generatedCatalog): readonly ServiceDetail[] {
+  const entries = entriesOf(catalog, 'services')
+  if (!entries) return base
+  return base.map((detail) => {
+    const entry = entries.find((candidate) => candidate.slug === detail.id)
+    if (!entry) return detail
+    return { ...detail, ...defined({ tagline: trilingual(entry.translations, 'tagline') ?? undefined, overview: trilingual(entry.translations, 'overview') ?? undefined }) }
+  })
+}
+
 export function overlayAddons(base: readonly Addon[], catalog: unknown = generatedCatalog): readonly Addon[] {
   const entries = entriesOf(catalog, 'extras')
   if (!entries) return base
@@ -145,7 +182,7 @@ const questionAnswer = (translations: Record<string, unknown>, field: 'question'
  * What the overlay would leave out of a pulled catalogue, as sentences for whoever runs `catalog:pull`. An
  * empty list means every edit in the administration will reach the website.
  */
-export function catalogProblems(catalog: unknown, known: { packages: readonly string[]; extras: readonly string[] }): string[] {
+export function catalogProblems(catalog: unknown, known: { packages: readonly string[]; extras: readonly string[]; services?: readonly string[] }): string[] {
   if (!isRecord(catalog)) return ['The catalogue is not a JSON object.']
   const problems: string[] = []
   const kinds = [
@@ -170,6 +207,30 @@ export function catalogProblems(catalog: unknown, known: { packages: readonly st
     }
     for (const id of kind.ids) {
       if (!entries.some((entry) => entry.code === id)) problems.push(`The ${kind.label} "${id}" is not in the backend's active catalogue (disabled or deleted there): the website keeps showing it until it is removed from its source.`)
+    }
+  }
+  if (known.services) {
+    const entries = entriesOf(catalog, 'services')
+    if (!entries) problems.push('The catalogue has no "services" list.')
+    else {
+      for (const entry of entries) {
+        const slug = typeof entry.slug === 'string' ? entry.slug : '(no slug)'
+        if (!known.services.includes(slug)) {
+          problems.push(`The service "${slug}" is in the backend but not in the website's source: the API serves it, the website has no page for it.`)
+          continue
+        }
+        for (const field of ['title', 'summary', 'tagline', 'overview']) {
+          if (trilingual(entry.translations, field) === null) problems.push(`The service "${slug}" has no "${field}" in all three languages: it stays as in the source.`)
+        }
+        if (trilingualList(entry.translations, 'features') === null) {
+          problems.push(`The service "${slug}" has a "features" list that is missing or does not line up across the languages: it stays as in the source.`)
+        }
+      }
+      for (const slug of known.services) {
+        if (!entries.some((entry) => entry.slug === slug)) {
+          problems.push(`The service "${slug}" is not in the backend's active catalogue (disabled or deleted there): the website keeps showing it until it is removed from its source.`)
+        }
+      }
     }
   }
   const faq = entriesOf(catalog, 'faq')

@@ -401,7 +401,7 @@ export const hu: AdminText = {
     priceKinds: { quote: 'Ajánlat alapján', tbd: 'Még nincs eldöntve', from: 'Közzétett kiinduló ár' },
     emptyTitle: 'Még nincs itt semmi',
     emptyBody: 'Hozd létre az elsőt a fenti gombbal.',
-    note: 'A weboldal azokat a csomagokat, kiegészítőket és szolgáltatásokat mutatja, amelyek már megvannak neki; az itt módosított árak és szövegek a következő buildnél jutnak el hozzá (Beállítások → Rendszer). Egy elem letiltása azonnal leállítja a rá vonatkozó kéréseket, de a weboldal addig kínálja, amíg a forrásából is ki nem veszed.',
+    note: 'A weboldal azokat a csomagokat, kiegészítőket és szolgáltatásokat mutatja, amelyek már megvannak neki; az itt módosított árak és szövegek (a szolgáltatások neve, összefoglalója és áttekintése is) a következő buildnél jutnak el hozzá (Beállítások → Rendszer). Egy elem letiltása azonnal leállítja a rá vonatkozó kéréseket, de a weboldal addig kínálja, amíg a forrásából is ki nem veszed.',
     toggled: '{name} állapota: {state}.',
     reordered: 'A sorrend mentve.',
     deleteTitle: 'Törlöd: „{name}”?',

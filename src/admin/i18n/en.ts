@@ -403,7 +403,7 @@ export const en = {
     priceKinds: { quote: 'On request', tbd: 'To be decided', from: 'From a published price' },
     emptyTitle: 'Nothing here yet',
     emptyBody: 'Create the first one with the button above.',
-    note: 'The website shows the packages, add-ons and services it already has; prices and texts you change here reach it at its next build (Settings → System). Disabling one stops requests for it at once, but the website keeps offering it until it is removed from its source.',
+    note: 'The website shows the packages, add-ons and services it already has; prices and texts you change here (including the names, summaries and overviews of the services) reach it at its next build (Settings → System). Disabling one stops requests for it at once, but the website keeps offering it until it is removed from its source.',
     toggled: '{name} is now {state}.',
     reordered: 'The order was saved.',
     deleteTitle: 'Delete “{name}”?',
