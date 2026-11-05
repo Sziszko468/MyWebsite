@@ -1,6 +1,6 @@
 import { del, get, post, put, patch, request, queryString, type Envelope } from './client'
 import type {
-  ContentRecord, DashboardData, ExtraRecord, Inquiry, InquiryDetail, ListQuery, LoginData, NotificationsData, Orderable, Page, PackageRecord, Preferences, Profile, Quote, QuoteDetail,
+  ContentRecord, DashboardData, ExtraRecord, Inquiry, InquiryDetail, ListQuery, LoginData, NotificationPreferences, NotificationsData, EmailCheck, Orderable, Page, PackageRecord, Preferences, Profile, Quote, QuoteDetail,
   ServiceRecord, SessionData, SessionView, SystemData, TranslationGroup, TranslationItem, TranslationOverview,
 } from './types'
 
@@ -78,9 +78,11 @@ export const translations = {
 }
 
 export const notifications = {
-  overview: (signal?: AbortSignal) => get<NotificationsData>(`${base}/notifications`, { signal }),
-  savePreferences: (preferences: { newInquiry: boolean; newQuote: boolean }) => put<{ newInquiry: boolean; newQuote: boolean }>(`${base}/notifications/preferences`, preferences),
+  overview: (query: { status?: string; page?: number } = {}, signal?: AbortSignal) => get<NotificationsData>(`${base}/notifications`, { query, signal }),
+  savePreferences: (preferences: NotificationPreferences) => put<NotificationPreferences>(`${base}/notifications/preferences`, preferences),
   retry: (id: string) => post<{ queued: boolean }>(`${base}/notifications/deliveries/${encodeURIComponent(id)}/retry`, {}),
+  runChecks: () => post<{ checkedAt: string; checks: EmailCheck[] }>(`${base}/notifications/checks`, {}),
+  sendTest: () => post<{ id: string }>(`${base}/notifications/test`, {}),
 }
 
 export const settings = {

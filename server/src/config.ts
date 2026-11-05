@@ -24,10 +24,31 @@ export interface SmtpConfig {
   timeoutMs: number
 }
 
+/** Read-only access to Cloudflare, used only by the administration's "is routing set up?" check. Never sends or changes anything. */
+export interface CloudflareConfig {
+  apiToken: string
+  zoneId: string
+  accountId: string
+}
+
 export interface EmailConfig {
-  provider: 'none' | 'smtp' | 'file'
-  /** `Name <address>` or an address; the sender of every message. */
+  provider: 'none' | 'smtp' | 'file' | 'resend'
+  /**
+   * `EMAIL_ENABLED=false` pauses sending without removing the configuration (the way to prepare a provider and its DNS before
+   * going live): nothing is queued, the administration says so.
+   */
+  enabled: boolean
+  /** `Name <address>` or an address; the sender of every message. Must be on a domain the provider has verified. */
   from: string | null
+  /** The public contact address (for example hello@domain.hu): what a customer's reply goes to. Never the owner's private inbox (`notifyTo`). */
+  replyTo: string | null
+  /** The transactional provider's API key (provider `resend`). A secret: never logged, never in an answer, never in the browser. */
+  apiKey: string | null
+  /** The provider's API origin; https outside development. */
+  apiUrl: string
+  /** The secret that signs the provider's webhooks (`whsec_…`). Without it the webhook address does not exist and nothing is ever "delivered". */
+  webhookSecret: string | null
+  cloudflare: CloudflareConfig | null
   /** Where the owner's notifications go. Never defaulted: no recipient, no owner notification. */
   notifyTo: string | null
   /** The language of the owner's notifications. */
@@ -178,8 +199,8 @@ export function loadConfig(env: Env = process.env): Config {
 
   // ---- e-mail ----
   const providerRaw = text('EMAIL_PROVIDER') ?? 'none'
-  if (!['none', 'smtp', 'file'].includes(providerRaw)) bad('EMAIL_PROVIDER', `must be none, smtp or file (got "${providerRaw}")`)
-  const provider = (['none', 'smtp', 'file'].includes(providerRaw) ? providerRaw : 'none') as EmailConfig['provider']
+  if (!['none', 'smtp', 'file', 'resend'].includes(providerRaw)) bad('EMAIL_PROVIDER', `must be none, resend, smtp or file (got "${providerRaw}")`)
+  const provider = (['none', 'smtp', 'file', 'resend'].includes(providerRaw) ? providerRaw : 'none') as EmailConfig['provider']
   if (provider === 'file' && production) bad('EMAIL_PROVIDER', 'file is for development: it writes messages to disk instead of sending them')
 
   const from = text('EMAIL_FROM')
@@ -215,6 +236,41 @@ export function loadConfig(env: Env = process.env): Config {
     }
   }
   const fileDirectory = provider === 'file' ? (text('EMAIL_FILE_DIR') ?? './data/mail') : null
+
+  // The transactional provider (resend): an API key, a sender on a verified domain, an https API.
+  const apiKey = text('EMAIL_API_KEY')
+  let apiUrl = 'https://api.resend.com'
+  const apiUrlRaw = text('EMAIL_API_URL')
+  if (apiUrlRaw !== null) {
+    try {
+      const url = new URL(apiUrlRaw)
+      if (url.protocol !== 'https:' && !(isLocalOrigin(url.origin) && !production)) bad('EMAIL_API_URL', 'must be an https address (plain http only for a local test server outside production)')
+      else apiUrl = url.origin
+    } catch {
+      bad('EMAIL_API_URL', 'is not a valid URL')
+    }
+  }
+  if (provider === 'resend') {
+    if (!from) bad('EMAIL_FROM', 'required when EMAIL_PROVIDER is resend (an address on the domain you verified with the provider)')
+    if (!apiKey) bad('EMAIL_API_KEY', 'required when EMAIL_PROVIDER is resend')
+    else if (apiKey.length < 10 || /\s/.test(apiKey)) bad('EMAIL_API_KEY', 'does not look like an API key')
+  }
+  const webhookSecret = text('EMAIL_WEBHOOK_SECRET')
+  // The provider signs webhooks with a secret of the form whsec_<base64>; anything else would never verify.
+  if (webhookSecret !== null && !/^whsec_[A-Za-z0-9+/]{16,}={0,2}$/.test(webhookSecret)) bad('EMAIL_WEBHOOK_SECRET', 'must be the signing secret the provider shows for the webhook (it starts with whsec_)')
+  const replyTo = text('EMAIL_REPLY_TO')
+  if (replyTo !== null && !isSender(replyTo)) bad('EMAIL_REPLY_TO', `must be an address or Name <address> (got "${replyTo}")`)
+  const emailEnabled = flag('EMAIL_ENABLED', true)
+
+  const cloudflareToken = text('CLOUDFLARE_API_TOKEN')
+  const cloudflareZone = text('CLOUDFLARE_ZONE_ID')
+  const cloudflareAccount = text('CLOUDFLARE_ACCOUNT_ID')
+  let cloudflare: CloudflareConfig | null = null
+  if (cloudflareToken !== null || cloudflareZone !== null || cloudflareAccount !== null) {
+    if (cloudflareToken === null || cloudflareZone === null || cloudflareAccount === null) bad('CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_API_TOKEN, CLOUDFLARE_ZONE_ID and CLOUDFLARE_ACCOUNT_ID must be set together')
+    else if (!/^[a-f0-9]{32}$/i.test(cloudflareZone) || !/^[a-f0-9]{32}$/i.test(cloudflareAccount)) bad('CLOUDFLARE_ZONE_ID', 'the zone and account ids are 32 hexadecimal characters (copy them from the Cloudflare dashboard)')
+    else cloudflare = { apiToken: cloudflareToken, zoneId: cloudflareZone, accountId: cloudflareAccount }
+  }
 
   const retention = text('RETENTION_DAYS')
   const retentionDays = retention === null ? null : integer('RETENTION_DAYS', 0, 1, 3650)
@@ -260,7 +316,13 @@ export function loadConfig(env: Env = process.env): Config {
     requireConsent,
     email: {
       provider,
+      enabled: emailEnabled,
       from,
+      replyTo,
+      apiKey,
+      apiUrl,
+      webhookSecret,
+      cloudflare,
       notifyTo,
       notifyLanguage,
       brandName: text('BRAND_NAME') ?? 'Website',
@@ -292,7 +354,12 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     secureCookies: config.secureCookies,
     requireConsent: config.requireConsent,
     emailProvider: config.email.provider,
+    emailEnabled: config.email.enabled,
     emailFromSet: config.email.from !== null,
+    emailReplyToSet: config.email.replyTo !== null,
+    emailApiKey: config.email.apiKey ? 'set' : 'missing',
+    emailWebhookSecret: config.email.webhookSecret ? 'set' : 'missing',
+    cloudflareApi: config.email.cloudflare ? 'set' : 'missing',
     ownerNotifications: config.email.provider !== 'none' && config.email.notifyTo !== null,
     smtp: config.email.smtp ? { host: config.email.smtp.host, port: config.email.smtp.port, secure: config.email.smtp.secure, authenticated: config.email.smtp.user !== null } : null,
     retentionDays: config.retentionDays,

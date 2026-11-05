@@ -27,7 +27,7 @@ export function runMaintenance(app: AppContext): MaintenanceResult {
       // Only what is finished: archived, or completed (inquiries) / closed or declined (quote requests). A request still open is never deleted by age.
       result.inquiries = db.run("DELETE FROM inquiries WHERE updated_at < ? AND (archived_at IS NOT NULL OR status = 'completed')", [cutoff]).changes
       result.quoteRequests = db.run("DELETE FROM quote_requests WHERE updated_at < ? AND (archived_at IS NOT NULL OR status IN ('closed', 'declined'))", [cutoff]).changes
-      result.deliveries = db.run("DELETE FROM email_deliveries WHERE created_at < ? AND status IN ('accepted', 'failed', 'cancelled')", [cutoff]).changes
+      result.deliveries = db.run("DELETE FROM email_deliveries WHERE created_at < ? AND status IN ('accepted', 'delivered', 'bounced', 'complained', 'failed', 'cancelled')", [cutoff]).changes
     })
   }
   return result

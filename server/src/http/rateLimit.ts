@@ -59,6 +59,8 @@ export const LIMITS = {
   login: { windowMs: 15 * MINUTE, max: 10 },
   /** Everything an administrator does once signed in. */
   admin: { windowMs: MINUTE, max: 300 },
+  /** The e-mail provider's webhook: a handful of events per message, far below this, and a flood of unsigned ones is refused cheaply. */
+  webhook: { windowMs: MINUTE, max: 240 },
 } as const
 
 export type LimitName = keyof typeof LIMITS
@@ -70,7 +72,7 @@ export class Limiters {
   constructor(clock: Clock, enabled: boolean) {
     this.enabled = enabled
     const make = (name: LimitName) => new RateLimiter(clock, LIMITS[name].windowMs, LIMITS[name].max)
-    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin') }
+    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), webhook: make('webhook') }
   }
 
   /** Counts one request against a limit and throws the 429 when it is over. */

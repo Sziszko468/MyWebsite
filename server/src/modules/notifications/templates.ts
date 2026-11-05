@@ -1,5 +1,5 @@
 import type { Language } from '../../config.ts'
-import { html, joinHtml } from '../../lib/html.ts'
+import { html, joinHtml, raw } from '../../lib/html.ts'
 import type { InquiryRow } from '../inquiries/repository.ts'
 import type { ItemView, QuoteRow } from '../quotes/repository.ts'
 import type { Totals } from '../shop/pricing.ts'
@@ -11,10 +11,12 @@ import type { Totals } from '../shop/pricing.ts'
  * the rest; the colours are the site's (carbon, racing red, paper). Nothing here says a message was "delivered".
  */
 
-export type EmailKind = 'inquiry_received' | 'quote_received' | 'inquiry_status' | 'quote_status'
+export type EmailKind = 'inquiry_received' | 'quote_received' | 'inquiry_status' | 'quote_status' | 'inquiry_confirmation' | 'quote_confirmation' | 'test'
 
 export interface Rendered {
   subject: string
+  /** The line a mail program shows beside the subject in the list (hidden at the top of the HTML part). */
+  preview: string
   text: string
   html: string
 }
@@ -218,8 +220,8 @@ interface Row {
   value: string
 }
 
-function layout(options: { lang: Language; brand: string; title: string; intro: string; rows: Row[]; note?: { title: string; text: string }; footer: string }): string {
-  const { lang, brand, title, intro, rows, note, footer } = options
+function layout(options: { lang: Language; brand: string; title: string; preview: string; intro: string; rows: Row[]; note?: { title: string; text: string }; footer: string }): string {
+  const { lang, brand, title, preview, intro, rows, note, footer } = options
   const rowHtml = rows.map(
     (row) => html`<tr>
       <td style="padding:10px 16px 10px 0;vertical-align:top;color:${MUTED};font:600 12px/1.4 Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">${row.label}</td>
@@ -232,6 +234,7 @@ function layout(options: { lang: Language; brand: string; title: string; intro: 
   return html`<!doctype html>
 <html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title></head>
 <body style="margin:0;background:${PAPER}">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:${PAPER}">${preview}${raw('&#847;&zwnj;&nbsp;'.repeat(40))}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PAPER}"><tr><td align="center" style="padding:24px 12px">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border:1px solid #ddd8cc">
     <tr><td style="background:${INK};padding:20px 24px;border-bottom:4px solid ${RED}">
@@ -291,7 +294,8 @@ export function renderInquiryReceived(inquiry: InquiryRow, lang: Language, brand
     { label: w.message, value: inquiry.message },
   ]
   const parts = { brand, title: `${w.newMessage}: ${oneLine(inquiry.subject, 60)}`, intro: `${w.newMessageIntro} ${w.replyHint}`, rows, footer: w.ownerFooter }
-  return { subject: `${w.newMessage} (${inquiry.reference}): ${oneLine(inquiry.subject)}`, text: plain(parts), html: layout({ lang, ...parts }) }
+  const preview = `${oneLine(inquiry.name, 40)}: ${oneLine(inquiry.message, 100)}`
+  return { subject: `${w.newMessage} (${inquiry.reference}): ${oneLine(inquiry.subject)}`, preview, text: plain(parts), html: layout({ lang, preview, ...parts }) }
 }
 
 function itemText(item: ItemView, words: Words, packageName: (code: string) => string): string {
@@ -319,7 +323,8 @@ export function renderQuoteReceived(quote: QuoteRow, items: readonly ItemView[],
     ...(quote.reference_notes ? [{ label: w.references, value: quote.reference_notes }] : []),
   ]
   const parts = { brand, title: `${w.newQuote} ${quote.reference}`, intro: `${w.newQuoteIntro} ${w.replyHint}`, rows, footer: w.ownerFooter }
-  return { subject: `${w.newQuote} (${quote.reference}): ${oneLine(quote.name, 40)}`, text: plain(parts), html: layout({ lang, ...parts }) }
+  const preview = `${oneLine(quote.name, 40)}: ${oneLine(items.map((item) => itemText(item, w, packageName)).join('; '), 100)}`
+  return { subject: `${w.newQuote} (${quote.reference}): ${oneLine(quote.name, 40)}`, preview, text: plain(parts), html: layout({ lang, preview, ...parts }) }
 }
 
 export function renderStatusChange(kind: 'inquiry' | 'quote', row: { reference: string; name: string; status: string; language: Language }, note: string | null, lang: Language, brand: string): Rendered {
@@ -332,6 +337,123 @@ export function renderStatusChange(kind: 'inquiry' | 'quote', row: { reference: 
   ]
   const intro = `${w.hello(oneLine(row.name, 60))} ${w.statusMessage(kind, row.reference, statusLabel)}`
   const parts = { brand, title, intro, rows, note: note ? { title: w.noteTitle, text: note } : undefined, footer: w.statusFooter }
-  return { subject: title, text: plain(parts), html: layout({ lang, ...parts }) }
+  const preview = w.statusMessage(kind, row.reference, statusLabel)
+  return { subject: title, preview, text: plain(parts), html: layout({ lang, preview, ...parts }) }
+}
+
+// ---- the confirmations to the person who wrote, and the test message --------------------------------------------------
+
+/**
+ * What a visitor is told when what they sent has arrived. It says that, and nothing more: no time to expect an answer
+ * (unless the administrator wrote one in the administration), no promise of a reply, of a price, of an appointment or of
+ * taking the project. Only what the visitor themself sent is repeated (the reference, when, the subject or the chosen
+ * parts): never a price, never anything the site worked out. Sent only when an administrator switched it on.
+ */
+interface ConfirmWords {
+  inquirySubject: (reference: string) => string
+  quoteSubject: (reference: string) => string
+  inquiryTitle: string
+  quoteTitle: string
+  inquiryBody: string
+  quoteBody: string
+  noteTitle: string
+  ignore: string
+  footer: string
+  testSubject: string
+  testTitle: string
+  testBody: string
+  testFooter: string
+  provider: string
+  sentAt: string
+}
+
+const CONFIRM: Record<Language, ConfirmWords> = {
+  hu: {
+    inquirySubject: (reference) => `Megkaptuk az üzeneted (${reference})`,
+    quoteSubject: (reference) => `Megkaptuk az ajánlatkérésed (${reference})`,
+    inquiryTitle: 'Üzeneted megérkezett',
+    quoteTitle: 'Ajánlatkérésed megérkezett',
+    inquiryBody: 'Köszönjük, hogy felvetted velünk a kapcsolatot! Üzeneted sikeresen megérkezett. Hamarosan áttekintjük a megkeresésedet.',
+    quoteBody: 'Köszönjük az ajánlatkérésedet! A kérésed sikeresen megérkezett. Hamarosan áttekintjük a megkeresésedet.',
+    noteTitle: 'Tájékoztatás',
+    ignore: 'Ha nem te küldted ezt az üzenetet, nyugodtan figyelmen kívül hagyhatod ezt az e-mailt.',
+    footer: 'Ez automatikus visszaigazolás. Ha ki szeretnél egészíteni valamit, válaszolj erre az e-mailre.',
+    testSubject: 'Teszt e-mail az adminisztrációból',
+    testTitle: 'Teszt e-mail',
+    testBody: 'Ezt a próbaüzenetet az adminisztrációból indították. Ha ezt olvasod, a szolgáltató elfogadta az üzenetet; hogy meg is érkezett, azt csak a szolgáltató értesítése (webhook) tudja igazolni.',
+    testFooter: 'Nem kell válaszolnod erre az e-mailre.',
+    provider: 'Szolgáltató',
+    sentAt: 'Elküldve',
+  },
+  en: {
+    inquirySubject: (reference) => `We received your message (${reference})`,
+    quoteSubject: (reference) => `We received your quote request (${reference})`,
+    inquiryTitle: 'Your message has arrived',
+    quoteTitle: 'Your quote request has arrived',
+    inquiryBody: 'Thank you for getting in touch! Your message has been received. We will review your enquiry soon.',
+    quoteBody: 'Thank you for your quote request! It has been received. We will review your enquiry soon.',
+    noteTitle: 'Information',
+    ignore: 'If you did not send this message, you can safely ignore this e-mail.',
+    footer: 'This is an automatic confirmation. If you want to add something, reply to this e-mail.',
+    testSubject: 'Test e-mail from the administration',
+    testTitle: 'Test e-mail',
+    testBody: 'This test message was started from the administration. If you can read it, the provider accepted it; whether it was delivered can only be confirmed by the provider’s notification (webhook).',
+    testFooter: 'You do not need to reply to this e-mail.',
+    provider: 'Provider',
+    sentAt: 'Sent',
+  },
+  nl: {
+    inquirySubject: (reference) => `We hebben je bericht ontvangen (${reference})`,
+    quoteSubject: (reference) => `We hebben je offerteaanvraag ontvangen (${reference})`,
+    inquiryTitle: 'Je bericht is aangekomen',
+    quoteTitle: 'Je offerteaanvraag is aangekomen',
+    inquiryBody: 'Bedankt voor je bericht! Je bericht is goed aangekomen. We bekijken je vraag binnenkort.',
+    quoteBody: 'Bedankt voor je offerteaanvraag! Je aanvraag is goed aangekomen. We bekijken je vraag binnenkort.',
+    noteTitle: 'Informatie',
+    ignore: 'Heb je dit bericht niet zelf verstuurd, dan kun je deze e-mail gerust negeren.',
+    footer: 'Dit is een automatische bevestiging. Wil je iets toevoegen, antwoord dan op deze e-mail.',
+    testSubject: 'Test-e-mail vanuit het beheer',
+    testTitle: 'Test-e-mail',
+    testBody: 'Dit testbericht is gestart vanuit het beheer. Als je dit leest, heeft de provider het bericht geaccepteerd; of het ook is afgeleverd, kan alleen de melding van de provider (webhook) bevestigen.',
+    testFooter: 'Je hoeft niet op deze e-mail te antwoorden.',
+    provider: 'Provider',
+    sentAt: 'Verstuurd',
+  },
+}
+
+export function renderInquiryConfirmation(inquiry: InquiryRow, lang: Language, brand: string, responseNote: string | null): Rendered {
+  const w = WORDS[lang]
+  const c = CONFIRM[lang]
+  const rows: Row[] = [
+    { label: w.reference, value: inquiry.reference },
+    { label: w.received, value: dateText(inquiry.created_at, lang) },
+    { label: w.subject, value: oneLine(inquiry.subject, 120) },
+  ]
+  const parts = { brand, title: c.inquiryTitle, intro: `${w.hello(oneLine(inquiry.name, 60))} ${c.inquiryBody}`, rows, note: responseNote ? { title: c.noteTitle, text: responseNote } : undefined, footer: `${c.ignore} ${c.footer}` }
+  return { subject: c.inquirySubject(inquiry.reference), preview: c.inquiryBody, text: plain(parts), html: layout({ lang, preview: c.inquiryBody, ...parts }) }
+}
+
+export function renderQuoteConfirmation(quote: QuoteRow, items: readonly ItemView[], lang: Language, brand: string, packageName: (code: string) => string, responseNote: string | null): Rendered {
+  const w = WORDS[lang]
+  const c = CONFIRM[lang]
+  const rows: Row[] = [
+    { label: w.reference, value: quote.reference },
+    { label: w.received, value: dateText(quote.created_at, lang) },
+    { label: w.services, value: items.map((item) => itemText(item, w, packageName)).join('\n') },
+  ]
+  const parts = { brand, title: c.quoteTitle, intro: `${w.hello(oneLine(quote.name, 60))} ${c.quoteBody}`, rows, note: responseNote ? { title: c.noteTitle, text: responseNote } : undefined, footer: `${c.ignore} ${c.footer}` }
+  return { subject: c.quoteSubject(quote.reference), preview: c.quoteBody, text: plain(parts), html: layout({ lang, preview: c.quoteBody, ...parts }) }
+}
+
+/** The administrator's test message: what the provider accepted, in the owner's language. */
+export function renderTestEmail(lang: Language, brand: string, providerName: string, at: Date): Rendered {
+  const c = CONFIRM[lang]
+  const rows: Row[] = [
+    { label: c.provider, value: providerName },
+    { label: c.sentAt, value: dateText(at.toISOString(), lang) },
+  ]
+  const preview = c.testBody.slice(0, 120)
+  const parts = { brand, title: c.testTitle, intro: c.testBody, rows, footer: c.testFooter }
+  return { subject: c.testSubject, preview, text: plain(parts), html: layout({ lang, preview, ...parts }) }
 }
 

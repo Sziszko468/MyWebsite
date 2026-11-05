@@ -50,7 +50,7 @@ function Profile() {
 function NotificationPreferences() {
   const t = useText()
   const session = useSession()
-  const resource = useResource((signal) => endpoints.notifications.overview(signal).then((answer) => answer.data), [])
+  const resource = useResource((signal) => endpoints.notifications.overview({}, signal).then((answer) => answer.data), [])
   if (resource.loading) return <LoadingState />
   if (resource.error || !resource.data) return <ErrorState error={resource.error} onRetry={resource.reload} />
   return (

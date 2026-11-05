@@ -294,24 +294,68 @@ export interface TranslationOverview {
 export interface Delivery {
   id: string
   kind: string
+  relatedType: 'inquiry' | 'quote_request' | 'system'
+  /** The record's id (for a link), or null for a message that belongs to none (a test). */
+  relatedId: string | null
   reference: string | null
   recipient: string
   language: string
   status: string
+  /** Waiting for another attempt after a failed one. */
+  retrying: boolean
   attempts: number
   nextAttemptAt: string | null
+  /** What kind of failure it was (auth, quota, rejected, unavailable, bounced, …); the screen words it itself. */
+  errorCode: string | null
+  /** The reason the provider gave, with addresses and tokens masked. */
   lastError: string | null
+  providerEvent: string | null
   acceptedAt: string | null
+  deliveredAt: string | null
   createdAt: string
 }
 
+export type CheckState = 'verified' | 'not_verified' | 'unknown' | 'not_applicable'
+
+export interface EmailCheck {
+  id: 'provider' | 'provider_domain' | 'dkim' | 'spf' | 'dmarc' | 'routing_dns' | 'routing_cloudflare' | 'webhook' | 'sending'
+  state: CheckState
+  /** What was found, in the server's own (English) words: record names and addresses of the domain, never a secret. */
+  detail: string
+  checkedAt: string
+}
+
+export interface NotificationPreferences {
+  newInquiry: boolean
+  newQuote: boolean
+  confirmInquiry: boolean
+  confirmQuote: boolean
+  responseNote: Record<Language, string>
+}
+
 export interface NotificationsData {
-  integration: { enabled: boolean; provider: string; senderConfigured: boolean; ownerAddressConfigured: boolean; ownerLanguage: Language; secure: string | null }
-  types: { id: 'new_inquiry' | 'new_quote' | 'status_update'; automatic: boolean; enabled: boolean; active: boolean }[]
-  preferences: { newInquiry: boolean; newQuote: boolean }
-  counts: { pending: number; accepted: number; failed: number }
+  integration: {
+    enabled: boolean
+    paused: boolean
+    provider: string
+    senderConfigured: boolean
+    /** The public contact address, which is public and so is shown. */
+    replyTo: string | null
+    ownerAddressConfigured: boolean
+    ownerLanguage: Language
+    secure: string | null
+    webhookSecretSet: boolean
+    cloudflareApiSet: boolean
+  }
+  types: { id: 'new_inquiry' | 'new_quote' | 'confirm_inquiry' | 'confirm_quote' | 'status_update'; automatic: boolean; enabled: boolean; active: boolean }[]
+  preferences: NotificationPreferences
+  responseNoteMax: number
+  counts: { pending: number; sent: number; delivered: number; failed: number; bounced: number }
   lastFailure: { at: string; error: string } | null
+  /** What the checks found when they last ran (`null`: not since the server started). */
+  checks: { checkedAt: string; checks: EmailCheck[] } | null
   deliveries: Delivery[]
+  paging: { page: number; pageSize: number; total: number }
 }
 
 // ---- settings -----------------------------------------------------------------------------------------------------------

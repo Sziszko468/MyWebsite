@@ -43,6 +43,9 @@ async function main(): Promise<void> {
   }
   if (config.env === 'production' && config.retentionDays === null) log.warn('RETENTION_DAYS is not set: closed and archived requests are kept until an administrator deletes them')
   if (config.email.provider !== 'none' && !config.email.notifyTo) log.warn('e-mail is configured but NOTIFY_TO is not set: the owner will not be notified of new messages')
+  if (config.email.provider !== 'none' && !config.email.enabled) log.warn('e-mail sending is paused (EMAIL_ENABLED=false): nothing will be sent until it is switched on')
+  if (config.email.provider === 'resend' && !config.email.webhookSecret) log.warn('EMAIL_WEBHOOK_SECRET is not set: messages can be sent but never shown as delivered or bounced')
+  if (config.email.provider !== 'none' && !config.email.replyTo) log.warn('EMAIL_REPLY_TO is not set: a customer who replies will reach the sender address')
 
   await new Promise<void>((resolve, reject) => {
     app.server.once('error', reject)

@@ -7,7 +7,9 @@ import { migrate } from '../src/db/migrate.ts'
 import { seedCatalog } from '../src/db/seed.ts'
 import { createLogger, type Logger } from '../src/lib/logger.ts'
 import type { Clock } from '../src/lib/time.ts'
+import type { DnsResolver } from '../src/modules/notifications/checks.ts'
 import { createMailer, type Mailer } from '../src/modules/notifications/mailer.ts'
+import type { FetchLike } from '../src/modules/notifications/resend.ts'
 import type { MailMessage } from '../src/modules/notifications/mime.ts'
 import { MailError } from '../src/modules/notifications/smtp.ts'
 import { createUser } from '../src/modules/auth/users.ts'
@@ -78,7 +80,7 @@ const baseEnv: Record<string, string> = {
   RATE_LIMITS: 'false',
 }
 
-export async function startServer(options: { env?: Record<string, string>; seed?: boolean; mailer?: Mailer | null; realMailer?: boolean; databasePath?: string } = {}): Promise<TestServer> {
+export async function startServer(options: { env?: Record<string, string>; seed?: boolean; mailer?: Mailer | null; realMailer?: boolean; databasePath?: string; fetch?: FetchLike; dns?: DnsResolver } = {}): Promise<TestServer> {
   const env = { ...baseEnv, ...options.env }
   if (options.databasePath) env.DATABASE_PATH = options.databasePath
   const config = loadConfig(env)
@@ -88,7 +90,7 @@ export async function startServer(options: { env?: Record<string, string>; seed?
   const logs: string[] = []
   const log: Logger = createLogger({ level: 'debug', write: (line) => void logs.push(line) })
   const mailer = options.realMailer ? createMailer(config.email) : options.mailer === undefined ? new RecordingMailer() : options.mailer
-  const app = createApp({ config, db, clock, log, mailer })
+  const app = createApp({ config, db, clock, log, mailer, fetch: options.fetch, dns: options.dns })
   if (options.seed !== false) seedCatalog(app.context)
   await new Promise<void>((resolve) => app.server.listen(0, '127.0.0.1', () => resolve()))
   const address = app.server.address()

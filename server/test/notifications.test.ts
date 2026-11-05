@@ -589,11 +589,11 @@ describe('the outbox', () => {
     const overview = await server.api('/api/admin/notifications', { headers: { Cookie: admin.cookie } })
     expect(overview.json.data.deliveries).toHaveLength(1)
     expect(overview.json.data.deliveries[0]).toMatchObject({ kind: 'inquiry_received', status: 'accepted', recipient: 'owner@site.test' })
-    expect(overview.json.data.counts).toEqual({ pending: 0, accepted: 1, failed: 0 })
-    // The strongest word any answer uses for a sent message is "accepted".
-    expect(overview.text).not.toMatch(/delivered/i)
-    expect((await server.api('/api/admin/system', { headers: { Cookie: admin.cookie } })).text).not.toMatch(/delivered/i)
-    expect((await server.api('/api/admin/dashboard', { headers: { Cookie: admin.cookie } })).text).not.toMatch(/delivered/i)
+    expect(overview.json.data.counts).toEqual({ pending: 0, sent: 1, delivered: 0, failed: 0, bounced: 0 })
+    // Nothing here has been confirmed by a provider event, so nothing is delivered: the count of delivered is zero and no message has that status.
+    expect(overview.json.data.counts.delivered).toBe(0)
+    expect(overview.json.data.deliveries.every((d: { status: string }) => d.status !== 'delivered')).toBe(true)
+    expect(server.db.get("SELECT COUNT(*) AS n FROM email_deliveries WHERE status = 'delivered' OR delivered_at IS NOT NULL")).toEqual({ n: 0 })
   })
 })
 

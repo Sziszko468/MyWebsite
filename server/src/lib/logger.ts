@@ -8,9 +8,21 @@ const ORDER: Record<Level, number> = { debug: 10, info: 20, warn: 30, error: 40 
 
 const SENSITIVE = /pass(word)?|secret|token|cookie|authorization|auth|email|e-mail|phone|name|message|body|subject|description|requirements|csrf|session|credential/i
 
-/** Messages that may quote what the database or the mail server said: addresses and long tokens are masked. */
+/**
+ * The configured secrets (an API key, a signing secret, a password), registered once at start-up. Whatever text is masked
+ * afterwards has them removed first, wherever it came from: a provider's error message that quotes the key it was
+ * given, a library's exception. A secret too short to be one is ignored (masking "ab" everywhere would be noise).
+ */
+const SECRETS = new Set<string>()
+export function registerSecret(value: string | null | undefined): void {
+  if (value && value.length >= 8) SECRETS.add(value)
+}
+
+/** Messages that may quote what the database or the mail server said: secrets, addresses and long tokens are masked. */
 export function redactText(text: string): string {
-  return text
+  let clean = text
+  for (const secret of SECRETS) clean = clean.split(secret).join('[secret]')
+  return clean
     .replace(/[^\s@<>()"']+@[^\s@<>()"']+\.[^\s@<>()"']+/g, '[address]')
     .replace(/\b[A-Za-z0-9_-]{32,}\b/g, '[token]')
     .slice(0, 500)

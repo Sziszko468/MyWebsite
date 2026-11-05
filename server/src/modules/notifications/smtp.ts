@@ -13,14 +13,19 @@ import { assertSingleLine, buildMime, splitSender, type MailMessage } from './mi
  * 250 after the data): that is not delivery, and nothing in the system calls it delivery.
  */
 
+/** Why a send failed, in words the administration can show a sentence for (never the provider's own text alone). */
+export type MailFailure = 'auth' | 'quota' | 'rate_limited' | 'rejected' | 'unavailable' | 'timeout' | 'network' | 'conflict'
+
 export class MailError extends Error {
   readonly transient: boolean
   readonly code: number | null
-  constructor(message: string, options: { transient: boolean; code?: number | null }) {
+  readonly reason: MailFailure
+  constructor(message: string, options: { transient: boolean; code?: number | null; reason?: MailFailure }) {
     super(redactText(message))
     this.name = 'MailError'
     this.transient = options.transient
     this.code = options.code ?? null
+    this.reason = options.reason ?? (options.transient ? 'unavailable' : 'rejected')
   }
 }
 

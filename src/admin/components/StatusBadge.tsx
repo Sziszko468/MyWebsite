@@ -16,14 +16,22 @@ const TONES: Record<string, string> = {
   accepted: styles.toneSuccess,
   declined: styles.toneNeutral,
   closed: styles.toneSuccess,
-  // deliveries
-  pending: styles.toneWarning,
-  sending: styles.toneInfo,
-  failed: styles.toneDanger,
-  cancelled: styles.toneNeutral,
   // availability
   active: styles.toneSuccess,
   disabled: styles.toneNeutral,
+}
+
+/** A message's state (the same word can mean something else for a quote request: "accepted" is good news there and only "sent" here). */
+const DELIVERY_TONES: Record<string, string> = {
+  pending: styles.toneWarning,
+  retrying: styles.toneWarning,
+  sending: styles.toneInfo,
+  accepted: styles.toneInfo,
+  delivered: styles.toneSuccess,
+  bounced: styles.toneDanger,
+  complained: styles.toneDanger,
+  failed: styles.toneDanger,
+  cancelled: styles.toneNeutral,
 }
 
 /**
@@ -36,7 +44,7 @@ export function StatusBadge({ kind, status, archived = false }: { kind: Kind; st
     kind === 'availability' ? (status === 'active' ? t.common.active : status === 'disabled' ? t.common.disabled : status) : kind === 'delivery' ? ((t.status.delivery as Record<string, string>)[status] ?? status) : statusLabel(t, kind, status)
   return (
     <span className={styles.rowTight}>
-      <span className={cx(styles.badge, TONES[status] ?? styles.toneNeutral)}>
+      <span className={cx(styles.badge, (kind === 'delivery' ? DELIVERY_TONES : TONES)[status] ?? styles.toneNeutral)}>
         <span className={styles.badgeDot} aria-hidden="true" />
         {label}
       </span>

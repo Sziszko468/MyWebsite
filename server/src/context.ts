@@ -5,6 +5,7 @@ import type { Limiters } from './http/rateLimit.ts'
 import type { Reply } from './http/reply.ts'
 import type { Logger } from './lib/logger.ts'
 import type { Clock } from './lib/time.ts'
+import type { EmailChecks } from './modules/notifications/checks.ts'
 import type { Notifier } from './modules/notifications/notifier.ts'
 
 /** The few counters the System page shows, kept since the process started. */
@@ -24,6 +25,8 @@ export interface AppContext {
   log: Logger
   limiters: Limiters
   notifier: Notifier
+  /** What can be verified about the e-mail set-up (checks.ts). */
+  emailChecks: EmailChecks
   stats: Stats
 }
 
@@ -54,6 +57,8 @@ export interface RequestCtx {
   session: SessionInfo | null
   json(): Promise<Record<string, unknown>>
   form(): Promise<URLSearchParams>
+  /** The body exactly as it arrived (for a signature, which is over the bytes, not over what they parse to). */
+  raw(): Promise<Buffer>
 }
 
 export type Handler = (ctx: RequestCtx) => Promise<Reply> | Reply

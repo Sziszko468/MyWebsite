@@ -214,7 +214,15 @@ export function adminRoutes(_app: AppContext): RouteDef[] {
     }),
 
     // ---- notifications ----
-    api('GET', '/api/admin/notifications', (ctx) => json(notifications.overview(ctx.app, ctx.session))),
+    api('GET', '/api/admin/notifications', (ctx) => json(notifications.overview(ctx.app, ctx.session, ctx.query))),
+    api('POST', '/api/admin/notifications/checks', async (ctx) => {
+      await ctx.json()
+      return json(await notifications.runChecks(ctx.app, ctx.session))
+    }),
+    api('POST', '/api/admin/notifications/test', async (ctx) => {
+      await ctx.json()
+      return json(notifications.sendTest(ctx.app, ctx.session), { status: 202 })
+    }),
     api('PUT', '/api/admin/notifications/preferences', async (ctx) => json(notifications.savePreferences(ctx.app, ctx.session, await ctx.json()))),
     api('POST', '/api/admin/notifications/deliveries/:id/retry', async (ctx) => {
       await ctx.json()

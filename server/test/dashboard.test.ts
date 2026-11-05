@@ -59,7 +59,7 @@ describe('migration 0002', () => {
       db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, created_at, updated_at) VALUES ('d1', 'inquiry_status', 'inquiry', 'i3', 'n@x.test', 'en', 'accepted', ?, ?)", [now, now])
       expect(migrationStatus(db, directory)).toMatchObject({ current: 1, pending: 0 })
 
-      expect(migrate(db, clock)).toEqual([2])
+      expect(migrate(db, clock)).toEqual([2, 3])
 
       expect(db.all('SELECT id, status FROM inquiries ORDER BY id')).toEqual([
         { id: 'i1', status: 'new' }, { id: 'i2', status: 'in_progress' }, { id: 'i3', status: 'waiting_client' }, { id: 'i4', status: 'completed' },
@@ -383,6 +383,9 @@ describe('notifications', () => {
     expect(on.types).toEqual([
       { id: 'new_inquiry', automatic: true, enabled: true, active: true },
       { id: 'new_quote', automatic: true, enabled: true, active: true },
+      // Confirmations to the person who wrote exist, and are off until an administrator turns them on.
+      { id: 'confirm_inquiry', automatic: true, enabled: false, active: false },
+      { id: 'confirm_quote', automatic: true, enabled: false, active: false },
       { id: 'status_update', automatic: false, enabled: true, active: true },
     ])
     await server.close()
@@ -390,7 +393,7 @@ describe('notifications', () => {
     admin = await server.signIn('admin', 'admin@site.test')
     const off = await overview()
     expect(off.integration).toMatchObject({ enabled: false, provider: 'none' })
-    expect(off.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, false])
+    expect(off.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, false, false, false])
     expect(off.deliveries).toEqual([])
   })
 
@@ -400,7 +403,7 @@ describe('notifications', () => {
     admin = await server.signIn('admin', 'admin@site.test')
     const data = await overview()
     expect(data.integration).toMatchObject({ enabled: true, ownerAddressConfigured: false })
-    expect(data.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, true])
+    expect(data.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, false, false, true])
   })
 
   it('lists the delivery log with each message\'s real state and the reference of its record', async () => {
@@ -414,12 +417,12 @@ describe('notifications', () => {
     const data = await overview()
     expect(data.deliveries.map((d: { kind: string; status: string }) => [d.kind, d.status]).sort()).toEqual([['inquiry_received', 'pending'], ['quote_received', 'accepted']].sort())
     expect(data.deliveries.find((d: { kind: string }) => d.kind === 'quote_received').reference).toMatch(/^Q-/)
-    expect(data.counts.accepted).toBe(1)
+    expect(data.counts.sent).toBe(1)
   })
 
   it('switches the owner notification for messages or quote requests off and on, and records who did it', async () => {
     const off = await send('PUT', '/api/admin/notifications/preferences', { newInquiry: false, newQuote: true })
-    expect(off.json.data).toEqual({ newInquiry: false, newQuote: true })
+    expect(off.json.data).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: false, responseNote: { hu: '', en: '', nl: '' } })
     server.db.run('DELETE FROM email_deliveries')
     await server.api('/api/contact', { body: contact() })
     await quotes(1)
@@ -428,7 +431,7 @@ describe('notifications', () => {
     expect(server.db.all('SELECT kind FROM email_deliveries')).toEqual([{ kind: 'quote_received' }])
     const data = await overview()
     expect(data.types[0]).toMatchObject({ id: 'new_inquiry', enabled: false, active: false })
-    expect(data.preferences).toEqual({ newInquiry: false, newQuote: true })
+    expect(data.preferences).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: false, responseNote: { hu: '', en: '', nl: '' } })
     expect((await send('PUT', '/api/admin/notifications/preferences', { newInquiry: true, newQuote: true })).status).toBe(200)
     expect(server.db.all("SELECT action FROM audit_log WHERE action = 'settings.notifications'")).toHaveLength(2)
     for (const body of [{}, { newInquiry: 'yes', newQuote: true }, { newInquiry: true }]) expect((await send('PUT', '/api/admin/notifications/preferences', body)).status).toBe(422)

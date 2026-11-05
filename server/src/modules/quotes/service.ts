@@ -197,6 +197,7 @@ export function submitQuote(app: AppContext, input: QuoteInput, ipHash: string):
   const saved: QuoteRow = row
 
   app.notifier.notifyOwner('quote_received', saved.id)
+  app.notifier.confirmSubmitter('quote', saved.id)
   return { reference: saved.reference, createdAt: saved.created_at, duplicate: false, pricing: totalsOf(snapshots) }
 }
 

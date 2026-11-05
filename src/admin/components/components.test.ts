@@ -39,7 +39,7 @@ describe('StatusBadge', () => {
 
   it('shows a status it does not know as it is, never hiding it', () => {
     expect(render(h(StatusBadge, { kind: 'inquiry', status: 'from_the_future' }))).toContain('from_the_future')
-    expect(render(h(StatusBadge, { kind: 'delivery', status: 'bounced' }))).toContain('bounced')
+    expect(render(h(StatusBadge, { kind: 'delivery', status: 'from_a_new_provider' }))).toContain('from_a_new_provider')
   })
 
   it('names the availability of a service in words', () => {

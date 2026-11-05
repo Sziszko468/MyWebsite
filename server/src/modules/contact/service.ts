@@ -103,7 +103,10 @@ export function submitContact(app: AppContext, input: ContactInput, ipHash: stri
     throw new Error('Could not allocate a unique inquiry reference.')
   })
 
-  if (!saved.duplicate) app.notifier.notifyOwner('inquiry_received', saved.row.id)
+  if (!saved.duplicate) {
+    app.notifier.notifyOwner('inquiry_received', saved.row.id)
+    app.notifier.confirmSubmitter('inquiry', saved.row.id)
+  }
   return { reference: saved.row.reference, createdAt: saved.row.created_at, duplicate: saved.duplicate }
 }
 

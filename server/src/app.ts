@@ -5,19 +5,22 @@ import type { AppContext, Handler, RequestCtx, Stats } from './context.ts'
 import type { Database } from './db/database.ts'
 import { DatabaseUnavailableError, ConstraintError, HttpError, csrfFailed, notFound, unauthorized } from './http/errors.ts'
 import { Limiters } from './http/rateLimit.ts'
-import { clientIp, parseCookies, readForm, readJson } from './http/request.ts'
+import { clientIp, parseCookies, readBody, readForm, readJson } from './http/request.ts'
 import { empty, errorReply, type Reply } from './http/reply.ts'
 import { Router, type RouteDef } from './http/router.ts'
 import { corsHeaders, PREFLIGHT_HEADERS, securityHeaders } from './http/security.ts'
 import { hmacHex } from './lib/crypto.ts'
-import { redactText, type Logger } from './lib/logger.ts'
+import { redactText, registerSecret, type Logger } from './lib/logger.ts'
 import type { Clock } from './lib/time.ts'
 import { adminRoutes } from './modules/admin/routes.ts'
 import { originIsThisHost, resolveSession, sameOrigin, sessionCookieName, verifySessionCsrf } from './modules/auth/sessions.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { contactRoutes } from './modules/contact/routes.ts'
+import { EmailChecks, type DnsResolver } from './modules/notifications/checks.ts'
 import { Notifier } from './modules/notifications/notifier.ts'
+import { emailRoutes } from './modules/notifications/routes.ts'
 import type { Mailer } from './modules/notifications/mailer.ts'
+import type { FetchLike } from './modules/notifications/resend.ts'
 import { quoteRoutes } from './modules/quotes/routes.ts'
 import { healthRoutes } from './modules/system/health.ts'
 import { serveAdminApp, serveStatic } from './modules/system/static.ts'
@@ -36,6 +39,9 @@ export interface AppDeps {
   clock: Clock
   log: Logger
   mailer: Mailer | null
+  /** For the e-mail checks: the way they reach a provider's and Cloudflare's APIs and the public DNS (tests pass fakes; the defaults are the real ones). */
+  fetch?: FetchLike
+  dns?: DnsResolver
 }
 
 export interface App {
@@ -52,13 +58,16 @@ const REQUEST_ID = /^[A-Za-z0-9_-]{8,64}$/
 
 export function createApp(deps: AppDeps): App {
   const { config, db, clock, log } = deps
+  // Whatever a provider's error text or a library's exception quotes of these is masked in every log line and every stored reason.
+  for (const secret of [config.email.apiKey, config.email.webhookSecret, config.email.smtp?.password, config.email.cloudflare?.apiToken]) registerSecret(secret)
   const stats: Stats = { startedAt: Date.now(), requests: 0, clientErrors: 0, serverErrors: 0, rateLimited: 0 }
   const limiters = new Limiters(clock, config.rateLimitsEnabled)
   const notifier = new Notifier({ db, config, clock, log, mailer: deps.mailer })
-  const context: AppContext = { config, db, clock, log, limiters, notifier, stats }
+  const emailChecks = new EmailChecks({ config, db, clock, log, fetch: deps.fetch, dns: deps.dns })
+  const context: AppContext = { config, db, clock, log, limiters, notifier, emailChecks, stats }
 
   const router = new Router()
-  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...adminRoutes(context))
+  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...emailRoutes(context), ...adminRoutes(context))
 
   const sweeper = setInterval(() => limiters.sweep(), 60_000)
   sweeper.unref()
@@ -135,6 +144,7 @@ export function createApp(deps: AppDeps): App {
         session: null,
         json: () => readJson(req, config.bodyLimitBytes),
         form: () => (formCache ??= readForm(req, config.bodyLimitBytes)),
+        raw: () => readBody(req, config.bodyLimitBytes),
       }
 
       if (method === 'OPTIONS') {

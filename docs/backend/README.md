@@ -50,7 +50,12 @@ Everything is an environment variable, validated once at start-up. A bad or miss
 | `RATE_LIMITS` | `true` | Switch the limiter off (tests only). |
 | `BODY_LIMIT_BYTES` | `65536` | Largest request body (1 kB–1 MB). |
 | `REQUIRE_CONSENT` | `true` | The two forms must send `consent: true` (the box on the form). |
-| `EMAIL_PROVIDER` | `none` | `none` (send nothing), `smtp`, `file` (writes `.eml` files; ⚠ refused in production). |
+| `EMAIL_PROVIDER` | `none` | `none` (send nothing), `resend` (the transactional provider, HTTPS API), `smtp`, `file` (writes `.eml` files; ⚠ refused in production). |
+| `EMAIL_ENABLED` | `true` | `false` pauses sending: configured, nothing queued, the administration says so. |
+| `EMAIL_API_KEY`, `EMAIL_API_URL` | —, the provider's address | `resend`: the API key (a secret; a send-only key), and the API origin (https outside development). |
+| `EMAIL_WEBHOOK_SECRET` | — | The `whsec_…` secret that signs the provider's webhook calls. Without it `POST /api/webhooks/email` does not exist and nothing is ever "delivered". |
+| `EMAIL_REPLY_TO` | — | The public contact address customers' replies go to (never the private `NOTIFY_TO`). |
+| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`, `CLOUDFLARE_ACCOUNT_ID` | — | Optional, all three, **read-only**: lets the administration's checks see Cloudflare Email Routing. |
 | `EMAIL_FROM`, `NOTIFY_TO`, `NOTIFY_LANGUAGE`, `BRAND_NAME` | — , — , `hu`, `Website` | The sender, the **one** address that receives owner notifications (never invented; without it nobody is notified and the log says so at start), their language, the name in the e-mails' header. |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_TLS_REJECT_UNAUTHORIZED`, `SMTP_TIMEOUT_MS` | `starttls`, port by mode (587/465/25), certificate checked, 15 s | `SMTP_SECURE` is `starttls`, `tls` or `none`. ⚠ `none` and an unchecked certificate are refused in production. User and password go together. |
 | `EMAIL_FILE_DIR`, `EMAIL_MAX_ATTEMPTS` | `./data/mail`, `5` | Folder for the `file` provider; tries before a message is marked failed (1–20). |
@@ -133,6 +138,10 @@ Field codes (the same words the website's forms use): `required`, `tooShort`, `t
 
 `Cache-Control: public, max-age=60` on these; **no customer data exists in any of them** (a test submits a message and a quote request and searches every public answer for it).
 
+### E-mail provider webhook
+
+`POST /api/webhooks/email` — not for browsers: the transactional provider reports delivery, bounce and complaint events here. It answers only a request signed with `EMAIL_WEBHOOK_SECRET` (Svix scheme; 401 otherwise; 404 when no secret is configured), applies each event once, and has no CORS. See docs/email/README.md §7.
+
 ### Health
 
 `GET /api/health` → `{ data: { status: "ok" } }` (the process is up; touches nothing). `GET /api/ready` → 200 `{ data: { status: "ready", checks: { database, migrations, email } } }` or 503 `not_ready` with `Retry-After: 10` (database unreachable or migrations pending). Neither reveals configuration beyond "e-mail configured / off".
@@ -165,25 +174,31 @@ The check is made in the business functions, not in the page, so the JSON routes
 **Pages.**
 
 - **Dashboard** (details in the administration's README) — real counts only: messages and quote requests by status, received in the last 7 and 30 days, the latest five of each, the e-mail queue (accepted / waiting / failed). Nothing is estimated or invented; there are no visitor statistics because the server does not measure visitors.
-- **Messages** and **Quote requests** — list with search (name, e-mail, subject/description, text, reference), status, type and date filters, archive filter, sort, 25 per page. A record shows everything sent, a status control (messages: new, in progress, waiting for the client, completed — archiving is separate; quote requests: new, in review, quoted, accepted, declined, closed) with an optional **"e-mail the customer"** box (off by default; sends a short status e-mail with an optional note — the only e-mail that ever goes to a customer), internal notes, archive/restore, and (admin) delete. Quote requests also show their items with the price each was requested at, and export as **CSV** (the current filter; cells that start with `=`, `+`, `-`, `@` are neutralised against spreadsheet formulas) or **JSON** (one request, complete).
+- **Messages** and **Quote requests** — list with search (name, e-mail, subject/description, text, reference), status, type and date filters, archive filter, sort, 25 per page. A record shows everything sent, a status control (messages: new, in progress, waiting for the client, completed — archiving is separate; quote requests: new, in review, quoted, accepted, declined, closed) with an optional **"e-mail the customer"** box (off by default; sends a short status e-mail with an optional note; the only other e-mail a customer ever gets is the optional confirmation, which is off until an administrator turns it on), internal notes, archive/restore, and (admin) delete. Quote requests also show their items with the price each was requested at, and export as **CSV** (the current filter; cells that start with `=`, `+`, `-`, `@` are neutralised against spreadsheet formulas) or **JSON** (one request, complete).
 - **Catalogue** — services, packages, add-ons and FAQ/content, each editable in all three languages: price (on request / to be decided / "from" an amount in EUR or HUF, with the VAT mode — an incomplete published price is refused), texts, lists, associations, status. A rejected form is shown again with the problems next to the values typed. Rows that requests refer to are disabled, not deleted. How edits reach the public website: §8.
 - **System** (admin) — the configuration without secrets, schema version, request/error counters since start, e-mail queue and the last failures, the last administrator actions (audit log: who, what, which record — never message text), "Run maintenance", "Publish".
 - **Account** — change your password, the interface language and theme, and the list of your sessions. **Translations**, **Notifications** and **Services & packages** screens are described in the administration's README.
 
 ## 6. E-mail
 
-Providers: `none` (default — nothing is sent; requests are still stored and the dashboard says e-mail is off), `smtp` (a small built-in client: implicit TLS or STARTTLS, `AUTH PLAIN`/`LOGIN`, never sends credentials in clear text over `SMTP_SECURE=none` in production, header-injection guarded), `file` (development: `.eml` files).
+The full account — architecture, the provider and why, addresses, states, the webhook, confirmations, Cloudflare Email Routing for incoming mail, the DNS checklist, the production checklist and what was **not** verified — is **[docs/email/README.md](../email/README.md)**. In short:
 
-**Flow.** A notification is a row in `email_deliveries` *first* and an e-mail second: the visitor's request is stored and answered, then the message is rendered from the stored record and handed to the provider in the background. States: `pending` → `accepted` (the provider took it), `failed` (a permanent refusal, or `EMAIL_MAX_ATTEMPTS` reached), `cancelled` (the record was deleted). A temporary failure (4xx, dropped connection, timeout, refused connection) is retried after 1, 5, 30, 120, 720 minutes; the attempt count and a sanitised error (addresses masked) are kept. A message stuck as "sending" after a crash is picked up again. Two runs never send the same message twice.
+Providers: `none` (default — nothing is sent; requests are still stored and the dashboard says e-mail is off), **`resend`** (the transactional provider, over its HTTPS API: an API key, an idempotency key per message, signed webhooks for delivery events), `smtp` (a small built-in client: implicit TLS or STARTTLS, `AUTH PLAIN`/`LOGIN`, never sends credentials in clear text over `SMTP_SECURE=none` in production, header-injection guarded), `file` (development: `.eml` files). `EMAIL_ENABLED=false` pauses sending without removing the configuration. All of them sit behind one `Mailer` interface.
 
-**What is recorded is *accepted by the provider*, never "delivered".** SMTP cannot promise delivery; the dashboard and the System page say so in words.
+**Flow.** A notification is a row in `email_deliveries` *first* and an e-mail second: the visitor's request is stored and answered, then the message is rendered from the stored record and handed to the provider in the background. States: `pending` → `sending` → `accepted` ("sent": the provider took it) → `delivered` / `bounced` / `complained` (**only** from a provider event whose signature verified: `POST /api/webhooks/email`), or `failed` (a permanent refusal, or `EMAIL_MAX_ATTEMPTS` reached), `cancelled` (the record was deleted). A temporary failure (5xx, dropped connection, timeout, refused connection) is retried after 1, 5, 30, 120, 720 minutes with the **same idempotency key**; the attempt count, the kind of failure and a sanitised reason (addresses and the configured secrets masked) are kept. A message stuck as "sending" after a crash is picked up again. Two runs never send the same message twice, and the database refuses a second owner notification or confirmation for the same record.
+
+**What is recorded is *sent* (accepted by the provider), and *delivered* only when the provider says so in a signed event.** SMTP cannot promise delivery and an API's `201` does not either; the dashboard and the Notifications screen say so in words, and a deployment with no webhook secret never shows a message as delivered.
 
 | Kind | To | When |
 | --- | --- | --- |
-| New message / new quote request | `NOTIFY_TO`, in `NOTIFY_LANGUAGE`, `Reply-To` = the visitor | Automatically after each stored (not duplicate) submission. |
-| Status change | The address the visitor typed, in the language they used | Only when an administrator ticks "e-mail the customer". No automatic confirmation is sent to an address a stranger typed (that would let anyone have the site send mail to anyone). |
+| New message / new quote request | `NOTIFY_TO`, in `NOTIFY_LANGUAGE`, `Reply-To` = the visitor | Automatically after each stored (not duplicate) submission, unless switched off in the administration. |
+| Confirmation (message / quote request) | The address the visitor typed, in the language of their form, `Reply-To` = `EMAIL_REPLY_TO` (the public address) | Only if an administrator switched it on (**off by default**); once per submission, at most 3 per address per day; says it arrived and promises nothing. |
+| Status change | The address the visitor typed, in the language they used | Only when an administrator ticks "e-mail the customer". |
+| Test message | `NOTIFY_TO` | Only when an administrator asks for it in the Notifications screen. |
 
-Templates exist in Hungarian, English and Dutch (HTML + plain text, table layout with inline styles because mail clients ignore the rest, the site's colours); what a visitor typed is escaped in the HTML and printed as text in the plain part; a subject never contains a line break.
+The sender (`From`) is always `EMAIL_FROM`, an address on a domain verified with the provider — never a visitor's address. A customer's `Reply-To` is the public address (`EMAIL_REPLY_TO`), never `NOTIFY_TO`.
+
+Templates exist in Hungarian, English and Dutch (subject, preview text, HTML and plain text; table layout with inline styles because mail clients ignore the rest, the site's colours, no image and no external resource); what a visitor typed is escaped in the HTML and printed as text in the plain part; a subject never contains a line break.
 
 ## 7. Security, in one place
 
@@ -202,6 +217,7 @@ Templates exist in Hungarian, English and Dutch (HTML + plain text, table layout
 | Supply chain | No runtime dependencies (a test fails if the server imports a package); `npm audit`: 0 known vulnerabilities (dev tooling included). | `security` |
 | Static serving | No path traversal, no hidden files, only website file types. | `security` |
 | Uploads | None exist; multipart is refused everywhere. | `security` |
+| E-mail provider | The API key and webhook secret only in the environment and masked in every log line and stored reason; the sender is never a visitor; recipients are never public input; the provider's webhook is accepted only with a verified, fresh signature, once per event id. | `email`, `webhook`, `emailChecks` |
 
 ## 8. How the website and the backend fit together
 
@@ -217,7 +233,7 @@ What a deployment needs: Node ≥ 22.18; the `server/` folder (and `server/seed/
 Production checklist:
 
 1. `APP_ENV=production`, a real `APP_SECRET` (`openssl rand -base64 48`), `DATABASE_PATH` on the persistent disk, `API_PUBLIC_URL`/`PUBLIC_URL` as https origins, `CORS_ORIGINS` the website's origin(s) (empty if the same process serves the site), `TRUST_PROXY=1` behind one proxy.
-2. E-mail: `EMAIL_PROVIDER=smtp` with the owner's provider, `EMAIL_FROM`, `NOTIFY_TO`, `NOTIFY_LANGUAGE`, `BRAND_NAME`. Send yourself a test message through the form and look at the System page: *accepted* means the provider took it. (Not done here: no provider or address was available.)
+2. E-mail: follow the production checklist in [docs/email/README.md](../email/README.md) §13 (Cloudflare Email Routing for incoming mail, the verified sending domain and DNS records, a send-only API key, the webhook secret, `EMAIL_ENABLED=false` until the checks pass). *Sent* means the provider accepted a message; *delivered* only a signed webhook says. (Not done here: no provider, domain or address was available.)
 3. `npm run server:cli -- check` — fix whatever it lists. Create the administrator(s). Start.
 4. `GET /api/ready` returns 200. Put it in the host's health check; `GET /api/health` is the liveness probe.
 5. Decide `RETENTION_DAYS` and tell visitors in the privacy notice; schedule `server:backup` and test a restore.
@@ -243,12 +259,13 @@ The backend stores only what the two forms collect, plus what running it require
 | Name, e-mail, phone, description, aims, references, requirements, timing, language, items with the approved price of each | `quote_requests`, `…_items`, `…_item_extras` | To quote | Same |
 | A keyed hash (HMAC with `APP_SECRET`) of the sender's network address; a keyed hash of what was said | `ip_hash`, `content_hash` | Abuse correlation; recognising a double submission. Not reversible without the secret; the address itself is **never stored** | With the record |
 | Internal notes | `*_notes` | The owner's own working notes (may repeat personal data an administrator typed) | With the record |
-| Recipient address, the note an administrator wrote, state, attempts, a masked error | `email_deliveries` | The delivery log and retry | With the record; retention; `erase` |
+| Recipient address, the note an administrator wrote, state, attempts, which sender handled it, the provider's message id, a masked reason (never the message text) | `email_deliveries` | The delivery log and retry | With the record; retention; `erase` |
+| Which provider event arrived for which message and when (no address, no subject, no text) | `email_events` | Not applying the same event twice; the log | With its delivery; retention |
 | Administrator e-mail, password hash, role, last sign-in; session token **hash**, CSRF token, address hash, first 200 characters of the browser's user-agent | `admin_users`, `admin_sessions` | Signing in | Sessions: expiry/sign-out; accounts: disabled (not deleted) |
 | Who did what to which record (no message text) | `audit_log` | Accountability | Kept (administrator actions only) |
 | Request id, route, status, duration | server log (stdout) | Operation | The log's own rotation. Bodies, names, addresses, passwords, tokens and cookies are never logged (field names that look like them are replaced before writing) |
 
-The public website sets no cookie through the backend; the only cookie it ever issues is the administration's session cookie. Browser-side storage on the website (cart choices, theme, consent) is described in the website's privacy notice and is not touched by the backend. Nothing is sent to a third party except the e-mail to the SMTP provider the owner configured (and the deploy hook, if set). Retention defaults to **keep everything until deleted** because that choice belongs to the owner — set `RETENTION_DAYS` and say so in the notice.
+The public website sets no cookie through the backend; the only cookie it ever issues is the administration's session cookie. Browser-side storage on the website (cart choices, theme, consent) is described in the website's privacy notice and is not touched by the backend. Nothing is sent to a third party except the e-mail to the sending provider the owner configured (the recipient, subject and content of each message, so the provider is a processor of them; for mail to the public address, Cloudflare Email Routing forwards it) and the deploy hook, if set; the website's privacy notice does not yet say so (docs/email/README.md §14). Retention defaults to **keep everything until deleted** because that choice belongs to the owner — set `RETENTION_DAYS` and say so in the notice.
 
 ## 11. Tests and what they showed
 
@@ -257,7 +274,7 @@ npm test             # website + backend
 npx vitest run server # the backend only, about 25 s
 ```
 
-Run on 2026-11-04 (Windows 11, Node 22.23): **1589 passed, 0 failed** over the whole project (68 files); the backend is 320 of them in 13 files (the administration's own tests are described in [docs/admin/README.md](../admin/README.md)). `tsc -b` (website, tooling and server projects): clean. `oxlint`: clean. `npm run build`: passes. `npm audit`: 0 vulnerabilities (the server has no runtime dependencies). Secret scan of the repository for private keys and provider tokens: nothing (run on 2026-11-03).
+Run on 2026-11-04 (Windows 11, Node 22.23): **1691 passed, 0 failed** over the whole project (71 files); the backend is 422 of them in 16 files (the administration's own tests are described in [docs/admin/README.md](../admin/README.md)). `tsc -b` (website, tooling and server projects): clean. `oxlint`: clean. `npm run build`: passes. `npm audit`: 0 vulnerabilities (the server has no runtime dependencies). Secret scan of the repository for private keys and provider tokens: nothing (run on 2026-11-03).
 
 | File | Tests | What it exercises |
 | --- | --: | --- |
@@ -267,11 +284,14 @@ Run on 2026-11-04 (Windows 11, Node 22.23): **1589 passed, 0 failed** over the w
 | `auth.test.ts` | 24 | Hashing, sign-in, generic failures, lockout and recovery, rate limit, cookie flags, idle/absolute expiry, sign-out, password change, no-session access to every admin route, roles, CSRF, origin checks. |
 | `admin.test.ts` | 28 | Messages and quote requests (filters, search, paging, status, notes, archive, delete, customer e-mail, audit log), CSV/JSON export incl. formula neutralisation, catalogue and content management with price rules, the administration page and its headers, hostile input returned as data. |
 | `dashboard.test.ts` | 35 | The administration's own API (PROMPT 13): the dashboard's counts, the renamed statuses and the migration of old rows, filters/sort/paging, linking a quote to an inquiry, activity history, ordering, translations, the notifications screen, settings and sessions. |
+| `email.test.ts` | 44 | The transactional provider path (PROMPT 14) on real HTTP against a stand-in for the provider's API: the request, idempotency keys, every failure class, retries, an administrator's retry, a stored request that survives a down provider, the confirmations and their rules, the test message, pausing, configuration refusals, migration 0003. |
+| `webhook.test.ts` | 31 | The provider's webhook: signature, replay, tampering, duplicates, late and out-of-order events, an event that beats the send's own answer, the administration's view of it. |
+| `emailChecks.test.ts` | 26 | The set-up checks in every state (DNS, the provider's API, Cloudflare's API, the log), and who may ask. |
 | `admin-contract.test.ts` | 39 | The administration's editors against the server's parsers: field lists, limits and required flags (§ the administration's README). |
 | `notifications.test.ts` | 29 | Templates in three languages and escaping, MIME and header-injection refusal, the SMTP client against a mock SMTP server that speaks the protocol (AUTH PLAIN/LOGIN, STARTTLS and implicit TLS with a generated self-signed certificate, 4xx/5xx at every step, dropped and silent servers, refused connections), the outbox (retry schedule, give-up, cancel, crash recovery, no double send), end-to-end through the real mailer. |
 | `security.test.ts` | 33 | SQL-injection strings through every input path, headers, CORS (allowed, denied, preflight), rate limits with the limiter on, body and header limits, malformed/hostile JSON, prototype pollution, no secrets or personal data in logs or answers, static serving and path traversal, no-dependency and no-shell/no-string-SQL source scans. |
 | `reliability.test.ts` | 23 | Configuration validation (production refusals, every variable), database unavailable → 503 and "not ready", half-failed writes leave nothing behind, 30 and 12 simultaneous submissions, restart persistence and no re-seed over edits, retention/erase, graceful shutdown waits for work in progress. |
-| `process.test.ts` | 11 | The real programs in an empty folder: clean start (migrate, seed, ready, accept a message), restart, exit 78 on bad configuration, refusal on a taken port or missing migrations, every CLI command, backup of a live database. |
+| `process.test.ts` | 12 | The real programs in an empty folder: clean start (migrate, seed, ready, accept a message), restart, exit 78 on bad configuration, refusal on a taken port or missing migrations, every CLI command, backup of a live database. |
 | `contract.test.ts` | 17 | The website's modules against the running backend (§8). |
 | `smoke.test.ts` | 1 | The app starts. |
 

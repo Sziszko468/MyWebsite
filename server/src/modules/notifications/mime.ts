@@ -17,6 +17,10 @@ export interface MailMessage {
   html: string
   messageId: string
   date: Date
+  /** For a provider that takes one: the same key for the same message, so a repeated request cannot send it twice. */
+  idempotencyKey?: string
+  /** Labels the provider hands back in its events (our delivery id), so an event can be matched to a message even before we have the provider's own id. ASCII letters, digits, `_` and `-` only. */
+  tags?: Record<string, string>
 }
 
 export class MimeError extends Error {

@@ -289,7 +289,7 @@ describe('abuse of the public forms', () => {
     // Only the windows still running are remembered, so the table does not grow with every address ever seen.
     server.clock.advance(16 * 60_000)
     limiters.sweep()
-    expect(Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)).toEqual([0, 0, 0, 0, 0, 0])
+    expect(Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)).toEqual([0, 0, 0, 0, 0, 0, 0])
     expect(() => new Limiters(server.clock, false).check('contact', 'x')).not.toThrow()
   })
 

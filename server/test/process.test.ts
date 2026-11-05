@@ -200,6 +200,15 @@ describe('a clean start', () => {
     expect(result.stdout).toBe('')
     expect(existsSync(join(directory, 'never.sqlite'))).toBe(false)
   }, 30_000)
+
+  it('refuses a half-made provider setup the same way: a missing key and sender, a plain-http API, a webhook secret that is not one, one Cloudflare value alone', async () => {
+    const directory = folder()
+    const result = await exits({ EMAIL_PROVIDER: 'resend', EMAIL_API_URL: 'http://api.example.com', EMAIL_WEBHOOK_SECRET: 'not-a-secret', CLOUDFLARE_API_TOKEN: 'token', DATABASE_PATH: join(directory, 'never2.sqlite') })
+    expect(result.code).toBe(78)
+    for (const name of ['EMAIL_FROM', 'EMAIL_API_KEY', 'EMAIL_API_URL', 'EMAIL_WEBHOOK_SECRET', 'CLOUDFLARE_API_TOKEN']) expect(result.stderr, name).toContain(name)
+    expect(result.stderr).not.toContain('not-a-secret')
+    expect(existsSync(join(directory, 'never2.sqlite'))).toBe(false)
+  }, 30_000)
 })
 
 describe('the operator\'s commands', () => {
@@ -217,7 +226,7 @@ describe('the operator\'s commands', () => {
 
   it('migrate and seed are safe to run again', async () => {
     const e = env(folder())
-    expect((await cli(['migrate'], e)).stdout).toMatch(/Applied migrations: 1, 2\.\s+Schema version 2\./)
+    expect((await cli(['migrate'], e)).stdout).toMatch(/Applied migrations: 1, 2, 3\.\s+Schema version 3\./)
     expect((await cli(['migrate'], e)).stdout).toMatch(/The schema is up to date\./)
     expect((await cli(['seed'], e)).stdout).toContain('Loaded 4 services, 4 packages, 8 add-ons and 6 FAQ entries.')
     expect((await cli(['seed'], e)).stdout).toContain('The catalogue is not empty: nothing was changed.')
