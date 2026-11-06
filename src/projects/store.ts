@@ -147,6 +147,16 @@ export function runtimeProject(slug: string): ProjectCard | null {
   return list.cards.find((card) => card.slug === slug) ?? null
 }
 
+/**
+ * Puts a list into the store without asking the network: the build's prerender (src/seo/entry.ts) reads the projects the backend
+ * published at build time (`npm run catalog:pull`) and needs the head of each project's page to be written from them.
+ */
+export function primeProjects(cards: readonly ProjectCard[], categories: readonly ProjectCategory[]): void {
+  list = { status: 'ready', cards, categories, source: 'api', preview: false }
+  listKey = 'public'
+  emit()
+}
+
 /** What the list holds right now (for tests and for code outside React). */
 export const listSnapshot = (): ListState => list
 

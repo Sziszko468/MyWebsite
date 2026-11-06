@@ -20,6 +20,8 @@ dist-ssr
 # The backend's catalogue as pulled for a build (npm run catalog:pull)
 src/content/catalog.generated.json
 src/content/catalog.generated.json.tmp
+src/content/projects.generated.json
+src/content/projects.generated.json.tmp
 
 # The backend's database and the mail it writes in development
 /data/

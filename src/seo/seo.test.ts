@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterAll, describe, expect, it } from 'vitest'
 import { LANGUAGES } from '../i18n/config'
 import { PAGES, findPage } from '../routes/pages'
 import { allPageVersions, buildHead, serializeJsonLd, seoContextFrom, type Head, type SeoContext } from './head'
@@ -6,7 +6,8 @@ import { renderNoscript, renderPage, renderTag, HEAD_MARKER, BODY_MARKER } from 
 import { seoPath } from './paths'
 import { buildRobots, buildSitemap } from './sitemap'
 import { normalizeSiteUrl } from './siteUrl'
-import { buildSiteFiles } from './entry'
+import { resetProjectStore } from '../projects/store'
+import { buildSiteFiles, pagesForBuild } from './entry'
 
 const SITE = 'https://example.test'
 const LIVE: SeoContext = { siteUrl: SITE, brandName: 'Test Brand', brandIsSet: true, profiles: ['https://github.com/test'] }
@@ -298,7 +299,8 @@ describe('sitemap.xml and robots.txt', () => {
 
 describe('the page files the build writes', () => {
   const template = `<!doctype html><html lang="hu" data-theme="dark"><head><meta charset="UTF-8" />${HEAD_MARKER}<style>html{}</style><script>var a=1</script></head><body><div id="root"></div>${BODY_MARKER}<script type="module" src="/assets/a.js"></script></body></html>`
-  const built = buildSiteFiles(template, { scriptHashes: ['AAA'], styleHashes: ['BBB'] }, LIVE)
+  // (`null`: no projects pulled from a backend, whatever a developer's machine has in src/content/projects.generated.json.)
+  const built = buildSiteFiles(template, { scriptHashes: ['AAA'], styleHashes: ['BBB'] }, LIVE, null)
 
   it('writes one file per page and language, the root, the 404 page, the sitemap, robots.txt and the headers', () => {
     const pageFiles = Object.keys(built.files).filter((p) => p.endsWith('index.html'))
@@ -333,7 +335,7 @@ describe('the page files the build writes', () => {
   })
 
   it('warns, and writes no sitemap, while the site address is not configured', () => {
-    const unset = buildSiteFiles(template, { scriptHashes: [], styleHashes: [] }, UNSET)
+    const unset = buildSiteFiles(template, { scriptHashes: [], styleHashes: [] }, UNSET, null)
     expect(unset.files['sitemap.xml']).toBeUndefined()
     expect(unset.files['robots.txt']).toBe('User-agent: *\nAllow: /\n')
     expect(unset.warnings.join(' ')).toContain('VITE_SITE_URL')
@@ -356,5 +358,61 @@ describe('the page files the build writes', () => {
 describe('every page in the registry is reachable by the build', () => {
   it('has a page version for each language it is translated into', () => {
     expect(allVersions.length).toBe(PAGES.reduce((n, p) => n + p.languages.length, 0))
+  })
+})
+
+describe('the projects the backend published are what the build writes pages for', () => {
+  const template = `<!doctype html><html lang="hu" data-theme="dark"><head><meta charset="UTF-8" />${HEAD_MARKER}</head><body><div id="root"></div>${BODY_MARKER}</body></html>`
+  const served = (slug: string, card: Record<string, unknown> = {}) => ({
+    slug,
+    featured: false,
+    position: 1,
+    category: 'apps',
+    status: 'published',
+    card: { title: { hu: 'Útinapló', en: 'Travel log', nl: 'Reisdagboek' }, label: { hu: 'Napló', en: 'Log', nl: 'Dagboek' }, description: { hu: 'Kézzel írt kártyaszöveg.', en: 'A hand-written card text.', nl: 'Een kaarttekst.' }, tags: ['React'], detailPage: true, projectStatus: 'demo', ...card },
+  })
+  // The backend publishes the website's own Spendly, a project that exists only in the administration, one with no page of its own,
+  // and does NOT publish BookingHub or the Logistics Platform (the owner unpublished them).
+  const pulled = { projects: [served('spendly'), served('travel-log'), served('only-a-card', { detailPage: false })], categories: [] }
+  const built = buildSiteFiles(template, { scriptHashes: [], styleHashes: [] }, LIVE, pulled)
+  afterAll(() => resetProjectStore())
+
+  it('writes a page in every language for a new project with a page, with its own title, description and canonical address', () => {
+    for (const lang of LANGUAGES) expect(built.files[`${lang}/work/travel-log/index.html`], lang).toBeDefined()
+    const english = built.files['en/work/travel-log/index.html']
+    expect(english).toContain('<title data-seo>Travel log — Test Brand</title>')
+    expect(english).toContain('A hand-written card text.')
+    expect(english).toContain('<link rel="canonical" href="https://example.test/en/work/travel-log/" data-seo>')
+    expect(english).not.toContain('noindex')
+    expect(built.files['nl/work/travel-log/index.html']).toContain('<title data-seo>Reisdagboek — Test Brand</title>')
+  })
+
+  it('lists it in the sitemap with its language alternates, and lists nothing the backend does not publish', () => {
+    const sitemap = built.files['sitemap.xml']
+    expect(sitemap).toContain('<loc>https://example.test/en/work/travel-log/</loc>')
+    expect(sitemap).toContain('hreflang="nl" href="https://example.test/nl/work/travel-log/"')
+    expect(sitemap).toContain('<loc>https://example.test/en/work/spendly/</loc>')
+    for (const gone of ['bookinghub', 'logistics-platform', 'only-a-card']) expect(sitemap, gone).not.toContain(`/work/${gone}/`)
+  })
+
+  it('writes no file for a project of the website that the backend does not publish, nor for one without a page of its own', () => {
+    for (const gone of ['bookinghub', 'logistics-platform', 'only-a-card']) {
+      for (const lang of LANGUAGES) expect(built.files[`${lang}/work/${gone}/index.html`], `${lang}/${gone}`).toBeUndefined()
+    }
+    // The website's own project the backend still publishes keeps its own, longer head.
+    expect(built.files['en/work/spendly/index.html']).toContain('<link rel="canonical" href="https://example.test/en/work/spendly/" data-seo>')
+  })
+
+  it('builds exactly what it always did when nothing was pulled, or the file is not a list', () => {
+    expect(pagesForBuild(null)).toBe(PAGES)
+    expect(pagesForBuild({ projects: 'nope' })).toBe(PAGES)
+    expect(pagesForBuild({})).toBe(PAGES)
+  })
+
+  it('ignores an entry that is not a project (no address, a bad address, no title) instead of writing a page for it', () => {
+    const pages = pagesForBuild({ projects: [served('travel-log'), { slug: '../x', card: { title: { hu: 'X' }, detailPage: true } }, { slug: 'no-title', card: { title: {}, detailPage: true } }, 42, null] })
+    const paths = pages.filter((page) => page.path.startsWith('/work/')).map((page) => page.path)
+    expect(paths).toContain('/work/travel-log')
+    expect(paths.filter((path) => path.includes('..') || path.includes('no-title'))).toEqual([])
   })
 })
