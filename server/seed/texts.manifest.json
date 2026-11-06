@@ -1,0 +1,5419 @@
+{
+ "keys": [
+  {
+   "key": "dict.cta.startProject",
+   "group": "Website: cta.startProject",
+   "label": "cta › startProject",
+   "placeholders": [],
+   "default": {
+    "hu": "Indítsunk projektet",
+    "en": "Start a project",
+    "nl": "Start een project"
+   }
+  },
+  {
+   "key": "dict.hero.titleLine1",
+   "group": "Website: hero.titleLine1",
+   "label": "hero › titleLine1",
+   "placeholders": [],
+   "default": {
+    "hu": "Digitális élmények.",
+    "en": "Digital experiences.",
+    "nl": "Digitale ervaringen."
+   }
+  },
+  {
+   "key": "dict.hero.titleLine2",
+   "group": "Website: hero.titleLine2",
+   "label": "hero › titleLine2",
+   "placeholders": [],
+   "default": {
+    "hu": "Valódi hatással.",
+    "en": "Real impact.",
+    "nl": "Echte impact."
+   }
+  },
+  {
+   "key": "dict.hero.description",
+   "group": "Website: hero.description",
+   "label": "hero › description",
+   "placeholders": [],
+   "default": {
+    "hu": "Weboldalakat és webalkalmazásokat tervezek és fejlesztek, ahol a technológia, a kreativitás és a részletekre való odafigyelés találkozik.",
+    "en": "I design and build websites and web applications where technology, creativity and attention to detail meet.",
+    "nl": "Ik ontwerp en bouw websites en webapplicaties waar technologie, creativiteit en oog voor detail samenkomen."
+   }
+  },
+  {
+   "key": "dict.hero.ctaPrimary",
+   "group": "Website: hero.ctaPrimary",
+   "label": "hero › ctaPrimary",
+   "placeholders": [],
+   "default": {
+    "hu": "Fedezd fel a munkáimat",
+    "en": "Explore my work",
+    "nl": "Ontdek mijn werk"
+   }
+  },
+  {
+   "key": "dict.hero.ctaSecondary",
+   "group": "Website: hero.ctaSecondary",
+   "label": "hero › ctaSecondary",
+   "placeholders": [],
+   "default": {
+    "hu": "Beszéljünk a projektedről",
+    "en": "Let's talk about your project",
+    "nl": "Laten we over je project praten"
+   }
+  },
+  {
+   "key": "dict.hero.scrollCue",
+   "group": "Website: hero.scrollCue",
+   "label": "hero › scrollCue",
+   "placeholders": [],
+   "default": {
+    "hu": "Görgess a felfedezéshez",
+    "en": "Scroll to explore",
+    "nl": "Scroll om te ontdekken"
+   }
+  },
+  {
+   "key": "dict.footer.role",
+   "group": "Website: footer.role",
+   "label": "footer › role",
+   "placeholders": [],
+   "default": {
+    "hu": "Weboldalak és webalkalmazások tervezése és fejlesztése.",
+    "en": "Websites and web applications, designed and built.",
+    "nl": "Websites en webapplicaties, ontworpen en gebouwd."
+   }
+  },
+  {
+   "key": "dict.home.path.title",
+   "group": "Website: home.path",
+   "label": "home › path › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Válaszd az utad",
+    "en": "Choose your path",
+    "nl": "Kies je pad"
+   }
+  },
+  {
+   "key": "dict.home.path.career.label",
+   "group": "Website: home.path",
+   "label": "home › path › career › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Karrier és munkáltatók",
+    "en": "Careers & employers",
+    "nl": "Carrière en werkgevers"
+   }
+  },
+  {
+   "key": "dict.home.path.career.title",
+   "group": "Website: home.path",
+   "label": "home › path › career › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Együtt építsünk valami értékeset.",
+    "en": "Let's build something worthwhile together.",
+    "nl": "Laten we samen iets waardevols bouwen."
+   }
+  },
+  {
+   "key": "dict.home.path.career.text",
+   "group": "Website: home.path",
+   "label": "home › path › career › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Ismerd meg a projektjeimet, a technológiai hátteremet és a problémamegoldási szemléletemet.",
+    "en": "Get to know my projects, my technical background and the way I approach problems.",
+    "nl": "Maak kennis met mijn projecten, mijn technische achtergrond en mijn manier van problemen oplossen."
+   }
+  },
+  {
+   "key": "dict.home.path.career.cta",
+   "group": "Website: home.path",
+   "label": "home › path › career › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Portfólió megtekintése",
+    "en": "View portfolio",
+    "nl": "Bekijk het portfolio"
+   }
+  },
+  {
+   "key": "dict.home.path.clients.label",
+   "group": "Website: home.path",
+   "label": "home › path › clients › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Ügyfelek és vállalkozások",
+    "en": "Clients & businesses",
+    "nl": "Klanten en bedrijven"
+   }
+  },
+  {
+   "key": "dict.home.path.clients.title",
+   "group": "Website: home.path",
+   "label": "home › path › clients › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Van egy ötleted? Valósítsuk meg.",
+    "en": "Got an idea? Let's make it real.",
+    "nl": "Heb je een idee? Laten we het realiseren."
+   }
+  },
+  {
+   "key": "dict.home.path.clients.text",
+   "group": "Website: home.path",
+   "label": "home › path › clients › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Modern, reszponzív weboldalak és webalkalmazások üzleti célokra, átgondolt tervezéssel és fejlesztéssel.",
+    "en": "Modern, responsive websites and web applications for business goals, with thoughtful design and development.",
+    "nl": "Moderne, responsieve websites en webapplicaties voor zakelijke doelen, met doordacht ontwerp en doordachte ontwikkeling."
+   }
+  },
+  {
+   "key": "dict.home.path.clients.cta",
+   "group": "Website: home.path",
+   "label": "home › path › clients › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Indítsunk projektet",
+    "en": "Start a project",
+    "nl": "Start een project"
+   }
+  },
+  {
+   "key": "dict.home.work.title",
+   "group": "Website: home.work",
+   "label": "home › work › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiemelt munkák",
+    "en": "Selected work",
+    "nl": "Uitgelicht werk"
+   }
+  },
+  {
+   "key": "dict.home.work.intro",
+   "group": "Website: home.work",
+   "label": "home › work › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Válogatás a projektjeimből. Mindegyiknél jelölöm, milyen állapotban van.",
+    "en": "A selection of my projects. Each one is marked with the state it is in.",
+    "nl": "Een selectie van mijn projecten. Bij elk project staat in welke staat het zich bevindt."
+   }
+  },
+  {
+   "key": "dict.home.work.conceptSketch",
+   "group": "Website: home.work",
+   "label": "home › work › conceptSketch",
+   "placeholders": [],
+   "default": {
+    "hu": "Koncepcióvázlat",
+    "en": "Concept sketch",
+    "nl": "Conceptschets"
+   }
+  },
+  {
+   "key": "dict.home.work.imageAlt",
+   "group": "Website: home.work",
+   "label": "home › work › imageAlt",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "{name} képernyőképe",
+    "en": "Screenshot of {name}",
+    "nl": "Schermafbeelding van {name}"
+   }
+  },
+  {
+   "key": "dict.home.work.demo",
+   "group": "Website: home.work",
+   "label": "home › work › demo",
+   "placeholders": [],
+   "default": {
+    "hu": "Élő demó",
+    "en": "Live demo",
+    "nl": "Live demo"
+   }
+  },
+  {
+   "key": "dict.home.work.details",
+   "group": "Website: home.work",
+   "label": "home › work › details",
+   "placeholders": [],
+   "default": {
+    "hu": "Részletek",
+    "en": "Details",
+    "nl": "Details"
+   }
+  },
+  {
+   "key": "dict.home.work.noDetails",
+   "group": "Website: home.work",
+   "label": "home › work › noDetails",
+   "placeholders": [],
+   "default": {
+    "hu": "A részletes oldal még nem készült el.",
+    "en": "The details page is not ready yet.",
+    "nl": "De detailpagina is nog niet klaar."
+   }
+  },
+  {
+   "key": "dict.home.build.title",
+   "group": "Website: home.build",
+   "label": "home › build › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Amit építek",
+    "en": "What I build",
+    "nl": "Wat ik bouw"
+   }
+  },
+  {
+   "key": "dict.home.build.items.websites.title",
+   "group": "Website: home.build",
+   "label": "home › build › items › websites › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Weboldalak",
+    "en": "Websites",
+    "nl": "Websites"
+   }
+  },
+  {
+   "key": "dict.home.build.items.websites.text",
+   "group": "Website: home.build",
+   "label": "home › build › items › websites › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Reszponzív, modern weboldalak, egyedi vizuális megjelenéssel.",
+    "en": "Responsive, modern websites with a distinctive visual identity.",
+    "nl": "Responsieve, moderne websites met een eigen visuele identiteit."
+   }
+  },
+  {
+   "key": "dict.home.build.items.webapps.title",
+   "group": "Website: home.build",
+   "label": "home › build › items › webapps › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Webalkalmazások",
+    "en": "Web Applications",
+    "nl": "Webapplicaties"
+   }
+  },
+  {
+   "key": "dict.home.build.items.webapps.text",
+   "group": "Website: home.build",
+   "label": "home › build › items › webapps › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Interaktív alkalmazások átgondolt felhasználói folyamatokkal.",
+    "en": "Interactive applications with carefully considered user flows.",
+    "nl": "Interactieve applicaties met doordachte gebruikersstromen."
+   }
+  },
+  {
+   "key": "dict.home.build.items.mobile.title",
+   "group": "Website: home.build",
+   "label": "home › build › items › mobile › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Mobilélmények",
+    "en": "Mobile Experiences",
+    "nl": "Mobiele ervaringen"
+   }
+  },
+  {
+   "key": "dict.home.build.items.mobile.text",
+   "group": "Website: home.build",
+   "label": "home › build › items › mobile › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Mobilra optimalizált felületek és alkalmazásélmények.",
+    "en": "Interfaces and application experiences optimised for mobile.",
+    "nl": "Voor mobiel geoptimaliseerde interfaces en applicatie-ervaringen."
+   }
+  },
+  {
+   "key": "dict.home.build.items.integrations.title",
+   "group": "Website: home.build",
+   "label": "home › build › items › integrations › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Integrációk",
+    "en": "Integrations",
+    "nl": "Integraties"
+   }
+  },
+  {
+   "key": "dict.home.build.items.integrations.text",
+   "group": "Website: home.build",
+   "label": "home › build › items › integrations › text",
+   "placeholders": [],
+   "default": {
+    "hu": "API-k és digitális szolgáltatások összekapcsolása a projekt tényleges igényei szerint.",
+    "en": "Connecting APIs and digital services according to the project's actual needs.",
+    "nl": "API's en digitale diensten koppelen op basis van wat het project echt nodig heeft."
+   }
+  },
+  {
+   "key": "dict.home.about.title",
+   "group": "Website: home.about",
+   "label": "home › about › title",
+   "placeholders": [],
+   "default": {
+    "hu": "A jó digitális élmény nem véletlen.",
+    "en": "A good digital experience is no accident.",
+    "nl": "Een goede digitale ervaring is geen toeval."
+   }
+  },
+  {
+   "key": "dict.home.about.text",
+   "group": "Website: home.about",
+   "label": "home › about › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Számomra a fejlesztés nem csupán kódírás. A cél az, hogy egy ötletből átgondolt, használható és vizuálisan karakteres digitális termék szülessen.",
+    "en": "For me, development is more than writing code. The goal is for an idea to become a thoughtful, usable and visually distinctive digital product.",
+    "nl": "Voor mij is ontwikkelen meer dan code schrijven. Het doel is dat uit een idee een doordacht, bruikbaar en visueel onderscheidend digitaal product ontstaat."
+   }
+  },
+  {
+   "key": "dict.home.about.principles.0",
+   "group": "Website: home.about",
+   "label": "home › about › principles #0",
+   "placeholders": [],
+   "default": {
+    "hu": "Átgondolt",
+    "en": "Considered",
+    "nl": "Doordacht"
+   }
+  },
+  {
+   "key": "dict.home.about.principles.1",
+   "group": "Website: home.about",
+   "label": "home › about › principles #1",
+   "placeholders": [],
+   "default": {
+    "hu": "Használható",
+    "en": "Usable",
+    "nl": "Bruikbaar"
+   }
+  },
+  {
+   "key": "dict.home.about.principles.2",
+   "group": "Website: home.about",
+   "label": "home › about › principles #2",
+   "placeholders": [],
+   "default": {
+    "hu": "Karakteres",
+    "en": "Distinctive",
+    "nl": "Karaktervol"
+   }
+  },
+  {
+   "key": "dict.home.about.principlesLabel",
+   "group": "Website: home.about",
+   "label": "home › about › principlesLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Három szó, amelyek a célt összefoglalják",
+    "en": "Three words that sum up the aim",
+    "nl": "Drie woorden die het doel samenvatten"
+   }
+  },
+  {
+   "key": "dict.home.about.stackHeading",
+   "group": "Website: home.about",
+   "label": "home › about › stackHeading",
+   "placeholders": [],
+   "default": {
+    "hu": "Ezzel épült ez az oldal",
+    "en": "What this site is built with",
+    "nl": "Hiermee is deze site gebouwd"
+   }
+  },
+  {
+   "key": "dict.home.about.stackNote",
+   "group": "Website: home.about",
+   "label": "home › about › stackNote",
+   "placeholders": [],
+   "default": {
+    "hu": "Az eszközök ennek az oldalnak a forráskódjából származnak.",
+    "en": "The tools are taken from this site's own source code.",
+    "nl": "De hulpmiddelen komen uit de broncode van deze site zelf."
+   }
+  },
+  {
+   "key": "dict.home.about.more",
+   "group": "Website: home.about",
+   "label": "home › about › more",
+   "placeholders": [],
+   "default": {
+    "hu": "Többet rólam",
+    "en": "More about me",
+    "nl": "Meer over mij"
+   }
+  },
+  {
+   "key": "dict.home.lab.title",
+   "group": "Website: home.lab",
+   "label": "home › lab › title",
+   "placeholders": [],
+   "default": {
+    "hu": "A Lab",
+    "en": "The Lab",
+    "nl": "Het lab"
+   }
+  },
+  {
+   "key": "dict.home.lab.intro",
+   "group": "Website: home.lab",
+   "label": "home › lab › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Kísérleti digitális játszótér: öt interaktív WebGL-élmény, a részecskéktől a kromatikus torzításig. Három ízelítő itt, mind az öt a Labban vár.",
+    "en": "An experimental digital playground: five interactive WebGL experiences, from particles to chromatic distortion. Three samples here, all five wait in the Lab.",
+    "nl": "Een experimentele digitale speeltuin: vijf interactieve WebGL-ervaringen, van deeltjes tot chromatische vervorming. Drie voorbeelden hier, alle vijf wachten in het Lab."
+   }
+  },
+  {
+   "key": "dict.home.lab.enter",
+   "group": "Website: home.lab",
+   "label": "home › lab › enter",
+   "placeholders": [],
+   "default": {
+    "hu": "Belépés a Labba",
+    "en": "Enter the Lab",
+    "nl": "Het Lab binnengaan"
+   }
+  },
+  {
+   "key": "dict.home.lab.open",
+   "group": "Website: home.lab",
+   "label": "home › lab › open",
+   "placeholders": [],
+   "default": {
+    "hu": "Megnyitás",
+    "en": "Open",
+    "nl": "Openen"
+   }
+  },
+  {
+   "key": "dict.home.packages.title",
+   "group": "Website: home.packages",
+   "label": "home › packages › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Hogyan dolgozhatunk együtt",
+    "en": "How we can work together",
+    "nl": "Zo kunnen we samenwerken"
+   }
+  },
+  {
+   "key": "dict.home.packages.intro",
+   "group": "Website: home.packages",
+   "label": "home › packages › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Négy kiindulási forma. A pontos tartalmat és az árat a projekthez igazítjuk.",
+    "en": "Four starting points. The exact scope and price are fitted to the project.",
+    "nl": "Vier uitgangspunten. De exacte inhoud en prijs stemmen we af op het project."
+   }
+  },
+  {
+   "key": "dict.home.packages.audienceLabel",
+   "group": "Website: home.packages",
+   "label": "home › packages › audienceLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Kinek szól",
+    "en": "Who it is for",
+    "nl": "Voor wie"
+   }
+  },
+  {
+   "key": "dict.home.packages.includesLabel",
+   "group": "Website: home.packages",
+   "label": "home › packages › includesLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Tartalmazza",
+    "en": "Includes",
+    "nl": "Inbegrepen"
+   }
+  },
+  {
+   "key": "dict.home.packages.cta",
+   "group": "Website: home.packages",
+   "label": "home › packages › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlatkérés",
+    "en": "Request a quote",
+    "nl": "Offerte aanvragen"
+   }
+  },
+  {
+   "key": "dict.home.final.title",
+   "group": "Website: home.final",
+   "label": "home › final › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Valósítsuk meg.",
+    "en": "Let's make it real.",
+    "nl": "Laten we het realiseren."
+   }
+  },
+  {
+   "key": "dict.home.final.text",
+   "group": "Website: home.final",
+   "label": "home › final › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Mesélj az ötletedről, és nézzük meg, hogyan válhat belőle működő digitális élmény.",
+    "en": "Tell me about your idea, and let's see how it can become a working digital experience.",
+    "nl": "Vertel over je idee, dan kijken we hoe er een werkende digitale ervaring uit kan ontstaan."
+   }
+  },
+  {
+   "key": "dict.home.final.cta",
+   "group": "Website: home.final",
+   "label": "home › final › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Beszéljünk a projektedről",
+    "en": "Let's talk about your project",
+    "nl": "Laten we over je project praten"
+   }
+  },
+  {
+   "key": "dict.home.final.emailLead",
+   "group": "Website: home.final",
+   "label": "home › final › emailLead",
+   "placeholders": [],
+   "default": {
+    "hu": "Vagy írj közvetlenül:",
+    "en": "Or write directly:",
+    "nl": "Of mail rechtstreeks:"
+   }
+  },
+  {
+   "key": "dict.aboutPage.hero.titleLine1",
+   "group": "Website: aboutPage.hero",
+   "label": "aboutPage › hero › titleLine1",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem csak kódot írok.",
+    "en": "Not just writing code.",
+    "nl": "Niet alleen code schrijven."
+   }
+  },
+  {
+   "key": "dict.aboutPage.hero.titleLine2",
+   "group": "Website: aboutPage.hero",
+   "label": "aboutPage › hero › titleLine2",
+   "placeholders": [],
+   "default": {
+    "hu": "Digitális élményeket építek.",
+    "en": "Building digital experiences.",
+    "nl": "Digitale ervaringen bouwen."
+   }
+  },
+  {
+   "key": "dict.aboutPage.hero.lead",
+   "group": "Website: aboutPage.hero",
+   "label": "aboutPage › hero › lead",
+   "placeholders": [],
+   "default": {
+    "hu": "Hiszek abban, hogy a jó fejlesztés a technológia, a kreativitás és a problémamegoldó gondolkodás találkozásából születik.",
+    "en": "I believe good development comes from technology, creativity and problem-solving thinking meeting.",
+    "nl": "Ik geloof dat goede ontwikkeling ontstaat waar technologie, creativiteit en probleemoplossend denken samenkomen."
+   }
+  },
+  {
+   "key": "dict.aboutPage.hero.ctaPrimary",
+   "group": "Website: aboutPage.hero",
+   "label": "aboutPage › hero › ctaPrimary",
+   "placeholders": [],
+   "default": {
+    "hu": "Nézd meg a munkáimat",
+    "en": "See my work",
+    "nl": "Bekijk mijn werk"
+   }
+  },
+  {
+   "key": "dict.aboutPage.hero.ctaSecondary",
+   "group": "Website: aboutPage.hero",
+   "label": "aboutPage › hero › ctaSecondary",
+   "placeholders": [],
+   "default": {
+    "hu": "Lépj kapcsolatba velem",
+    "en": "Get in touch",
+    "nl": "Neem contact met me op"
+   }
+  },
+  {
+   "key": "dict.aboutPage.final.title",
+   "group": "Website: aboutPage.final",
+   "label": "aboutPage › final › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Építsünk valami maradandót.",
+    "en": "Let’s build something meaningful.",
+    "nl": "Laten we iets blijvends bouwen."
+   }
+  },
+  {
+   "key": "dict.aboutPage.final.text",
+   "group": "Website: aboutPage.final",
+   "label": "aboutPage › final › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Minden jó projekt egy beszélgetéssel kezdődik.",
+    "en": "Every good project starts with a conversation.",
+    "nl": "Elk goed project begint met een gesprek."
+   }
+  },
+  {
+   "key": "dict.aboutPage.final.cta",
+   "group": "Website: aboutPage.final",
+   "label": "aboutPage › final › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Kapcsolatfelvétel",
+    "en": "Get in touch",
+    "nl": "Neem contact op"
+   }
+  },
+  {
+   "key": "dict.contactPage.hero.title",
+   "group": "Website: contactPage.hero",
+   "label": "contactPage › hero › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Van egy jó ötleted?",
+    "en": "Got a good idea?",
+    "nl": "Heb je een goed idee?"
+   }
+  },
+  {
+   "key": "dict.contactPage.hero.lead",
+   "group": "Website: contactPage.hero",
+   "label": "contactPage › hero › lead",
+   "placeholders": [],
+   "default": {
+    "hu": "Beszéljünk róla. Legyen szó egy új projektről, szakmai lehetőségről vagy együttműködésről, szívesen meghallgatom.",
+    "en": "Let’s talk about it. Whether it is a new project, a professional opportunity or a collaboration, I would be glad to listen.",
+    "nl": "Laten we erover praten. Of het nu gaat om een nieuw project, een professionele kans of een samenwerking: ik luister graag."
+   }
+  },
+  {
+   "key": "dict.contactPage.hero.doorsLabel",
+   "group": "Website: contactPage.hero",
+   "label": "contactPage › hero › doorsLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Válaszd ki, miről szeretnél beszélni",
+    "en": "Choose what you would like to talk about",
+    "nl": "Kies waarover je wilt praten"
+   }
+  },
+  {
+   "key": "dict.contactPage.hero.employers.label",
+   "group": "Website: contactPage.hero",
+   "label": "contactPage › hero › employers › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Munkáltatóknak",
+    "en": "For employers",
+    "nl": "Voor werkgevers"
+   }
+  },
+  {
+   "key": "dict.contactPage.hero.employers.title",
+   "group": "Website: contactPage.hero",
+   "label": "contactPage › hero › employers › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Szakmai lehetőség, fejlesztői pozíció vagy csapatmunka.",
+    "en": "A professional opportunity, a developer position or teamwork.",
+    "nl": "Een professionele kans, een ontwikkelaarspositie of teamwerk."
+   }
+  },
+  {
+   "key": "dict.contactPage.hero.employers.cta",
+   "group": "Website: contactPage.hero",
+   "label": "contactPage › hero › employers › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Beszéljünk a lehetőségről",
+    "en": "Let’s talk about the opportunity",
+    "nl": "Laten we over de kans praten"
+   }
+  },
+  {
+   "key": "dict.contactPage.hero.clients.label",
+   "group": "Website: contactPage.hero",
+   "label": "contactPage › hero › clients › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Ügyfeleknek",
+    "en": "For clients",
+    "nl": "Voor opdrachtgevers"
+   }
+  },
+  {
+   "key": "dict.contactPage.hero.clients.title",
+   "group": "Website: contactPage.hero",
+   "label": "contactPage › hero › clients › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Weboldal, webalkalmazás vagy egyedi digitális megoldás.",
+    "en": "A website, a web application or a custom digital solution.",
+    "nl": "Een website, een webapplicatie of een digitale oplossing op maat."
+   }
+  },
+  {
+   "key": "dict.contactPage.hero.clients.cta",
+   "group": "Website: contactPage.hero",
+   "label": "contactPage › hero › clients › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Indítsunk projektet",
+    "en": "Start a project",
+    "nl": "Start een project"
+   }
+  },
+  {
+   "key": "dict.contactPage.form.title",
+   "group": "Website: contactPage.form",
+   "label": "contactPage › form › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Írj nekem",
+    "en": "Write to me",
+    "nl": "Schrijf me"
+   }
+  },
+  {
+   "key": "dict.contactPage.form.intro",
+   "group": "Website: contactPage.form",
+   "label": "contactPage › form › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Pár sor is elég: a témát, a tárgyat és az üzenetet várom, és azt, hogyan válaszolhatok.",
+    "en": "A few lines are enough: the topic, a subject and your message, and how I can reply.",
+    "nl": "Een paar regels zijn genoeg: het onderwerp, een titel en je bericht, en hoe ik kan antwoorden."
+   }
+  },
+  {
+   "key": "dict.project.sections.overview",
+   "group": "Website: project.sections",
+   "label": "project › sections › overview",
+   "placeholders": [],
+   "default": {
+    "hu": "Áttekintés",
+    "en": "Overview",
+    "nl": "Overzicht"
+   }
+  },
+  {
+   "key": "dict.project.sections.challenge",
+   "group": "Website: project.sections",
+   "label": "project › sections › challenge",
+   "placeholders": [],
+   "default": {
+    "hu": "A kihívás",
+    "en": "The challenge",
+    "nl": "De uitdaging"
+   }
+  },
+  {
+   "key": "dict.project.sections.approach",
+   "group": "Website: project.sections",
+   "label": "project › sections › approach",
+   "placeholders": [],
+   "default": {
+    "hu": "A megközelítés",
+    "en": "The approach",
+    "nl": "De aanpak"
+   }
+  },
+  {
+   "key": "dict.project.sections.architecture",
+   "group": "Website: project.sections",
+   "label": "project › sections › architecture",
+   "placeholders": [],
+   "default": {
+    "hu": "Technikai architektúra",
+    "en": "Technical architecture",
+    "nl": "Technische architectuur"
+   }
+  },
+  {
+   "key": "dict.project.sections.features",
+   "group": "Website: project.sections",
+   "label": "project › sections › features",
+   "placeholders": [],
+   "default": {
+    "hu": "Főbb funkciók",
+    "en": "Key features",
+    "nl": "Belangrijkste functies"
+   }
+  },
+  {
+   "key": "dict.project.sections.decisions",
+   "group": "Website: project.sections",
+   "label": "project › sections › decisions",
+   "placeholders": [],
+   "default": {
+    "hu": "Tervezési döntések",
+    "en": "Design decisions",
+    "nl": "Ontwerpbeslissingen"
+   }
+  },
+  {
+   "key": "dict.project.sections.learned",
+   "group": "Website: project.sections",
+   "label": "project › sections › learned",
+   "placeholders": [],
+   "default": {
+    "hu": "Tanulságok és következő lépések",
+    "en": "Lessons and next steps",
+    "nl": "Lessen en volgende stappen"
+   }
+  },
+  {
+   "key": "dict.project.sections.gallery",
+   "group": "Website: project.sections",
+   "label": "project › sections › gallery",
+   "placeholders": [],
+   "default": {
+    "hu": "Galéria",
+    "en": "Gallery",
+    "nl": "Galerij"
+   }
+  },
+  {
+   "key": "dict.project.sections.results",
+   "group": "Website: project.sections",
+   "label": "project › sections › results",
+   "placeholders": [],
+   "default": {
+    "hu": "Eredmények",
+    "en": "Results",
+    "nl": "Resultaten"
+   }
+  },
+  {
+   "key": "dict.project.sections.links",
+   "group": "Website: project.sections",
+   "label": "project › sections › links",
+   "placeholders": [],
+   "default": {
+    "hu": "Hivatkozások",
+    "en": "Links",
+    "nl": "Links"
+   }
+  },
+  {
+   "key": "shop.common.nav.label",
+   "group": "Shop: common",
+   "label": "common › nav › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Bolt",
+    "en": "Shop",
+    "nl": "Winkel"
+   }
+  },
+  {
+   "key": "shop.common.nav.services",
+   "group": "Shop: common",
+   "label": "common › nav › services",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatások",
+    "en": "Services",
+    "nl": "Diensten"
+   }
+  },
+  {
+   "key": "shop.common.nav.packages",
+   "group": "Shop: common",
+   "label": "common › nav › packages",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomagok",
+    "en": "Packages",
+    "nl": "Pakketten"
+   }
+  },
+  {
+   "key": "shop.common.nav.configure",
+   "group": "Shop: common",
+   "label": "common › nav › configure",
+   "placeholders": [],
+   "default": {
+    "hu": "Összeállító",
+    "en": "Configure",
+    "nl": "Samenstellen"
+   }
+  },
+  {
+   "key": "shop.common.nav.cart",
+   "group": "Shop: common",
+   "label": "common › nav › cart",
+   "placeholders": [],
+   "default": {
+    "hu": "Kosár",
+    "en": "Cart",
+    "nl": "Winkelmand"
+   }
+  },
+  {
+   "key": "shop.common.nav.search",
+   "group": "Shop: common",
+   "label": "common › nav › search",
+   "placeholders": [],
+   "default": {
+    "hu": "Keresés",
+    "en": "Search",
+    "nl": "Zoeken"
+   }
+  },
+  {
+   "key": "shop.common.nav.back",
+   "group": "Shop: common",
+   "label": "common › nav › back",
+   "placeholders": [],
+   "default": {
+    "hu": "Vissza a szolgáltatásokhoz",
+    "en": "Back to Services",
+    "nl": "Terug naar Diensten"
+   }
+  },
+  {
+   "key": "shop.common.nav.breadcrumb",
+   "group": "Shop: common",
+   "label": "common › nav › breadcrumb",
+   "placeholders": [],
+   "default": {
+    "hu": "Hol vagy",
+    "en": "You are here",
+    "nl": "Je bent hier"
+   }
+  },
+  {
+   "key": "shop.common.nav.categories",
+   "group": "Shop: common",
+   "label": "common › nav › categories",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatáskategóriák",
+    "en": "Service categories",
+    "nl": "Dienstencategorieën"
+   }
+  },
+  {
+   "key": "shop.common.nav.menuHeading",
+   "group": "Shop: common",
+   "label": "common › nav › menuHeading",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatások boltja",
+    "en": "The services shop",
+    "nl": "De dienstenwinkel"
+   }
+  },
+  {
+   "key": "shop.common.cartLink.empty",
+   "group": "Shop: common",
+   "label": "common › cartLink › empty",
+   "placeholders": [],
+   "default": {
+    "hu": "Kosár, üres",
+    "en": "Cart, empty",
+    "nl": "Winkelmand, leeg"
+   }
+  },
+  {
+   "key": "shop.common.cartLink.one",
+   "group": "Shop: common",
+   "label": "common › cartLink › one",
+   "placeholders": [],
+   "default": {
+    "hu": "Kosár, 1 tétel",
+    "en": "Cart, 1 item",
+    "nl": "Winkelmand, 1 item"
+   }
+  },
+  {
+   "key": "shop.common.cartLink.many",
+   "group": "Shop: common",
+   "label": "common › cartLink › many",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "Kosár, {count} tétel",
+    "en": "Cart, {count} items",
+    "nl": "Winkelmand, {count} items"
+   }
+  },
+  {
+   "key": "shop.common.announce.added",
+   "group": "Shop: common",
+   "label": "common › announce › added",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "{name} a kosárba került.",
+    "en": "{name} was added to your cart.",
+    "nl": "{name} is toegevoegd aan je winkelmand."
+   }
+  },
+  {
+   "key": "shop.common.announce.removed",
+   "group": "Shop: common",
+   "label": "common › announce › removed",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "{name} kikerült a kosárból.",
+    "en": "{name} was removed from your cart.",
+    "nl": "{name} is uit je winkelmand verwijderd."
+   }
+  },
+  {
+   "key": "shop.common.announce.updated",
+   "group": "Shop: common",
+   "label": "common › announce › updated",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "{name} frissítve a kosárban.",
+    "en": "{name} was updated in your cart.",
+    "nl": "{name} is bijgewerkt in je winkelmand."
+   }
+  },
+  {
+   "key": "shop.common.announce.cleared",
+   "group": "Shop: common",
+   "label": "common › announce › cleared",
+   "placeholders": [],
+   "default": {
+    "hu": "A kosár kiürítve.",
+    "en": "Your cart was cleared.",
+    "nl": "Je winkelmand is geleegd."
+   }
+  },
+  {
+   "key": "shop.common.price.customQuote",
+   "group": "Shop: common",
+   "label": "common › price › customQuote",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi ajánlat",
+    "en": "Custom Quote",
+    "nl": "Offerte op maat"
+   }
+  },
+  {
+   "key": "shop.common.price.quoteHint",
+   "group": "Shop: common",
+   "label": "common › price › quoteHint",
+   "placeholders": [],
+   "default": {
+    "hu": "Az ár a projekt terjedelmétől függ, és az ajánlatban szerepel.",
+    "en": "The price depends on the scope of the project and comes with the quote.",
+    "nl": "De prijs hangt af van de omvang van het project en staat in de offerte."
+   }
+  },
+  {
+   "key": "shop.common.price.from",
+   "group": "Shop: common",
+   "label": "common › price › from",
+   "placeholders": [],
+   "default": {
+    "hu": "Ettől",
+    "en": "From",
+    "nl": "Vanaf"
+   }
+  },
+  {
+   "key": "shop.common.price.exact",
+   "group": "Shop: common",
+   "label": "common › price › exact",
+   "placeholders": [],
+   "default": {
+    "hu": "A pontos összeg az ajánlatban szerepel.",
+    "en": "The exact amount is given in the quote.",
+    "nl": "Het exacte bedrag staat in de offerte."
+   }
+  },
+  {
+   "key": "shop.common.price.tbd",
+   "group": "Shop: common",
+   "label": "common › price › tbd",
+   "placeholders": [],
+   "default": {
+    "hu": "Az ár még nincs megerősítve",
+    "en": "Price to be confirmed",
+    "nl": "Prijs nog te bevestigen"
+   }
+  },
+  {
+   "key": "shop.common.price.notPublished",
+   "group": "Shop: common",
+   "label": "common › price › notPublished",
+   "placeholders": [],
+   "default": {
+    "hu": "Nincs közzétett ár",
+    "en": "No published price",
+    "nl": "Geen gepubliceerde prijs"
+   }
+  },
+  {
+   "key": "shop.common.price.vat.excluded",
+   "group": "Shop: common",
+   "label": "common › price › vat › excluded",
+   "placeholders": [],
+   "default": {
+    "hu": "+ ÁFA",
+    "en": "+ VAT",
+    "nl": "+ btw"
+   }
+  },
+  {
+   "key": "shop.common.price.vat.included",
+   "group": "Shop: common",
+   "label": "common › price › vat › included",
+   "placeholders": [],
+   "default": {
+    "hu": "ÁFÁ-val",
+    "en": "incl. VAT",
+    "nl": "incl. btw"
+   }
+  },
+  {
+   "key": "shop.common.price.vat.exempt",
+   "group": "Shop: common",
+   "label": "common › price › vat › exempt",
+   "placeholders": [],
+   "default": {
+    "hu": "ÁFA-mentes",
+    "en": "VAT-exempt",
+    "nl": "btw-vrij"
+   }
+  },
+  {
+   "key": "shop.common.price.kind.fixed",
+   "group": "Shop: common",
+   "label": "common › price › kind › fixed",
+   "placeholders": [],
+   "default": {
+    "hu": "Fix áras termék",
+    "en": "Fixed-price product",
+    "nl": "Product met vaste prijs"
+   }
+  },
+  {
+   "key": "shop.common.price.kind.quote",
+   "group": "Shop: common",
+   "label": "common › price › kind › quote",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi ajánlat alapján",
+    "en": "Custom-quoted service",
+    "nl": "Dienst op offerte"
+   }
+  },
+  {
+   "key": "shop.common.price.kind.addon",
+   "group": "Shop: common",
+   "label": "common › price › kind › addon",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítő",
+    "en": "Add-on",
+    "nl": "Toevoeging"
+   }
+  },
+  {
+   "key": "shop.common.action.addToCart",
+   "group": "Shop: common",
+   "label": "common › action › addToCart",
+   "placeholders": [],
+   "default": {
+    "hu": "Kosárba",
+    "en": "Add to cart",
+    "nl": "In winkelmand"
+   }
+  },
+  {
+   "key": "shop.common.action.inCart",
+   "group": "Shop: common",
+   "label": "common › action › inCart",
+   "placeholders": [],
+   "default": {
+    "hu": "A kosárban",
+    "en": "In your cart",
+    "nl": "In je winkelmand"
+   }
+  },
+  {
+   "key": "shop.common.action.updateCart",
+   "group": "Shop: common",
+   "label": "common › action › updateCart",
+   "placeholders": [],
+   "default": {
+    "hu": "Kosár frissítése",
+    "en": "Update cart",
+    "nl": "Winkelmand bijwerken"
+   }
+  },
+  {
+   "key": "shop.common.action.viewCart",
+   "group": "Shop: common",
+   "label": "common › action › viewCart",
+   "placeholders": [],
+   "default": {
+    "hu": "Kosár megnyitása",
+    "en": "View cart",
+    "nl": "Winkelmand bekijken"
+   }
+  },
+  {
+   "key": "shop.common.action.requestQuote",
+   "group": "Shop: common",
+   "label": "common › action › requestQuote",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlatot kérek",
+    "en": "Request a quote",
+    "nl": "Offerte aanvragen"
+   }
+  },
+  {
+   "key": "shop.common.action.viewService",
+   "group": "Shop: common",
+   "label": "common › action › viewService",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatás megnézése",
+    "en": "View service",
+    "nl": "Dienst bekijken"
+   }
+  },
+  {
+   "key": "shop.common.action.configure",
+   "group": "Shop: common",
+   "label": "common › action › configure",
+   "placeholders": [],
+   "default": {
+    "hu": "Összeállítom",
+    "en": "Build my request",
+    "nl": "Mijn aanvraag samenstellen"
+   }
+  },
+  {
+   "key": "shop.common.action.letsTalk",
+   "group": "Shop: common",
+   "label": "common › action › letsTalk",
+   "placeholders": [],
+   "default": {
+    "hu": "Beszéljünk",
+    "en": "Let’s talk",
+    "nl": "Laten we praten"
+   }
+  },
+  {
+   "key": "shop.common.action.choosePlan",
+   "group": "Shop: common",
+   "label": "common › action › choosePlan",
+   "placeholders": [],
+   "default": {
+    "hu": "Ezt választom",
+    "en": "Choose this",
+    "nl": "Kies dit"
+   }
+  },
+  {
+   "key": "shop.common.plans.custom.name",
+   "group": "Shop: common",
+   "label": "common › plans › custom › name",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi projekt",
+    "en": "Custom project",
+    "nl": "Maatwerkproject"
+   }
+  },
+  {
+   "key": "shop.common.plans.custom.tagline",
+   "group": "Shop: common",
+   "label": "common › plans › custom › tagline",
+   "placeholders": [],
+   "default": {
+    "hu": "Ha egyik csomag sem illik: leírod, mit szeretnél, és az ajánlat a projektre készül.",
+    "en": "If no package fits: you describe what you want and the quote is made for the project.",
+    "nl": "Past geen pakket: jij beschrijft wat je wilt en de offerte wordt op het project gemaakt."
+   }
+  },
+  {
+   "key": "shop.common.needs.website.title",
+   "group": "Shop: common",
+   "label": "common › needs › website › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Új weboldal",
+    "en": "New website",
+    "nl": "Nieuwe website"
+   }
+  },
+  {
+   "key": "shop.common.needs.website.text",
+   "group": "Shop: common",
+   "label": "common › needs › website › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Bemutatkozó vagy tartalomközpontú oldal a nulláról.",
+    "en": "An introductory or content-focused site from scratch.",
+    "nl": "Een introductie- of inhoudelijke site vanaf nul."
+   }
+  },
+  {
+   "key": "shop.common.needs.webapp.title",
+   "group": "Shop: common",
+   "label": "common › needs › webapp › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Webalkalmazás",
+    "en": "Web application",
+    "nl": "Webapplicatie"
+   }
+  },
+  {
+   "key": "shop.common.needs.webapp.text",
+   "group": "Shop: common",
+   "label": "common › needs › webapp › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi felhasználói folyamatokkal és adatkezeléssel.",
+    "en": "With custom user flows and data handling.",
+    "nl": "Met maatwerk gebruikersflows en gegevensbeheer."
+   }
+  },
+  {
+   "key": "shop.common.needs.improve.title",
+   "group": "Shop: common",
+   "label": "common › needs › improve › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Meglévő weboldal fejlesztése",
+    "en": "Existing website improvement",
+    "nl": "Bestaande website verbeteren"
+   }
+  },
+  {
+   "key": "shop.common.needs.improve.text",
+   "group": "Shop: common",
+   "label": "common › needs › improve › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Bővítés, javítás vagy továbbfejlesztés egy már működő oldalon.",
+    "en": "Extending, fixing or developing a site that already runs.",
+    "nl": "Uitbreiden, herstellen of doorontwikkelen van een site die al draait."
+   }
+  },
+  {
+   "key": "shop.common.needs.ui.title",
+   "group": "Shop: common",
+   "label": "common › needs › ui › title",
+   "placeholders": [],
+   "default": {
+    "hu": "UI-megvalósítás",
+    "en": "UI implementation",
+    "nl": "UI-implementatie"
+   }
+  },
+  {
+   "key": "shop.common.needs.ui.text",
+   "group": "Shop: common",
+   "label": "common › needs › ui › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Meglévő designterv minőségi webes megvalósítása.",
+    "en": "A quality web build of a design you already have.",
+    "nl": "Een hoogwaardige webuitwerking van een ontwerp dat je al hebt."
+   }
+  },
+  {
+   "key": "shop.common.needs.integrations.title",
+   "group": "Shop: common",
+   "label": "common › needs › integrations › title",
+   "placeholders": [],
+   "default": {
+    "hu": "API-integráció",
+    "en": "API integration",
+    "nl": "API-integratie"
+   }
+  },
+  {
+   "key": "shop.common.needs.integrations.text",
+   "group": "Shop: common",
+   "label": "common › needs › integrations › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatások és rendszerek összekötése.",
+    "en": "Connecting services and systems.",
+    "nl": "Diensten en systemen met elkaar verbinden."
+   }
+  },
+  {
+   "key": "shop.common.needs.unsure.title",
+   "group": "Shop: common",
+   "label": "common › needs › unsure › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Még nem tudom",
+    "en": "Not sure yet",
+    "nl": "Nog niet zeker"
+   }
+  },
+  {
+   "key": "shop.common.needs.unsure.text",
+   "group": "Shop: common",
+   "label": "common › needs › unsure › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Semmi baj: a kérdéseket együtt tisztázzuk.",
+    "en": "That is fine: we work the questions out together.",
+    "nl": "Geen probleem: we zoeken de antwoorden samen uit."
+   }
+  },
+  {
+   "key": "shop.common.planNames.launch",
+   "group": "Shop: common",
+   "label": "common › planNames › launch",
+   "placeholders": [],
+   "default": {
+    "hu": "Launch",
+    "en": "Launch",
+    "nl": "Launch"
+   }
+  },
+  {
+   "key": "shop.common.planNames.grow",
+   "group": "Shop: common",
+   "label": "common › planNames › grow",
+   "placeholders": [],
+   "default": {
+    "hu": "Grow",
+    "en": "Grow",
+    "nl": "Grow"
+   }
+  },
+  {
+   "key": "shop.common.planNames.build",
+   "group": "Shop: common",
+   "label": "common › planNames › build",
+   "placeholders": [],
+   "default": {
+    "hu": "Build",
+    "en": "Build",
+    "nl": "Build"
+   }
+  },
+  {
+   "key": "shop.common.planNames.care",
+   "group": "Shop: common",
+   "label": "common › planNames › care",
+   "placeholders": [],
+   "default": {
+    "hu": "Care",
+    "en": "Care",
+    "nl": "Care"
+   }
+  },
+  {
+   "key": "shop.common.planNames.custom",
+   "group": "Shop: common",
+   "label": "common › planNames › custom",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi projekt",
+    "en": "Custom project",
+    "nl": "Maatwerkproject"
+   }
+  },
+  {
+   "key": "shop.common.loading",
+   "group": "Shop: common",
+   "label": "common › loading",
+   "placeholders": [],
+   "default": {
+    "hu": "Betöltés…",
+    "en": "Loading…",
+    "nl": "Laden…"
+   }
+  },
+  {
+   "key": "shop.common.optional",
+   "group": "Shop: common",
+   "label": "common › optional",
+   "placeholders": [],
+   "default": {
+    "hu": "nem kötelező",
+    "en": "optional",
+    "nl": "optioneel"
+   }
+  },
+  {
+   "key": "shop.common.open",
+   "group": "Shop: common",
+   "label": "common › open",
+   "placeholders": [],
+   "default": {
+    "hu": "Megnyitás",
+    "en": "Open",
+    "nl": "Openen"
+   }
+  },
+  {
+   "key": "shop.common.close",
+   "group": "Shop: common",
+   "label": "common › close",
+   "placeholders": [],
+   "default": {
+    "hu": "Bezárás",
+    "en": "Close",
+    "nl": "Sluiten"
+   }
+  },
+  {
+   "key": "shop.common.newTab",
+   "group": "Shop: common",
+   "label": "common › newTab",
+   "placeholders": [],
+   "default": {
+    "hu": "(új lapon nyílik)",
+    "en": "(opens in a new tab)",
+    "nl": "(opent in een nieuw tabblad)"
+   }
+  },
+  {
+   "key": "shop.landing.hero.titleLine1",
+   "group": "Shop: landing",
+   "label": "landing › hero › titleLine1",
+   "placeholders": [],
+   "default": {
+    "hu": "Alkossunk valami",
+    "en": "Build something",
+    "nl": "Bouw iets"
+   }
+  },
+  {
+   "key": "shop.landing.hero.titleLine2",
+   "group": "Shop: landing",
+   "label": "landing › hero › titleLine2",
+   "placeholders": [],
+   "default": {
+    "hu": "maradandót.",
+    "en": "that matters.",
+    "nl": "dat ertoe doet."
+   }
+  },
+  {
+   "key": "shop.landing.hero.lead",
+   "group": "Shop: landing",
+   "label": "landing › hero › lead",
+   "placeholders": [],
+   "default": {
+    "hu": "Weboldalak, digitális élmények és alkalmazások, amelyek a következő nagy ötleted köré épülnek.",
+    "en": "Digital experiences, websites and applications designed around your next big idea.",
+    "nl": "Websites, digitale ervaringen en applicaties, ontworpen rond jouw volgende grote idee."
+   }
+  },
+  {
+   "key": "shop.landing.hero.ctaPrimary",
+   "group": "Shop: landing",
+   "label": "landing › hero › ctaPrimary",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatások felfedezése",
+    "en": "Explore services",
+    "nl": "Ontdek de diensten"
+   }
+  },
+  {
+   "key": "shop.landing.hero.ctaSecondary",
+   "group": "Shop: landing",
+   "label": "landing › hero › ctaSecondary",
+   "placeholders": [],
+   "default": {
+    "hu": "Beszéljünk",
+    "en": "Let’s talk",
+    "nl": "Laten we praten"
+   }
+  },
+  {
+   "key": "shop.landing.hero.glance",
+   "group": "Shop: landing",
+   "label": "landing › hero › glance",
+   "placeholders": [],
+   "default": {
+    "hu": "Mit kaphatsz",
+    "en": "What you can get",
+    "nl": "Wat je kunt krijgen"
+   }
+  },
+  {
+   "key": "shop.landing.hero.note",
+   "group": "Shop: landing",
+   "label": "landing › hero › note",
+   "placeholders": [],
+   "default": {
+    "hu": "Az ajánlatkérés nem megrendelés: leírod, mire van szükséged, és egyedi ajánlatot kapsz.",
+    "en": "Asking for a quote is not placing an order: you say what you need and you get a custom quote.",
+    "nl": "Een offerte aanvragen is geen bestelling: je zegt wat je nodig hebt en krijgt een offerte op maat."
+   }
+  },
+  {
+   "key": "shop.landing.hero.compositionLabel",
+   "group": "Shop: landing",
+   "label": "landing › hero › compositionLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "A négy szolgáltatás egy képen",
+    "en": "The four services in one picture",
+    "nl": "De vier diensten in één beeld"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.title",
+   "group": "Shop: landing",
+   "label": "landing › discovery › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Találd meg a megfelelő szolgáltatást",
+    "en": "Find the right service",
+    "nl": "Vind de juiste dienst"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.intro",
+   "group": "Shop: landing",
+   "label": "landing › discovery › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Négy szolgáltatás, mindegyiknek saját oldala. Olvasd végig, vagy keress rá arra, ami érdekel.",
+    "en": "Four services, each with a page of its own. Read through them, or search for what you are after.",
+    "nl": "Vier diensten, elk met een eigen pagina. Lees ze door of zoek op wat je zoekt."
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.label",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Keresés szolgáltatások, csomagok és kiegészítők között",
+    "en": "Search services, packages and add-ons",
+    "nl": "Zoek in diensten, pakketten en toevoegingen"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.placeholder",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › placeholder",
+   "placeholders": [],
+   "default": {
+    "hu": "pl. API, nyelv, mobil",
+    "en": "e.g. API, language, mobile",
+    "nl": "bijv. API, taal, mobiel"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.filterLabel",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › filterLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Szűrés típus szerint",
+    "en": "Filter by type",
+    "nl": "Filter op soort"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.kinds.all",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › kinds › all",
+   "placeholders": [],
+   "default": {
+    "hu": "Mind",
+    "en": "All",
+    "nl": "Alles"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.kinds.service",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › kinds › service",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatások",
+    "en": "Services",
+    "nl": "Diensten"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.kinds.package",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › kinds › package",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomagok",
+    "en": "Packages",
+    "nl": "Pakketten"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.kinds.addon",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › kinds › addon",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítők",
+    "en": "Add-ons",
+    "nl": "Toevoegingen"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.kindOne.service",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › kindOne › service",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatás",
+    "en": "Service",
+    "nl": "Dienst"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.kindOne.package",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › kindOne › package",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomag",
+    "en": "Package",
+    "nl": "Pakket"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.kindOne.addon",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › kindOne › addon",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítő",
+    "en": "Add-on",
+    "nl": "Toevoeging"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.clear",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › clear",
+   "placeholders": [],
+   "default": {
+    "hu": "Szűrők törlése",
+    "en": "Clear all filters",
+    "nl": "Alle filters wissen"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.count",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › count",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} találat",
+    "en": "{count} results",
+    "nl": "{count} resultaten"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.countOne",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › countOne",
+   "placeholders": [],
+   "default": {
+    "hu": "1 találat",
+    "en": "1 result",
+    "nl": "1 resultaat"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.emptyTitle",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › emptyTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Nincs találat",
+    "en": "No results",
+    "nl": "Geen resultaten"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.emptyText",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › emptyText",
+   "placeholders": [],
+   "default": {
+    "hu": "Erre nem találtam semmit. Próbálj rövidebb szót, vagy töröld a szűrőket. Ha egyik sem illik a projektedhez, kérhetsz egyedi megoldást.",
+    "en": "I found nothing for that. Try a shorter word, or clear the filters. If nothing fits your project, you can ask for a custom solution.",
+    "nl": "Daar vond ik niets voor. Probeer een korter woord of wis de filters. Past niets bij je project, dan kun je een oplossing op maat vragen."
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.emptyCta",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › emptyCta",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi projekt leírása",
+    "en": "Describe a custom project",
+    "nl": "Vraag maatwerk aan"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.appliesTo",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › appliesTo",
+   "placeholders": [
+    "{list}"
+   ],
+   "default": {
+    "hu": "Ehhez adható: {list}",
+    "en": "Can be added to: {list}",
+    "nl": "Toe te voegen aan: {list}"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.open",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › open",
+   "placeholders": [],
+   "default": {
+    "hu": "Megnézem",
+    "en": "Open",
+    "nl": "Bekijken"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.finder.resultsLabel",
+   "group": "Shop: landing",
+   "label": "landing › discovery › finder › resultsLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Keresési találatok",
+    "en": "Search results",
+    "nl": "Zoekresultaten"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.card.benefits",
+   "group": "Shop: landing",
+   "label": "landing › discovery › card › benefits",
+   "placeholders": [],
+   "default": {
+    "hu": "Előnyök",
+    "en": "Benefits",
+    "nl": "Voordelen"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.card.useCases",
+   "group": "Shop: landing",
+   "label": "landing › discovery › card › useCases",
+   "placeholders": [],
+   "default": {
+    "hu": "Tipikus felhasználás",
+    "en": "Typical use",
+    "nl": "Typisch gebruik"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.card.included",
+   "group": "Shop: landing",
+   "label": "landing › discovery › card › included",
+   "placeholders": [],
+   "default": {
+    "hu": "Amit tartalmazhat",
+    "en": "What can be included",
+    "nl": "Wat erbij kan horen"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.card.example",
+   "group": "Shop: landing",
+   "label": "landing › discovery › card › example",
+   "placeholders": [],
+   "default": {
+    "hu": "Példa a munkáimból",
+    "en": "An example from my work",
+    "nl": "Een voorbeeld uit mijn werk"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.card.noExample",
+   "group": "Shop: landing",
+   "label": "landing › discovery › card › noExample",
+   "placeholders": [],
+   "default": {
+    "hu": "Ezt a munkát még nem mutatja egyik portfólióprojekt sem.",
+    "en": "No portfolio project shows this kind of work yet.",
+    "nl": "Geen enkel portfolioproject toont dit soort werk al."
+   }
+  },
+  {
+   "key": "shop.landing.discovery.card.more",
+   "group": "Shop: landing",
+   "label": "landing › discovery › card › more",
+   "placeholders": [],
+   "default": {
+    "hu": "Részletek",
+    "en": "Details",
+    "nl": "Details"
+   }
+  },
+  {
+   "key": "shop.landing.discovery.card.suggested",
+   "group": "Shop: landing",
+   "label": "landing › discovery › card › suggested",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlott csomagok",
+    "en": "Suggested packages",
+    "nl": "Voorgestelde pakketten"
+   }
+  },
+  {
+   "key": "shop.landing.packages.title",
+   "group": "Shop: landing",
+   "label": "landing › packages › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomagok",
+    "en": "Packages",
+    "nl": "Pakketten"
+   }
+  },
+  {
+   "key": "shop.landing.packages.intro",
+   "group": "Shop: landing",
+   "label": "landing › packages › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Négy kiindulási szerkezet. Nem végleges ajánlatok: a pontos tartalom, ár és időzítés az ajánlatkérés után, a projekt ismeretében dől el.",
+    "en": "Four starting structures. They are not final offers: the exact content, price and timing are settled after a quote request, once the project is known.",
+    "nl": "Vier startstructuren. Het zijn geen definitieve offertes: de exacte inhoud, prijs en timing worden na een offerteaanvraag vastgesteld, als het project bekend is."
+   }
+  },
+  {
+   "key": "shop.landing.packages.chooser",
+   "group": "Shop: landing",
+   "label": "landing › packages › chooser",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz csomagot",
+    "en": "Choose a package",
+    "nl": "Kies een pakket"
+   }
+  },
+  {
+   "key": "shop.landing.packages.rows.audience",
+   "group": "Shop: landing",
+   "label": "landing › packages › rows › audience",
+   "placeholders": [],
+   "default": {
+    "hu": "Kinek szól",
+    "en": "Who it is for",
+    "nl": "Voor wie"
+   }
+  },
+  {
+   "key": "shop.landing.packages.rows.deliverables",
+   "group": "Shop: landing",
+   "label": "landing › packages › rows › deliverables",
+   "placeholders": [],
+   "default": {
+    "hu": "Fő eredmények",
+    "en": "Main deliverables",
+    "nl": "Belangrijkste resultaten"
+   }
+  },
+  {
+   "key": "shop.landing.packages.rows.includes",
+   "group": "Shop: landing",
+   "label": "landing › packages › rows › includes",
+   "placeholders": [],
+   "default": {
+    "hu": "Amit tartalmazhat",
+    "en": "What can be included",
+    "nl": "Wat erbij kan horen"
+   }
+  },
+  {
+   "key": "shop.landing.packages.rows.extras",
+   "group": "Shop: landing",
+   "label": "landing › packages › rows › extras",
+   "placeholders": [],
+   "default": {
+    "hu": "Választható kiegészítők",
+    "en": "Optional extras",
+    "nl": "Optionele toevoegingen"
+   }
+  },
+  {
+   "key": "shop.landing.packages.rows.price",
+   "group": "Shop: landing",
+   "label": "landing › packages › rows › price",
+   "placeholders": [],
+   "default": {
+    "hu": "Ár",
+    "en": "Price",
+    "nl": "Prijs"
+   }
+  },
+  {
+   "key": "shop.landing.packages.rows.timeline",
+   "group": "Shop: landing",
+   "label": "landing › packages › rows › timeline",
+   "placeholders": [],
+   "default": {
+    "hu": "Határidő",
+    "en": "Timeline",
+    "nl": "Doorlooptijd"
+   }
+  },
+  {
+   "key": "shop.landing.packages.rows.fits",
+   "group": "Shop: landing",
+   "label": "landing › packages › rows › fits",
+   "placeholders": [],
+   "default": {
+    "hu": "Ilyen projektekhez illik",
+    "en": "Suits projects like",
+    "nl": "Past bij projecten als"
+   }
+  },
+  {
+   "key": "shop.landing.packages.timeline.scope",
+   "group": "Shop: landing",
+   "label": "landing › packages › timeline › scope",
+   "placeholders": [],
+   "default": {
+    "hu": "A projekt terjedelmétől függ, és az ajánlatban rögzítjük.",
+    "en": "Depends on the scope of the project and is fixed in the quote.",
+    "nl": "Hangt af van de omvang van het project en wordt vastgelegd in de offerte."
+   }
+  },
+  {
+   "key": "shop.landing.packages.timeline.estimate",
+   "group": "Shop: landing",
+   "label": "landing › packages › timeline › estimate",
+   "placeholders": [
+    "{range}",
+    "{unit}"
+   ],
+   "default": {
+    "hu": "Jellemzően {range} {unit}, az ajánlatban megerősítve.",
+    "en": "Typically {range} {unit}, confirmed in the quote.",
+    "nl": "Doorgaans {range} {unit}, bevestigd in de offerte."
+   }
+  },
+  {
+   "key": "shop.landing.packages.timeline.units.days.one",
+   "group": "Shop: landing",
+   "label": "landing › packages › timeline › units › days › one",
+   "placeholders": [],
+   "default": {
+    "hu": "nap",
+    "en": "day",
+    "nl": "dag"
+   }
+  },
+  {
+   "key": "shop.landing.packages.timeline.units.days.other",
+   "group": "Shop: landing",
+   "label": "landing › packages › timeline › units › days › other",
+   "placeholders": [],
+   "default": {
+    "hu": "nap",
+    "en": "days",
+    "nl": "dagen"
+   }
+  },
+  {
+   "key": "shop.landing.packages.timeline.units.weeks.one",
+   "group": "Shop: landing",
+   "label": "landing › packages › timeline › units › weeks › one",
+   "placeholders": [],
+   "default": {
+    "hu": "hét",
+    "en": "week",
+    "nl": "week"
+   }
+  },
+  {
+   "key": "shop.landing.packages.timeline.units.weeks.other",
+   "group": "Shop: landing",
+   "label": "landing › packages › timeline › units › weeks › other",
+   "placeholders": [],
+   "default": {
+    "hu": "hét",
+    "en": "weeks",
+    "nl": "weken"
+   }
+  },
+  {
+   "key": "shop.landing.packages.timeline.units.months.one",
+   "group": "Shop: landing",
+   "label": "landing › packages › timeline › units › months › one",
+   "placeholders": [],
+   "default": {
+    "hu": "hónap",
+    "en": "month",
+    "nl": "maand"
+   }
+  },
+  {
+   "key": "shop.landing.packages.timeline.units.months.other",
+   "group": "Shop: landing",
+   "label": "landing › packages › timeline › units › months › other",
+   "placeholders": [],
+   "default": {
+    "hu": "hónap",
+    "en": "months",
+    "nl": "maanden"
+   }
+  },
+  {
+   "key": "shop.landing.packages.featured",
+   "group": "Shop: landing",
+   "label": "landing › packages › featured",
+   "placeholders": [],
+   "default": {
+    "hu": "Hangsúlyosabb",
+    "en": "Highlighted",
+    "nl": "Uitgelicht"
+   }
+  },
+  {
+   "key": "shop.landing.packages.featuredNote",
+   "group": "Shop: landing",
+   "label": "landing › packages › featuredNote",
+   "placeholders": [],
+   "default": {
+    "hu": "Csak vizuális hangsúly, nem népszerűségi állítás.",
+    "en": "A visual emphasis only, not a claim of popularity.",
+    "nl": "Alleen visuele nadruk, geen bewering van populariteit."
+   }
+  },
+  {
+   "key": "shop.landing.packages.start",
+   "group": "Shop: landing",
+   "label": "landing › packages › start",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Kezdés: {name}",
+    "en": "Start with {name}",
+    "nl": "Begin met {name}"
+   }
+  },
+  {
+   "key": "shop.landing.packages.chosenLive",
+   "group": "Shop: landing",
+   "label": "landing › packages › chosenLive",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Kiválasztott csomag: {name}",
+    "en": "Selected package: {name}",
+    "nl": "Geselecteerd pakket: {name}"
+   }
+  },
+  {
+   "key": "shop.landing.packages.customCard.cta",
+   "group": "Shop: landing",
+   "label": "landing › packages › customCard › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi projekt leírása",
+    "en": "Describe a custom project",
+    "nl": "Vraag maatwerk aan"
+   }
+  },
+  {
+   "key": "shop.landing.packages.customCard.title",
+   "group": "Shop: landing",
+   "label": "landing › packages › customCard › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyik sem illik? Egyedi projekt.",
+    "en": "None of them fit? A custom project.",
+    "nl": "Past er geen bij? Een maatwerkproject."
+   }
+  },
+  {
+   "key": "shop.landing.packages.customCard.text",
+   "group": "Shop: landing",
+   "label": "landing › packages › customCard › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Leírod, mit szeretnél, és az ajánlat a projektre készül, nem egy csomagra.",
+    "en": "You describe what you want and the quote is made for the project, not for a package.",
+    "nl": "Jij beschrijft wat je wilt en de offerte wordt op het project gemaakt, niet op een pakket."
+   }
+  },
+  {
+   "key": "shop.landing.compare.title",
+   "group": "Shop: landing",
+   "label": "landing › compare › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomagok összehasonlítása",
+    "en": "Compare packages",
+    "nl": "Pakketten vergelijken"
+   }
+  },
+  {
+   "key": "shop.landing.compare.intro",
+   "group": "Shop: landing",
+   "label": "landing › compare › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Tartalom, terjedelem, kiegészítők, támogatás és testreszabhatóság egymás mellett. Telefonon soronként olvasható.",
+    "en": "Content, scope, extras, support and customisation side by side. On a phone it reads row by row.",
+    "nl": "Inhoud, omvang, toevoegingen, ondersteuning en aanpasbaarheid naast elkaar. Op een telefoon lees je het rij voor rij."
+   }
+  },
+  {
+   "key": "shop.landing.compare.open",
+   "group": "Shop: landing",
+   "label": "landing › compare › open",
+   "placeholders": [],
+   "default": {
+    "hu": "Összehasonlítás megnyitása",
+    "en": "Show the comparison",
+    "nl": "Vergelijking tonen"
+   }
+  },
+  {
+   "key": "shop.landing.compare.close",
+   "group": "Shop: landing",
+   "label": "landing › compare › close",
+   "placeholders": [],
+   "default": {
+    "hu": "Összehasonlítás elrejtése",
+    "en": "Hide the comparison",
+    "nl": "Vergelijking verbergen"
+   }
+  },
+  {
+   "key": "shop.landing.compare.pick",
+   "group": "Shop: landing",
+   "label": "landing › compare › pick",
+   "placeholders": [],
+   "default": {
+    "hu": "Mely csomagokat hasonlítsuk össze?",
+    "en": "Which packages to compare?",
+    "nl": "Welke pakketten vergelijken?"
+   }
+  },
+  {
+   "key": "shop.landing.compare.pickHint",
+   "group": "Shop: landing",
+   "label": "landing › compare › pickHint",
+   "placeholders": [],
+   "default": {
+    "hu": "Legalább kettőt hagyj bekapcsolva.",
+    "en": "Keep at least two switched on.",
+    "nl": "Laat er minstens twee aan staan."
+   }
+  },
+  {
+   "key": "shop.landing.compare.rowsLabel",
+   "group": "Shop: landing",
+   "label": "landing › compare › rowsLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Összehasonlító táblázat",
+    "en": "Comparison",
+    "nl": "Vergelijking"
+   }
+  },
+  {
+   "key": "shop.landing.compare.rows.includes",
+   "group": "Shop: landing",
+   "label": "landing › compare › rows › includes",
+   "placeholders": [],
+   "default": {
+    "hu": "Tartalmazott szolgáltatások",
+    "en": "Included services",
+    "nl": "Inbegrepen diensten"
+   }
+  },
+  {
+   "key": "shop.landing.compare.rows.scope",
+   "group": "Shop: landing",
+   "label": "landing › compare › rows › scope",
+   "placeholders": [],
+   "default": {
+    "hu": "Projektterjedelem",
+    "en": "Project scope",
+    "nl": "Projectomvang"
+   }
+  },
+  {
+   "key": "shop.landing.compare.rows.customization",
+   "group": "Shop: landing",
+   "label": "landing › compare › rows › customization",
+   "placeholders": [],
+   "default": {
+    "hu": "Testreszabhatóság",
+    "en": "Customisation",
+    "nl": "Aanpasbaarheid"
+   }
+  },
+  {
+   "key": "shop.landing.compare.rows.extras",
+   "group": "Shop: landing",
+   "label": "landing › compare › rows › extras",
+   "placeholders": [],
+   "default": {
+    "hu": "Választható kiegészítők",
+    "en": "Available extras",
+    "nl": "Beschikbare toevoegingen"
+   }
+  },
+  {
+   "key": "shop.landing.compare.rows.support",
+   "group": "Shop: landing",
+   "label": "landing › compare › rows › support",
+   "placeholders": [],
+   "default": {
+    "hu": "Támogatás",
+    "en": "Support",
+    "nl": "Ondersteuning"
+   }
+  },
+  {
+   "key": "shop.landing.compare.rows.price",
+   "group": "Shop: landing",
+   "label": "landing › compare › rows › price",
+   "placeholders": [],
+   "default": {
+    "hu": "Ár",
+    "en": "Price",
+    "nl": "Prijs"
+   }
+  },
+  {
+   "key": "shop.landing.compare.rows.timeline",
+   "group": "Shop: landing",
+   "label": "landing › compare › rows › timeline",
+   "placeholders": [],
+   "default": {
+    "hu": "Határidő",
+    "en": "Timeline",
+    "nl": "Doorlooptijd"
+   }
+  },
+  {
+   "key": "shop.landing.configureBand.title",
+   "group": "Shop: landing",
+   "label": "landing › configureBand › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem tudod, mire van szükséged? Állítsd össze a kérésed.",
+    "en": "Not sure what you need? Build your request.",
+    "nl": "Weet je niet wat je nodig hebt? Stel je aanvraag samen."
+   }
+  },
+  {
+   "key": "shop.landing.configureBand.text",
+   "group": "Shop: landing",
+   "label": "landing › configureBand › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Hat rövid lépés: mire van szükséged, melyik csomag, milyen kiegészítők, a projekt részletei, áttekintés, ajánlatkérés. Bármikor visszaléphetsz, és semmire nem kötelez.",
+    "en": "Six short steps: what you need, which package, which extras, the project details, a review and the request. You can go back at any time and it commits you to nothing.",
+    "nl": "Zes korte stappen: wat je nodig hebt, welk pakket, welke toevoegingen, de projectdetails, een overzicht en de aanvraag. Je kunt altijd terug en het verplicht je tot niets."
+   }
+  },
+  {
+   "key": "shop.landing.configureBand.cta",
+   "group": "Shop: landing",
+   "label": "landing › configureBand › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Összeállítás indítása",
+    "en": "Start building",
+    "nl": "Begin met samenstellen"
+   }
+  },
+  {
+   "key": "shop.landing.configureBand.custom",
+   "group": "Shop: landing",
+   "label": "landing › configureBand › custom",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi projektet írok le",
+    "en": "Describe a custom project",
+    "nl": "Vraag maatwerk aan"
+   }
+  },
+  {
+   "key": "shop.landing.configureBand.steps",
+   "group": "Shop: landing",
+   "label": "landing › configureBand › steps",
+   "placeholders": [],
+   "default": {
+    "hu": "6 lépés",
+    "en": "6 steps",
+    "nl": "6 stappen"
+   }
+  },
+  {
+   "key": "shop.landing.process.title",
+   "group": "Shop: landing",
+   "label": "landing › process › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Hogyan működik egy projekt",
+    "en": "How a project runs",
+    "nl": "Hoe een project verloopt"
+   }
+  },
+  {
+   "key": "shop.landing.process.intro",
+   "group": "Shop: landing",
+   "label": "landing › process › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Öt lépés az ötlettől az átadásig.",
+    "en": "Five steps from idea to handover.",
+    "nl": "Vijf stappen van idee tot oplevering."
+   }
+  },
+  {
+   "key": "shop.landing.process.afterTitle",
+   "group": "Shop: landing",
+   "label": "landing › process › afterTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Mi történik az ajánlatkérés után",
+    "en": "What happens after you ask",
+    "nl": "Wat er gebeurt nadat je aanvraagt"
+   }
+  },
+  {
+   "key": "shop.landing.process.afterIntro",
+   "group": "Shop: landing",
+   "label": "landing › process › afterIntro",
+   "placeholders": [],
+   "default": {
+    "hu": "Csak a sorrendet mondom meg; válaszidőt, árat vagy határidőt nem ígérek.",
+    "en": "I can only tell you the order of things; I promise no reply time, price or deadline.",
+    "nl": "Ik kan alleen de volgorde noemen; ik beloof geen reactietijd, prijs of deadline."
+   }
+  },
+  {
+   "key": "shop.landing.process.collabTitle",
+   "group": "Shop: landing",
+   "label": "landing › process › collabTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Kommunikáció és együttműködés",
+    "en": "Communication and collaboration",
+    "nl": "Communicatie en samenwerking"
+   }
+  },
+  {
+   "key": "shop.landing.support.title",
+   "group": "Shop: landing",
+   "label": "landing › support › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Támogatási lehetőségek",
+    "en": "Support options",
+    "nl": "Hulp na de oplevering"
+   }
+  },
+  {
+   "key": "shop.landing.support.intro",
+   "group": "Shop: landing",
+   "label": "landing › support › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Mi történik az átadás után? Három külön dolog, amelyeket nem keverek össze.",
+    "en": "What happens after handover? Three separate things, which I do not mix up.",
+    "nl": "Wat gebeurt er na de oplevering? Drie aparte dingen, die ik niet door elkaar haal."
+   }
+  },
+  {
+   "key": "shop.landing.support.items.0.title",
+   "group": "Shop: landing",
+   "label": "landing › support › items #0 › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Átadáskor",
+    "en": "At handover",
+    "nl": "Bij de oplevering"
+   }
+  },
+  {
+   "key": "shop.landing.support.items.0.text",
+   "group": "Shop: landing",
+   "label": "landing › support › items #0 › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Az átadás módját a projekt elején egyeztetjük, és az ajánlatban rögzítjük.",
+    "en": "How the handover works is agreed at the start of the project and written in the quote.",
+    "nl": "Hoe de oplevering verloopt, spreken we aan het begin van het project af en leggen we vast in de offerte."
+   }
+  },
+  {
+   "key": "shop.landing.support.items.1.title",
+   "group": "Shop: landing",
+   "label": "landing › support › items #1 › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Folyamatos karbantartás",
+    "en": "Ongoing maintenance",
+    "nl": "Doorlopend onderhoud"
+   }
+  },
+  {
+   "key": "shop.landing.support.items.1.text",
+   "group": "Shop: landing",
+   "label": "landing › support › items #1 › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem automatikus: külön megállapodás tárgya. Erre való a Care csomag.",
+    "en": "It is not automatic: it is a separate agreement. That is what the Care package is for.",
+    "nl": "Het is niet automatisch: het is een aparte afspraak. Daar is het pakket Care voor."
+   }
+  },
+  {
+   "key": "shop.landing.support.items.2.title",
+   "group": "Shop: landing",
+   "label": "landing › support › items #2 › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Új funkciók",
+    "en": "New features",
+    "nl": "Nieuwe functies"
+   }
+  },
+  {
+   "key": "shop.landing.support.items.2.text",
+   "group": "Shop: landing",
+   "label": "landing › support › items #2 › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy kész megoldás továbbfejlesztése külön megállapodás szerint történik.",
+    "en": "Developing a finished solution further is done by separate agreement.",
+    "nl": "Een afgeronde oplossing verder ontwikkelen gebeurt volgens aparte afspraak."
+   }
+  },
+  {
+   "key": "shop.landing.work.title",
+   "group": "Shop: landing",
+   "label": "landing › work › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Portfóliópéldák",
+    "en": "Portfolio examples",
+    "nl": "Voorbeelden uit het portfolio"
+   }
+  },
+  {
+   "key": "shop.landing.work.intro",
+   "group": "Shop: landing",
+   "label": "landing › work › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Valódi projektek, amelyek megmutatják, hogyan dolgozom. Mindegyiknél ott áll, mi az állapota.",
+    "en": "Real projects that show how I work. Each one says what state it is in.",
+    "nl": "Echte projecten die laten zien hoe ik werk. Bij elk staat in welke staat het is."
+   }
+  },
+  {
+   "key": "shop.landing.work.all",
+   "group": "Shop: landing",
+   "label": "landing › work › all",
+   "placeholders": [],
+   "default": {
+    "hu": "Összes munka",
+    "en": "All work",
+    "nl": "Al het werk"
+   }
+  },
+  {
+   "key": "shop.landing.work.details",
+   "group": "Shop: landing",
+   "label": "landing › work › details",
+   "placeholders": [],
+   "default": {
+    "hu": "Részletek",
+    "en": "Details",
+    "nl": "Details"
+   }
+  },
+  {
+   "key": "shop.landing.faq.title",
+   "group": "Shop: landing",
+   "label": "landing › faq › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Gyakori kérdések",
+    "en": "Frequently asked questions",
+    "nl": "Veelgestelde vragen"
+   }
+  },
+  {
+   "key": "shop.landing.faq.intro",
+   "group": "Shop: landing",
+   "label": "landing › faq › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Őszinte, általános válaszok. Ha a tiéd nincs itt, írd le az ajánlatkérésben.",
+    "en": "Honest, general answers. If yours is not here, write it in the quote request.",
+    "nl": "Eerlijke, algemene antwoorden. Staat de jouwe er niet bij, schrijf hem dan in de offerteaanvraag."
+   }
+  },
+  {
+   "key": "shop.landing.final.title",
+   "group": "Shop: landing",
+   "label": "landing › final › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Van egy ötleted?",
+    "en": "Have an idea?",
+    "nl": "Heb je een idee?"
+   }
+  },
+  {
+   "key": "shop.landing.final.text",
+   "group": "Shop: landing",
+   "label": "landing › final › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Nézzük meg, hogyan lehet belőle működő digitális termék.",
+    "en": "Let’s see how it can become a working digital product.",
+    "nl": "Laten we kijken hoe het een werkend digitaal product kan worden."
+   }
+  },
+  {
+   "key": "shop.landing.final.cta",
+   "group": "Shop: landing",
+   "label": "landing › final › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Összeállítom a kérésem",
+    "en": "Build my request",
+    "nl": "Mijn aanvraag samenstellen"
+   }
+  },
+  {
+   "key": "shop.landing.loadingPage",
+   "group": "Shop: landing",
+   "label": "landing › loadingPage",
+   "placeholders": [],
+   "default": {
+    "hu": "A bolt betöltése",
+    "en": "Loading the shop",
+    "nl": "De winkel wordt geladen"
+   }
+  },
+  {
+   "key": "shop.detail.eyebrow",
+   "group": "Shop: detail",
+   "label": "detail › eyebrow",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatás",
+    "en": "Service",
+    "nl": "Dienst"
+   }
+  },
+  {
+   "key": "shop.detail.pageIndex",
+   "group": "Shop: detail",
+   "label": "detail › pageIndex",
+   "placeholders": [],
+   "default": {
+    "hu": "Ezen az oldalon",
+    "en": "On this page",
+    "nl": "Op deze pagina"
+   }
+  },
+  {
+   "key": "shop.detail.sections.overview",
+   "group": "Shop: detail",
+   "label": "detail › sections › overview",
+   "placeholders": [],
+   "default": {
+    "hu": "Áttekintés",
+    "en": "Overview",
+    "nl": "Overzicht"
+   }
+  },
+  {
+   "key": "shop.detail.sections.get",
+   "group": "Shop: detail",
+   "label": "detail › sections › get",
+   "placeholders": [],
+   "default": {
+    "hu": "Amit kapsz",
+    "en": "What you get",
+    "nl": "Wat je krijgt"
+   }
+  },
+  {
+   "key": "shop.detail.sections.features",
+   "group": "Shop: detail",
+   "label": "detail › sections › features",
+   "placeholders": [],
+   "default": {
+    "hu": "Fő jellemzők",
+    "en": "Key features",
+    "nl": "Belangrijkste kenmerken"
+   }
+  },
+  {
+   "key": "shop.detail.sections.audience",
+   "group": "Shop: detail",
+   "label": "detail › sections › audience",
+   "placeholders": [],
+   "default": {
+    "hu": "Kinek szól?",
+    "en": "Who is it for?",
+    "nl": "Voor wie?"
+   }
+  },
+  {
+   "key": "shop.detail.sections.how",
+   "group": "Shop: detail",
+   "label": "detail › sections › how",
+   "placeholders": [],
+   "default": {
+    "hu": "Hogyan működik",
+    "en": "How it works",
+    "nl": "Hoe het werkt"
+   }
+  },
+  {
+   "key": "shop.detail.sections.addons",
+   "group": "Shop: detail",
+   "label": "detail › sections › addons",
+   "placeholders": [],
+   "default": {
+    "hu": "Választható kiegészítők",
+    "en": "Available add-ons",
+    "nl": "Beschikbare toevoegingen"
+   }
+  },
+  {
+   "key": "shop.detail.sections.work",
+   "group": "Shop: detail",
+   "label": "detail › sections › work",
+   "placeholders": [],
+   "default": {
+    "hu": "Kapcsolódó projektek",
+    "en": "Related projects",
+    "nl": "Gerelateerde projecten"
+   }
+  },
+  {
+   "key": "shop.detail.sections.faq",
+   "group": "Shop: detail",
+   "label": "detail › sections › faq",
+   "placeholders": [],
+   "default": {
+    "hu": "Kérdések",
+    "en": "Questions",
+    "nl": "Vragen"
+   }
+  },
+  {
+   "key": "shop.detail.sections.price",
+   "group": "Shop: detail",
+   "label": "detail › sections › price",
+   "placeholders": [],
+   "default": {
+    "hu": "Ár vagy egyedi ajánlat",
+    "en": "Pricing or custom quote",
+    "nl": "Prijs of offerte op maat"
+   }
+  },
+  {
+   "key": "shop.detail.short.overview",
+   "group": "Shop: detail",
+   "label": "detail › short › overview",
+   "placeholders": [],
+   "default": {
+    "hu": "Áttekintés",
+    "en": "Overview",
+    "nl": "Overzicht"
+   }
+  },
+  {
+   "key": "shop.detail.short.get",
+   "group": "Shop: detail",
+   "label": "detail › short › get",
+   "placeholders": [],
+   "default": {
+    "hu": "Eredmény",
+    "en": "You get",
+    "nl": "Je krijgt"
+   }
+  },
+  {
+   "key": "shop.detail.short.features",
+   "group": "Shop: detail",
+   "label": "detail › short › features",
+   "placeholders": [],
+   "default": {
+    "hu": "Jellemzők",
+    "en": "Features",
+    "nl": "Kenmerken"
+   }
+  },
+  {
+   "key": "shop.detail.short.audience",
+   "group": "Shop: detail",
+   "label": "detail › short › audience",
+   "placeholders": [],
+   "default": {
+    "hu": "Kinek",
+    "en": "Who for",
+    "nl": "Voor wie"
+   }
+  },
+  {
+   "key": "shop.detail.short.how",
+   "group": "Shop: detail",
+   "label": "detail › short › how",
+   "placeholders": [],
+   "default": {
+    "hu": "Menet",
+    "en": "How",
+    "nl": "Hoe"
+   }
+  },
+  {
+   "key": "shop.detail.short.addons",
+   "group": "Shop: detail",
+   "label": "detail › short › addons",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítők",
+    "en": "Add-ons",
+    "nl": "Toevoegingen"
+   }
+  },
+  {
+   "key": "shop.detail.short.work",
+   "group": "Shop: detail",
+   "label": "detail › short › work",
+   "placeholders": [],
+   "default": {
+    "hu": "Projektek",
+    "en": "Projects",
+    "nl": "Projecten"
+   }
+  },
+  {
+   "key": "shop.detail.short.faq",
+   "group": "Shop: detail",
+   "label": "detail › short › faq",
+   "placeholders": [],
+   "default": {
+    "hu": "Kérdések",
+    "en": "FAQ",
+    "nl": "Vragen"
+   }
+  },
+  {
+   "key": "shop.detail.short.price",
+   "group": "Shop: detail",
+   "label": "detail › short › price",
+   "placeholders": [],
+   "default": {
+    "hu": "Ár",
+    "en": "Price",
+    "nl": "Prijs"
+   }
+  },
+  {
+   "key": "shop.detail.overview.benefits",
+   "group": "Shop: detail",
+   "label": "detail › overview › benefits",
+   "placeholders": [],
+   "default": {
+    "hu": "Mit nyersz vele",
+    "en": "What it gives you",
+    "nl": "Wat het je geeft"
+   }
+  },
+  {
+   "key": "shop.detail.overview.useCases",
+   "group": "Shop: detail",
+   "label": "detail › overview › useCases",
+   "placeholders": [],
+   "default": {
+    "hu": "Tipikus projektek",
+    "en": "Typical projects",
+    "nl": "Typische projecten"
+   }
+  },
+  {
+   "key": "shop.detail.get.intro",
+   "group": "Shop: detail",
+   "label": "detail › get › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Ezt tartod a kezedben a végén. A pontos lista az ajánlatban szerepel.",
+    "en": "This is what you hold at the end. The exact list is written in the quote.",
+    "nl": "Dit houd je aan het eind in handen. De exacte lijst staat in de offerte."
+   }
+  },
+  {
+   "key": "shop.detail.features.intro",
+   "group": "Shop: detail",
+   "label": "detail › features › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Amit a szolgáltatás tartalmazhat. Nem minden projekthez kell mindegyik.",
+    "en": "What the service can include. Not every project needs all of it.",
+    "nl": "Wat de dienst kan omvatten. Niet elk project heeft alles nodig."
+   }
+  },
+  {
+   "key": "shop.detail.how.intro",
+   "group": "Shop: detail",
+   "label": "detail › how › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Ugyanaz az öt lépés minden szolgáltatásnál; a különbség a második lépésben van.",
+    "en": "The same five steps for every service; the difference is in the second step.",
+    "nl": "Dezelfde vijf stappen voor elke dienst; het verschil zit in de tweede stap."
+   }
+  },
+  {
+   "key": "shop.detail.how.thisService",
+   "group": "Shop: detail",
+   "label": "detail › how › thisService",
+   "placeholders": [],
+   "default": {
+    "hu": "Ennél a szolgáltatásnál",
+    "en": "For this service",
+    "nl": "Bij deze dienst"
+   }
+  },
+  {
+   "key": "shop.detail.addons.intro",
+   "group": "Shop: detail",
+   "label": "detail › addons › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Mind választható. Jelöld be, ami kell: a kiválasztásod lent az összeállításba kerül.",
+    "en": "All optional. Tick what you want: your choice goes into the summary below.",
+    "nl": "Allemaal optioneel. Vink aan wat je wilt: je keuze komt in het overzicht hieronder."
+   }
+  },
+  {
+   "key": "shop.detail.addons.none",
+   "group": "Shop: detail",
+   "label": "detail › addons › none",
+   "placeholders": [],
+   "default": {
+    "hu": "Ehhez a szolgáltatáshoz nincs választható kiegészítő.",
+    "en": "No add-ons are available for this service.",
+    "nl": "Voor deze dienst zijn geen toevoegingen beschikbaar."
+   }
+  },
+  {
+   "key": "shop.detail.addons.selected",
+   "group": "Shop: detail",
+   "label": "detail › addons › selected",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} kiválasztva",
+    "en": "{count} selected",
+    "nl": "{count} geselecteerd"
+   }
+  },
+  {
+   "key": "shop.detail.addons.legend",
+   "group": "Shop: detail",
+   "label": "detail › addons › legend",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítők",
+    "en": "Add-ons",
+    "nl": "Toevoegingen"
+   }
+  },
+  {
+   "key": "shop.detail.work.intro",
+   "group": "Shop: detail",
+   "label": "detail › work › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Munkák a portfólióból, amelyek ezt a fajta feladatot mutatják.",
+    "en": "Work from the portfolio that shows this kind of task.",
+    "nl": "Werk uit het portfolio dat dit soort taak laat zien."
+   }
+  },
+  {
+   "key": "shop.detail.work.look",
+   "group": "Shop: detail",
+   "label": "detail › work › look",
+   "placeholders": [],
+   "default": {
+    "hu": "Mire érdemes nézni",
+    "en": "What to look at",
+    "nl": "Waar je op kunt letten"
+   }
+  },
+  {
+   "key": "shop.detail.work.none",
+   "group": "Shop: detail",
+   "label": "detail › work › none",
+   "placeholders": [],
+   "default": {
+    "hu": "Ezt a munkát egyelőre egyik portfólióprojekt sem mutatja. Inkább ezt mondom ki, minthogy egy nem odaillő példát mutassak.",
+    "en": "No portfolio project shows this work yet. I would rather say so than show an example that does not fit.",
+    "nl": "Dit werk wordt nog door geen portfolioproject getoond. Ik zeg dat liever dan een voorbeeld te laten zien dat niet past."
+   }
+  },
+  {
+   "key": "shop.detail.work.open",
+   "group": "Shop: detail",
+   "label": "detail › work › open",
+   "placeholders": [],
+   "default": {
+    "hu": "Projekt megnyitása",
+    "en": "Open the project",
+    "nl": "Project openen"
+   }
+  },
+  {
+   "key": "shop.detail.faq.intro",
+   "group": "Shop: detail",
+   "label": "detail › faq › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Rövid, őszinte válaszok erről a szolgáltatásról.",
+    "en": "Short, honest answers about this service.",
+    "nl": "Korte, eerlijke antwoorden over deze dienst."
+   }
+  },
+  {
+   "key": "shop.detail.price.intro",
+   "group": "Shop: detail",
+   "label": "detail › price › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "A szolgáltatásnak nincs közzétett ára: a projekt terjedelméből indulunk ki, és egyedi ajánlatot kapsz. Az alábbi összeállítás kiindulópont, nem megrendelés.",
+    "en": "The service has no published price: we start from the scope of the project and you get a custom quote. The summary below is a starting point, not an order.",
+    "nl": "De dienst heeft geen gepubliceerde prijs: we gaan uit van de omvang van het project en je krijgt een offerte op maat. Het overzicht hieronder is een startpunt, geen bestelling."
+   }
+  },
+  {
+   "key": "shop.detail.price.configTitle",
+   "group": "Shop: detail",
+   "label": "detail › price › configTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Állítsd össze",
+    "en": "Put it together",
+    "nl": "Stel het samen"
+   }
+  },
+  {
+   "key": "shop.detail.price.packageLegend",
+   "group": "Shop: detail",
+   "label": "detail › price › packageLegend",
+   "placeholders": [],
+   "default": {
+    "hu": "Melyik csomaggal kezdenél?",
+    "en": "Which package would you start with?",
+    "nl": "Met welk pakket zou je beginnen?"
+   }
+  },
+  {
+   "key": "shop.detail.price.suggested",
+   "group": "Shop: detail",
+   "label": "detail › price › suggested",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlott ehhez",
+    "en": "Suggested for this",
+    "nl": "Aanbevolen hiervoor"
+   }
+  },
+  {
+   "key": "shop.detail.price.summaryTitle",
+   "group": "Shop: detail",
+   "label": "detail › price › summaryTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Az összeállításod",
+    "en": "Your selection",
+    "nl": "Je selectie"
+   }
+  },
+  {
+   "key": "shop.detail.price.summaryPackage",
+   "group": "Shop: detail",
+   "label": "detail › price › summaryPackage",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomag",
+    "en": "Package",
+    "nl": "Pakket"
+   }
+  },
+  {
+   "key": "shop.detail.price.summaryAddons",
+   "group": "Shop: detail",
+   "label": "detail › price › summaryAddons",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítők",
+    "en": "Add-ons",
+    "nl": "Toevoegingen"
+   }
+  },
+  {
+   "key": "shop.detail.price.summaryPrice",
+   "group": "Shop: detail",
+   "label": "detail › price › summaryPrice",
+   "placeholders": [],
+   "default": {
+    "hu": "Ár",
+    "en": "Price",
+    "nl": "Prijs"
+   }
+  },
+  {
+   "key": "shop.detail.price.noPackage",
+   "group": "Shop: detail",
+   "label": "detail › price › noPackage",
+   "placeholders": [],
+   "default": {
+    "hu": "Még nincs csomag kiválasztva",
+    "en": "No package chosen yet",
+    "nl": "Nog geen pakket gekozen"
+   }
+  },
+  {
+   "key": "shop.detail.price.noAddons",
+   "group": "Shop: detail",
+   "label": "detail › price › noAddons",
+   "placeholders": [],
+   "default": {
+    "hu": "Nincs kiegészítő",
+    "en": "No add-ons",
+    "nl": "Geen toevoegingen"
+   }
+  },
+  {
+   "key": "shop.detail.price.note",
+   "group": "Shop: detail",
+   "label": "detail › price › note",
+   "placeholders": [],
+   "default": {
+    "hu": "Az összeállítás módosítható a kosárban és az összeállítóban is.",
+    "en": "You can still change it in the cart and in the request builder.",
+    "nl": "Je kunt het nog wijzigen in de winkelmand en in de aanvraagbouwer."
+   }
+  },
+  {
+   "key": "shop.detail.price.added",
+   "group": "Shop: detail",
+   "label": "detail › price › added",
+   "placeholders": [],
+   "default": {
+    "hu": "A kosárban",
+    "en": "In your cart",
+    "nl": "In je winkelmand"
+   }
+  },
+  {
+   "key": "shop.detail.price.changed",
+   "group": "Shop: detail",
+   "label": "detail › price › changed",
+   "placeholders": [],
+   "default": {
+    "hu": "Módosítottad: a kosár frissítéséhez kattints a gombra.",
+    "en": "You changed it: press the button to update the cart.",
+    "nl": "Je hebt iets gewijzigd: druk op de knop om de winkelmand bij te werken."
+   }
+  },
+  {
+   "key": "shop.detail.sticky.label",
+   "group": "Shop: detail",
+   "label": "detail › sticky › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlat kérése",
+    "en": "Request a quote",
+    "nl": "Offerte aanvragen"
+   }
+  },
+  {
+   "key": "shop.detail.sticky.bar",
+   "group": "Shop: detail",
+   "label": "detail › sticky › bar",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Ajánlatkérés: {name}",
+    "en": "Quote request: {name}",
+    "nl": "Offerteaanvraag: {name}"
+   }
+  },
+  {
+   "key": "shop.detail.final.title",
+   "group": "Shop: detail",
+   "label": "detail › final › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Készen állsz?",
+    "en": "Ready to start?",
+    "nl": "Klaar om te beginnen?"
+   }
+  },
+  {
+   "key": "shop.detail.final.text",
+   "group": "Shop: detail",
+   "label": "detail › final › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Kérj egyedi ajánlatot, vagy nézd meg az összes szolgáltatást.",
+    "en": "Ask for a custom quote, or look at all the services.",
+    "nl": "Vraag een offerte op maat aan of bekijk alle diensten."
+   }
+  },
+  {
+   "key": "shop.detail.final.cta",
+   "group": "Shop: detail",
+   "label": "detail › final › cta",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlatot kérek",
+    "en": "Request a quote",
+    "nl": "Offerte aanvragen"
+   }
+  },
+  {
+   "key": "shop.detail.notFound.title",
+   "group": "Shop: detail",
+   "label": "detail › notFound › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez a szolgáltatás nem található",
+    "en": "This service was not found",
+    "nl": "Deze dienst is niet gevonden"
+   }
+  },
+  {
+   "key": "shop.configurator.eyebrow",
+   "group": "Shop: configurator",
+   "label": "configurator › eyebrow",
+   "placeholders": [],
+   "default": {
+    "hu": "Összeállító",
+    "en": "Request builder",
+    "nl": "Aanvraagbouwer"
+   }
+  },
+  {
+   "key": "shop.configurator.title",
+   "group": "Shop: configurator",
+   "label": "configurator › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Állítsd össze a kérésed",
+    "en": "Build your request",
+    "nl": "Stel je aanvraag samen"
+   }
+  },
+  {
+   "key": "shop.configurator.intro",
+   "group": "Shop: configurator",
+   "label": "configurator › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Hat rövid lépés. Semmi nem kötelez: az ajánlatkérés nem megrendelés. A választásaid megmaradnak, ha visszalépsz, nyelvet váltasz vagy máshová kattintasz.",
+    "en": "Six short steps. Nothing commits you: asking for a quote is not placing an order. Your choices are kept if you go back, change language or click elsewhere.",
+    "nl": "Zes korte stappen. Niets verplicht je: een offerte aanvragen is geen bestelling. Je keuzes blijven bewaard als je teruggaat, van taal wisselt of ergens anders klikt."
+   }
+  },
+  {
+   "key": "shop.configurator.progressLabel",
+   "group": "Shop: configurator",
+   "label": "configurator › progressLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "A lépések",
+    "en": "The steps",
+    "nl": "De stappen"
+   }
+  },
+  {
+   "key": "shop.configurator.stepOf",
+   "group": "Shop: configurator",
+   "label": "configurator › stepOf",
+   "placeholders": [
+    "{current}",
+    "{total}"
+   ],
+   "default": {
+    "hu": "{current}. lépés / {total}",
+    "en": "Step {current} of {total}",
+    "nl": "Stap {current} van {total}"
+   }
+  },
+  {
+   "key": "shop.configurator.stepDone",
+   "group": "Shop: configurator",
+   "label": "configurator › stepDone",
+   "placeholders": [],
+   "default": {
+    "hu": "kész",
+    "en": "done",
+    "nl": "klaar"
+   }
+  },
+  {
+   "key": "shop.configurator.stepCurrent",
+   "group": "Shop: configurator",
+   "label": "configurator › stepCurrent",
+   "placeholders": [],
+   "default": {
+    "hu": "jelenlegi lépés",
+    "en": "current step",
+    "nl": "huidige stap"
+   }
+  },
+  {
+   "key": "shop.configurator.steps.need",
+   "group": "Shop: configurator",
+   "label": "configurator › steps › need",
+   "placeholders": [],
+   "default": {
+    "hu": "Igény",
+    "en": "Need",
+    "nl": "Behoefte"
+   }
+  },
+  {
+   "key": "shop.configurator.steps.plan",
+   "group": "Shop: configurator",
+   "label": "configurator › steps › plan",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomag",
+    "en": "Package",
+    "nl": "Pakket"
+   }
+  },
+  {
+   "key": "shop.configurator.steps.extras",
+   "group": "Shop: configurator",
+   "label": "configurator › steps › extras",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítők",
+    "en": "Extras",
+    "nl": "Toevoegingen"
+   }
+  },
+  {
+   "key": "shop.configurator.steps.details",
+   "group": "Shop: configurator",
+   "label": "configurator › steps › details",
+   "placeholders": [],
+   "default": {
+    "hu": "Részletek",
+    "en": "Details",
+    "nl": "Details"
+   }
+  },
+  {
+   "key": "shop.configurator.steps.review",
+   "group": "Shop: configurator",
+   "label": "configurator › steps › review",
+   "placeholders": [],
+   "default": {
+    "hu": "Áttekintés",
+    "en": "Review",
+    "nl": "Overzicht"
+   }
+  },
+  {
+   "key": "shop.configurator.steps.send",
+   "group": "Shop: configurator",
+   "label": "configurator › steps › send",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlatkérés",
+    "en": "Request",
+    "nl": "Aanvraag"
+   }
+  },
+  {
+   "key": "shop.configurator.titles.need",
+   "group": "Shop: configurator",
+   "label": "configurator › titles › need",
+   "placeholders": [],
+   "default": {
+    "hu": "Mire van szükséged?",
+    "en": "What do you need?",
+    "nl": "Wat heb je nodig?"
+   }
+  },
+  {
+   "key": "shop.configurator.titles.plan",
+   "group": "Shop: configurator",
+   "label": "configurator › titles › plan",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz csomagot",
+    "en": "Choose a package",
+    "nl": "Kies een pakket"
+   }
+  },
+  {
+   "key": "shop.configurator.titles.extras",
+   "group": "Shop: configurator",
+   "label": "configurator › titles › extras",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz kiegészítőket",
+    "en": "Select additional services",
+    "nl": "Kies extra diensten"
+   }
+  },
+  {
+   "key": "shop.configurator.titles.details",
+   "group": "Shop: configurator",
+   "label": "configurator › titles › details",
+   "placeholders": [],
+   "default": {
+    "hu": "Mesélj a projektről",
+    "en": "Tell me about the project",
+    "nl": "Vertel over het project"
+   }
+  },
+  {
+   "key": "shop.configurator.titles.review",
+   "group": "Shop: configurator",
+   "label": "configurator › titles › review",
+   "placeholders": [],
+   "default": {
+    "hu": "Nézd át a kérésed",
+    "en": "Review your request",
+    "nl": "Bekijk je aanvraag"
+   }
+  },
+  {
+   "key": "shop.configurator.titles.send",
+   "group": "Shop: configurator",
+   "label": "configurator › titles › send",
+   "placeholders": [],
+   "default": {
+    "hu": "Kérd az ajánlatot",
+    "en": "Request your quote",
+    "nl": "Vraag je offerte aan"
+   }
+  },
+  {
+   "key": "shop.configurator.help.need",
+   "group": "Shop: configurator",
+   "label": "configurator › help › need",
+   "placeholders": [],
+   "default": {
+    "hu": "Jelölj be mindent, ami igaz. Később bármikor módosíthatod.",
+    "en": "Pick everything that applies. You can change it later.",
+    "nl": "Kies alles wat van toepassing is. Je kunt het later altijd wijzigen."
+   }
+  },
+  {
+   "key": "shop.configurator.help.plan",
+   "group": "Shop: configurator",
+   "label": "configurator › help › plan",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem biztos? Válaszd az Egyedi projektet: a megfelelő formát együtt találjuk meg.",
+    "en": "Not sure? Choose Custom project: we will find the right shape together.",
+    "nl": "Niet zeker? Kies Maatwerkproject: we vinden samen de juiste vorm."
+   }
+  },
+  {
+   "key": "shop.configurator.help.extras",
+   "group": "Shop: configurator",
+   "label": "configurator › help › extras",
+   "placeholders": [],
+   "default": {
+    "hu": "Mind nem kötelező. Csak azok a kiegészítők jelennek meg, amelyek a választásodhoz illenek.",
+    "en": "All optional. Only the add-ons that fit your choices are shown.",
+    "nl": "Allemaal optioneel. Alleen de toevoegingen die bij je keuzes passen worden getoond."
+   }
+  },
+  {
+   "key": "shop.configurator.help.details",
+   "group": "Shop: configurator",
+   "label": "configurator › help › details",
+   "placeholders": [],
+   "default": {
+    "hu": "Csak az első kérdés kötelező. A többi segít, de üresen hagyhatod.",
+    "en": "Only the first question is required. The rest helps, but you can leave it empty.",
+    "nl": "Alleen de eerste vraag is verplicht. De rest helpt, maar je kunt het leeg laten."
+   }
+  },
+  {
+   "key": "shop.configurator.help.review",
+   "group": "Shop: configurator",
+   "label": "configurator › help › review",
+   "placeholders": [],
+   "default": {
+    "hu": "Ellenőrizd. Minden válasz módosítható: a „Módosítás” gomb a megfelelő lépésre visz.",
+    "en": "Check it over. Every answer can be changed: “Change” takes you to the right step.",
+    "nl": "Controleer alles. Elk antwoord kan worden gewijzigd: “Wijzigen” brengt je naar de juiste stap."
+   }
+  },
+  {
+   "key": "shop.configurator.help.send",
+   "group": "Shop: configurator",
+   "label": "configurator › help › send",
+   "placeholders": [],
+   "default": {
+    "hu": "Az utolsó lépés: hogyan érhetlek el? Erre az e-mail-címre válaszolok.",
+    "en": "The last step: how can I reach you? I will reply to this email address.",
+    "nl": "De laatste stap: hoe kan ik je bereiken? Op dit e-mailadres antwoord ik."
+   }
+  },
+  {
+   "key": "shop.configurator.need.selected",
+   "group": "Shop: configurator",
+   "label": "configurator › need › selected",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} kiválasztva",
+    "en": "{count} selected",
+    "nl": "{count} gekozen"
+   }
+  },
+  {
+   "key": "shop.configurator.need.legend",
+   "group": "Shop: configurator",
+   "label": "configurator › need › legend",
+   "placeholders": [],
+   "default": {
+    "hu": "Mire van szükséged?",
+    "en": "What do you need?",
+    "nl": "Wat heb je nodig?"
+   }
+  },
+  {
+   "key": "shop.configurator.need.unsureNote",
+   "group": "Shop: configurator",
+   "label": "configurator › need › unsureNote",
+   "placeholders": [],
+   "default": {
+    "hu": "A „Még nem tudom” mellett más igényt is megadhatsz.",
+    "en": "You can pick other needs next to “Not sure yet”.",
+    "nl": "Je kunt naast “Nog niet zeker” ook andere behoeften kiezen."
+   }
+  },
+  {
+   "key": "shop.configurator.plan.forNeed",
+   "group": "Shop: configurator",
+   "label": "configurator › plan › forNeed",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Ehhez: {name}",
+    "en": "For: {name}",
+    "nl": "Voor: {name}"
+   }
+  },
+  {
+   "key": "shop.configurator.plan.suggested",
+   "group": "Shop: configurator",
+   "label": "configurator › plan › suggested",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlott",
+    "en": "Suggested",
+    "nl": "Voorgesteld"
+   }
+  },
+  {
+   "key": "shop.configurator.plan.legend",
+   "group": "Shop: configurator",
+   "label": "configurator › plan › legend",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Csomag ehhez: {name}",
+    "en": "Package for {name}",
+    "nl": "Pakket voor {name}"
+   }
+  },
+  {
+   "key": "shop.configurator.plan.noLines",
+   "group": "Shop: configurator",
+   "label": "configurator › plan › noLines",
+   "placeholders": [],
+   "default": {
+    "hu": "Előbb válassz igényt az első lépésben.",
+    "en": "Choose a need in the first step first.",
+    "nl": "Kies eerst een behoefte in de eerste stap."
+   }
+  },
+  {
+   "key": "shop.configurator.plan.backToNeed",
+   "group": "Shop: configurator",
+   "label": "configurator › plan › backToNeed",
+   "placeholders": [],
+   "default": {
+    "hu": "Vissza az igényekhez",
+    "en": "Back to the needs",
+    "nl": "Terug naar de behoeften"
+   }
+  },
+  {
+   "key": "shop.configurator.extras.forNeed",
+   "group": "Shop: configurator",
+   "label": "configurator › extras › forNeed",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Kiegészítők ehhez: {name}",
+    "en": "Add-ons for {name}",
+    "nl": "Toevoegingen voor {name}"
+   }
+  },
+  {
+   "key": "shop.configurator.extras.none",
+   "group": "Shop: configurator",
+   "label": "configurator › extras › none",
+   "placeholders": [],
+   "default": {
+    "hu": "Ehhez nincs választható kiegészítő.",
+    "en": "No add-ons are available for this one.",
+    "nl": "Hiervoor zijn geen toevoegingen beschikbaar."
+   }
+  },
+  {
+   "key": "shop.configurator.extras.selected",
+   "group": "Shop: configurator",
+   "label": "configurator › extras › selected",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} kiválasztva",
+    "en": "{count} selected",
+    "nl": "{count} gekozen"
+   }
+  },
+  {
+   "key": "shop.configurator.extras.skipHint",
+   "group": "Shop: configurator",
+   "label": "configurator › extras › skipHint",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem kell semmit választanod: léphetsz tovább.",
+    "en": "You do not have to pick anything: just go on.",
+    "nl": "Je hoeft niets te kiezen: ga gewoon verder."
+   }
+  },
+  {
+   "key": "shop.configurator.details.description.label",
+   "group": "Shop: configurator",
+   "label": "configurator › details › description › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Mi a projekt, röviden?",
+    "en": "What is the project, briefly?",
+    "nl": "Wat is het project, kort?"
+   }
+  },
+  {
+   "key": "shop.configurator.details.description.hint",
+   "group": "Shop: configurator",
+   "label": "configurator › details › description › hint",
+   "placeholders": [],
+   "default": {
+    "hu": "Mit szeretnél létrehozni, kinek, és mi a cél? Néhány mondat elég.",
+    "en": "What do you want to create, for whom, and what is the goal? A few sentences are enough.",
+    "nl": "Wat wil je maken, voor wie en wat is het doel? Een paar zinnen volstaan."
+   }
+  },
+  {
+   "key": "shop.configurator.details.description.count",
+   "group": "Shop: configurator",
+   "label": "configurator › details › description › count",
+   "placeholders": [
+    "{count}",
+    "{max}"
+   ],
+   "default": {
+    "hu": "{count} / {max}",
+    "en": "{count} / {max}",
+    "nl": "{count} / {max}"
+   }
+  },
+  {
+   "key": "shop.configurator.details.objective.label",
+   "group": "Shop: configurator",
+   "label": "configurator › details › objective › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Mi a fő cél?",
+    "en": "What is the main goal?",
+    "nl": "Wat is het hoofddoel?"
+   }
+  },
+  {
+   "key": "shop.configurator.details.objective.options.present",
+   "group": "Shop: configurator",
+   "label": "configurator › details › objective › options › present",
+   "placeholders": [],
+   "default": {
+    "hu": "Bemutatkozás",
+    "en": "Presenting a business or myself",
+    "nl": "Een bedrijf of mezelf presenteren"
+   }
+  },
+  {
+   "key": "shop.configurator.details.objective.options.leads",
+   "group": "Shop: configurator",
+   "label": "configurator › details › objective › options › leads",
+   "placeholders": [],
+   "default": {
+    "hu": "Megkeresések szerzése",
+    "en": "Getting enquiries",
+    "nl": "Aanvragen krijgen"
+   }
+  },
+  {
+   "key": "shop.configurator.details.objective.options.sell",
+   "group": "Shop: configurator",
+   "label": "configurator › details › objective › options › sell",
+   "placeholders": [],
+   "default": {
+    "hu": "Foglalás vagy rendelés",
+    "en": "Taking bookings or orders",
+    "nl": "Boekingen of bestellingen aannemen"
+   }
+  },
+  {
+   "key": "shop.configurator.details.objective.options.process",
+   "group": "Shop: configurator",
+   "label": "configurator › details › objective › options › process",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy folyamat digitalizálása",
+    "en": "Taking a process online",
+    "nl": "Een proces digitaliseren"
+   }
+  },
+  {
+   "key": "shop.configurator.details.objective.options.improve",
+   "group": "Shop: configurator",
+   "label": "configurator › details › objective › options › improve",
+   "placeholders": [],
+   "default": {
+    "hu": "A meglévő javítása",
+    "en": "Improving what exists",
+    "nl": "Verbeteren wat er al is"
+   }
+  },
+  {
+   "key": "shop.configurator.details.objective.options.other",
+   "group": "Shop: configurator",
+   "label": "configurator › details › objective › options › other",
+   "placeholders": [],
+   "default": {
+    "hu": "Más",
+    "en": "Something else",
+    "nl": "Iets anders"
+   }
+  },
+  {
+   "key": "shop.configurator.details.reference.label",
+   "group": "Shop: configurator",
+   "label": "configurator › details › reference › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Van meglévő weboldalad vagy példád?",
+    "en": "Is there an existing website or a reference?",
+    "nl": "Is er een bestaande website of een voorbeeld?"
+   }
+  },
+  {
+   "key": "shop.configurator.details.reference.hint",
+   "group": "Shop: configurator",
+   "label": "configurator › details › reference › hint",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy hivatkozás, vagy néhány szó arról, ami tetszik.",
+    "en": "A link, or a few words about something you like.",
+    "nl": "Een link, of een paar woorden over iets wat je mooi vindt."
+   }
+  },
+  {
+   "key": "shop.configurator.details.timing.label",
+   "group": "Shop: configurator",
+   "label": "configurator › details › timing › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Mikorra szeretnéd?",
+    "en": "When would you like it?",
+    "nl": "Wanneer wil je het?"
+   }
+  },
+  {
+   "key": "shop.configurator.details.timing.options.unsure",
+   "group": "Shop: configurator",
+   "label": "configurator › details › timing › options › unsure",
+   "placeholders": [],
+   "default": {
+    "hu": "Még nem tudom",
+    "en": "Not sure yet",
+    "nl": "Nog niet zeker"
+   }
+  },
+  {
+   "key": "shop.configurator.details.timing.options.asap",
+   "group": "Shop: configurator",
+   "label": "configurator › details › timing › options › asap",
+   "placeholders": [],
+   "default": {
+    "hu": "Minél előbb",
+    "en": "As soon as possible",
+    "nl": "Zo snel mogelijk"
+   }
+  },
+  {
+   "key": "shop.configurator.details.timing.options.weeks",
+   "group": "Shop: configurator",
+   "label": "configurator › details › timing › options › weeks",
+   "placeholders": [],
+   "default": {
+    "hu": "A következő hetekben",
+    "en": "In the coming weeks",
+    "nl": "In de komende weken"
+   }
+  },
+  {
+   "key": "shop.configurator.details.timing.options.months",
+   "group": "Shop: configurator",
+   "label": "configurator › details › timing › options › months",
+   "placeholders": [],
+   "default": {
+    "hu": "A következő hónapokban",
+    "en": "In the coming months",
+    "nl": "In de komende maanden"
+   }
+  },
+  {
+   "key": "shop.configurator.details.timing.options.flexible",
+   "group": "Shop: configurator",
+   "label": "configurator › details › timing › options › flexible",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem sürgős",
+    "en": "No rush",
+    "nl": "Geen haast"
+   }
+  },
+  {
+   "key": "shop.configurator.details.requirements.label",
+   "group": "Shop: configurator",
+   "label": "configurator › details › requirements › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Van még valami, amit tudnom kell?",
+    "en": "Anything else I should know?",
+    "nl": "Is er nog iets wat ik moet weten?"
+   }
+  },
+  {
+   "key": "shop.configurator.details.requirements.hint",
+   "group": "Shop: configurator",
+   "label": "configurator › details › requirements › hint",
+   "placeholders": [],
+   "default": {
+    "hu": "További követelmények, korlátok vagy egy költségkeret-elképzelés, ha van. Nem kötelező.",
+    "en": "Further requirements, constraints or an idea of a budget, if you have one. Optional.",
+    "nl": "Verdere eisen, beperkingen of een idee van een budget, als je dat hebt. Optioneel."
+   }
+  },
+  {
+   "key": "shop.configurator.review.lines",
+   "group": "Shop: configurator",
+   "label": "configurator › review › lines",
+   "placeholders": [],
+   "default": {
+    "hu": "A kiválasztott szolgáltatások",
+    "en": "Your selected services",
+    "nl": "Je gekozen diensten"
+   }
+  },
+  {
+   "key": "shop.configurator.review.details",
+   "group": "Shop: configurator",
+   "label": "configurator › review › details",
+   "placeholders": [],
+   "default": {
+    "hu": "A projekt részletei",
+    "en": "Project details",
+    "nl": "Projectdetails"
+   }
+  },
+  {
+   "key": "shop.configurator.review.package",
+   "group": "Shop: configurator",
+   "label": "configurator › review › package",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomag",
+    "en": "Package",
+    "nl": "Pakket"
+   }
+  },
+  {
+   "key": "shop.configurator.review.addons",
+   "group": "Shop: configurator",
+   "label": "configurator › review › addons",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítők",
+    "en": "Add-ons",
+    "nl": "Toevoegingen"
+   }
+  },
+  {
+   "key": "shop.configurator.review.none",
+   "group": "Shop: configurator",
+   "label": "configurator › review › none",
+   "placeholders": [],
+   "default": {
+    "hu": "nincs",
+    "en": "none",
+    "nl": "geen"
+   }
+  },
+  {
+   "key": "shop.configurator.review.notChosen",
+   "group": "Shop: configurator",
+   "label": "configurator › review › notChosen",
+   "placeholders": [],
+   "default": {
+    "hu": "nincs kiválasztva",
+    "en": "not chosen",
+    "nl": "niet gekozen"
+   }
+  },
+  {
+   "key": "shop.configurator.review.change",
+   "group": "Shop: configurator",
+   "label": "configurator › review › change",
+   "placeholders": [],
+   "default": {
+    "hu": "Módosítás",
+    "en": "Change",
+    "nl": "Wijzigen"
+   }
+  },
+  {
+   "key": "shop.configurator.review.changeNeed",
+   "group": "Shop: configurator",
+   "label": "configurator › review › changeNeed",
+   "placeholders": [],
+   "default": {
+    "hu": "Igények módosítása",
+    "en": "Change needs",
+    "nl": "Behoeften wijzigen"
+   }
+  },
+  {
+   "key": "shop.configurator.review.changePlan",
+   "group": "Shop: configurator",
+   "label": "configurator › review › changePlan",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Csomag módosítása: {name}",
+    "en": "Change the package: {name}",
+    "nl": "Pakket wijzigen: {name}"
+   }
+  },
+  {
+   "key": "shop.configurator.review.changeExtras",
+   "group": "Shop: configurator",
+   "label": "configurator › review › changeExtras",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Kiegészítők módosítása: {name}",
+    "en": "Change the add-ons: {name}",
+    "nl": "Toevoegingen wijzigen: {name}"
+   }
+  },
+  {
+   "key": "shop.configurator.review.changeDetails",
+   "group": "Shop: configurator",
+   "label": "configurator › review › changeDetails",
+   "placeholders": [],
+   "default": {
+    "hu": "Részletek módosítása",
+    "en": "Change the details",
+    "nl": "Details wijzigen"
+   }
+  },
+  {
+   "key": "shop.configurator.review.addAnother",
+   "group": "Shop: configurator",
+   "label": "configurator › review › addAnother",
+   "placeholders": [],
+   "default": {
+    "hu": "Másik szolgáltatás hozzáadása",
+    "en": "Add another service",
+    "nl": "Nog een dienst toevoegen"
+   }
+  },
+  {
+   "key": "shop.configurator.review.price",
+   "group": "Shop: configurator",
+   "label": "configurator › review › price",
+   "placeholders": [],
+   "default": {
+    "hu": "Ár",
+    "en": "Price",
+    "nl": "Prijs"
+   }
+  },
+  {
+   "key": "shop.configurator.review.priceNote",
+   "group": "Shop: configurator",
+   "label": "configurator › review › priceNote",
+   "placeholders": [],
+   "default": {
+    "hu": "Mindegyik tétel ára az ajánlatban szerepel.",
+    "en": "The price of every item comes with the quote.",
+    "nl": "De prijs van elk onderdeel staat in de offerte."
+   }
+  },
+  {
+   "key": "shop.configurator.send.contactTitle",
+   "group": "Shop: configurator",
+   "label": "configurator › send › contactTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Elérhetőség",
+    "en": "Contact",
+    "nl": "Contact"
+   }
+  },
+  {
+   "key": "shop.configurator.send.name.label",
+   "group": "Shop: configurator",
+   "label": "configurator › send › name › label",
+   "placeholders": [],
+   "default": {
+    "hu": "A neved",
+    "en": "Your name",
+    "nl": "Je naam"
+   }
+  },
+  {
+   "key": "shop.configurator.send.name.hint",
+   "group": "Shop: configurator",
+   "label": "configurator › send › name › hint",
+   "placeholders": [],
+   "default": {
+    "hu": "A keresztnév is elég.",
+    "en": "A first name is enough.",
+    "nl": "Een voornaam is genoeg."
+   }
+  },
+  {
+   "key": "shop.configurator.send.email.label",
+   "group": "Shop: configurator",
+   "label": "configurator › send › email › label",
+   "placeholders": [],
+   "default": {
+    "hu": "E-mail-cím",
+    "en": "Email address",
+    "nl": "E-mailadres"
+   }
+  },
+  {
+   "key": "shop.configurator.send.email.hint",
+   "group": "Shop: configurator",
+   "label": "configurator › send › email › hint",
+   "placeholders": [],
+   "default": {
+    "hu": "Erre a címre válaszolok.",
+    "en": "This is where I will reply.",
+    "nl": "Hier antwoord ik op."
+   }
+  },
+  {
+   "key": "shop.configurator.send.phone.label",
+   "group": "Shop: configurator",
+   "label": "configurator › send › phone › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Telefonszám",
+    "en": "Phone number",
+    "nl": "Telefoonnummer"
+   }
+  },
+  {
+   "key": "shop.configurator.send.phone.hint",
+   "group": "Shop: configurator",
+   "label": "configurator › send › phone › hint",
+   "placeholders": [],
+   "default": {
+    "hu": "Csak akkor, ha inkább telefonálnál.",
+    "en": "Only if you would rather talk by phone.",
+    "nl": "Alleen als je liever belt."
+   }
+  },
+  {
+   "key": "shop.configurator.send.consent.label",
+   "group": "Shop: configurator",
+   "label": "configurator › send › consent › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Tudomásul veszem, hogy a megadott adatokat az ajánlatkérés megválaszolására használják fel.",
+    "en": "I understand that the details I give will be used to answer this quote request.",
+    "nl": "Ik begrijp dat de opgegeven gegevens worden gebruikt om deze offerteaanvraag te beantwoorden."
+   }
+  },
+  {
+   "key": "shop.configurator.send.consent.privacy",
+   "group": "Shop: configurator",
+   "label": "configurator › send › consent › privacy",
+   "placeholders": [],
+   "default": {
+    "hu": "Adatkezelési tájékoztató",
+    "en": "Privacy notice",
+    "nl": "Privacyverklaring"
+   }
+  },
+  {
+   "key": "shop.configurator.send.consent.pending",
+   "group": "Shop: configurator",
+   "label": "configurator › send › consent › pending",
+   "placeholders": [],
+   "default": {
+    "hu": "Az adatkezelési tájékoztató elérési útja még nincs beállítva: src/config/site.ts",
+    "en": "The privacy notice path is not set yet: src/config/site.ts",
+    "nl": "Het pad van de privacyverklaring is nog niet ingesteld: src/config/site.ts"
+   }
+  },
+  {
+   "key": "shop.configurator.send.memory",
+   "group": "Shop: configurator",
+   "label": "configurator › send › memory",
+   "placeholders": [],
+   "default": {
+    "hu": "Amíg el nem küldöd, a válaszaid csak ezen az oldalon, a böngésződ memóriájában vannak: a személyes adataidat és a leírásodat sehol nem mentem el. Újratöltéskor törlődnek. A kiválasztott szolgáltatások a kosárban maradnak.",
+    "en": "Until you send it, your answers exist only on this page, in your browser’s memory: your personal details and your description are not saved anywhere. A reload clears them. The services you chose stay in the cart.",
+    "nl": "Tot je het verstuurt, bestaan je antwoorden alleen op deze pagina, in het geheugen van je browser: je persoonlijke gegevens en je beschrijving worden nergens opgeslagen. Bij herladen verdwijnen ze. De gekozen diensten blijven in de winkelmand."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.required.need",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › required › need",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz legalább egy igényt.",
+    "en": "Choose at least one need.",
+    "nl": "Kies minstens één behoefte."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.required.plan",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › required › plan",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Válassz csomagot ehhez: {name}, vagy az Egyedi projektet.",
+    "en": "Choose a package for {name}, or Custom project.",
+    "nl": "Kies een pakket voor {name}, of Maatwerkproject."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.required.description",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › required › description",
+   "placeholders": [],
+   "default": {
+    "hu": "Írj néhány szót a projektről.",
+    "en": "Write a few words about the project.",
+    "nl": "Schrijf een paar woorden over het project."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.required.timing",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › required › timing",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz a listából, vagy hagyd üresen.",
+    "en": "Choose from the list, or leave it empty.",
+    "nl": "Kies uit de lijst of laat het leeg."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.required.name",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › required › name",
+   "placeholders": [],
+   "default": {
+    "hu": "Add meg a neved.",
+    "en": "Enter your name.",
+    "nl": "Vul je naam in."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.required.email",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › required › email",
+   "placeholders": [],
+   "default": {
+    "hu": "Add meg az e-mail-címed, hogy válaszolhassak.",
+    "en": "Enter your email address so I can reply.",
+    "nl": "Vul je e-mailadres in zodat ik kan antwoorden."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.tooShort",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › tooShort",
+   "placeholders": [
+    "{min}"
+   ],
+   "default": {
+    "hu": "Legalább {min} karakter kell ide.",
+    "en": "At least {min} characters are needed here.",
+    "nl": "Hier zijn minstens {min} tekens nodig."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.tooLong",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › tooLong",
+   "placeholders": [
+    "{max}"
+   ],
+   "default": {
+    "hu": "Legfeljebb {max} karakter lehet.",
+    "en": "No more than {max} characters.",
+    "nl": "Maximaal {max} tekens."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.invalidEmail",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › invalidEmail",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez nem tűnik érvényes e-mail-címnek. Ellenőrizd, hogy van-e benne @ jel és utána tartomány.",
+    "en": "That does not look like a valid email address. Check that it has an @ sign followed by a domain.",
+    "nl": "Dat lijkt geen geldig e-mailadres. Controleer of er een @-teken met daarna een domein in staat."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.invalidPhone",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › invalidPhone",
+   "placeholders": [],
+   "default": {
+    "hu": "Számjegyeket, szóközöket és a + ( ) - . / jeleket használj, legalább 6 számjeggyel.",
+    "en": "Use digits, spaces and the characters + ( ) - . /, with at least 6 digits.",
+    "nl": "Gebruik cijfers, spaties en de tekens + ( ) - . /, met minstens 6 cijfers."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.consentRequired",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › consentRequired",
+   "placeholders": [],
+   "default": {
+    "hu": "A küldéshez ezt be kell jelölnöd.",
+    "en": "You need to tick this to send the request.",
+    "nl": "Je moet dit aanvinken om de aanvraag te versturen."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.summary",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › summary",
+   "placeholders": [],
+   "default": {
+    "hu": "Javítsd, ami piros, mielőtt továbblépsz.",
+    "en": "Fix what is marked before you go on.",
+    "nl": "Herstel wat is gemarkeerd voordat je verdergaat."
+   }
+  },
+  {
+   "key": "shop.configurator.actions.next",
+   "group": "Shop: configurator",
+   "label": "configurator › actions › next",
+   "placeholders": [],
+   "default": {
+    "hu": "Tovább",
+    "en": "Next",
+    "nl": "Volgende"
+   }
+  },
+  {
+   "key": "shop.configurator.actions.back",
+   "group": "Shop: configurator",
+   "label": "configurator › actions › back",
+   "placeholders": [],
+   "default": {
+    "hu": "Vissza",
+    "en": "Back",
+    "nl": "Terug"
+   }
+  },
+  {
+   "key": "shop.configurator.actions.send",
+   "group": "Shop: configurator",
+   "label": "configurator › actions › send",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlatkérés elküldése",
+    "en": "Send quote request",
+    "nl": "Offerteaanvraag versturen"
+   }
+  },
+  {
+   "key": "shop.configurator.actions.prepare",
+   "group": "Shop: configurator",
+   "label": "configurator › actions › prepare",
+   "placeholders": [],
+   "default": {
+    "hu": "Összegzés készítése",
+    "en": "Prepare summary",
+    "nl": "Overzicht maken"
+   }
+  },
+  {
+   "key": "shop.configurator.actions.sending",
+   "group": "Shop: configurator",
+   "label": "configurator › actions › sending",
+   "placeholders": [],
+   "default": {
+    "hu": "Küldés…",
+    "en": "Sending…",
+    "nl": "Versturen…"
+   }
+  },
+  {
+   "key": "shop.configurator.actions.toCart",
+   "group": "Shop: configurator",
+   "label": "configurator › actions › toCart",
+   "placeholders": [],
+   "default": {
+    "hu": "Vissza a kosárhoz",
+    "en": "Back to the cart",
+    "nl": "Terug naar de winkelmand"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.title",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlatkérés",
+    "en": "Quote request",
+    "nl": "Offerteaanvraag"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.heading",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › heading",
+   "placeholders": [],
+   "default": {
+    "hu": "Összefoglaló",
+    "en": "Summary",
+    "nl": "Samenvatting"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.empty",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › empty",
+   "placeholders": [],
+   "default": {
+    "hu": "—",
+    "en": "—",
+    "nl": "—"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.services",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › services",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatások",
+    "en": "Services",
+    "nl": "Diensten"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.description",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › description",
+   "placeholders": [],
+   "default": {
+    "hu": "Leírás",
+    "en": "Description",
+    "nl": "Beschrijving"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.objective",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › objective",
+   "placeholders": [],
+   "default": {
+    "hu": "Fő cél",
+    "en": "Main goal",
+    "nl": "Hoofddoel"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.reference",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › reference",
+   "placeholders": [],
+   "default": {
+    "hu": "Meglévő oldal vagy példa",
+    "en": "Existing site or reference",
+    "nl": "Bestaande site of voorbeeld"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.timing",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › timing",
+   "placeholders": [],
+   "default": {
+    "hu": "Időzítés",
+    "en": "Timing",
+    "nl": "Timing"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.requirements",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › requirements",
+   "placeholders": [],
+   "default": {
+    "hu": "További követelmények",
+    "en": "Further requirements",
+    "nl": "Verdere eisen"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.name",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › name",
+   "placeholders": [],
+   "default": {
+    "hu": "Név",
+    "en": "Name",
+    "nl": "Naam"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.email",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › email",
+   "placeholders": [],
+   "default": {
+    "hu": "E-mail",
+    "en": "Email",
+    "nl": "E-mail"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.phone",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › phone",
+   "placeholders": [],
+   "default": {
+    "hu": "Telefon",
+    "en": "Phone",
+    "nl": "Telefoon"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.language",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › language",
+   "placeholders": [],
+   "default": {
+    "hu": "Nyelv",
+    "en": "Language",
+    "nl": "Taal"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.price",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › price",
+   "placeholders": [],
+   "default": {
+    "hu": "Ár",
+    "en": "Price",
+    "nl": "Prijs"
+   }
+  },
+  {
+   "key": "shop.configurator.unavailable.notice",
+   "group": "Shop: configurator",
+   "label": "configurator › unavailable › notice",
+   "placeholders": [],
+   "default": {
+    "hu": "Az online küldés még nincs bekötve. Végigmehetsz a kérdéseken, de a kérés most nem hagyhatja el az oldalt: a végén az összefoglalót másolhatod.",
+    "en": "Online sending is not connected yet. You can go through the questions, but the request cannot leave this page right now: at the end you can copy the summary.",
+    "nl": "Online versturen is nog niet gekoppeld. Je kunt de vragen doorlopen, maar de aanvraag kan deze pagina nu niet verlaten: aan het eind kun je de samenvatting kopiëren."
+   }
+  },
+  {
+   "key": "shop.configurator.unavailable.title",
+   "group": "Shop: configurator",
+   "label": "configurator › unavailable › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Az ajánlatkérés nem lett elküldve",
+    "en": "The quote request was not sent",
+    "nl": "De offerteaanvraag is niet verstuurd"
+   }
+  },
+  {
+   "key": "shop.configurator.unavailable.text",
+   "group": "Shop: configurator",
+   "label": "configurator › unavailable › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Az online küldés még nincs beállítva, ezért semmi nem lett elküldve. A válaszaid megvannak: másold ki az összefoglalót, és küldd el más módon.",
+    "en": "Online sending is not set up yet, so nothing has been sent. Your answers are still here: copy the summary and send it another way.",
+    "nl": "Online versturen is nog niet ingesteld, dus er is niets verstuurd. Je antwoorden staan er nog: kopieer de samenvatting en stuur die op een andere manier."
+   }
+  },
+  {
+   "key": "shop.configurator.unavailable.copy",
+   "group": "Shop: configurator",
+   "label": "configurator › unavailable › copy",
+   "placeholders": [],
+   "default": {
+    "hu": "Összefoglaló másolása",
+    "en": "Copy summary",
+    "nl": "Samenvatting kopiëren"
+   }
+  },
+  {
+   "key": "shop.configurator.unavailable.copied",
+   "group": "Shop: configurator",
+   "label": "configurator › unavailable › copied",
+   "placeholders": [],
+   "default": {
+    "hu": "Az összefoglaló a vágólapon van.",
+    "en": "The summary is on your clipboard.",
+    "nl": "De samenvatting staat op je klembord."
+   }
+  },
+  {
+   "key": "shop.configurator.unavailable.copyFailed",
+   "group": "Shop: configurator",
+   "label": "configurator › unavailable › copyFailed",
+   "placeholders": [],
+   "default": {
+    "hu": "A másolás nem sikerült. Jelöld ki az alábbi szöveget, és másold ki kézzel.",
+    "en": "Copying did not work. Select the text below and copy it by hand.",
+    "nl": "Kopiëren is niet gelukt. Selecteer de tekst hieronder en kopieer die met de hand."
+   }
+  },
+  {
+   "key": "shop.configurator.unavailable.mail",
+   "group": "Shop: configurator",
+   "label": "configurator › unavailable › mail",
+   "placeholders": [],
+   "default": {
+    "hu": "Megnyitás e-mail-piszkozatként",
+    "en": "Open as an email draft",
+    "nl": "Openen als e-mailconcept"
+   }
+  },
+  {
+   "key": "shop.configurator.unavailable.mailNote",
+   "group": "Shop: configurator",
+   "label": "configurator › unavailable › mailNote",
+   "placeholders": [],
+   "default": {
+    "hu": "Az e-mail-programod megnyílik egy piszkozattal; csak akkor megy el, ha ott elküldöd.",
+    "en": "Your email app opens with a draft; it is only sent when you send it there.",
+    "nl": "Je e-mailprogramma opent met een concept; het wordt pas verstuurd als je het daar verstuurt."
+   }
+  },
+  {
+   "key": "shop.configurator.unavailable.subject",
+   "group": "Shop: configurator",
+   "label": "configurator › unavailable › subject",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlatkérés",
+    "en": "Quote request",
+    "nl": "Offerteaanvraag"
+   }
+  },
+  {
+   "key": "shop.configurator.failed.title",
+   "group": "Shop: configurator",
+   "label": "configurator › failed › title",
+   "placeholders": [],
+   "default": {
+    "hu": "A küldés nem sikerült",
+    "en": "Sending did not work",
+    "nl": "Versturen is niet gelukt"
+   }
+  },
+  {
+   "key": "shop.configurator.failed.network",
+   "group": "Shop: configurator",
+   "label": "configurator › failed › network",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem értem el a szolgáltatást. A válaszaid megvannak; ellenőrizd a kapcsolatot, és próbáld újra.",
+    "en": "I could not reach the service. Your answers are still here; check your connection and try again.",
+    "nl": "Ik kon de dienst niet bereiken. Je antwoorden staan er nog; controleer je verbinding en probeer het opnieuw."
+   }
+  },
+  {
+   "key": "shop.configurator.failed.timeout",
+   "group": "Shop: configurator",
+   "label": "configurator › failed › timeout",
+   "placeholders": [],
+   "default": {
+    "hu": "A küldés túl sokáig tartott, ezért nem tudom, megérkezett-e. A válaszaid megvannak; próbáld újra később.",
+    "en": "Sending took too long, so I cannot tell whether it arrived. Your answers are still here; try again later.",
+    "nl": "Versturen duurde te lang, dus ik weet niet of het is aangekomen. Je antwoorden staan er nog; probeer het later opnieuw."
+   }
+  },
+  {
+   "key": "shop.configurator.failed.rejected",
+   "group": "Shop: configurator",
+   "label": "configurator › failed › rejected",
+   "placeholders": [],
+   "default": {
+    "hu": "A szolgáltatás nem fogadta el a kérést. A válaszaid megvannak; próbáld újra később.",
+    "en": "The service did not accept the request. Your answers are still here; try again later.",
+    "nl": "De dienst heeft de aanvraag niet geaccepteerd. Je antwoorden staan er nog; probeer het later opnieuw."
+   }
+  },
+  {
+   "key": "shop.configurator.sent.title",
+   "group": "Shop: configurator",
+   "label": "configurator › sent › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Elküldve",
+    "en": "Sent",
+    "nl": "Verstuurd"
+   }
+  },
+  {
+   "key": "shop.configurator.sent.text",
+   "group": "Shop: configurator",
+   "label": "configurator › sent › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Az ajánlatkérésed elküldtem. A megadott e-mail-címen jelentkezem.",
+    "en": "Your quote request has been sent. I will get back to you at the email address you gave.",
+    "nl": "Je offerteaanvraag is verstuurd. Ik neem contact met je op via het e-mailadres dat je hebt opgegeven."
+   }
+  },
+  {
+   "key": "shop.configurator.sent.next",
+   "group": "Shop: configurator",
+   "label": "configurator › sent › next",
+   "placeholders": [],
+   "default": {
+    "hu": "Mi történik most?",
+    "en": "What happens now?",
+    "nl": "Wat gebeurt er nu?"
+   }
+  },
+  {
+   "key": "shop.configurator.sent.again",
+   "group": "Shop: configurator",
+   "label": "configurator › sent › again",
+   "placeholders": [],
+   "default": {
+    "hu": "Új ajánlatkérés",
+    "en": "New quote request",
+    "nl": "Nieuwe offerteaanvraag"
+   }
+  },
+  {
+   "key": "shop.configurator.sent.browse",
+   "group": "Shop: configurator",
+   "label": "configurator › sent › browse",
+   "placeholders": [],
+   "default": {
+    "hu": "Vissza a szolgáltatásokhoz",
+    "en": "Back to the services",
+    "nl": "Terug naar de diensten"
+   }
+  },
+  {
+   "key": "shop.cart.eyebrow",
+   "group": "Shop: cart",
+   "label": "cart › eyebrow",
+   "placeholders": [],
+   "default": {
+    "hu": "Kosár",
+    "en": "Cart",
+    "nl": "Winkelmand"
+   }
+  },
+  {
+   "key": "shop.cart.title",
+   "group": "Shop: cart",
+   "label": "cart › title",
+   "placeholders": [],
+   "default": {
+    "hu": "A kosarad",
+    "en": "Your cart",
+    "nl": "Je winkelmand"
+   }
+  },
+  {
+   "key": "shop.cart.intro",
+   "group": "Shop: cart",
+   "label": "cart › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Itt nincs fizetés. Összeállítod, mire van szükséged, ajánlatot kérsz, és egyedi ajánlatot kapsz.",
+    "en": "There is no payment here. You put together what you need, ask for a quote and receive a custom quote.",
+    "nl": "Hier is geen betaling. Je stelt samen wat je nodig hebt, vraagt een offerte aan en krijgt een offerte op maat."
+   }
+  },
+  {
+   "key": "shop.cart.empty.title",
+   "group": "Shop: cart",
+   "label": "cart › empty › title",
+   "placeholders": [],
+   "default": {
+    "hu": "A kosarad üres",
+    "en": "Your cart is empty",
+    "nl": "Je winkelmand is leeg"
+   }
+  },
+  {
+   "key": "shop.cart.empty.text",
+   "group": "Shop: cart",
+   "label": "cart › empty › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz szolgáltatást, vagy állítsd össze a kérésed lépésről lépésre.",
+    "en": "Choose a service, or build your request step by step.",
+    "nl": "Kies een dienst of stel je aanvraag stap voor stap samen."
+   }
+  },
+  {
+   "key": "shop.cart.empty.browse",
+   "group": "Shop: cart",
+   "label": "cart › empty › browse",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatások megnézése",
+    "en": "Browse services",
+    "nl": "Diensten bekijken"
+   }
+  },
+  {
+   "key": "shop.cart.empty.configure",
+   "group": "Shop: cart",
+   "label": "cart › empty › configure",
+   "placeholders": [],
+   "default": {
+    "hu": "Összeállítás indítása",
+    "en": "Start building",
+    "nl": "Begin met samenstellen"
+   }
+  },
+  {
+   "key": "shop.cart.groups.fixed",
+   "group": "Shop: cart",
+   "label": "cart › groups › fixed",
+   "placeholders": [],
+   "default": {
+    "hu": "Fix áras termékek",
+    "en": "Fixed-price products",
+    "nl": "Producten met vaste prijs"
+   }
+  },
+  {
+   "key": "shop.cart.groups.quote",
+   "group": "Shop: cart",
+   "label": "cart › groups › quote",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi ajánlat alapján",
+    "en": "Custom-quoted services",
+    "nl": "Diensten op offerte"
+   }
+  },
+  {
+   "key": "shop.cart.groups.itemsLabel",
+   "group": "Shop: cart",
+   "label": "cart › groups › itemsLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "A kosár tételei",
+    "en": "Cart items",
+    "nl": "Items in de winkelmand"
+   }
+  },
+  {
+   "key": "shop.cart.legend.title",
+   "group": "Shop: cart",
+   "label": "cart › legend › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Mit jelentenek a címkék?",
+    "en": "What the labels mean",
+    "nl": "Wat de labels betekenen"
+   }
+  },
+  {
+   "key": "shop.cart.legend.fixed",
+   "group": "Shop: cart",
+   "label": "cart › legend › fixed",
+   "placeholders": [],
+   "default": {
+    "hu": "Közzétett ára van: az összeg látszik és összeadódik.",
+    "en": "It has a published price: the amount is shown and added up.",
+    "nl": "Er is een gepubliceerde prijs: het bedrag wordt getoond en opgeteld."
+   }
+  },
+  {
+   "key": "shop.cart.legend.quote",
+   "group": "Shop: cart",
+   "label": "cart › legend › quote",
+   "placeholders": [],
+   "default": {
+    "hu": "Nincs közzétett ára: az ajánlatban kapod meg.",
+    "en": "It has no published price: you get it in the quote.",
+    "nl": "Er is geen gepubliceerde prijs: je krijgt die in de offerte."
+   }
+  },
+  {
+   "key": "shop.cart.legend.addon",
+   "group": "Shop: cart",
+   "label": "cart › legend › addon",
+   "placeholders": [],
+   "default": {
+    "hu": "Választható kiegészítő egy szolgáltatáson.",
+    "en": "An optional add-on on a service.",
+    "nl": "Een optionele toevoeging op een dienst."
+   }
+  },
+  {
+   "key": "shop.cart.line.package",
+   "group": "Shop: cart",
+   "label": "cart › line › package",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomag",
+    "en": "Package",
+    "nl": "Pakket"
+   }
+  },
+  {
+   "key": "shop.cart.line.packageFor",
+   "group": "Shop: cart",
+   "label": "cart › line › packageFor",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Csomag ehhez: {name}",
+    "en": "Package for {name}",
+    "nl": "Pakket voor {name}"
+   }
+  },
+  {
+   "key": "shop.cart.line.suggested",
+   "group": "Shop: cart",
+   "label": "cart › line › suggested",
+   "placeholders": [],
+   "default": {
+    "hu": "ajánlott",
+    "en": "suggested",
+    "nl": "voorgesteld"
+   }
+  },
+  {
+   "key": "shop.cart.line.notChosen",
+   "group": "Shop: cart",
+   "label": "cart › line › notChosen",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz csomagot",
+    "en": "Choose a package",
+    "nl": "Kies een pakket"
+   }
+  },
+  {
+   "key": "shop.cart.line.addons",
+   "group": "Shop: cart",
+   "label": "cart › line › addons",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítők",
+    "en": "Add-ons",
+    "nl": "Toevoegingen"
+   }
+  },
+  {
+   "key": "shop.cart.line.addonsSelected",
+   "group": "Shop: cart",
+   "label": "cart › line › addonsSelected",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} kiválasztva",
+    "en": "{count} selected",
+    "nl": "{count} gekozen"
+   }
+  },
+  {
+   "key": "shop.cart.line.price",
+   "group": "Shop: cart",
+   "label": "cart › line › price",
+   "placeholders": [],
+   "default": {
+    "hu": "Ár",
+    "en": "Price",
+    "nl": "Prijs"
+   }
+  },
+  {
+   "key": "shop.cart.line.addonsFor",
+   "group": "Shop: cart",
+   "label": "cart › line › addonsFor",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Kiegészítők ehhez: {name}",
+    "en": "Add-ons for {name}",
+    "nl": "Toevoegingen voor {name}"
+   }
+  },
+  {
+   "key": "shop.cart.line.noAddons",
+   "group": "Shop: cart",
+   "label": "cart › line › noAddons",
+   "placeholders": [],
+   "default": {
+    "hu": "Ehhez nincs választható kiegészítő.",
+    "en": "No add-ons are available for this one.",
+    "nl": "Hiervoor zijn geen toevoegingen beschikbaar."
+   }
+  },
+  {
+   "key": "shop.cart.line.remove",
+   "group": "Shop: cart",
+   "label": "cart › line › remove",
+   "placeholders": [],
+   "default": {
+    "hu": "Eltávolítás",
+    "en": "Remove",
+    "nl": "Verwijderen"
+   }
+  },
+  {
+   "key": "shop.cart.line.removeNamed",
+   "group": "Shop: cart",
+   "label": "cart › line › removeNamed",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "{name} eltávolítása",
+    "en": "Remove {name}",
+    "nl": "{name} verwijderen"
+   }
+  },
+  {
+   "key": "shop.cart.line.view",
+   "group": "Shop: cart",
+   "label": "cart › line › view",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatás oldala",
+    "en": "Service page",
+    "nl": "Dienstpagina"
+   }
+  },
+  {
+   "key": "shop.cart.line.needsPlan",
+   "group": "Shop: cart",
+   "label": "cart › line › needsPlan",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomag szükséges",
+    "en": "Needs a package",
+    "nl": "Pakket nodig"
+   }
+  },
+  {
+   "key": "shop.cart.summary.title",
+   "group": "Shop: cart",
+   "label": "cart › summary › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Összegzés",
+    "en": "Summary",
+    "nl": "Overzicht"
+   }
+  },
+  {
+   "key": "shop.cart.summary.services",
+   "group": "Shop: cart",
+   "label": "cart › summary › services",
+   "placeholders": [],
+   "default": {
+    "hu": "Szolgáltatások",
+    "en": "Services",
+    "nl": "Diensten"
+   }
+  },
+  {
+   "key": "shop.cart.summary.addons",
+   "group": "Shop: cart",
+   "label": "cart › summary › addons",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítők",
+    "en": "Add-ons",
+    "nl": "Toevoegingen"
+   }
+  },
+  {
+   "key": "shop.cart.summary.fixedTotal",
+   "group": "Shop: cart",
+   "label": "cart › summary › fixedTotal",
+   "placeholders": [],
+   "default": {
+    "hu": "Fix áras tételek összesen",
+    "en": "Fixed-price total",
+    "nl": "Totaal vaste prijzen"
+   }
+  },
+  {
+   "key": "shop.cart.summary.startingTotal",
+   "group": "Shop: cart",
+   "label": "cart › summary › startingTotal",
+   "placeholders": [],
+   "default": {
+    "hu": "Kezdőár összesen",
+    "en": "Starting total",
+    "nl": "Totaal vanaf-prijzen"
+   }
+  },
+  {
+   "key": "shop.cart.summary.quoted",
+   "group": "Shop: cart",
+   "label": "cart › summary › quoted",
+   "placeholders": [],
+   "default": {
+    "hu": "Az ajánlatban kapod meg",
+    "en": "Priced in your quote",
+    "nl": "Prijs in je offerte"
+   }
+  },
+  {
+   "key": "shop.cart.summary.quotedValue",
+   "group": "Shop: cart",
+   "label": "cart › summary › quotedValue",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} tétel",
+    "en": "{count} items",
+    "nl": "{count} items"
+   }
+  },
+  {
+   "key": "shop.cart.summary.noPayment",
+   "group": "Shop: cart",
+   "label": "cart › summary › noPayment",
+   "placeholders": [],
+   "default": {
+    "hu": "Fizetés nincs. A kosár ajánlatkéréssé alakul; a végleges összeget az ajánlat tartalmazza.",
+    "en": "No payment is taken. The cart turns into a quote request; the final amount is in the quote.",
+    "nl": "Er wordt niet betaald. De winkelmand wordt een offerteaanvraag; het uiteindelijke bedrag staat in de offerte."
+   }
+  },
+  {
+   "key": "shop.cart.summary.open",
+   "group": "Shop: cart",
+   "label": "cart › summary › open",
+   "placeholders": [],
+   "default": {
+    "hu": "Összegzés megnyitása",
+    "en": "Show the summary",
+    "nl": "Overzicht tonen"
+   }
+  },
+  {
+   "key": "shop.cart.summary.countOne",
+   "group": "Shop: cart",
+   "label": "cart › summary › countOne",
+   "placeholders": [],
+   "default": {
+    "hu": "1 szolgáltatás",
+    "en": "1 service",
+    "nl": "1 dienst"
+   }
+  },
+  {
+   "key": "shop.cart.summary.countMany",
+   "group": "Shop: cart",
+   "label": "cart › summary › countMany",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} szolgáltatás",
+    "en": "{count} services",
+    "nl": "{count} diensten"
+   }
+  },
+  {
+   "key": "shop.cart.summary.mobileTitle",
+   "group": "Shop: cart",
+   "label": "cart › summary › mobileTitle",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "Összegzés ({count})",
+    "en": "Summary ({count})",
+    "nl": "Overzicht ({count})"
+   }
+  },
+  {
+   "key": "shop.cart.summary.needsPlan",
+   "group": "Shop: cart",
+   "label": "cart › summary › needsPlan",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Először válassz csomagot ehhez: {name}.",
+    "en": "First choose a package for {name}.",
+    "nl": "Kies eerst een pakket voor {name}."
+   }
+  },
+  {
+   "key": "shop.cart.actions.continue",
+   "group": "Shop: cart",
+   "label": "cart › actions › continue",
+   "placeholders": [],
+   "default": {
+    "hu": "Böngészés folytatása",
+    "en": "Continue browsing",
+    "nl": "Verder kijken"
+   }
+  },
+  {
+   "key": "shop.cart.actions.proceed",
+   "group": "Shop: cart",
+   "label": "cart › actions › proceed",
+   "placeholders": [],
+   "default": {
+    "hu": "Tovább az ajánlatkéréshez",
+    "en": "Proceed to inquiry",
+    "nl": "Door naar de aanvraag"
+   }
+  },
+  {
+   "key": "shop.cart.actions.proceedShort",
+   "group": "Shop: cart",
+   "label": "cart › actions › proceedShort",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlatot kérek",
+    "en": "Request a quote",
+    "nl": "Offerte aanvragen"
+   }
+  },
+  {
+   "key": "shop.cart.actions.edit",
+   "group": "Shop: cart",
+   "label": "cart › actions › edit",
+   "placeholders": [],
+   "default": {
+    "hu": "Szerkesztés a lépéseken át",
+    "en": "Edit step by step",
+    "nl": "Stap voor stap bewerken"
+   }
+  },
+  {
+   "key": "shop.cart.actions.clear",
+   "group": "Shop: cart",
+   "label": "cart › actions › clear",
+   "placeholders": [],
+   "default": {
+    "hu": "Kosár ürítése",
+    "en": "Clear cart",
+    "nl": "Winkelmand legen"
+   }
+  },
+  {
+   "key": "shop.cart.actions.clearAsk",
+   "group": "Shop: cart",
+   "label": "cart › actions › clearAsk",
+   "placeholders": [],
+   "default": {
+    "hu": "Biztosan kiüríted a kosarat?",
+    "en": "Clear the whole cart?",
+    "nl": "De hele winkelmand legen?"
+   }
+  },
+  {
+   "key": "shop.cart.actions.clearYes",
+   "group": "Shop: cart",
+   "label": "cart › actions › clearYes",
+   "placeholders": [],
+   "default": {
+    "hu": "Igen, ürítés",
+    "en": "Yes, clear it",
+    "nl": "Ja, legen"
+   }
+  },
+  {
+   "key": "shop.cart.actions.clearNo",
+   "group": "Shop: cart",
+   "label": "cart › actions › clearNo",
+   "placeholders": [],
+   "default": {
+    "hu": "Megtartom",
+    "en": "Keep it",
+    "nl": "Behouden"
+   }
+  },
+  {
+   "key": "shop.cart.actions.undo",
+   "group": "Shop: cart",
+   "label": "cart › actions › undo",
+   "placeholders": [],
+   "default": {
+    "hu": "Visszavonás",
+    "en": "Undo",
+    "nl": "Ongedaan maken"
+   }
+  },
+  {
+   "key": "shop.cart.notice.removed",
+   "group": "Shop: cart",
+   "label": "cart › notice › removed",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "{name} kikerült a kosárból.",
+    "en": "{name} was removed.",
+    "nl": "{name} is verwijderd."
+   }
+  },
+  {
+   "key": "shop.cart.notice.cleared",
+   "group": "Shop: cart",
+   "label": "cart › notice › cleared",
+   "placeholders": [],
+   "default": {
+    "hu": "A kosár üres.",
+    "en": "The cart is empty.",
+    "nl": "De winkelmand is leeg."
+   }
+  }
+ ]
+}

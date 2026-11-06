@@ -6,6 +6,7 @@ import type { Language } from '../i18n/config'
 import { dictionaries } from '../i18n/dictionaries'
 import type { DocumentMeta } from '../routes/documentMeta'
 import { findPage, labIdOfPage, projectIdOfPage, serviceIdOfPage, type PageDef } from '../routes/pages'
+import { runtimeProject } from '../projects/store'
 import type { SeoContext } from './head'
 import { seoPath } from './paths'
 
@@ -41,7 +42,7 @@ function trail(page: PageDef, lang: Language): Crumb[] {
   if (page.id === 'home') return [home]
   const projectId = projectIdOfPage(page.id)
   if (projectId) {
-    const name = projects.find((p) => p.id === projectId)?.name ?? projectId
+    const name = projects.find((p) => p.id === projectId)?.name ?? runtimeProject(projectId)?.name[lang] ?? projectId
     // The Work page is a trail step only once it is a page worth listing.
     return findPage('/work')?.indexable ? [home, nav('work'), here(name)] : [home, here(name)]
   }
@@ -112,7 +113,7 @@ export function buildJsonLd(page: PageDef, lang: Language, ctx: SeoContext, meta
   const projectId = projectIdOfPage(page.id)
   if (projectId) {
     const entry = projects.find((p) => p.id === projectId)
-    const own = projectMeta[projectId]
+    const own = (projectMeta as Record<string, (typeof projectMeta)[keyof typeof projectMeta]>)[projectId]
     if (entry) {
       const id = `${canonical}#project`
       webPage.mainEntity = ref(id)

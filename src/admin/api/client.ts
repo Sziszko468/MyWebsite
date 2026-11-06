@@ -40,6 +40,8 @@ export interface RequestOptions {
   signal?: AbortSignal
   /** Sign-in is the one request that is allowed to answer 401 without meaning "the session ended". */
   anonymous?: boolean
+  /** An image to upload: sent as it is, with its own type, instead of a JSON body. */
+  rawBody?: Blob
 }
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>
@@ -83,15 +85,16 @@ export async function request<T>(method: string, path: string, options: RequestO
   let body: string | undefined
   if (UNSAFE.has(method)) {
     if (csrfToken) headers['X-CSRF-Token'] = csrfToken
-    if (method !== 'DELETE') {
+    if (method !== 'DELETE' && !options.rawBody) {
       headers['Content-Type'] = 'application/json'
       body = JSON.stringify(options.body ?? {})
     }
   }
+  if (options.rawBody) headers['Content-Type'] = options.rawBody.type
 
   let response: Response
   try {
-    response = await fetchImpl(`${path}${queryString(options.query)}`, { method, headers, body, credentials: 'same-origin', cache: 'no-store', signal: options.signal })
+    response = await fetchImpl(`${path}${queryString(options.query)}`, { method, headers, body: options.rawBody ?? body, credentials: 'same-origin', cache: 'no-store', signal: options.signal })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error
     throw new ApiError(0, 'network', 'The server could not be reached.')

@@ -1,5 +1,5 @@
 import { experimentPath, playableExperiments, type LabId } from '../content/lab'
-import { projects, type ProjectId } from '../content/projects'
+import { projects } from '../content/projects'
 import { SERVICE_IDS, type ServiceId } from '../content/services/ids'
 import { LANGUAGES, type Language } from '../i18n/config'
 import { SHOP_PATHS, servicePath } from '../shop/paths'
@@ -11,8 +11,8 @@ import { SHOP_PATHS, servicePath } from '../shop/paths'
  */
 
 export type NavPageId = 'home' | 'work' | 'services' | 'about' | 'lab' | 'contact'
-/** A project's details page: `project-spendly`, `project-bookinghub`... */
-export type ProjectPageId = `project-${ProjectId}`
+/** A project's details page: `project-spendly`, `project-bookinghub`, and any slug an administrator publishes. */
+export type ProjectPageId = `project-${string}`
 /** An experiment's own page: `lab-particle-universe`, `lab-liquid-matter`... */
 export type LabPageId = `lab-${LabId}`
 /** A service's product page: `service-website`, `service-webapp`... */
@@ -51,9 +51,8 @@ const page = <Id extends PageId>(
 /** Shown in the header and footer navigation, in this order. */
 export const NAV_PAGES: readonly PageDef<NavPageId>[] = [
   page('home', '/'),
-  // A placeholder until the Work page is built (pages/PlaceholderPage.tsx): it stays out of the search index
-  // and the sitemap, and the projects are reached from the home page. Make it indexable together with its content.
-  page('work', '/work', LANGUAGES, false),
+  // The portfolio: the published projects, read from the backend (src/projects/), with the website's own four as the fallback.
+  page('work', '/work'),
   page('services', '/services'),
   page('about', '/about'),
   page('lab', '/lab'),
@@ -61,16 +60,17 @@ export const NAV_PAGES: readonly PageDef<NavPageId>[] = [
 ]
 
 /**
- * One page per project that has a details path (content/projects.ts). They sit under /work, are
- * not in the navigation, and exist in every language.
+ * One page per project of the website's own content that has a details path (content/projects.ts): the pages that are
+ * prerendered at build time. They sit under /work, are not in the navigation, and exist in every language. A project an
+ * administrator publishes later has no entry here; `resolvePage` gives it one when its address is visited.
  */
 export const PROJECT_PAGES: readonly PageDef<ProjectPageId>[] = projects.flatMap((project) =>
   project.detailPath ? [page<ProjectPageId>(`project-${project.id}`, project.detailPath)] : [],
 )
 
 /** The project a page shows, or `null` when the page is not a project's. */
-export function projectIdOfPage(id: PageId): ProjectId | null {
-  return id.startsWith('project-') ? (id.slice('project-'.length) as ProjectId) : null
+export function projectIdOfPage(id: PageId): string | null {
+  return id.startsWith('project-') ? id.slice('project-'.length) : null
 }
 
 /**
@@ -119,4 +119,29 @@ function normalize(path: string): string {
 export function findPage(path: string, pages: readonly PageDef[] = PAGES): PageDef | undefined {
   const wanted = normalize(path)
   return pages.find((candidate) => normalize(candidate.path) === wanted)
+}
+
+const dynamic = new Map<string, PageDef>()
+const SLUG_PATH = /^\/work\/([a-z0-9][a-z0-9-]{1,59})$/
+const PREVIEW_PATH = /^\/work\/preview\/(\d{1,9})$/
+
+/**
+ * The page behind an address: the registered one, or, for `/work/<slug>`, the page of a project that exists only in the
+ * administration (a slug is any lowercase word; the page itself says "not found" when there is no such project), or, for
+ * `/work/preview/<id>`, an administrator's preview of a project, which is never indexed. The definitions are made once, so a
+ * page keeps its identity from render to render.
+ */
+export function resolvePage(path: string): PageDef | undefined {
+  const known = findPage(path)
+  if (known) return known
+  const wanted = normalize(path)
+  const preview = PREVIEW_PATH.exec(wanted)
+  if (preview) {
+    if (!dynamic.has(wanted)) dynamic.set(wanted, page<ProjectPageId>('project-preview', wanted, LANGUAGES, false))
+    return dynamic.get(wanted)
+  }
+  const match = SLUG_PATH.exec(wanted)
+  if (!match || match[1] === 'preview') return undefined
+  if (!dynamic.has(wanted)) dynamic.set(wanted, page<ProjectPageId>(`project-${match[1]}`, wanted))
+  return dynamic.get(wanted)
 }

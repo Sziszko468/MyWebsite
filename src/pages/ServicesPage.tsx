@@ -1,3 +1,4 @@
+import { useCatalogGate } from '../content/liveCatalog'
 import { useState } from 'react'
 import { useLocation } from 'react-router'
 import { isPackageId, packages, type PackageId } from '../content/packages'
@@ -24,6 +25,7 @@ function packageFromSearch(search: string): PackageId | null {
  * (`/services?package=build#packages`) arrives chosen.
  */
 export function ServicesPage() {
+  useCatalogGate()
   const { landing } = useShopText()
   const { search } = useLocation()
   // The visitor's own choice holds for the address it was made at; a different `?package=` in the address wins again.

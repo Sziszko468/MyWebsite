@@ -12,7 +12,7 @@ describe('fill', () => {
 
   it.each(LANGUAGES)('every placeholder in the %s project texts is one the code fills', (lang) => {
     const project = dictionaries[lang].project
-    const known = new Set(['name', 'date', 'title', 'current', 'total'])
+    const known = new Set(['name', 'date', 'title', 'current', 'total', 'state'])
     const all = JSON.stringify(project).matchAll(/\{(\w+)\}/g)
     for (const match of all) expect(known.has(match[1]), `${lang}: {${match[1]}}`).toBe(true)
   })

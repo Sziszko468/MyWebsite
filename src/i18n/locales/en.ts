@@ -349,6 +349,13 @@ export const en: Dictionary = {
   },
   project: {
     backToPortfolio: 'Back to the portfolio',
+    preview: {
+      title: 'Preview',
+      banner: 'Preview: this project is not public yet (state: {state}). Only you can see it, signed in to the administration.',
+      signIn: 'Sign in to the administration to see the preview.',
+      states: { draft: 'draft', published: 'published', archived: 'archived' },
+    },
+    videoLink: 'Video',
     repoName: 'In the repository and in the interface: {name}',
     reviewed: 'Based on the documentation and the code, read on {date}',
     sourceLink: 'Source code',
@@ -372,6 +379,8 @@ export const en: Dictionary = {
       decisions: 'Design decisions',
       learned: 'Lessons and next steps',
       gallery: 'Gallery',
+      results: 'Results',
+      links: 'Links',
     },
     overview: {
       what: 'What it is',
@@ -423,6 +432,24 @@ export const en: Dictionary = {
       next: 'Next project',
       all: 'All projects',
     },
+  },
+  workPage: {
+    meta: {
+      title: 'Work',
+      description: 'A selection of my projects: web and mobile apps, platforms and concepts, each marked with the state it is really in.',
+    },
+    hero: {
+      eyebrow: 'Work',
+      titleLine1: 'What I have built,',
+      titleLine2: 'as it really is.',
+      lead: 'Every project is marked with the state it is in: live, demo, in progress or concept. No invented results and no invented testimonials.',
+    },
+    filter: { label: 'Filter projects', all: 'All' },
+    count: '{count} projects',
+    loading: 'Loading the projects…',
+    empty: 'No projects are published yet.',
+    emptyFilter: 'There is no project in this category yet.',
+    draft: 'Draft: not public yet',
   },
   placeholder: {
     description: 'This page is coming soon.',

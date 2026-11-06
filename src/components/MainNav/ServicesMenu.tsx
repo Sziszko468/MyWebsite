@@ -1,3 +1,4 @@
+import { useCatalogVersion } from '../../content/liveCatalog'
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { useLocation } from 'react-router'
 import { serviceAreas } from '../../content/services/areas'
@@ -22,6 +23,7 @@ const CLOSE_DELAY = 200
  * (opacity and transform only, the motion tokens), and with no animation at all it simply appears.
  */
 export function ServicesMenu({ children }: { children: ReactNode }) {
+  useCatalogVersion()
   const { lang } = useI18n()
   const common = useCommonText()
   const { pathname } = useLocation()

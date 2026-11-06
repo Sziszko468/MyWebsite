@@ -1,6 +1,6 @@
 import { useId } from 'react'
-import { projects } from '../../content/projects'
 import { useI18n } from '../../i18n/useI18n'
+import { useCards } from '../../projects/useCards'
 import { Container } from '../Container/Container'
 import { Reveal } from '../motion/Reveal'
 import { ProjectCard } from '../ProjectCard/ProjectCard'
@@ -11,7 +11,7 @@ import { homeTone } from './rhythm'
 import styles from './SelectedWork.module.scss'
 
 /**
- * Four projects in an uneven composition: the lead is large, the second sits lower, the third is
+ * The featured projects (the same list the Work page reads: src/projects/) in an uneven composition: the lead is large, the second sits lower, the third is
  * a compact card, the fourth is wide. Each card is understandable without hovering: the status,
  * the category, the description and the technologies are always on screen, and the pointer only
  * adds depth to the picture. A project without a real screenshot shows a concept sketch, captioned
@@ -20,6 +20,7 @@ import styles from './SelectedWork.module.scss'
 export function SelectedWork() {
   const { t } = useI18n()
   const titleId = useId()
+  const cards = useCards()
 
   return (
     <Section id="work" tone={homeTone('work')} slant labelledBy={titleId}>
@@ -28,26 +29,24 @@ export function SelectedWork() {
           <SectionHeading id={titleId} index="02" title={t.home.work.title} description={t.home.work.intro} />
         </Reveal>
 
-        <ul className={styles.grid}>
-          {projects.map((project, position) => {
-            const copy = t.home.work.items[project.id]
-            return (
-              <li key={project.id} className={styles.item} data-layout={project.layout}>
+        {cards.loading ? (
+          // The cards arrive from the backend: a placeholder keeps the section's height, so nothing below it moves.
+          <div className={styles.grid} aria-busy="true" style={{ minHeight: '60svh' }} />
+        ) : (
+          <ul className={styles.grid}>
+            {cards.featured.map((project, position) => (
+              <li key={project.slug} className={styles.item} data-layout={project.layout}>
                 <Reveal className={styles.fill} delay={position % 2 ? 90 : 0}>
                   <ProjectCard
                     className={styles.card}
                     layout={project.layout}
                     index={String(position + 1).padStart(2, '0')}
                     title={project.name}
-                    category={copy.category}
-                    description={copy.description}
+                    category={project.label}
+                    description={project.description}
                     status={project.status}
                     tags={project.tags}
-                    image={
-                      project.image
-                        ? { ...project.image, alt: t.home.work.imageAlt.replace('{name}', project.name) }
-                        : undefined
-                    }
+                    image={project.image ?? undefined}
                     media={<ProjectMockup kind={project.mockup} />}
                     mediaLabel={t.home.work.conceptSketch}
                     to={project.detailPath ?? undefined}
@@ -58,9 +57,9 @@ export function SelectedWork() {
                   />
                 </Reveal>
               </li>
-            )
-          })}
-        </ul>
+            ))}
+          </ul>
+        )}
       </Container>
     </Section>
   )

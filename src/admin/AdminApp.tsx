@@ -15,7 +15,11 @@ import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { NotificationsPage } from './pages/NotificationsPage'
 import { QuoteDetailPage } from './pages/QuoteDetailPage'
+import { ProjectEditPage } from './pages/ProjectEditPage'
+import { ProjectSettingsPage } from './pages/ProjectSettingsPage'
+import { ProjectsPage } from './pages/ProjectsPage'
 import { QuotesPage } from './pages/QuotesPage'
+import { TextsPage } from './pages/TextsPage'
 import { ExtraEditPage, PackageEditPage, ServiceEditPage } from './pages/CatalogEditPages'
 import { ServicesPage } from './pages/ServicesPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -85,6 +89,11 @@ function Gate() {
           <Route path="services/package/:code" element={<PackageEditPage />} />
           <Route path="services/new/extra" element={<ExtraEditPage />} />
           <Route path="services/extra/:code" element={<ExtraEditPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
+          <Route path="projects/new" element={<ProjectEditPage />} />
+          <Route path="projects/settings" element={<ProjectSettingsPage />} />
+          <Route path="projects/:id" element={<ProjectEditPage />} />
+          <Route path="texts" element={<TextsPage />} />
           <Route path="content" element={<ContentPage />} />
           <Route path="content/new" element={<FaqEditPage />} />
           <Route path="content/faq/:slug" element={<FaqEditPage />} />

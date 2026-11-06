@@ -100,3 +100,32 @@ describe('what the editors let through, the save accepts; what they warn about, 
     expect(() => parse(group, body(group, { language: 'nl', field: field.name, value: '' }))).not.toThrow()
   })
 })
+
+describe("the project editor's rules are the server's rules", () => {
+  it('has the same limits, the same choices, and the same verdict per language on the same documents', async () => {
+    const editor = await load('src/admin/lib/projects.ts')
+    const server = await import('../src/modules/projects/content.ts')
+    expect(editor.LIMITS).toEqual({ title: server.LIMITS.title, line: server.LIMITS.line, card: server.LIMITS.card, summary: server.LIMITS.card * 2, paragraph: server.LIMITS.paragraph, item: server.LIMITS.item, source: server.LIMITS.source, tag: server.LIMITS.tag, list: server.LIMITS.list, gallery: server.LIMITS.gallery, challenges: server.LIMITS.challenges })
+    expect([...editor.ACCENTS]).toEqual([...server.ACCENTS])
+    expect([...editor.HEROES]).toEqual([...server.HEROES])
+    expect([...editor.MOCKUPS]).toEqual([...server.MOCKUPS])
+    expect([...editor.LAYOUTS]).toEqual([...server.LAYOUTS])
+    expect([...editor.PROJECT_STATUSES]).toEqual([...server.PROJECT_STATUSES])
+    expect([...editor.STACK_GROUPS]).toEqual([...server.STACK_GROUPS])
+    expect([...editor.FEATURE_STATUSES]).toEqual([...server.FEATURE_STATUSES])
+    expect([...editor.SECTIONS]).toEqual([...server.SECTIONS])
+
+    // The same documents, judged by both: a fresh one, a half-written one, a hidden section, a gallery without descriptions.
+    const tri = (hu: string, en = '', nl = '') => ({ hu, en, nl })
+    const documents: unknown[] = [
+      editor.emptyContent(),
+      { ...editor.emptyContent(), title: tri('Cím', 'Title'), summary: tri('Összefoglaló', 'Summary', 'Samenvatting'), cardDescription: tri('Kártya', 'Card', 'Kaart') },
+      { ...editor.emptyContent(), title: tri('A', 'B', 'C'), cardDescription: tri('A', 'B', 'C'), summary: tri('A', 'B', 'C'), overview: { ...editor.emptyContent().overview, what: tri('Mi', 'What', '') }, hidden: ['overview'], learned: [tri('Csak magyar')] },
+      { ...editor.emptyContent(), title: tri('A', 'B', 'C'), cardDescription: tri('A', 'B', 'C'), summary: tri('A', 'B', 'C'), thumbnail: { mediaId: 1, alt: tri('Alt', '', 'Alt') }, gallery: [{ mediaId: 2, device: 'desktop', alt: tri('Alt'), caption: tri(''), hero: true }], detailPage: false },
+    ]
+    for (const [index, document] of documents.entries()) {
+      const { content } = server.normalizeContent(document)
+      expect(editor.completenessOf(content), `document ${index}`).toEqual(server.completeness(content))
+    }
+  })
+})

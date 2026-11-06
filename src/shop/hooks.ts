@@ -1,5 +1,7 @@
 import { useMemo, useSyncExternalStore } from 'react'
 import { common } from '../content/shop/common'
+import { applyTextOverrides } from '../content/textOverrides'
+import { useTextOverrides } from '../content/textOverridesStore'
 import { localize } from '../content/trilingual'
 import { useI18n } from '../i18n/useI18n'
 import type { Cart } from './cart'
@@ -32,5 +34,7 @@ export function useInquiry(): InquiryState {
 /** The shop's shared words (names, price wording, announcements) in the visitor's language: small enough for the header. */
 export function useCommonText() {
   const { lang } = useI18n()
-  return useMemo(() => localize(common, lang), [lang])
+  const overrides = useTextOverrides()
+  // The overrides' paths start at the shop's text as a whole (`shop.common.…`), so the part is wrapped to be addressed the same way.
+  return useMemo(() => applyTextOverrides({ common: localize(common, lang) }, overrides, 'shop', lang).common, [lang, overrides])
 }

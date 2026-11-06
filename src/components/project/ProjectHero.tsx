@@ -1,5 +1,6 @@
 import { useId } from 'react'
-import type { ProjectEntry } from '../../content/projects'
+import type { ProjectStatus } from '../Badge/Badge'
+import type { MockupKind } from '../../content/projects'
 import type { GalleryImage, HeroVariant, ProjectDetail } from '../../content/projectDetails/types'
 import { useI18n } from '../../i18n/useI18n'
 import { cx } from '../../utils/cx'
@@ -82,8 +83,18 @@ function HeroArt({ variant }: { variant: HeroVariant }) {
   return <RouteArt />
 }
 
+/** What the hero needs of the card, in the visitor's language. */
+export interface HeroEntry {
+  name: string
+  label: string
+  status: ProjectStatus
+  tags: readonly string[]
+  demoUrl: string | null
+  mockup: MockupKind
+}
+
 interface ProjectHeroProps {
-  entry: ProjectEntry
+  entry: HeroEntry
   detail: ProjectDetail
   /** The gallery image shown large, if the project has one. */
   image: GalleryImage | undefined
@@ -99,7 +110,7 @@ export function ProjectHero({ entry, detail, image, onOpenImage }: ProjectHeroPr
   const { lang, t } = useI18n()
   const titleId = useId()
   const rootRef = usePointerField<HTMLElement>()
-  const category = t.home.work.items[entry.id].category
+  const category = entry.label
 
   return (
     <section ref={rootRef} className={cx(styles.hero, styles[detail.hero])} aria-labelledby={titleId} data-hero={detail.hero}>
@@ -110,7 +121,7 @@ export function ProjectHero({ entry, detail, image, onOpenImage }: ProjectHeroPr
 
       <Container size="wide" className={styles.inner}>
         <div className={styles.copy}>
-          <LocalizedLink to="/#work" className={styles.back}>
+          <LocalizedLink to="/work" className={styles.back}>
             <span aria-hidden="true">←</span> {t.project.backToPortfolio}
           </LocalizedLink>
 
@@ -124,7 +135,7 @@ export function ProjectHero({ entry, detail, image, onOpenImage }: ProjectHeroPr
           </h1>
           {detail.repoName && <p className={styles.repoName}>{fill(t.project.repoName, { name: detail.repoName })}</p>}
 
-          <p className={styles.lead}>{detail.summary[lang]}</p>
+          <p className={styles.lead}>{detail.summary[lang] || detail.summary.hu}</p>
 
           {entry.tags.length > 0 && (
             <ul className={styles.tags} aria-label={t.project.stackLabel}>

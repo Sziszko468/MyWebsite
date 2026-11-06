@@ -4,7 +4,6 @@ import { DEFAULT_LANGUAGE } from './i18n/config'
 import { localizedPath } from './i18n/paths'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
-import { PlaceholderPage } from './pages/PlaceholderPage'
 import { lazyRoute } from './motion/loading'
 import { PAGES, labIdOfPage, projectIdOfPage, serviceIdOfPage, type LegalPageId, type NavPageId, type PageDef, type ShopPageId } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
@@ -17,7 +16,10 @@ const DesignSystemPage = import.meta.env.DEV ? lazyRoute(() => import('./pages/D
 
 // A project's page and its three-language content are their own chunk: the home page and the rest of
 // the site do not pay for them, and they load when a project is opened.
-const ProjectPage = lazyRoute(() => import('./pages/ProjectPage').then((module) => ({ default: module.ProjectPage })))
+const ProjectRoute = lazyRoute(() => import('./pages/ProjectPage').then((module) => ({ default: module.ProjectRoute })))
+
+// The portfolio page: the published projects as cards, filtered by category.
+const WorkPage = lazyRoute(() => import('./pages/WorkPage').then((module) => ({ default: module.WorkPage })))
 
 // The shop (the services page, a service's product page, the request builder and the cart) carries
 // its texts in three languages, so each page is a chunk of its own: the home page does not pay for
@@ -50,7 +52,7 @@ const LabExperimentPage = lazyRoute(() =>
 // screen until the next one's code has arrived instead of swapping it for a blank placeholder.
 const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | 'designSystem', ReactElement | null> = {
   home: <HomePage />,
-  work: <PlaceholderPage pageId="work" />,
+  work: <WorkPage />,
   services: <ServicesPage />,
   configure: <ConfiguratorPage />,
   cart: <CartPage />,
@@ -62,8 +64,6 @@ const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | 'designSystem
 }
 
 function elementFor(page: PageDef): ReactElement | null {
-  const project = projectIdOfPage(page.id)
-  if (project) return <ProjectPage projectId={project} />
   const service = serviceIdOfPage(page.id)
   if (service) return <ServiceDetailPage serviceId={service} />
   const experiment = labIdOfPage(page.id)
@@ -79,7 +79,10 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate to={localizedPath(DEFAULT_LANGUAGE)} replace />} />
             <Route path=":lang" element={<LanguageLayout />}>
-              {PAGES.map((page) =>
+              {/* A project's page is one route for every slug: the data decides which project (or "not found") it shows. */}
+              <Route path="work/preview/:id" element={<ProjectRoute preview />} />
+              <Route path="work/:slug" element={<ProjectRoute />} />
+              {PAGES.filter((page) => projectIdOfPage(page.id) === null).map((page) =>
                 page.path === '/' ? (
                   <Route key={page.id} index element={elementFor(page)} />
                 ) : (

@@ -349,6 +349,13 @@ export const nl: Dictionary = {
   },
   project: {
     backToPortfolio: 'Terug naar het portfolio',
+    preview: {
+      title: 'Voorbeeld',
+      banner: 'Voorbeeld: dit project is nog niet openbaar (stand: {state}). Alleen jij ziet het, ingelogd in het beheer.',
+      signIn: 'Log in op het beheer om het voorbeeld te zien.',
+      states: { draft: 'concept', published: 'gepubliceerd', archived: 'gearchiveerd' },
+    },
+    videoLink: 'Video',
     repoName: 'In de repository en in de interface: {name}',
     reviewed: 'Gebaseerd op de documentatie en de code, gelezen op {date}',
     sourceLink: 'Broncode',
@@ -372,6 +379,8 @@ export const nl: Dictionary = {
       decisions: 'Ontwerpbeslissingen',
       learned: 'Lessen en volgende stappen',
       gallery: 'Galerij',
+      results: 'Resultaten',
+      links: 'Links',
     },
     overview: {
       what: 'Wat het is',
@@ -423,6 +432,24 @@ export const nl: Dictionary = {
       next: 'Volgend project',
       all: 'Alle projecten',
     },
+  },
+  workPage: {
+    meta: {
+      title: 'Werk',
+      description: 'Een selectie van mijn projecten: web- en mobiele apps, platformen en concepten, elk met de stand waarin het echt verkeert.',
+    },
+    hero: {
+      eyebrow: 'Werk',
+      titleLine1: 'Wat ik gebouwd heb,',
+      titleLine2: 'zoals het echt is.',
+      lead: 'Elk project staat met zijn werkelijke stand: live, demo, in ontwikkeling of concept. Geen verzonnen resultaten en geen verzonnen reacties.',
+    },
+    filter: { label: 'Projecten filteren', all: 'Alles' },
+    count: '{count} projecten',
+    loading: 'De projecten worden geladen…',
+    empty: 'Er zijn nog geen projecten gepubliceerd.',
+    emptyFilter: 'Er is nog geen project in deze categorie.',
+    draft: 'Concept: nog niet openbaar',
   },
   placeholder: {
     description: 'Deze pagina komt binnenkort.',

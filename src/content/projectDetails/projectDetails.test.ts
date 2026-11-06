@@ -4,6 +4,7 @@ import { readFileSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { LANGUAGES } from '../../i18n/config'
+import type { ProjectId } from '../projects'
 import { projects } from '../projects'
 import { getProjectDetail, neighbours, projectDetails, publishedProjects } from './index'
 import { projectMeta } from './meta'
@@ -104,7 +105,7 @@ describe.each(details)('the page of $id', (detail) => {
   })
 
   it('has a title and a description that suit a search result', () => {
-    const meta = projectMeta[detail.id]!
+    const meta = projectMeta[detail.id as ProjectId]!
     expect(meta).toBeDefined()
     for (const lang of LANGUAGES) {
       expect(meta.title[lang].length, `title ${lang}`).toBeLessThanOrEqual(70)

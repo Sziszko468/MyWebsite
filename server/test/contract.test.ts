@@ -27,6 +27,8 @@ const forms = await load('src/forms/validate.ts')
 const submit = await load('src/forms/submit.ts')
 const ids = await load('src/content/services/ids.ts')
 const catalogExport = await load('src/content/catalogExport.ts')
+const projectsExport = await load('src/content/projectsExport.ts')
+const textsExport = await load('src/content/textsExport.ts')
 const apiConfig = await load('src/config/api.ts')
 
 let server: TestServer
@@ -273,6 +275,33 @@ describe('what the quote configurator sends', () => {
 })
 
 // ---- the catalogue ------------------------------------------------------------------------------------------------------------
+
+describe("the portfolio and the website's own wording", () => {
+  it("has seed files that are exactly what the website's content produces (the pictures' sizes and hashes are read from public/)", async () => {
+    const { readFileSync } = await import('node:fs')
+    const projects = JSON.parse(readFileSync(join(root, 'server', 'seed', 'projects.seed.json'), 'utf8'))
+    const built = JSON.parse(JSON.stringify(projectsExport.buildProjectsSeed()))
+    expect(projects.projects).toEqual(built.projects)
+    expect(projects.categories).toEqual(built.categories)
+    expect(projects.media.map(({ path, mime, width, height }: Record<string, unknown>) => ({ path, mime, width, height }))).toEqual(built.media)
+    const manifest = JSON.parse(readFileSync(join(root, 'server', 'seed', 'texts.manifest.json'), 'utf8'))
+    expect(manifest).toEqual(JSON.parse(JSON.stringify(textsExport.buildTextsManifest())))
+  })
+
+  it('lets the server accept every project document the website itself has (nothing in the seed is refused)', async () => {
+    const { normalizeContent } = await import('../src/modules/projects/content.ts')
+    for (const project of projectsExport.buildProjectsSeed().projects as Array<{ slug: string; content: Record<string, unknown> }>) {
+      const content = JSON.parse(JSON.stringify(project.content))
+      // Pictures are named by path in the seed and by id once loaded: give each a stand-in id.
+      let next = 0
+      const withIds = (image: Record<string, unknown>) => ({ ...image, mediaId: (next += 1) })
+      if (content.thumbnail) content.thumbnail = withIds(content.thumbnail)
+      content.gallery = content.gallery.map(withIds)
+      const { errors } = normalizeContent(content)
+      expect(errors, project.slug).toEqual({})
+    }
+  })
+})
 
 describe('the catalogue the backend serves', () => {
   it('is the website\'s own: the seed file is exactly what the website\'s content produces, and the backend starts from it', async () => {

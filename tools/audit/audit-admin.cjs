@@ -140,11 +140,44 @@ function measure(page) {
         if (!Array.isArray(inquiries)) throw new Error(`Not signed in on ${tag}: the session was refused.`)
         const inquiry = inquiries[0]?.id
         const quote = (await api('/api/admin/quote-requests'))[0]?.id
-        const screens = ['/admin', '/admin/inquiries', inquiry && `/admin/inquiries/${inquiry}`, '/admin/quotes', quote && `/admin/quotes/${quote}`, '/admin/services', '/admin/content', '/admin/translations', '/admin/notifications', '/admin/settings', '/admin/settings?tab=security', '/admin/not-a-screen'].filter(Boolean)
+        // The portfolio's content management (PROMPT 13.1): the list, a new project, the settings, the editor of the first project, the wording.
+        const project = (await api('/api/admin/projects'))?.projects?.[0]?.id
+        const screens = ['/admin', '/admin/projects', '/admin/projects/new', '/admin/projects/settings', project && `/admin/projects/${project}`, '/admin/texts', '/admin/inquiries', inquiry && `/admin/inquiries/${inquiry}`, '/admin/quotes', quote && `/admin/quotes/${quote}`, '/admin/services', '/admin/content', '/admin/translations', '/admin/notifications', '/admin/settings', '/admin/settings?tab=security', '/admin/not-a-screen'].filter(Boolean)
         for (const path of screens) {
           await page.goto(BASE + path, { waitUntil: 'domcontentloaded' })
           await settle(page)
-          await check(path.replace(inquiry, ':inquiry').replace(quote, ':quote'))
+          await check(path.replace(inquiry, ':inquiry').replace(quote, ':quote').replace(new RegExp(`/projects/${project}$`), '/projects/:project'))
+        }
+
+        // The project editor: every tab, in each language of the language bar; the picture chooser open; a wording row open.
+        if (project) {
+          await page.goto(`${BASE}/admin/projects/${project}`, { waitUntil: 'domcontentloaded' })
+          await settle(page)
+          for (const tab of ['general', 'images', 'descriptions', 'technical', 'sections', 'links', 'publication']) {
+            await page.locator(`#project-tab-${tab}`).click()
+            await sleep(200)
+            await check(`project-edit:${tab}`)
+          }
+          await page.locator('#project-tab-images').click()
+          await sleep(200)
+          const choose = page.locator('#project-panel-images button', { hasText: /Choose or upload|Replace|Kép kiválasztása|Csere|Kép/ }).first()
+          if (await choose.count()) {
+            await choose.click()
+            await sleep(500)
+            await check('media-picker', { layout: false })
+            await page.keyboard.press('Escape')
+            await sleep(300)
+            const closed = await page.evaluate(() => ![...document.querySelectorAll('dialog')].some((d) => d.open))
+            if (!closed) findings.push({ view: `${tag} media-picker`, kind: 'focus', note: 'Escape did not close the picture chooser' })
+          }
+          await page.goto(`${BASE}/admin/texts`, { waitUntil: 'domcontentloaded' })
+          await settle(page)
+          const row = page.locator('details > summary').first()
+          if (await row.count()) {
+            await row.click()
+            await sleep(200)
+            await check('texts-row-open')
+          }
         }
 
         // The delete confirmation: opens on the safe button, keeps Tab inside, Escape cancels and gives focus back.

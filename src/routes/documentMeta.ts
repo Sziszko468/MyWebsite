@@ -2,6 +2,7 @@ import { findExperiment } from '../content/lab'
 import { experimentSummary, labMeta } from '../content/labMeta'
 import { privacyMeta } from '../content/privacyMeta'
 import { projectMeta } from '../content/projectDetails/meta'
+import { runtimeProject } from '../projects/store'
 import { serviceAreas } from '../content/services/areas'
 import { shopMeta } from '../content/shop/meta'
 import type { Language } from '../i18n/config'
@@ -19,6 +20,7 @@ export interface DocumentMeta {
 }
 
 const OWN_META: Partial<Record<PageDef['id'], (t: Dictionary) => { title: string; description: string }>> = {
+  work: (t) => t.workPage.meta,
   about: (t) => t.aboutPage.meta,
   contact: (t) => t.contactPage.meta,
 }
@@ -47,10 +49,17 @@ export function buildDocumentMeta(
   if (!page) return { ...site, title: `${t.notFound.title} — ${brandName}`, description: t.notFound.description }
 
   const projectId = projectIdOfPage(page.id)
-  const own = projectId ? projectMeta[projectId] : undefined
+  const own = projectId ? (projectMeta as Record<string, (typeof projectMeta)[keyof typeof projectMeta]>)[projectId] : undefined
   if (own) {
     return { title: `${own.title[lang]} — ${brandName}`, description: own.description[lang], ogType: 'article' }
   }
+  // A project that exists only in the administration: its own name and card text (the data arrives after the page's code).
+  if (projectId && projectId !== 'preview') {
+    const card = runtimeProject(projectId)
+    if (card) return { title: `${card.name[lang] || card.name.hu} — ${brandName}`, description: card.description[lang] || card.description.hu, ogType: 'article' }
+    return { ...site, title: `${t.nav.work} — ${brandName}`, description: t.workPage.meta.description }
+  }
+  if (projectId === 'preview') return { ...site, title: `${t.project.preview.title} — ${brandName}` }
 
   // An experiment is titled by its name; the Lab's own page by its statement.
   const labId = labIdOfPage(page.id)

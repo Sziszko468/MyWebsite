@@ -43,6 +43,7 @@ Everything is an environment variable, validated once at start-up. A bad or miss
 | `PUBLIC_URL`, `API_PUBLIC_URL` | — | Public origins. `API_PUBLIC_URL` starting with `https://` turns on `Secure` cookies and the `__Host-` cookie name. ⚠ https in production. |
 | `CORS_ORIGINS` | — | Exact origins allowed to call the public API from a browser, comma-separated. A wildcard is refused. ⚠ https in production. |
 | `DATABASE_PATH` | `./data/app.sqlite` | SQLite file (folder created if missing). ⚠ `:memory:` refused in production. |
+| `MEDIA_DIR`, `MEDIA_MAX_BYTES` | beside the database (`<DATABASE_PATH's folder>/media`), `6291456` | Where uploaded pictures are kept (back it up with the database), and the largest upload (100 kB–25 MB). The database holds only their descriptions. |
 | `MIGRATE_ON_START`, `SEED_ON_START` | `true` | Apply migrations / fill an empty catalogue at start. With migrations off and some pending, the server refuses to start. |
 | `APP_SECRET` | dev-only value | Keys the hash of visitors' network addresses, the duplicate fingerprints and the sign-in form's token. ⚠ Required in production: 32+ characters, not a placeholder. Never logged, never returned. |
 | `TRUST_PROXY` | `0` | Number of reverse proxies in front (0–5). `0`: `X-Forwarded-For` is ignored, because anyone can send it. |
@@ -70,6 +71,8 @@ SQLite through `node:sqlite` (Node marks it *experimental*: it prints one warnin
 
 **Schema** (migration `0001_init.sql`): `admin_users`, `admin_sessions`, `inquiries`, `inquiry_notes`, `quote_requests`, `quote_request_items`, `quote_request_item_extras`, `quote_request_notes`, `services`, `service_translations`, `packages`, `package_translations`, `package_needs`, `package_extras`, `service_packages`, `extras`, `extra_translations`, `extra_needs`, `site_content`, `site_content_translations`, `email_deliveries`, `audit_log`, `schema_migrations`. Every foreign key is declared and enforced; enumerations are `CHECK`s; a published `from` price must have an amount, a currency and a VAT mode other than `unspecified` (a `CHECK`); catalogue rows that requests refer to cannot be deleted (`RESTRICT`: disable them). Customer-facing records have random ids and a short `reference` (`C-XXXXXXXX` for a message, `Q-XXXXXXXX` for a quote request). Times are UTC ISO-8601 text.
 
+**Migration `0004_projects_media_texts.sql`** (PROMPT 13.1) adds three tables: `projects` (one row per portfolio project: address, category, state, featured, position, and the whole trilingual document as JSON in `content`, with `published_at`/`updated_at`), `media` (a description of each picture: content hash, type, size, dimensions, where the file is — `upload` in `MEDIA_DIR` or `public` for the pictures that ship with the website — never the picture itself) and `text_overrides` (the website's changed wording, per key and language). Migrations 0002 and 0003 belong to the administration (PROMPT 13) and the e-mail integration (PROMPT 14).
+
 **Migrations** are numbered `.sql` files, applied in order, each in a transaction, recorded with a SHA-256 checksum. A migration that was changed after it was applied, a failing migration, or a database that is *newer* than the software stops start-up with a message and leaves the database as it was. Migrations are forward-only: to go back, restore a backup.
 
 **Backup and restore.** `npm run server:backup -- /path/backup-2026-11-03.sqlite` writes a consistent single-file copy (`VACUUM INTO`) while the server is running and refuses to overwrite an existing file. Restore = stop the server, put the copy at `DATABASE_PATH` (delete any `-wal`/`-shm` files next to the old one), start. A schedule, off-site storage and a restore drill are the operator's job; a daily `cron` line running the command above with a dated name is enough to start (not set up here). Backups hold deleted data until they are rotated out — keep their lifetime in line with `RETENTION_DAYS`.
@@ -95,7 +98,7 @@ Base: the server's origin. All bodies and answers are JSON (`Content-Type: appli
 | 405 | `method_not_allowed` | `Allow` header lists the right ones. |
 | 409 | `conflict` | (admin) a duplicate code, or a record that is in use. |
 | 413 | `payload_too_large` | Body over `BODY_LIMIT_BYTES`. |
-| 415 | `unsupported_media_type` | Not `application/json` (there is no multipart/upload anywhere). |
+| 415 | `unsupported_media_type` | Not `application/json` — or, on the one upload route (`POST /api/admin/media`, the image itself as the body), not PNG/JPEG/WebP/GIF. There is no multipart anywhere. |
 | 422 | `validation_failed`, `spam_suspected` | Fields wrong (see below); the honeypot field `website` was filled or the text had too many links. |
 | 429 | `rate_limited` | `Retry-After` says how many seconds. |
 | 500 | `internal_error` | Generic; the cause is in the server log under the same `requestId`. |
@@ -139,6 +142,17 @@ Field codes (the same words the website's forms use): `required`, `tooShort`, `t
 `Cache-Control: public, max-age=60` on these; **no customer data exists in any of them** (a test submits a message and a quote request and searches every public answer for it).
 
 ### E-mail provider webhook
+
+### Portfolio, pictures and wording (read-only, public)
+
+| Route | Answers |
+| --- | --- |
+| `GET /api/projects` | The **published** projects in the owner's order, each with its card (title, label, text, technologies, state, thumbnail with its size and description), `featured`, `category`, and the categories that have at least one published project. `Cache-Control: public, max-age=30` and an ETag. |
+| `GET /api/projects/:slug` | One published project's page content (hidden sections and unchecked links are **not sent**) and its previous/next neighbours. A draft, an archived project, one without a page of its own, or an unknown address: 404. |
+| `GET /api/texts` | The website's changed wording, `{ key: { lang: text } }`. Same caching. |
+| `GET /media/:file` | An uploaded picture (`<hash>.<png|jpg|webp|gif>`). Any other name: 404. Immutable, `nosniff`, `sandbox`. |
+
+The administration's side (create, edit, publish, upload, …) is under `/api/admin/…`; see [`../cms/README.md`](../cms/README.md). A published project that the build did not prerender is served the Work page's shell with status 200 (`GET /<lang>/work/<slug>/`), so its address works the moment it is published.
 
 `POST /api/webhooks/email` — not for browsers: the transactional provider reports delivery, bounce and complaint events here. It answers only a request signed with `EMAIL_WEBHOOK_SECRET` (Svix scheme; 401 otherwise; 404 when no secret is configured), applies each event once, and has no CORS. See docs/email/README.md §7.
 
@@ -216,7 +230,7 @@ Templates exist in Hungarian, English and Dutch (subject, preview text, HTML and
 | Errors | One envelope; no stack, path or SQL. | `security`, `reliability` |
 | Supply chain | No runtime dependencies (a test fails if the server imports a package); `npm audit`: 0 known vulnerabilities (dev tooling included). | `security` |
 | Static serving | No path traversal, no hidden files, only website file types. | `security` |
-| Uploads | None exist; multipart is refused everywhere. | `security` |
+| Uploads | One: an administrator's picture (`POST /api/admin/media`). The file's own bytes decide its type (PNG/JPEG/WebP/GIF only; SVG and anything else refused), at most 8000 px a side and 36 million pixels, at most `MEDIA_MAX_BYTES`; stored under its content hash (the uploader's name never reaches a path); served with the real type, `nosniff` and a `sandbox` policy. No multipart. | `security`, `projects` |
 | E-mail provider | The API key and webhook secret only in the environment and masked in every log line and stored reason; the sender is never a visitor; recipients are never public input; the provider's webhook is accepted only with a verified, fresh signature, once per event id. | `email`, `webhook`, `emailChecks` |
 
 ## 8. How the website and the backend fit together
@@ -317,4 +331,4 @@ Run on 2026-11-04 (Windows 11, Node 22.23): **1691 passed, 0 failed** over the w
 - **`node:sqlite` is experimental in Node 22.** It worked throughout; a future Node major may change it, which the wrapper file contains.
 - **The website's forms do not send the honeypot field or a fill-time**, so those two spam checks exist on the server but do nothing against a bot until the forms carry them. The rate limit, link counting, duplicate detection and consent check are active.
 - **Server-side cart:** none, on purpose (the cart holds choices only and lives in the visitor's browser).
-- **Not built, by design:** online payment and checkout (every price is "on request" and the backend never takes a price from a request), customer accounts, file uploads, any AI or 3D-generation endpoint, a visitor-analytics store.
+- **Not built, by design:** online payment and checkout (every price is "on request" and the backend never takes a price from a request), customer accounts, file uploads other than an administrator's pictures, any AI or 3D-generation endpoint, a visitor-analytics store.

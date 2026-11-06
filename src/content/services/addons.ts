@@ -130,7 +130,8 @@ export const baseAddons: readonly Addon[] = [
 ]
 
 /** What the website shows: the add-ons above with the prices and texts edited in the administration laid over them (content/catalogOverlay.ts). */
-export const addons: readonly Addon[] = overlayAddons(baseAddons)
+/** A copy of its own: the live catalogue updates this list in place and must never touch the source's `base…` list. */
+export const addons: readonly Addon[] = [...overlayAddons(baseAddons)]
 
 export function getAddon(id: ExtraId): Addon {
   const found = addons.find((addon) => addon.id === id)

@@ -59,6 +59,8 @@ export interface RequestCtx {
   form(): Promise<URLSearchParams>
   /** The body exactly as it arrived (for a signature, which is over the bytes, not over what they parse to). */
   raw(): Promise<Buffer>
+  /** The body as it arrived with a limit of the route's own (an image upload), instead of the small default of the JSON API. */
+  body(limit: number): Promise<Buffer>
 }
 
 export type Handler = (ctx: RequestCtx) => Promise<Reply> | Reply

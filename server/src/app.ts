@@ -21,9 +21,15 @@ import { Notifier } from './modules/notifications/notifier.ts'
 import { emailRoutes } from './modules/notifications/routes.ts'
 import type { Mailer } from './modules/notifications/mailer.ts'
 import type { FetchLike } from './modules/notifications/resend.ts'
+import { projectRoutes } from './modules/projects/routes.ts'
 import { quoteRoutes } from './modules/quotes/routes.ts'
 import { healthRoutes } from './modules/system/health.ts'
 import { serveAdminApp, serveStatic } from './modules/system/static.ts'
+
+/** Whether a project with this address is published (drafts are not acknowledged). */
+function projectIsPublished(app: AppContext, slug: string): boolean {
+  return app.db.get("SELECT 1 AS x FROM projects WHERE slug = ? AND status = 'published'", [slug]) !== undefined
+}
 
 /**
  * The composition root: it builds the context (database, clock, limiters, notifier), registers every module's
@@ -67,7 +73,7 @@ export function createApp(deps: AppDeps): App {
   const context: AppContext = { config, db, clock, log, limiters, notifier, emailChecks, stats }
 
   const router = new Router()
-  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...emailRoutes(context), ...adminRoutes(context))
+  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...emailRoutes(context), ...adminRoutes(context))
 
   const sweeper = setInterval(() => limiters.sweep(), 60_000)
   sweeper.unref()
@@ -145,6 +151,7 @@ export function createApp(deps: AppDeps): App {
         json: () => readJson(req, config.bodyLimitBytes),
         form: () => (formCache ??= readForm(req, config.bodyLimitBytes)),
         raw: () => readBody(req, config.bodyLimitBytes),
+        body: (limit) => readBody(req, limit),
       }
 
       if (method === 'OPTIONS') {
@@ -165,7 +172,14 @@ export function createApp(deps: AppDeps): App {
         } else if (match.kind === 'method') {
           throw new HttpError(405, 'method_not_allowed', 'This method is not allowed here.', { headers: { Allow: match.allowed.join(', ') } })
         } else if (area === 'static' && config.staticDir && (method === 'GET' || method === 'HEAD')) {
-          const served = serveStatic(config.staticDir, url.pathname)
+          let served = serveStatic(config.staticDir, url.pathname)
+          // A project published after the site was built has no prerendered page of its own: answer with the Work page's shell
+          // (200, not a 404) so the browser starts the application, which draws the project from the API.
+          const projectPage = /^\/(hu|en|nl)\/work\/([a-z0-9][a-z0-9-]{1,59})\/?$/.exec(url.pathname)
+          if (projectPage && (!served || served.status === 404) && projectIsPublished(context, projectPage[2])) {
+            const shell = serveStatic(config.staticDir, `/${projectPage[1]}/work/`)
+            if (shell && shell.status === 200) served = shell
+          }
           if (!served) throw notFound('The address')
           label = 'static'
           reply = served

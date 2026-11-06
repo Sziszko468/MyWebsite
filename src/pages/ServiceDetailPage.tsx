@@ -1,3 +1,4 @@
+import { useCatalogGate } from '../content/liveCatalog'
 import { useEffect, useId, useMemo, useState } from 'react'
 import { track } from '../analytics/tracker'
 import { getPackage, packages } from '../content/packages'
@@ -49,6 +50,7 @@ const PLAN_ORDER: readonly PlanId[] = [...packages.map((pkg) => pkg.id), 'custom
  * Nothing on the page is a result, a testimonial, a guarantee or a price that is not in the content.
  */
 export function ServiceDetailPage({ serviceId }: { serviceId: ServiceId }) {
+  useCatalogGate()
   const { lang, t } = useI18n()
   const { detail, common, landing } = useShopText()
   useEffect(() => track('service_viewed', { service: serviceId }), [serviceId])

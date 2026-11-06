@@ -361,7 +361,8 @@ export const basePackages: readonly ServicePackage[] = [
 ]
 
 /** What the website shows: the packages above with the prices and texts the owner has edited in the administration laid over them (content/catalogOverlay.ts). */
-export const packages: readonly ServicePackage[] = overlayPackages(basePackages)
+/** A copy of its own: the live catalogue (content/liveCatalog.ts) updates this list in place and must never touch the source's `base…` list. */
+export const packages: readonly ServicePackage[] = [...overlayPackages(basePackages)]
 
 export function getPackage(id: PackageId): ServicePackage {
   const found = packages.find((candidate) => candidate.id === id)

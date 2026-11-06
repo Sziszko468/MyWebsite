@@ -48,17 +48,22 @@ export function Overview({ detail }: { detail: ProjectDetail }) {
     [t.project.overview.goal, overview.goal[lang]],
   ]
   if (role) rows.push([t.project.overview.role, role[lang]])
+  const facts = rows.filter(([, text]) => text !== '')
+  // A group with nothing in it, and a stack with no group, are not drawn: no label over an empty space.
+  const groups = stack.filter((entry) => entry.items.length > 0)
+  // The line "based on the documentation and the code, read on ..." is a statement about the website's own four pages.
+  const fromRepository = detail.links === undefined
 
   return (
     <div className={styles.overview}>
       <Reveal className={styles.overviewLead}>
-        <p className={styles.lead}>{detail.summary[lang]}</p>
-        <p className={styles.reviewed}>{t.project.reviewed.replace('{date}', formatDate(reviewed, lang))}</p>
+        <p className={styles.lead}>{detail.summary[lang] || detail.summary.hu}</p>
+        {fromRepository && <p className={styles.reviewed}>{t.project.reviewed.replace('{date}', formatDate(reviewed, lang))}</p>}
       </Reveal>
 
       <Reveal className={styles.overviewFacts} delay={100}>
         <dl className={styles.facts}>
-          {rows.map(([label, text]) => (
+          {facts.map(([label, text]) => (
             <div key={label} className={styles.fact}>
               <dt>{label}</dt>
               <dd>{text}</dd>
@@ -67,23 +72,25 @@ export function Overview({ detail }: { detail: ProjectDetail }) {
         </dl>
       </Reveal>
 
-      <Reveal className={styles.stack} delay={140}>
-        <h3 className={styles.stackTitle}>{t.project.stackLabel}</h3>
-        <dl className={styles.stackGroups}>
-          {stack.map((entry) => (
-            <div key={entry.group} className={styles.stackGroup}>
-              <dt>{t.project.stackGroups[entry.group]}</dt>
-              <dd>
-                <ul>
-                  {entry.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </Reveal>
+      {groups.length > 0 && (
+        <Reveal className={styles.stack} delay={140}>
+          <h3 className={styles.stackTitle}>{t.project.stackLabel}</h3>
+          <dl className={styles.stackGroups}>
+            {groups.map((entry) => (
+              <div key={entry.group} className={styles.stackGroup}>
+                <dt>{t.project.stackGroups[entry.group]}</dt>
+                <dd>
+                  <ul>
+                    {entry.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </Reveal>
+      )}
     </div>
   )
 }
@@ -94,7 +101,7 @@ export function Challenges({ detail }: { detail: ProjectDetail }) {
   return (
     <ol className={styles.challenges}>
       {detail.challenges.map((challenge, position) => (
-        <li key={challenge.source} className={styles.challenge} data-side={position % 2 ? 'right' : 'left'}>
+        <li key={position} className={styles.challenge} data-side={position % 2 ? 'right' : 'left'}>
           <Reveal>
             <span className={styles.numeral} aria-hidden="true">
               {pad(position + 1)}
@@ -126,7 +133,7 @@ export function Approach({ detail }: { detail: ProjectDetail }) {
   return (
     <ol className={styles.approach}>
       {detail.approach.map((step, position) => (
-        <li key={step.title.hu} className={styles.step} style={{ '--i': position } as CSSProperties}>
+        <li key={position} className={styles.step} style={{ '--i': position } as CSSProperties}>
           <Reveal delay={position * 70}>
             <span className={styles.stepNumber} aria-hidden="true">
               {pad(position + 1)}
@@ -146,7 +153,7 @@ export function Decisions({ detail }: { detail: ProjectDetail }) {
   return (
     <ul className={styles.decisions}>
       {detail.decisions.map((decision, position) => (
-        <li key={decision.title.hu} className={styles.decision}>
+        <li key={position} className={styles.decision}>
           <Reveal delay={(position % 2) * 90}>
             <article>
               <h3 className={styles.decisionTitle}>{decision.title[lang]}</h3>
@@ -167,8 +174,8 @@ export function Lessons({ detail }: { detail: ProjectDetail }) {
     <div className={styles.lessons}>
       {learned.length > 0 ? (
         <Reveal className={styles.learned}>
-          {learned.map((lesson) => (
-            <p key={lesson.hu} className={styles.quote}>
+          {learned.map((lesson, position) => (
+            <p key={position} className={styles.quote}>
               {lesson[lang]}
             </p>
           ))}
@@ -181,12 +188,41 @@ export function Lessons({ detail }: { detail: ProjectDetail }) {
         <Reveal className={styles.next} delay={80}>
           <h3 className={styles.nextTitle}>{t.project.learned.next}</h3>
           <ul>
-            {next.map((item) => (
-              <li key={item.hu}>{item[lang]}</li>
+            {next.map((item, position) => (
+              <li key={position}>{item[lang]}</li>
             ))}
           </ul>
         </Reveal>
       )}
     </div>
+  )
+}
+
+/** A plain description of the architecture, for a project that has no drawn diagram. Paragraphs are separated by a blank line. */
+export function ArchitectureText({ detail }: { detail: ProjectDetail }) {
+  const { lang } = useI18n()
+  const text = detail.architectureText?.[lang] || detail.architectureText?.hu || ''
+  return (
+    <Reveal className={styles.lessons}>
+      {text.split(/\n{2,}/).map((paragraph, position) => (
+        <p key={position} className={styles.lead}>
+          {paragraph}
+        </p>
+      ))}
+    </Reveal>
+  )
+}
+
+/** Results, written by the owner from real evidence (the form says so); the band exists only when there are some. */
+export function Results({ detail }: { detail: ProjectDetail }) {
+  const { lang } = useI18n()
+  return (
+    <Reveal className={styles.learned}>
+      {(detail.results ?? []).map((result, position) => (
+        <p key={position} className={styles.quote}>
+          {result[lang] || result.hu}
+        </p>
+      ))}
+    </Reveal>
   )
 }

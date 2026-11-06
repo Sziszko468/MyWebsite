@@ -1,3 +1,4 @@
+import { useCatalogVersion } from '../../content/liveCatalog'
 import { useId } from 'react'
 import { packages, type ServicePackage } from '../../content/packages'
 import { useI18n } from '../../i18n/useI18n'
@@ -67,6 +68,7 @@ function Package({ pkg, position }: { pkg: ServicePackage; position: number }) {
  * with the package already chosen.
  */
 export function ServicePackages() {
+  useCatalogVersion()
   const { t } = useI18n()
   const titleId = useId()
 

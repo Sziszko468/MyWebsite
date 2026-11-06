@@ -304,7 +304,8 @@ async function mockSmtp(options: MockOptions = {}, port = 0): Promise<MockServer
   }
 }
 
-const smtp = (port: number, overrides: Partial<SmtpConfig> = {}): SmtpConfig => ({ host: '127.0.0.1', port, secure: 'none', user: null, password: null, rejectUnauthorized: true, timeoutMs: 3000, ...overrides })
+// (10 s, not 3: the whole suite runs its files in parallel, and a TLS handshake on a starved machine took longer than 3 s once.)
+const smtp = (port: number, overrides: Partial<SmtpConfig> = {}): SmtpConfig => ({ host: '127.0.0.1', port, secure: 'none', user: null, password: null, rejectUnauthorized: true, timeoutMs: 10_000, ...overrides })
 
 /** A throw-away self-signed certificate for localhost, made with openssl when it is installed. */
 function selfSigned(): { key: string; cert: string } | null {

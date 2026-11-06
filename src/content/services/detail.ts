@@ -466,7 +466,7 @@ export const baseServiceDetails: readonly ServiceDetail[] = [
 ]
 
 /** The details as the website shows them: the source's, with the tagline and overview the owner edited laid over them (content/catalogOverlay.ts). */
-export const serviceDetails: readonly ServiceDetail[] = overlayServiceDetails(baseServiceDetails)
+export const serviceDetails: readonly ServiceDetail[] = [...overlayServiceDetails(baseServiceDetails)]
 
 export function getServiceDetail(id: ServiceId): ServiceDetail {
   const found = serviceDetails.find((detail) => detail.id === id)

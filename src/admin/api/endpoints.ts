@@ -99,3 +99,35 @@ export const system = {
   maintenance: () => post<{ expiredSessions: number; inquiries: number; quoteRequests: number; deliveries: number }>(`${base}/system/maintenance`, {}),
   publish: () => post<{ published: boolean }>(`${base}/system/publish`, {}),
 }
+
+// ---- the portfolio (PROMPT 13.1): projects, pictures and the website's own wording ----
+
+import type { Category, MediaItem, ProjectDetailData, ProjectList, TextKey } from './projectTypes'
+
+export const projects = {
+  list: (signal?: AbortSignal) => get<ProjectList>(`${base}/projects`, { signal }).then((answer) => answer.data),
+  get: (id: number, signal?: AbortSignal) => get<ProjectDetailData>(`${base}/projects/${id}`, { signal }).then((answer) => answer.data),
+  create: (body: unknown) => post<ProjectDetailData>(`${base}/projects`, body).then((answer) => answer.data),
+  update: (id: number, body: unknown) => put<ProjectDetailData>(`${base}/projects/${id}`, body).then((answer) => answer.data),
+  feature: (id: number, featured: boolean) => patch<ProjectDetailData>(`${base}/projects/${id}`, { featured }).then((answer) => answer.data),
+  publish: (id: number) => post<ProjectDetailData>(`${base}/projects/${id}/publish`, {}).then((answer) => answer.data),
+  unpublish: (id: number) => post<ProjectDetailData>(`${base}/projects/${id}/unpublish`, {}).then((answer) => answer.data),
+  archive: (id: number) => post<ProjectDetailData>(`${base}/projects/${id}/archive`, {}).then((answer) => answer.data),
+  restore: (id: number) => post<ProjectDetailData>(`${base}/projects/${id}/restore`, {}).then((answer) => answer.data),
+  duplicate: (id: number) => post<ProjectDetailData>(`${base}/projects/${id}/duplicate`, {}).then((answer) => answer.data),
+  remove: (id: number) => del(`${base}/projects/${id}`),
+  reorder: (ids: number[]) => put<undefined>(`${base}/project-order`, { ids }),
+  settings: (signal?: AbortSignal) => get<{ categories: Category[]; requireAllLanguages: boolean }>(`${base}/project-settings`, { signal }).then((answer) => answer.data),
+  saveSettings: (body: { categories?: Category[]; requireAllLanguages?: boolean }) => put<{ categories: Category[]; requireAllLanguages: boolean }>(`${base}/project-settings`, body).then((answer) => answer.data),
+}
+
+export const media = {
+  list: (signal?: AbortSignal) => get<MediaItem[]>(`${base}/media`, { signal }).then((answer) => answer.data),
+  upload: (blob: Blob, name: string) => request<MediaItem>('POST', `${base}/media`, { rawBody: blob, query: { name } }).then((answer) => answer.data),
+  remove: (id: number) => del(`${base}/media/${id}`),
+}
+
+export const texts = {
+  list: (signal?: AbortSignal) => get<{ keys: TextKey[] }>(`${base}/texts`, { signal }).then((answer) => answer.data.keys),
+  save: (key: string, values: Record<string, string>) => put<TextKey>(`${base}/texts/${encodeURIComponent(key)}`, { values }).then((answer) => answer.data),
+}

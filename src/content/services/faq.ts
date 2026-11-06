@@ -81,4 +81,4 @@ export const baseFaq: readonly FaqItem[] = [
 ]
 
 /** What the website shows: the list as edited in the administration when there is one (content/catalogOverlay.ts), otherwise the one above. */
-export const faq: readonly FaqItem[] = overlayFaq(baseFaq)
+export const faq: readonly FaqItem[] = [...overlayFaq(baseFaq)]

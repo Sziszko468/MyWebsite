@@ -1,3 +1,4 @@
+import { useCatalogGate } from '../content/liveCatalog'
 import { useEffect } from 'react'
 import { useLocation } from 'react-router'
 import { isPackageId } from '../content/packages'
@@ -17,6 +18,7 @@ import styles from './ShopPage.module.scss'
  * if it suits it. The address is read once per arrival and is not written back.
  */
 export function ConfiguratorPage() {
+  useCatalogGate()
   const { t } = useI18n()
   const { configurator: c } = useShopText()
   const { search } = useLocation()

@@ -239,3 +239,38 @@ describe('catalogue editing helpers', () => {
     expect(fromForm(EXTRA_FIELDS, values({ name: 'Név', summary: 'Rövid' })).hu).toEqual({ name: 'Név', summary: 'Rövid' })
   })
 })
+
+describe('the project editor helpers', async () => {
+  const { setIn, moveItem, linesToList, sameDocument, documentPath, emptyContent, titleOf } = await import('./projects')
+  const { fitSize, needsOptimizing } = await import('./image')
+
+  it('changes a document by copy: nothing it was given is mutated', () => {
+    const before = emptyContent()
+    const after = setIn(before, ['overview', 'what', 'en'], 'Hello')
+    expect(after.overview.what.en).toBe('Hello')
+    expect(before.overview.what.en).toBe('')
+    const list = setIn({ items: [{ a: 1 }, { a: 2 }] }, ['items', 1, 'a'], 9)
+    expect(list.items).toEqual([{ a: 1 }, { a: 9 }])
+    expect(documentPath('content.gallery.0.alt.hu')).toEqual(['gallery', '0', 'alt', 'hu'])
+  })
+
+  it('moves an item one place and stops at the ends; reads lines as a list without repeats or blanks', () => {
+    expect(moveItem(['a', 'b', 'c'], 1, -1)).toEqual(['b', 'a', 'c'])
+    expect(moveItem(['a', 'b', 'c'], 0, -1)).toEqual(['a', 'b', 'c'])
+    expect(moveItem(['a', 'b', 'c'], 2, 1)).toEqual(['a', 'b', 'c'])
+    expect(linesToList('React\n\n  TypeScript  \nReact\r\nNode')).toEqual(['React', 'TypeScript', 'Node'])
+    expect(sameDocument({ a: [1] }, { a: [1] })).toBe(true)
+    expect(sameDocument({ a: [1] }, { a: [2] })).toBe(false)
+    expect(titleOf({ hu: '', en: 'English', nl: '' }, 'hu', 'slug')).toBe('English')
+    expect(titleOf({ hu: '', en: '', nl: '' }, 'hu', 'slug')).toBe('slug')
+  })
+
+  it('shrinks only what is large, keeps the proportions, and leaves a GIF alone', () => {
+    expect(fitSize(3200, 1600)).toEqual({ width: 1600, height: 800 })
+    expect(fitSize(800, 600)).toEqual({ width: 800, height: 600 })
+    expect(needsOptimizing('image/png', 2_000_000, 1200, 800)).toBe(true)
+    expect(needsOptimizing('image/webp', 90_000, 1200, 800)).toBe(false)
+    expect(needsOptimizing('image/jpeg', 90_000, 4000, 3000)).toBe(true)
+    expect(needsOptimizing('image/gif', 9_000_000, 4000, 3000)).toBe(false)
+  })
+})

@@ -138,4 +138,4 @@ export const baseServiceAreas: readonly ServiceArea[] = [
 ]
 
 /** The areas as the website shows them: the source's, with what the owner edited in the administration laid over it (content/catalogOverlay.ts). */
-export const serviceAreas: readonly ServiceArea[] = overlayServiceAreas(baseServiceAreas)
+export const serviceAreas: readonly ServiceArea[] = [...overlayServiceAreas(baseServiceAreas)]

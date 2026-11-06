@@ -29,7 +29,7 @@ function FeatureGroup({
       </h3>
       <ol className={styles.list}>
         {features.map((feature, position) => (
-          <li key={feature.title.hu} className={styles.feature}>
+          <li key={position} className={styles.feature}>
             <Reveal delay={Math.min(position, 3) * 60}>
               <h4 className={styles.title}>{feature.title[lang]}</h4>
               <p className={styles.text}>{feature.text[lang]}</p>
@@ -70,8 +70,8 @@ export function FeatureList({ detail, onOpenImage }: { detail: ProjectDetail; on
         <Reveal className={styles.limits}>
           <h3 className={styles.limitsTitle}>{t.project.features.limits}</h3>
           <ul>
-            {detail.limits.map((limit) => (
-              <li key={limit.hu}>{limit[lang]}</li>
+            {detail.limits.map((limit, position) => (
+              <li key={position}>{limit[lang]}</li>
             ))}
           </ul>
         </Reveal>

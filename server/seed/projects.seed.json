@@ -1,0 +1,2837 @@
+{
+  "categories": [
+    {
+      "key": "apps",
+      "label": {
+        "hu": "Webes és mobilalkalmazások",
+        "en": "Web and mobile apps",
+        "nl": "Web- en mobiele apps"
+      }
+    },
+    {
+      "key": "platforms",
+      "label": {
+        "hu": "Platformok és rendszerek",
+        "en": "Platforms and systems",
+        "nl": "Platformen en systemen"
+      }
+    },
+    {
+      "key": "concepts",
+      "label": {
+        "hu": "Koncepciók és útmutatók",
+        "en": "Concepts and guides",
+        "nl": "Concepten en gidsen"
+      }
+    }
+  ],
+  "media": [
+    {
+      "path": "/projects/spendly/dashboard-light.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 50110,
+      "sha256": "21a81b68039df590afd38659bd8ca8366aa85fb0d7671f16d13640df81771fb1"
+    },
+    {
+      "path": "/projects/spendly/dashboard-dark.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 50916,
+      "sha256": "0ff50d7374bf5be22b18e79bec865038bd8f47aa86ceda11c736a90530498ae4"
+    },
+    {
+      "path": "/projects/spendly/dashboard-hu.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 55852,
+      "sha256": "b699ec73686f25ab69c216cac7ddb890a8ea601a0fd585e99e0dabf8b14f81e8"
+    },
+    {
+      "path": "/projects/spendly/transactions.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 900,
+      "bytes": 36960,
+      "sha256": "9ffcc59a524a41410c2807eb421a4b1fe682411a38c1144abac69a8786d1b232"
+    },
+    {
+      "path": "/projects/spendly/budgets.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 800,
+      "bytes": 40492,
+      "sha256": "b461eb9e2b6578a86efde1595a52703a98becf12e9d7f393ab1a8a08e70c0e46"
+    },
+    {
+      "path": "/projects/spendly/api-docs.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 968,
+      "bytes": 48602,
+      "sha256": "86cf2659af1ada747f0b0b5f45590280c3096fd241ecd014564186fe50751896"
+    },
+    {
+      "path": "/projects/spendly/mobile-dashboard.webp",
+      "mime": "image/webp",
+      "width": 520,
+      "height": 1125,
+      "bytes": 29034,
+      "sha256": "2c2b71b73bec3669427c5a3a2856263a489cf1cc43d751a443fa39fcac2c62c4"
+    },
+    {
+      "path": "/projects/spendly/mobile-transactions.webp",
+      "mime": "image/webp",
+      "width": 520,
+      "height": 1125,
+      "bytes": 27446,
+      "sha256": "1bafe3bf82b56dc020d88fe3f9821ce2e8c4d87a6bcb77df62337f69e911edfc"
+    },
+    {
+      "path": "/projects/spendly/mobile-budgets.webp",
+      "mime": "image/webp",
+      "width": 520,
+      "height": 1125,
+      "bytes": 28124,
+      "sha256": "469da54fabcb7fc4b4a7f04de68d22ebdb87d59c1f7f0d470f2adbe3b5f5a188"
+    },
+    {
+      "path": "/projects/spendly/mobile-add-transaction.webp",
+      "mime": "image/webp",
+      "width": 520,
+      "height": 1125,
+      "bytes": 15840,
+      "sha256": "2c16f091f11f5fc489be6ca4d30d8205d0e85af36b366972ebda01c7d6e8a89d"
+    },
+    {
+      "path": "/projects/bookinghub/calendar.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 900,
+      "bytes": 20850,
+      "sha256": "5b4ed2dc1889f22eed48c082b2d3ea1db12ee7f63f87ca23073576e0dcfb7b34"
+    },
+    {
+      "path": "/projects/bookinghub/booking-form.webp",
+      "mime": "image/webp",
+      "width": 720,
+      "height": 618,
+      "bytes": 10128,
+      "sha256": "64b2bb309a50e57485df10bdf75b8d4c9cc27ef44cdf0c5dd975df201b6a2bd4"
+    },
+    {
+      "path": "/projects/bookinghub/calendar-light.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 900,
+      "bytes": 21592,
+      "sha256": "ef04eeeaa802d9ae1758c733f79b9a9cce57975560bb62b3a1f612e08b8640b1"
+    },
+    {
+      "path": "/projects/bookinghub/clients.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 900,
+      "bytes": 19706,
+      "sha256": "633d7337dccf96930d71667146540562919bb695522e0ca392b1ed20f499b6b3"
+    },
+    {
+      "path": "/projects/bookinghub/email-settings.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 900,
+      "bytes": 35658,
+      "sha256": "698f86e61a26c4be455a1e41750cecf96f57ac66d518d0a23805350732ffbae3"
+    },
+    {
+      "path": "/projects/bookinghub/mobile-booking-form.webp",
+      "mime": "image/webp",
+      "width": 520,
+      "height": 887,
+      "bytes": 15592,
+      "sha256": "d4b91f670df815f096ea5130f2483aed28a01b5369aa6552deff2ed8214de5f6"
+    },
+    {
+      "path": "/projects/logistics-platform/dashboard.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 900,
+      "bytes": 54178,
+      "sha256": "a85c326b12640a86b1823775c6cf4f87bbc1fa5088cfb14279183907a8ad0d3b"
+    },
+    {
+      "path": "/projects/logistics-platform/shipments.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 900,
+      "bytes": 83866,
+      "sha256": "1c42eba51914266e6fbd98df36194111a4fa1afb2c004fe2f05eda2535d8ddfe"
+    },
+    {
+      "path": "/projects/logistics-platform/shipment-details.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 1320,
+      "bytes": 120414,
+      "sha256": "73db84ac223847f36531f9825f4137befa3d9db72cff5b0a3d06cc4dd62a2c45"
+    },
+    {
+      "path": "/projects/logistics-platform/fleet.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 900,
+      "bytes": 66244,
+      "sha256": "301912cfc8bb7fdf59461740836ce7484b5dbaef5ab40dc2614bf84e50291df2"
+    },
+    {
+      "path": "/projects/logistics-platform/maintenance.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 1000,
+      "bytes": 64110,
+      "sha256": "887a83bc40dc580db665a1459343af7cafc0a498d39bfea1528c5d1777fdef57"
+    },
+    {
+      "path": "/projects/logistics-platform/reports.webp",
+      "mime": "image/webp",
+      "width": 1440,
+      "height": 1100,
+      "bytes": 59348,
+      "sha256": "6046047f4ccb4554369223fb0dc0004898f63d6c9793dba7010af03a385c9004"
+    }
+  ],
+  "projects": [
+    {
+      "slug": "spendly",
+      "status": "published",
+      "featured": true,
+      "position": 1,
+      "category": "apps",
+      "content": {
+        "title": {
+          "hu": "Spendly",
+          "en": "Spendly",
+          "nl": "Spendly"
+        },
+        "cardLabel": {
+          "hu": "Pénzügyi alkalmazás",
+          "en": "Finance app",
+          "nl": "Financiële applicatie"
+        },
+        "cardDescription": {
+          "hu": "Modern pénzügyi alkalmazás koncepciója a kiadások átlátható követéséhez és a mindennapi pénzügyek kezeléséhez.",
+          "en": "The concept of a modern finance app for tracking spending clearly and managing everyday money.",
+          "nl": "Het concept van een moderne financiële applicatie om uitgaven overzichtelijk bij te houden en dagelijkse financiën te beheren."
+        },
+        "summary": {
+          "hu": "Személyes pénzügyi platform: kiadások rögzítése (vagy a blokk beolvasása), havi költségkeretek, és egy vezérlőpult, amely érthetően elmondja, mi változott. Egyetlen API szolgálja ki a webes és a mobil klienst.",
+          "en": "A personal finance platform: record spending (or scan the receipt), set monthly budgets, and read a dashboard that says in plain language what changed. One API serves the web and the mobile client.",
+          "nl": "Een persoonlijk financieel platform: uitgaven vastleggen (of de bon scannen), maandbudgetten instellen en een dashboard lezen dat in gewone taal zegt wat er veranderd is. Eén API bedient de web- en de mobiele client."
+        },
+        "detailPage": true,
+        "projectStatus": "demo",
+        "accent": "red",
+        "hero": "split",
+        "mockup": "finance",
+        "layout": "lead",
+        "tags": [
+          "React",
+          "TypeScript",
+          "Django REST Framework",
+          "PostgreSQL",
+          "React Native",
+          "Docker"
+        ],
+        "stack": [
+          {
+            "group": "frontend",
+            "items": [
+              "React 19",
+              "TypeScript",
+              "Vite",
+              "React Router",
+              "Recharts",
+              "SCSS modules",
+              "i18next",
+              "React Native",
+              "Expo"
+            ]
+          },
+          {
+            "group": "backend",
+            "items": [
+              "Python 3.13",
+              "Django 5.2",
+              "Django REST Framework",
+              "SimpleJWT",
+              "drf-spectacular (OpenAPI)",
+              "Tesseract OCR",
+              "gunicorn"
+            ]
+          },
+          {
+            "group": "data",
+            "items": [
+              "PostgreSQL 16"
+            ]
+          },
+          {
+            "group": "infrastructure",
+            "items": [
+              "Docker Compose",
+              "nginx",
+              "EAS Build"
+            ]
+          },
+          {
+            "group": "testing",
+            "items": [
+              "pytest",
+              "Vitest",
+              "Jest",
+              "Testing Library",
+              "Playwright",
+              "ruff",
+              "oxlint"
+            ]
+          }
+        ],
+        "repoName": "WALLEX",
+        "role": {
+          "hu": "Egyszemélyes projekt: a tároló minden commitját én készítettem.",
+          "en": "A single-author project: every commit in the repository is mine.",
+          "nl": "Een project van één auteur: elke commit in de repository is van mij."
+        },
+        "thumbnail": null,
+        "gallery": [
+          {
+            "mediaPath": "/projects/spendly/dashboard-light.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "A vezérlőpult világos témában: egyenleg, bevételek és kiadások, észrevételek és diagramok.",
+              "en": "The dashboard in the light theme: balance, income and expenses, insights and charts.",
+              "nl": "Het dashboard in het lichte thema: saldo, inkomsten en uitgaven, inzichten en grafieken."
+            },
+            "caption": {
+              "hu": "Vezérlőpult, világos téma",
+              "en": "Dashboard, light theme",
+              "nl": "Dashboard, licht thema"
+            },
+            "hero": true
+          },
+          {
+            "mediaPath": "/projects/spendly/dashboard-dark.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "Ugyanaz a vezérlőpult sötét témában.",
+              "en": "The same dashboard in the dark theme.",
+              "nl": "Hetzelfde dashboard in het donkere thema."
+            },
+            "caption": {
+              "hu": "Ugyanez sötét témában",
+              "en": "The same in the dark theme",
+              "nl": "Hetzelfde in het donkere thema"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/spendly/dashboard-hu.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "A vezérlőpult magyarul: minden szöveg, észrevétel, kategórianév, hónapnév és számformátum követi a nyelvet.",
+              "en": "The dashboard in Hungarian: every text, insight, category name, month name and number format follows the language.",
+              "nl": "Het dashboard in het Hongaars: elke tekst, elk inzicht, elke categorienaam, maandnaam en getalnotatie volgt de taal."
+            },
+            "caption": {
+              "hu": "Vezérlőpult magyarul",
+              "en": "Dashboard in Hungarian",
+              "nl": "Dashboard in het Hongaars"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/spendly/transactions.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "Napok szerint csoportosított tranzakciók kereséssel, szűrőkkel és rendezéssel.",
+              "en": "Transactions grouped by day, with search, filters and sorting.",
+              "nl": "Transacties gegroepeerd per dag, met zoeken, filters en sorteren."
+            },
+            "caption": {
+              "hu": "Tranzakciók",
+              "en": "Transactions",
+              "nl": "Transacties"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/spendly/budgets.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "Költségkeretek felhasználási sávokkal és állapotjelvényekkel.",
+              "en": "Budgets with usage bars and status badges.",
+              "nl": "Budgetten met gebruiksbalken en statusbadges."
+            },
+            "caption": {
+              "hu": "Költségkeretek",
+              "en": "Budgets",
+              "nl": "Budgetten"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/spendly/api-docs.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "A Swagger UI a dokumentált tranzakció-végpontokkal.",
+              "en": "Swagger UI showing the documented transaction endpoints.",
+              "nl": "Swagger UI met de gedocumenteerde transactie-eindpunten."
+            },
+            "caption": {
+              "hu": "Interaktív API-dokumentáció",
+              "en": "Interactive API documentation",
+              "nl": "Interactieve API-documentatie"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/spendly/mobile-dashboard.webp",
+            "device": "mobile",
+            "alt": {
+              "hu": "A mobil kezdőképernyő: egyenleg, bevételek és kiadások, észrevételek, hová ment a pénz.",
+              "en": "Mobile home: balance, income and expenses, insights, where the money went.",
+              "nl": "Mobiel startscherm: saldo, inkomsten en uitgaven, inzichten, waar het geld naartoe ging."
+            },
+            "caption": {
+              "hu": "Kezdőképernyő",
+              "en": "Home",
+              "nl": "Start"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/spendly/mobile-transactions.webp",
+            "device": "mobile",
+            "alt": {
+              "hu": "Mobil tranzakciólista napok szerint csoportosítva, kereséssel és szűrőkkel.",
+              "en": "Mobile transactions grouped by day, with search and filters.",
+              "nl": "Mobiele transacties gegroepeerd per dag, met zoeken en filters."
+            },
+            "caption": {
+              "hu": "Tranzakciók",
+              "en": "Transactions",
+              "nl": "Transacties"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/spendly/mobile-budgets.webp",
+            "device": "mobile",
+            "alt": {
+              "hu": "Mobil költségkeretek felhasználási sávokkal és állapotjelvényekkel.",
+              "en": "Mobile budgets with usage bars and status badges.",
+              "nl": "Mobiele budgetten met gebruiksbalken en statusbadges."
+            },
+            "caption": {
+              "hu": "Költségkeretek",
+              "en": "Budgets",
+              "nl": "Budgetten"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/spendly/mobile-add-transaction.webp",
+            "device": "mobile",
+            "alt": {
+              "hu": "A mobil hozzáadás űrlap: először az összeg, aztán egy kategóriacsempe.",
+              "en": "The mobile add form: amount first, then a category tile.",
+              "nl": "Het mobiele toevoegformulier: eerst het bedrag, dan een categorietegel."
+            },
+            "caption": {
+              "hu": "Hozzáadás: az összeg az első",
+              "en": "Add: amount first",
+              "nl": "Toevoegen: eerst het bedrag"
+            },
+            "hero": false
+          }
+        ],
+        "galleryNote": {
+          "hu": "A képernyőképeken az alkalmazás mai neve, a WALLEX látszik (a Spendly a korábbi neve); minden adat generált demóadat. A mobil képernyőképek az Expo webes célpontjából készültek iPhone-méretben.",
+          "en": "The screenshots show the app under its current name, WALLEX (Spendly was its earlier name); all data is generated demo data. The mobile screenshots come from the Expo web target at iPhone size.",
+          "nl": "De schermafbeeldingen tonen de app onder zijn huidige naam, WALLEX (Spendly was de eerdere naam); alle data is gegenereerde demodata. De mobiele schermafbeeldingen komen uit het Expo-webdoel op iPhone-formaat."
+        },
+        "overview": {
+          "what": {
+            "hu": "Teljes értékű személyes pénzügyi alkalmazás: webes felület, iOS- és Androidalkalmazás, mögötte egyetlen Django REST API és PostgreSQL adatbázis. A tárolóban és a felületen ma WALLEX néven fut.",
+            "en": "A full personal finance application: a web app, an iOS and Android app, and behind them one Django REST API and a PostgreSQL database. In the repository and in the interface it now runs as WALLEX.",
+            "nl": "Een volwaardige persoonlijke financiële applicatie: een webapp, een iOS- en Android-app en daarachter één Django REST API en een PostgreSQL-database. In de repository en in de interface heet het nu WALLEX."
+          },
+          "audience": {
+            "hu": "Magánszemélyeknek, akik követni akarják a mindennapi kiadásaikat, a költségkereteiket és a megtakarítási céljaikat.",
+            "en": "Individuals who want to follow their everyday spending, their budgets and their savings goals.",
+            "nl": "Particulieren die hun dagelijkse uitgaven, hun budgetten en hun spaardoelen willen volgen."
+          },
+          "problem": {
+            "hu": "A mindennapi költések szétszóródnak a kártyás fizetések, a készpénz és az előfizetések között, ezért a túlköltést későn veszi észre az ember.",
+            "en": "Everyday spending is scattered across card payments, cash and subscriptions, so overspending is noticed too late.",
+            "nl": "Dagelijkse uitgaven zijn verspreid over kaartbetalingen, contant geld en abonnementen, waardoor te hoge uitgaven te laat opvallen."
+          },
+          "goal": {
+            "hu": "Pontosság a pénz körül (tizedes törtek végig, soha nem lebegőpontos szám), a felhasználók adatainak szigorú elválasztása, a fontos kockázatokra írt tesztek, és egy környezet, amely egyetlen docker compose paranccsal indul.",
+            "en": "Correctness around money (exact decimals end to end, never floats), strict per-user data isolation, tests for the risks that matter, and a setup that starts with one docker compose command.",
+            "nl": "Correctheid rond geld (overal exacte decimalen, nooit floats), strikte scheiding van gebruikersdata, tests voor de risico’s die ertoe doen en een opzet die met één docker compose-opdracht start."
+          }
+        },
+        "challenges": [
+          {
+            "title": {
+              "hu": "Lapozás, amely ismételt és kihagyott sorokat adott",
+              "en": "Pagination that repeated and skipped rows",
+              "nl": "Paginering die rijen herhaalde en oversloeg"
+            },
+            "problem": {
+              "hu": "Mindkét kliens dátum szerint rendezi a tranzakciólistát. Az azonos napi tranzakciók lekérdezésenként más sorrendben jöttek, így a limit/offset oldalak egyes sorokat megismételtek, másokat kihagytak: 95 tesztadattal 10-ből 10 futásban volt duplikáció, és egy tranzakció soha nem jelent meg.",
+              "en": "Both clients sort the transaction list by date. Transactions on the same date came back in a different order on each query, so limit/offset pages repeated some rows and skipped others: with 95 seeded transactions, duplicates showed up in 10 of 10 runs and one transaction was never shown.",
+              "nl": "Beide clients sorteren de transactielijst op datum. Transacties met dezelfde datum kwamen bij elke query in een andere volgorde terug, waardoor pagina’s met limit/offset rijen herhaalden en andere oversloegen: met 95 testtransacties kwamen er in 10 van 10 runs dubbelen voor en werd één transactie nooit getoond."
+            },
+            "solution": {
+              "hu": "Egy stabil rendezést adó szűrő mindig hozzáfűzi az elsődleges kulcsot döntetlen esetére, így minden sorrend teljes. A regressziós teszt öt rendezést futtat, minden rendezési mezőn döntetlenekkel.",
+              "en": "A stable-ordering filter always appends the primary key as a tie-breaker, so every ordering is total. The regression test runs five orderings with ties on every sort field.",
+              "nl": "Een filter voor stabiele sortering voegt altijd de primaire sleutel toe als tiebreaker, zodat elke volgorde totaal is. De regressietest draait vijf sorteringen met gelijke waarden op elk sorteerveld."
+            },
+            "source": "docs/code-review.md · H1"
+          },
+          {
+            "title": {
+              "hu": "Egy üzleti szabály, amely háromszor létezett",
+              "en": "A business rule that existed three times",
+              "nl": "Een bedrijfsregel die drie keer bestond"
+            },
+            "problem": {
+              "hu": "A költségkeret-API, az analitika és a felhasználási százalék külön-külön számolta ki az elköltött összeget: költségkeretenként egy lekérdezést (a lista a történettel együtt lassult), és két képletet, amely eltérhetett egymástól.",
+              "en": "The budget API, the analytics and the usage percentage each worked out the spent amount on their own: one query per budget (the list got slower as history grew) and two formulas that could drift apart.",
+              "nl": "De budget-API, de analyse en het gebruikspercentage berekenden elk zelf het uitgegeven bedrag: één query per budget (de lijst werd trager naarmate de geschiedenis groeide) en twee formules die uit elkaar konden lopen."
+            },
+            "solution": {
+              "hu": "Egyetlen kiegészített queryset számolja ki a listához az elköltött összeget egy lekérdezésben, és egyetlen függvény tartalmazza a maradék és a felhasználás képletét. Az API, a vezérlőpult, az észrevételek és a push-ellenőrzések mind ezt használják; egy teszt rögzíti, hogy a lekérdezések száma nem nő a költségkeretek számával.",
+              "en": "One annotated queryset works out the spent amount for the whole list in a single query, and one function holds the formula for remaining amount and usage. The API, the dashboard, the insights and the push checks all use them; a test pins that the query count does not grow with the number of budgets.",
+              "nl": "Eén geannoteerde queryset berekent het uitgegeven bedrag voor de hele lijst in één query en één functie bevat de formule voor het restbedrag en het gebruik. De API, het dashboard, de inzichten en de pushcontroles gebruiken ze allemaal; een test legt vast dat het aantal queries niet groeit met het aantal budgetten."
+            },
+            "source": "docs/code-review.md · H2"
+          },
+          {
+            "title": {
+              "hu": "Telefonon beírt összegek: tizedesvesszős billentyűzet",
+              "en": "Money typed on phones: the decimal-comma keypad",
+              "nl": "Bedragen op telefoons: het toetsenbord met decimale komma"
+            },
+            "problem": {
+              "hu": "A tizedesvesszős billentyűzetű telefonokon nem lehetett fillért beírni: az űrlapok az „1250,50”-et Number()-rel olvasták, ami NaN, és úgy küldték volna el, ahogy beírták.",
+              "en": "On phones with a decimal-comma keypad cents could not be entered: the forms read \"1250,50\" with Number(), which gives NaN, and would have sent it as typed.",
+              "nl": "Op telefoons met een toetsenbord met decimale komma konden centen niet worden ingevoerd: de formulieren lazen \"1250,50\" met Number(), wat NaN geeft, en zouden het verstuurd hebben zoals het getypt was."
+            },
+            "solution": {
+              "hu": "Egyetlen normalizáló függvény az „1 250,50”-et „1250.50”-re alakítja küldés előtt; a teszteket előbb úgy írtam meg, hogy elbukjanak. A webes űrlap number mezőt használ, ahol ezt a böngésző intézi.",
+              "en": "One normalising function turns \"1 250,50\" into \"1250.50\" before sending; the tests were written to fail first. The web form uses a number input, where the browser does it.",
+              "nl": "Eén normaliseerfunctie maakt van \"1 250,50\" \"1250.50\" vóór het versturen; de tests zijn eerst zo geschreven dat ze faalden. Het webformulier gebruikt een number-invoer, waar de browser dit doet."
+            },
+            "source": "docs/code-review.md · B2"
+          },
+          {
+            "title": {
+              "hu": "A második nyelv több, mint lefordított szövegek",
+              "en": "A second language is more than translated strings",
+              "nl": "Een tweede taal is meer dan vertaalde teksten"
+            },
+            "problem": {
+              "hu": "A magyar nyelv hozzáadása felszínre hozott olyan szövegeket, amelyek megkerülték a fordítást (kódban összeállított mondatok, egy álnéven importált függvény, amelyet a kinyerő eszköz nem látott), valamint alapértelmezett kategóriákat, amelyeket az API angolul adott vissza, vagy amelyeket egy lefordított névvel meg lehetett duplázni.",
+              "en": "Adding Hungarian exposed texts that bypassed translation (sentences built in code, a function imported under an alias that the extraction tool did not see) and default categories that the API returned in English or that a translated name could duplicate.",
+              "nl": "Het toevoegen van Hongaars bracht teksten aan het licht die de vertaling omzeilden (zinnen die in code werden opgebouwd, een onder een alias geïmporteerde functie die het extractiehulpmiddel niet zag) en standaardcategorieën die de API in het Engels teruggaf of die met een vertaalde naam konden worden gedupliceerd."
+            },
+            "solution": {
+              "hu": "A katalógusteszt beolvassa a forrást, és elbukik minden olyan szövegen, amely hiányzik belőle; egy AST-vizsgálat megtalálja a hibaosztályoknak átadott nyers szövegeket; a kategória-API az alapértelmezetteket a kérés nyelvén listázza, és elutasít egy lefordított alapértelmezettel megegyező nevet.",
+              "en": "The catalogue test reads the source and fails on any text missing from it; an AST scan finds raw strings handed to error classes; the category API lists the defaults in the request language and refuses a name equal to a translated default.",
+              "nl": "De catalogustest leest de broncode en faalt op elke tekst die erin ontbreekt; een AST-scan vindt ruwe strings die aan foutklassen worden doorgegeven; de categorie-API toont de standaardcategorieën in de taal van het verzoek en weigert een naam die gelijk is aan een vertaalde standaard."
+            },
+            "source": "docs/code-review.md · A1–A5"
+          }
+        ],
+        "approach": [
+          {
+            "title": {
+              "hu": "Vékony kliensek, egyetlen „agy”",
+              "en": "Thin clients, one brain",
+              "nl": "Dunne clients, één brein"
+            },
+            "text": {
+              "hu": "A validáció, a tulajdonosi ellenőrzés, a pénzszámítás, az analitika és az észrevételek kizárólag a háttérrendszerben élnek. A web- és a mobilalkalmazás API-kliens saját felülettel; a pénz decimális szövegként érkezik, és a kliens soha nem számolja újra.",
+              "en": "Validation, ownership checks, money arithmetic, analytics and insights live only in the backend. The web and mobile apps are API clients with their own UI; money arrives as decimal strings and is never recalculated on the client.",
+              "nl": "Validatie, eigenaarschapscontroles, geldberekeningen, analyses en inzichten leven alleen in de backend. De web- en mobiele app zijn API-clients met een eigen UI; geld komt als decimale tekst binnen en wordt op de client nooit herberekend."
+            }
+          },
+          {
+            "title": {
+              "hu": "Rétegzett háttérrendszer",
+              "en": "A layered backend",
+              "nl": "Een gelaagde backend"
+            },
+            "text": {
+              "hu": "A nézetek a HTTP-t, a jogosultságokat és a sebességkorlátokat kezelik; a szerializálók a bemenetet validálják; a szolgáltatások tartalmazzák az üzleti logikát HTTP nélkül; a modellek a megszorításokat. A nehéz lekérdezések rögzített számú lekérdezésből állnak, és a tesztek ellenőrzik a számot. Az OCR és a push kis felületek mögött áll.",
+              "en": "Views handle HTTP, permissions and rate limits; serializers validate input; services hold the business logic with no HTTP in it; models carry the constraints. Heavy queries run in a fixed number of queries and tests assert the number. OCR and push delivery sit behind small interfaces.",
+              "nl": "Views regelen HTTP, rechten en snelheidslimieten; serializers valideren de invoer; services bevatten de bedrijfslogica zonder HTTP; modellen dragen de constraints. Zware queries draaien in een vast aantal queries en tests controleren dat aantal. OCR en pushbezorging zitten achter kleine interfaces."
+            }
+          },
+          {
+            "title": {
+              "hu": "Minden sor egy felhasználóé",
+              "en": "Every row belongs to a user",
+              "nl": "Elke rij hoort bij een gebruiker"
+            },
+            "text": {
+              "hu": "A querysetek mindig a bejelentkezett felhasználóra szűrnek, és egy objektumszintű jogosultság másodszor is ellenőriz; más felhasználó objektumára 404 a válasz, így a létezése sem derül ki. Az adatbázis CHECK és UNIQUE megszorításai is őrzik a fontos szabályokat.",
+              "en": "Querysets are always scoped to the signed-in user and an object permission adds a second check; another user’s object answers 404, so its existence is not revealed. Database CHECK and UNIQUE constraints back the important rules too.",
+              "nl": "Querysets zijn altijd beperkt tot de ingelogde gebruiker en een objectrecht voegt een tweede controle toe; het object van een andere gebruiker geeft 404, zodat het bestaan niet wordt verraden. Ook CHECK- en UNIQUE-constraints in de database dekken de belangrijke regels af."
+            }
+          },
+          {
+            "title": {
+              "hu": "Több eszköz, egy fiók",
+              "en": "Many devices, one account",
+              "nl": "Meerdere apparaten, één account"
+            },
+            "text": {
+              "hu": "A mobilalkalmazás offline sorában az írások kliensazonosítót hordoznak, így az újrapróbálás nem duplikál. Minden kliens egy olcsó szinkronállapot-végpontot kérdez le, és a háttérben frissít; a szerkesztések verziót (If-Match) visznek, és az elavult szerkesztés 412-t kap, ahelyett hogy felülírna egy újabbat.",
+              "en": "The mobile app’s offline queue carries a client id with each write, so a retry never duplicates. Every client polls a cheap sync-status endpoint and refreshes in the background; edits carry a version (If-Match) and a stale edit gets 412 instead of overwriting a newer one.",
+              "nl": "De offlinewachtrij van de mobiele app geeft elke schrijfactie een client-id mee, zodat een nieuwe poging nooit dubbelt. Elke client bevraagt een goedkoop sync-statuseindpunt en ververst op de achtergrond; bewerkingen dragen een versie (If-Match) en een verouderde bewerking krijgt 412 in plaats van een nieuwere te overschrijven."
+            }
+          },
+          {
+            "title": {
+              "hu": "Egy origin élesben",
+              "en": "One origin in production",
+              "nl": "Eén origin in productie"
+            },
+            "text": {
+              "hu": "Az nginx kiszolgálja a webes buildet, és az /api kéréseket az alkalmazásszerverre továbbítja, így egyetlen tanúsítvány kell, és nincs CORS-beállítás. A mobilalkalmazások ugyanezt a címet hívják.",
+              "en": "nginx serves the web build and proxies /api to the application server, so there is one certificate and no CORS setup. The mobile apps call the same address.",
+              "nl": "nginx serveert de webbuild en stuurt /api door naar de applicatieserver, zodat er één certificaat is en geen CORS-configuratie. De mobiele apps roepen hetzelfde adres aan."
+            }
+          }
+        ],
+        "architectureText": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "architecture": {
+          "tiers": [
+            {
+              "id": "clients",
+              "label": {
+                "hu": "Kliensek",
+                "en": "Clients",
+                "nl": "Clients"
+              },
+              "nodes": [
+                {
+                  "id": "web",
+                  "label": "React web app",
+                  "detail": {
+                    "hu": "React 19 · TypeScript · Vite",
+                    "en": "React 19 · TypeScript · Vite",
+                    "nl": "React 19 · TypeScript · Vite"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "mobile",
+                  "label": "Expo mobile app",
+                  "detail": {
+                    "hu": "iOS és Android · React Native; néhány képernyő még hiányzik",
+                    "en": "iOS and Android · React Native; some screens are still missing",
+                    "nl": "iOS en Android · React Native; enkele schermen ontbreken nog"
+                  },
+                  "status": "partial"
+                }
+              ]
+            },
+            {
+              "id": "edge",
+              "label": {
+                "hu": "Élesben",
+                "en": "In production",
+                "nl": "In productie"
+              },
+              "nodes": [
+                {
+                  "id": "nginx",
+                  "label": "nginx",
+                  "detail": {
+                    "hu": "kiszolgálja a webes buildet, továbbítja az /api-t",
+                    "en": "serves the web build, proxies /api",
+                    "nl": "serveert de webbuild, stuurt /api door"
+                  },
+                  "status": "built"
+                }
+              ]
+            },
+            {
+              "id": "application",
+              "label": {
+                "hu": "Alkalmazás",
+                "en": "Application",
+                "nl": "Applicatie"
+              },
+              "nodes": [
+                {
+                  "id": "api",
+                  "label": "Django REST API",
+                  "detail": {
+                    "hu": "Django 5.2 · DRF · JWT · üzleti logika, validáció, analitika",
+                    "en": "Django 5.2 · DRF · JWT · business logic, validation, analytics",
+                    "nl": "Django 5.2 · DRF · JWT · bedrijfslogica, validatie, analyse"
+                  },
+                  "status": "built"
+                }
+              ]
+            },
+            {
+              "id": "data",
+              "label": {
+                "hu": "Adat",
+                "en": "Data",
+                "nl": "Data"
+              },
+              "nodes": [
+                {
+                  "id": "db",
+                  "label": "PostgreSQL 16",
+                  "status": "built"
+                }
+              ]
+            },
+            {
+              "id": "services",
+              "label": {
+                "hu": "Külső szolgáltatások",
+                "en": "External services",
+                "nl": "Externe diensten"
+              },
+              "nodes": [
+                {
+                  "id": "ocr",
+                  "label": "Tesseract OCR",
+                  "detail": {
+                    "hu": "blokkolvasás, cserélhető",
+                    "en": "receipt reading, swappable",
+                    "nl": "bonnen lezen, uitwisselbaar"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "push",
+                  "label": "Expo Push Service",
+                  "detail": {
+                    "hu": "APNs / FCM",
+                    "en": "APNs / FCM",
+                    "nl": "APNs / FCM"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "ai",
+                  "label": "AI provider",
+                  "detail": {
+                    "hu": "alapból Gemini, opcionálisan Claude; kulcs nélkül ki van kapcsolva",
+                    "en": "Gemini by default, Claude optionally; off unless a key is set",
+                    "nl": "standaard Gemini, optioneel Claude; uit zonder sleutel"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "ecb",
+                  "label": "ECB exchange rates",
+                  "detail": {
+                    "hu": "egy kezelőparancs tölti le",
+                    "en": "fetched by a management command",
+                    "nl": "opgehaald door een beheeropdracht"
+                  },
+                  "status": "built"
+                }
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "web",
+              "to": "nginx",
+              "label": {
+                "hu": "HTTPS · JSON · JWT",
+                "en": "HTTPS · JSON · JWT",
+                "nl": "HTTPS · JSON · JWT"
+              }
+            },
+            {
+              "from": "mobile",
+              "to": "api",
+              "label": {
+                "hu": "HTTPS · JSON · JWT, ugyanarra a címre",
+                "en": "HTTPS · JSON · JWT, to the same address",
+                "nl": "HTTPS · JSON · JWT, naar hetzelfde adres"
+              },
+              "status": "partial"
+            },
+            {
+              "from": "nginx",
+              "to": "api",
+              "label": {
+                "hu": "/api továbbítása",
+                "en": "proxies /api",
+                "nl": "stuurt /api door"
+              }
+            },
+            {
+              "from": "api",
+              "to": "db",
+              "label": {
+                "hu": "SQL, megszorításokkal",
+                "en": "SQL, with constraints",
+                "nl": "SQL, met constraints"
+              }
+            },
+            {
+              "from": "api",
+              "to": "ocr",
+              "label": {
+                "hu": "blokkfotó → javaslatok, semmi sem mentődik",
+                "en": "receipt photo → suggestions, nothing saved",
+                "nl": "bonfoto → suggesties, niets opgeslagen"
+              }
+            },
+            {
+              "from": "api",
+              "to": "push",
+              "label": {
+                "hu": "értesítések küldése",
+                "en": "sends notifications",
+                "nl": "verstuurt notificaties"
+              }
+            },
+            {
+              "from": "api",
+              "to": "ai",
+              "label": {
+                "hu": "csak olvasó háttér-eszközök, aggregált számok",
+                "en": "read-only backend tools, aggregated figures",
+                "nl": "alleen-lezen backendtools, geaggregeerde cijfers"
+              }
+            },
+            {
+              "from": "api",
+              "to": "ecb",
+              "label": {
+                "hu": "referenciaárfolyamok",
+                "en": "reference rates",
+                "nl": "referentiekoersen"
+              }
+            }
+          ],
+          "note": {
+            "hu": "Az OCR és a push választható integráció kis felületek mögött; az AI-asszisztens kikapcsolt, amíg nincs beállítva szolgáltatói kulcs.",
+            "en": "OCR and push are optional integrations behind small interfaces; the AI assistant is off until a provider key is configured.",
+            "nl": "OCR en push zijn optionele integraties achter kleine interfaces; de AI-assistent staat uit zolang er geen providersleutel is ingesteld."
+          }
+        },
+        "features": [
+          {
+            "title": {
+              "hu": "Tranzakciók és kategóriák",
+              "en": "Transactions and categories",
+              "nl": "Transacties en categorieën"
+            },
+            "text": {
+              "hu": "Bevételek és kiadások létrehozása, szerkesztése, törlése; keresés, szűrés típus, kategória és dátum szerint, rendezés és lapozás. Felhasználónként tíz alapértelmezett kategória, saját színes, ikonos kategóriák mellett.",
+              "en": "Create, edit and delete income and expenses; search, filter by type, category and date, sort and paginate. Ten default categories per user, plus custom ones with colours and icons.",
+              "nl": "Inkomsten en uitgaven aanmaken, bewerken en verwijderen; zoeken, filteren op type, categorie en datum, sorteren en pagineren. Tien standaardcategorieën per gebruiker, plus eigen categorieën met kleuren en iconen."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/spendly/transactions.webp"
+          },
+          {
+            "title": {
+              "hu": "Vezérlőpult és analitika",
+              "en": "Dashboard and analytics",
+              "nl": "Dashboard en analyses"
+            },
+            "text": {
+              "hu": "Havi egyenleg, 12 hónapos trend, kiadások kategóriák szerint, kereskedők, hétköznapi minták, fix és változó kiadások, hónapról hónapra és évről évre összevetés. Mind az adatbázisban, rögzített számú lekérdezéssel számolva.",
+              "en": "Monthly balance, a 12-month trend, spending by category, merchants, weekday patterns, fixed versus variable spending, month-over-month and year-over-year comparison. All computed in the database with a fixed number of queries.",
+              "nl": "Maandsaldo, een trend over 12 maanden, uitgaven per categorie, winkels, weekdagpatronen, vaste versus variabele uitgaven, vergelijking met vorige maand en vorig jaar. Alles berekend in de database met een vast aantal queries."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/spendly/dashboard-light.webp"
+          },
+          {
+            "title": {
+              "hu": "Költségkeretek",
+              "en": "Budgets",
+              "nl": "Budgetten"
+            },
+            "text": {
+              "hu": "Havi keretek kategóriánként vagy összesen; az elköltött, a maradék és a felhasználás élőben számolódik, figyelmeztető (≥ 80 %) és túllépett állapottal. A weben a keretek megtekinthetők, de létrehozásukhoz még az API kell: űrlap nincs.",
+              "en": "Monthly limits per category or overall; spent, remaining and usage are computed live, with warning (≥ 80 %) and over-budget states. The web app shows budgets, but creating one still needs the API: there is no form yet.",
+              "nl": "Maandlimieten per categorie of totaal; uitgegeven, resterend en gebruik worden live berekend, met waarschuwing (≥ 80 %) en overschreden status. De webapp toont budgetten, maar aanmaken vereist nog de API: er is nog geen formulier."
+            },
+            "status": "partial",
+            "imageMediaPath": "/projects/spendly/budgets.webp"
+          },
+          {
+            "title": {
+              "hu": "Ismétlődő fizetések és előfizetések",
+              "en": "Recurring payments and subscriptions",
+              "nl": "Terugkerende betalingen en abonnementen"
+            },
+            "text": {
+              "hu": "Az előfizetés-kezelő a webes felületen kiszámolja a havi és éves költséget és a következő fizetéseket. Az ismétlődő sablonok emlékeztetőket és összesítéseket hajtanak, de még nem hoznak létre tranzakciókat.",
+              "en": "The subscription manager on the web works out monthly and yearly cost and the next payments. Recurring templates drive reminders and totals, but do not yet create transactions.",
+              "nl": "De abonnementenbeheerder op het web berekent maand- en jaarkosten en de volgende betalingen. Terugkerende sjablonen sturen herinneringen en totalen aan, maar maken nog geen transacties aan."
+            },
+            "status": "partial"
+          },
+          {
+            "title": {
+              "hu": "Megtakarítási célok és mérföldkövek",
+              "en": "Savings goals and achievements",
+              "nl": "Spaardoelen en mijlpalen"
+            },
+            "text": {
+              "hu": "Több cél felhasználónként, saját pénznemmel és határidővel; a pénz hozzáadása és levonása atomi, zárolt szerveroldali művelet. A mérföldköveket a szerver értékeli a meglévő adatokból, és egyszer megszerezve véglegesek. A weben elérhető; mobilra még nincs képernyő.",
+              "en": "Several goals per user, each in its own currency with an optional target date; adding and removing money are atomic, row-locked server actions. Achievements are evaluated on the server from existing data and are permanent once earned. Available on the web; the mobile screens do not exist yet.",
+              "nl": "Meerdere doelen per gebruiker, elk in een eigen valuta met een optionele streefdatum; geld toevoegen en opnemen zijn atomaire serveracties met rijvergrendeling. Mijlpalen worden op de server beoordeeld uit bestaande data en zijn blijvend zodra ze behaald zijn. Beschikbaar op het web; mobiele schermen bestaan nog niet."
+            },
+            "status": "done"
+          },
+          {
+            "title": {
+              "hu": "Észrevételek és értesítések",
+              "en": "Insights and notifications",
+              "nl": "Inzichten en notificaties"
+            },
+            "text": {
+              "hu": "Szabályalapú észrevételek (8 szabálytípus) és a szerver által megírt értesítések: költségkeret-küszöbök, közelgő fizetések, havi összefoglaló; mindegyik fajta kikapcsolható. A mobilon push is érkezik; az alkalmazáson belüli értesítési postaláda képernyője még nincs meg.",
+              "en": "Rule-based insights (8 rule types) and server-written notifications: budget thresholds, upcoming payments, a monthly summary; each kind can be switched off. Mobile also gets a push; the in-app notification inbox screens are not built yet.",
+              "nl": "Regelgebaseerde inzichten (8 regeltypen) en door de server geschreven notificaties: budgetdrempels, aankomende betalingen, een maandoverzicht; elk soort kan worden uitgezet. Op mobiel komt er ook een push; de schermen voor een notificatie-inbox in de app zijn nog niet gebouwd."
+            },
+            "status": "partial"
+          },
+          {
+            "title": {
+              "hu": "Szinkron és offline mód",
+              "en": "Sync and offline mode",
+              "nl": "Synchronisatie en offlinemodus"
+            },
+            "text": {
+              "hu": "A web, az iPhone és az Android egy fiókot és egy adatbázist használ; a telefonon rögzített tranzakció újratöltés nélkül megjelenik a megnyitott weboldalon. A mobilon a gyorsítótárazott képernyők offline is olvashatók, az új tranzakciók sorba kerülnek, és duplikáció nélkül szinkronizálódnak.",
+              "en": "Web, iPhone and Android share one account and one database; a transaction added on the phone appears on the open web page without a reload. On mobile, cached screens stay readable offline and new transactions are queued and synced without duplicates.",
+              "nl": "Web, iPhone en Android delen één account en één database; een transactie die op de telefoon wordt toegevoegd verschijnt zonder herladen op de geopende webpagina. Op mobiel blijven gecachte schermen offline leesbaar en worden nieuwe transacties in de wachtrij gezet en zonder dubbelen gesynchroniseerd."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/spendly/mobile-dashboard.webp"
+          },
+          {
+            "title": {
+              "hu": "Többpénznemű számolás",
+              "en": "Multi-currency",
+              "nl": "Meerdere valuta"
+            },
+            "text": {
+              "hu": "EUR, HUF, USD, GBP, JPY és CHF. A tranzakció megőrzi a fizetés pénznemét; az alappénznembeli értéke a napi ECB-referenciaárfolyammal rögzül, és az alappénznem váltása a teljes történetet a korabeli árfolyamokon számolja át.",
+              "en": "EUR, HUF, USD, GBP, JPY and CHF. A transaction keeps the currency it was paid in; its value in the base currency is fixed with the ECB reference rate of its date, and changing the base currency converts the whole history at historical rates.",
+              "nl": "EUR, HUF, USD, GBP, JPY en CHF. Een transactie behoudt de valuta waarin ze betaald is; de waarde in de basisvaluta wordt vastgelegd met de ECB-referentiekoers van die datum en het wisselen van basisvaluta rekent de hele geschiedenis om tegen historische koersen."
+            },
+            "status": "done"
+          },
+          {
+            "title": {
+              "hu": "AI-pénzügyi asszisztens",
+              "en": "AI finance assistant",
+              "nl": "AI-financiële assistent"
+            },
+            "text": {
+              "hu": "Chat a weben és mobilon. A modell nem éri el az adatbázist: hét csak olvasó háttér-eszközt hívhat, amelyek aggregált számokat adnak vissza azonosítók, név és e-mail nélkül. A válaszoknak ezekből kell származniuk; ha nem elég az adat, az asszisztens ezt mondja, nem találgat. Kulcs nélkül ki van kapcsolva.",
+              "en": "A chat on web and mobile. The model never touches the database: it can only call seven read-only backend tools that return aggregated figures with no ids, name or e-mail. Answers must come from those results; when they are not enough the assistant says so instead of guessing. Off unless a provider key is set.",
+              "nl": "Een chat op web en mobiel. Het model raakt de database nooit aan: het kan alleen zeven alleen-lezen backendtools aanroepen die geaggregeerde cijfers teruggeven zonder id’s, naam of e-mail. Antwoorden moeten uit die resultaten komen; als die niet genoeg zijn, zegt de assistent dat in plaats van te gokken. Uit zolang er geen providersleutel is."
+            },
+            "status": "done"
+          },
+          {
+            "title": {
+              "hu": "Mobil extrák: blokkolvasás, biometrikus zár, push",
+              "en": "Mobile extras: receipt scanning, biometric lock, push",
+              "nl": "Mobiele extra’s: bon scannen, biometrisch slot, push"
+            },
+            "text": {
+              "hu": "A fotóról a szerver OCR-rel kiolvassa a kereskedőt, az összeget, a dátumot és a tételeket, és kategóriát javasol; csak a megerősítés hoz létre tranzakciót. Face ID / ujjlenyomat zár, a frissítő token Keychain/Keystore-ban. A projekt saját átvilágítása szerint fizikai telefonon még nem ellenőrizték.",
+              "en": "The server reads merchant, total, date and items from the photo with OCR and suggests a category; only the confirmation creates a transaction. Face ID or fingerprint lock, with the refresh token in the Keychain/Keystore. According to the project’s own review, it has not yet been verified on a physical phone.",
+              "nl": "De server leest winkel, totaal, datum en artikelen uit de foto met OCR en stelt een categorie voor; pas de bevestiging maakt een transactie aan. Face ID- of vingerafdrukslot, met het refresh-token in de Keychain/Keystore. Volgens de eigen review van het project is het nog niet op een fysieke telefoon geverifieerd."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/spendly/mobile-add-transaction.webp"
+          },
+          {
+            "title": {
+              "hu": "Fiók és biztonság",
+              "en": "Account and security",
+              "nl": "Account en beveiliging"
+            },
+            "text": {
+              "hu": "Forgó JWT-tokenek feketelistával, eszközönkénti munkamenetek, kétfaktoros hitelesítés (TOTP, helyreállító kódok), naplózott bejelentkezések és törlések, valamint a saját adatok letöltése és törlése. Minden vizsgálati megállapítást először egy bukó teszttel reprodukáltak.",
+              "en": "Rotating JWT tokens with a blacklist, one session per device, two-factor authentication (TOTP, recovery codes), a log of sign-ins and deletions, and download and erasure of one’s own data. Every finding of the security audit was first reproduced by a failing test.",
+              "nl": "Roterende JWT-tokens met blacklist, één sessie per apparaat, tweefactorauthenticatie (TOTP, herstelcodes), een log van aanmeldingen en verwijderingen en het downloaden en wissen van eigen gegevens. Elke bevinding van de beveiligingsaudit werd eerst met een falende test gereproduceerd."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/spendly/api-docs.webp"
+          },
+          {
+            "title": {
+              "hu": "Két nyelv és CSV-import",
+              "en": "Two languages and CSV import",
+              "nl": "Twee talen en CSV-import"
+            },
+            "text": {
+              "hu": "Angol és magyar felület a weben és mobilon; a választás a fiókhoz kötődik, a számok, a pénz és a dátumok követik. A weben banki CSV-import automatikus kategorizálással, duplikátumfelismeréssel és sorokra bontott jelentéssel.",
+              "en": "English and Hungarian in the web and mobile apps; the choice is saved to the account and numbers, money and dates follow it. On the web, bank CSV import with automatic categorisation, duplicate detection and a per-row report.",
+              "nl": "Engels en Hongaars in de web- en mobiele app; de keuze wordt in het account bewaard en cijfers, geld en datums volgen die. Op het web: bank-CSV-import met automatische categorisering, dubbeldetectie en een rapport per rij."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/spendly/dashboard-hu.webp"
+          },
+          {
+            "title": {
+              "hu": "Automatikus ismétlődő tranzakciók",
+              "en": "Automatic recurring transactions",
+              "nl": "Automatische terugkerende transacties"
+            },
+            "text": {
+              "hu": "Egy ütemezett, idempotens feladat hozná létre a tényleges tranzakciókat a sablonokból, sablononként bekapcsolhatóan, hogy a kézzel rögzített fizetések ne duplázódjanak.",
+              "en": "A scheduled, idempotent job should create the actual transactions from the templates, opt-in per template so manually entered payments are not duplicated.",
+              "nl": "Een geplande, idempotente taak zou de echte transacties uit de sjablonen moeten aanmaken, per sjabloon aan te zetten zodat handmatig ingevoerde betalingen niet dubbel komen."
+            },
+            "status": "planned"
+          },
+          {
+            "title": {
+              "hu": "Mobilképernyők előfizetésekhez, célokhoz, mérföldkövekhez",
+              "en": "Mobile screens for subscriptions, goals and achievements",
+              "nl": "Mobiele schermen voor abonnementen, doelen en mijlpalen"
+            },
+            "text": {
+              "hu": "A típusok és az API-szolgáltatások megvannak a mobilalkalmazásban, a képernyők még nem.",
+              "en": "The types and API services exist in the mobile app; the screens do not yet.",
+              "nl": "De types en API-services bestaan in de mobiele app; de schermen nog niet."
+            },
+            "status": "planned"
+          },
+          {
+            "title": {
+              "hu": "Értesítési postaláda",
+              "en": "Notification inbox",
+              "nl": "Notificatie-inbox"
+            },
+            "text": {
+              "hu": "Az API (lista, olvasott/olvasatlan, számláló, mind olvasott) és a kliensszolgáltatások megvannak; a webes harang és a mobil postaláda képernyője még nem.",
+              "en": "The API (list, read/unread, unread count, mark all read) and the client services exist; the web bell and the mobile inbox screen do not yet.",
+              "nl": "De API (lijst, gelezen/ongelezen, teller, alles gelezen) en de clientservices bestaan; de webbel en het mobiele inboxscherm nog niet."
+            },
+            "status": "planned"
+          },
+          {
+            "title": {
+              "hu": "Megtakarítási előzmények",
+              "en": "Savings history",
+              "nl": "Spaargeschiedenis"
+            },
+            "text": {
+              "hu": "Egy napló minden befizetésről és kivételről (a cél most csak az egyenlegét őrzi), amely megtakarítási ráta diagramot és „a céldátumra időben vagy” jelzéseket tenne lehetővé.",
+              "en": "A log of each deposit and withdrawal (a goal currently keeps only its balance), which would enable a savings-rate chart and \"on track for the target date\" hints.",
+              "nl": "Een log van elke storting en opname (een doel bewaart nu alleen zijn saldo), waarmee een spaarquotegrafiek en \"op schema voor de streefdatum\"-hints mogelijk worden."
+            },
+            "status": "planned"
+          }
+        ],
+        "limits": [
+          {
+            "hu": "Nincs üzemeltetve: nincs élő demó, és a projekt nem éles használatban van.",
+            "en": "It is not hosted anywhere: there is no live demo and it is not in production use.",
+            "nl": "Het wordt nergens gehost: er is geen live demo en het is niet in productie."
+          },
+          {
+            "hu": "A webes kategóriakezelő oldal még helyőrző; a költségkeret-létrehozáshoz nincs űrlap.",
+            "en": "The web category-management page is still a placeholder, and there is no form to create budgets.",
+            "nl": "De webpagina voor categoriebeheer is nog een placeholder en er is geen formulier om budgetten aan te maken."
+          },
+          {
+            "hu": "A mobilképernyők az Expo webes célpontján lettek ellenőrizve; iOS- és Android-eszközön még nem.",
+            "en": "The mobile screens were checked in the Expo web target; they have not been run on iOS or Android devices yet.",
+            "nl": "De mobiele schermen zijn gecontroleerd in het Expo-webdoel; ze zijn nog niet op iOS- of Android-apparaten gedraaid."
+          },
+          {
+            "hu": "Nincs jelszó-visszaállítás e-mailben.",
+            "en": "There is no password reset by e-mail.",
+            "nl": "Er is geen wachtwoordherstel per e-mail."
+          }
+        ],
+        "decisions": [
+          {
+            "title": {
+              "hu": "„Nyugodt főkönyv”, nem sablon-vezérlőpult",
+              "en": "A calm ledger, not a dashboard template",
+              "nl": "Een rustig grootboek, geen dashboardsjabloon"
+            },
+            "text": {
+              "hu": "Meleg semleges színek tiszta fehér és fekete helyett, egyetlen visszafogott zsályazöld hangsúly, felületek közötti tónusbeli elválasztás szegélyek és árnyékok helyett. A tiszta #fff / #000 háttérként soha nem szerepel, és egy teszt ezt kikényszeríti.",
+              "en": "Warm neutrals instead of pure white and black, one muted sage-green accent, and tonal separation between surfaces instead of borders and shadows. Pure #fff / #000 is never a background, and a test enforces it.",
+              "nl": "Warme neutrale kleuren in plaats van zuiver wit en zwart, één ingetogen saliegroen accent en toonscheiding tussen vlakken in plaats van randen en schaduwen. Zuiver #fff / #000 is nooit een achtergrond en een test dwingt dat af."
+            }
+          },
+          {
+            "title": {
+              "hu": "A szín soha nem az egyetlen jelzés",
+              "en": "Colour is never the only signal",
+              "nl": "Kleur is nooit het enige signaal"
+            },
+            "text": {
+              "hu": "A bevétel „+”, a kiadás „−”; a költségkeret „A terv szerint / Határon / Túllépve” szöveget és ikont kap; a változás nyilat és előjelet. A hosszú listákban a kiadások a normál szövegszínt használják, hogy egy oldalnyi kiadás ne legyen piros fal. A kontrasztot teszt védi mindkét témában.",
+              "en": "Income is \"+\" and spending is \"−\"; budgets say \"On track / Near limit / Over budget\" with an icon; changes carry an arrow and a sign. In long lists expenses use the normal text colour, so a page of spending is not a wall of red. Contrast is guarded by a test in both themes.",
+              "nl": "Inkomsten zijn \"+\" en uitgaven \"−\"; budgetten zeggen \"Op schema / Bijna op limiet / Overschreden\" met een pictogram; wijzigingen dragen een pijl en een teken. In lange lijsten gebruiken uitgaven de gewone tekstkleur, zodat een pagina met uitgaven geen rode muur is. Contrast wordt in beide thema’s door een test bewaakt."
+            }
+          },
+          {
+            "title": {
+              "hu": "Az összeg az űrlap fókusza",
+              "en": "The amount is the focus of the form",
+              "nl": "Het bedrag is het brandpunt van het formulier"
+            },
+            "text": {
+              "hu": "A tranzakció űrlapja az összeggel kezdődik, mind a weben, mind a mobilon. Az üres állapotok megmondják, mi hiányzik, miért számít, és mi a következő lépés; a betöltés a kész tartalom méretű vázat mutat, hogy az oldal ne ugráljon; a hiba szekciónként jelenik meg újrapróbálással, így a vezérlőpult többi része tovább működik.",
+              "en": "A transaction form starts with the amount on both web and mobile. Empty states say what is missing, why it matters and what to do next; loading shows skeletons sized like the finished content so the page does not jump; errors are per section with a retry, so the rest of the dashboard keeps working.",
+              "nl": "Een transactieformulier begint met het bedrag, zowel op web als op mobiel. Lege toestanden zeggen wat er ontbreekt, waarom het ertoe doet en wat de volgende stap is; laden toont skeletons met de grootte van de uiteindelijke inhoud zodat de pagina niet verspringt; fouten zijn per sectie met een nieuwe poging, zodat de rest van het dashboard blijft werken."
+            }
+          },
+          {
+            "title": {
+              "hu": "A navigáció az eszközhöz igazodik",
+              "en": "Navigation follows the device",
+              "nl": "Navigatie volgt het apparaat"
+            },
+            "text": {
+              "hu": "Asztalon oldalsáv, telefonon és táblagépen alsó navigáció kiemelt hozzáadás gombbal; a DOM-ban egyszerre csak egy navigáció van, így a képernyőolvasó nem találkozik két példánnyal. A párbeszédablakok telefonon alsó lapokká válnak, és csapdába ejtik, majd visszaadják a fókuszt.",
+              "en": "A sidebar on desktop, a bottom bar with a raised add button on phones and tablets; only one navigation is in the DOM at a time, so a screen reader never meets two copies. Dialogs become bottom sheets on phones and trap and then return focus.",
+              "nl": "Een zijbalk op desktop, een onderbalk met verhoogde toevoegknop op telefoons en tablets; er staat telkens maar één navigatie in de DOM, zodat een schermlezer nooit twee kopieën tegenkomt. Dialogen worden op telefoons bottom sheets en vangen de focus op en geven die daarna terug."
+            }
+          },
+          {
+            "title": {
+              "hu": "Valódi számjegyek, vezérelt témák",
+              "en": "Real numerals, managed themes",
+              "nl": "Echte cijfers, beheerde thema’s"
+            },
+            "text": {
+              "hu": "Az összegek táblázatos számjegyeket használnak, így az oszlopok egy vonalban vannak, és az értékek nem ugrálnak. A téma Rendszer / Világos / Sötét lehet; a rendszerbeállítás élőben követhető, és a mentett választás nem villan fel a másik témában betöltéskor.",
+              "en": "Amounts use tabular figures so columns line up and values do not jitter. The theme is System / Light / Dark; the system setting is followed live, and a saved choice never flashes the other theme on load.",
+              "nl": "Bedragen gebruiken tabelcijfers, zodat kolommen uitgelijnd zijn en waarden niet verspringen. Het thema is Systeem / Licht / Donker; de systeeminstelling wordt live gevolgd en een opgeslagen keuze flitst bij het laden niet in het andere thema."
+            }
+          }
+        ],
+        "learned": [],
+        "results": [],
+        "next": [
+          {
+            "hu": "Ütemezett, idempotens generátor az ismétlődő tranzakciókhoz.",
+            "en": "A scheduled, idempotent generator for recurring transactions.",
+            "nl": "Een geplande, idempotente generator voor terugkerende transacties."
+          },
+          {
+            "hu": "A TypeScript típusok generálása az openapi.yaml-ból, a kézzel tükrözött típusok helyett.",
+            "en": "TypeScript types generated from openapi.yaml instead of types mirrored by hand.",
+            "nl": "TypeScript-types genereren uit openapi.yaml in plaats van met de hand gespiegelde types."
+          },
+          {
+            "hu": "Hibakövetés és automatikus adatbázis-mentések.",
+            "en": "Error tracking and automated database backups.",
+            "nl": "Foutopsporing en geautomatiseerde databaseback-ups."
+          }
+        ],
+        "links": {
+          "demo": null,
+          "source": null,
+          "extra": null,
+          "video": null
+        },
+        "hidden": []
+      }
+    },
+    {
+      "slug": "bookinghub",
+      "status": "published",
+      "featured": true,
+      "position": 2,
+      "category": "apps",
+      "content": {
+        "title": {
+          "hu": "BookingHub",
+          "en": "BookingHub",
+          "nl": "BookingHub"
+        },
+        "cardLabel": {
+          "hu": "Időpontfoglaló webalkalmazás",
+          "en": "Appointment booking web app",
+          "nl": "Webapplicatie voor afspraken"
+        },
+        "cardDescription": {
+          "hu": "Időpontfoglalási rendszer koncepciója, amely az ügyféloldali foglalási folyamatot és a szolgáltatás digitális élményét helyezi középpontba.",
+          "en": "The concept of an appointment booking system that puts the client-side booking flow and the digital experience of the service at the centre.",
+          "nl": "Het concept van een afsprakensysteem waarin het boekingsproces aan de klantkant en de digitale beleving van de dienst centraal staan."
+        },
+        "summary": {
+          "hu": "Egy Next.js időpontfoglaló prototípus: nyilvános foglalási űrlap e-mail-visszaigazolással, és admin felület vezérlőpulttal, időpontlistával, naptárral és ügyfélnézettel. Az adatok ma a böngészőben élnek; a tárolóréteg arra készült, hogy később háttérrendszerre váltson.",
+          "en": "A Next.js appointment-booking prototype: a public booking form with e-mail confirmation, and an admin area with a dashboard, an appointment list, a calendar and a client view. The data lives in the browser today; the storage layer is built to move to a backend later.",
+          "nl": "Een Next.js-prototype voor afsprakenboeking: een openbaar boekingsformulier met e-mailbevestiging en een beheeromgeving met dashboard, afsprakenlijst, kalender en klantoverzicht. De data leeft nu in de browser; de opslaglaag is gebouwd om later naar een backend te verhuizen."
+        },
+        "detailPage": true,
+        "projectStatus": "demo",
+        "accent": "blue",
+        "hero": "stack",
+        "mockup": "booking",
+        "layout": "offset",
+        "tags": [
+          "Next.js",
+          "React",
+          "TypeScript",
+          "Tailwind CSS"
+        ],
+        "stack": [
+          {
+            "group": "frontend",
+            "items": [
+              "Next.js 16",
+              "React 19",
+              "TypeScript",
+              "Tailwind CSS",
+              "Lucide"
+            ]
+          },
+          {
+            "group": "services",
+            "items": [
+              "Resend (e-mail)"
+            ]
+          }
+        ],
+        "repoName": "",
+        "role": {
+          "hu": "Egyszemélyes projekt: a tároló minden commitját én készítettem.",
+          "en": "A single-author project: every commit in the repository is mine.",
+          "nl": "Een project van één auteur: elke commit in de repository is van mij."
+        },
+        "thumbnail": null,
+        "gallery": [
+          {
+            "mediaPath": "/projects/bookinghub/calendar.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "A havi naptár 2026 februárjával: három időpont a hónap 18., 20. és 21. napján, állapot szerint színezve, jelmagyarázattal.",
+              "en": "The monthly calendar showing February 2026: three appointments on the 18th, 20th and 21st, coloured by status, with a legend.",
+              "nl": "De maandkalender met februari 2026: drie afspraken op de 18e, 20e en 21e, gekleurd naar status, met een legenda."
+            },
+            "caption": {
+              "hu": "Havi naptár, sötét téma",
+              "en": "Monthly calendar, dark theme",
+              "nl": "Maandkalender, donker thema"
+            },
+            "hero": true
+          },
+          {
+            "mediaPath": "/projects/bookinghub/booking-form.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "A nyilvános foglalási űrlap: név, e-mail, szolgáltatás időtartammal és árral, dátum és időpont.",
+              "en": "The public booking form: name, e-mail, a service with duration and price, date and time.",
+              "nl": "Het openbare boekingsformulier: naam, e-mail, een dienst met duur en prijs, datum en tijd."
+            },
+            "caption": {
+              "hu": "Nyilvános foglalási űrlap",
+              "en": "Public booking form",
+              "nl": "Openbaar boekingsformulier"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/bookinghub/calendar-light.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "Ugyanaz a naptár világos témában.",
+              "en": "The same calendar in the light theme.",
+              "nl": "Dezelfde kalender in het lichte thema."
+            },
+            "caption": {
+              "hu": "Világos téma",
+              "en": "Light theme",
+              "nl": "Licht thema"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/bookinghub/clients.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "Az ügyfélnézet: két ügyfél foglalásszámmal és utolsó látogatás dátumával, összesítő kártyákkal.",
+              "en": "The client view: two clients with their number of bookings and last visit, with summary cards.",
+              "nl": "Het klantenoverzicht: twee klanten met hun aantal boekingen en laatste bezoek, met samenvattingskaarten."
+            },
+            "caption": {
+              "hu": "Ügyfelek az időpontokból összesítve",
+              "en": "Clients aggregated from appointments",
+              "nl": "Klanten samengesteld uit afspraken"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/bookinghub/email-settings.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "Az e-mail-beállítások oldal: „TEST MODE” jelzés, három kapcsoló és egy beállítási útmutató.",
+              "en": "The e-mail settings page: a \"TEST MODE\" notice, three toggles and a setup guide.",
+              "nl": "De pagina met e-mailinstellingen: een \"TEST MODE\"-melding, drie schakelaars en een installatiehandleiding."
+            },
+            "caption": {
+              "hu": "E-mail-beállítások teszt módban",
+              "en": "E-mail settings in test mode",
+              "nl": "E-mailinstellingen in testmodus"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/bookinghub/mobile-booking-form.webp",
+            "device": "mobile",
+            "alt": {
+              "hu": "A foglalási űrlap telefonméretben, egy oszlopban.",
+              "en": "The booking form at phone size, in one column.",
+              "nl": "Het boekingsformulier op telefoonformaat, in één kolom."
+            },
+            "caption": {
+              "hu": "Foglalási űrlap telefonon",
+              "en": "Booking form on a phone",
+              "nl": "Boekingsformulier op een telefoon"
+            },
+            "hero": false
+          }
+        ],
+        "galleryNote": {
+          "hu": "A képernyőképek az alkalmazás futó példányáról készültek, a saját mintaadataival. A nyitóoldalt szándékosan nem mutatom: a számai helyőrző marketingszöveg.",
+          "en": "The screenshots come from a running copy of the app with its own sample data. The landing page is left out on purpose: its figures are placeholder marketing text.",
+          "nl": "De schermafbeeldingen komen van een draaiende kopie van de app met zijn eigen voorbeelddata. De landingspagina is bewust weggelaten: de cijfers daarop zijn placeholder-marketingtekst."
+        },
+        "overview": {
+          "what": {
+            "hu": "Az időpontfoglalás ügyféloldali folyamatának és az adminisztrációs felületnek működő prototípusa: az ügyfelek nyilvános űrlapon foglalnak, az admin pedig időpontokat, havi naptárat és automatikusan épülő ügyféllistát kezel.",
+            "en": "A working prototype of the client-side booking flow and the admin screens: clients book through a public form, and an admin manages appointments, a monthly calendar and an automatically built client list.",
+            "nl": "Een werkend prototype van de boekingsstroom voor klanten en de beheerschermen: klanten boeken via een openbaar formulier en een beheerder beheert afspraken, een maandkalender en een automatisch opgebouwde klantenlijst."
+          },
+          "audience": {
+            "hu": "Egy időpontot adó szolgáltatónak és azoknak, akik időpontot foglalnak nála. A mintaszolgáltatások (konzultáció, kezelés, ellenőrzés…) helyőrzők.",
+            "en": "A service provider who takes appointments, and the people who book them. The sample services (consultation, treatment, check-up…) are placeholders.",
+            "nl": "Een dienstverlener die afspraken aanneemt en de mensen die erbij boeken. De voorbeelddiensten (consult, behandeling, controle…) zijn placeholders."
+          },
+          "problem": {
+            "hu": "Az időpontok fogadása és követése egy helyen: ki mikorra foglalt mit, és mi lett az időponttal.",
+            "en": "Taking bookings and keeping track of them in one place: who booked what and when, and what happened to the appointment.",
+            "nl": "Boekingen aannemen en bijhouden op één plek: wie wat wanneer boekte en wat er met de afspraak gebeurde."
+          },
+          "goal": {
+            "hu": "A teljes foglalási folyamat és az admin képernyők felépítése működő prototípusként, úgy, hogy az adatréteg különálló maradjon, és a böngészőtárolót később egy valódi háttérrendszer válthassa fel.",
+            "en": "To build the whole booking flow and the admin screens as a working prototype, with the data layer kept separate so that the browser storage can later be replaced by a real backend.",
+            "nl": "De hele boekingsstroom en de beheerschermen bouwen als werkend prototype, met een aparte datalaag zodat de browseropslag later door een echte backend kan worden vervangen."
+          }
+        },
+        "challenges": [
+          {
+            "title": {
+              "hu": "Tárolás, amely a képernyők érintése nélkül cserélhető",
+              "en": "Storage that can change without touching the screens",
+              "nl": "Opslag die kan veranderen zonder de schermen aan te raken"
+            },
+            "problem": {
+              "hu": "A prototípusnak adatra volt szüksége háttérrendszer nélkül, de a képernyőknek nem szabadott változniuk, amikor egy háttérrendszer megérkezik.",
+              "en": "The prototype needed data without a backend, but the screens should not have to change when a backend arrives.",
+              "nl": "Het prototype had data nodig zonder backend, maar de schermen mogen niet hoeven te veranderen zodra er een backend komt."
+            },
+            "solution": {
+              "hu": "Egyetlen időpont-szolgáltatás választ egy localStorage-szolgáltató és egy API-szolgáltató (időtúllépéses fetch-burkoló típusos hibákkal) között egyetlen konfigurációs kapcsoló alapján; a képernyők csak a szolgáltatást és egy hookot hívnak. Az API-szolgáltató megírt, de háttérrendszer híján még nem futott ellene, mert a tárolóban nincs ilyen.",
+              "en": "A single appointment service chooses between a localStorage provider and an API provider (a fetch wrapper with a timeout and typed errors) from one configuration switch; the screens only call the service and a hook. The API provider is written, but it has not been run against a backend, because the repository has none.",
+              "nl": "Eén afsprakenservice kiest tussen een localStorage-provider en een API-provider (een fetch-wrapper met timeout en getypeerde fouten) op basis van één configuratieschakelaar; de schermen roepen alleen de service en een hook aan. De API-provider is geschreven, maar nog niet tegen een backend gedraaid, omdat de repository er geen heeft."
+            },
+            "source": "src/services/appointmentApi.ts · apiClient.ts"
+          },
+          {
+            "title": {
+              "hu": "A foglalás nem bukhat el egy e-mail miatt",
+              "en": "A booking must not fail because an e-mail did",
+              "nl": "Een boeking mag niet mislukken door een e-mail"
+            },
+            "problem": {
+              "hu": "A visszaigazoló e-mail egy külső szolgáltatástól és egy API-kulcstól függ, amely hiányozhat.",
+              "en": "The confirmation e-mail depends on an external service and an API key that may be missing.",
+              "nl": "De bevestigingsmail hangt af van een externe dienst en een API-sleutel die kan ontbreken."
+            },
+            "solution": {
+              "hu": "A foglalás előbb mentődik; az e-mailt egy szerveroldali útvonal küldi utána, és a hibája elkapva naplózódik, a foglalást nem blokkolja. Kulcs nélkül az útvonal egyértelműen jelzett teszt módban fut, amely csak szimulálja a küldést.",
+              "en": "The booking is saved first; the e-mail is sent through a server-side route afterwards, and its failure is caught and logged without blocking the booking. Without a key the route runs in a clearly reported test mode that only simulates sending.",
+              "nl": "De boeking wordt eerst opgeslagen; de e-mail wordt daarna via een serverroute verstuurd en een fout daarin wordt opgevangen en gelogd zonder de boeking te blokkeren. Zonder sleutel draait de route in een duidelijk gemelde testmodus die het versturen alleen simuleert."
+            },
+            "source": "src/app/book/page.tsx · src/services/emailService.ts"
+          },
+          {
+            "title": {
+              "hu": "Az admin felület védelme (prototípus-szinten)",
+              "en": "Protecting the admin area (at prototype level)",
+              "nl": "De beheeromgeving beschermen (op prototypeniveau)"
+            },
+            "problem": {
+              "hu": "Az admin képernyők bejelentkezés nélkül ne nyíljanak meg. A commit-előzmények több kört mutatnak a hitelesítés és az útvonalvédelem körül (hitelesítési javítások, védett útvonalak, hibakeresési naplózás).",
+              "en": "The admin screens should not open without signing in. The commit history shows several rounds around authentication and route protection (auth fixes, protected routes, debug logging).",
+              "nl": "De beheerschermen mogen niet zonder inloggen openen. De commitgeschiedenis toont meerdere rondes rond authenticatie en routebescherming (auth-fixes, beschermde routes, debuglogging)."
+            },
+            "solution": {
+              "hu": "Egy útvonalcsoport egy ProtectedRoute-ba csomagolja az admin oldalakat, amely a böngészőtárolóban lévő jelzőt ellenőrzi. Ez demóbejelentkezés egy fix fiókkal, nem valódi hitelesítés: a jelzőt bárki beállíthatja, és szerveroldalon semmi nem ellenőrzi.",
+              "en": "A route group wraps the admin pages in a ProtectedRoute that checks a flag in browser storage. This is a demo sign-in with a fixed account, not real authentication: anyone can set the flag, and nothing on the server checks it.",
+              "nl": "Een routegroep verpakt de beheerpagina’s in een ProtectedRoute die een vlag in de browseropslag controleert. Dit is een demo-aanmelding met een vast account, geen echte authenticatie: iedereen kan de vlag zetten en niets op de server controleert hem."
+            },
+            "source": "src/services/auth.ts · src/components/auth/ProtectedRoute.tsx · git history"
+          }
+        ],
+        "approach": [
+          {
+            "title": {
+              "hu": "Foglalás → mentés → visszaigazolás",
+              "en": "Book, save, confirm",
+              "nl": "Boeken, opslaan, bevestigen"
+            },
+            "text": {
+              "hu": "A nyilvános űrlap ellenőrzi a kötelező mezőket, az e-mail formátumát és hogy a dátum ne legyen múltbeli; az időpont-szolgáltatáson át ment, majd megkéri a szerveroldali útvonalat a visszaigazolás elküldésére. A látogató összefoglalót kap az időpontról.",
+              "en": "The public form checks the required fields, the e-mail format and that the date is not in the past; it saves through the appointment service, then asks the server route to send the confirmation. The visitor gets a summary of the appointment.",
+              "nl": "Het openbare formulier controleert de verplichte velden, het e-mailformaat en dat de datum niet in het verleden ligt; het slaat op via de afsprakenservice en vraagt dan de serverroute de bevestiging te versturen. De bezoeker krijgt een samenvatting van de afspraak."
+            }
+          },
+          {
+            "title": {
+              "hu": "Egyetlen adatszolgáltatás",
+              "en": "One data service",
+              "nl": "Eén dataservice"
+            },
+            "text": {
+              "hu": "Az összes képernyő ugyanazon a szolgáltatáson és egy hookon át olvas és ír; a szolgáltató cseréje egy kapcsoló, nem képernyőnkénti átírás.",
+              "en": "Every screen reads and writes through the same service and one hook; swapping the provider is a switch, not a rewrite of each screen.",
+              "nl": "Elk scherm leest en schrijft via dezelfde service en één hook; het wisselen van provider is een schakelaar, geen herschrijving van elk scherm."
+            }
+          },
+          {
+            "title": {
+              "hu": "Az admin felület útvonalcsoportként",
+              "en": "The admin area as a route group",
+              "nl": "De beheeromgeving als routegroep"
+            },
+            "text": {
+              "hu": "A Next.js App Routerben egy (protected) csoport: vezérlőpult, időpontok (keresés, állapotszűrő, szerkesztés jegyzettel, törlés), naptár, ügyfelek és e-mail-beállítások. Az elrendezésben asztalon oldalsáv, telefonon alsó sáv van.",
+              "en": "In the Next.js App Router, a (protected) group: dashboard, appointments (search, status filter, edit with notes, delete), calendar, clients and e-mail settings. The layout has a sidebar on desktop and a bottom bar on phones.",
+              "nl": "In de Next.js App Router een (protected)-groep: dashboard, afspraken (zoeken, statusfilter, bewerken met notities, verwijderen), kalender, klanten en e-mailinstellingen. De layout heeft een zijbalk op desktop en een onderbalk op telefoons."
+            }
+          },
+          {
+            "title": {
+              "hu": "Származtatott adat, nem kétszer tárolt",
+              "en": "Derived data, not stored twice",
+              "nl": "Afgeleide data, niet dubbel opgeslagen"
+            },
+            "text": {
+              "hu": "Az ügyfeleket az időpontokból összesíti a kód (név, e-mail, foglalások száma, utolsó látogatás), a vezérlőpult statisztikái ugyanabból a listából számolódnak.",
+              "en": "Clients are aggregated from the appointments (name, e-mail, number of bookings, last visit), and the dashboard statistics are computed from the same list.",
+              "nl": "Klanten worden uit de afspraken samengesteld (naam, e-mail, aantal boekingen, laatste bezoek) en de dashboardstatistieken worden uit dezelfde lijst berekend."
+            }
+          }
+        ],
+        "architectureText": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "architecture": {
+          "tiers": [
+            {
+              "id": "browser",
+              "label": {
+                "hu": "Böngésző",
+                "en": "Browser",
+                "nl": "Browser"
+              },
+              "nodes": [
+                {
+                  "id": "ui",
+                  "label": "Next.js client components",
+                  "detail": {
+                    "hu": "React 19 · App Router oldalak",
+                    "en": "React 19 · App Router pages",
+                    "nl": "React 19 · App Router-pagina’s"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "storage",
+                  "label": "localStorage",
+                  "detail": {
+                    "hu": "időpontok, bejelentkezési jelző, e-mail-beállítások",
+                    "en": "appointments, sign-in flag, e-mail settings",
+                    "nl": "afspraken, aanmeldvlag, e-mailinstellingen"
+                  },
+                  "status": "built"
+                }
+              ]
+            },
+            {
+              "id": "server",
+              "label": {
+                "hu": "Szerver",
+                "en": "Server",
+                "nl": "Server"
+              },
+              "nodes": [
+                {
+                  "id": "routes",
+                  "label": "Next.js API routes",
+                  "detail": {
+                    "hu": "/api/send-email · /api/email-status",
+                    "en": "/api/send-email · /api/email-status",
+                    "nl": "/api/send-email · /api/email-status"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "backend",
+                  "label": "Backend REST API",
+                  "detail": {
+                    "hu": "a szolgáltató /appointments, /auth, /users végpontokat vár; háttérrendszer nincs a tárolóban",
+                    "en": "the provider expects /appointments, /auth and /users; there is no backend in the repository",
+                    "nl": "de provider verwacht /appointments, /auth en /users; er is geen backend in de repository"
+                  },
+                  "status": "planned"
+                }
+              ]
+            },
+            {
+              "id": "external",
+              "label": {
+                "hu": "Külső szolgáltatás",
+                "en": "External service",
+                "nl": "Externe dienst"
+              },
+              "nodes": [
+                {
+                  "id": "resend",
+                  "label": "Resend",
+                  "detail": {
+                    "hu": "tranzakciós e-mail; kulcs nélkül teszt mód",
+                    "en": "transactional e-mail; test mode without a key",
+                    "nl": "transactionele e-mail; testmodus zonder sleutel"
+                  },
+                  "status": "built"
+                }
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "ui",
+              "to": "storage",
+              "label": {
+                "hu": "olvassa és írja az időpontokat (alapértelmezett szolgáltató)",
+                "en": "reads and writes appointments (default provider)",
+                "nl": "leest en schrijft afspraken (standaardprovider)"
+              }
+            },
+            {
+              "from": "ui",
+              "to": "routes",
+              "label": {
+                "hu": "POST /api/send-email (visszaigazolás)",
+                "en": "POST /api/send-email (confirmation)",
+                "nl": "POST /api/send-email (bevestiging)"
+              }
+            },
+            {
+              "from": "routes",
+              "to": "resend",
+              "label": {
+                "hu": "HTTPS, csak ha van kulcs",
+                "en": "HTTPS, only when a key is set",
+                "nl": "HTTPS, alleen als er een sleutel is"
+              }
+            },
+            {
+              "from": "ui",
+              "to": "backend",
+              "label": {
+                "hu": "REST, egyetlen kapcsolóval bekapcsolható; még nem futott ellene",
+                "en": "REST, switched on by one flag; never run against a backend yet",
+                "nl": "REST, aan te zetten met één schakelaar; nog nooit tegen een backend gedraaid"
+              },
+              "status": "planned"
+            }
+          ],
+          "note": {
+            "hu": "A szaggatott elemek tervek: a kód előkészíti, de nem tartalmazza őket.",
+            "en": "Dashed items are plans: the code prepares for them but does not contain them.",
+            "nl": "Onderbroken items zijn plannen: de code bereidt ze voor maar bevat ze niet."
+          }
+        },
+        "features": [
+          {
+            "title": {
+              "hu": "Nyilvános foglalási űrlap",
+              "en": "Public booking form",
+              "nl": "Openbaar boekingsformulier"
+            },
+            "text": {
+              "hu": "Név, e-mail, szolgáltatás (hat mintaszolgáltatás időtartammal és árral), dátum mától és időpont. Kötelező mezők és e-mail-formátum ellenőrzése, hibaüzenet, majd összefoglaló képernyő a foglalás adataival.",
+              "en": "Name, e-mail, service (six sample services with a duration and a price), a date from today and a time. Required-field and e-mail-format checks, an error message, then a summary screen with the booking details.",
+              "nl": "Naam, e-mail, dienst (zes voorbeelddiensten met duur en prijs), een datum vanaf vandaag en een tijd. Controle op verplichte velden en e-mailformaat, een foutmelding en daarna een samenvattingsscherm met de boekingsgegevens."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/bookinghub/booking-form.webp"
+          },
+          {
+            "title": {
+              "hu": "Visszaigazoló e-mail",
+              "en": "Confirmation e-mail",
+              "nl": "Bevestigingsmail"
+            },
+            "text": {
+              "hu": "A foglalás után egy szerveroldali útvonal elküldi a visszaigazolást a Resend szolgáltatáson át. API-kulcs nélkül teszt módban fut, amely csak szimulál, és ezt az admin felület ki is írja.",
+              "en": "After a booking, a server route sends the confirmation through Resend. Without an API key it runs in a test mode that only simulates, and the admin area says so.",
+              "nl": "Na een boeking verstuurt een serverroute de bevestiging via Resend. Zonder API-sleutel draait het in een testmodus die alleen simuleert, en de beheeromgeving meldt dat."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/bookinghub/email-settings.webp"
+          },
+          {
+            "title": {
+              "hu": "Időpontkezelés",
+              "en": "Appointment management",
+              "nl": "Afsprakenbeheer"
+            },
+            "text": {
+              "hu": "Lista kereséssel és állapotszűrővel (ütemezett, teljesült, lemondott), szerkesztő ablak jegyzetekkel, állapotváltás és törlés. Új időpont az admin felületről is felvehető.",
+              "en": "A list with search and a status filter (scheduled, completed, cancelled), an edit dialog with notes, status changes and deletion. New appointments can also be created from the admin area.",
+              "nl": "Een lijst met zoeken en een statusfilter (gepland, voltooid, geannuleerd), een bewerkvenster met notities, statuswijzigingen en verwijderen. Nieuwe afspraken kunnen ook vanuit de beheeromgeving worden aangemaakt."
+            },
+            "status": "done"
+          },
+          {
+            "title": {
+              "hu": "Havi naptár",
+              "en": "Monthly calendar",
+              "nl": "Maandkalender"
+            },
+            "text": {
+              "hu": "Hónapok közti lapozás, „Ma” gomb, a szomszédos hónapok napjai halványan, minden naphoz az időpontok állapot szerint színezett bejegyzései és jelmagyarázat.",
+              "en": "Navigation between months, a \"Today\" button, neighbouring months’ days shown dimmed, and for each day its appointments coloured by status, with a legend.",
+              "nl": "Navigatie tussen maanden, een \"Vandaag\"-knop, dagen van aangrenzende maanden gedimd weergegeven en per dag de afspraken gekleurd naar status, met een legenda."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/bookinghub/calendar.webp"
+          },
+          {
+            "title": {
+              "hu": "Ügyfelek és vezérlőpult",
+              "en": "Clients and dashboard",
+              "nl": "Klanten en dashboard"
+            },
+            "text": {
+              "hu": "Az ügyféllista az időpontokból épül: foglalások száma, utolsó látogatás, előzmények, keresés. A vezérlőpult összes foglalást, a mai és heti időpontokat, az egyedi ügyfeleket és a szolgáltatások megoszlását mutatja.",
+              "en": "The client list is built from the appointments: number of bookings, last visit, history, search. The dashboard shows total bookings, today’s and this week’s appointments, unique clients and the service breakdown.",
+              "nl": "De klantenlijst wordt uit de afspraken opgebouwd: aantal boekingen, laatste bezoek, geschiedenis, zoeken. Het dashboard toont totaal boekingen, afspraken van vandaag en deze week, unieke klanten en de verdeling per dienst."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/bookinghub/clients.webp"
+          },
+          {
+            "title": {
+              "hu": "Sötét és világos téma",
+              "en": "Dark and light theme",
+              "nl": "Donker en licht thema"
+            },
+            "text": {
+              "hu": "Egy CSS-változókészlet két témához; alapból sötét, a fejlécben kapcsoló, a választás a böngészőben megmarad. A téma nem követi a rendszerbeállítást.",
+              "en": "One set of CSS variables for two themes; dark by default, a toggle in the header, and the choice is remembered in the browser. The theme does not follow the system setting.",
+              "nl": "Eén set CSS-variabelen voor twee thema’s; standaard donker, een schakelaar in de koptekst en de keuze wordt in de browser onthouden. Het thema volgt de systeeminstelling niet."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/bookinghub/calendar-light.webp"
+          },
+          {
+            "title": {
+              "hu": "Bejelentkezés",
+              "en": "Sign-in",
+              "nl": "Aanmelden"
+            },
+            "text": {
+              "hu": "Egy fix demófiókkal működik, a böngészőtárolóban lévő jelzővel. Az admin oldalak elrejtésére jó a bemutatóhoz, de nem valódi hitelesítés.",
+              "en": "It works with one fixed demo account and a flag in browser storage. Good enough to hide the admin pages in a demo, but not real authentication.",
+              "nl": "Het werkt met één vast demoaccount en een vlag in de browseropslag. Goed genoeg om de beheerpagina’s in een demo te verbergen, maar geen echte authenticatie."
+            },
+            "status": "partial"
+          },
+          {
+            "title": {
+              "hu": "E-mail-beállítások",
+              "en": "E-mail settings",
+              "nl": "E-mailinstellingen"
+            },
+            "text": {
+              "hu": "A kapcsolók (visszaigazolás, emlékeztető és időzítése, lemondás) csak a böngészőben mentődnek, és nem vezérlik a küldést. Az emlékeztető és a lemondás sablonja megvan, de semmi nem küldi el őket.",
+              "en": "The toggles (confirmation, reminder and its timing, cancellation) are saved in the browser only and do not control sending. Templates for the reminder and the cancellation exist, but nothing sends them.",
+              "nl": "De schakelaars (bevestiging, herinnering en timing, annulering) worden alleen in de browser opgeslagen en sturen het versturen niet aan. Sjablonen voor de herinnering en de annulering bestaan, maar niets verstuurt ze."
+            },
+            "status": "partial",
+            "imageMediaPath": "/projects/bookinghub/email-settings.webp"
+          },
+          {
+            "title": {
+              "hu": "API-mód háttérrendszerrel",
+              "en": "API mode with a backend",
+              "nl": "API-modus met een backend"
+            },
+            "text": {
+              "hu": "Az API-szolgáltató és a hibakezelő fetch-burkoló megvan, de alapból ki van kapcsolva, és háttérrendszer híján még sosem futott valóssal szemben.",
+              "en": "The API provider and its error-handling fetch wrapper exist, but it is switched off by default and, with no backend to run against, has never been run against a real one.",
+              "nl": "De API-provider en de foutafhandelende fetch-wrapper bestaan, maar staan standaard uit en zijn, bij gebrek aan een backend, nog nooit tegen een echte gedraaid."
+            },
+            "status": "partial"
+          },
+          {
+            "title": {
+              "hu": "Valódi háttérrendszer és hitelesítés",
+              "en": "A real backend and authentication",
+              "nl": "Een echte backend en authenticatie"
+            },
+            "text": {
+              "hu": "A README szerint a következő lépés egy háttérrendszer építése és az API-mód bekapcsolása; a szolgáltatásréteg erre van előkészítve.",
+              "en": "According to the README, the next step is to build a backend and switch API mode on; the service layer is prepared for it.",
+              "nl": "Volgens de README is de volgende stap een backend bouwen en de API-modus aanzetten; de servicelaag is daarop voorbereid."
+            },
+            "status": "planned"
+          }
+        ],
+        "limits": [
+          {
+            "hu": "Nincs szabadidőpont- vagy ütközésellenőrzés: bármely dátum és időpont kérhető, kétszeres foglalás megelőzése nincs.",
+            "en": "There is no availability or conflict check: any date and time can be requested, and double bookings are not prevented.",
+            "nl": "Er is geen beschikbaarheids- of conflictcontrole: elke datum en tijd kan worden aangevraagd en dubbele boekingen worden niet voorkomen."
+          },
+          {
+            "hu": "A tárolóban nincsenek automatizált tesztek.",
+            "en": "The repository has no automated tests.",
+            "nl": "De repository heeft geen geautomatiseerde tests."
+          },
+          {
+            "hu": "A nyitóoldal számai (felhasználók, üzemidő, értékelés) és a vezérlőpult trendjelvényei mintatartalom, nem mérések.",
+            "en": "The figures on the landing page (users, uptime, rating) and the trend badges on the dashboard are sample content, not measurements.",
+            "nl": "De cijfers op de landingspagina (gebruikers, uptime, beoordeling) en de trendbadges op het dashboard zijn voorbeeldinhoud, geen metingen."
+          },
+          {
+            "hu": "Az adatok a böngészőben élnek: egy másik eszközön vagy böngészőben nem látszanak.",
+            "en": "The data lives in the browser: it is not visible from another device or browser.",
+            "nl": "De data leeft in de browser: ze is niet zichtbaar vanaf een ander apparaat of een andere browser."
+          }
+        ],
+        "decisions": [
+          {
+            "title": {
+              "hu": "Két téma egy változókészletből",
+              "en": "Two themes from one set of variables",
+              "nl": "Twee thema’s uit één set variabelen"
+            },
+            "text": {
+              "hu": "A színek CSS-változók, a sötét téma az alapértelmezett, a világos a változók felülírása. A választás a böngészőben marad, így a következő látogatás ugyanúgy néz ki.",
+              "en": "Colours are CSS variables; dark is the default and light overrides the variables. The choice stays in the browser, so the next visit looks the same.",
+              "nl": "Kleuren zijn CSS-variabelen; donker is de standaard en licht overschrijft de variabelen. De keuze blijft in de browser, zodat het volgende bezoek er hetzelfde uitziet."
+            }
+          },
+          {
+            "title": {
+              "hu": "A foglalás előtt látszik, mit választottál",
+              "en": "You see what you chose before you book",
+              "nl": "Je ziet wat je koos voordat je boekt"
+            },
+            "text": {
+              "hu": "Az űrlap a kiválasztott szolgáltatás időtartamát és árát az űrlapon belül mutatja, és a foglalás után egy összefoglaló képernyő ismétli meg az adatokat és azt az e-mail-címet, ahová a visszaigazolás ment.",
+              "en": "The form shows the chosen service’s duration and price in place, and after booking a summary screen repeats the details and the e-mail address the confirmation was sent to.",
+              "nl": "Het formulier toont de duur en prijs van de gekozen dienst ter plekke en na het boeken herhaalt een samenvattingsscherm de gegevens en het e-mailadres waarheen de bevestiging ging."
+            }
+          },
+          {
+            "title": {
+              "hu": "Az állapotot szín és szöveg is mondja",
+              "en": "Status is told by colour and by text",
+              "nl": "Status wordt door kleur en tekst verteld"
+            },
+            "text": {
+              "hu": "A naptárban az ütemezett kék, a teljesült zöld, a lemondott piros, jelmagyarázattal; a listában ugyanezek az állapotok szóval is szerepelnek.",
+              "en": "In the calendar, scheduled is blue, completed green and cancelled red, with a legend; in the list the same statuses are also written out.",
+              "nl": "In de kalender is gepland blauw, voltooid groen en geannuleerd rood, met een legenda; in de lijst staan dezelfde statussen ook uitgeschreven."
+            }
+          },
+          {
+            "title": {
+              "hu": "Telefonon alsó navigáció",
+              "en": "Bottom navigation on phones",
+              "nl": "Onderste navigatie op telefoons"
+            },
+            "text": {
+              "hu": "A telefonos elrendezés alsó sávot használ kiemelt hozzáadás gombbal, hogy a fő műveletek a hüvelykujj közelében legyenek; asztalon oldalsáv van.",
+              "en": "The phone layout uses a bottom bar with a raised add button so the main actions are near the thumb; on desktop there is a sidebar.",
+              "nl": "De telefoonlayout gebruikt een onderbalk met een verhoogde toevoegknop zodat de hoofdacties dicht bij de duim liggen; op desktop is er een zijbalk."
+            }
+          }
+        ],
+        "learned": [],
+        "results": [],
+        "next": [
+          {
+            "hu": "Az előkészített API-szolgáltató összekötése egy valódi háttérrendszerrel, és a demóbejelentkezés cseréje valódi hitelesítésre.",
+            "en": "Connect the prepared API provider to a real backend and replace the demo sign-in with real authentication.",
+            "nl": "De voorbereide API-provider koppelen aan een echte backend en de demo-aanmelding vervangen door echte authenticatie."
+          },
+          {
+            "hu": "Szabadidőpont- és ütközésellenőrzés a foglalási folyamatban.",
+            "en": "Availability and conflict checks in the booking flow.",
+            "nl": "Beschikbaarheids- en conflictcontroles in de boekingsstroom."
+          },
+          {
+            "hu": "Automatizált tesztek a foglalási folyamatra és az adatszolgáltatásra.",
+            "en": "Automated tests for the booking flow and the data service.",
+            "nl": "Geautomatiseerde tests voor de boekingsstroom en de dataservice."
+          }
+        ],
+        "links": {
+          "demo": null,
+          "source": null,
+          "extra": null,
+          "video": null
+        },
+        "hidden": []
+      }
+    },
+    {
+      "slug": "hollandia",
+      "status": "published",
+      "featured": true,
+      "position": 3,
+      "category": "concepts",
+      "content": {
+        "title": {
+          "hu": "Hollandia Kezdőknek",
+          "en": "Hollandia Kezdőknek",
+          "nl": "Hollandia Kezdőknek"
+        },
+        "cardLabel": {
+          "hu": "Információs weboldal",
+          "en": "Information website",
+          "nl": "Informatieve website"
+        },
+        "cardDescription": {
+          "hu": "Magyar nyelvű információs platform a Hollandiába költözők és az ott új életet kezdők támogatására.",
+          "en": "A Hungarian-language information platform supporting people who move to the Netherlands and start a new life there.",
+          "nl": "Een Hongaarstalig informatieplatform ter ondersteuning van mensen die naar Nederland verhuizen en daar een nieuw leven beginnen."
+        },
+        "summary": {
+          "hu": "Magyar nyelvű információs platform a Hollandiába költözők és az ott új életet kezdők támogatására.",
+          "en": "A Hungarian-language information platform supporting people who move to the Netherlands and start a new life there.",
+          "nl": "Een Hongaarstalig informatieplatform ter ondersteuning van mensen die naar Nederland verhuizen en daar een nieuw leven beginnen."
+        },
+        "detailPage": false,
+        "projectStatus": "concept",
+        "accent": "blue",
+        "hero": "split",
+        "mockup": "guide",
+        "layout": "compact",
+        "tags": [],
+        "stack": [],
+        "repoName": "",
+        "role": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "thumbnail": null,
+        "gallery": [],
+        "galleryNote": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "overview": {
+          "what": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          },
+          "audience": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          },
+          "problem": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          },
+          "goal": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          }
+        },
+        "challenges": [],
+        "approach": [],
+        "architectureText": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "architecture": null,
+        "features": [],
+        "limits": [],
+        "decisions": [],
+        "learned": [],
+        "results": [],
+        "next": [],
+        "links": {
+          "demo": null,
+          "source": null,
+          "extra": null,
+          "video": null
+        },
+        "hidden": []
+      }
+    },
+    {
+      "slug": "logistics-platform",
+      "status": "published",
+      "featured": true,
+      "position": 4,
+      "category": "platforms",
+      "content": {
+        "title": {
+          "hu": "Logistics Platform",
+          "en": "Logistics Platform",
+          "nl": "Logistics Platform"
+        },
+        "cardLabel": {
+          "hu": "Logisztikai webalkalmazás",
+          "en": "Logistics web app",
+          "nl": "Logistieke webapplicatie"
+        },
+        "cardDescription": {
+          "hu": "Logisztikai és fuvarozási folyamatok digitalizálására tervezett alkalmazáskoncepció.",
+          "en": "An application concept designed to digitise logistics and haulage processes.",
+          "nl": "Een applicatieconcept voor het digitaliseren van logistieke en transportprocessen."
+        },
+        "summary": {
+          "hu": "Fuvarozás- és flottakezelő rendszer egy fiktív közúti fuvarozócégnek: szabályellenőrzött szállítmány-munkafolyamat, sofőrök, vontatók és pótkocsik, karbantartás, költségek és jelentések, élő frissítéssel és szerepkör-alapú hozzáféréssel. Bemutató projekt: nincs éles használatban, minden adata kitalált.",
+          "en": "A transport and fleet management system for a fictional road-freight company: a rule-checked shipment workflow, drivers, trucks and trailers, maintenance, costs and reports, with live updates and role-based access. A demonstration project: it is not in production and all of its data is fictional.",
+          "nl": "Een transport- en vlootbeheersysteem voor een fictief wegtransportbedrijf: een door regels gecontroleerde zendingsworkflow, chauffeurs, trekkers en opleggers, onderhoud, kosten en rapporten, met live updates en rolgebaseerde toegang. Een demonstratieproject: het is niet in productie en alle data is fictief."
+        },
+        "detailPage": true,
+        "projectStatus": "demo",
+        "accent": "ink",
+        "hero": "route",
+        "mockup": "logistics",
+        "layout": "wide",
+        "tags": [
+          "FastAPI",
+          "React",
+          "TypeScript",
+          "PostgreSQL",
+          "React Native",
+          "Docker"
+        ],
+        "stack": [
+          {
+            "group": "frontend",
+            "items": [
+              "React 19",
+              "TypeScript",
+              "Vite",
+              "React Router",
+              "React Hook Form",
+              "Zod",
+              "Recharts",
+              "Leaflet",
+              "SCSS modules",
+              "React Native",
+              "Expo",
+              "TanStack Query"
+            ]
+          },
+          {
+            "group": "backend",
+            "items": [
+              "Python 3.13",
+              "FastAPI",
+              "SQLAlchemy 2",
+              "Alembic",
+              "Pydantic v2",
+              "Celery",
+              "PyJWT",
+              "Argon2id"
+            ]
+          },
+          {
+            "group": "data",
+            "items": [
+              "PostgreSQL 17",
+              "Redis 7"
+            ]
+          },
+          {
+            "group": "infrastructure",
+            "items": [
+              "Docker Compose",
+              "nginx",
+              "GitHub Actions"
+            ]
+          },
+          {
+            "group": "testing",
+            "items": [
+              "pytest",
+              "Vitest",
+              "Jest",
+              "Testing Library",
+              "Ruff",
+              "mypy (strict)"
+            ]
+          },
+          {
+            "group": "services",
+            "items": [
+              "OpenRouteService",
+              "OpenStreetMap"
+            ]
+          }
+        ],
+        "repoName": "Logextic",
+        "role": {
+          "hu": "Egyszemélyes projekt: a tároló minden commitját én készítettem.",
+          "en": "A single-author project: every commit in the repository is mine.",
+          "nl": "Een project van één auteur: elke commit in de repository is van mij."
+        },
+        "thumbnail": null,
+        "gallery": [
+          {
+            "mediaPath": "/projects/logistics-platform/dashboard.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "A vezérlőpult: nyitott szállítmányok, késések, szabad vontatók, súlyosság szerinti riasztások és a szállítmányok állapotdiagramja.",
+              "en": "The dashboard: open shipments, delays, available trucks, alerts by severity and the shipment status chart.",
+              "nl": "Het dashboard: open zendingen, vertragingen, beschikbare trekkers, meldingen naar ernst en de statusgrafiek van zendingen."
+            },
+            "caption": {
+              "hu": "Vezérlőpult",
+              "en": "Dashboard",
+              "nl": "Dashboard"
+            },
+            "hero": true
+          },
+          {
+            "mediaPath": "/projects/logistics-platform/shipments.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "A szállítmánylista keresővel, állapot-, ügyfél-, sofőr-, vontató- és felvételi dátum szűrőkkel, rendezhető oszlopokkal és állapotjelvényekkel.",
+              "en": "The shipment list with search, status, customer, driver, truck and pickup-date filters, sortable columns and status badges.",
+              "nl": "De zendingenlijst met zoeken, filters op status, klant, chauffeur, truck en ophaaldatum, sorteerbare kolommen en statusbadges."
+            },
+            "caption": {
+              "hu": "Szállítmánykezelés",
+              "en": "Shipment management",
+              "nl": "Zendingenbeheer"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/logistics-platform/shipment-details.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "Egy szállítmány részletei: az állapot-munkafolyamat a most engedélyezett lépésekkel és a térképen tervezett útvonal távolsággal és menetidővel.",
+              "en": "A shipment’s details: the status workflow with the moves allowed right now, and the planned route on a map with distance and driving time.",
+              "nl": "De details van een zending: de statusworkflow met de nu toegestane stappen en de geplande route op een kaart met afstand en rijtijd."
+            },
+            "caption": {
+              "hu": "Szállítmány részletei",
+              "en": "Shipment details",
+              "nl": "Zendingdetails"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/logistics-platform/fleet.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "A flotta: vontatók állapottal, futásteljesítménnyel és azokkal a dátumokkal, ameddig közúton járhatnak, a lejárókhoz jelzéssel.",
+              "en": "The fleet: trucks with status, mileage and the dates they must be road-legal until, flagged as they come due.",
+              "nl": "De vloot: trucks met status, kilometerstand en de data tot wanneer ze wettelijk mogen rijden, gemarkeerd naarmate ze verlopen."
+            },
+            "caption": {
+              "hu": "Flotta",
+              "en": "Fleet",
+              "nl": "Vloot"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/logistics-platform/maintenance.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "Karbantartás: mi késik, mi következik és mi van a műhelyben, járművenként.",
+              "en": "Maintenance: what is overdue, what is coming and what is in the workshop, truck by truck.",
+              "nl": "Onderhoud: wat achterstallig is, wat eraan komt en wat in de werkplaats staat, truck per truck."
+            },
+            "caption": {
+              "hu": "Karbantartás",
+              "en": "Maintenance",
+              "nl": "Onderhoud"
+            },
+            "hero": false
+          },
+          {
+            "mediaPath": "/projects/logistics-platform/reports.webp",
+            "device": "desktop",
+            "alt": {
+              "hu": "Jelentések: bevétel, költség és haszon egy választott időszakra, diagramokkal és CSV- vagy Excel-exporttal.",
+              "en": "Reports: revenue, expenses and profit for a chosen period, with charts and CSV or Excel export.",
+              "nl": "Rapporten: omzet, kosten en winst voor een gekozen periode, met grafieken en CSV- of Excel-export."
+            },
+            "caption": {
+              "hu": "Jelentések",
+              "en": "Reports",
+              "nl": "Rapporten"
+            },
+            "hero": false
+          }
+        ],
+        "galleryNote": {
+          "hu": "A képernyőképek a projekt tárolójából valók, és a későbbi sötétkék-narancs újratervezés, valamint a felület magyarra fordítása előtt készültek: a korábbi kék palettát és angol szövegeket mutatják. Minden adat egy fiktív budapesti fuvarozócég generált demóadata.",
+          "en": "The screenshots come from the project’s repository and were taken before its later navy-and-orange redesign and before the interface was translated, so they show the earlier blue palette and English texts. All data is generated demo data of a fictional Budapest haulier.",
+          "nl": "De schermafbeeldingen komen uit de repository van het project en zijn gemaakt vóór de latere marineblauw-oranje herontwerp en vóór de interface werd vertaald, dus ze tonen het eerdere blauwe palet en Engelse teksten. Alle data is gegenereerde demodata van een fictief Boedapester transportbedrijf."
+        },
+        "overview": {
+          "what": {
+            "hu": "Egy kis közúti fuvarozócég mindennapi munkájának teljes veremű bemutatója: szállítmányok tervezése, sofőrök és járművek hozzárendelése, karbantartás és költségek követése, és auditnapló. Van hozzá React webalkalmazás az irodának és React Native sofőr-alkalmazás.",
+            "en": "A full-stack demonstration of the daily work of a small road-freight company: planning shipments, assigning drivers and vehicles, following maintenance and costs, and keeping an audit trail. It has a React web application for the office and a React Native driver app.",
+            "nl": "Een full-stackdemonstratie van het dagelijkse werk van een klein wegtransportbedrijf: zendingen plannen, chauffeurs en voertuigen toewijzen, onderhoud en kosten volgen en een auditspoor bijhouden. Er is een React-webapplicatie voor kantoor en een React Native-chauffeursapp."
+          },
+          "audience": {
+            "hu": "Négy szerepkör, ahogy a rendszerben is: adminisztrátorok, diszpécserek, könyvelők és sofőrök; mindegyik ugyanannak az adatnak más szeletét látja.",
+            "en": "Four roles, as in the system itself: administrators, dispatchers, accountants and drivers; each sees a different slice of the same data.",
+            "nl": "Vier rollen, zoals in het systeem zelf: beheerders, planners, boekhouders en chauffeurs; elk ziet een ander deel van dezelfde data."
+          },
+          "problem": {
+            "hu": "A kis és közepes fuvarozócégek a napot gyakran táblázatokon, telefonhívásokon, e-mailen és papír szállítólevelen viszik, amíg ki nem derül, hogy egy kocsit két rakományra is ígértek, egy sofőr jogosítványa észrevétlenül lejárt, vagy senki nem tudja megmondani, mit hozott egy szállítmány.",
+            "en": "Small and mid-sized freight companies often run the day on spreadsheets, phone calls, e-mail and paper consignment notes, until a truck is promised to two loads, a driver’s licence expires unnoticed, or nobody can say what a shipment earned.",
+            "nl": "Kleine en middelgrote transportbedrijven draaien de dag vaak op spreadsheets, telefoontjes, e-mail en papieren vrachtbrieven, totdat een truck aan twee ladingen is beloofd, een rijbewijs ongemerkt verloopt of niemand kan zeggen wat een zending opleverde."
+          },
+          "goal": {
+            "hu": "A teljes veremű mérnöki munka bemutatása: típusos REST API, relációs adatmodell, háttérfeladatok, webes és mobilalkalmazás, automatikus tesztek, és egyetlen Docker-paranccsal induló környezet.",
+            "en": "To demonstrate full-stack engineering: a typed REST API, a relational data model, background jobs, a web app and a mobile app, automated tests, and a one-command Docker setup.",
+            "nl": "Full-stackengineering demonstreren: een getypeerde REST API, een relationeel datamodel, achtergrondtaken, een webapp en een mobiele app, geautomatiseerde tests en een Docker-opzet met één opdracht."
+          }
+        },
+        "challenges": [
+          {
+            "title": {
+              "hu": "Szabályok, amelyeknek akkor is érvényesnek kell lenniük, ha a kód téved",
+              "en": "Rules that must hold even when the code is wrong",
+              "nl": "Regels die moeten gelden ook als de code zich vergist"
+            },
+            "problem": {
+              "hu": "Egy sofőr és egy vontató hozzárendelésekor figyelembe kell venni a jogosítványt, a bizonyítványokat, a biztosítást, a műszaki vizsgát, az átfedő fuvarokat és a műhelyben lévő járműveket; egy csak a felületen futó ellenőrzés megkerülhető, vagy versenyhelyzetbe kerülhet egy másik kéréssel.",
+              "en": "Assigning a driver and a truck has to respect licences, certificates, insurance, inspections, overlapping jobs and vehicles in the workshop; a check that lives only in the interface can be bypassed or race with another request.",
+              "nl": "Het toewijzen van een chauffeur en een trekker moet rekening houden met rijbewijzen, certificaten, verzekering, keuringen, overlappende ritten en voertuigen in de werkplaats; een controle die alleen in de interface leeft kan worden omzeild of in een race met een ander verzoek terechtkomen."
+            },
+            "solution": {
+              "hu": "A szállítmány állapotgépét a háttérrendszer birtokolja, és a hozzárendelést olyan üzenettel utasítja el, amely megnevezi az erőforrást és az okot. Ugyanezek a szabályok CHECK, UNIQUE és ON DELETE RESTRICT megszorításként a PostgreSQL-ben is ott vannak, így az adatbázist nem lehet „megbeszélni”; az API megmondja a felületnek, mely állapotváltások engedélyezettek éppen.",
+              "en": "The backend owns the shipment state machine and refuses an assignment with a message naming the resource and the reason. The same rules are also CHECK, UNIQUE and ON DELETE RESTRICT constraints in PostgreSQL, so the database cannot be talked round; the API tells the interface which status moves are allowed right now.",
+              "nl": "De backend is eigenaar van de toestandsmachine van de zending en weigert een toewijzing met een melding die de resource en de reden noemt. Dezelfde regels zijn ook CHECK-, UNIQUE- en ON DELETE RESTRICT-constraints in PostgreSQL, zodat de database niet te overtuigen is; de API vertelt de interface welke statusovergangen op dit moment zijn toegestaan."
+            },
+            "source": "docs/architecture.md · The shipment workflow · Decisions worth knowing about"
+          },
+          {
+            "title": {
+              "hu": "Különböző szerepkörök, különböző igazságok",
+              "en": "Different roles, different truths",
+              "nl": "Verschillende rollen, verschillende waarheden"
+            },
+            "problem": {
+              "hu": "Egy sofőr csak a saját szállítmányait láthatja; egy könyvelő látja a pénzt, de a címeket nem.",
+              "en": "A driver may see only their own shipments; an accountant should see the money but not the addresses.",
+              "nl": "Een chauffeur mag alleen zijn eigen zendingen zien; een boekhouder moet het geld zien maar niet de adressen."
+            },
+            "solution": {
+              "hu": "A hozzáférési mátrixot egyszer deklarálják, és tesztek vetik össze a specifikációval; a hozzáférés nemcsak engedélyezett, hanem szűkített is (más szállítmánya 404, így a létezése sem derül ki). Egy teszt minden útvonalat névtelenül hív, és elbukik, ha bármelyik 401-től eltérőt válaszol.",
+              "en": "The access matrix is declared once and checked against the specification by tests; access is scoped as well as allowed (someone else’s shipment is a 404, so its existence is not revealed). A test calls every route anonymously and fails if any answers anything but 401.",
+              "nl": "De toegangsmatrix wordt één keer gedeclareerd en door tests met de specificatie vergeleken; toegang is niet alleen toegestaan maar ook beperkt (andermans zending is een 404, zodat het bestaan niet wordt verraden). Een test roept elke route anoniem aan en faalt als er een iets anders dan 401 antwoordt."
+            },
+            "source": "README · Engineering Highlights · Role-based access control"
+          },
+          {
+            "title": {
+              "hu": "Élő képernyők extra infrastruktúra és kiszivárgás nélkül",
+              "en": "Live screens without extra infrastructure or leaks",
+              "nl": "Live schermen zonder extra infrastructuur of lekken"
+            },
+            "problem": {
+              "hu": "A diszpécsereknek olyan képernyők kellenek, amelyek maguktól frissülnek, ehhez külön üzenetközvetítő nélkül, és anélkül, hogy egy visszagörgetett változásról bárkit értesítenének.",
+              "en": "Dispatchers need screens that update by themselves, without a message broker just for that, and without telling anyone about a change that was rolled back.",
+              "nl": "Planners hebben schermen nodig die zichzelf bijwerken, zonder een aparte berichtenbroker en zonder iemand te informeren over een wijziging die is teruggedraaid."
+            },
+            "solution": {
+              "hu": "Az események PostgreSQL LISTEN/NOTIFY-jal, a változást végző tranzakción belül mennek ki, így egy visszagörgetett változás senkit nem értesít. Az események nem hordoznak adatot: a képernyő a szokásos API-n át kéri le újra, így minden jogosultsági szabály újra érvényesül.",
+              "en": "Events go out through PostgreSQL LISTEN/NOTIFY inside the transaction that makes the change, so a rolled-back change tells nobody. Events carry no data: the screen refetches through the normal API, so every permission rule applies again.",
+              "nl": "Events gaan uit via PostgreSQL LISTEN/NOTIFY binnen de transactie die de wijziging maakt, zodat een teruggedraaide wijziging niemand informeert. Events dragen geen data: het scherm haalt opnieuw op via de gewone API, zodat elke rechtenregel opnieuw geldt."
+            },
+            "source": "docs/architecture.md · Live updates · docs/realtime.md"
+          },
+          {
+            "title": {
+              "hu": "Egy demó, amely sosem mond ellent a rendszernek",
+              "en": "A demo that never contradicts the system",
+              "nl": "Een demo die het systeem nooit tegenspreekt"
+            },
+            "problem": {
+              "hu": "Egy hihető demóhoz egy évnyi adat kell, de a kitalált adat megsértheti a rendszer saját szabályait (egy sofőr egyszerre két rakományon).",
+              "en": "A believable demo needs a year of data, but invented data can break the very rules the system enforces (a driver on two loads at once).",
+              "nl": "Een geloofwaardige demo heeft een jaar aan data nodig, maar verzonnen data kan juist de regels breken die het systeem afdwingt (een chauffeur op twee ladingen tegelijk)."
+            },
+            "solution": {
+              "hu": "A demócéget előbb megtervezik, majd ugyanazokkal a szabályokkal ellenőrzik, amelyeket az API is alkalmaz; a dátumok a mai naptól számolódnak, így a vezérlőpult a létrehozás pillanatában él.",
+              "en": "The demo company is planned first and then checked against the same rules the API applies; it is dated from today, so the dashboard is alive whenever it is created.",
+              "nl": "Het democedrijf wordt eerst gepland en daarna gecontroleerd tegen dezelfde regels die de API toepast; het is gedateerd vanaf vandaag, zodat het dashboard leeft op het moment van aanmaken."
+            },
+            "source": "docs/architecture.md · Decisions worth knowing about · docs/demo-data.md"
+          }
+        ],
+        "approach": [
+          {
+            "title": {
+              "hu": "A háttérrendszer az igazság forrása",
+              "en": "The backend as the source of truth",
+              "nl": "De backend als bron van waarheid"
+            },
+            "text": {
+              "hu": "Rétegek: útválasztók (csak HTTP), függőségek (munkamenet, felhasználó, szerepkör-ellenőrzés), szolgáltatások (az üzleti szabályok) és tárolók (SQL). A felület az API válaszából dolgozik, és sosem számolja ki maga a szabályokat.",
+              "en": "Layers: routers (HTTP only), dependencies (session, signed-in user, role check), services (the business rules) and repositories (SQL). The interface works from the API’s answers and never works the rules out itself.",
+              "nl": "Lagen: routers (alleen HTTP), dependencies (sessie, ingelogde gebruiker, rolcontrole), services (de bedrijfsregels) en repositories (SQL). De interface werkt vanuit de antwoorden van de API en berekent de regels nooit zelf."
+            }
+          },
+          {
+            "title": {
+              "hu": "Egy tranzakció, három hatás",
+              "en": "One transaction, three effects",
+              "nl": "Eén transactie, drie effecten"
+            },
+            "text": {
+              "hu": "A változás, az auditbejegyzés és az esemény ugyanabban a tranzakcióban van: a visszagörgetett változás nem hagy bejegyzést és nem értesít senkit; a megtartott változásnak mindig van bejegyzése.",
+              "en": "The change, the audit entry and the event are in the same transaction: a rolled-back change leaves no entry and tells nobody; a kept change always has both.",
+              "nl": "De wijziging, het auditbericht en het event zitten in dezelfde transactie: een teruggedraaide wijziging laat geen bericht achter en informeert niemand; een behouden wijziging heeft altijd beide."
+            }
+          },
+          {
+            "title": {
+              "hu": "A háttérmunka vékony marad",
+              "en": "Background work stays thin",
+              "nl": "Achtergrondwerk blijft dun"
+            },
+            "text": {
+              "hu": "A Celery-feladatok a szolgáltatások vékony burkolói és idempotensek, pontosan egy ütemezővel; az API Redis nélkül is működik (az állapotjelzés ekkor „degraded”, nem „nem elérhető”).",
+              "en": "Celery tasks are thin wrappers over services and idempotent, with exactly one scheduler; the API works without Redis (the readiness check then says \"degraded\", not \"unavailable\").",
+              "nl": "Celery-taken zijn dunne wrappers rond services en idempotent, met precies één scheduler; de API werkt zonder Redis (de readiness-check meldt dan \"degraded\", niet \"unavailable\")."
+            }
+          },
+          {
+            "title": {
+              "hu": "A webalkalmazás közös darabokból épül",
+              "en": "A web app built from shared parts",
+              "nl": "Een webapp opgebouwd uit gedeelde onderdelen"
+            },
+            "text": {
+              "hu": "Típusos szolgáltatások és hookok, közös UI-készlet (táblák, szűrők, párbeszédek, jelzések), a listák állapota a címben él. A frontend a szerepkör szerint mutatja a menüt, de a jogosultságot az API tőle függetlenül kikényszeríti.",
+              "en": "Typed services and hooks, a shared UI kit (tables, filters, dialogs, status), and list state that lives in the address. The front end shows the menu by role, but the API enforces permissions independently of it.",
+              "nl": "Getypeerde services en hooks, een gedeelde UI-kit (tabellen, filters, dialogen, status) en lijststatus die in het adres leeft. De frontend toont het menu per rol, maar de API dwingt rechten er onafhankelijk van af."
+            }
+          },
+          {
+            "title": {
+              "hu": "Egyetlen paranccsal futtatható",
+              "en": "Runnable with one command",
+              "nl": "Met één opdracht te draaien"
+            },
+            "text": {
+              "hu": "A Docker Compose hat szolgáltatást indít (PostgreSQL, Redis, API, worker, ütemező, webszerver), megvárva az egészséges függőségeket; a backend-kép nem root felhasználóként fut, a portok csak a 127.0.0.1-en nyitottak.",
+              "en": "Docker Compose starts six services (PostgreSQL, Redis, API, worker, scheduler, web server), waiting for healthy dependencies; the backend image runs as an unprivileged user and ports are published on 127.0.0.1 only.",
+              "nl": "Docker Compose start zes services (PostgreSQL, Redis, API, worker, scheduler, webserver) en wacht op gezonde afhankelijkheden; het backendimage draait als niet-bevoorrechte gebruiker en poorten zijn alleen op 127.0.0.1 gepubliceerd."
+            }
+          }
+        ],
+        "architectureText": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "architecture": {
+          "tiers": [
+            {
+              "id": "clients",
+              "label": {
+                "hu": "Kliensek",
+                "en": "Clients",
+                "nl": "Clients"
+              },
+              "nodes": [
+                {
+                  "id": "web",
+                  "label": "Web app",
+                  "detail": {
+                    "hu": "React · TypeScript; adminisztrátorok, diszpécserek, könyvelők",
+                    "en": "React · TypeScript; administrators, dispatchers, accountants",
+                    "nl": "React · TypeScript; beheerders, planners, boekhouders"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "driver",
+                  "label": "Driver app",
+                  "detail": {
+                    "hu": "React Native (Expo) · offline sor; fizikai eszközön még nem futtatva",
+                    "en": "React Native (Expo) · offline queue; not yet run on a physical device",
+                    "nl": "React Native (Expo) · offlinewachtrij; nog niet op een fysiek apparaat gedraaid"
+                  },
+                  "status": "partial"
+                }
+              ]
+            },
+            {
+              "id": "edge",
+              "label": {
+                "hu": "Belépési pont",
+                "en": "Entry point",
+                "nl": "Toegangspunt"
+              },
+              "nodes": [
+                {
+                  "id": "nginx",
+                  "label": "nginx",
+                  "detail": {
+                    "hu": "statikus fájlok, /api és WebSocket továbbítás",
+                    "en": "static files, /api and WebSocket proxy",
+                    "nl": "statische bestanden, /api- en WebSocket-proxy"
+                  },
+                  "status": "built"
+                }
+              ]
+            },
+            {
+              "id": "application",
+              "label": {
+                "hu": "Alkalmazás",
+                "en": "Application",
+                "nl": "Applicatie"
+              },
+              "nodes": [
+                {
+                  "id": "api",
+                  "label": "FastAPI",
+                  "detail": {
+                    "hu": "útválasztók · szolgáltatások · tárolók",
+                    "en": "routers · services · repositories",
+                    "nl": "routers · services · repositories"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "worker",
+                  "label": "Celery worker",
+                  "detail": {
+                    "hu": "ellenőrzések és e-mailek",
+                    "en": "checks and e-mails",
+                    "nl": "controles en e-mails"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "beat",
+                  "label": "Celery beat",
+                  "detail": {
+                    "hu": "ütemező, pontosan egy példány",
+                    "en": "scheduler, exactly one instance",
+                    "nl": "scheduler, precies één instantie"
+                  },
+                  "status": "built"
+                }
+              ]
+            },
+            {
+              "id": "data",
+              "label": {
+                "hu": "Adat",
+                "en": "Data",
+                "nl": "Data"
+              },
+              "nodes": [
+                {
+                  "id": "pg",
+                  "label": "PostgreSQL 17",
+                  "detail": {
+                    "hu": "adatok, auditnapló, LISTEN / NOTIFY",
+                    "en": "data, audit log, LISTEN / NOTIFY",
+                    "nl": "data, auditlog, LISTEN / NOTIFY"
+                  },
+                  "status": "built"
+                },
+                {
+                  "id": "redis",
+                  "label": "Redis 7",
+                  "detail": {
+                    "hu": "csak a háttérfeladatok közvetítője",
+                    "en": "task broker only",
+                    "nl": "alleen takenbroker"
+                  },
+                  "status": "built"
+                }
+              ]
+            },
+            {
+              "id": "external",
+              "label": {
+                "hu": "Külső szolgáltatás",
+                "en": "External service",
+                "nl": "Externe dienst"
+              },
+              "nodes": [
+                {
+                  "id": "maps",
+                  "label": "OpenRouteService / OpenStreetMap",
+                  "detail": {
+                    "hu": "útvonaltervezés; az ORS-adaptert a dokumentációhoz tesztelték, nem éles kulccsal",
+                    "en": "route planning; the ORS adapter is tested against its documentation, not a live key",
+                    "nl": "routeplanning; de ORS-adapter is getest tegen de documentatie, niet met een live sleutel"
+                  },
+                  "status": "partial"
+                }
+              ]
+            }
+          ],
+          "links": [
+            {
+              "from": "web",
+              "to": "nginx",
+              "label": {
+                "hu": "HTTP",
+                "en": "HTTP",
+                "nl": "HTTP"
+              }
+            },
+            {
+              "from": "driver",
+              "to": "nginx",
+              "label": {
+                "hu": "REST + JWT",
+                "en": "REST + JWT",
+                "nl": "REST + JWT"
+              },
+              "status": "partial"
+            },
+            {
+              "from": "nginx",
+              "to": "api",
+              "label": {
+                "hu": "/api és /api/ws",
+                "en": "/api and /api/ws",
+                "nl": "/api en /api/ws"
+              }
+            },
+            {
+              "from": "api",
+              "to": "pg",
+              "label": {
+                "hu": "SQL",
+                "en": "SQL",
+                "nl": "SQL"
+              }
+            },
+            {
+              "from": "api",
+              "to": "maps",
+              "label": {
+                "hu": "útvonaltervezés",
+                "en": "route planning",
+                "nl": "routeplanning"
+              },
+              "status": "partial"
+            },
+            {
+              "from": "beat",
+              "to": "redis",
+              "label": {
+                "hu": "feladatok ütemezése",
+                "en": "schedules tasks",
+                "nl": "plant taken in"
+              }
+            },
+            {
+              "from": "redis",
+              "to": "worker",
+              "label": {
+                "hu": "feladatok",
+                "en": "tasks",
+                "nl": "taken"
+              }
+            },
+            {
+              "from": "worker",
+              "to": "pg",
+              "label": {
+                "hu": "SQL",
+                "en": "SQL",
+                "nl": "SQL"
+              }
+            },
+            {
+              "from": "pg",
+              "to": "api",
+              "label": {
+                "hu": "NOTIFY-események (a tranzakció után)",
+                "en": "NOTIFY events (after the transaction commits)",
+                "nl": "NOTIFY-events (nadat de transactie is gecommit)"
+              }
+            },
+            {
+              "from": "api",
+              "to": "web",
+              "label": {
+                "hu": "WebSocket: események, adat nélkül",
+                "en": "WebSocket: events without data",
+                "nl": "WebSocket: events zonder data"
+              }
+            }
+          ],
+          "note": {
+            "hu": "Az eseményeken át a képernyő újra lekéri az adatot a szokásos API-n keresztül, így minden jogosultsági szabály újra érvényesül.",
+            "en": "On an event the screen refetches through the normal API, so every permission rule applies again.",
+            "nl": "Na een event haalt het scherm opnieuw op via de gewone API, zodat elke rechtenregel opnieuw geldt."
+          }
+        },
+        "features": [
+          {
+            "title": {
+              "hu": "Szállítmányok és állapot-munkafolyamat",
+              "en": "Shipments and the status workflow",
+              "nl": "Zendingen en de statusworkflow"
+            },
+            "text": {
+              "hu": "NEW → ASSIGNED → LOADING → IN_TRANSIT → DELIVERED (vagy CANCELLED), útpontokkal, térképen tervezett útvonallal, távolsággal és menetidővel, teljes állapottörténettel. Visszalépés és lemondás indoklást kér, és a szerepkör határozza meg, ki melyik lépést teheti.",
+              "en": "NEW → ASSIGNED → LOADING → IN_TRANSIT → DELIVERED (or CANCELLED), with waypoints, a route planned on a map with distance and driving time, and a full status history. Stepping back or cancelling asks for a reason, and the role decides who may make which move.",
+              "nl": "NEW → ASSIGNED → LOADING → IN_TRANSIT → DELIVERED (of CANCELLED), met tussenstops, een op de kaart geplande route met afstand en rijtijd en een volledige statusgeschiedenis. Een stap terug of annuleren vraagt om een reden en de rol bepaalt wie welke stap mag zetten."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/logistics-platform/shipment-details.webp"
+          },
+          {
+            "title": {
+              "hu": "Szabályellenőrzött hozzárendelés",
+              "en": "Rule-checked assignment",
+              "nl": "Regelgecontroleerde toewijzing"
+            },
+            "text": {
+              "hu": "Sofőr, vontató és pótkocsi csak akkor rendelhető, ha a jogosítvány, a GKI, az orvosi alkalmasság, a biztosítás és a műszaki vizsga a kiszállítás napján érvényes, nincs átfedő nyitott fuvar, és semmi nincs a műhelyben.",
+              "en": "A driver, truck and trailer can be assigned only if the licence, GKI, medical certificate, insurance and inspection are valid on the delivery day, no other open shipment overlaps, and nothing is in the workshop.",
+              "nl": "Een chauffeur, trekker en oplegger kunnen alleen worden toegewezen als rijbewijs, GKI, medisch certificaat, verzekering en keuring op de leverdag geldig zijn, geen andere open zending overlapt en niets in de werkplaats staat."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/logistics-platform/shipments.webp"
+          },
+          {
+            "title": {
+              "hu": "Flotta, sofőrök és ügyfelek",
+              "en": "Fleet, drivers and customers",
+              "nl": "Vloot, chauffeurs en klanten"
+            },
+            "text": {
+              "hu": "Vontatók, pótkocsik, sofőrök és ügyfelek lejárati dátumokkal, amelyeket a lejárat előtt jelöl a rendszer. A listák kereshetők, rendezhetők és lapozhatók, az állapotuk a címben él.",
+              "en": "Trucks, trailers, drivers and customers with expiry dates that are flagged before they pass. Lists are searchable, sortable and paged, with their state in the address.",
+              "nl": "Trekkers, opleggers, chauffeurs en klanten met vervaldata die voor het verlopen worden gemarkeerd. Lijsten zijn doorzoekbaar, sorteerbaar en gepagineerd, met hun status in het adres."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/logistics-platform/fleet.webp"
+          },
+          {
+            "title": {
+              "hu": "Karbantartás és üzemanyag",
+              "en": "Maintenance and fuel",
+              "nl": "Onderhoud en brandstof"
+            },
+            "text": {
+              "hu": "Tervezett és késő szervizek súlyosság szerinti riasztásokkal (dátum és kilométer alapján), műhelylista, idővonal járművenként; tankolási rekordok, fogyasztás liter/100 km-ben, kilométerköltség és összehasonlítás.",
+              "en": "Planned and overdue services with alerts by severity (by date and by kilometres), a workshop list and a timeline per truck; refuelling records, consumption in litres per 100 km, cost per kilometre and a comparison.",
+              "nl": "Geplande en achterstallige servicebeurten met meldingen naar ernst (op datum en op kilometers), een werkplaatslijst en een tijdlijn per truck; tankregistraties, verbruik in liters per 100 km, kosten per kilometer en een vergelijking."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/logistics-platform/maintenance.webp"
+          },
+          {
+            "title": {
+              "hu": "Költségek, haszon és jelentések",
+              "en": "Costs, profit and reports",
+              "nl": "Kosten, winst en rapporten"
+            },
+            "text": {
+              "hu": "Költségek szállítmányonként, haszon és árrés szállítmányonként, öt jelentés (szállítmányok, pénzügy, flotta, sofőrök, üzemanyag) CSV- és Excel-exporttal. A pénz NUMERIC, soha nem lebegőpontos. Csak euróban számol: más pénznemű költség rögzül, de nem számít bele.",
+              "en": "Expenses per shipment, profit and margin per shipment, five reports (shipments, financial, fleet, drivers, fuel) with CSV and Excel export. Money is NUMERIC, never floating point. It counts in euro only: an expense in another currency is recorded but not counted.",
+              "nl": "Kosten per zending, winst en marge per zending, vijf rapporten (zendingen, financieel, vloot, chauffeurs, brandstof) met CSV- en Excel-export. Geld is NUMERIC, nooit floating point. Er wordt alleen in euro gerekend: een uitgave in een andere valuta wordt vastgelegd maar niet meegeteld."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/logistics-platform/reports.webp"
+          },
+          {
+            "title": {
+              "hu": "Dokumentumok",
+              "en": "Documents",
+              "nl": "Documenten"
+            },
+            "text": {
+              "hu": "CMR, kézbesítési igazolás és számlák csatolása szállítmányhoz: PDF, JPEG vagy PNG, méret- és típusellenőrzéssel, csak a szállítmányt látó szerepköröknek hozzáférhető. A fájlok helyi lemezen vannak.",
+              "en": "CMR, proof of delivery and invoices attached to a shipment: PDF, JPEG or PNG with size and type checks, available only to the roles that may see the shipment. Files live on local disk.",
+              "nl": "CMR, afleverbewijs en facturen gekoppeld aan een zending: PDF, JPEG of PNG met controle op grootte en type, alleen toegankelijk voor de rollen die de zending mogen zien. Bestanden staan op de lokale schijf."
+            },
+            "status": "done"
+          },
+          {
+            "title": {
+              "hu": "Értesítések és élő frissítés",
+              "en": "Notifications and live updates",
+              "nl": "Notificaties en live updates"
+            },
+            "text": {
+              "hu": "Ütemezett feladatok értesítést küldenek késő szállítmányokról, lejáró papírokról és késő karbantartásról (az alkalmazásban, sürgős esetben e-mailben is); a képernyők WebSockettel maguktól frissülnek. Az események jelzések, nem napló: nem tárolódnak és nem játszhatók vissza.",
+              "en": "Scheduled jobs raise notifications about late shipments, expiring papers and overdue maintenance (in the app, and by e-mail when urgent); screens refresh by themselves over a WebSocket. Events are hints, not a log: they are not stored or replayed.",
+              "nl": "Geplande taken sturen notificaties over late zendingen, verlopende papieren en achterstallig onderhoud (in de app en bij urgentie per e-mail); schermen verversen zichzelf via een WebSocket. Events zijn hints, geen log: ze worden niet opgeslagen of herhaald."
+            },
+            "status": "done",
+            "imageMediaPath": "/projects/logistics-platform/dashboard.webp"
+          },
+          {
+            "title": {
+              "hu": "Szerepkör-alapú hozzáférés és auditnapló",
+              "en": "Role-based access and the audit log",
+              "nl": "Rolgebaseerde toegang en het auditlog"
+            },
+            "text": {
+              "hu": "Négy szerepkör a szerveren kikényszerítve; a hozzáférési mátrixot tesztek vetik össze a specifikációval. Csak hozzáfűzhető auditnapló minden változásról, JSONB-ben a változás előtti és utáni értékekkel.",
+              "en": "Four roles enforced on the server; the access matrix is checked against the specification by tests. An append-only audit log of every change, with before and after values in JSONB.",
+              "nl": "Vier rollen afgedwongen op de server; de toegangsmatrix wordt door tests met de specificatie vergeleken. Een append-only auditlog van elke wijziging, met waarden voor en na in JSONB."
+            },
+            "status": "done"
+          },
+          {
+            "title": {
+              "hu": "Sofőr-alkalmazás",
+              "en": "Driver app",
+              "nl": "Chauffeursapp"
+            },
+            "text": {
+              "hu": "React Native (Expo) alkalmazás offline sorral az állapotváltásokhoz, tankolásokhoz és dokumentumfotókhoz. Az offline támogatás sor, nem teljes offline mód; fizikai eszközön még nem futtatták; a helyzetet még nem jelenti.",
+              "en": "A React Native (Expo) app with an offline queue for status changes, refuellings and document photos. Its offline support is a queue, not a full offline mode; it has not been run on a physical device, and it does not report position yet.",
+              "nl": "Een React Native-app (Expo) met een offlinewachtrij voor statuswijzigingen, tankbeurten en documentfoto’s. De offline-ondersteuning is een wachtrij, geen volledige offlinemodus; ze is nog niet op een fysiek apparaat gedraaid en meldt nog geen positie."
+            },
+            "status": "partial"
+          },
+          {
+            "title": {
+              "hu": "Útvonaltérképek",
+              "en": "Route maps",
+              "nl": "Routekaarten"
+            },
+            "text": {
+              "hu": "Az útvonal a szolgáltató adatainak minőségéig jó; a pozíció kézzel nem javítható, és egy szállítmány címei létrehozás után nem szerkeszthetők (az útpontok igen). Az OpenRouteService-adaptert a dokumentációhoz tesztelték, nem éles kulccsal.",
+              "en": "A route is only as good as the provider’s data; a position cannot be corrected by hand and a shipment’s own addresses cannot be edited after creation (its waypoints can). The OpenRouteService adapter is tested against its documentation, not a live key.",
+              "nl": "Een route is zo goed als de data van de provider; een positie kan niet met de hand worden gecorrigeerd en de eigen adressen van een zending zijn na aanmaak niet te bewerken (de tussenstops wel). De OpenRouteService-adapter is getest tegen de documentatie, niet met een live sleutel."
+            },
+            "status": "partial"
+          },
+          {
+            "title": {
+              "hu": "Folyamatos integráció",
+              "en": "Continuous integration",
+              "nl": "Continue integratie"
+            },
+            "text": {
+              "hu": "A GitHub Actions munkafolyamat megvan, és a fejlesztés során használt parancsokat futtatja; tiszta Linux-konténerekben ellenőrizték, de magán a GitHubon még nem futott. Telepítési folyamat nincs.",
+              "en": "The GitHub Actions workflow exists and runs exactly the commands used during development; it was checked in clean Linux containers but has not yet run on GitHub itself. There is no deployment pipeline.",
+              "nl": "De GitHub Actions-workflow bestaat en draait precies de opdrachten die tijdens de ontwikkeling zijn gebruikt; hij is gecontroleerd in schone Linux-containers maar nog niet op GitHub zelf gedraaid. Er is geen deploymentpijplijn."
+            },
+            "status": "partial"
+          },
+          {
+            "title": {
+              "hu": "GPS és élő követés",
+              "en": "GPS and live tracking",
+              "nl": "GPS en live tracking"
+            },
+            "text": {
+              "hu": "A sofőr-alkalmazás az állapotot jelenti, a pozíciót még nem. Következik: háttérbeli helyzetjelentés, pozíciótörténet és a járművek élő térképe a diszpécser vezérlőpultján.",
+              "en": "The driver app reports status, not yet position. Next: background location reporting, a position history and a live map of the vehicles on the dispatcher’s dashboard.",
+              "nl": "De chauffeursapp meldt de status, nog niet de positie. Volgende stap: locatiemeldingen op de achtergrond, een positiegeschiedenis en een live kaart van de voertuigen op het dashboard van de planner."
+            },
+            "status": "planned"
+          },
+          {
+            "title": {
+              "hu": "Fiókok megerősítése",
+              "en": "Hardening accounts",
+              "nl": "Accounts verstevigen"
+            },
+            "text": {
+              "hu": "Frissítő tokenek szerveroldali visszavonással, jelszómódosítás és -visszaállítás e-mailben, opcionális kétfaktoros bejelentkezés. Ma a hozzáférési tokenek egy óráig élnek, és nem vonhatók vissza.",
+              "en": "Refresh tokens with server-side revocation, password change and reset by e-mail, optional two-factor sign-in. Today access tokens last an hour and cannot be revoked.",
+              "nl": "Refresh-tokens met intrekking aan serverzijde, wachtwoordwijziging en -herstel per e-mail, optioneel tweefactoraanmelden. Nu duren toegangstokens een uur en kunnen ze niet worden ingetrokken."
+            },
+            "status": "planned"
+          },
+          {
+            "title": {
+              "hu": "Üzemeltetett demó és böngészős végpontok közötti tesztek",
+              "en": "A hosted demo and browser end-to-end tests",
+              "nl": "Een gehoste demo en browser-end-to-endtests"
+            },
+            "text": {
+              "hu": "A tárolóképek publikálása és egy üzemeltetett demó TLS mögött, mentésekkel és megfigyeléssel; Playwright-tesztek a fő útvonalakra (szállítmány létrehozása, hozzárendelése, kézbesítése).",
+              "en": "Publish the container images and deploy a hosted demo behind TLS, with backups and monitoring; Playwright tests for the main journeys (create a shipment, assign it, deliver it).",
+              "nl": "De containerimages publiceren en een gehoste demo achter TLS uitrollen, met back-ups en monitoring; Playwright-tests voor de hoofdroutes (een zending aanmaken, toewijzen, afleveren)."
+            },
+            "status": "planned"
+          }
+        ],
+        "limits": [
+          {
+            "hu": "Nincs üzemeltetve sehol: a projekt nem éles, nincsenek ügyfelei, minden adata fiktív.",
+            "en": "It is not hosted anywhere: it is not in production, has no customers, and all of its data is fictional.",
+            "nl": "Het wordt nergens gehost: het is niet in productie, heeft geen klanten en alle data is fictief."
+          },
+          {
+            "hu": "A pénz csak euróban kezelt: nincs ÁFA, számlázás és árfolyam.",
+            "en": "Money is handled in euro only: no VAT, invoicing or exchange rates.",
+            "nl": "Geld wordt alleen in euro behandeld: geen btw, facturatie of wisselkoersen."
+          },
+          {
+            "hu": "A hozzáférési tokenek egy óráig élnek, és nem vonhatók vissza; nincs jelszó-visszaállítás és kétfaktoros belépés.",
+            "en": "Access tokens last an hour and cannot be revoked; there is no password reset and no two-factor sign-in.",
+            "nl": "Toegangstokens duren een uur en kunnen niet worden ingetrokken; er is geen wachtwoordherstel en geen tweefactoraanmelding."
+          },
+          {
+            "hu": "A dokumentumok helyi lemezen vannak, objektumtár és víruskeresés nélkül.",
+            "en": "Documents are stored on local disk, with no object storage or virus scan.",
+            "nl": "Documenten staan op de lokale schijf, zonder objectopslag of virusscan."
+          }
+        ],
+        "decisions": [
+          {
+            "title": {
+              "hu": "A menü csak azt mutatja, amit a szerepkör megnyithat",
+              "en": "The menu shows only what the role may open",
+              "nl": "Het menu toont alleen wat de rol mag openen"
+            },
+            "text": {
+              "hu": "Az oldalsáv a bejelentkezett szerepkörnek megfelelően szűkül; aki mégis begépeli a címet, „hozzáférés megtagadva” képernyőt kap, és ugyanaz a kérés közvetlenül az API-nak 403. A felület csak megjeleníti a szabályt, az API érvényesíti.",
+              "en": "The sidebar narrows to the signed-in role; someone who types the address anyway gets an \"access denied\" screen, and the same request straight to the API is a 403. The interface only shows the rule; the API enforces it.",
+              "nl": "De zijbalk past zich aan de ingelogde rol aan; wie het adres toch intypt krijgt een \"toegang geweigerd\"-scherm en hetzelfde verzoek rechtstreeks naar de API is een 403. De interface toont de regel alleen; de API dwingt hem af."
+            }
+          },
+          {
+            "title": {
+              "hu": "A lista állapota a címben él",
+              "en": "List state lives in the address",
+              "nl": "Lijststatus leeft in het adres"
+            },
+            "text": {
+              "hu": "A keresés, a szűrők, a rendezés és az oldal a címsorban van, így a lista könyvjelzőzhető, és a Vissza gomb oda tér vissza.",
+              "en": "Search, filters, sort and page are in the address, so a list can be bookmarked and Back returns to it.",
+              "nl": "Zoeken, filters, sortering en pagina staan in het adres, zodat een lijst kan worden gebookmarkt en Terug ernaar terugkeert."
+            }
+          },
+          {
+            "title": {
+              "hu": "Két stratégia a táblákra telefonon",
+              "en": "Two strategies for tables on a phone",
+              "nl": "Twee strategieën voor tabellen op een telefoon"
+            },
+            "text": {
+              "hu": "A rekordtáblák telefonon kártyákká válnak; a széles adattáblák oldalra görgethetők, és az élükön árnyék jelzi, hol van még tartalom. Az elrendezés az alkotóelem rendelkezésére álló helyre reagál (konténer-lekérdezések), nem az ablakra.",
+              "en": "Record tables become cards on a phone; wide data tables scroll sideways with an edge shadow where more is hidden. Layouts react to the room a component has (container queries), not to the window.",
+              "nl": "Recordtabellen worden kaarten op een telefoon; brede datatabellen scrollen zijwaarts met een randschaduw waar meer verborgen is. Layouts reageren op de ruimte van een component (containerqueries), niet op het venster."
+            }
+          },
+          {
+            "title": {
+              "hu": "Billentyűzet-barát extrák",
+              "en": "Keyboard-friendly extras",
+              "nl": "Toetsenbordvriendelijke extra’s"
+            },
+            "text": {
+              "hu": "Globális keresés (Ctrl/Cmd+K vagy „/”), morzsamenü, a fókuszt csapdába ejtő és visszaadó párbeszédablakok, a WCAG 1.4.13-at követő tippek; minden diagramhoz tartozik az adatai táblázata a képernyőolvasóknak.",
+              "en": "A global search (Ctrl/Cmd+K or \"/\"), breadcrumbs, dialogs that trap and return focus, tooltips that follow WCAG 1.4.13; every chart comes with its data as a table for screen readers.",
+              "nl": "Een globale zoekfunctie (Ctrl/Cmd+K of \"/\"), kruimelpaden, dialogen die de focus vangen en teruggeven, tooltips die WCAG 1.4.13 volgen; elke grafiek komt met zijn data als tabel voor schermlezers."
+            }
+          }
+        ],
+        "learned": [],
+        "results": [],
+        "next": [
+          {
+            "hu": "GPS és élő követés a sofőr-alkalmazásból, a járművek élő térképével.",
+            "en": "GPS and live tracking from the driver app, with a live map of the vehicles.",
+            "nl": "GPS en live tracking vanuit de chauffeursapp, met een live kaart van de voertuigen."
+          },
+          {
+            "hu": "Útvonal-optimalizálás: több megállós utak sorrendje és a legolcsóbb jármű kiválasztása.",
+            "en": "Route optimisation: sequencing multi-stop trips and choosing the truck that makes the plan cheapest.",
+            "nl": "Routeoptimalisatie: meerdere stops volgordelijk plannen en de truck kiezen die het plan het goedkoopst maakt."
+          },
+          {
+            "hu": "Üzemeltetett demó TLS mögött, mentésekkel és megfigyeléssel.",
+            "en": "A hosted demo behind TLS, with backups and monitoring.",
+            "nl": "Een gehoste demo achter TLS, met back-ups en monitoring."
+          }
+        ],
+        "links": {
+          "demo": null,
+          "source": null,
+          "extra": null,
+          "video": null
+        },
+        "hidden": []
+      }
+    }
+  ]
+}

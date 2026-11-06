@@ -22,3 +22,28 @@
   --pa: var(--color-text);
   --pa-text: var(--color-text);
 }
+
+/* An administrator's preview of a project that is not public: said once, at the top, in the page's own flow (it does not cover the
+   header). It is positioned so that it paints above the hero, which is drawn up behind the header and would otherwise hide it. */
+.preview {
+  position: relative;
+  z-index: 3;
+  padding: var(--space-3) 0;
+  background: var(--color-accent);
+  color: var(--brand-black);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  text-align: center;
+}
+
+/* The checked addresses of a project, as buttons. */
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.signIn {
+  padding-block: var(--space-8);
+  font-size: var(--fs-md);
+}

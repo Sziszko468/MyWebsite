@@ -1,4 +1,3 @@
-import type { ProjectId } from '../projects'
 import type { Trilingual } from '../trilingual'
 
 /**
@@ -95,7 +94,8 @@ export interface StackEntry {
 }
 
 export interface ProjectDetail {
-  id: ProjectId
+  /** The project's address (its slug). For the four static projects it is their id. */
+  id: string
   /** The name inside the repository and the app, when it differs from the one shown on the site. */
   repoName: string | null
   accent: Accent
@@ -124,4 +124,10 @@ export interface ProjectDetail {
   gallery: readonly GalleryImage[]
   /** What a visitor should know about the screenshots (names, age, data). */
   galleryNote: Trilingual | null
+  /** Only on a project managed in the administration: a plain description of the architecture, shown when there is no drawn diagram. */
+  architectureText?: Trilingual
+  /** Only on a project managed in the administration: results, written by the owner from real evidence. Empty hides the section. */
+  results?: readonly Trilingual[]
+  /** Only on a project managed in the administration: the addresses the owner marked as checked. */
+  links?: { demo: string | null; source: string | null; extra: { url: string; label: Trilingual } | null; video: string | null }
 }

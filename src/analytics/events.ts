@@ -1,5 +1,4 @@
 import type { LabId } from '../content/lab'
-import type { ProjectId } from '../content/projects'
 import type { NeedId, PlanId, ServiceId } from '../content/services/ids'
 
 /**
@@ -18,8 +17,8 @@ export interface AnalyticsEvents {
   configurator_completed: { needs: number }
   /** A request or message was sent and the receiving end said it arrived. */
   quote_request_submitted: { form: 'inquiry' | 'contact'; items: number }
-  /** A project's page was opened. */
-  project_opened: { project: ProjectId }
+  /** A project's page was opened. The project is its address (a slug: lowercase letters, digits and hyphens, chosen by the owner). */
+  project_opened: { project: string }
   /** A Lab experience was opened. */
   lab_experience_opened: { experiment: LabId }
 }

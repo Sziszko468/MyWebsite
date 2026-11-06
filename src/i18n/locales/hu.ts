@@ -349,6 +349,13 @@ export const hu = {
   },
   project: {
     backToPortfolio: 'Vissza a portfólióhoz',
+    preview: {
+      title: 'Előnézet',
+      banner: 'Előnézet: ez a projekt még nem nyilvános (állapot: {state}). Csak te látod, az adminisztrációba bejelentkezve.',
+      signIn: 'Az előnézethez jelentkezz be az adminisztrációba.',
+      states: { draft: 'piszkozat', published: 'közzétett', archived: 'archivált' },
+    },
+    videoLink: 'Videó',
     repoName: 'A tárolóban és a felületen: {name}',
     reviewed: 'Dokumentáció és kód alapján, áttekintve: {date}',
     sourceLink: 'Forráskód',
@@ -372,6 +379,8 @@ export const hu = {
       decisions: 'Tervezési döntések',
       learned: 'Tanulságok és következő lépések',
       gallery: 'Galéria',
+      results: 'Eredmények',
+      links: 'Hivatkozások',
     },
     overview: {
       what: 'Mi ez',
@@ -423,6 +432,24 @@ export const hu = {
       next: 'Következő projekt',
       all: 'Összes projekt',
     },
+  },
+  workPage: {
+    meta: {
+      title: 'Munkáim',
+      description: 'Válogatás a projektjeimből: webes és mobilalkalmazások, platformok és koncepciók, mindegyik a valódi állapotával megjelölve.',
+    },
+    hero: {
+      eyebrow: 'Munkáim',
+      titleLine1: 'Amit építettem,',
+      titleLine2: 'ahogy valójában van.',
+      lead: 'Minden projekt a saját állapotával szerepel: élő, bemutató, készülő vagy koncepció. Nincs kitalált eredmény és nincs kitalált vélemény.',
+    },
+    filter: { label: 'Projektek szűrése', all: 'Mind' },
+    count: '{count} projekt',
+    loading: 'A projektek betöltése…',
+    empty: 'Még nincs közzétett projekt.',
+    emptyFilter: 'Ebben a kategóriában még nincs projekt.',
+    draft: 'Piszkozat: még nem nyilvános',
   },
   placeholder: {
     description: 'Ez az oldal hamarosan elkészül.',

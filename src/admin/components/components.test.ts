@@ -12,6 +12,7 @@ import { CheckField, SelectField, TextAreaField, TextField } from './form'
 import { InternalNotes } from './InternalNotes'
 import { DashboardStatCard, DetailPanel, PageHeader, TabPanel, Tabs } from './layout'
 import { Pagination } from './Pagination'
+import { ItemList } from './ProjectFields'
 import { EmptyState, ErrorState, LoadingState } from './states'
 import { StatusBadge } from './StatusBadge'
 
@@ -261,5 +262,22 @@ describe('ActivityTimeline', () => {
     const html = render(h(ActivityTimeline, { events: events as never }))
     expect(html).toContain(en.activity.system)
     expect(html).toContain('owner@site.test')
+  })
+})
+
+describe('ItemList', () => {
+  const list = (props: Record<string, unknown>) => render(h(ItemList<string>, { items: ['one'], onChange: noop, render: (item: string) => h('span', null, item), max: 5, itemLabel: 'Step', ...props } as never))
+
+  it('has an add button only when it can make an item (a list that is filled another way, like the gallery, has none)', () => {
+    expect(list({ create: () => 'new', addLabel: 'Add a step' })).toContain('Add a step')
+    expect(list({})).not.toContain('Add')
+    expect(list({ create: () => 'new', addLabel: 'Add a step', max: 1 })).not.toContain('Add a step')
+  })
+
+  it("names each item's move and remove buttons with its number", () => {
+    const html = list({ items: ['a', 'b'] })
+    expect(html).toContain('Move up: Step 2')
+    expect(html).toContain('Move down: Step 1')
+    expect(html).toContain('Delete: Step 2')
   })
 })

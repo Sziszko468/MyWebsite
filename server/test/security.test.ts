@@ -103,7 +103,8 @@ describe('SQL injection', () => {
       expect((await server.api('/api/admin/login', { body: { email: `admin@site.test${payload}`, password: GOOD_PASSWORD } })).status).toBe(401)
     }
     expect(counts().users).toBe(1)
-  })
+    // Every sign-in is a real scrypt hash (about 0.1 s of CPU), and the suite runs its files in parallel: the default 5 s was not enough once.
+  }, 30_000)
 })
 
 async function send(who: { cookie: string; csrf: string }, method: string, path: string, body?: unknown) {

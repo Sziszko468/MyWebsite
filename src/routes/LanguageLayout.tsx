@@ -12,7 +12,8 @@ import { buildHead } from '../seo/head'
 import { PageTransition } from '../motion/PageTransition'
 import { scopeOfPage } from '../motion/config'
 import { ScrollManager } from '../motion/ScrollManager'
-import { findPage, labIdOfPage, type PageDef } from './pages'
+import { isMissingProject, useProjectsVersion } from '../projects/store'
+import { labIdOfPage, projectIdOfPage, resolvePage, type PageDef } from './pages'
 
 /**
  * Keeps <html lang> and the head (title, description, indexing rule, canonical address, language
@@ -22,10 +23,12 @@ import { findPage, labIdOfPage, type PageDef } from './pages'
  */
 function DocumentMeta({ page }: { page: PageDef | undefined }) {
   const { lang } = useI18n()
+  // A project's title and description are the data's own once it has arrived: the head follows it.
+  const projectsVersion = useProjectsVersion()
 
   useEffect(() => {
     applyHead(buildHead(page, lang))
-  }, [lang, page])
+  }, [lang, page, projectsVersion])
 
   return null
 }
@@ -67,13 +70,17 @@ const PageFallback = () => <div style={{ minHeight: '100svh' }} aria-hidden="tru
 export function LanguageLayout() {
   const { lang } = useParams()
   const { pathname, search, hash } = useLocation()
+  useProjectsVersion()
 
   if (!isLanguage(lang)) {
     return <Navigate to={`${localizedPath(DEFAULT_LANGUAGE, pathname)}${search}${hash}`} replace />
   }
 
   const { rest } = splitLanguage(pathname)
-  const page = findPage(rest)
+  // A project the backend says does not exist is "not found", like any other unknown address (and is not indexed).
+  const found = resolvePage(rest)
+  const slug = found ? projectIdOfPage(found.id) : null
+  const page = found && slug && slug !== 'preview' && isMissingProject(slug) ? undefined : found
   const scope = scopeOfPage(page?.id)
 
   if (page && !page.languages.includes(lang)) {

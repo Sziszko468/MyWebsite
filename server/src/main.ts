@@ -3,6 +3,7 @@ import { ConfigError, loadConfig } from './config.ts'
 import { Database } from './db/database.ts'
 import { migrate, migrationStatus } from './db/migrate.ts'
 import { seedCatalog } from './db/seed.ts'
+import { seedProjects } from './modules/projects/service.ts'
 import { createLogger } from './lib/logger.ts'
 import { DAY, systemClock } from './lib/time.ts'
 import { createMailer } from './modules/notifications/mailer.ts'
@@ -40,6 +41,9 @@ async function main(): Promise<void> {
   if (config.seedOnStart) {
     const seeded = seedCatalog(app.context)
     if (seeded.seeded) log.info('catalogue loaded into an empty database', { services: seeded.services, packages: seeded.packages, extras: seeded.extras, faq: seeded.faq })
+    // The portfolio is seeded on its own: a database that already holds a catalogue still gets the website's projects once.
+    const projects = seedProjects(app.context)
+    if (projects.seeded) log.info('projects loaded into an empty table', { projects: projects.projects, media: projects.media })
   }
   if (config.env === 'production' && config.retentionDays === null) log.warn('RETENTION_DAYS is not set: closed and archived requests are kept until an administrator deletes them')
   if (config.email.provider !== 'none' && !config.email.notifyTo) log.warn('e-mail is configured but NOTIFY_TO is not set: the owner will not be notified of new messages')

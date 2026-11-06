@@ -1,3 +1,5 @@
+import { tmpdir } from 'node:os'
+import { dirname, join } from 'node:path'
 import type { Level } from './lib/logger.ts'
 
 /**
@@ -88,6 +90,10 @@ export interface Config {
   staticDir: string | null
   rateLimitsEnabled: boolean
   bodyLimitBytes: number
+  /** Where uploaded images are kept (never in the database). */
+  mediaDir: string
+  /** The largest image an administrator may upload, in bytes. */
+  mediaMaxBytes: number
 }
 
 export class ConfigError extends Error {
@@ -296,6 +302,8 @@ export function loadConfig(env: Env = process.env): Config {
   const adminIdleMinutes = integer('ADMIN_IDLE_MINUTES', 30, 5, 1440)
   const rateLimitsEnabled = flag('RATE_LIMITS', true)
   const bodyLimitBytes = integer('BODY_LIMIT_BYTES', 65536, 1024, 1048576)
+  const mediaMaxBytes = integer('MEDIA_MAX_BYTES', 6 * 1024 * 1024, 100 * 1024, 25 * 1024 * 1024)
+  const mediaDir = text('MEDIA_DIR') ?? (databasePath === ':memory:' ? join(tmpdir(), `cc-media-${process.pid}`) : join(dirname(databasePath), 'media'))
 
   if (problems.length > 0) throw new ConfigError(problems)
 
@@ -337,6 +345,8 @@ export function loadConfig(env: Env = process.env): Config {
     staticDir: text('STATIC_DIR'),
     rateLimitsEnabled,
     bodyLimitBytes,
+    mediaDir,
+    mediaMaxBytes,
   }
 }
 
@@ -366,5 +376,7 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     rateLimits: config.rateLimitsEnabled,
     deployHook: config.deployHookUrl !== null,
     servesWebsite: config.staticDir !== null,
+    mediaDir: config.mediaDir,
+    mediaMaxBytes: config.mediaMaxBytes,
   }
 }

@@ -1,3 +1,4 @@
+import { useCatalogGate } from '../content/liveCatalog'
 import { Container } from '../components/Container/Container'
 import { Breadcrumbs } from '../components/shop/Breadcrumbs'
 import { CartView } from '../components/shop/CartView'
@@ -8,6 +9,7 @@ import styles from './ShopPage.module.scss'
 
 /** The cart's page: the selection, edited in place, and the way on to the request. No payment takes place on it. */
 export function CartPage() {
+  useCatalogGate()
   const { t } = useI18n()
   const { cart: c } = useShopText()
 
