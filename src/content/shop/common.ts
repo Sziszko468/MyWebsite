@@ -12,6 +12,7 @@ export const common = {
     label: tri('Bolt', 'Shop', 'Winkel'),
     services: tri('Szolgáltatások', 'Services', 'Diensten'),
     packages: tri('Csomagok', 'Packages', 'Pakketten'),
+    fullExperience: tri('FULL EXPERIENCE', 'FULL EXPERIENCE', 'FULL EXPERIENCE'),
     configure: tri('Összeállító', 'Configure', 'Samenstellen'),
     cart: tri('Kosár', 'Cart', 'Winkelmand'),
     search: tri('Keresés', 'Search', 'Zoeken'),

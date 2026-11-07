@@ -9,11 +9,12 @@ import type { SectionTone } from '../Section/tone'
 export const SHOP_RHYTHM = [
   { id: 'services', tone: 'inverse' },
   { id: 'packages', tone: 'base' },
-  { id: 'configure', tone: 'inverse' },
-  { id: 'process', tone: 'base' },
-  { id: 'support', tone: 'inverse' },
-  { id: 'work', tone: 'base' },
-  { id: 'faq', tone: 'inverse' },
+  { id: 'full-experience', tone: 'inverse' },
+  { id: 'configure', tone: 'base' },
+  { id: 'process', tone: 'inverse' },
+  { id: 'support', tone: 'base' },
+  { id: 'work', tone: 'inverse' },
+  { id: 'faq', tone: 'base' },
   { id: 'start', tone: 'dark' },
 ] as const satisfies ReadonlyArray<{ id: string; tone: SectionTone }>
 

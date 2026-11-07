@@ -25,6 +25,11 @@ export interface Addon {
   appliesTo: readonly NeedId[]
   price: ServicePrice
   vat: VatMode
+  /**
+   * `false` when the owner has taken the add-on out of the offer in the administration (it is disabled there): it is not shown,
+   * not offered in the cart or the builder, and not listed on a package. Absent means offered.
+   */
+  available?: boolean
 }
 
 const REAL_NEEDS = ['website', 'webapp', 'improve', 'ui', 'integrations'] as const
@@ -143,5 +148,10 @@ export const isExtraId = (value: unknown): value is ExtraId => ADDON_IDS.some((i
 
 /** The add-ons that can be put on a need, in catalogue order. */
 export function addonsFor(need: NeedId): readonly Addon[] {
-  return addons.filter((addon) => addon.appliesTo.includes(need))
+  return addons.filter((addon) => addon.available !== false && addon.appliesTo.includes(need))
+}
+
+/** The add-ons a package can carry that are on offer now, in catalogue order. */
+export function offeredExtras(extras: readonly ExtraId[]): readonly Addon[] {
+  return addons.filter((addon) => addon.available !== false && extras.includes(addon.id))
 }

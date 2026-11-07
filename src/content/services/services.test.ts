@@ -388,8 +388,10 @@ describe('the texts', () => {
       }
     }
     visit(shopText, 'shop')
-    // A name that is the same in every language (Launch, Grow, Build, Care) is a proper noun; nothing else may be.
-    expect(same.filter((path) => !path.startsWith('shop.common.planNames'))).toEqual([])
+    // A name that is the same in every language (Launch, Grow, Build, Care, and the flagship offer's FULL EXPERIENCE) is a proper noun;
+    // nothing else may be.
+    const NAMES = ['shop.common.nav.fullExperience']
+    expect(same.filter((path) => !path.startsWith('shop.common.planNames') && !NAMES.includes(path))).toEqual([])
   })
 
   it('titles the shop’s pages differently in each language', () => {

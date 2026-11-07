@@ -4,6 +4,8 @@ import { baseAddons as addons } from './services/addons'
 import { baseServiceAreas as serviceAreas } from './services/areas'
 import { baseServiceDetails as serviceDetails } from './services/detail'
 import { baseFaq as faq } from './services/faq'
+import { baseComparison } from './shop/comparison'
+import { baseFullExperience } from './shop/fullExperience'
 import type { Trilingual } from './trilingual'
 
 /**
@@ -30,6 +32,14 @@ export interface CatalogSeed {
   packages: unknown[]
   services: unknown[]
   faq: unknown[]
+}
+
+/** The tier comparison and the FULL EXPERIENCE offer as the backend's `shop_documents` take them (server/seed/shop.seed.json). */
+export function buildShopSeed(): { comparison: unknown; fullExperience: unknown } {
+  return {
+    comparison: { version: 1, tiers: baseComparison.tiers, features: baseComparison.features },
+    fullExperience: { version: 1, ...baseFullExperience },
+  }
 }
 
 export function buildCatalogSeed(): CatalogSeed {

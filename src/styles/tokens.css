@@ -190,6 +190,7 @@
   --color-on-accent: var(--brand-black);
 
   --color-secondary: var(--brand-blue);
+  --color-on-secondary: #ffffff; /* text on a Cobalt fill: 4.98:1 (Carbon Black would be 3.96:1) */
   --color-secondary-text: #8d9cff;
 
   --color-focus: #8d9cff;
@@ -242,6 +243,7 @@
   --color-on-accent: var(--brand-black);
 
   --color-secondary: var(--brand-blue);
+  --color-on-secondary: #ffffff;
   --color-secondary-text: #2f44e6;
 
   --color-focus: #2f44e6;

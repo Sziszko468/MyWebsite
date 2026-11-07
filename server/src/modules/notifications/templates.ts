@@ -2,6 +2,7 @@ import type { Language } from '../../config.ts'
 import { html, joinHtml, raw } from '../../lib/html.ts'
 import type { InquiryRow } from '../inquiries/repository.ts'
 import type { ItemView, QuoteRow } from '../quotes/repository.ts'
+import { briefRows } from '../shop/brief.ts'
 import type { Totals } from '../shop/pricing.ts'
 
 /**
@@ -314,8 +315,8 @@ export function renderQuoteReceived(quote: QuoteRow, items: readonly ItemView[],
     { label: w.email, value: quote.email },
     ...(quote.phone ? [{ label: w.phone, value: quote.phone }] : []),
     { label: w.language, value: w.languages[quote.language] },
-    { label: w.services, value: items.map((item) => itemText(item, w, packageName)).join('\n') },
-    { label: w.pricing, value: totalsText(totals, w) },
+    { label: w.services, value: quote.kind === 'full_experience' ? 'FULL EXPERIENCE' : items.map((item) => itemText(item, w, packageName)).join('\n') },
+    ...(quote.kind === 'full_experience' ? briefRows(quote, lang) : [{ label: w.pricing, value: totalsText(totals, w) }]),
     { label: w.description, value: quote.description },
     ...(quote.objective ? [{ label: w.objective, value: w.objectives[quote.objective] ?? quote.objective }] : []),
     ...(quote.timing ? [{ label: w.timing, value: w.timings[quote.timing] ?? quote.timing }] : []),
@@ -323,7 +324,7 @@ export function renderQuoteReceived(quote: QuoteRow, items: readonly ItemView[],
     ...(quote.reference_notes ? [{ label: w.references, value: quote.reference_notes }] : []),
   ]
   const parts = { brand, title: `${w.newQuote} ${quote.reference}`, intro: `${w.newQuoteIntro} ${w.replyHint}`, rows, footer: w.ownerFooter }
-  const preview = `${oneLine(quote.name, 40)}: ${oneLine(items.map((item) => itemText(item, w, packageName)).join('; '), 100)}`
+  const preview = `${oneLine(quote.name, 40)}: ${oneLine(quote.kind === 'full_experience' ? 'FULL EXPERIENCE' : items.map((item) => itemText(item, w, packageName)).join('; '), 100)}`
   return { subject: `${w.newQuote} (${quote.reference}): ${oneLine(quote.name, 40)}`, preview, text: plain(parts), html: layout({ lang, preview, ...parts }) }
 }
 
@@ -439,7 +440,7 @@ export function renderQuoteConfirmation(quote: QuoteRow, items: readonly ItemVie
   const rows: Row[] = [
     { label: w.reference, value: quote.reference },
     { label: w.received, value: dateText(quote.created_at, lang) },
-    { label: w.services, value: items.map((item) => itemText(item, w, packageName)).join('\n') },
+    { label: w.services, value: quote.kind === 'full_experience' ? 'FULL EXPERIENCE' : items.map((item) => itemText(item, w, packageName)).join('\n') },
   ]
   const parts = { brand, title: c.quoteTitle, intro: `${w.hello(oneLine(quote.name, 60))} ${c.quoteBody}`, rows, note: responseNote ? { title: c.noteTitle, text: responseNote } : undefined, footer: `${c.ignore} ${c.footer}` }
   return { subject: c.quoteSubject(quote.reference), preview: c.quoteBody, text: plain(parts), html: layout({ lang, preview: c.quoteBody, ...parts }) }

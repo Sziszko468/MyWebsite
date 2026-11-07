@@ -6,6 +6,7 @@ import { iso } from '../../lib/time.ts'
 import { parseListing, type Listing } from '../admin/listing.ts'
 import { requirePermission } from '../auth/permissions.ts'
 import { getInquiry } from '../inquiries/repository.ts'
+import { briefRows, readBrief } from '../shop/brief.ts'
 import { totalsOf } from '../shop/pricing.ts'
 import { activityOf } from '../system/activity.ts'
 import { audit } from '../system/audit.ts'
@@ -139,12 +140,14 @@ export function overview(app: AppContext, session: SessionInfo | null) {
 /** One request, complete, as JSON: the thing to hand to whoever writes the quote. */
 export function exportOne(app: AppContext, session: SessionInfo | null, id: string): Record<string, unknown> {
   const { quote, items, notes, pricing } = detailForAdmin(app, session, id)
-  const { id: _id, ip_hash: _ip, content_hash: _hash, inquiry_id: _inquiry, ...visible } = quote
-  return { ...visible, items, pricing, notes: notes.map((note) => ({ author: note.author_email, body: note.body, createdAt: note.created_at })) }
+  const { id: _id, ip_hash: _ip, content_hash: _hash, inquiry_id: _inquiry, brief_json: briefJson, ...visible } = quote
+  // The brief of a FULL EXPERIENCE request is an object in the export, not the text it is stored as.
+  return { ...visible, ...(briefJson ? { brief: readBrief(briefJson) } : {}), items, pricing, notes: notes.map((note) => ({ author: note.author_email, body: note.body, createdAt: note.created_at })) }
 }
 
 const summaryOf = (quote: QuoteRow, itemsText: string): unknown[] => [
-  quote.reference, quote.created_at, quote.status, quote.name, quote.email, quote.phone, quote.language, itemsText, quote.objective, quote.timing, quote.description, quote.requirements, quote.reference_notes,
+  quote.reference, quote.created_at, quote.status, quote.name, quote.email, quote.phone, quote.language, quote.kind === 'full_experience' ? 'FULL EXPERIENCE' : itemsText, quote.objective, quote.timing, quote.description, quote.requirements, quote.reference_notes,
+  quote.kind, quote.company, quote.kind === 'full_experience' ? briefRows(quote, 'en').map((row) => `${row.label}: ${row.value}`).join('; ') : null,
 ]
 
 /** The current list (all pages, same filters) as CSV; cells that a spreadsheet could run as a formula are neutralised (lib/csv.ts). */
@@ -153,7 +156,7 @@ export function exportCsv(app: AppContext, session: SessionInfo | null, query: U
   const filters = { ...parseQuoteQuery(query), page: 1, pageSize: 5000 }
   const { rows } = listQuotes(app.db, filters)
   return toCsv(
-    ['reference', 'received', 'status', 'name', 'email', 'phone', 'language', 'services', 'objective', 'timing', 'description', 'requirements', 'references'],
+    ['reference', 'received', 'status', 'name', 'email', 'phone', 'language', 'services', 'objective', 'timing', 'description', 'requirements', 'references', 'kind', 'company', 'brief'],
     rows.map((quote) =>
       summaryOf(
         quote,

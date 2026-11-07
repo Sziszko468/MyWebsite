@@ -267,7 +267,7 @@ describe('quote requests', () => {
     expect(response.headers.get('content-type')).toBe('text/csv; charset=utf-8')
     expect(response.headers.get('content-disposition')).toBe('attachment; filename="quote-requests.csv"')
     const csv = await response.text()
-    expect(csv.startsWith('reference,received,status,name,email,phone,language,services,objective,timing,description,requirements,references\r\n')).toBe(true)
+    expect(csv.startsWith('reference,received,status,name,email,phone,language,services,objective,timing,description,requirements,references,kind,company,brief\r\n')).toBe(true)
     expect(csv).toContain('"\'=HYPERLINK(""http://evil.example"",""click"")"')
     expect(csv).toContain('"\'+36 Nagy, Péter"')
     expect(csv).toContain('"Line one,\nline ""two"", with a comma."')

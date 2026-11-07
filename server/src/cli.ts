@@ -6,6 +6,7 @@ import { Database } from './db/database.ts'
 import { migrate, migrationStatus } from './db/migrate.ts'
 import { seedCatalog } from './db/seed.ts'
 import { seedProjects } from './modules/projects/service.ts'
+import { seedShopDocuments } from './modules/shop/documents.ts'
 import { createLogger } from './lib/logger.ts'
 import { systemClock } from './lib/time.ts'
 import { createUser, findUserByEmail, listUsers, normalizeEmail, setPassword, setUserStatus } from './modules/auth/users.ts'
@@ -129,6 +130,8 @@ async function run(): Promise<void> {
       case 'seed': {
         const result = seedCatalog(app.context)
         const projectSeed = seedProjects(app.context)
+        const shopSeed = seedShopDocuments(app.context)
+        if (shopSeed.seeded) process.stdout.write('Loaded the tier comparison and the FULL EXPERIENCE offer.' + '\n')
         if (projectSeed.seeded) process.stdout.write(`Loaded ${projectSeed.projects} projects and ${projectSeed.media} images.
 `)
         process.stdout.write(result.seeded ? `Loaded ${result.services} services, ${result.packages} packages, ${result.extras} add-ons and ${result.faq} FAQ entries.\n` : 'The catalogue is not empty: nothing was changed.\n')

@@ -5,6 +5,7 @@ import type { QuoteDetail, QuoteItem } from '../api/types'
 import { ActivityTimeline } from '../components/ActivityTimeline'
 import { AdminButton } from '../components/AdminButton'
 import { useConfirm } from '../components/Confirm'
+import { FullExperienceBrief } from '../components/FullExperienceBrief'
 import { SelectField } from '../components/form'
 import { Icon } from '../components/Icon'
 import { InternalNotes } from '../components/InternalNotes'
@@ -125,6 +126,12 @@ export function QuoteDetailPage() {
               <dd>
                 <a href={mailtoLink(quote.email, t.quotes.title, quote.reference)}>{quote.email}</a>
               </dd>
+              {quote.company && (
+                <>
+                  <dt>{t.shop.quote.company}</dt>
+                  <dd>{quote.company}</dd>
+                </>
+              )}
               <dt>{t.common.phone}</dt>
               <dd>{quote.phone ? <a href={`tel:${quote.phone.replace(/[^\d+]/g, '')}`}>{quote.phone}</a> : t.common.noValue}</dd>
               <dt>{t.common.language}</dt>
@@ -134,6 +141,12 @@ export function QuoteDetailPage() {
             </dl>
           </DetailPanel>
 
+          {quote.kind === 'full_experience' ? (
+            <DetailPanel title={`${t.shop.quote.kind}: ${t.shop.quote.briefTitle}`}>
+              <p className={styles.hint}>{t.shop.quote.noItems}</p>
+              <FullExperienceBrief json={quote.brief_json} />
+            </DetailPanel>
+          ) : (
           <DetailPanel title={d.services}>
             <ul className={page.items}>
               {quote.items.map((item) => (
@@ -158,6 +171,7 @@ export function QuoteDetailPage() {
             </ul>
             <p className={`${styles.hint} ${page.tabPanelGap}`}>{quote.pricing.fixed.length === 0 ? d.pricingNone : fill(d.pricingSome, { sums, quoted: quote.pricing.quotedParts })}</p>
           </DetailPanel>
+          )}
 
           <DetailPanel title={d.project}>
             <dl className={styles.definitions}>

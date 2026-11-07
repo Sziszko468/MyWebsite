@@ -18,8 +18,11 @@ export type ServiceId = (typeof SERVICE_IDS)[number]
 export const NEED_IDS = ['website', 'webapp', 'improve', 'ui', 'integrations', 'unsure'] as const
 export type NeedId = (typeof NEED_IDS)[number]
 
+/** The packages, in the order the shop shows them. */
+export const PACKAGE_IDS = ['launch', 'grow', 'build', 'care'] as const satisfies ReadonlyArray<PackageId>
+
 /** A package, or a project that fits none of them (step 2 of the configurator). */
-export const PLAN_IDS = ['launch', 'grow', 'build', 'care', 'custom'] as const satisfies ReadonlyArray<PackageId | 'custom'>
+export const PLAN_IDS = [...PACKAGE_IDS, 'custom'] as const satisfies ReadonlyArray<PackageId | 'custom'>
 export type PlanId = (typeof PLAN_IDS)[number]
 
 export const isServiceId = (value: unknown): value is ServiceId => SERVICE_IDS.some((id) => id === value)

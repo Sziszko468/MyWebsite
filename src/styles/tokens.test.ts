@@ -73,6 +73,12 @@ describe.each(THEMES)('%s theme contrast (WCAG 2.x)', (theme) => {
     )
   })
 
+  describe('text on the Cobalt fill (the selected tab and button of the Grow package)', () => {
+    it('on-secondary text on the secondary colour is AA (4.5:1)', () => {
+      expect(ratio('--color-on-secondary', '--color-secondary')).toBeGreaterThanOrEqual(4.5)
+    })
+  })
+
   describe('non-text UI (3:1)', () => {
     it.each(SURFACES.filter((s) => s !== '--color-bg-subtle'))('focus ring against %s', (bg) => {
       expect(ratio('--color-focus', bg)).toBeGreaterThanOrEqual(3)

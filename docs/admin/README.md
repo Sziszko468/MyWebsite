@@ -27,6 +27,8 @@ Languages of the interface: **Hungarian and English** (the owner's two languages
 | Dashboard (Áttekintés) | `/admin` | ✓ | What needs attention now: real counts, the newest items, quick actions |
 | Inquiries (Üzenetek) | `/admin/inquiries`, `/admin/inquiries/:id` | ✓ | The contact form's messages |
 | Quote requests (Ajánlatkérések) | `/admin/quotes`, `/admin/quotes/:id` | ✓ | The quote builder's requests |
+| Package comparison (Csomag-összehasonlítás) | `/admin/comparison` | More | The tier comparison of the shop (PROMPT 09.1, [`../shop/README.md`](../shop/README.md)): each tier's label and the package it builds on, and the feature grid (what each package has) |
+| FULL EXPERIENCE | `/admin/full-experience` | More | The flagship offer: copy, stages, components, the configurator's questions and options (the budget ranges), FAQ, with a draft and an explicit publish |
 | Services & packages (Szolgáltatások és csomagok) | `/admin/services`, `/admin/services/{service,package,extra}/:key`, `/admin/services/new/{service,package,extra}` | ✓ | Services, packages, add-ons: texts in three languages, price, availability, order |
 | Website content (Weboldal-tartalom) | `/admin/content`, `/admin/content/faq/:slug`, `/admin/content/new` | More | The FAQ (the only content the website reads from the backend) |
 | Translations (Fordítások) | `/admin/translations` | More | Every translated field by language, what is missing, edited in place |
@@ -42,6 +44,10 @@ There is **no separate Media screen**: pictures are chosen and uploaded inside t
 **Inquiries.** Search (name, e-mail, subject, text, reference), status filter (New, In progress, Waiting for the client, Completed, Archived), type, a date range, sort (newest, oldest, name), 25 per page; all of it lives in the address (`?status=new&q=anna&page=2`), so a filtered list can be bookmarked and survives a reload. A row shows who, what about, when, status, and a quick status control. The detail shows the message as it arrived (as text, never as markup), the sender with a `mailto:` link, the quote requests linked to it, **internal notes** (never shown to the sender or on the website; cannot be edited or removed — the history is the point), the **activity history**, and: change status (with an optional "e-mail the sender" box, off by default, and an optional note; the only other e-mail a customer gets is the confirmation, which is off until an administrator turns it on in Notifications), archive/restore, and (admin role) delete for good after a confirmation. Opening the mail program is a link; nothing is sent by the application unless that box is ticked.
 
 **Quote requests.** The same list and detail machinery with the quote statuses (New, In review, Quoted, Accepted, Declined, Closed). The detail shows the items, add-ons and the **price each item was requested at** (as the request recorded it, unchanged), the description, aims, references, requirements and timing, and the inquiry it belongs to (a link; linking is done here). Export: CSV for the current filter (cells that could be read as spreadsheet formulas are neutralised) and JSON for one request. There is no budget field and no invented amount anywhere.
+
+**FULL EXPERIENCE requests** (PROMPT 09.1). A request that came from the flagship configurator is in the same list, marked "FULL EXPERIENCE" where a catalogue request shows its items. Its detail has no items: it shows the **brief** (each question the visitor answered and the options they chose, in the interface language, "Not sure yet" marked as such, from the labels stored when the request was sent, so it still reads right after the questions are edited), the description, the contact and the company; status, notes and activity work as for any request.
+
+**Package comparison** and **FULL EXPERIENCE** (PROMPT 09.1, [`../shop/README.md`](../shop/README.md)). Two editors for the shop's two *documents*. Each keeps a **draft** (Save draft) separate from what visitors see (Publish; Unpublish takes it back to the website's built-in copy, or turns the offer off). A line says whether the document is published as it is, saved but not published, unsaved or not published; a save made on top of someone else's newer save is refused, not merged. Every text is a field per language; lists (features, stages, components, questions, options, FAQ) are reordered with move-up/move-down buttons, never by dragging; the server's errors appear on the field they belong to. Reading needs the quote-requests permission, saving and publishing the catalogue-write one.
 
 **Services & packages.** Three tabs (services, packages, add-ons) of tables that turn into cards on a phone; per row: status (enabled/disabled), edit, move up/down (a full, validated order is sent), delete (admin role; rows that requests refer to are disabled, not deleted — the server says so). The editor has a tab per language with a mark on the tab that is half-finished (empty where another language has text), counters against each field's limit, lists as one item per line, and the price as "on request", "to be decided" or "from" an amount in EUR or HUF with a VAT mode. A published price must be complete; the server checks again and its refusals appear next to the field. **Prices exist only where the owner entered them.**
 
@@ -85,6 +91,7 @@ There is **no separate Media screen**: pictures are chosen and uploaded inside t
 | `GET/POST /api/admin/projects` · `GET/PUT/PATCH/DELETE …/projects/:id` · `GET …/projects/:id/preview` · `POST …/projects/:id/{duplicate,publish,unpublish,archive,restore}` · `GET/PUT …/project-settings` · `PUT …/project-order` · `GET …/project-preview` | The portfolio (PROMPT 13.1; [`../cms/README.md`](../cms/README.md)) |
 | `GET/POST /api/admin/media` · `DELETE …/media/:id` | The picture library: the upload takes the image itself as the request body |
 | `GET /api/admin/texts` · `PUT …/texts/:key` | The website's changeable wording |
+| `GET/PUT /api/admin/shop/documents/:code` · `POST …/shop/documents/:code/{publish,unpublish}` | The shop's two documents (`comparison`, `full_experience`): the draft and the published copy, saving a draft (`{ document, expectedUpdatedAt }`), publishing and taking it back (PROMPT 09.1) |
 
 Every route needs a session; every write needs the CSRF token and a same-origin request; each is checked for its permission in the business function, not in the route (a test calls every route without a session and with the wrong role). The old server-rendered HTML pages (`/admin/*` as forms) are **gone**: the HTML renderer, its forms and its templates were deleted, and their tests rewritten against the JSON API.
 
@@ -99,6 +106,8 @@ One forward-only migration, `server/src/db/migrations/0002_admin_dashboard.sql` 
 - `settings` (key/value, for the notification switches).
 
 No data is dropped; rolling back means restoring a backup (§9 of the backend README).
+
+PROMPT 09.1 added `0005_shop_experience.sql`: the `shop_documents` table (the comparison and the FULL EXPERIENCE offer, each a draft and a published JSON) and, on `quote_requests`, `kind` (`catalogue` or `full_experience`), `company` and `brief_json`.
 
 ## 7. Security
 

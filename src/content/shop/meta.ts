@@ -19,6 +19,22 @@ export const shopMeta = {
       'Stel in zes korte stappen samen wat je nodig hebt en vraag een offerte op maat aan.',
     ),
   },
+  fullExperience: {
+    title: tri('FULL EXPERIENCE: az ötletedtől a kész digitális termékig', 'FULL EXPERIENCE: your idea, built from zero', 'FULL EXPERIENCE: jouw idee, vanaf nul gebouwd'),
+    description: tri(
+      'Teljes weboldal vagy alkalmazás fejlesztése nulláról: a koncepciótól és a tervezéstől a fejlesztésen át az éles indulásig. Egyedi ajánlat, fix ár nélkül.',
+      'A complete website or application built from scratch: from the concept and the design, through development, to launch. A custom quote, with no fixed price.',
+      'Een complete website of applicatie vanaf nul gebouwd: van concept en ontwerp, via ontwikkeling, tot livegang. Een offerte op maat, zonder vaste prijs.',
+    ),
+  },
+  fullExperienceStart: {
+    title: tri('FULL EXPERIENCE: a projekted összeállítása', 'FULL EXPERIENCE: set up your project', 'FULL EXPERIENCE: stel je project samen'),
+    description: tri(
+      'Néhány rövid kérdés a projektedről, és személyre szabott ajánlatot kérhetsz.',
+      'A few short questions about your project, and you can ask for a tailored proposal.',
+      'Een paar korte vragen over je project en je kunt een voorstel op maat aanvragen.',
+    ),
+  },
   cart: {
     title: tri('Kosár', 'Cart', 'Winkelmand'),
     description: tri(

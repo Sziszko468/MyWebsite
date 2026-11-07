@@ -121,6 +121,17 @@ export const projects = {
   saveSettings: (body: { categories?: Category[]; requireAllLanguages?: boolean }) => put<{ categories: Category[]; requireAllLanguages: boolean }>(`${base}/project-settings`, body).then((answer) => answer.data),
 }
 
+// ---- the Shop (PROMPT 09.1): the tier comparison and the FULL EXPERIENCE offer, documents with a draft and a published copy ----
+
+import type { DocumentCode, DocumentView } from '../lib/shop'
+
+export const shop = {
+  get: <T>(code: DocumentCode, signal?: AbortSignal) => get<DocumentView<T>>(`${base}/shop/documents/${code}`, { signal }).then((answer) => answer.data),
+  save: <T>(code: DocumentCode, document: T, expectedUpdatedAt: string) => put<DocumentView<T>>(`${base}/shop/documents/${code}`, { document, expectedUpdatedAt }).then((answer) => answer.data),
+  publish: <T>(code: DocumentCode) => post<DocumentView<T>>(`${base}/shop/documents/${code}/publish`, {}).then((answer) => answer.data),
+  unpublish: <T>(code: DocumentCode) => post<DocumentView<T>>(`${base}/shop/documents/${code}/unpublish`, {}).then((answer) => answer.data),
+}
+
 export const media = {
   list: (signal?: AbortSignal) => get<MediaItem[]>(`${base}/media`, { signal }).then((answer) => answer.data),
   upload: (blob: Blob, name: string) => request<MediaItem>('POST', `${base}/media`, { rawBody: blob, query: { name } }).then((answer) => answer.data),

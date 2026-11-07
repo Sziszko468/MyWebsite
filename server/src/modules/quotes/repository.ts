@@ -8,18 +8,26 @@ export type QuoteStatus = (typeof QUOTE_STATUSES)[number]
 export const OBJECTIVES = ['present', 'leads', 'sell', 'process', 'improve', 'other'] as const
 export const TIMINGS = ['unsure', 'asap', 'weeks', 'months', 'flexible'] as const
 
+export const QUOTE_KINDS = ['catalogue', 'full_experience'] as const
+export type QuoteKind = (typeof QUOTE_KINDS)[number]
+
 export interface QuoteRow {
   id: string
   reference: string
   language: Language
+  /** `catalogue`: built from the cart (items). `full_experience`: the flagship offer's configurator (no items, a brief). */
+  kind: QuoteKind
   name: string
   email: string
   phone: string | null
+  company: string | null
   description: string
   objective: string | null
   reference_notes: string | null
   timing: string | null
   requirements: string | null
+  /** A FULL EXPERIENCE request's answers with the questions and labels as they were (modules/shop/brief.ts). */
+  brief_json: string | null
   status: QuoteStatus
   /** The inquiry an administrator linked this request to. */
   inquiry_id: string | null
@@ -53,9 +61,9 @@ export interface ItemView {
 
 export function insertQuote(db: Database, row: QuoteRow, items: readonly NewItem[]): void {
   db.run(
-    `INSERT INTO quote_requests (id, reference, language, name, email, phone, description, objective, reference_notes, timing, requirements, status, archived_at, consent_at, ip_hash, content_hash, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [row.id, row.reference, row.language, row.name, row.email, row.phone, row.description, row.objective, row.reference_notes, row.timing, row.requirements, row.status, row.archived_at, row.consent_at, row.ip_hash, row.content_hash, row.created_at, row.updated_at],
+    `INSERT INTO quote_requests (id, reference, language, kind, name, email, phone, company, description, objective, reference_notes, timing, requirements, brief_json, status, archived_at, consent_at, ip_hash, content_hash, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [row.id, row.reference, row.language, row.kind, row.name, row.email, row.phone, row.company, row.description, row.objective, row.reference_notes, row.timing, row.requirements, row.brief_json, row.status, row.archived_at, row.consent_at, row.ip_hash, row.content_hash, row.created_at, row.updated_at],
   )
   for (const item of items) {
     const result = db.run('INSERT INTO quote_request_items (quote_request_id, position, need, service_id, package_id, plan, price_snapshot) VALUES (?, ?, ?, ?, ?, ?, ?)', [

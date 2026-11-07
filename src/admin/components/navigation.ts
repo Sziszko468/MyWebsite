@@ -7,7 +7,7 @@ import type { IconName } from './Icon'
  * support. The pictures of the portfolio are chosen and uploaded inside the project editor (there is no separate library screen).
  */
 export interface NavItem {
-  id: 'dashboard' | 'inquiries' | 'quotes' | 'services' | 'projects' | 'content' | 'texts' | 'translations' | 'notifications' | 'settings'
+  id: 'dashboard' | 'inquiries' | 'quotes' | 'services' | 'comparison' | 'fullExperience' | 'projects' | 'content' | 'texts' | 'translations' | 'notifications' | 'settings'
   path: string
   icon: IconName
   /** On the phone's bottom bar (the four used most); the rest are in "More". */
@@ -19,6 +19,8 @@ export const NAVIGATION: readonly NavItem[] = [
   { id: 'inquiries', path: '/inquiries', icon: 'inbox', primary: true },
   { id: 'quotes', path: '/quotes', icon: 'quote', primary: true },
   { id: 'services', path: '/services', icon: 'layers', primary: true },
+  { id: 'comparison', path: '/comparison', icon: 'layers', primary: false },
+  { id: 'fullExperience', path: '/full-experience', icon: 'edit', primary: false },
   { id: 'projects', path: '/projects', icon: 'layers', primary: false },
   { id: 'content', path: '/content', icon: 'edit', primary: false },
   { id: 'texts', path: '/texts', icon: 'edit', primary: false },

@@ -104,9 +104,14 @@ export interface Quote {
   id: string
   reference: string
   language: Language
+  /** `full_experience`: the flagship offer's configurator (no cart lines, a brief); `catalogue`: built from the cart. */
+  kind: 'catalogue' | 'full_experience'
   name: string
   email: string
   phone: string | null
+  company: string | null
+  /** A FULL EXPERIENCE request's answers as stored (lib/brief.ts reads it). */
+  brief_json: string | null
   description: string
   objective: string | null
   reference_notes: string | null

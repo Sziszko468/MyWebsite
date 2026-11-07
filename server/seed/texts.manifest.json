@@ -960,6 +960,17 @@
    }
   },
   {
+   "key": "shop.common.nav.fullExperience",
+   "group": "Shop: common",
+   "label": "common › nav › fullExperience",
+   "placeholders": [],
+   "default": {
+    "hu": "FULL EXPERIENCE",
+    "en": "FULL EXPERIENCE",
+    "nl": "FULL EXPERIENCE"
+   }
+  },
+  {
    "key": "shop.common.nav.configure",
    "group": "Shop: common",
    "label": "common › nav › configure",
@@ -5413,6 +5424,1758 @@
     "hu": "A kosár üres.",
     "en": "The cart is empty.",
     "nl": "De winkelmand is leeg."
+   }
+  },
+  {
+   "key": "shop.tiers.compare.title",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Négy csomag, egymás mellett",
+    "en": "Four packages, side by side",
+    "nl": "Vier pakketten, naast elkaar"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.intro",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "A Launch az alap, a Grow bővebb lehetőségeket ad, a Build összetettebb megoldás, a Care pedig a folyamatos támogatás. Minden lépcső megmutatja, mit tesz hozzá az előzőhöz.",
+    "en": "Launch is the foundation, Grow adds capabilities, Build is the more advanced solution and Care is continuous support. Each step shows what it adds to the one before.",
+    "nl": "Launch is de basis, Grow voegt mogelijkheden toe, Build is de uitgebreidere oplossing en Care is voortdurende ondersteuning. Elke stap laat zien wat hij aan de vorige toevoegt."
+   }
+  },
+  {
+   "key": "shop.tiers.compare.tableLabel",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › tableLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomagok összehasonlítása: a sorok a tulajdonságok, az oszlopok a csomagok",
+    "en": "Package comparison: the rows are features, the columns are packages",
+    "nl": "Pakketvergelijking: de rijen zijn kenmerken, de kolommen zijn pakketten"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.scrollLabel",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › scrollLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Összehasonlító táblázat, vízszintesen görgethető",
+    "en": "Comparison table, scrolls sideways",
+    "nl": "Vergelijkingstabel, scrolt zijwaarts"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.featureHeader",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › featureHeader",
+   "placeholders": [],
+   "default": {
+    "hu": "Tulajdonság",
+    "en": "Feature",
+    "nl": "Kenmerk"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.legendTitle",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › legendTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Jelmagyarázat",
+    "en": "Key",
+    "nl": "Legenda"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.levels.included",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › levels › included",
+   "placeholders": [],
+   "default": {
+    "hu": "Tartalmazza",
+    "en": "Included",
+    "nl": "Inbegrepen"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.levels.addon",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › levels › addon",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítő",
+    "en": "Add-on",
+    "nl": "Optie"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.levels.custom",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › levels › custom",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi",
+    "en": "Custom",
+    "nl": "Maatwerk"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.levels.none",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › levels › none",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem része",
+    "en": "Not included",
+    "nl": "Niet inbegrepen"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.levelsLong.included",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › levelsLong › included",
+   "placeholders": [],
+   "default": {
+    "hu": "A csomag tartalmazza",
+    "en": "Included in the package",
+    "nl": "Inbegrepen in het pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.levelsLong.addon",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › levelsLong › addon",
+   "placeholders": [],
+   "default": {
+    "hu": "Választható kiegészítőként kérhető",
+    "en": "Available as an optional add-on",
+    "nl": "Beschikbaar als optionele toevoeging"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.levelsLong.custom",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › levelsLong › custom",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi szolgáltatásként kérhető",
+    "en": "Available as a custom service",
+    "nl": "Beschikbaar als dienst op maat"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.levelsLong.none",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › levelsLong › none",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem része a csomagnak",
+    "en": "Not part of the package",
+    "nl": "Geen onderdeel van het pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.adds.row",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › adds › row",
+   "placeholders": [],
+   "default": {
+    "hu": "A lépcső értéke",
+    "en": "The value of each step",
+    "nl": "De waarde van elke stap"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.adds.over",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › adds › over",
+   "placeholders": [
+    "{name}",
+    "{previous}"
+   ],
+   "default": {
+    "hu": "Amit a(z) {name} hozzátesz a(z) {previous} csomaghoz",
+    "en": "What {name} adds to {previous}",
+    "nl": "Wat {name} toevoegt aan {previous}"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.adds.start",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › adds › start",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Amivel a(z) {name} indul",
+    "en": "What {name} starts with",
+    "nl": "Waarmee {name} begint"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.adds.beside",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › adds › beside",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Amit a(z) {name} nyújt",
+    "en": "What {name} provides",
+    "nl": "Wat {name} biedt"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.adds.more",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › adds › more",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "+{count} további, lent a táblázatban",
+    "en": "+{count} more, in the table below",
+    "nl": "+{count} meer, in de tabel hieronder"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.adds.none",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › adds › none",
+   "placeholders": [],
+   "default": {
+    "hu": "Ennél a csomagnál nincs új tartalmazott tulajdonság.",
+    "en": "This package has no newly included feature.",
+    "nl": "Dit pakket heeft geen nieuw inbegrepen kenmerk."
+   }
+  },
+  {
+   "key": "shop.tiers.compare.builds",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › builds",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Épít a(z) {name} csomagra",
+    "en": "Builds on {name}",
+    "nl": "Bouwt voort op {name}"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.besideLadder",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › besideLadder",
+   "placeholders": [],
+   "default": {
+    "hu": "A többi mellett áll: a már meglévő megoldást tartja karban és fejleszti",
+    "en": "Stands beside the others: it maintains and develops what already exists",
+    "nl": "Staat naast de andere: het onderhoudt en ontwikkelt wat al bestaat"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.groups.every",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › groups › every",
+   "placeholders": [],
+   "default": {
+    "hu": "Minden csomagban",
+    "en": "In every package",
+    "nl": "In elk pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.groups.introduced",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › groups › introduced",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "A(z) {name} csomagtól",
+    "en": "Introduced with {name}",
+    "nl": "Vanaf {name}"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.groups.other",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › groups › other",
+   "placeholders": [],
+   "default": {
+    "hu": "Csak kiegészítőként vagy egyedi szolgáltatásként",
+    "en": "Only as an add-on or a custom service",
+    "nl": "Alleen als optie of dienst op maat"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.viewDetails",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › viewDetails",
+   "placeholders": [],
+   "default": {
+    "hu": "Részletek",
+    "en": "View details",
+    "nl": "Bekijk details"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.viewDetailsOf",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › viewDetailsOf",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "{name} részletei",
+    "en": "Details of {name}",
+    "nl": "Details van {name}"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.start",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › start",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Kezdés a(z) {name} csomaggal",
+    "en": "Start with {name}",
+    "nl": "Begin met {name}"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.select",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › select",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiválasztom",
+    "en": "Select",
+    "nl": "Kiezen"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.selected",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › selected",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiválasztva",
+    "en": "Selected",
+    "nl": "Gekozen"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.selectedLive",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › selectedLive",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Kiválasztott csomag: {name}",
+    "en": "Selected package: {name}",
+    "nl": "Gekozen pakket: {name}"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.notAvailable",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › notAvailable",
+   "placeholders": [],
+   "default": {
+    "hu": "Jelenleg nem elérhető",
+    "en": "Not available at the moment",
+    "nl": "Momenteel niet beschikbaar"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.summaryTitle",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › summaryTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "A kiválasztott csomag",
+    "en": "Your selection",
+    "nl": "Je keuze"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.explain",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › explain",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Mit jelent: {name}?",
+    "en": "What does {name} mean?",
+    "nl": "Wat betekent {name}?"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.showMore",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › showMore",
+   "placeholders": [],
+   "default": {
+    "hu": "Magyarázat",
+    "en": "Explanation",
+    "nl": "Uitleg"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.tabsLabel",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › tabsLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz csomagot",
+    "en": "Choose a package",
+    "nl": "Kies een pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.swipeHint",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › swipeHint",
+   "placeholders": [],
+   "default": {
+    "hu": "Húzd oldalra, vagy használd a füleket a csomagok közötti váltáshoz.",
+    "en": "Swipe sideways or use the tabs to move between packages.",
+    "nl": "Veeg zijwaarts of gebruik de tabs om tussen pakketten te wisselen."
+   }
+  },
+  {
+   "key": "shop.tiers.compare.allFeatures",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › allFeatures",
+   "placeholders": [],
+   "default": {
+    "hu": "Az összes tulajdonság",
+    "en": "All features",
+    "nl": "Alle kenmerken"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.featuresCount",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › featuresCount",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} tulajdonság",
+    "en": "{count} features",
+    "nl": "{count} kenmerken"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.pair.open",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › pair › open",
+   "placeholders": [],
+   "default": {
+    "hu": "Két csomag összehasonlítása",
+    "en": "Compare two packages",
+    "nl": "Twee pakketten vergelijken"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.pair.close",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › pair › close",
+   "placeholders": [],
+   "default": {
+    "hu": "Vissza egy csomaghoz",
+    "en": "Back to one package",
+    "nl": "Terug naar één pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.pair.left",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › pair › left",
+   "placeholders": [],
+   "default": {
+    "hu": "Első csomag",
+    "en": "First package",
+    "nl": "Eerste pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.pair.right",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › pair › right",
+   "placeholders": [],
+   "default": {
+    "hu": "Második csomag",
+    "en": "Second package",
+    "nl": "Tweede pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.pair.differencesOnly",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › pair › differencesOnly",
+   "placeholders": [],
+   "default": {
+    "hu": "Csak a különbségeket mutasd",
+    "en": "Show only the differences",
+    "nl": "Toon alleen de verschillen"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.pair.same",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › pair › same",
+   "placeholders": [],
+   "default": {
+    "hu": "A két csomag ugyanazt mutatja: válassz másikat.",
+    "en": "The two packages are the same: choose another.",
+    "nl": "De twee pakketten zijn gelijk: kies een ander."
+   }
+  },
+  {
+   "key": "shop.tiers.compare.pair.noDifferences",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › pair › noDifferences",
+   "placeholders": [],
+   "default": {
+    "hu": "Nincs különbség a két csomag között.",
+    "en": "There is no difference between the two.",
+    "nl": "Er is geen verschil tussen de twee."
+   }
+  },
+  {
+   "key": "shop.tiers.compare.pair.live",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › pair › live",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} különbség a két csomag között",
+    "en": "{count} differences between the two",
+    "nl": "{count} verschillen tussen de twee"
+   }
+  },
+  {
+   "key": "shop.tiers.compare.recommended",
+   "group": "Shop: tiers",
+   "label": "tiers › compare › recommended",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlott",
+    "en": "Recommended",
+    "nl": "Aanbevolen"
+   }
+  },
+  {
+   "key": "shop.tiers.page.eyebrow",
+   "group": "Shop: tiers",
+   "label": "tiers › page › eyebrow",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomag",
+    "en": "Package",
+    "nl": "Pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.page.breadcrumbPackages",
+   "group": "Shop: tiers",
+   "label": "tiers › page › breadcrumbPackages",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomagok",
+    "en": "Packages",
+    "nl": "Pakketten"
+   }
+  },
+  {
+   "key": "shop.tiers.page.compareAll",
+   "group": "Shop: tiers",
+   "label": "tiers › page › compareAll",
+   "placeholders": [],
+   "default": {
+    "hu": "Az összes csomag összehasonlítása",
+    "en": "Compare all packages",
+    "nl": "Alle pakketten vergelijken"
+   }
+  },
+  {
+   "key": "shop.tiers.page.sections.forWhom",
+   "group": "Shop: tiers",
+   "label": "tiers › page › sections › forWhom",
+   "placeholders": [],
+   "default": {
+    "hu": "Kinek szól",
+    "en": "Who this package is for",
+    "nl": "Voor wie dit pakket is"
+   }
+  },
+  {
+   "key": "shop.tiers.page.sections.included",
+   "group": "Shop: tiers",
+   "label": "tiers › page › sections › included",
+   "placeholders": [],
+   "default": {
+    "hu": "Tartalmazott szolgáltatások",
+    "en": "Included services",
+    "nl": "Inbegrepen diensten"
+   }
+  },
+  {
+   "key": "shop.tiers.page.sections.deliverables",
+   "group": "Shop: tiers",
+   "label": "tiers › page › sections › deliverables",
+   "placeholders": [],
+   "default": {
+    "hu": "Amit a végén a kezedben tartasz",
+    "en": "What you hold at the end",
+    "nl": "Wat je aan het eind in handen hebt"
+   }
+  },
+  {
+   "key": "shop.tiers.page.sections.features",
+   "group": "Shop: tiers",
+   "label": "tiers › page › sections › features",
+   "placeholders": [],
+   "default": {
+    "hu": "Részletes tulajdonságok",
+    "en": "Detailed features",
+    "nl": "Gedetailleerde kenmerken"
+   }
+  },
+  {
+   "key": "shop.tiers.page.sections.different",
+   "group": "Shop: tiers",
+   "label": "tiers › page › sections › different",
+   "placeholders": [],
+   "default": {
+    "hu": "Mitől más ez a lépcső",
+    "en": "What makes this tier different",
+    "nl": "Wat dit niveau anders maakt"
+   }
+  },
+  {
+   "key": "shop.tiers.page.sections.addons",
+   "group": "Shop: tiers",
+   "label": "tiers › page › sections › addons",
+   "placeholders": [],
+   "default": {
+    "hu": "Választható kiegészítők",
+    "en": "Optional add-ons",
+    "nl": "Optionele toevoegingen"
+   }
+  },
+  {
+   "key": "shop.tiers.page.sections.related",
+   "group": "Shop: tiers",
+   "label": "tiers › page › sections › related",
+   "placeholders": [],
+   "default": {
+    "hu": "Kapcsolódó szolgáltatások",
+    "en": "Related services",
+    "nl": "Gerelateerde diensten"
+   }
+  },
+  {
+   "key": "shop.tiers.page.sections.pricing",
+   "group": "Shop: tiers",
+   "label": "tiers › page › sections › pricing",
+   "placeholders": [],
+   "default": {
+    "hu": "Ár és ajánlat",
+    "en": "Pricing",
+    "nl": "Prijs"
+   }
+  },
+  {
+   "key": "shop.tiers.page.sections.faq",
+   "group": "Shop: tiers",
+   "label": "tiers › page › sections › faq",
+   "placeholders": [],
+   "default": {
+    "hu": "Gyakori kérdések",
+    "en": "Questions",
+    "nl": "Veelgestelde vragen"
+   }
+  },
+  {
+   "key": "shop.tiers.page.fits",
+   "group": "Shop: tiers",
+   "label": "tiers › page › fits",
+   "placeholders": [],
+   "default": {
+    "hu": "Illik hozzá",
+    "en": "A good fit for",
+    "nl": "Past bij"
+   }
+  },
+  {
+   "key": "shop.tiers.page.scope",
+   "group": "Shop: tiers",
+   "label": "tiers › page › scope",
+   "placeholders": [],
+   "default": {
+    "hu": "Terjedelem",
+    "en": "Scope",
+    "nl": "Omvang"
+   }
+  },
+  {
+   "key": "shop.tiers.page.customization",
+   "group": "Shop: tiers",
+   "label": "tiers › page › customization",
+   "placeholders": [],
+   "default": {
+    "hu": "Testreszabhatóság",
+    "en": "Customisation",
+    "nl": "Aanpasbaarheid"
+   }
+  },
+  {
+   "key": "shop.tiers.page.support",
+   "group": "Shop: tiers",
+   "label": "tiers › page › support",
+   "placeholders": [],
+   "default": {
+    "hu": "Támogatás",
+    "en": "Support",
+    "nl": "Ondersteuning"
+   }
+  },
+  {
+   "key": "shop.tiers.page.timeline",
+   "group": "Shop: tiers",
+   "label": "tiers › page › timeline",
+   "placeholders": [],
+   "default": {
+    "hu": "Határidő",
+    "en": "Timeline",
+    "nl": "Doorlooptijd"
+   }
+  },
+  {
+   "key": "shop.tiers.page.featureGroups.included",
+   "group": "Shop: tiers",
+   "label": "tiers › page › featureGroups › included",
+   "placeholders": [],
+   "default": {
+    "hu": "A csomag tartalmazza",
+    "en": "Included in the package",
+    "nl": "Inbegrepen in het pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.page.featureGroups.addon",
+   "group": "Shop: tiers",
+   "label": "tiers › page › featureGroups › addon",
+   "placeholders": [],
+   "default": {
+    "hu": "Választható kiegészítőként",
+    "en": "Available as an optional add-on",
+    "nl": "Beschikbaar als optionele toevoeging"
+   }
+  },
+  {
+   "key": "shop.tiers.page.featureGroups.custom",
+   "group": "Shop: tiers",
+   "label": "tiers › page › featureGroups › custom",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi szolgáltatásként",
+    "en": "Available as a custom service",
+    "nl": "Beschikbaar als dienst op maat"
+   }
+  },
+  {
+   "key": "shop.tiers.page.featureGroups.none",
+   "group": "Shop: tiers",
+   "label": "tiers › page › featureGroups › none",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem része a csomagnak",
+    "en": "Not part of the package",
+    "nl": "Geen onderdeel van het pakket"
+   }
+  },
+  {
+   "key": "shop.tiers.page.nextTier",
+   "group": "Shop: tiers",
+   "label": "tiers › page › nextTier",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "A következő lépcső: {name}",
+    "en": "The next step up: {name}",
+    "nl": "De volgende stap: {name}"
+   }
+  },
+  {
+   "key": "shop.tiers.page.previousTier",
+   "group": "Shop: tiers",
+   "label": "tiers › page › previousTier",
+   "placeholders": [
+    "{name}"
+   ],
+   "default": {
+    "hu": "Az előző lépcső: {name}",
+    "en": "The step below: {name}",
+    "nl": "De stap eronder: {name}"
+   }
+  },
+  {
+   "key": "shop.tiers.page.neighbours",
+   "group": "Shop: tiers",
+   "label": "tiers › page › neighbours",
+   "placeholders": [],
+   "default": {
+    "hu": "Szomszédos csomagok",
+    "en": "Neighbouring packages",
+    "nl": "Naastgelegen pakketten"
+   }
+  },
+  {
+   "key": "shop.tiers.page.noAddons",
+   "group": "Shop: tiers",
+   "label": "tiers › page › noAddons",
+   "placeholders": [],
+   "default": {
+    "hu": "Ehhez a csomaghoz jelenleg nincs választható kiegészítő.",
+    "en": "There are no optional add-ons for this package at the moment.",
+    "nl": "Er zijn momenteel geen optionele toevoegingen voor dit pakket."
+   }
+  },
+  {
+   "key": "shop.tiers.page.addonsHint",
+   "group": "Shop: tiers",
+   "label": "tiers › page › addonsHint",
+   "placeholders": [],
+   "default": {
+    "hu": "A kiegészítők a kosárban vagy az összeállítóban választhatók, és az ajánlat rögzíti őket.",
+    "en": "Add-ons are chosen in the cart or the request builder and written down in the quote.",
+    "nl": "Opties kies je in de winkelmand of de aanvraagbouwer en ze worden in de offerte vastgelegd."
+   }
+  },
+  {
+   "key": "shop.tiers.page.ctaTitle",
+   "group": "Shop: tiers",
+   "label": "tiers › page › ctaTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Indítsuk el ezzel a csomaggal?",
+    "en": "Shall we start with this package?",
+    "nl": "Zullen we met dit pakket beginnen?"
+   }
+  },
+  {
+   "key": "shop.tiers.page.ctaText",
+   "group": "Shop: tiers",
+   "label": "tiers › page › ctaText",
+   "placeholders": [],
+   "default": {
+    "hu": "Az ajánlatkérés semmire nem köt: a pontos tartalmat és az árat az ajánlat rögzíti.",
+    "en": "Asking commits you to nothing: the exact scope and price are written in the quote.",
+    "nl": "Een aanvraag verplicht tot niets: de exacte omvang en prijs staan in de offerte."
+   }
+  },
+  {
+   "key": "shop.tiers.page.notFoundTitle",
+   "group": "Shop: tiers",
+   "label": "tiers › page › notFoundTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez a csomag nem található",
+    "en": "This package was not found",
+    "nl": "Dit pakket is niet gevonden"
+   }
+  },
+  {
+   "key": "shop.experience.band.kicker",
+   "group": "Shop: experience",
+   "label": "experience › band › kicker",
+   "placeholders": [],
+   "default": {
+    "hu": "Zászlóshajó ajánlat",
+    "en": "The flagship offer",
+    "nl": "Het vlaggenschip"
+   }
+  },
+  {
+   "key": "shop.experience.band.note",
+   "group": "Shop: experience",
+   "label": "experience › band › note",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem csomag és nincs ára: egyedi ajánlat.",
+    "en": "Not a package and it has no price: a custom quote.",
+    "nl": "Geen pakket en het heeft geen prijs: een offerte op maat."
+   }
+  },
+  {
+   "key": "shop.experience.band.stagesLabel",
+   "group": "Shop: experience",
+   "label": "experience › band › stagesLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Fejlesztési szakaszok",
+    "en": "Development stages",
+    "nl": "Ontwikkelfasen"
+   }
+  },
+  {
+   "key": "shop.experience.band.moreStages",
+   "group": "Shop: experience",
+   "label": "experience › band › moreStages",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "+{count} további szakasz",
+    "en": "+{count} more stages",
+    "nl": "+{count} andere fasen"
+   }
+  },
+  {
+   "key": "shop.experience.page.includedTitle",
+   "group": "Shop: experience",
+   "label": "experience › page › includedTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Amit a FULL EXPERIENCE tartalmazhat",
+    "en": "What FULL EXPERIENCE can include",
+    "nl": "Wat FULL EXPERIENCE kan omvatten"
+   }
+  },
+  {
+   "key": "shop.experience.page.includedIntro",
+   "group": "Shop: experience",
+   "label": "experience › page › includedIntro",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy projekt teljes életútja a feltárástól az éles indulásig. Nem minden projekthez kell minden szakasz: a terjedelem a te követelményeidhez igazodik.",
+    "en": "The whole life of a project, from discovery to launch. Not every project needs every stage: the scope follows your requirements.",
+    "nl": "De hele levensloop van een project, van verkenning tot livegang. Niet elk project heeft elke fase nodig: de omvang volgt jouw wensen."
+   }
+  },
+  {
+   "key": "shop.experience.page.stage",
+   "group": "Shop: experience",
+   "label": "experience › page › stage",
+   "placeholders": [
+    "{n}"
+   ],
+   "default": {
+    "hu": "{n}. szakasz",
+    "en": "Stage {n}",
+    "nl": "Fase {n}"
+   }
+  },
+  {
+   "key": "shop.experience.page.componentsTitle",
+   "group": "Shop: experience",
+   "label": "experience › page › componentsTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Választható összetevők",
+    "en": "Optional components",
+    "nl": "Optionele onderdelen"
+   }
+  },
+  {
+   "key": "shop.experience.page.componentsIntro",
+   "group": "Shop: experience",
+   "label": "experience › page › componentsIntro",
+   "placeholders": [],
+   "default": {
+    "hu": "Azt építjük meg, amire a projektnek szüksége van, nem többet.",
+    "en": "We build what the project needs, and no more.",
+    "nl": "We bouwen wat het project nodig heeft, niet meer."
+   }
+  },
+  {
+   "key": "shop.experience.page.customTitle",
+   "group": "Shop: experience",
+   "label": "experience › page › customTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi ajánlat, nem árlista",
+    "en": "A custom quote, not a price list",
+    "nl": "Een offerte op maat, geen prijslijst"
+   }
+  },
+  {
+   "key": "shop.experience.page.customText",
+   "group": "Shop: experience",
+   "label": "experience › page › customText",
+   "placeholders": [],
+   "default": {
+    "hu": "A FULL EXPERIENCE-nek nincs feltüntetett ára, mert az ajánlat a követelményeid ismeretében készül. Töltsd ki a rövid kérdőívet, és személyre szabott javaslatot kapsz.",
+    "en": "FULL EXPERIENCE has no price shown, because the quote is written once your requirements are known. Answer a few short questions and you get a tailored proposal.",
+    "nl": "FULL EXPERIENCE heeft geen getoonde prijs, omdat de offerte wordt opgesteld als jouw wensen bekend zijn. Beantwoord een paar korte vragen en je krijgt een voorstel op maat."
+   }
+  },
+  {
+   "key": "shop.experience.page.howTitle",
+   "group": "Shop: experience",
+   "label": "experience › page › howTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Hogyan működik",
+    "en": "How it works",
+    "nl": "Hoe het werkt"
+   }
+  },
+  {
+   "key": "shop.experience.page.how.0",
+   "group": "Shop: experience",
+   "label": "experience › page › how #0",
+   "placeholders": [],
+   "default": {
+    "hu": "Válaszolsz néhány rövid kérdésre, a nem kötelezőket kihagyhatod.",
+    "en": "You answer a few short questions; the optional ones can be skipped.",
+    "nl": "Je beantwoordt een paar korte vragen; de optionele kun je overslaan."
+   }
+  },
+  {
+   "key": "shop.experience.page.how.1",
+   "group": "Shop: experience",
+   "label": "experience › page › how #1",
+   "placeholders": [],
+   "default": {
+    "hu": "Leírod az ötletet a saját szavaiddal, és megadod az elérhetőségedet.",
+    "en": "You describe the idea in your own words and leave your contact details.",
+    "nl": "Je beschrijft het idee in je eigen woorden en laat je contactgegevens achter."
+   }
+  },
+  {
+   "key": "shop.experience.page.how.2",
+   "group": "Shop: experience",
+   "label": "experience › page › how #2",
+   "placeholders": [],
+   "default": {
+    "hu": "Áttekintjük a válaszaidat, és személyre szabott javaslattal jelentkezünk. Az ajánlatkérés semmire nem köt.",
+    "en": "We go through your answers and come back with a tailored proposal. Asking commits you to nothing.",
+    "nl": "We bekijken je antwoorden en komen terug met een voorstel op maat. Een aanvraag verplicht tot niets."
+   }
+  },
+  {
+   "key": "shop.experience.page.faqTitle",
+   "group": "Shop: experience",
+   "label": "experience › page › faqTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Kérdések a FULL EXPERIENCE-ről",
+    "en": "Questions about FULL EXPERIENCE",
+    "nl": "Vragen over FULL EXPERIENCE"
+   }
+  },
+  {
+   "key": "shop.experience.page.finalTitle",
+   "group": "Shop: experience",
+   "label": "experience › page › finalTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Van egy ötleted? Építsük meg nulláról.",
+    "en": "Have an idea? Let’s build it from zero.",
+    "nl": "Heb je een idee? Laten we het vanaf nul bouwen."
+   }
+  },
+  {
+   "key": "shop.experience.page.finalText",
+   "group": "Shop: experience",
+   "label": "experience › page › finalText",
+   "placeholders": [],
+   "default": {
+    "hu": "Néhány rövid kérdés, és tudjuk, hol kezdjük. Semmire nem kötelez.",
+    "en": "A few short questions and we know where to start. It commits you to nothing.",
+    "nl": "Een paar korte vragen en we weten waar we beginnen. Het verplicht tot niets."
+   }
+  },
+  {
+   "key": "shop.experience.page.alsoPackages",
+   "group": "Shop: experience",
+   "label": "experience › page › alsoPackages",
+   "placeholders": [],
+   "default": {
+    "hu": "Inkább egy kész csomagból indulnál?",
+    "en": "Would you rather start from a ready-made package?",
+    "nl": "Begin je liever met een kant-en-klaar pakket?"
+   }
+  },
+  {
+   "key": "shop.experience.page.seePackages",
+   "group": "Shop: experience",
+   "label": "experience › page › seePackages",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomagok megtekintése",
+    "en": "See the packages",
+    "nl": "Bekijk de pakketten"
+   }
+  },
+  {
+   "key": "shop.experience.start.title",
+   "group": "Shop: experience",
+   "label": "experience › start › title",
+   "placeholders": [],
+   "default": {
+    "hu": "A projekted összeállítása",
+    "en": "Set up your project",
+    "nl": "Stel je project samen"
+   }
+  },
+  {
+   "key": "shop.experience.start.progress",
+   "group": "Shop: experience",
+   "label": "experience › start › progress",
+   "placeholders": [
+    "{n}",
+    "{total}"
+   ],
+   "default": {
+    "hu": "{n}. lépés / {total}",
+    "en": "Step {n} of {total}",
+    "nl": "Stap {n} van {total}"
+   }
+  },
+  {
+   "key": "shop.experience.start.progressLabel",
+   "group": "Shop: experience",
+   "label": "experience › start › progressLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "Haladás",
+    "en": "Progress",
+    "nl": "Voortgang"
+   }
+  },
+  {
+   "key": "shop.experience.start.optional",
+   "group": "Shop: experience",
+   "label": "experience › start › optional",
+   "placeholders": [],
+   "default": {
+    "hu": "nem kötelező",
+    "en": "optional",
+    "nl": "optioneel"
+   }
+  },
+  {
+   "key": "shop.experience.start.required",
+   "group": "Shop: experience",
+   "label": "experience › start › required",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz egy lehetőséget a folytatáshoz.",
+    "en": "Choose an option to continue.",
+    "nl": "Kies een optie om verder te gaan."
+   }
+  },
+  {
+   "key": "shop.experience.start.chooseOne",
+   "group": "Shop: experience",
+   "label": "experience › start › chooseOne",
+   "placeholders": [],
+   "default": {
+    "hu": "Válassz egyet",
+    "en": "Choose one",
+    "nl": "Kies er één"
+   }
+  },
+  {
+   "key": "shop.experience.start.chooseAny",
+   "group": "Shop: experience",
+   "label": "experience › start › chooseAny",
+   "placeholders": [],
+   "default": {
+    "hu": "Több is választható",
+    "en": "Choose any that apply",
+    "nl": "Kies wat van toepassing is"
+   }
+  },
+  {
+   "key": "shop.experience.start.selectedCount",
+   "group": "Shop: experience",
+   "label": "experience › start › selectedCount",
+   "placeholders": [
+    "{count}"
+   ],
+   "default": {
+    "hu": "{count} kiválasztva",
+    "en": "{count} selected",
+    "nl": "{count} gekozen"
+   }
+  },
+  {
+   "key": "shop.experience.start.skip",
+   "group": "Shop: experience",
+   "label": "experience › start › skip",
+   "placeholders": [],
+   "default": {
+    "hu": "Kihagyás",
+    "en": "Skip",
+    "nl": "Overslaan"
+   }
+  },
+  {
+   "key": "shop.experience.start.next",
+   "group": "Shop: experience",
+   "label": "experience › start › next",
+   "placeholders": [],
+   "default": {
+    "hu": "Tovább",
+    "en": "Next",
+    "nl": "Volgende"
+   }
+  },
+  {
+   "key": "shop.experience.start.back",
+   "group": "Shop: experience",
+   "label": "experience › start › back",
+   "placeholders": [],
+   "default": {
+    "hu": "Vissza",
+    "en": "Back",
+    "nl": "Terug"
+   }
+  },
+  {
+   "key": "shop.experience.start.descriptionTitle",
+   "group": "Shop: experience",
+   "label": "experience › start › descriptionTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Meséld el az ötletet",
+    "en": "Tell us about the idea",
+    "nl": "Vertel over het idee"
+   }
+  },
+  {
+   "key": "shop.experience.start.descriptionLabel",
+   "group": "Shop: experience",
+   "label": "experience › start › descriptionLabel",
+   "placeholders": [],
+   "default": {
+    "hu": "A projekt leírása",
+    "en": "Project description",
+    "nl": "Projectbeschrijving"
+   }
+  },
+  {
+   "key": "shop.experience.start.descriptionHint",
+   "group": "Shop: experience",
+   "label": "experience › start › descriptionHint",
+   "placeholders": [],
+   "default": {
+    "hu": "Saját szavaiddal: mit szeretnél létrehozni, kinek, és mi a legfontosabb benne?",
+    "en": "In your own words: what do you want to create, for whom, and what matters most?",
+    "nl": "In je eigen woorden: wat wil je maken, voor wie en wat is het belangrijkst?"
+   }
+  },
+  {
+   "key": "shop.experience.start.descriptionCount",
+   "group": "Shop: experience",
+   "label": "experience › start › descriptionCount",
+   "placeholders": [
+    "{count}",
+    "{max}"
+   ],
+   "default": {
+    "hu": "{count} / {max} karakter",
+    "en": "{count} / {max} characters",
+    "nl": "{count} / {max} tekens"
+   }
+  },
+  {
+   "key": "shop.experience.start.contactTitle",
+   "group": "Shop: experience",
+   "label": "experience › start › contactTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Hogyan érünk el?",
+    "en": "How can we reach you?",
+    "nl": "Hoe bereiken we je?"
+   }
+  },
+  {
+   "key": "shop.experience.start.name",
+   "group": "Shop: experience",
+   "label": "experience › start › name",
+   "placeholders": [],
+   "default": {
+    "hu": "Neved",
+    "en": "Your name",
+    "nl": "Je naam"
+   }
+  },
+  {
+   "key": "shop.experience.start.email",
+   "group": "Shop: experience",
+   "label": "experience › start › email",
+   "placeholders": [],
+   "default": {
+    "hu": "E-mail-címed",
+    "en": "Your e-mail address",
+    "nl": "Je e-mailadres"
+   }
+  },
+  {
+   "key": "shop.experience.start.emailHint",
+   "group": "Shop: experience",
+   "label": "experience › start › emailHint",
+   "placeholders": [],
+   "default": {
+    "hu": "Erre a címre válaszolunk.",
+    "en": "This is where we reply.",
+    "nl": "Hier antwoorden we."
+   }
+  },
+  {
+   "key": "shop.experience.start.company",
+   "group": "Shop: experience",
+   "label": "experience › start › company",
+   "placeholders": [],
+   "default": {
+    "hu": "Cég neve",
+    "en": "Company name",
+    "nl": "Bedrijfsnaam"
+   }
+  },
+  {
+   "key": "shop.experience.start.preferredLanguage",
+   "group": "Shop: experience",
+   "label": "experience › start › preferredLanguage",
+   "placeholders": [],
+   "default": {
+    "hu": "Milyen nyelven válaszoljunk?",
+    "en": "Which language should we reply in?",
+    "nl": "In welke taal antwoorden we?"
+   }
+  },
+  {
+   "key": "shop.experience.start.languages.hu",
+   "group": "Shop: experience",
+   "label": "experience › start › languages › hu",
+   "placeholders": [],
+   "default": {
+    "hu": "Magyar",
+    "en": "Hungarian",
+    "nl": "Hongaars"
+   }
+  },
+  {
+   "key": "shop.experience.start.languages.en",
+   "group": "Shop: experience",
+   "label": "experience › start › languages › en",
+   "placeholders": [],
+   "default": {
+    "hu": "Angol",
+    "en": "English",
+    "nl": "Engels"
+   }
+  },
+  {
+   "key": "shop.experience.start.languages.nl",
+   "group": "Shop: experience",
+   "label": "experience › start › languages › nl",
+   "placeholders": [],
+   "default": {
+    "hu": "Holland",
+    "en": "Dutch",
+    "nl": "Nederlands"
+   }
+  },
+  {
+   "key": "shop.experience.start.consent",
+   "group": "Shop: experience",
+   "label": "experience › start › consent",
+   "placeholders": [],
+   "default": {
+    "hu": "Tudomásul veszem, hogy a megadott adataimat az ajánlat elkészítéséhez használják fel.",
+    "en": "I understand that my details are used to prepare the quote.",
+    "nl": "Ik begrijp dat mijn gegevens worden gebruikt om de offerte op te stellen."
+   }
+  },
+  {
+   "key": "shop.experience.start.privacy",
+   "group": "Shop: experience",
+   "label": "experience › start › privacy",
+   "placeholders": [],
+   "default": {
+    "hu": "Adatkezelési tájékoztató",
+    "en": "Privacy notice",
+    "nl": "Privacyverklaring"
+   }
+  },
+  {
+   "key": "shop.experience.start.memory",
+   "group": "Shop: experience",
+   "label": "experience › start › memory",
+   "placeholders": [],
+   "default": {
+    "hu": "A válaszaid csak ebben a lapban maradnak meg, amíg el nem küldöd őket.",
+    "en": "Your answers stay on this page only, until you send them.",
+    "nl": "Je antwoorden blijven alleen op deze pagina staan, tot je ze verstuurt."
+   }
+  },
+  {
+   "key": "shop.experience.start.reviewTitle",
+   "group": "Shop: experience",
+   "label": "experience › start › reviewTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "A válaszaid",
+    "en": "Your answers",
+    "nl": "Je antwoorden"
+   }
+  },
+  {
+   "key": "shop.experience.start.reviewSkipped",
+   "group": "Shop: experience",
+   "label": "experience › start › reviewSkipped",
+   "placeholders": [],
+   "default": {
+    "hu": "kihagyva",
+    "en": "skipped",
+    "nl": "overgeslagen"
+   }
+  },
+  {
+   "key": "shop.experience.start.change",
+   "group": "Shop: experience",
+   "label": "experience › start › change",
+   "placeholders": [],
+   "default": {
+    "hu": "Módosítás",
+    "en": "Change",
+    "nl": "Wijzigen"
+   }
+  },
+  {
+   "key": "shop.experience.start.changeAnswer",
+   "group": "Shop: experience",
+   "label": "experience › start › changeAnswer",
+   "placeholders": [
+    "{title}"
+   ],
+   "default": {
+    "hu": "{title}: módosítás",
+    "en": "Change: {title}",
+    "nl": "Wijzigen: {title}"
+   }
+  },
+  {
+   "key": "shop.experience.start.send",
+   "group": "Shop: experience",
+   "label": "experience › start › send",
+   "placeholders": [],
+   "default": {
+    "hu": "Ajánlatkérés küldése",
+    "en": "Send the request",
+    "nl": "Aanvraag versturen"
+   }
+  },
+  {
+   "key": "shop.experience.start.sending",
+   "group": "Shop: experience",
+   "label": "experience › start › sending",
+   "placeholders": [],
+   "default": {
+    "hu": "Küldés…",
+    "en": "Sending…",
+    "nl": "Versturen…"
+   }
+  },
+  {
+   "key": "shop.experience.start.prepare",
+   "group": "Shop: experience",
+   "label": "experience › start › prepare",
+   "placeholders": [],
+   "default": {
+    "hu": "Összefoglaló elkészítése",
+    "en": "Prepare the summary",
+    "nl": "Samenvatting voorbereiden"
+   }
+  },
+  {
+   "key": "shop.experience.start.errors.required",
+   "group": "Shop: experience",
+   "label": "experience › start › errors › required",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez a mező kötelező.",
+    "en": "This field is required.",
+    "nl": "Dit veld is verplicht."
+   }
+  },
+  {
+   "key": "shop.experience.start.errors.tooShort",
+   "group": "Shop: experience",
+   "label": "experience › start › errors › tooShort",
+   "placeholders": [
+    "{min}"
+   ],
+   "default": {
+    "hu": "Ez túl rövid: legalább {min} karakter kell.",
+    "en": "This is too short: at least {min} characters.",
+    "nl": "Dit is te kort: minstens {min} tekens."
+   }
+  },
+  {
+   "key": "shop.experience.start.errors.tooLong",
+   "group": "Shop: experience",
+   "label": "experience › start › errors › tooLong",
+   "placeholders": [
+    "{max}"
+   ],
+   "default": {
+    "hu": "Ez túl hosszú: legfeljebb {max} karakter lehet.",
+    "en": "This is too long: at most {max} characters.",
+    "nl": "Dit is te lang: hoogstens {max} tekens."
+   }
+  },
+  {
+   "key": "shop.experience.start.errors.invalidEmail",
+   "group": "Shop: experience",
+   "label": "experience › start › errors › invalidEmail",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez nem tűnik érvényes e-mail-címnek.",
+    "en": "This does not look like a valid e-mail address.",
+    "nl": "Dit lijkt geen geldig e-mailadres."
+   }
+  },
+  {
+   "key": "shop.experience.start.errors.consentRequired",
+   "group": "Shop: experience",
+   "label": "experience › start › errors › consentRequired",
+   "placeholders": [],
+   "default": {
+    "hu": "A küldéshez el kell fogadnod.",
+    "en": "Please tick this to send.",
+    "nl": "Vink dit aan om te versturen."
+   }
+  },
+  {
+   "key": "shop.experience.start.sent.title",
+   "group": "Shop: experience",
+   "label": "experience › start › sent › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Megkaptuk a kérésedet",
+    "en": "We have your request",
+    "nl": "We hebben je aanvraag"
+   }
+  },
+  {
+   "key": "shop.experience.start.sent.text",
+   "group": "Shop: experience",
+   "label": "experience › start › sent › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Köszönjük! Átnézzük a válaszaidat, és a megadott e-mail-címen jelentkezünk.",
+    "en": "Thank you! We will go through your answers and get back to you at the e-mail address you gave.",
+    "nl": "Bedankt! We bekijken je antwoorden en nemen contact met je op via het e-mailadres dat je opgaf."
+   }
+  },
+  {
+   "key": "shop.experience.start.sent.again",
+   "group": "Shop: experience",
+   "label": "experience › start › sent › again",
+   "placeholders": [],
+   "default": {
+    "hu": "Új kérés indítása",
+    "en": "Start another request",
+    "nl": "Nog een aanvraag starten"
+   }
+  },
+  {
+   "key": "shop.experience.start.sent.home",
+   "group": "Shop: experience",
+   "label": "experience › start › sent › home",
+   "placeholders": [],
+   "default": {
+    "hu": "Vissza a szolgáltatásokhoz",
+    "en": "Back to the services",
+    "nl": "Terug naar de diensten"
+   }
+  },
+  {
+   "key": "shop.experience.start.failed.title",
+   "group": "Shop: experience",
+   "label": "experience › start › failed › title",
+   "placeholders": [],
+   "default": {
+    "hu": "A kérés nem ment el",
+    "en": "The request was not sent",
+    "nl": "De aanvraag is niet verstuurd"
+   }
+  },
+  {
+   "key": "shop.experience.start.failed.network",
+   "group": "Shop: experience",
+   "label": "experience › start › failed › network",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem sikerült kapcsolódni. A válaszaid megvannak: próbáld újra.",
+    "en": "We could not connect. Your answers are still here: try again.",
+    "nl": "Verbinden is niet gelukt. Je antwoorden staan er nog: probeer het opnieuw."
+   }
+  },
+  {
+   "key": "shop.experience.start.failed.timeout",
+   "group": "Shop: experience",
+   "label": "experience › start › failed › timeout",
+   "placeholders": [],
+   "default": {
+    "hu": "A küldés túl sokáig tartott. A válaszaid megvannak: próbáld újra.",
+    "en": "Sending took too long. Your answers are still here: try again.",
+    "nl": "Het versturen duurde te lang. Je antwoorden staan er nog: probeer het opnieuw."
+   }
+  },
+  {
+   "key": "shop.experience.start.failed.rejected",
+   "group": "Shop: experience",
+   "label": "experience › start › failed › rejected",
+   "placeholders": [],
+   "default": {
+    "hu": "A kérést nem fogadtuk el. Nézd át a válaszaidat, és próbáld újra.",
+    "en": "The request was not accepted. Check your answers and try again.",
+    "nl": "De aanvraag is niet geaccepteerd. Controleer je antwoorden en probeer het opnieuw."
+   }
+  },
+  {
+   "key": "shop.experience.start.unavailable.title",
+   "group": "Shop: experience",
+   "label": "experience › start › unavailable › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Az online küldés még nincs bekötve",
+    "en": "Online sending is not connected yet",
+    "nl": "Online versturen is nog niet gekoppeld"
+   }
+  },
+  {
+   "key": "shop.experience.start.unavailable.text",
+   "group": "Shop: experience",
+   "label": "experience › start › unavailable › text",
+   "placeholders": [],
+   "default": {
+    "hu": "A kérdőívet kitöltheted, de a kérés most nem tud elmenni erről az oldalról. Az összefoglalót kimásolhatod.",
+    "en": "You can go through the questions, but the request cannot leave this page right now. You can copy the summary.",
+    "nl": "Je kunt de vragen doorlopen, maar de aanvraag kan deze pagina nu niet verlaten. Je kunt de samenvatting kopiëren."
+   }
+  },
+  {
+   "key": "shop.experience.start.unavailable.copy",
+   "group": "Shop: experience",
+   "label": "experience › start › unavailable › copy",
+   "placeholders": [],
+   "default": {
+    "hu": "Összefoglaló másolása",
+    "en": "Copy the summary",
+    "nl": "Samenvatting kopiëren"
+   }
+  },
+  {
+   "key": "shop.experience.start.unavailable.copied",
+   "group": "Shop: experience",
+   "label": "experience › start › unavailable › copied",
+   "placeholders": [],
+   "default": {
+    "hu": "Kimásolva.",
+    "en": "Copied.",
+    "nl": "Gekopieerd."
+   }
+  },
+  {
+   "key": "shop.experience.start.unavailable.copyFailed",
+   "group": "Shop: experience",
+   "label": "experience › start › unavailable › copyFailed",
+   "placeholders": [],
+   "default": {
+    "hu": "A másolás nem sikerült: jelöld ki a szöveget, és másold kézzel.",
+    "en": "Copying failed: select the text and copy it yourself.",
+    "nl": "Kopiëren is mislukt: selecteer de tekst en kopieer die zelf."
+   }
+  },
+  {
+   "key": "shop.experience.start.unavailable.mail",
+   "group": "Shop: experience",
+   "label": "experience › start › unavailable › mail",
+   "placeholders": [],
+   "default": {
+    "hu": "E-mail megnyitása",
+    "en": "Open an e-mail",
+    "nl": "E-mail openen"
+   }
+  },
+  {
+   "key": "shop.experience.start.unavailable.mailNote",
+   "group": "Shop: experience",
+   "label": "experience › start › unavailable › mailNote",
+   "placeholders": [],
+   "default": {
+    "hu": "Az e-mail csak akkor megy el, ha te elküldöd.",
+    "en": "The e-mail only leaves when you send it.",
+    "nl": "De e-mail vertrekt pas als jij hem verstuurt."
+   }
+  },
+  {
+   "key": "shop.experience.start.unavailable.subject",
+   "group": "Shop: experience",
+   "label": "experience › start › unavailable › subject",
+   "placeholders": [],
+   "default": {
+    "hu": "FULL EXPERIENCE ajánlatkérés",
+    "en": "FULL EXPERIENCE quote request",
+    "nl": "FULL EXPERIENCE offerteaanvraag"
+   }
+  },
+  {
+   "key": "shop.experience.start.summaryHeading",
+   "group": "Shop: experience",
+   "label": "experience › start › summaryHeading",
+   "placeholders": [],
+   "default": {
+    "hu": "A kérésed összefoglalója",
+    "en": "Your request summary",
+    "nl": "Samenvatting van je aanvraag"
+   }
+  },
+  {
+   "key": "shop.experience.start.summaryDescription",
+   "group": "Shop: experience",
+   "label": "experience › start › summaryDescription",
+   "placeholders": [],
+   "default": {
+    "hu": "Leírás",
+    "en": "Description",
+    "nl": "Beschrijving"
+   }
+  },
+  {
+   "key": "shop.experience.start.summaryContact",
+   "group": "Shop: experience",
+   "label": "experience › start › summaryContact",
+   "placeholders": [],
+   "default": {
+    "hu": "Elérhetőség",
+    "en": "Contact",
+    "nl": "Contact"
    }
   }
  ]

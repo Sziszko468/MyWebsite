@@ -1,7 +1,9 @@
 import { experimentPath, playableExperiments, type LabId } from '../content/lab'
 import { projects } from '../content/projects'
-import { SERVICE_IDS, type ServiceId } from '../content/services/ids'
+import type { PackageId } from '../content/packages'
+import { PACKAGE_IDS, SERVICE_IDS, type ServiceId } from '../content/services/ids'
 import { LANGUAGES, type Language } from '../i18n/config'
+import { packagePath } from '../shop/packagePaths'
 import { SHOP_PATHS, servicePath } from '../shop/paths'
 
 /**
@@ -17,11 +19,13 @@ export type ProjectPageId = `project-${string}`
 export type LabPageId = `lab-${LabId}`
 /** A service's product page: `service-website`, `service-webapp`... */
 export type ServicePageId = `service-${ServiceId}`
-/** The shop's two working pages, under /services. */
-export type ShopPageId = 'configure' | 'cart'
+/** A package's own page: `package-launch`, `package-grow`... */
+export type PackagePageId = `package-${PackageId}`
+/** The shop's working pages and the flagship offer's two pages, under /services. */
+export type ShopPageId = 'configure' | 'cart' | 'full-experience' | 'full-experience-start'
 /** The privacy and cookie notice, linked from the footer. */
 export type LegalPageId = 'privacy'
-export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | ShopPageId | LegalPageId | 'designSystem'
+export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | 'designSystem'
 
 export interface PageDef<Id extends PageId = PageId> {
   id: Id
@@ -88,14 +92,23 @@ export function labIdOfPage(id: PageId): LabId | null {
 }
 
 /**
- * The shop's pages beneath /services: one product page per service, the request builder and the
- * cart. They are not in the navigation (the Services page leads to them) and exist in every language.
+ * The shop's pages beneath /services: one product page per service and one per package, the flagship FULL EXPERIENCE page,
+ * its configurator, the request builder and the cart. They are not in the navigation (the Services page leads to them) and
+ * exist in every language. The builders and the cart are a visitor's working state, so they are not indexed.
  */
-export const SHOP_PAGES: readonly PageDef<ServicePageId | ShopPageId>[] = [
+export const SHOP_PAGES: readonly PageDef<ServicePageId | PackagePageId | ShopPageId>[] = [
   ...SERVICE_IDS.map((id) => page<ServicePageId>(`service-${id}`, servicePath(id))),
+  ...PACKAGE_IDS.map((id) => page<PackagePageId>(`package-${id}`, packagePath(id))),
+  page<ShopPageId>('full-experience', SHOP_PATHS.fullExperience),
+  page<ShopPageId>('full-experience-start', SHOP_PATHS.fullExperienceStart, LANGUAGES, false),
   page<ShopPageId>('configure', SHOP_PATHS.configure, LANGUAGES, false),
   page<ShopPageId>('cart', SHOP_PATHS.cart, LANGUAGES, false),
 ]
+
+/** The package a page shows, or `null` when the page is not a package's. */
+export function packageIdOfPage(id: PageId): PackageId | null {
+  return id.startsWith('package-') ? (id.slice('package-'.length) as PackageId) : null
+}
 
 /** The service a page shows, or `null` when the page is not a service's. */
 export function serviceIdOfPage(id: PageId): ServiceId | null {

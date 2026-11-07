@@ -1,11 +1,13 @@
 import { use, useSyncExternalStore } from 'react'
 import { API_BASE, apiEndpoint } from '../config/api'
-import { overlayAddons, overlayFaq, overlayPackages, overlayServiceAreas, overlayServiceDetails } from './catalogOverlay'
+import { overlayAddons, overlayComparison, overlayFaq, overlayFullExperience, overlayPackages, overlayServiceAreas, overlayServiceDetails } from './catalogOverlay'
 import { basePackages, packages } from './packages'
 import { baseAddons, addons } from './services/addons'
 import { baseServiceAreas, serviceAreas } from './services/areas'
 import { baseServiceDetails, serviceDetails } from './services/detail'
 import { baseFaq, faq } from './services/faq'
+import { baseComparison, comparison } from './shop/comparison'
+import { baseFullExperience, fullExperience } from './shop/fullExperience'
 
 /**
  * What the owner edited in the administration (prices, texts, the FAQ) shown on the website WITHOUT a new build. At start the
@@ -34,13 +36,18 @@ const replace = <T>(live: readonly T[], next: readonly T[]) => {
 
 /** Lays a catalogue over the website's own lists, in place. Returns whether anything is different from before. */
 export function applyLiveCatalog(catalog: unknown): boolean {
-  const before = JSON.stringify([packages, addons, serviceAreas, serviceDetails, faq])
+  const snapshot = () => JSON.stringify([packages, addons, serviceAreas, serviceDetails, faq, comparison, fullExperience])
+  const before = snapshot()
   replace(packages, overlayPackages(basePackages, catalog))
   replace(addons, overlayAddons(baseAddons, catalog))
   replace(serviceAreas, overlayServiceAreas(baseServiceAreas, catalog))
   replace(serviceDetails, overlayServiceDetails(baseServiceDetails, catalog))
   replace(faq, overlayFaq(baseFaq, catalog))
-  return JSON.stringify([packages, addons, serviceAreas, serviceDetails, faq]) !== before
+  const nextComparison = overlayComparison(baseComparison, catalog)
+  replace(comparison.tiers, nextComparison.tiers)
+  replace(comparison.features, nextComparison.features)
+  Object.assign(fullExperience, overlayFullExperience(baseFullExperience, catalog))
+  return snapshot() !== before
 }
 
 function settle(changed: boolean): void {

@@ -73,6 +73,7 @@ export function ServicesMenu({ children }: { children: ReactNode }) {
   const links = [
     ...serviceAreas.map((area) => ({ to: servicePath(area.id), label: area.name[lang] })),
     { to: `${SHOP_PATHS.home}#packages`, label: common.nav.packages },
+    { to: SHOP_PATHS.fullExperience, label: common.nav.fullExperience },
     { to: SHOP_PATHS.configure, label: common.nav.configure },
     { to: SHOP_PATHS.cart, label: common.nav.cart },
   ]

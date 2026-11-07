@@ -1,5 +1,6 @@
 import type { Database } from '../../db/database.ts'
 import { LANGUAGES, type Language } from '../../config.ts'
+import { publishedDocuments } from '../shop/documents.ts'
 
 /**
  * The catalogue as records: services, packages, add-ons and content blocks with their translations and
@@ -98,6 +99,8 @@ export interface Catalog {
   packages: PackageRecord[]
   extras: ExtraRecord[]
   content: ContentRecord[]
+  /** The published comparison matrix and FULL EXPERIENCE offer (modules/shop/documents.ts); `null` for one that is not published. */
+  documents: ReturnType<typeof publishedDocuments>
 }
 
 const list = (json: string): string[] => {
@@ -204,7 +207,7 @@ export function loadCatalog(db: Database, options: { includeDisabled: boolean } 
     if (item && isLanguage(row.language)) item.translations[row.language] = { title: row.title, description: row.description, data: object(row.data_json) }
   }
 
-  return { services, packages, extras, content }
+  return { services, packages, extras, content, documents: publishedDocuments(db) }
 }
 
 export const findServiceBySlug = (db: Database, slug: string): { id: number; status: Status } | undefined => db.get<{ id: number; status: Status }>('SELECT id, status FROM services WHERE slug = ?', [slug])

@@ -5,6 +5,8 @@ export const SHOP_PATHS = {
   home: '/services',
   configure: '/services/configure',
   cart: '/services/cart',
+  fullExperience: '/services/full-experience',
+  fullExperienceStart: '/services/full-experience/start',
 } as const
 
 export const servicePath = (id: ServiceId): string => `/services/${id}`

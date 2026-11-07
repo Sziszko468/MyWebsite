@@ -139,14 +139,17 @@ function measure(page) {
         const inquiries = await api('/api/admin/inquiries')
         if (!Array.isArray(inquiries)) throw new Error(`Not signed in on ${tag}: the session was refused.`)
         const inquiry = inquiries[0]?.id
-        const quote = (await api('/api/admin/quote-requests'))[0]?.id
+        const quotes = await api('/api/admin/quote-requests')
+        const quote = quotes[0]?.id
+        // A FULL EXPERIENCE request (PROMPT 09.1) has a brief of its own on the detail screen; the run submits one first (see README).
+        const experience = quotes.find((item) => item.kind === 'full_experience')?.id
         // The portfolio's content management (PROMPT 13.1): the list, a new project, the settings, the editor of the first project, the wording.
         const project = (await api('/api/admin/projects'))?.projects?.[0]?.id
-        const screens = ['/admin', '/admin/projects', '/admin/projects/new', '/admin/projects/settings', project && `/admin/projects/${project}`, '/admin/texts', '/admin/inquiries', inquiry && `/admin/inquiries/${inquiry}`, '/admin/quotes', quote && `/admin/quotes/${quote}`, '/admin/services', '/admin/content', '/admin/translations', '/admin/notifications', '/admin/settings', '/admin/settings?tab=security', '/admin/not-a-screen'].filter(Boolean)
+        const screens = ['/admin', '/admin/projects', '/admin/projects/new', '/admin/projects/settings', project && `/admin/projects/${project}`, '/admin/texts', '/admin/inquiries', inquiry && `/admin/inquiries/${inquiry}`, '/admin/quotes', quote && `/admin/quotes/${quote}`, experience && experience !== quote && `/admin/quotes/${experience}`, '/admin/comparison', '/admin/full-experience', '/admin/services', '/admin/content', '/admin/translations', '/admin/notifications', '/admin/settings', '/admin/settings?tab=security', '/admin/not-a-screen'].filter(Boolean)
         for (const path of screens) {
           await page.goto(BASE + path, { waitUntil: 'domcontentloaded' })
           await settle(page)
-          await check(path.replace(inquiry, ':inquiry').replace(quote, ':quote').replace(new RegExp(`/projects/${project}$`), '/projects/:project'))
+          await check(path.replace(inquiry, ':inquiry').replace(experience || ':none', ':experience').replace(quote, ':quote').replace(new RegExp(`/projects/${project}$`), '/projects/:project'))
         }
 
         // The project editor: every tab, in each language of the language bar; the picture chooser open; a wording row open.
@@ -178,6 +181,16 @@ function measure(page) {
             await sleep(200)
             await check('texts-row-open')
           }
+        }
+
+        // The tier comparison (PROMPT 09.1): the first feature open, with its three-language fields and a level for every package.
+        await page.goto(`${BASE}/admin/comparison`, { waitUntil: 'domcontentloaded' })
+        await settle(page)
+        const feature = page.locator('details > summary').first()
+        if (await feature.count()) {
+          await feature.click()
+          await sleep(200)
+          await check('comparison-feature-open')
         }
 
         // The delete confirmation: opens on the safe button, keeps Tab inside, Escape cancels and gives focus back.

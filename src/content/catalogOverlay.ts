@@ -6,6 +6,9 @@ import type { ServicePackage } from './packages'
 import type { ServicePrice, VatMode } from './pricing'
 import type { Trilingual } from './trilingual'
 import { LANGUAGES } from '../i18n/config'
+import type { Comparison } from './shop/comparison'
+import { readComparison, readFullExperience } from './shop/documents'
+import type { FullExperience } from './shop/fullExperience'
 
 /**
  * What the owner edits in the administration reaches the website here, at build time. `npm run catalog:pull`
@@ -24,6 +27,11 @@ import { LANGUAGES } from '../i18n/config'
  *     its questions) is the website's own writing and stays in the source.
  *   - the FAQ: the list is replaced (entries added, edited, reordered, removed), because nothing in the site's
  *     code depends on a particular entry.
+ *   - availability and order: an add-on the catalogue no longer lists (disabled in the administration) is marked
+ *     `available: false` and the pages stop offering it; a package it no longer lists is marked the same and shown as
+ *     not available at the moment; when every entry has a display position the list follows it.
+ *   - the tier comparison and the FULL EXPERIENCE offer: the published documents replace the website's own, as a whole
+ *     (shop/documents.ts decides whether a document can be drawn; if not, the website's own stays).
  *   - never: which packages, add-ons and services exist, which need a package suits, which add-ons a package
  *     takes. The pages, the cart and the quote form are built around those; changing them is a change to the
  *     source, and `npm run catalog:seed-export` carries it to the backend.
@@ -91,12 +99,19 @@ function priceOf(entry: Record<string, unknown>): { price: ServicePrice; vat: Va
 
 const defined = <T extends object>(value: T): Partial<T> => Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)) as Partial<T>
 
+/** The list in the administration's display order, when every entry the website knows has one (a half-set order leaves the source's). */
+function byPosition<T extends { id: string }>(items: readonly T[], entries: Record<string, unknown>[]): readonly T[] {
+  const positions = items.map((item) => entries.find((entry) => entry.code === item.id)?.position)
+  if (!positions.every((position) => typeof position === 'number' && Number.isInteger(position))) return items
+  return items.map((item, index) => ({ item, index, at: positions[index] as number })).sort((a, b) => a.at - b.at || a.index - b.index).map((entry) => entry.item)
+}
+
 export function overlayPackages(base: readonly ServicePackage[], catalog: unknown = generatedCatalog): readonly ServicePackage[] {
   const entries = entriesOf(catalog, 'packages')
   if (!entries) return base
-  return base.map((pack) => {
+  const merged = base.map((pack) => {
     const entry = entries.find((candidate) => candidate.code === pack.id)
-    if (!entry) return pack
+    if (!entry) return { ...pack, available: false }
     const money = priceOf(entry)
     const note = isRecord(entry.translations) ? trilingual(entry.translations, 'priceNote') : null
     const noteIsEmpty = isRecord(entry.translations) && LANGUAGES.every((lang) => {
@@ -119,6 +134,7 @@ export function overlayPackages(base: readonly ServicePackage[], catalog: unknow
     })
     return { ...pack, ...changes }
   })
+  return byPosition(merged, entries)
 }
 
 /** A service's block on the services page: its name, summary and features. */
@@ -155,11 +171,23 @@ export function overlayServiceDetails(base: readonly ServiceDetail[], catalog: u
 export function overlayAddons(base: readonly Addon[], catalog: unknown = generatedCatalog): readonly Addon[] {
   const entries = entriesOf(catalog, 'extras')
   if (!entries) return base
-  return base.map((addon) => {
+  const merged = base.map((addon) => {
     const entry = entries.find((candidate) => candidate.code === addon.id)
-    if (!entry) return addon
+    // The catalogue lists only what is on offer: an add-on it does not list has been switched off.
+    if (!entry) return { ...addon, available: false }
     return { ...addon, ...defined({ ...(priceOf(entry) ?? {}), name: trilingual(entry.translations, 'name') ?? undefined, summary: trilingual(entry.translations, 'summary') ?? undefined }) }
   })
+  return byPosition(merged, entries)
+}
+
+/** The tier comparison as the backend published it; the website's own when there is none or it cannot be drawn. */
+export function overlayComparison(base: Comparison, catalog: unknown = generatedCatalog): Comparison {
+  return (isRecord(catalog) ? readComparison(catalog.comparison) : null) ?? base
+}
+
+/** The FULL EXPERIENCE offer as the backend published it; the website's own when there is none or it cannot be drawn. */
+export function overlayFullExperience(base: FullExperience, catalog: unknown = generatedCatalog): FullExperience {
+  return (isRecord(catalog) ? readFullExperience(catalog.fullExperience) : null) ?? base
 }
 
 /** The FAQ as the backend has it, in its order; the static list when the backend's is missing, empty or malformed. */
@@ -206,7 +234,7 @@ export function catalogProblems(catalog: unknown, known: { packages: readonly st
       for (const field of kind.lists) if (trilingualList(entry.translations, field) === null) problems.push(`The ${kind.label} "${code}" has a "${field}" list that is missing or does not line up across the languages: it stays as in the source.`)
     }
     for (const id of kind.ids) {
-      if (!entries.some((entry) => entry.code === id)) problems.push(`The ${kind.label} "${id}" is not in the backend's active catalogue (disabled or deleted there): the website keeps showing it until it is removed from its source.`)
+      if (!entries.some((entry) => entry.code === id)) problems.push(`The ${kind.label} "${id}" is not in the backend's active catalogue (disabled or deleted there): the website marks it as not available${kind.key === 'extras' ? ' and stops offering it' : ''}.`)
     }
   }
   if (known.services) {
@@ -235,5 +263,7 @@ export function catalogProblems(catalog: unknown, known: { packages: readonly st
   }
   const faq = entriesOf(catalog, 'faq')
   if (!faq || faq.length === 0) problems.push('The catalogue has no FAQ entries: the website keeps its own list.')
+  if (readComparison(catalog.comparison) === null) problems.push('The catalogue has no published tier comparison, or one the website cannot draw: the website keeps its own.')
+  if (readFullExperience(catalog.fullExperience) === null) problems.push('The catalogue has no published FULL EXPERIENCE offer, or one the website cannot draw: the website keeps its own.')
   return problems
 }

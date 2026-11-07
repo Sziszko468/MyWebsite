@@ -1,0 +1,1481 @@
+{
+  "comparison": {
+    "version": 1,
+    "tiers": [
+      {
+        "package": "launch",
+        "label": {
+          "hu": "A stabil alap",
+          "en": "Essential foundation",
+          "nl": "De essentiële basis"
+        },
+        "buildsOn": null
+      },
+      {
+        "package": "grow",
+        "label": {
+          "hu": "Bővebb lehetőségek",
+          "en": "Expanded capabilities",
+          "nl": "Uitgebreide mogelijkheden"
+        },
+        "buildsOn": "launch"
+      },
+      {
+        "package": "build",
+        "label": {
+          "hu": "Összetettebb megoldás",
+          "en": "Advanced solution",
+          "nl": "Geavanceerde oplossing"
+        },
+        "buildsOn": "grow"
+      },
+      {
+        "package": "care",
+        "label": {
+          "hu": "Folyamatos támogatás",
+          "en": "Continuous support",
+          "nl": "Voortdurende ondersteuning"
+        },
+        "buildsOn": null
+      }
+    ],
+    "features": [
+      {
+        "id": "quote",
+        "name": {
+          "hu": "Egyedi ajánlat, leírt tartalommal",
+          "en": "A custom quote with the scope written down",
+          "nl": "Een offerte op maat met de omvang op papier"
+        },
+        "description": {
+          "hu": "Minden csomag ajánlatkéréssel indul: a pontos tartalmat és az árat az ajánlat rögzíti, az ajánlatkérés semmire nem köt.",
+          "en": "Every package starts with a quote request: the exact scope and price are written in the quote, and asking commits you to nothing.",
+          "nl": "Elk pakket begint met een offerteaanvraag: de exacte omvang en prijs staan in de offerte en een aanvraag verplicht tot niets."
+        },
+        "levels": {
+          "launch": "included",
+          "grow": "included",
+          "build": "included",
+          "care": "included"
+        }
+      },
+      {
+        "id": "responsive",
+        "name": {
+          "hu": "Reszponzív megjelenés mobiltól asztali gépig",
+          "en": "A responsive layout from phone to desktop",
+          "nl": "Een responsieve opmaak van telefoon tot desktop"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "included",
+          "grow": "included",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "structure",
+        "name": {
+          "hu": "Átgondolt oldal- és tartalomszerkezet",
+          "en": "A considered page and content structure",
+          "nl": "Een doordachte pagina- en inhoudsstructuur"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "included",
+          "grow": "included",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "navigation",
+        "name": {
+          "hu": "Mobilbarát navigáció",
+          "en": "Mobile-friendly navigation",
+          "nl": "Mobielvriendelijke navigatie"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "included",
+          "grow": "included",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "contact",
+        "name": {
+          "hu": "Kapcsolatfelvételi felület",
+          "en": "A contact section",
+          "nl": "Een contactgedeelte"
+        },
+        "description": {
+          "hu": "Az üzenetek kezelésének módját projektenként egyeztetjük.",
+          "en": "How messages are handled is agreed per project.",
+          "nl": "Hoe berichten worden afgehandeld spreken we per project af."
+        },
+        "levels": {
+          "launch": "included",
+          "grow": "included",
+          "build": "custom",
+          "care": "none"
+        }
+      },
+      {
+        "id": "seo",
+        "name": {
+          "hu": "Alapvető metaadatok és technikai SEO",
+          "en": "Basic metadata and technical SEO",
+          "nl": "Basismetadata en technische SEO"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "included",
+          "grow": "included",
+          "build": "custom",
+          "care": "none"
+        }
+      },
+      {
+        "id": "sections",
+        "name": {
+          "hu": "További oldalak és tartalmi szekciók",
+          "en": "More pages and content sections",
+          "nl": "Meer pagina’s en inhoudssecties"
+        },
+        "description": {
+          "hu": "A megállapodott szerkezetbe illesztve; a Launch csomaghoz külön kiegészítőként kérhető.",
+          "en": "Fitted into the agreed structure; on Launch it can be asked for as an add-on.",
+          "nl": "Ingepast in de afgesproken structuur; bij Launch kan het als optie worden gevraagd."
+        },
+        "levels": {
+          "launch": "addon",
+          "grow": "included",
+          "build": "custom",
+          "care": "addon"
+        }
+      },
+      {
+        "id": "components",
+        "name": {
+          "hu": "Egyedi komponensek",
+          "en": "Custom components",
+          "nl": "Eigen componenten"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "custom",
+          "grow": "included",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "interactive",
+        "name": {
+          "hu": "Interaktív felületek és mozgás",
+          "en": "Interactive interfaces and motion",
+          "nl": "Interactieve interfaces en beweging"
+        },
+        "description": {
+          "hu": "A használhatóság mindig előbbre való a mozgásnál.",
+          "en": "Usability always comes before motion.",
+          "nl": "Bruikbaarheid gaat altijd voor beweging."
+        },
+        "levels": {
+          "launch": "addon",
+          "grow": "included",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "integrations",
+        "name": {
+          "hu": "Külső szolgáltatások és API-kapcsolatok",
+          "en": "Third-party services and API connections",
+          "nl": "Externe diensten en API-koppelingen"
+        },
+        "description": {
+          "hu": "Hogy egy adott szolgáltatás bekötése megvalósítható-e, azt az ajánlat előtt tisztázzuk.",
+          "en": "Whether a particular service can be connected is settled before the quote.",
+          "nl": "Of een bepaalde dienst gekoppeld kan worden, stemmen we af vóór de offerte."
+        },
+        "levels": {
+          "launch": "custom",
+          "grow": "included",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "userflows",
+        "name": {
+          "hu": "Egyedi felhasználói folyamatok",
+          "en": "Custom user flows",
+          "nl": "Eigen gebruikersstromen"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "custom",
+          "grow": "custom",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "backend",
+        "name": {
+          "hu": "Frontend- és backendfejlesztés",
+          "en": "Frontend and backend development",
+          "nl": "Frontend- en backendontwikkeling"
+        },
+        "description": {
+          "hu": "A megállapodott keretek között.",
+          "en": "Within the agreed scope.",
+          "nl": "Binnen de afgesproken omvang."
+        },
+        "levels": {
+          "launch": "custom",
+          "grow": "custom",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "database",
+        "name": {
+          "hu": "Adatbázis-integráció",
+          "en": "Database integration",
+          "nl": "Database-integratie"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "custom",
+          "grow": "custom",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "architecture",
+        "name": {
+          "hu": "Az alkalmazás architektúrájának kialakítása",
+          "en": "Shaping the application architecture",
+          "nl": "Het vormgeven van de applicatiearchitectuur"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "custom",
+          "grow": "custom",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "languages",
+        "name": {
+          "hu": "További nyelvi változat",
+          "en": "An additional language",
+          "nl": "Een extra taalversie"
+        },
+        "description": {
+          "hu": "A szövegek elkészítésének módját az ajánlatban rögzítjük.",
+          "en": "How the texts are produced is agreed in the quote.",
+          "nl": "Hoe de teksten tot stand komen, leggen we vast in de offerte."
+        },
+        "levels": {
+          "launch": "addon",
+          "grow": "addon",
+          "build": "addon",
+          "care": "addon"
+        }
+      },
+      {
+        "id": "performance",
+        "name": {
+          "hu": "Teljesítmény-átvilágítás",
+          "en": "A performance check",
+          "nl": "Een prestatiecontrole"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "custom",
+          "grow": "addon",
+          "build": "addon",
+          "care": "included"
+        }
+      },
+      {
+        "id": "maintenance",
+        "name": {
+          "hu": "Egyeztetett karbantartási feladatok",
+          "en": "Agreed maintenance tasks",
+          "nl": "Afgesproken onderhoudstaken"
+        },
+        "description": {
+          "hu": "Külön megállapodással; a teljes keretet a Care csomag adja.",
+          "en": "By separate agreement; the Care package is built around it.",
+          "nl": "Via een aparte afspraak; het Care-pakket draait hier volledig om."
+        },
+        "levels": {
+          "launch": "addon",
+          "grow": "addon",
+          "build": "addon",
+          "care": "included"
+        }
+      },
+      {
+        "id": "fixes",
+        "name": {
+          "hu": "Hibaelhárítás és kisebb módosítások",
+          "en": "Troubleshooting and small changes",
+          "nl": "Probleemoplossing en kleine aanpassingen"
+        },
+        "description": {
+          "hu": "",
+          "en": "",
+          "nl": ""
+        },
+        "levels": {
+          "launch": "addon",
+          "grow": "addon",
+          "build": "addon",
+          "care": "included"
+        }
+      },
+      {
+        "id": "handover",
+        "name": {
+          "hu": "Átadás a megállapodás szerint",
+          "en": "Handover as agreed",
+          "nl": "Oplevering zoals afgesproken"
+        },
+        "description": {
+          "hu": "A karbantartás külön megállapodás (Care).",
+          "en": "Ongoing maintenance is a separate agreement (Care).",
+          "nl": "Doorlopend onderhoud is een aparte afspraak (Care)."
+        },
+        "levels": {
+          "launch": "included",
+          "grow": "included",
+          "build": "included",
+          "care": "none"
+        }
+      },
+      {
+        "id": "newfeatures",
+        "name": {
+          "hu": "Új funkciók tervezése külön megállapodással",
+          "en": "New features planned by separate agreement",
+          "nl": "Nieuwe functies plannen via een aparte afspraak"
+        },
+        "description": {
+          "hu": "Amit a lista nem tartalmaz, azt leírod, és a részletek ismeretében közösen döntjük el, belefér-e.",
+          "en": "What is not on the list you describe, and once the details are known we decide together whether it fits.",
+          "nl": "Wat niet op de lijst staat, beschrijf je, en als de details bekend zijn beslissen we samen of het past."
+        },
+        "levels": {
+          "launch": "custom",
+          "grow": "custom",
+          "build": "custom",
+          "care": "custom"
+        }
+      }
+    ]
+  },
+  "fullExperience": {
+    "version": 1,
+    "hero": {
+      "eyebrow": {
+        "hu": "FULL EXPERIENCE",
+        "en": "FULL EXPERIENCE",
+        "nl": "FULL EXPERIENCE"
+      },
+      "headline": {
+        "hu": "AZ ÖTLETEDTŐL A KÉSZ DIGITÁLIS TERMÉKIG.",
+        "en": "YOUR IDEA. BUILT FROM ZERO.",
+        "nl": "JOUW IDEE. VANAF NUL GEBOUWD."
+      },
+      "supporting": {
+        "hu": "Teljes weboldal vagy alkalmazás fejlesztése nulláról. A koncepciótól és a tervezéstől a fejlesztésen át egészen az éles indulásig.",
+        "en": "From the first concept to a fully developed digital experience. One complete solution, designed, engineered, and delivered around your requirements.",
+        "nl": "Van het eerste concept tot een volledig uitgewerkte digitale ervaring. Eén complete oplossing, ontworpen, ontwikkeld en opgeleverd rond jouw wensen."
+      },
+      "primaryCta": {
+        "hu": "Indítsuk el a projekted",
+        "en": "Start Your Project",
+        "nl": "Start jouw project"
+      },
+      "secondaryCta": {
+        "hu": "Nézd meg, mit tartalmaz",
+        "en": "Explore What’s Included",
+        "nl": "Bekijk wat erbij zit"
+      }
+    },
+    "teaser": {
+      "title": {
+        "hu": "Az ötletedtől a kész digitális termékig",
+        "en": "Your idea, built from zero",
+        "nl": "Jouw idee, vanaf nul gebouwd"
+      },
+      "text": {
+        "hu": "Ha nem egy meglévő csomag, hanem egy teljes weboldal vagy alkalmazás kell nulláról, ez a külön ajánlat neked szól: a koncepciótól az éles indulásig, a követelményeid köré építve.",
+        "en": "If you need a complete website or application from scratch rather than one of the packages, this is the separate offer for you: from the concept to the launch, built around your requirements.",
+        "nl": "Heb je geen pakket nodig maar een complete website of applicatie vanaf nul, dan is dit het aparte aanbod voor jou: van concept tot livegang, gebouwd rond jouw wensen."
+      }
+    },
+    "priceLabel": {
+      "hu": "Egyedi ajánlat",
+      "en": "Custom quote",
+      "nl": "Offerte op maat"
+    },
+    "stages": [
+      {
+        "id": "discovery",
+        "title": {
+          "hu": "Feltárás és követelmények",
+          "en": "Discovery & Requirements",
+          "nl": "Verkenning en eisen"
+        },
+        "text": {
+          "hu": "Megértjük az ötletet, a felhasználókat és a követelményeket, mielőtt bármi elkészül.",
+          "en": "Understanding the idea, the users and the requirements before anything is built.",
+          "nl": "Het idee, de gebruikers en de eisen begrijpen voordat er iets wordt gebouwd."
+        }
+      },
+      {
+        "id": "strategy",
+        "title": {
+          "hu": "Termékstratégia",
+          "en": "Product Strategy",
+          "nl": "Productstrategie"
+        },
+        "text": {
+          "hu": "Eldöntjük, mi kerüljön az első változatba, és mi várhat.",
+          "en": "Deciding what belongs in the first version and what can wait.",
+          "nl": "Bepalen wat in de eerste versie hoort en wat kan wachten."
+        }
+      },
+      {
+        "id": "ux",
+        "title": {
+          "hu": "UX-kutatás és tervezés",
+          "en": "UX Research & Planning",
+          "nl": "UX-onderzoek en planning"
+        },
+        "text": {
+          "hu": "A felhasználói folyamatok és az oldalszerkezet megtervezése.",
+          "en": "Planning the user flows and the structure of the pages.",
+          "nl": "De gebruikersstromen en de structuur van de pagina’s plannen."
+        }
+      },
+      {
+        "id": "design",
+        "title": {
+          "hu": "UI/UX-tervezés",
+          "en": "UI/UX Design",
+          "nl": "UI/UX-ontwerp"
+        },
+        "text": {
+          "hu": "A felületek és az interakciók megtervezése, a márkához igazítva.",
+          "en": "Designing the interfaces and interactions to fit the brand.",
+          "nl": "De interfaces en interacties ontwerpen, passend bij het merk."
+        }
+      },
+      {
+        "id": "system",
+        "title": {
+          "hu": "Designrendszer",
+          "en": "Design System",
+          "nl": "Designsysteem"
+        },
+        "text": {
+          "hu": "Újrahasználható komponensek és tervezési alapelemek.",
+          "en": "Reusable components and design tokens.",
+          "nl": "Herbruikbare componenten en designtokens."
+        }
+      },
+      {
+        "id": "frontend",
+        "title": {
+          "hu": "Frontendfejlesztés",
+          "en": "Frontend Development",
+          "nl": "Frontendontwikkeling"
+        },
+        "text": {
+          "hu": "A felület elkészítése, amely minden eszközön használható.",
+          "en": "Building the interface so that it works on every device.",
+          "nl": "De interface bouwen zodat die op elk apparaat werkt."
+        }
+      },
+      {
+        "id": "backend",
+        "title": {
+          "hu": "Backendfejlesztés",
+          "en": "Backend Development",
+          "nl": "Backendontwikkeling"
+        },
+        "text": {
+          "hu": "A szerveroldali logika, a megállapodott keretek között.",
+          "en": "The server-side logic, within the agreed scope.",
+          "nl": "De serverlogica, binnen de afgesproken omvang."
+        }
+      },
+      {
+        "id": "database",
+        "title": {
+          "hu": "Adatbázis-architektúra",
+          "en": "Database Architecture",
+          "nl": "Databasearchitectuur"
+        },
+        "text": {
+          "hu": "Az adatok szerkezetének és tárolásának megtervezése.",
+          "en": "Designing how the data is structured and stored.",
+          "nl": "Ontwerpen hoe de gegevens worden gestructureerd en opgeslagen."
+        }
+      },
+      {
+        "id": "api",
+        "title": {
+          "hu": "API-fejlesztés és integrációk",
+          "en": "API Development & Integrations",
+          "nl": "API-ontwikkeling en integraties"
+        },
+        "text": {
+          "hu": "A felület és a háttérrendszer összekötése, külső szolgáltatások bekötése, ahol a projekt igényli.",
+          "en": "Connecting the interface to the back end and to external services where the project calls for it.",
+          "nl": "De interface met de back-end en met externe diensten verbinden waar het project dat vraagt."
+        }
+      },
+      {
+        "id": "auth",
+        "title": {
+          "hu": "Azonosítás és jogosultságkezelés",
+          "en": "Authentication & Authorization",
+          "nl": "Authenticatie en autorisatie"
+        },
+        "text": {
+          "hu": "Bejelentkezés és szerepkörök, ha a projektnek szüksége van rájuk.",
+          "en": "Sign-in and user roles, if the project needs them.",
+          "nl": "Inloggen en gebruikersrollen, als het project ze nodig heeft."
+        }
+      },
+      {
+        "id": "admin",
+        "title": {
+          "hu": "Adminisztrációs felület",
+          "en": "Admin Dashboard",
+          "nl": "Beheeromgeving"
+        },
+        "text": {
+          "hu": "Egy felület, amelyen a tartalmat és az adatokat kezelni lehet.",
+          "en": "A place where the content and the data can be managed.",
+          "nl": "Een plek waar de inhoud en de gegevens beheerd kunnen worden."
+        }
+      },
+      {
+        "id": "mobile",
+        "title": {
+          "hu": "Reszponzív, mobilra tervezett élmény",
+          "en": "Responsive Mobile Experience",
+          "nl": "Responsieve mobiele ervaring"
+        },
+        "text": {
+          "hu": "Mobilról indulva, telefontól az asztali gépig.",
+          "en": "Designed from the phone up, to the desktop.",
+          "nl": "Ontworpen vanaf de telefoon, tot en met de desktop."
+        }
+      },
+      {
+        "id": "testing",
+        "title": {
+          "hu": "Tesztelés és minőségbiztosítás",
+          "en": "Testing & Quality Assurance",
+          "nl": "Testen en kwaliteitsborging"
+        },
+        "text": {
+          "hu": "Az átadás előtt kipróbáljuk, hogy minden a megbeszéltek szerint működik.",
+          "en": "Checking before handover that everything works as agreed.",
+          "nl": "Vóór de oplevering nagaan dat alles werkt zoals afgesproken."
+        }
+      },
+      {
+        "id": "performance",
+        "title": {
+          "hu": "Teljesítmény-optimalizálás",
+          "en": "Performance Optimization",
+          "nl": "Prestatie-optimalisatie"
+        },
+        "text": {
+          "hu": "A sebesség mérése és a talált szűk keresztmetszetek javítása.",
+          "en": "Measuring speed and fixing the bottlenecks found.",
+          "nl": "De snelheid meten en de gevonden knelpunten verhelpen."
+        }
+      },
+      {
+        "id": "seo",
+        "title": {
+          "hu": "SEO és hozzáférhetőség",
+          "en": "SEO & Accessibility",
+          "nl": "SEO en toegankelijkheid"
+        },
+        "text": {
+          "hu": "Technikai SEO-alapok, billentyűzetes használat, kontraszt és fókuszjelzés.",
+          "en": "Technical SEO basics, keyboard use, contrast and focus states.",
+          "nl": "Technische SEO-basis, toetsenbordgebruik, contrast en focusstatussen."
+        }
+      },
+      {
+        "id": "launch",
+        "title": {
+          "hu": "Éles indulás",
+          "en": "Deployment & Launch",
+          "nl": "Livegang"
+        },
+        "text": {
+          "hu": "A kész rendszer üzembe helyezése.",
+          "en": "Putting the finished system into use.",
+          "nl": "Het afgeronde systeem in gebruik nemen."
+        }
+      },
+      {
+        "id": "docs",
+        "title": {
+          "hu": "Dokumentáció",
+          "en": "Documentation",
+          "nl": "Documentatie"
+        },
+        "text": {
+          "hu": "Az átadáskor leírjuk, hogyan épül fel és hogyan kezelhető a rendszer.",
+          "en": "At handover, a description of how the system is built and how it is managed.",
+          "nl": "Bij de oplevering een beschrijving van hoe het systeem is opgebouwd en beheerd wordt."
+        }
+      },
+      {
+        "id": "care",
+        "title": {
+          "hu": "Folyamatos karbantartás (opcionális)",
+          "en": "Optional Ongoing Maintenance",
+          "nl": "Optioneel doorlopend onderhoud"
+        },
+        "text": {
+          "hu": "Külön megállapodással a Care csomag szerint.",
+          "en": "By separate agreement, as in the Care package.",
+          "nl": "Via een aparte afspraak, zoals in het Care-pakket."
+        }
+      }
+    ],
+    "components": [
+      {
+        "id": "frontend",
+        "title": {
+          "hu": "Frontend",
+          "en": "Frontend",
+          "nl": "Frontend"
+        },
+        "text": {
+          "hu": "A felület, amelyet a látogatók látnak.",
+          "en": "The interface visitors see.",
+          "nl": "De interface die bezoekers zien."
+        }
+      },
+      {
+        "id": "backend",
+        "title": {
+          "hu": "Backend",
+          "en": "Backend",
+          "nl": "Backend"
+        },
+        "text": {
+          "hu": "A szerveroldali logika.",
+          "en": "The server-side logic.",
+          "nl": "De serverlogica."
+        }
+      },
+      {
+        "id": "database",
+        "title": {
+          "hu": "Adatbázis",
+          "en": "Database",
+          "nl": "Database"
+        },
+        "text": {
+          "hu": "Az adatok tárolása és kezelése.",
+          "en": "Storing and managing the data.",
+          "nl": "Het opslaan en beheren van de gegevens."
+        }
+      },
+      {
+        "id": "auth",
+        "title": {
+          "hu": "Azonosítás",
+          "en": "Authentication",
+          "nl": "Authenticatie"
+        },
+        "text": {
+          "hu": "Bejelentkezés és szerepkörök.",
+          "en": "Sign-in and user roles.",
+          "nl": "Inloggen en gebruikersrollen."
+        }
+      },
+      {
+        "id": "admin",
+        "title": {
+          "hu": "Adminisztrációs felület",
+          "en": "Admin dashboard",
+          "nl": "Beheeromgeving"
+        },
+        "text": {
+          "hu": "A tartalom és az adatok kezelése.",
+          "en": "Managing content and data.",
+          "nl": "Het beheren van inhoud en gegevens."
+        }
+      },
+      {
+        "id": "api",
+        "title": {
+          "hu": "API-integrációk",
+          "en": "API integrations",
+          "nl": "API-integraties"
+        },
+        "text": {
+          "hu": "Külső szolgáltatások bekötése.",
+          "en": "Connecting external services.",
+          "nl": "Externe diensten koppelen."
+        }
+      },
+      {
+        "id": "payments",
+        "title": {
+          "hu": "Fizetési integráció",
+          "en": "Payment integration",
+          "nl": "Betalingsintegratie"
+        },
+        "text": {
+          "hu": "Ha a projekt fizetést igényel, ezt az igényt az ajánlat előtt tisztázzuk.",
+          "en": "If the project needs payments, that is settled before the quote.",
+          "nl": "Heeft het project betalingen nodig, dan stemmen we dat af vóór de offerte."
+        }
+      },
+      {
+        "id": "multilingual",
+        "title": {
+          "hu": "Többnyelvűség",
+          "en": "Multilingual support",
+          "nl": "Meertalige ondersteuning"
+        },
+        "text": {
+          "hu": "Több nyelvi változat ugyanabban a szerkezetben.",
+          "en": "Several language versions in one structure.",
+          "nl": "Meerdere taalversies in één structuur."
+        }
+      },
+      {
+        "id": "interactive",
+        "title": {
+          "hu": "3D / interaktív élmény",
+          "en": "3D / interactive experience",
+          "nl": "3D / interactieve ervaring"
+        },
+        "text": {
+          "hu": "Mozgás és interakció, ahol az segíti a használatot.",
+          "en": "Motion and interaction where it helps the use.",
+          "nl": "Beweging en interactie waar het het gebruik helpt."
+        }
+      },
+      {
+        "id": "mobile",
+        "title": {
+          "hu": "Mobilra fókuszáló élmény",
+          "en": "Mobile-focused experience",
+          "nl": "Op mobiel gerichte ervaring"
+        },
+        "text": {
+          "hu": "Telefonra tervezve, nem csak ahhoz igazítva.",
+          "en": "Designed for the phone, not just adapted to it.",
+          "nl": "Ontworpen voor de telefoon, niet alleen eraan aangepast."
+        }
+      }
+    ],
+    "faq": [
+      {
+        "id": "price",
+        "question": {
+          "hu": "Ez egy fix árú csomag?",
+          "en": "Is this a fixed-price package?",
+          "nl": "Is dit een pakket met een vaste prijs?"
+        },
+        "answer": {
+          "hu": "Nem. A FULL EXPERIENCE egyedi szolgáltatás: az ajánlatot a követelményeid ismeretében készítjük el, ezért itt nincs feltüntetett ár.",
+          "en": "No. FULL EXPERIENCE is a custom service: the quote is written once your requirements are known, which is why no price is shown here.",
+          "nl": "Nee. FULL EXPERIENCE is een dienst op maat: de offerte wordt opgesteld als jouw wensen bekend zijn, daarom staat hier geen prijs."
+        }
+      },
+      {
+        "id": "stages",
+        "question": {
+          "hu": "Kell minden szakaszra szükségem legyen?",
+          "en": "Do I need every stage?",
+          "nl": "Heb ik alle fasen nodig?"
+        },
+        "answer": {
+          "hu": "Nem. A szakaszok és az összetevők a projekthez igazodnak: nem minden projekthez kell mindegyik, és amit nem kérsz, az nem része az ajánlatnak.",
+          "en": "No. The stages and components follow the project: not every project needs all of them, and what you do not ask for is not part of the quote.",
+          "nl": "Nee. De fasen en onderdelen volgen het project: niet elk project heeft ze allemaal nodig en wat je niet vraagt, maakt geen deel uit van de offerte."
+        }
+      },
+      {
+        "id": "idea",
+        "question": {
+          "hu": "Mi van, ha csak egy ötletem van?",
+          "en": "What if I only have an idea?",
+          "nl": "Wat als ik alleen een idee heb?"
+        },
+        "answer": {
+          "hu": "Az is elég a kezdéshez. Az első lépés a feltárás: közösen tisztázzuk, mit szeretnél, és mi férhet bele.",
+          "en": "That is enough to begin. The first step is discovery: together we settle what you want and what fits.",
+          "nl": "Dat is genoeg om te beginnen. De eerste stap is de verkenning: samen bepalen we wat je wilt en wat past."
+        }
+      },
+      {
+        "id": "request",
+        "question": {
+          "hu": "Mi történik az ajánlatkérés után?",
+          "en": "What happens after I send the request?",
+          "nl": "Wat gebeurt er nadat ik de aanvraag heb verstuurd?"
+        },
+        "answer": {
+          "hu": "Megkapjuk a válaszaidat, áttekintjük őket, és a megadott e-mail-címen jelentkezünk. Az ajánlatkérés semmire nem kötelez.",
+          "en": "We receive your answers, read through them and get back to you at the e-mail address you give. Sending the request commits you to nothing.",
+          "nl": "We ontvangen je antwoorden, lezen ze door en nemen contact met je op via het e-mailadres dat je opgeeft. Het versturen van de aanvraag verplicht tot niets."
+        }
+      }
+    ],
+    "configurator": {
+      "intro": {
+        "hu": "Néhány rövid kérdés, hogy lássuk, mit szeretnél építeni. A nem kötelező kérdéseket kihagyhatod, és bármikor visszaléphetsz.",
+        "en": "A few short questions to see what you want to build. You can skip the optional ones and go back at any time.",
+        "nl": "Een paar korte vragen om te zien wat je wilt bouwen. Je kunt de optionele vragen overslaan en op elk moment teruggaan."
+      },
+      "questions": [
+        {
+          "id": "type",
+          "kind": "single",
+          "required": true,
+          "title": {
+            "hu": "Milyen projektet szeretnél?",
+            "en": "What kind of project is it?",
+            "nl": "Wat voor project is het?"
+          },
+          "help": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          },
+          "options": [
+            {
+              "id": "business-site",
+              "label": {
+                "hu": "Céges weboldal",
+                "en": "Business website",
+                "nl": "Bedrijfswebsite"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "shop-site",
+              "label": {
+                "hu": "Webáruház",
+                "en": "E-commerce website",
+                "nl": "Webshop"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "web-app",
+              "label": {
+                "hu": "Webalkalmazás",
+                "en": "Web application",
+                "nl": "Webapplicatie"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "internal-app",
+              "label": {
+                "hu": "Belső üzleti alkalmazás",
+                "en": "Internal business application",
+                "nl": "Interne bedrijfsapplicatie"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "portal",
+              "label": {
+                "hu": "Ügyfélportál",
+                "en": "Customer portal",
+                "nl": "Klantenportaal"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "custom",
+              "label": {
+                "hu": "Egyedi digitális termék",
+                "en": "Custom digital product",
+                "nl": "Digitaal product op maat"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "unsure",
+              "label": {
+                "hu": "Még nem tudom",
+                "en": "Not sure yet",
+                "nl": "Nog niet zeker"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": true
+            }
+          ]
+        },
+        {
+          "id": "stage",
+          "kind": "single",
+          "required": true,
+          "title": {
+            "hu": "Hol tart a projekt?",
+            "en": "Where is the project now?",
+            "nl": "Waar staat het project nu?"
+          },
+          "help": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          },
+          "options": [
+            {
+              "id": "idea",
+              "label": {
+                "hu": "Egyelőre csak egy ötlet",
+                "en": "Just an idea",
+                "nl": "Alleen nog een idee"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "requirements",
+              "label": {
+                "hu": "A követelmények már megvannak",
+                "en": "Requirements already defined",
+                "nl": "De eisen zijn al vastgelegd"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "design",
+              "label": {
+                "hu": "A terv már megvan",
+                "en": "Design already exists",
+                "nl": "Het ontwerp bestaat al"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "redevelopment",
+              "label": {
+                "hu": "Meglévő alkalmazást kell újrafejleszteni",
+                "en": "Existing application needs redevelopment",
+                "nl": "Een bestaande applicatie moet opnieuw ontwikkeld worden"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "extension",
+              "label": {
+                "hu": "Meglévő rendszert kell új funkcióval bővíteni",
+                "en": "Existing system needs additional functionality",
+                "nl": "Een bestaand systeem heeft extra functionaliteit nodig"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            }
+          ]
+        },
+        {
+          "id": "components",
+          "kind": "multi",
+          "required": false,
+          "title": {
+            "hu": "Mire van szükség? (többet is választhatsz)",
+            "en": "Which components are needed? (choose any)",
+            "nl": "Welke onderdelen zijn nodig? (kies er meerdere)"
+          },
+          "help": {
+            "hu": "Ha nem vagy biztos benne, hagyd üresen: közösen kiderítjük.",
+            "en": "If you are not sure, leave it empty: we will find out together.",
+            "nl": "Weet je het niet zeker, laat het leeg: we zoeken het samen uit."
+          },
+          "options": [
+            {
+              "id": "frontend",
+              "label": {
+                "hu": "Frontend",
+                "en": "Frontend",
+                "nl": "Frontend"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "backend",
+              "label": {
+                "hu": "Backend",
+                "en": "Backend",
+                "nl": "Backend"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "database",
+              "label": {
+                "hu": "Adatbázis",
+                "en": "Database",
+                "nl": "Database"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "auth",
+              "label": {
+                "hu": "Azonosítás",
+                "en": "Authentication",
+                "nl": "Authenticatie"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "admin",
+              "label": {
+                "hu": "Adminisztrációs felület",
+                "en": "Admin dashboard",
+                "nl": "Beheeromgeving"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "api",
+              "label": {
+                "hu": "API-integrációk",
+                "en": "API integrations",
+                "nl": "API-integraties"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "payments",
+              "label": {
+                "hu": "Fizetési integráció",
+                "en": "Payment integration",
+                "nl": "Betalingsintegratie"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "multilingual",
+              "label": {
+                "hu": "Többnyelvűség",
+                "en": "Multilingual support",
+                "nl": "Meertalige ondersteuning"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "interactive",
+              "label": {
+                "hu": "3D / interaktív élmény",
+                "en": "3D / interactive experience",
+                "nl": "3D / interactieve ervaring"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "mobile",
+              "label": {
+                "hu": "Mobilra fókuszáló élmény",
+                "en": "Mobile-focused experience",
+                "nl": "Op mobiel gerichte ervaring"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            }
+          ]
+        },
+        {
+          "id": "complexity",
+          "kind": "single",
+          "required": false,
+          "title": {
+            "hu": "Mennyire összetett a projekt?",
+            "en": "How complex is the project?",
+            "nl": "Hoe complex is het project?"
+          },
+          "help": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          },
+          "options": [
+            {
+              "id": "simple",
+              "label": {
+                "hu": "Egyszerű",
+                "en": "Simple",
+                "nl": "Eenvoudig"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "medium",
+              "label": {
+                "hu": "Közepes",
+                "en": "Medium",
+                "nl": "Gemiddeld"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "complex",
+              "label": {
+                "hu": "Összetett",
+                "en": "Complex",
+                "nl": "Complex"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "unsure",
+              "label": {
+                "hu": "Nem vagyok biztos benne",
+                "en": "Not sure",
+                "nl": "Niet zeker"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": true
+            }
+          ]
+        },
+        {
+          "id": "budget",
+          "kind": "single",
+          "required": false,
+          "title": {
+            "hu": "Van elképzelésed a költségvetésről?",
+            "en": "Do you have a budget in mind?",
+            "nl": "Heb je een budget in gedachten?"
+          },
+          "help": {
+            "hu": "Nincs feltüntetett ár: az ajánlat a követelményeid alapján készül. A válaszod csak a beszélgetést segíti.",
+            "en": "No price is shown here: the quote is written from your requirements. Your answer only helps the conversation.",
+            "nl": "Er staat hier geen prijs: de offerte wordt opgesteld op basis van jouw wensen. Je antwoord helpt alleen het gesprek."
+          },
+          "options": [
+            {
+              "id": "fixed",
+              "label": {
+                "hu": "Van egy meghatározott keretem",
+                "en": "I have a set budget",
+                "nl": "Ik heb een vast budget"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "flexible",
+              "label": {
+                "hu": "A költségvetés rugalmas",
+                "en": "My budget is flexible",
+                "nl": "Mijn budget is flexibel"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "unsure",
+              "label": {
+                "hu": "Még nem tudom: beszéljük meg",
+                "en": "Not sure yet — let’s discuss it",
+                "nl": "Nog niet zeker: laten we het bespreken"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": true
+            }
+          ]
+        },
+        {
+          "id": "timeline",
+          "kind": "single",
+          "required": false,
+          "title": {
+            "hu": "Mikorra szeretnéd?",
+            "en": "When would you like it?",
+            "nl": "Wanneer wil je het hebben?"
+          },
+          "help": {
+            "hu": "Ez a te elképzelésed, nem ígéret: az ütemezést az ajánlatban egyeztetjük.",
+            "en": "This is what you would like, not a promise: the schedule is agreed in the quote.",
+            "nl": "Dit is wat jij wilt, geen belofte: de planning spreken we af in de offerte."
+          },
+          "options": [
+            {
+              "id": "flexible",
+              "label": {
+                "hu": "Rugalmas",
+                "en": "Flexible",
+                "nl": "Flexibel"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "month",
+              "label": {
+                "hu": "Egy hónapon belül",
+                "en": "Within 1 month",
+                "nl": "Binnen 1 maand"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "quarter",
+              "label": {
+                "hu": "1–3 hónap",
+                "en": "1–3 months",
+                "nl": "1–3 maanden"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "half",
+              "label": {
+                "hu": "3–6 hónap",
+                "en": "3–6 months",
+                "nl": "3–6 maanden"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": false
+            },
+            {
+              "id": "unsure",
+              "label": {
+                "hu": "Még nem tudom",
+                "en": "Not sure yet",
+                "nl": "Nog niet zeker"
+              },
+              "hint": {
+                "hu": "",
+                "en": "",
+                "nl": ""
+              },
+              "unsure": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

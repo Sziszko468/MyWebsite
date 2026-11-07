@@ -5,7 +5,7 @@ import { localizedPath } from './i18n/paths'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { lazyRoute } from './motion/loading'
-import { PAGES, labIdOfPage, projectIdOfPage, serviceIdOfPage, type LegalPageId, type NavPageId, type PageDef, type ShopPageId } from './routes/pages'
+import { PAGES, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type LegalPageId, type NavPageId, type PageDef, type ShopPageId } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
 import { IntroProvider } from './components/intro/IntroProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
@@ -26,6 +26,9 @@ const WorkPage = lazyRoute(() => import('./pages/WorkPage').then((module) => ({ 
 // them, and none of them loads Three.js or any other 3D code.
 const ServicesPage = lazyRoute(() => import('./pages/ServicesPage').then((module) => ({ default: module.ServicesPage })))
 const ServiceDetailPage = lazyRoute(() => import('./pages/ServiceDetailPage').then((module) => ({ default: module.ServiceDetailPage })))
+const PackagePage = lazyRoute(() => import('./pages/PackagePage').then((module) => ({ default: module.PackagePage })))
+const FullExperiencePage = lazyRoute(() => import('./pages/FullExperiencePage').then((module) => ({ default: module.FullExperiencePage })))
+const FullExperienceStartPage = lazyRoute(() => import('./pages/FullExperienceStartPage').then((module) => ({ default: module.FullExperienceStartPage })))
 const ConfiguratorPage = lazyRoute(() => import('./pages/ConfiguratorPage').then((module) => ({ default: module.ConfiguratorPage })))
 const CartPage = lazyRoute(() => import('./pages/CartPage').then((module) => ({ default: module.CartPage })))
 
@@ -56,6 +59,8 @@ const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | 'designSystem
   services: <ServicesPage />,
   configure: <ConfiguratorPage />,
   cart: <CartPage />,
+  'full-experience': <FullExperiencePage />,
+  'full-experience-start': <FullExperienceStartPage />,
   about: <AboutPage />,
   lab: <LabPage />,
   contact: <ContactPage />,
@@ -66,6 +71,8 @@ const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | 'designSystem
 function elementFor(page: PageDef): ReactElement | null {
   const service = serviceIdOfPage(page.id)
   if (service) return <ServiceDetailPage serviceId={service} />
+  const pack = packageIdOfPage(page.id)
+  if (pack) return <PackagePage packageId={pack} />
   const experiment = labIdOfPage(page.id)
   if (experiment) return <LabExperimentPage id={experiment} />
   return PAGE_ELEMENTS[page.id as NavPageId | ShopPageId | LegalPageId | 'designSystem']

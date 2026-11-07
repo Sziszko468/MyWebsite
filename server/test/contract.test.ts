@@ -288,6 +288,16 @@ describe("the portfolio and the website's own wording", () => {
     expect(manifest).toEqual(JSON.parse(JSON.stringify(textsExport.buildTextsManifest())))
   })
 
+  it("has a shop seed (the tier comparison and the FULL EXPERIENCE offer) that is exactly what the website's content produces, and that the server accepts", async () => {
+    const { readFileSync } = await import('node:fs')
+    const onDisk = JSON.parse(readFileSync(join(root, 'server', 'seed', 'shop.seed.json'), 'utf8'))
+    expect(onDisk).toEqual(JSON.parse(JSON.stringify(catalogExport.buildShopSeed())))
+    const { parseComparison, parseFullExperience } = await import('../src/modules/shop/documents.ts')
+    // What the server stores is what the seed says: nothing is dropped or changed by its checks.
+    expect(parseComparison(onDisk.comparison, seed.packages.map((pack) => pack.code))).toEqual(onDisk.comparison)
+    expect(parseFullExperience(onDisk.fullExperience)).toEqual(onDisk.fullExperience)
+  })
+
   it('lets the server accept every project document the website itself has (nothing in the seed is refused)', async () => {
     const { normalizeContent } = await import('../src/modules/projects/content.ts')
     for (const project of projectsExport.buildProjectsSeed().projects as Array<{ slug: string; content: Record<string, unknown> }>) {

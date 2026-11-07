@@ -15,6 +15,12 @@ describe('page registry', () => {
       '/services/webapp',
       '/services/ui',
       '/services/integrations',
+      '/services/packages/launch',
+      '/services/packages/grow',
+      '/services/packages/build',
+      '/services/packages/care',
+      '/services/full-experience',
+      '/services/full-experience/start',
       '/services/configure',
       '/services/cart',
     ])

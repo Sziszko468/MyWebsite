@@ -10,6 +10,8 @@ import { faq } from '../content/services/faq'
 import { SERVICE_IDS } from '../content/services/ids'
 import { processSteps } from '../content/services/process'
 import { shopText } from '../content/shop'
+import { baseComparison } from '../content/shop/comparison'
+import { baseFullExperience } from '../content/shop/fullExperience'
 import { localize } from '../content/trilingual'
 import { LANGUAGES, type Language } from '../i18n/config'
 import { I18nContext } from '../i18n/context'
@@ -22,8 +24,12 @@ import { inquiryActions } from '../shop/inquiryStore'
 import { CartPage } from './CartPage'
 import { ConfiguratorPage } from './ConfiguratorPage'
 import { ServiceDetailPage } from './ServiceDetailPage'
+import { FullExperiencePage } from './FullExperiencePage'
+import { FullExperienceStartPage } from './FullExperienceStartPage'
+import { PackagePage } from './PackagePage'
 import { ServicesPage } from './ServicesPage'
 import { flattenKinetic } from '../test/markup'
+import { fill } from '../utils/format'
 
 /**
  * Renders the shop's pages on the server, as markup, with the real providers. It cannot click (the
@@ -107,21 +113,22 @@ describe.each(LANGUAGES)('the shop’s front page in %s', (lang) => {
     expect(html).toContain('id="find"')
   })
 
-  it('presents the four packages as radio tiles and the first as a product, with what it contains', () => {
-    expect(inputs(html, { type: 'radio' }).map((input) => input.value).filter((value) => packages.some((pkg) => pkg.id === value))).toEqual(packages.map((pkg) => pkg.id))
-    const first = packages[0]
-    expect(html).toContain(`data-package="${first.id}"`)
-    for (const item of first.deliverables) expect(html).toContain(escape(item[lang]))
-    for (const item of first.includes) expect(html).toContain(escape(item[lang]))
-    expect(html).toContain(escape(first.audience[lang]))
-    expect(html).toContain(`href="/${lang}/services/configure?plan=${first.id}"`)
+  it('presents the four packages as the columns of one comparison, each with its tier, a way to start and its own page', () => {
+    const columns = [...html.matchAll(/<th scope="col"[^>]*data-package="([a-z]+)"/g)].map((match) => match[1])
+    expect(columns).toEqual(packages.map((pkg) => pkg.id))
+    for (const tier of baseComparison.tiers) {
+      expect(html).toContain(escape(tier.label[lang]))
+      expect(html).toContain(`href="/${lang}/services/configure?plan=${tier.package}"`)
+      expect(html).toContain(`href="/${lang}/services/packages/${tier.package}"`)
+    }
     expect(html).toContain(escape(text.landing.packages.customCard.title))
   })
 
-  it('has the comparison, with a row per topic and every package as a column', () => {
-    for (const row of Object.values(text.landing.compare.rows)) expect(html).toContain(`>${escape(row)}<`)
-    expect(html.match(/role="columnheader"/g)!.length).toBeGreaterThanOrEqual(packages.length)
-    expect(html).toContain('role="table"')
+  it('has the comparison: a row for every feature, in groups, and a mark with a word for each level', () => {
+    expect(html).toContain('<caption')
+    for (const feature of baseComparison.features) expect(html, feature.id).toContain(escape(feature.name[lang]))
+    expect(html).toMatch(/<th scope="rowgroup"/)
+    for (const level of ['included', 'addon', 'custom', 'none']) expect(html, level).toContain(`data-level="${level}"`)
   })
 
   it('asks for a Custom Quote instead of showing a price', () => {
@@ -153,15 +160,15 @@ describe.each(LANGUAGES)('the shop’s front page in %s', (lang) => {
 describe('the shop’s front page', () => {
   it('chooses the package named in the address', () => {
     const html = render(createElement(ServicesPage), 'hu', 'dark', '/services?package=build')
-    expect(html).toMatch(/<article[^>]*data-package="build"/)
-    expect(html).toMatch(/<label[^>]*data-package="build"[^>]*data-checked="true"/)
-    expect(html).not.toMatch(/<label[^>]*data-package="(launch|grow|care)"[^>]*data-checked/)
-    expect(html).toContain(escape(shopText.landing.packages.start.hu.replace('{name}', 'Build')))
+    expect(html).toMatch(/<th scope="col"[^>]*data-package="build"[^>]*data-selected="true"/)
+    expect(html).not.toMatch(/<th scope="col"[^>]*data-package="(launch|grow|care)"[^>]*data-selected/)
+    expect(html.match(/aria-pressed="true"/g)).toHaveLength(1)
   })
 
-  it('ignores a package it does not know', () => {
+  it('ignores a package it does not know, and starts with the first', () => {
     const html = render(createElement(ServicesPage), 'hu', 'dark', '/services?package=enterprise')
-    expect(html).toMatch(/<article[^>]*data-package="launch"/)
+    expect(html).toMatch(/<th scope="col"[^>]*data-package="launch"[^>]*data-selected="true"/)
+    expect(html).not.toMatch(/<th scope="col"[^>]*data-package="(grow|build|care)"[^>]*data-selected/)
   })
 
   it('renders the same bands in the light theme, alternating the dark and light bands', () => {
@@ -309,6 +316,53 @@ describe.each(LANGUAGES)('the cart in %s', (lang) => {
     expect(html).toContain(escape(text.cart.actions.clear))
     expect(html).toMatch(new RegExp(`href="/${lang}/services/configure"[^>]*>(?:(?!</a>).)*${escape(text.cart.actions.proceed)}`))
     expect(html).toContain(escape(text.cart.actions.continue))
+    expect(plain(html)).not.toMatch(NO_PRICE)
+    expect(plain(html)).not.toMatch(NOT_LEAKED)
+  })
+})
+
+describe.each(LANGUAGES)('a package’s page in %s', (lang) => {
+  const text = localize(shopText, lang)
+
+  it.each(packages.map((pkg) => pkg.id))('%s: one h1, the sections of the brief in its order, a way back to the comparison, no price', (id) => {
+    const html = render(createElement(PackagePage, { packageId: id }), lang, 'dark', `/services/packages/${id}`)
+    expect(html.match(/<h1\b/g)).toHaveLength(1)
+    const sections = text.tiers.page.sections
+    const order = [sections.forWhom, sections.included, sections.features, sections.different, sections.addons, sections.related, sections.pricing, sections.faq]
+    // The heading itself, not the same word elsewhere on the page (the hero card has a "Prijs" label, too).
+    const at = order.map((title) => html.search(new RegExp(`<h2[^>]*>(?:<[^>]+>)*${escape(title).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}<`)))
+    expect(at.every((index) => index >= 0), `a section is missing: ${at.join(', ')}`).toBe(true)
+    expect(at, 'the sections are not in the order of the brief').toEqual([...at].sort((x, y) => x - y))
+    expect(html).toContain(`href="/${lang}/services?package=${id}#compare"`)
+    expect(html).toContain(escape(text.tiers.page.compareAll))
+    expect(plain(html)).not.toMatch(NO_PRICE)
+    expect(plain(html)).not.toMatch(NOT_LEAKED)
+  })
+})
+
+describe.each(LANGUAGES)('the FULL EXPERIENCE page in %s', (lang) => {
+  it('says what it is, lists the stages and the components, shows no price and leads to the configurator', () => {
+    const html = render(createElement(FullExperiencePage), lang, 'dark', '/services/full-experience')
+    expect(html.match(/<h1\b/g)).toHaveLength(1)
+    // The last sentence of the headline is a span of its own (Racing Red): take the tags out without adding spaces.
+    expect(html.replace(/<[^>]+>/g, '')).toContain(escape(baseFullExperience.hero.headline[lang]))
+    for (const stage of baseFullExperience.stages) expect(html).toContain(escape(stage.title[lang]))
+    for (const component of baseFullExperience.components) expect(html).toContain(escape(component.title[lang]))
+    for (const entry of baseFullExperience.faq) expect(html).toContain(escape(entry.question[lang]))
+    expect(html).toContain(`href="/${lang}/services/full-experience/start"`)
+    expect(plain(html)).not.toMatch(NO_PRICE)
+    expect(plain(html)).not.toMatch(NOT_LEAKED)
+  })
+
+  it('opens the configurator on its first question, with its choices as radio buttons and the way out for “not sure”', () => {
+    const html = render(createElement(FullExperienceStartPage), lang, 'dark', '/services/full-experience/start')
+    const text = localize(shopText, lang)
+    const first = baseFullExperience.configurator.questions[0]
+    expect(html.match(/<h1\b/g)).toHaveLength(1)
+    expect(html).toContain(escape(first.title[lang]))
+    for (const option of first.options) expect(html).toContain(escape(option.label[lang]))
+    expect(inputs(html, { type: 'radio' })).toHaveLength(first.options.length)
+    expect(html).toContain(escape(fill(text.experience.start.progress, { n: 1, total: baseFullExperience.configurator.questions.length + 2 })))
     expect(plain(html)).not.toMatch(NO_PRICE)
     expect(plain(html)).not.toMatch(NOT_LEAKED)
   })

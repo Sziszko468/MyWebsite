@@ -47,6 +47,24 @@ node tools/e2e/cms-journey.cjs --base=http://127.0.0.1:8788 --email=admin@exampl
 
 One administrator creates a project through the administration's screens and the PUBLIC side is asked at every step what a visitor would see: sign in → the list shows what the website ships with → a new project saved as a **draft with one language only** → the draft is not in the public list, not at its address, not in the sitemap → the Publication tab lists what is missing and the server refuses to publish (422) → the language bar goes *incomplete / missing / missing* → *complete* after the three languages are written **by hand** → a thumbnail and two gallery pictures are uploaded (a 3200 × 2000 picture is made smaller in the browser: 3.6 MB → 62 kB) and described → an unchecked external link is stored but not public → the preview shows the saved draft with a banner and `noindex`, and shows nothing to a signed-out browser → publish (confirmed) → visible on the Work page and at its address in hu/en/nl **within the 30 s public cache** (the step prints how long it took) → featured → on the home page → moved up → unpublished (gone from list, home page and address; content kept) → published again → archived (out) → restored (a draft, not public) → duplicated → a cancelled delete deletes nothing → deleted. It needs a fresh scratch server for each run (the sign-in is limited to 10 per 15 minutes; the run signs in twice). The run **found a real bug** (the gallery's add button created an undefined item and the editor crashed) which is fixed and has a regression test.
 
+## Shop 3.0: comparison and FULL EXPERIENCE (PROMPT 09.1)
+
+```bash
+node tools/e2e/shop-journey.cjs --base=http://127.0.0.1:8788 --email=admin@example.test --password=<the test password> [--out=<dir>]
+```
+
+Needs a **fresh** scratch server for every run (it signs in several times, the sign-in is limited to 10 per 15 minutes, and a server that an earlier run left with the offer unpublished starts the next run from a different state). Forty-one steps, in seven journeys, each asking the PUBLIC side what a visitor would see:
+
+| Journey | Path | What it asserts |
+| --- | --- | --- |
+| **A** Desktop visitor | the shop's front page → the four-column comparison (headers, the "in every package" and "introduced with" groups, a cell's level in words as well as a mark, a feature's explanation) → select Grow → its package page (no price anywhere) → "Compare all packages" → Grow is still selected | what the table shows is what the seed says; no price; the selection survives the round trip |
+| **B** Phone visitor | 390×844 touch: the tabs, arrow keys and Home, a swipe, a group opened, "Compare two packages" with and without "only the differences", back to one package; 320×640: no pair mode but all four tabs | the phone has its own component, not the table; the roving tabindex works; the pair mode is offered only where there is room |
+| **C** FULL EXPERIENCE | the page (headline, 18+ stages, no price) → the band on the front page → the configurator: a required question refuses an empty answer, the answer survives Back, an optional question offers Skip, "Not sure yet" stands alone, a too short description is refused, then a real send with name, e-mail, company, Dutch as the preferred language and the acknowledgement | the request is accepted by the real backend (201, an `F-…` reference); the confirmation appears only after that |
+| **D** Administrator: the request | sign in → Quote requests → the request from C is listed and marked FULL EXPERIENCE → its detail shows the company, the language asked for, every question with its answer, skipped ones marked, and the description | what the visitor chose is readable without the website |
+| **E** Administrator: the comparison | the editor lists the tiers and 18+ features with their levels → an edit is a **draft** and does not reach the public page → publish → a new visitor sees it, in every language it was written in → a feature with a missing translation is refused on the field | a draft is not public; the server's rule is shown where it applies; the edit is put back at the end |
+| **F** Administrator: FULL EXPERIENCE | edit the headline in three languages and add a budget range → save and publish → a new visitor sees the copy and the new option → unpublish → the website's own text returns and requests are not accepted meanwhile → put back as it was | the budget ranges are the administrator's; withdrawing the offer is honest |
+| **G** Administrator on a phone | 390×844: both shop screens load without sideways scrolling, Publish is visible and Save is a tappable size | the editors are usable by thumb |
+
 ## Security probe
 
 ```bash

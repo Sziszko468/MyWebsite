@@ -79,6 +79,9 @@ export function catalogOut(catalog: Catalog): { version: string; body: Record<st
     extras: catalog.extras.map((item) => extraOut(item, 'all')),
     faq: catalog.content.filter((item) => item.type === 'faq').map((item) => faqOut(item, 'all')),
     categories: categoriesOut(catalog),
+    // The tier comparison and the FULL EXPERIENCE offer, as published (null when not): the website lays them over its own text.
+    comparison: catalog.documents.comparison,
+    fullExperience: catalog.documents.fullExperience,
   }
   const version = sha256Hex(JSON.stringify(body)).slice(0, 16)
   return { version, body: { version, ...body } }

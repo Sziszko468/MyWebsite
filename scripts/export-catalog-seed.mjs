@@ -1,5 +1,6 @@
 // Writes the backend's seed files from the website's static content (src/content/*Export.ts):
 //   server/seed/catalog.seed.json     services, packages, add-ons, FAQ
+//   server/seed/shop.seed.json        the tier comparison and the FULL EXPERIENCE offer (documents)
 //   server/seed/projects.seed.json    the four projects, their categories and the pictures that ship with the website
 //   server/seed/texts.manifest.json   the wordings an administrator may override
 // The website's modules import each other without file extensions, so they are loaded through Vite, not Node.
@@ -17,6 +18,12 @@ try {
   const seed = buildCatalogSeed()
   await writeFile(join(root, 'server', 'seed', 'catalog.seed.json'), `${JSON.stringify(seed, null, 2)}\n`)
   console.log(`catalog seed: ${seed.services.length} services, ${seed.packages.length} packages, ${seed.extras.length} add-ons, ${seed.faq.length} FAQ entries -> server/seed/catalog.seed.json`)
+
+  const { buildShopSeed } = await vite.ssrLoadModule('/src/content/catalogExport.ts')
+  const shop = buildShopSeed()
+  await writeFile(join(root, 'server', 'seed', 'shop.seed.json'), `${JSON.stringify(shop, null, 2)}
+`)
+  console.log('shop seed: the tier comparison and the FULL EXPERIENCE offer -> server/seed/shop.seed.json')
 
   const { buildProjectsSeed } = await vite.ssrLoadModule('/src/content/projectsExport.ts')
   const projects = buildProjectsSeed()

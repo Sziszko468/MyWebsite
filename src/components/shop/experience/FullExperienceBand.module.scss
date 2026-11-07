@@ -1,0 +1,134 @@
+@use '../../../styles/mixins' as m;
+
+/*
+ * The flagship panel: dark in either theme, large type with Racing Red on the last sentence, diagonal speed lines behind, the stages
+ * as a numbered column. A card the page's bands carry, so the band itself keeps the shop's light/dark rhythm.
+ */
+
+.panel {
+  position: relative;
+  display: grid;
+  gap: var(--space-7);
+  overflow: clip;
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+
+  @include m.up('md') {
+    padding: var(--space-8);
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    align-items: center;
+    padding: var(--space-9) var(--space-8);
+  }
+}
+
+.lines {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(112deg, transparent 0 46px, color-mix(in srgb, var(--color-text) 5%, transparent) 46px 47px),
+    linear-gradient(112deg, transparent 58%, var(--brand-red) 58.2%, var(--brand-red) 59.2%, transparent 59.4%),
+    radial-gradient(ellipse at 90% 0%, color-mix(in srgb, var(--brand-red) 32%, transparent), transparent 55%);
+  pointer-events: none;
+}
+
+.copy {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+}
+
+.kicker {
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.headline {
+  max-width: 16ch;
+  font-size: var(--fs-3xl);
+  font-stretch: var(--fstretch-expanded);
+  letter-spacing: -0.04em;
+  line-height: var(--lh-tight);
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.text {
+  max-width: 44rem;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-relaxed);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+
+  strong {
+    color: var(--color-text);
+  }
+}
+
+.stagesWrap {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-bg) 78%, transparent);
+}
+
+.stagesTitle {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.stages {
+  display: grid;
+  gap: var(--space-2);
+
+  li {
+    display: flex;
+    gap: var(--space-3);
+    align-items: baseline;
+    padding-bottom: var(--space-2);
+    border-bottom: var(--border-width) solid var(--color-divider);
+    font-weight: var(--fw-semibold);
+    overflow-wrap: anywhere;
+  }
+}
+
+.number {
+  flex: none;
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-black);
+  font-variant-numeric: tabular-nums;
+}
+
+.more {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}

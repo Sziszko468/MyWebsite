@@ -39,7 +39,7 @@ export function QuoteRequestList({ rows, statuses, canChange, busyId, onStatus }
       header: t.quotes.columns.services,
       cell: (row) => (
         <span className={styles.cellMain}>
-          <span>{summary(row.items) || t.common.noValue}</span>
+          <span>{row.kind === 'full_experience' ? t.shop.quote.kind : summary(row.items) || t.common.noValue}</span>
           <span className={cx(styles.muted, styles.small, styles.mono)}>{row.reference}</span>
         </span>
       ),
@@ -77,7 +77,7 @@ export function QuoteRequestList({ rows, statuses, canChange, busyId, onStatus }
             </span>
             <StatusBadge kind="quote" status={row.status} archived={row.archived_at !== null} />
           </div>
-          <p className={styles.small}>{summary(row.items) || t.common.noValue}</p>
+          <p className={styles.small}>{row.kind === 'full_experience' ? t.shop.quote.kind : summary(row.items) || t.common.noValue}</p>
           <div className={styles.listCardMeta}>
             <span className={styles.mono}>{row.reference}</span>
             <span>{formatDateTime(row.created_at, language)}</span>

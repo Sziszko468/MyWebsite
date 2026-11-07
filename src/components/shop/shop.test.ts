@@ -11,7 +11,7 @@ import { SHOP_RHYTHM, shopTone } from './rhythm'
 
 // What the shop's pages and components say about where they link to and what they keep.
 const sources = import.meta.glob(
-  ['./*.tsx', '../../pages/ServicesPage.tsx', '../../pages/ServiceDetailPage.tsx', '../../pages/ConfiguratorPage.tsx', '../../pages/CartPage.tsx', '../../shop/*.ts', '../../shop/!(*.test).ts'],
+  ['./*.tsx', './tiers/*.tsx', './experience/*.tsx', '../../pages/ServicesPage.tsx', '../../pages/PackagePage.tsx', '../../pages/FullExperiencePage.tsx', '../../pages/FullExperienceStartPage.tsx', '../../pages/ServiceDetailPage.tsx', '../../pages/ConfiguratorPage.tsx', '../../pages/CartPage.tsx', '../../shop/*.ts', '../../shop/!(*.test).ts'],
   { eager: true, query: '?raw', import: 'default' },
 ) as Record<string, string>
 // Stylesheets are read from disk: the test runner hands CSS modules over as a proxy, not as text.
@@ -35,7 +35,7 @@ describe('the shop’s dark and light rhythm', () => {
   })
 
   it('knows its bands by id, in order, and only those', () => {
-    expect(SHOP_RHYTHM.map((section) => section.id)).toEqual(['services', 'packages', 'configure', 'process', 'support', 'work', 'faq', 'start'])
+    expect(SHOP_RHYTHM.map((section) => section.id)).toEqual(['services', 'packages', 'full-experience', 'configure', 'process', 'support', 'work', 'faq', 'start'])
     expect(shopTone('packages')).toBe('base')
     // @ts-expect-error an unknown id is a type error as well as a runtime one
     expect(() => shopTone('nowhere')).toThrow()
@@ -62,8 +62,8 @@ describe('where the shop’s links go', () => {
   it('sends every in-page link to a band that exists on that page', () => {
     const hero = sources['./ShopHero.tsx']
     expect(hero).toMatch(/href="#services"/)
-    const landing = ['./Discovery.tsx', './Bands.tsx', './PackageSelector.tsx', './ShopHero.tsx'].map((file) => sources[file]).join('\n')
-    for (const id of ['services', 'packages', 'configure', 'process', 'support', 'work', 'faq', 'find']) expect(landing, id).toContain(`id="${id}"`)
+    const landing = ['./Discovery.tsx', './Bands.tsx', './tiers/Tiers.tsx', './experience/FullExperienceBand.tsx', './ShopHero.tsx'].map((file) => sources[file]).join('\n')
+    for (const id of ['services', 'packages', 'full-experience', 'configure', 'process', 'support', 'work', 'faq', 'find']) expect(landing, id).toContain(`id="${id}"`)
     const detail = sources['../../pages/ServiceDetailPage.tsx']
     for (const match of detail.matchAll(/<a href=\{`#\$\{(\w+)\}`\}/g)) expect(match[1]).toBe('id')
     for (const id of ['overview', 'get', 'features', 'audience', 'how', 'addons', 'work', 'faq', 'price', 'final']) expect(detail, id).toContain(`id="${id}"`)

@@ -5,7 +5,8 @@ import { isPackageId, packages, type PackageId } from '../content/packages'
 import { FinalCta } from '../components/home/FinalCta'
 import { ConfigureBand, FaqBand, ProcessBand, SupportBand, WorkBand } from '../components/shop/Bands'
 import { Discovery } from '../components/shop/Discovery'
-import { PackageSelector } from '../components/shop/PackageSelector'
+import { FullExperienceBand } from '../components/shop/experience/FullExperienceBand'
+import { Tiers } from '../components/shop/tiers/Tiers'
 import { shopTone } from '../components/shop/rhythm'
 import { ShopHero } from '../components/shop/ShopHero'
 import { SHOP_PATHS } from '../shop/paths'
@@ -36,7 +37,8 @@ export function ServicesPage() {
     <>
       <ShopHero />
       <Discovery />
-      <PackageSelector value={selected} onChange={(id) => setPicked({ address: search, id })} />
+      <Tiers value={selected} onChange={(id) => setPicked({ address: search, id })} />
+      <FullExperienceBand />
       <ConfigureBand />
       <ProcessBand />
       <SupportBand />

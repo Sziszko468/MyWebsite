@@ -38,6 +38,11 @@ export function ShopMenuGroup({ onNavigate }: { onNavigate: MouseEventHandler<HT
           </LocalizedLink>
         </li>
         <li>
+          <LocalizedLink to={SHOP_PATHS.fullExperience} className={styles.chip} onClick={onNavigate}>
+            {common.nav.fullExperience}
+          </LocalizedLink>
+        </li>
+        <li>
           <LocalizedLink to={SHOP_PATHS.configure} className={styles.chip} onClick={onNavigate}>
             {common.nav.configure}
           </LocalizedLink>

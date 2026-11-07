@@ -1,0 +1,716 @@
+@use '../../../styles/mixins' as m;
+
+/*
+ * The tier comparison. One look for the four packages with a visible identity each (--accent): Launch is plain and outlined, Grow
+ * carries the cobalt, Build the Racing Red on a raised surface (the most weight, which is design, not a claim of popularity), Care
+ * the neutral ink. Below `md` the markup is a package switcher (TierMobile.tsx); from `md` a table (TierTable.tsx) that scrolls
+ * sideways until `lg`, where all four columns fit. Marks never rely on colour alone: each has a shape, and the two that need a
+ * word carry it.
+ */
+
+[data-package='launch'],
+[data-package='build'] {
+  --accent: var(--color-accent);
+  --accent-text: var(--color-accent-text);
+  --accent-on: var(--color-on-accent);
+}
+
+[data-package='grow'] {
+  --accent: var(--color-secondary);
+  --accent-text: var(--color-secondary-text);
+  --accent-on: var(--color-on-secondary);
+}
+
+[data-package='care'] {
+  --accent: var(--color-text-secondary);
+  --accent-text: var(--color-text);
+  --accent-on: var(--color-bg);
+}
+
+.tiers {
+  margin-top: var(--space-7);
+}
+
+/* ── Marks ────────────────────────────────────────────────────────────────── */
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.markIcon {
+  flex: none;
+  box-sizing: content-box;
+  width: 1em;
+  height: 1em;
+  padding: 0.2em;
+  border: 1.5px solid transparent;
+  border-radius: 50%;
+  font-size: 1.1rem;
+}
+
+.mark[data-level='included'] {
+  color: var(--color-text);
+
+  .markIcon {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+}
+
+.mark[data-level='addon'] {
+  color: var(--color-secondary-text);
+
+  .markIcon {
+    border-color: var(--color-secondary-text);
+  }
+}
+
+.mark[data-level='custom'] {
+  color: var(--color-text-secondary);
+
+  .markIcon {
+    border-color: var(--color-text-secondary);
+    border-style: dashed;
+  }
+}
+
+.mark[data-level='none'] .markIcon {
+  opacity: 0.6;
+}
+
+.markWord {
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+
+  dt,
+  dd {
+    margin: 0;
+  }
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.featureName {
+  display: inline;
+  overflow-wrap: anywhere;
+}
+
+.featureLabel {
+  font-weight: var(--fw-semibold);
+}
+
+.featureText {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+/* A button of its own, at least a finger wide where the pointer is a finger. */
+.info {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-left: var(--space-2);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-style: italic;
+  font-weight: var(--fw-bold);
+  vertical-align: middle;
+  cursor: pointer;
+
+  @media (pointer: coarse) {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  &[aria-expanded='true'] {
+    border-color: var(--color-accent-text);
+    color: var(--color-accent-text);
+  }
+}
+
+/* ── The table (md and up) ────────────────────────────────────────────────── */
+
+.scroller {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* All four columns fit: nothing to scroll, and the sticky names need no scroll box around them. */
+  @include m.up('lg') {
+    overflow: visible;
+  }
+}
+
+.table {
+  width: 100%;
+  min-width: 52rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+
+  @include m.up('lg') {
+    min-width: 0;
+  }
+}
+
+.corner,
+.rowHead {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: 22%;
+  background-color: var(--color-bg);
+  text-align: left;
+  vertical-align: middle;
+
+  @include m.up('lg') {
+    position: static;
+  }
+}
+
+.corner {
+  z-index: 3;
+}
+
+.colHead,
+.cell {
+  padding: var(--space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+.colHead {
+  border-top: 4px solid var(--accent);
+  background-color: var(--color-surface);
+  font-weight: var(--fw-regular);
+
+  &[data-selected] {
+    background-color: var(--color-surface-raised);
+    box-shadow: inset 0 -1px 0 var(--accent);
+  }
+
+  &[data-package='launch'] {
+    border-top-style: dashed;
+  }
+
+  &[data-package='build'] {
+    box-shadow: var(--shadow-md);
+    background-color: var(--color-surface-raised);
+  }
+}
+
+.head {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.headTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.glyph {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  color: var(--accent-text);
+}
+
+.select {
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: var(--accent);
+    background-color: var(--accent);
+    color: var(--accent-on);
+  }
+}
+
+.name {
+  color: var(--color-text);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-snug);
+}
+
+.tierLabel {
+  color: var(--accent-text);
+  font-size: var(--fs-xs);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.recommended {
+  justify-self: start;
+  padding: 0.125rem var(--space-2);
+  border: var(--border-width) solid var(--accent);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.tagline {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+.price {
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+}
+
+.actions {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-1);
+}
+
+.unavailable {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-style: italic;
+}
+
+/* A slim row of names that stays under the site's header while the matrix scrolls past (lg and up, where the page scrolls it). */
+.stickyRow td {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 2;
+  display: none;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg);
+  color: var(--accent-text);
+  font-weight: var(--fw-black);
+
+  @include m.up('lg') {
+    display: table-cell;
+  }
+}
+
+.addsRow {
+  .rowHead,
+  .cell {
+    border-bottom: var(--border-width) solid var(--color-divider);
+  }
+}
+
+.addsTitle {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  line-height: var(--lh-normal);
+  text-transform: uppercase;
+}
+
+.addsList {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+
+  li {
+    padding-left: 1rem;
+    text-indent: -1rem;
+
+    &::before {
+      content: '+ ';
+      color: var(--accent-text);
+      font-weight: var(--fw-black);
+    }
+  }
+}
+
+.addsMore {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+
+  &::before {
+    content: '' !important;
+  }
+}
+
+.addsNone {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.groupRow th {
+  padding: var(--space-5) 0 var(--space-2);
+  border-bottom: 2px solid var(--color-border-strong);
+  background-color: var(--color-bg);
+  text-align: left;
+}
+
+.groupTitle {
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.featureRow {
+  .rowHead,
+  .cell {
+    padding: var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-divider);
+  }
+
+  .rowHead {
+    padding-left: 0;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-regular);
+  }
+
+  .cell {
+    vertical-align: middle;
+  }
+}
+
+.cell[data-selected],
+.stickyRow td[data-selected] {
+  background-color: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/* ── The phone's switcher ─────────────────────────────────────────────────── */
+
+.mobile {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface);
+}
+
+.tab {
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+
+  &[aria-selected='true'] {
+    background-color: var(--accent);
+    color: var(--accent-on);
+  }
+
+  &:focus-visible {
+    outline-offset: 0;
+  }
+}
+
+.swipeHint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
+
+.swipe {
+  touch-action: pan-y;
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-top: 4px solid var(--accent);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+
+  &[data-package='build'] {
+    background-color: var(--color-surface-raised);
+    box-shadow: var(--shadow-md);
+  }
+
+  &[data-package='launch'] {
+    border-top-style: dashed;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: tier-in var(--dur-base) var(--ease-out);
+  }
+}
+
+@keyframes tier-in {
+  from {
+    opacity: 0;
+    transform: translateX(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.panelTitle {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.audience {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+.adds {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.addsBuilds {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.link {
+  min-height: var(--size-touch);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent-text);
+  font: inherit;
+  font-weight: var(--fw-bold);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.groups {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.groupsTitle {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.featureList {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.featureItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: var(--border-width) solid var(--color-divider);
+  font-size: var(--fs-sm);
+
+  > :first-child {
+    min-width: 0;
+  }
+}
+
+.pairOpen {
+  justify-self: stretch;
+}
+
+.pair {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.pairPick {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.pairLabel {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.pairSelect {
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.pairNote {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.pairTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  th,
+  td {
+    padding: var(--space-2);
+    border-bottom: var(--border-width) solid var(--color-divider);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    border-bottom: 3px solid var(--accent);
+    font-weight: var(--fw-black);
+  }
+
+  th:first-child {
+    width: 46%;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-regular);
+  }
+
+  td {
+    text-align: center;
+  }
+
+  tr[data-differs] {
+    background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  }
+
+  .mark {
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.25em;
+  }
+}
+
+/* ── The way into a project that fits none of them ───────────────────────── */
+
+.custom {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+
+  @include m.up('md') {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: var(--space-6);
+  }
+}
+
+.customTitle {
+  font-size: var(--fs-lg);
+}
+
+.customText {
+  max-width: 54ch;
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+
+@media (forced-colors: active) {
+  .mark[data-level='included'] .markIcon {
+    border-color: CanvasText;
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}

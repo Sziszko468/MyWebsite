@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { buildCatalogSeed } from './catalogExport'
-import { catalogProblems, overlayAddons, overlayFaq, overlayPackages, overlayServiceAreas, overlayServiceDetails } from './catalogOverlay'
+import { buildCatalogSeed, buildShopSeed } from './catalogExport'
+import { catalogProblems, overlayAddons, overlayComparison, overlayFaq, overlayFullExperience, overlayPackages, overlayServiceAreas, overlayServiceDetails } from './catalogOverlay'
+import { baseComparison } from './shop/comparison'
+import { baseFullExperience } from './shop/fullExperience'
 import { basePackages } from './packages'
 import { baseAddons } from './services/addons'
 import { baseServiceAreas } from './services/areas'
@@ -10,8 +12,11 @@ import { baseFaq } from './services/faq'
 /** The catalogue the way the backend serves it (`/api/shop/catalog`): the seed has the same shape for packages and add-ons; the FAQ is spelled question/answer. */
 function served() {
   const seed = buildCatalogSeed() as unknown as { services: Record<string, any>[]; packages: Record<string, any>[]; extras: Record<string, any>[] }
+  const shop = structuredClone(buildShopSeed()) as { comparison: Record<string, any>; fullExperience: Record<string, any> }
   return {
     version: 'abc',
+    comparison: shop.comparison,
+    fullExperience: shop.fullExperience,
     services: structuredClone(seed.services),
     packages: structuredClone(seed.packages),
     extras: structuredClone(seed.extras),
@@ -120,7 +125,8 @@ describe('the catalogue overlay', () => {
     catalog.extras.push({ code: 'blockchain', price: { kind: 'tbd' }, vat: 'unspecified', translations: {} })
     catalog.packages = [null, 5, 'x', ...catalog.packages.filter((pack) => pack.code !== 'care')] as never
     expect(overlayPackages(basePackages, catalog).map((pack) => pack.id)).toEqual(basePackages.map((pack) => pack.id)) // a package is not removed by being absent
-    expect(overlayPackages(basePackages, catalog)).toEqual(basePackages)
+    // ... it is marked as not available, and nothing else about it changes
+    expect(overlayPackages(basePackages, catalog)).toEqual(basePackages.map((pack) => (pack.id === 'care' ? { ...pack, available: false } : pack)))
     expect(overlayAddons(baseAddons, catalog).map((addon) => addon.id)).toEqual(baseAddons.map((addon) => addon.id))
     expect(JSON.stringify([basePackages, baseAddons, baseFaq])).toBe(before)
     const changed = served()
@@ -128,6 +134,77 @@ describe('the catalogue overlay', () => {
     launch(changed).vat = 'included'
     overlayPackages(basePackages, changed)
     expect(JSON.stringify([basePackages, baseAddons, baseFaq])).toBe(before)
+  })
+
+  it('stops offering an add-on the catalogue no longer lists, and shows a package it no longer lists as not available', () => {
+    const catalog = served()
+    catalog.extras = catalog.extras.filter((extra) => extra.code !== 'motion')
+    catalog.packages = catalog.packages.filter((pack) => pack.code !== 'build')
+    const addons = overlayAddons(baseAddons, catalog)
+    expect(addons.find((addon) => addon.id === 'motion')).toMatchObject({ available: false })
+    expect(addons.filter((addon) => addon.available === false).map((addon) => addon.id)).toEqual(['motion'])
+    expect(overlayPackages(basePackages, catalog).find((pack) => pack.id === 'build')).toMatchObject({ available: false })
+    expect(overlayPackages(basePackages, catalog).filter((pack) => pack.available === false)).toHaveLength(1)
+    // An add-on that is on offer carries no flag at all.
+    expect(overlayAddons(baseAddons, served()).some((addon) => 'available' in addon)).toBe(false)
+  })
+
+  it('follows the display order set in the administration, but only when every entry has one', () => {
+    const catalog = served()
+    const positions = { launch: 3, grow: 2, build: 1, care: 0 } as const
+    for (const pack of catalog.packages) pack.position = positions[pack.code as keyof typeof positions]
+    expect(overlayPackages(basePackages, catalog).map((pack) => pack.id)).toEqual(['care', 'build', 'grow', 'launch'])
+    delete catalog.packages[1].position
+    expect(overlayPackages(basePackages, catalog).map((pack) => pack.id)).toEqual(basePackages.map((pack) => pack.id))
+    const extras = served()
+    extras.extras.forEach((extra, index) => (extra.position = extras.extras.length - index))
+    expect(overlayAddons(baseAddons, extras).map((addon) => addon.id)).toEqual([...baseAddons].reverse().map((addon) => addon.id))
+  })
+
+  it('takes the published tier comparison and FULL EXPERIENCE offer as a whole, or keeps the website own when it cannot be drawn', () => {
+    expect(overlayComparison(baseComparison, served())).toEqual(baseComparison)
+    expect(overlayFullExperience(baseFullExperience, served())).toEqual(baseFullExperience)
+    for (const nothing of [null, undefined, 42, {}, { comparison: null, fullExperience: null }]) {
+      expect(overlayComparison(baseComparison, nothing)).toBe(baseComparison)
+      expect(overlayFullExperience(baseFullExperience, nothing)).toBe(baseFullExperience)
+    }
+
+    const edited = served()
+    edited.comparison.features[0].name.en = 'Edited in the administration'
+    edited.comparison.features[1].levels.build = 'addon'
+    const result = overlayComparison(baseComparison, edited)
+    expect(result.features[0].name.en).toBe('Edited in the administration')
+    expect(result.features[1].levels.build).toBe('addon')
+    expect(baseComparison.features[0].name.en).not.toBe('Edited in the administration')
+
+    const refused: Array<(catalog: ReturnType<typeof served>) => void> = [
+      (catalog) => (catalog.comparison.features[0].name.nl = ''),
+      (catalog) => (catalog.comparison.features[0].levels.grow = 'maybe'),
+      (catalog) => (catalog.comparison.tiers = catalog.comparison.tiers.slice(1)),
+      (catalog) => (catalog.comparison.tiers[0].buildsOn = 'build'),
+      (catalog) => catalog.comparison.features.push({ ...catalog.comparison.features[0] }),
+    ]
+    for (const damage of refused) {
+      const catalog = served()
+      damage(catalog)
+      expect(overlayComparison(baseComparison, catalog)).toBe(baseComparison)
+    }
+
+    const offer = served()
+    offer.fullExperience.hero.headline.en = 'A different headline'
+    expect(overlayFullExperience(baseFullExperience, offer).hero.headline.en).toBe('A different headline')
+    const broken: Array<(catalog: ReturnType<typeof served>) => void> = [
+      (catalog) => (catalog.fullExperience.hero.headline.nl = ''),
+      (catalog) => (catalog.fullExperience.configurator.questions = catalog.fullExperience.configurator.questions.filter((q: { id: string }) => q.id !== 'budget')),
+      (catalog) => catalog.fullExperience.configurator.questions.find((q: { id: string }) => q.id === 'budget').options.forEach((o: { unsure: boolean }) => (o.unsure = false)),
+      (catalog) => (catalog.fullExperience.configurator.questions[0].options = [catalog.fullExperience.configurator.questions[0].options[0]]),
+      (catalog) => (catalog.fullExperience.stages[0].id = 'Not A Slug'),
+    ]
+    for (const damage of broken) {
+      const catalog = served()
+      damage(catalog)
+      expect(overlayFullExperience(baseFullExperience, catalog)).toBe(baseFullExperience)
+    }
   })
 
   it('changes an add-on price and texts the same way', () => {

@@ -4,10 +4,12 @@ import { privacyMeta } from '../content/privacyMeta'
 import { projectMeta } from '../content/projectDetails/meta'
 import { runtimeProject } from '../projects/store'
 import { serviceAreas } from '../content/services/areas'
+import { packages } from '../content/packages'
+import { comparison } from '../content/shop/comparison'
 import { shopMeta } from '../content/shop/meta'
 import type { Language } from '../i18n/config'
 import type { Dictionary } from '../i18n/locales/hu'
-import { labIdOfPage, projectIdOfPage, serviceIdOfPage, type NavPageId, type PageDef } from './pages'
+import { labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type NavPageId, type PageDef } from './pages'
 
 const NAV_IDS: readonly string[] = ['work', 'services', 'about', 'lab', 'contact']
 
@@ -80,7 +82,21 @@ export function buildDocumentMeta(
   const serviceId = serviceIdOfPage(page.id)
   const area = serviceId ? serviceAreas.find((candidate) => candidate.id === serviceId) : undefined
   if (area) return { ...site, title: `${area.name[lang]} — ${t.nav.services} — ${brandName}`, description: area.summary[lang] }
-  const shop = page.id === 'services' ? shopMeta.landing : page.id === 'configure' ? shopMeta.configurator : page.id === 'cart' ? shopMeta.cart : undefined
+  // A package is titled by its name and described by what it is and who it is for.
+  const packageId = packageIdOfPage(page.id)
+  const pack = packageId ? packages.find((candidate) => candidate.id === packageId) : undefined
+  if (pack) {
+    // The package's name and its tier label (a few words); the tagline is the description's first sentence.
+    const label = comparison.tiers.find((tier) => tier.package === pack.id)?.label[lang]
+    return { ...site, title: `${pack.name}${label ? `: ${label}` : ''} — ${brandName}`, description: `${pack.tagline[lang]} ${pack.audience[lang]}` }
+  }
+  const shop =
+    page.id === 'services' ? shopMeta.landing
+    : page.id === 'configure' ? shopMeta.configurator
+    : page.id === 'cart' ? shopMeta.cart
+    : page.id === 'full-experience' ? shopMeta.fullExperience
+    : page.id === 'full-experience-start' ? shopMeta.fullExperienceStart
+    : undefined
   if (shop) return { ...site, title: `${shop.title[lang]} — ${brandName}`, description: shop.description[lang] }
 
   if (page.id === 'privacy') return { ...site, title: `${privacyMeta.title[lang]} — ${brandName}`, description: privacyMeta.description[lang] }

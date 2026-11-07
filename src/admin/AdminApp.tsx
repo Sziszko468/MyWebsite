@@ -21,6 +21,8 @@ import { ProjectsPage } from './pages/ProjectsPage'
 import { QuotesPage } from './pages/QuotesPage'
 import { TextsPage } from './pages/TextsPage'
 import { ExtraEditPage, PackageEditPage, ServiceEditPage } from './pages/CatalogEditPages'
+import { ShopComparisonPage } from './pages/ShopComparisonPage'
+import { ShopOfferPage } from './pages/ShopOfferPage'
 import { ServicesPage } from './pages/ServicesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { TranslationsPage } from './pages/TranslationsPage'
@@ -89,6 +91,8 @@ function Gate() {
           <Route path="services/package/:code" element={<PackageEditPage />} />
           <Route path="services/new/extra" element={<ExtraEditPage />} />
           <Route path="services/extra/:code" element={<ExtraEditPage />} />
+          <Route path="comparison" element={<ShopComparisonPage />} />
+          <Route path="full-experience" element={<ShopOfferPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/new" element={<ProjectEditPage />} />
           <Route path="projects/settings" element={<ProjectSettingsPage />} />

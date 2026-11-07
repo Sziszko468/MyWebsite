@@ -10,6 +10,7 @@ import { authenticate, clearedCookie, destroySession, sessionCookie } from '../a
 import * as catalog from '../catalog/admin.ts'
 import type { ContentType } from '../catalog/repository.ts'
 import * as translations from '../catalog/translations.ts'
+import * as shopDocuments from '../shop/documents.ts'
 import * as inquiries from '../inquiries/admin.ts'
 import { INQUIRY_KINDS, INQUIRY_STATUSES, LIST_SORTS, type InquiryRow } from '../inquiries/repository.ts'
 import * as notifications from '../notifications/admin.ts'
@@ -71,6 +72,11 @@ function sessionOut(app: AppContext, who: ReturnType<typeof session>) {
       emailEnabled: app.notifier.enabled,
     },
   }
+}
+
+function documentCode(value: string): shopDocuments.DocumentCode {
+  if (shopDocuments.isDocumentCode(value)) return value
+  throw notFound('The document')
 }
 
 function contentType(value: string): ContentType {
@@ -205,6 +211,12 @@ export function adminRoutes(_app: AppContext): RouteDef[] {
       catalog.reorder(ctx.app, ctx.session, kind as catalog.Orderable, (await ctx.json()).keys)
       return empty(204)
     }),
+
+    // ---- the tier comparison and the FULL EXPERIENCE offer (documents with a draft and a published copy) ----
+    api('GET', '/api/admin/shop/documents/:code', (ctx) => json(shopDocuments.getDocument(ctx.app, ctx.session, documentCode(ctx.params.code)))),
+    api('PUT', '/api/admin/shop/documents/:code', async (ctx) => json(shopDocuments.saveDraft(ctx.app, ctx.session, documentCode(ctx.params.code), await ctx.json()))),
+    api('POST', '/api/admin/shop/documents/:code/publish', (ctx) => json(shopDocuments.publishDocument(ctx.app, ctx.session, documentCode(ctx.params.code)))),
+    api('POST', '/api/admin/shop/documents/:code/unpublish', (ctx) => json(shopDocuments.unpublishDocument(ctx.app, ctx.session, documentCode(ctx.params.code)))),
 
     // ---- translations ----
     api('GET', '/api/admin/translations', (ctx) => json(translations.overview(ctx.app, ctx.session, ctx.query))),

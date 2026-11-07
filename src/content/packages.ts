@@ -54,6 +54,11 @@ export interface ServicePackage {
   customization: Trilingual
   support: Trilingual
   extras: readonly ExtraId[]
+  /**
+   * `false` when the owner has switched the package off in the administration: it stays on the page, marked as not available
+   * at the moment, and cannot be started from there. Absent means available.
+   */
+  available?: boolean
 }
 
 /** The packages as written in this file: what the backend is seeded from (content/catalogExport.ts). */

@@ -5,6 +5,7 @@ import { loadConfig, type Config } from '../src/config.ts'
 import { Database } from '../src/db/database.ts'
 import { migrate } from '../src/db/migrate.ts'
 import { seedCatalog } from '../src/db/seed.ts'
+import { seedShopDocuments } from '../src/modules/shop/documents.ts'
 import { createLogger, type Logger } from '../src/lib/logger.ts'
 import type { Clock } from '../src/lib/time.ts'
 import type { DnsResolver } from '../src/modules/notifications/checks.ts'
@@ -91,7 +92,10 @@ export async function startServer(options: { env?: Record<string, string>; seed?
   const log: Logger = createLogger({ level: 'debug', write: (line) => void logs.push(line) })
   const mailer = options.realMailer ? createMailer(config.email) : options.mailer === undefined ? new RecordingMailer() : options.mailer
   const app = createApp({ config, db, clock, log, mailer, fetch: options.fetch, dns: options.dns })
-  if (options.seed !== false) seedCatalog(app.context)
+  if (options.seed !== false) {
+    seedCatalog(app.context)
+    seedShopDocuments(app.context)
+  }
   await new Promise<void>((resolve) => app.server.listen(0, '127.0.0.1', () => resolve()))
   const address = app.server.address()
   const url = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`

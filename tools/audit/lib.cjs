@@ -10,6 +10,8 @@ const LANGS = ['hu', 'en', 'nl']
 // Every public page (language-free paths), from src/routes/pages.ts
 const PAGES = [
   '/', '/work', '/services', '/services/website', '/services/webapp', '/services/ui', '/services/integrations',
+  '/services/packages/launch', '/services/packages/grow', '/services/packages/build', '/services/packages/care',
+  '/services/full-experience', '/services/full-experience/start',
   '/services/configure', '/services/cart', '/about', '/lab', '/contact',
   '/work/spendly', '/work/bookinghub', '/work/logistics-platform',
   '/privacy', '/lab/particle-universe', '/lab/liquid-matter', '/lab/type-in-motion', '/lab/infinite-space', '/lab/chromatic-distortion',
