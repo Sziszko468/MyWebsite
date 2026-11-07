@@ -85,16 +85,27 @@
   justify-content: space-between;
   gap: var(--space-5);
   height: 100%;
-  padding: calc(var(--_pad) + var(--size-touch) + var(--space-3)) var(--_pad) calc(var(--_pad) + env(safe-area-inset-bottom));
+  padding:
+    calc(var(--_pad) + var(--size-touch) + var(--space-3) + var(--safe-top))
+    max(var(--_pad), var(--safe-right))
+    calc(var(--_pad) + var(--safe-bottom))
+    max(var(--_pad), var(--safe-left));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* The finger's drag is the field's input, not a scroll (see VelocityIntro.tsx for the exception). */
+  touch-action: none;
 
   @include m.up('lg') {
     justify-content: center;
     gap: var(--space-7);
-    padding-top: var(--_pad);
+    padding-top: calc(var(--_pad) + var(--safe-top));
   }
+}
+
+/* Only when the content is taller than the screen: it may pan, so the entry button is never out of reach. */
+.intro[data-scrollable='true'] .content {
+  touch-action: pan-y;
 }
 
 .copy {
@@ -186,7 +197,7 @@
     align-items: flex-end;
     justify-content: space-between;
     gap: var(--space-6);
-    padding-top: var(--_pad);
+    padding-top: calc(var(--_pad) + var(--safe-top));
   }
 
   .copy {
@@ -207,8 +218,8 @@
 /* The language and theme controls: small, in the corner, out of the way of the headline. */
 .controls {
   position: absolute;
-  top: var(--_pad);
-  right: var(--_pad);
+  top: calc(var(--_pad) + var(--safe-top));
+  right: max(var(--_pad), var(--safe-right));
   z-index: calc(var(--z-content) + 1);
   display: flex;
   align-items: center;

@@ -86,11 +86,13 @@ export interface DeviceHints {
   coarsePointer: boolean
   /** The visitor asked for reduced data usage. */
   saveData: boolean
+  /** The connection reports itself as 2G or slower (Network Information API, Chromium only). Heavy scenes start light there. */
+  slowNetwork?: boolean
 }
 
 /** First guess from what the browser tells us; the frame-time watchdog corrects it later. */
-export function pickQuality({ width, cores, memory, coarsePointer, saveData }: DeviceHints): QualityTier {
-  if (saveData) return 'low'
+export function pickQuality({ width, cores, memory, coarsePointer, saveData, slowNetwork }: DeviceHints): QualityTier {
+  if (saveData || slowNetwork) return 'low'
   if ((memory !== undefined && memory <= 2) || (cores !== undefined && cores <= 2)) return 'low'
 
   const handheld = coarsePointer || width < 768
@@ -107,6 +109,20 @@ export function lowerTier(tier: QualityTier): QualityTier | null {
   if (tier === 'high') return 'medium'
   if (tier === 'medium') return 'low'
   return null
+}
+
+/** The step back up (see qualityGovernor.ts), or null at the top. */
+export function raiseTier(tier: QualityTier): QualityTier | null {
+  if (tier === 'low') return 'medium'
+  if (tier === 'medium') return 'high'
+  return null
+}
+
+const TIER_RANK: Record<QualityTier, number> = { low: 0, medium: 1, high: 2 }
+
+/** Whether `tier` is above `ceiling`. */
+export function isAbove(tier: QualityTier, ceiling: QualityTier): boolean {
+  return TIER_RANK[tier] > TIER_RANK[ceiling]
 }
 
 /** Average frame time (ms) above which the watchdog lowers the tier, and the one that gives up on WebGL. */

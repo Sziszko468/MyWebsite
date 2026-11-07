@@ -88,6 +88,35 @@ button {
   color: inherit;
 }
 
+/* Touch: a double tap on a control is two presses, never a zoom (and the browser does not wait to see
+   whether a second tap is coming). Pinch-zoom of the page itself stays available. The flash a tap leaves
+   is the brand red, quiet, instead of the browser's grey. */
+a,
+button,
+summary,
+label,
+select,
+[role='button'],
+[role='tab'],
+[role='switch'],
+input:not([type='range']) {
+  touch-action: manipulation;
+}
+
+html {
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--brand-red) 16%, transparent);
+}
+
+/* A phone zooms the page when a field is focused whose text is under 16 px (iOS Safari), and does not zoom back.
+   Fields are never smaller than that where the pointer is a finger. */
+@media (pointer: coarse) {
+  input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color']),
+  select,
+  textarea {
+    font-size: max(1rem, 16px);
+  }
+}
+
 ::selection {
   background-color: var(--color-accent);
   color: var(--color-on-accent);

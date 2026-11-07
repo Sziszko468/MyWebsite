@@ -19,7 +19,7 @@ export function supportsWebGL(): boolean {
 
 interface NavigatorHints extends Navigator {
   deviceMemory?: number
-  connection?: { saveData?: boolean }
+  connection?: { saveData?: boolean; effectiveType?: string }
 }
 
 export function getDeviceHints(): DeviceHints {
@@ -30,6 +30,7 @@ export function getDeviceHints(): DeviceHints {
     memory: nav.deviceMemory,
     coarsePointer: window.matchMedia('(pointer: coarse)').matches,
     saveData: nav.connection?.saveData === true,
+    slowNetwork: nav.connection?.effectiveType === 'slow-2g' || nav.connection?.effectiveType === '2g',
   }
 }
 

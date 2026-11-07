@@ -4,6 +4,8 @@
   position: sticky;
   top: 0;
   z-index: var(--z-nav);
+  /* Under a notch or a status bar (viewport-fit=cover): the bar starts below it, the background reaches behind it. */
+  padding-top: var(--safe-top);
   border-bottom: var(--border-width) solid transparent;
   background-color: transparent;
   transition:
@@ -23,7 +25,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: var(--header-height);
+  min-height: var(--header-bar);
 
   @include m.up('nav') {
     display: grid;

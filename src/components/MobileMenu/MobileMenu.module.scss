@@ -82,6 +82,7 @@
   justify-content: space-between;
   gap: var(--space-3);
   min-height: var(--header-height);
+  padding-top: var(--safe-top);
   padding-inline: var(--gutter);
   border-bottom: var(--border-width) solid var(--color-divider);
 }
@@ -91,7 +92,7 @@
   flex: 1;
   flex-direction: column;
   gap: var(--space-6);
-  padding: var(--space-5) var(--gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
+  padding: var(--space-5) var(--gutter) calc(var(--space-6) + var(--safe-bottom));
   overflow-y: auto;
   overscroll-behavior: contain;
 }

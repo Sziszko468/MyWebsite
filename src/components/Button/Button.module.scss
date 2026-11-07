@@ -130,6 +130,11 @@
   padding-inline: var(--space-4);
   font-size: var(--fs-xs);
 
+  /* Compact where a mouse points, a full finger where a finger does. */
+  @media (pointer: coarse) {
+    min-height: var(--size-touch);
+  }
+
   &.text {
     padding-inline: var(--space-1);
   }

@@ -55,6 +55,7 @@ function IntroDialog() {
 
   const dialogRef = useRef<HTMLDialogElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
   const ctaRef = useRef<HTMLButtonElement>(null)
   const exit = useRef<ExitSignal>({ progress: 0 })
   const lastPointer = useRef('mouse')
@@ -84,6 +85,23 @@ function IntroDialog() {
       for (const name of events) window.removeEventListener(name, first)
     }
   }, [engage])
+
+  // A finger dragging over the field is the field's input, so the content does not pan (touch-action: none in the
+  // stylesheet): the browser would otherwise take the first move for a scroll and cancel the pointer. Only if the
+  // content really is taller than the screen (a small phone held sideways, a large text size) may it pan, so the way
+  // in is never out of reach.
+  useEffect(() => {
+    const content = contentRef.current
+    const dialog = dialogRef.current
+    if (!content || !dialog) return
+    const measure = () => {
+      dialog.dataset.scrollable = String(content.scrollHeight > content.clientHeight + 1)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(content)
+    return () => observer.disconnect()
+  }, [])
 
   const handleDone = useCallback(() => {
     finish()
@@ -187,7 +205,7 @@ function IntroDialog() {
 
       <div className={styles.scrim} aria-hidden="true" />
 
-      <div className={styles.content}>
+      <div ref={contentRef} className={styles.content}>
         <div className={styles.copy}>
           <KineticTypography
             id={titleId}

@@ -6,6 +6,7 @@ import { cx } from '../../utils/cx'
 import { Reveal } from '../motion/Reveal'
 import { RevealImage } from '../motion/RevealImage'
 import { fill } from '../../utils/format'
+import { GALLERY_DESKTOP_SIZES, GALLERY_PHONE_SIZES } from '../../utils/responsiveImage'
 import styles from './Gallery.module.scss'
 
 function Thumbnails({
@@ -34,6 +35,7 @@ function Thumbnails({
                     width={image.width}
                     height={image.height}
                     alt={image.alt[lang]}
+                    sizes={kind === 'desktop' ? GALLERY_DESKTOP_SIZES : GALLERY_PHONE_SIZES}
                     loading="lazy"
                     decoding="async"
                   />
@@ -144,7 +146,7 @@ export function Lightbox({
             )}
           </div>
           <figure className={styles.large}>
-            <RevealImage key={image.id} src={image.src} width={image.width} height={image.height} alt={image.alt[lang]} decoding="async" />
+            <RevealImage key={image.id} src={image.src} srcSet="" width={image.width} height={image.height} alt={image.alt[lang]} decoding="async" />
             <figcaption>
               {image.caption[lang]}
               <span className={styles.counter}>{fill(t.project.gallery.counter, { current: index + 1, total: images.length })}</span>

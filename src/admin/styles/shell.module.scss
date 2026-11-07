@@ -241,14 +241,15 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: var(--admin-header-height);
-  padding: 0 var(--space-4);
+  min-height: calc(var(--admin-header-height) + var(--safe-top));
+  /* A phone held sideways has a notch at one side and a status bar above: the bar's content stays clear of both. */
+  padding: var(--safe-top) max(var(--space-4), var(--safe-right)) 0 max(var(--space-4), var(--safe-left));
   border-bottom: var(--border-width) solid var(--color-border);
   background-color: var(--color-header-bg, var(--color-bg));
   backdrop-filter: blur(8px);
 
   @include m.up('md') {
-    padding: 0 var(--space-6);
+    padding: var(--safe-top) max(var(--space-6), var(--safe-right)) 0 max(var(--space-6), var(--safe-left));
   }
 }
 
@@ -301,7 +302,7 @@
   width: 100%;
   max-width: 80rem;
   margin: 0 auto;
-  padding: var(--space-5) var(--space-4) calc(var(--space-9) + var(--admin-bottom-nav-height));
+  padding: var(--space-5) max(var(--space-4), var(--safe-right)) calc(var(--space-9) + var(--admin-bottom-nav-total)) max(var(--space-4), var(--safe-left));
 
   @include m.up('md') {
     padding: var(--space-7) var(--space-6) var(--space-9);
@@ -320,8 +321,8 @@
   z-index: var(--z-nav);
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  height: var(--admin-bottom-nav-height);
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  height: var(--admin-bottom-nav-total);
+  padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
   border-top: var(--border-width) solid var(--color-border);
   background-color: var(--color-bg-subtle);
 
@@ -379,7 +380,7 @@
 .sheetBody {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-4) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0));
+  padding: var(--space-4) var(--space-4) calc(var(--space-6) + var(--safe-bottom));
 }
 
 .sheetHead {

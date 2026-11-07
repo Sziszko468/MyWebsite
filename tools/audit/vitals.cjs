@@ -1,5 +1,5 @@
 // Web-vitals style measurement under emulation.
-// usage: node vitals.cjs <baseUrl> <out.json> [--runs=3] [--profile=phone|desktop] [--intro=0|1] [--pages=/hu/,/hu/services]
+// usage: node vitals.cjs <baseUrl> <out.json> [--runs=3] [--profile=phone|phone-fast|phone-slow|desktop] [--intro=0|1] [--pages=/hu/,/hu/services]
 const { launch, newPage, fs } = require('./lib.cjs')
 
 const args = Object.fromEntries(process.argv.slice(4).map((a) => a.replace(/^--/, '').split('=')))
@@ -19,15 +19,24 @@ new PerformanceObserver((l) => { for (const e of l.getEntries()) if (e.name === 
 new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__v.events.push([e.name, e.duration]) }).observe({ type: 'event', durationThreshold: 16, buffered: true })
 `
 
-async function once(browser, url) {
-  const mobile = profile === 'phone'
+// phone: 4x CPU slowdown, 1.6 Mbit/s and 150 ms (Lighthouse's mobile shape, the standard mobile connection);
+// phone-fast: the same CPU on an unthrottled connection; phone-slow: 6x CPU, 400 kbit/s and 400 ms (a slow 3G-like connection).
+const NETWORK = {
+  phone: { cpu: 4, latency: 150, down: 1.6 * 1024 * 1024, up: 750 * 1024 },
+  'phone-fast': { cpu: 4, latency: 0, down: -1, up: -1 },
+  'phone-slow': { cpu: 6, latency: 400, down: 400 * 1024, up: 400 * 1024 },
+}
+
+async function onceInner(browser, url) {
+  const mobile = profile.startsWith('phone')
   const { context, page } = await newPage(browser, { width: mobile ? 390 : 1440, height: mobile ? 844 : 900, mobile, seen: !intro })
   await context.addInitScript(INIT)
   const cdp = await context.newCDPSession(page)
   await cdp.send('Network.enable')
   if (mobile) {
-    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
-    await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: 150, downloadThroughput: (1.6 * 1024 * 1024) / 8, uploadThroughput: (750 * 1024) / 8 })
+    const n = NETWORK[profile]
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: n.cpu })
+    await cdp.send('Network.emulateNetworkConditions', { offline: false, latency: n.latency, downloadThroughput: n.down < 0 ? -1 : n.down / 8, uploadThroughput: n.up < 0 ? -1 : n.up / 8 })
   }
   const res = new Map()
   cdp.on('Network.responseReceived', (e) => res.set(e.requestId, { url: e.response.url, type: e.type, status: e.response.status }))
@@ -37,7 +46,7 @@ async function once(browser, url) {
   page.on('pageerror', (e) => errors.push('pageerror ' + e.message.slice(0, 160)))
   const t0 = Date.now()
   await page.goto(base + url, { waitUntil: 'load', timeout: 90000 })
-  await page.waitForTimeout(mobile ? 6000 : 3500)
+  await page.waitForTimeout(profile === 'phone-slow' ? 12000 : mobile ? 6000 : 3500)
   const v = await page.evaluate(() => window.__v)
   const list = [...res.values()].filter((r) => r.bytes != null)
   const sum = (f) => list.filter(f).reduce((a, r) => a + r.bytes, 0)
@@ -54,6 +63,16 @@ async function once(browser, url) {
   }
   await context.close()
   return result
+}
+
+// A navigation that is reset (the static server busy compressing a file) is tried again twice before the run is given up.
+async function once(browser, url, attempt = 0) {
+  try {
+    return await onceInner(browser, url)
+  } catch (e) {
+    if (attempt >= 2) throw e
+    return once(browser, url, attempt + 1)
+  }
 }
 
 const median = (a) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)]

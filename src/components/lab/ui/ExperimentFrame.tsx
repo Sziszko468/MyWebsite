@@ -101,6 +101,7 @@ export function ExperimentFrame({
             poster={poster ?? <LabArt id={id} />}
             hint={touchFirst ? copy.hintTouch : copy.hint}
             onSlow={state.onSlow}
+            onHeadroom={state.onHeadroom}
             onFail={state.onFail}
             notices={{ loading: text.notices.loading, contextLost: text.notices.contextLost }}
             pointerRef={pointerRef}

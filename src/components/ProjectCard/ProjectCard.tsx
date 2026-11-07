@@ -15,7 +15,7 @@ interface ProjectImage {
   height: number
 }
 
-export type ProjectCardLayout = 'default' | 'lead' | 'offset' | 'compact' | 'wide'
+export type ProjectCardLayout = 'default' | 'lead' | 'offset' | 'compact' | 'wide' | 'row'
 
 interface ProjectCardProps {
   title: string
@@ -85,6 +85,7 @@ export function ProjectCard({
               className={styles.image}
               src={image.src}
               alt={image.alt}
+              sizes="(min-width: 80rem) 30vw, (min-width: 48rem) 46vw, 92vw"
               width={image.width}
               height={image.height}
               loading="lazy"

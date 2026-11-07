@@ -66,7 +66,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const element = region.current
     if (!element) return
     const query = window.matchMedia('(max-width: 47.99rem)')
-    const place = () => element.style.setProperty('--_toast-offset', query.matches ? 'var(--admin-bottom-nav-height)' : '0px')
+    const place = () => element.style.setProperty('--_toast-offset', query.matches ? 'var(--admin-bottom-nav-total)' : '0px')
     place()
     query.addEventListener('change', place)
     return () => query.removeEventListener('change', place)

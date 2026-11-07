@@ -49,6 +49,7 @@ interface LiveSceneProps {
   maxDpr?: number
   onDemand?: boolean
   onSlow: (averageMs: number) => void
+  onHeadroom?: () => boolean
   notices: { loading: string; contextLost: string }
   children: ReactNode
 }
@@ -69,6 +70,7 @@ export function LiveScene({
   maxDpr,
   onDemand,
   onSlow,
+  onHeadroom,
   notices,
   children,
 }: LiveSceneProps) {
@@ -97,6 +99,7 @@ export function LiveScene({
             onDemand={onDemand}
             onReady={onReady}
             onSlow={onSlow}
+            onHeadroom={onHeadroom}
             onContextLost={onContextLost}
             onContextRestored={onContextRestored}
           >
@@ -129,6 +132,7 @@ export interface LabStageProps {
   /** The line laid over the stage until the first interaction. */
   hint?: string
   onSlow: (averageMs: number) => void
+  onHeadroom?: () => boolean
   onFail: () => void
   /** The scene's parts (they render inside the canvas and read `useLabScene()`). */
   children: ReactNode
@@ -164,6 +168,7 @@ export function LabStage({
   poster,
   hint,
   onSlow,
+  onHeadroom,
   onFail,
   children,
   notices,
@@ -242,6 +247,7 @@ export function LabStage({
             antialias={antialias}
             maxDpr={maxDpr}
             onSlow={onSlow}
+            onHeadroom={onHeadroom}
             notices={notices}
           >
             {children}

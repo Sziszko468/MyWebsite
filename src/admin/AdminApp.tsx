@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { ThemeProvider } from '../theme/ThemeProvider'
 import { ConfirmProvider } from './components/Confirm'
 import { AdminShell } from './components/AdminShell'
@@ -100,6 +100,8 @@ function Gate() {
           <Route path="translations" element={<TranslationsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          {/* The sign-in is a gate, not a page: someone who signed in at /admin/login (a bookmark, a typed address) goes on to the dashboard. */}
+          <Route path="login" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

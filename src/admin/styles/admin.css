@@ -9,6 +9,8 @@
   --admin-rail-width: 4.5rem;
   --admin-header-height: 3.75rem;
   --admin-bottom-nav-height: 3.75rem;
+  /* The phone's bottom bar with the home-indicator area under it: what the page's content and the toasts must clear. */
+  --admin-bottom-nav-total: calc(var(--admin-bottom-nav-height) + var(--safe-bottom));
   --admin-success: #5bd49b;
   --admin-warning: #f0b84a;
   --admin-danger: #ff6b72;

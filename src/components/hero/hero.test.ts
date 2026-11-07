@@ -65,6 +65,7 @@ describe('quality', () => {
     expect(pickQuality({ width: 390, cores: 4, memory: 3, coarsePointer: true, saveData: false })).toBe('low')
     expect(pickQuality({ ...desktop, memory: 2 })).toBe('low')
     expect(pickQuality({ ...desktop, saveData: true })).toBe('low')
+    expect(pickQuality({ ...desktop, slowNetwork: true })).toBe('low')
   })
 
   it('treats a narrow window like a handheld', () => {

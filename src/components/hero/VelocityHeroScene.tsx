@@ -6,6 +6,7 @@ import { createMotion, fieldMotion, type ExitSignal, type FieldMode } from './fi
 import { blendPalette, createBlended, createUniforms, type BlendedPalette, type FieldUniforms } from './fieldUniforms'
 import { FieldCamera } from './FieldCamera'
 import { FramePacer, stepScaleDown } from './framePacing'
+import { QualityGovernor, stepScaleUp } from './qualityGovernor'
 import type { HeroDriver } from './HeroDriver'
 import { clamp, clockSeconds, smoothstep } from './heroMath'
 import { readScenePalette, type ScenePalette } from './heroPalette'
@@ -51,6 +52,9 @@ export interface VelocityHeroSceneProps {
 
 type RuntimeProps = Pick<VelocityHeroSceneProps, 'driver' | 'onReady' | 'onSlow' | 'onContextLost' | 'onContextRestored'> & {
   mode: FieldMode
+  /** Counts steady frames after a lowering; when it says so, `onRestore` raises the resolution one step. */
+  governor: QualityGovernor
+  onRestore: () => void
   exit?: RefObject<ExitSignal>
   target: ScenePalette
   blended: BlendedPalette
@@ -77,7 +81,7 @@ const MIN_DPR = 0.55
  * something is changing (pointer, click waves, waking up, theme blend, exit), so a scene at rest
  * costs nothing.
  */
-function Runtime({ driver, mode, exit, target, blended, uniforms, rig, onReady, onSlow, onContextLost, onContextRestored }: RuntimeProps) {
+function Runtime({ driver, mode, exit, target, blended, uniforms, rig, governor, onRestore, onReady, onSlow, onContextLost, onContextRestored }: RuntimeProps) {
   const gl = useThree((state) => state.gl)
   const size = useThree((state) => state.size)
   const scene = useThree((state) => state.scene)
@@ -190,6 +194,9 @@ function Runtime({ driver, mode, exit, target, blended, uniforms, rig, onReady, 
     if (intro && (!cursor.settled || !scroll.settled || rig.intro < 1 || leaving > 0 || paletteMoving || cursor.hasActiveRipples(now))) {
       invalidate()
     }
+
+    // Steady for a good while since the resolution was lowered: one step back up (see qualityGovernor.ts).
+    if (governor.tick(delta)) onRestore()
 
     // Frame-rate watchdog: two consecutive slow windows lower the quality tier.
     const w = watch.current
@@ -322,8 +329,22 @@ function Scene({
   // the resolution is already at its floor does the quality tier drop, which rebuilds the scene.
   const [scale, setScale] = useState(1)
   const scaleRef = useRef(1)
+  const [governor] = useState(() => new QualityGovernor())
+  // Only the resolution comes back by itself here: a tier change rebuilds the scene (and shows the static graphic for
+  // a moment), which is not worth interrupting the visitor for. The Lab restores the tier as well.
+  const handleRestore = useCallback(() => {
+    const higher = stepScaleUp(scaleRef.current)
+    if (higher !== null) {
+      scaleRef.current = higher
+      setScale(higher)
+      governor.restored()
+    } else {
+      governor.settled()
+    }
+  }, [governor])
   const handleSlow = useCallback(
     (averageMs: number) => {
+      governor.lowered()
       const lower = stepScaleDown(scaleRef.current)
       if (lower !== null) {
         scaleRef.current = lower
@@ -332,12 +353,14 @@ function Scene({
         onSlow(averageMs)
       }
     },
-    [onSlow],
+    [onSlow, governor],
   )
 
   return (
     <>
       <Runtime
+        governor={governor}
+        onRestore={handleRestore}
         driver={driver}
         mode={mode}
         exit={exit}

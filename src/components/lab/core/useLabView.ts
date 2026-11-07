@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { getDeviceHints, supportsWebGL, useReducedMotion } from '../../hero/capabilities'
-import { UNUSABLE_FRAME_MS, type QualityTier } from '../../hero/velocityHeroConfig'
+import { isAbove, raiseTier, UNUSABLE_FRAME_MS, type QualityTier } from '../../hero/velocityHeroConfig'
 import { decideView, readViewPreference, storeViewPreference, type LabView, type StillReason } from './labMode'
 import { lowerTier, pickLabTier } from './labProfile'
 import { readQuality, resolveTier, storeQuality, type LabQuality } from './quality'
@@ -58,6 +58,8 @@ export interface LabViewState {
   setQuality: (quality: LabQuality) => void
   /** For the canvas: the frame rate cannot hold at this tier. Lowers the tier; at the lowest, falls back to the still view. */
   onSlow: (averageMs: number) => void
+  /** For the canvas: the frame rate has been steady since a lowering. Raises the tier one step, never above the device's first guess. Returns whether it did. */
+  onHeadroom: () => boolean
   /** For the boundary: the scene threw or lost its context for good. */
   onFail: () => void
 }
@@ -80,6 +82,8 @@ export function useLabView(options: { respectPreference?: boolean } = {}): LabVi
   const [automaticTier, setTier] = useState<QualityTier>(() => override.tier ?? pickLabTier(getDeviceHints()))
   const [quality, setQualityState] = useState<LabQuality>(() => readQuality(localStorageOrNull()))
   const tierRef = useRef(automaticTier)
+  // What the device was first given is the most it is ever given back.
+  const ceilingRef = useRef(automaticTier)
   const qualityRef = useRef(quality)
   const tier = override.tier ?? resolveTier(quality, automaticTier)
 
@@ -117,7 +121,16 @@ export function useLabView(options: { respectPreference?: boolean } = {}): LabVi
     }
   }, [])
 
+  const onHeadroom = useCallback(() => {
+    if (qualityRef.current !== 'auto') return false
+    const higher = raiseTier(tierRef.current)
+    if (!higher || isAbove(higher, ceilingRef.current)) return false
+    tierRef.current = higher
+    setTier(higher)
+    return true
+  }, [])
+
   const onFail = useCallback(() => setFailed(true), [])
 
-  return { view, reason, reducedMotion, preference, choose, tier, quality, setQuality, onSlow, onFail }
+  return { view, reason, reducedMotion, preference, choose, tier, quality, setQuality, onSlow, onHeadroom, onFail }
 }

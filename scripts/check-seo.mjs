@@ -160,7 +160,8 @@ check(headers.includes('Content-Security-Policy'), '_headers', 'has no Content-S
 for (const tag of ['script', 'style']) {
   const bodies = [...shell.matchAll(new RegExp(`<${tag}(?![^>]*\\bsrc=)(?![^>]*ld\\+json)[^>]*>([\\s\\S]*?)</${tag}>`, 'g'))].map((m) => m[1]).filter((b) => b.trim())
   for (const body of bodies) {
-    const hash = createHash('sha256').update(body).digest('base64')
+    // The browser hashes the parsed text, in which every CRLF is already an LF (see scripts/prerender.mjs).
+    const hash = createHash('sha256').update(body.replace(/\r\n?/g, '\n')).digest('base64')
     check(headers.includes(`'sha256-${hash}'`), '_headers', `does not allow the page's inline <${tag}> (sha256-${hash})`)
   }
 }

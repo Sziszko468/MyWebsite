@@ -13,6 +13,7 @@ import { KineticText } from '../motion/KineticText'
 import { ScrollLinked } from '../motion/ScrollLinked'
 import { usePointerField } from '../motion/usePointerField'
 import { fill } from '../../utils/format'
+import { PROJECT_HERO_SIZES, srcSetFor } from '../../utils/responsiveImage'
 import styles from './ProjectHero.module.scss'
 
 /*
@@ -174,6 +175,8 @@ export function ProjectHero({ entry, detail, image, onOpenImage }: ProjectHeroPr
               >
                 <img
                   src={image.src}
+                  srcSet={srcSetFor(image.src, image.width)}
+                  sizes={PROJECT_HERO_SIZES}
                   width={image.width}
                   height={image.height}
                   alt={image.alt[lang]}

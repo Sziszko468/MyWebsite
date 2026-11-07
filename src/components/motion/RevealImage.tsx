@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, type ImgHTMLAttributes } from 'react'
 import { cx } from '../../utils/cx'
+import { srcSetFor } from '../../utils/responsiveImage'
 import styles from './RevealImage.module.scss'
 
 /**
@@ -10,7 +11,13 @@ import styles from './RevealImage.module.scss'
  * script, with reduced motion and for any image that is not loading the markup is a plain <img>.
  * Only opacity and transform animate, over the motion tokens.
  */
-export function RevealImage({ className, alt, ...rest }: ImgHTMLAttributes<HTMLImageElement> & { alt: string }) {
+export function RevealImage({
+  className,
+  alt,
+  srcSet,
+  sizes,
+  ...rest
+}: ImgHTMLAttributes<HTMLImageElement> & { alt: string }) {
   const ref = useRef<HTMLImageElement>(null)
 
   useLayoutEffect(() => {
@@ -29,5 +36,8 @@ export function RevealImage({ className, alt, ...rest }: ImgHTMLAttributes<HTMLI
     }
   }, [])
 
-  return <img ref={ref} className={cx(styles.image, className)} alt={alt} {...rest} />
+  // A picture with smaller copies is offered at all of them (utils/responsiveImage.ts); `sizes` says how wide the page draws it.
+  // `srcSet=""` opts out (the lightbox shows the original).
+  const set = srcSet === '' ? undefined : (srcSet ?? (typeof rest.src === 'string' ? srcSetFor(rest.src, typeof rest.width === 'number' ? rest.width : undefined) : undefined))
+  return <img ref={ref} className={cx(styles.image, className)} alt={alt} srcSet={set} sizes={set ? (sizes ?? '100vw') : undefined} {...rest} />
 }

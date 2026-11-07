@@ -2,6 +2,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { PCFShadowMap } from 'three'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { FramePacer, stepScaleDown } from '../../hero/framePacing'
+import { QualityGovernor, stepScaleUp } from '../../hero/qualityGovernor'
 import { blendPalette, createBlended } from '../../hero/fieldUniforms'
 import { readScenePalette, type ScenePalette } from '../../hero/heroPalette'
 import { quietKnownLibraryWarnings } from '../../hero/threeConsole'
@@ -24,6 +25,8 @@ interface RuntimeProps {
   target: ScenePalette
   onReady: () => void
   onSlow: (averageMs: number) => void
+  /** The frame rate has been steady for a while after quality was lowered: raise the tier one step if there is one. Returns whether it did. */
+  onHeadroom?: () => boolean
   onContextLost: () => void
   onContextRestored: () => void
   children: ReactNode
@@ -53,6 +56,7 @@ function Runtime({
   target,
   onReady,
   onSlow,
+  onHeadroom,
   onContextLost,
   onContextRestored,
   children,
@@ -70,6 +74,7 @@ function Runtime({
   const [busy] = useState(() => ({ current: false }))
   const [pacer] = useState(() => new FramePacer())
   const [watchdog] = useState(() => new FrameWatchdog())
+  const [governor] = useState(() => new QualityGovernor())
   const [scale, setScale] = useState(1)
   const scaleRef = useRef(1)
 
@@ -147,6 +152,7 @@ function Runtime({
 
   const handleSlow = useCallback(
     (averageMs: number) => {
+      governor.lowered()
       // The cheapest remedy first: draw fewer pixels. Only at the floor does the tier drop, and
       // straight away when the frames are so slow that fewer pixels cannot be the whole answer.
       const severe = averageMs > SLOW_FRAME_MS * SEVERE_FACTOR
@@ -158,7 +164,7 @@ function Runtime({
         onSlow(averageMs)
       }
     },
-    [onSlow],
+    [onSlow, governor],
   )
 
   useFrame((_, delta) => {
@@ -177,7 +183,24 @@ function Runtime({
     // Frame-rate watchdog (only meaningful when the canvas draws continuously).
     if (view !== 'live') return
     const averageMs = watchdog.tick(delta)
-    if (averageMs !== null) handleSlow(averageMs)
+    if (averageMs !== null) {
+      handleSlow(averageMs)
+      return
+    }
+
+    // Steady for a while after a lowering: try one step back up, resolution first (invisible), then the tier.
+    if (governor.tick(delta)) {
+      const higher = stepScaleUp(scaleRef.current)
+      if (higher !== null) {
+        scaleRef.current = higher
+        setScale(higher)
+        governor.restored()
+      } else if (onHeadroom?.()) {
+        governor.restored()
+      } else {
+        governor.settled()
+      }
+    }
   }, -2)
 
   // Taking over the drawing (a subscriber above priority 0 does) lets the pacer skip frames: a
@@ -212,6 +235,7 @@ export interface LabCanvasProps {
   maxDpr?: number
   onReady: () => void
   onSlow: (averageMs: number) => void
+  onHeadroom?: () => boolean
   onContextLost: () => void
   onContextRestored: () => void
   children: ReactNode
@@ -235,6 +259,7 @@ export function LabCanvas({
   onDemand = false,
   onReady,
   onSlow,
+  onHeadroom,
   onContextLost,
   onContextRestored,
   children,
@@ -272,6 +297,7 @@ export function LabCanvas({
         target={target}
         onReady={onReady}
         onSlow={onSlow}
+        onHeadroom={onHeadroom}
         onContextLost={onContextLost}
         onContextRestored={onContextRestored}
       >

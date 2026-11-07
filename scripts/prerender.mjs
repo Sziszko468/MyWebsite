@@ -12,10 +12,13 @@ const entry = join(root, 'node_modules', '.cache', 'seo', 'entry.js')
 const template = await readFile(join(dist, 'index.html'), 'utf8')
 const { buildSiteFiles } = await import(pathToFileURL(entry).href)
 
-// The Content-Security-Policy allows the shell's inline <script> and <style> blocks by their hash.
+// The Content-Security-Policy allows the shell's inline <script> and <style> blocks by their hash. A browser hashes the
+// text it parsed, and the HTML parser turns every CRLF (and lone CR) into LF first, so the hash is taken over the same
+// text. Without this, a checkout with Windows line endings (git's autocrlf) hashed `\r\n` and the browser refused its own
+// pre-paint theme script ("Executing inline script violates the following Content Security Policy directive").
 const hashesOf = (tag) =>
   [...template.matchAll(new RegExp(String.raw`<${tag}(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</${tag}>`, 'g'))]
-    .map((match) => match[1])
+    .map((match) => match[1].replace(/\r\n?/g, '\n'))
     .filter((body) => body.trim() !== '')
     .map((body) => createHash('sha256').update(body).digest('base64'))
 

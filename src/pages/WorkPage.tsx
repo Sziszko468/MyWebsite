@@ -7,6 +7,7 @@ import { PageHero, HeroLine } from '../components/PageHero/PageHero'
 import { ProjectCard } from '../components/ProjectCard/ProjectCard'
 import { Section } from '../components/Section/Section'
 import { useI18n } from '../i18n/useI18n'
+import { useReducedMotion } from '../components/hero/capabilities'
 import { useCards } from '../projects/useCards'
 import { fill, pad } from '../utils/format'
 import styles from './WorkPage.module.scss'
@@ -23,6 +24,7 @@ export function WorkPage() {
   const cards = useCards()
   const [filter, setFilter] = useState<string>('all')
   const titleId = useId()
+  const reduced = useReducedMotion()
 
   const visible = filter === 'all' ? cards.all : cards.all.filter((card) => card.category === filter)
   const hero = t.workPage.hero
@@ -51,7 +53,17 @@ export function WorkPage() {
           {cards.categories.length > 1 && (
             <div className={styles.filters} role="group" aria-label={t.workPage.filter.label}>
               {[{ key: 'all', label: t.workPage.filter.all }, ...cards.categories].map((category) => (
-                <Button key={category.key} variant={filter === category.key ? 'primary' : 'secondary'} size="sm" aria-pressed={filter === category.key} onClick={() => setFilter(category.key)}>
+                <Button
+                  key={category.key}
+                  variant={filter === category.key ? 'primary' : 'secondary'}
+                  size="sm"
+                  aria-pressed={filter === category.key}
+                  onClick={(event) => {
+                    setFilter(category.key)
+                    // On a phone the chips are one swipeable row: bring the chosen one (and its neighbours) into view.
+                    event.currentTarget.scrollIntoView({ inline: 'center', block: 'nearest', behavior: reduced ? 'auto' : 'smooth' })
+                  }}
+                >
                   {category.label}
                 </Button>
               ))}
@@ -75,7 +87,9 @@ export function WorkPage() {
                   <Reveal className={styles.fill} delay={(position % 2) * 80}>
                     <ProjectCard
                       className={styles.card}
-                      layout="default"
+                      // A phone gets a rhythm: the first project and every third one is a full card, the rest are list rows
+                      // (from `md` all are the same card of the grid).
+                      layout={position % 3 === 0 ? 'default' : 'row'}
                       index={pad(position + 1)}
                       title={card.name}
                       category={card.label}

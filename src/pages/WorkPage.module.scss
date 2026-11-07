@@ -10,9 +10,38 @@
 
 .filters {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--space-2);
   margin-bottom: var(--space-4);
+
+  /* A phone: one row the thumb can swipe, running to the screen's edges, instead of three rows of wrapped pills that push the
+     work down the page. The edges fade where there is more. Chosen chips scroll into view (WorkPage.tsx). */
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: var(--gutter);
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--gutter), #000 calc(100% - var(--gutter)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--gutter), #000 calc(100% - var(--gutter)), transparent);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > * {
+    flex: none;
+    scroll-snap-align: start;
+  }
+
+  @include m.up('md') {
+    flex-wrap: wrap;
+    margin-inline: 0;
+    padding-inline: 0;
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
 .count {
@@ -31,7 +60,7 @@
 
 .grid {
   display: grid;
-  gap: var(--space-6) var(--space-5);
+  gap: var(--space-5) var(--space-5);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -50,6 +79,8 @@
   gap: var(--space-2);
   align-content: start;
   min-width: 0;
+  /* The card inside decides its own arrangement from the width it is given (ProjectCard `row`). */
+  container-type: inline-size;
 }
 
 .fill {

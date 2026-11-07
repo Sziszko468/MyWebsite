@@ -24,6 +24,7 @@ They use the system Chrome (`channel: 'chrome'`, with `--ignore-gpu-blocklist`, 
 | `audit-lab-overlap.cjs` | (PROMPT 15) Every Lab experience × 3 languages × 7 sizes × reduced/normal motion: do the hint, the notice, the title, the crumb, the control panel or the dock lie on one another? Found the hint hidden under the notice on phones. |
 | `webgl.cjs` | No WebGL at all, context loss and restore on the hero and a Lab experience, and which pages load Three.js. |
 | `vitals.cjs`, `inp.cjs`, `timeline.cjs` | First/largest paint, layout shift and blocking time (CDP: 4× CPU slowdown, 150 ms / 1.6 Mbit/s for the phone profile); interaction latency from real clicks; where the time to first paint goes. |
+| `mobile/` | (PROMPT 13.2) Phone checks with CDP touch events, emulated safe-area insets and CPU throttling: the intro and the Lab under a dragging finger, the notch, the hidden NFSU2 screen on phones, the quality governor end to end, the project pages' real picture widths, the administration on a notched phone. See `mobile/README.md`. `vitals.cjs` also has `--profile=phone-fast` and `--profile=phone-slow` (6× CPU, 400 kbit/s, 400 ms). |
 | `devharness.cjs` | Starts a mock collector and the dev server with local endpoints: analytics consent, what an event may carry, the forms' success/failure/timeout handling, and a lazy page whose code fails to load. |
 | `mapsize.cjs` | What is inside a bundle (`npx vite build --sourcemap --outDir /tmp/map --emptyOutDir`, then `node mapsize.cjs /tmp/map index-`). |
 
