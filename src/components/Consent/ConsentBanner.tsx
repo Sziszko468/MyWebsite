@@ -21,7 +21,7 @@ export function ConsentBanner() {
 
   const privacyPath = siteConfig.legal.find((entry) => entry.id === 'privacy')?.path ?? null
   return (
-    <section className={styles.banner} aria-label={t.consent.region}>
+    <section className={styles.banner} data-bottom-bar aria-label={t.consent.region}>
       <div>
         <p className={styles.title}>{t.consent.title}</p>
         <p className={styles.text}>{t.consent.text}</p>

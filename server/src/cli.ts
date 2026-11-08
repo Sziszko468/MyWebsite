@@ -28,6 +28,8 @@ import { eraseByEmail, runMaintenance } from './modules/system/maintenance.ts'
  *   backup <file>                        write a consistent copy of the database to a new file (safe while the server runs)
  *   maintenance                          remove expired sessions and, if RETENTION_DAYS is set, old finished requests
  *   erase <email>                        delete everything held about an e-mail address
+ *   ai check [message]                   one real request to the configured model (spends a few tokens): proves the key, the model and the address
+ *   ai status                            whether the assistant is available, and why not
  */
 
 /** Input that has arrived but not yet been asked for: piped text can hold several answers in one chunk. */
@@ -183,6 +185,19 @@ async function run(): Promise<void> {
         process.stdout.write(`${JSON.stringify(runMaintenance(app.context), null, 2)}\n`)
         return
       }
+      case 'ai': {
+        const [what, ...rest] = args
+        const { availability, loadSettings } = await import('./modules/ai/settings.ts')
+        if (what === 'status') {
+          process.stdout.write(`${JSON.stringify({ model: config.ai.model, apiKey: config.ai.apiKey ? 'set' : 'missing', operatorEnabled: config.ai.enabled, availability: availability(app.context), settings: loadSettings(app.context) }, null, 2)}
+`)
+          return
+        }
+        if (what !== 'check') throw new Error('Use: ai check [message] | ai status')
+        process.stdout.write(`${JSON.stringify(await app.context.assistant.check(rest.join(' ') || 'Say hello in one short sentence.'), null, 2)}
+`)
+        return
+      }
       case 'erase': {
         const [email] = args
         if (!email) throw new Error('Give the e-mail address to erase.')
@@ -192,7 +207,7 @@ async function run(): Promise<void> {
         return
       }
       default:
-        process.stdout.write('Commands: migrate, seed, check, admin create|password|disable|enable|list, backup, maintenance, erase. See server/src/cli.ts.\n')
+        process.stdout.write('Commands: migrate, seed, check, admin create|password|disable|enable|list, backup, maintenance, erase, ai check|status. See server/src/cli.ts.\n')
         process.exitCode = command ? 2 : 0
     }
   } finally {

@@ -191,8 +191,8 @@ describe('other websites', () => {
     const ok = await server.fetch('/api/contact', { method: 'OPTIONS', headers: { Origin: allowed, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' } })
     expect(ok.status).toBe(204)
     expect(ok.headers.get('access-control-allow-origin')).toBe(allowed)
-    expect(ok.headers.get('access-control-allow-methods')).toBe('GET, POST, OPTIONS')
-    expect(ok.headers.get('access-control-allow-headers')).toBe('Content-Type, If-None-Match')
+    expect(ok.headers.get('access-control-allow-methods')).toBe('GET, POST, PUT, DELETE, OPTIONS')
+    expect(ok.headers.get('access-control-allow-headers')).toBe('Content-Type, If-None-Match, X-AI-Session')
     expect(ok.headers.get('access-control-allow-headers')).not.toMatch(/authorization|cookie|csrf/i)
     expect(ok.headers.get('access-control-allow-credentials')).toBeNull()
     for (const origin of ['https://evil.test', 'null']) {
@@ -290,7 +290,7 @@ describe('abuse of the public forms', () => {
     // Only the windows still running are remembered, so the table does not grow with every address ever seen.
     server.clock.advance(16 * 60_000)
     limiters.sweep()
-    expect(Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)).toEqual([0, 0, 0, 0, 0, 0, 0])
+    expect(Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0])
     expect(() => new Limiters(server.clock, false).check('contact', 'x')).not.toThrow()
   })
 
@@ -570,13 +570,19 @@ describe('what the backend is built from', () => {
       return statSync(path).isDirectory() ? files(path) : name.endsWith('.ts') ? [path] : []
     })
 
-  it('imports nothing but Node\'s own modules and its own files: no package to be compromised, no package to update', () => {
+  // The one deliberate exception (PROMPT 16): the AI assistant is built on the Vercel AI SDK and the Anthropic provider, which
+  // need zod for the tools' schemas. They are imported ONLY by modules/ai (and lazily, so a server that never answers never loads
+  // them); nothing else in the backend may import any package.
+  const ASSISTANT_PACKAGES = new Set(['ai', 'ai/test', '@ai-sdk/anthropic', 'zod'])
+
+  it('imports nothing but Node\'s own modules and its own files: no package to be compromised, no package to update (the assistant\'s three are the one exception, and only inside modules/ai)', () => {
     const offenders: string[] = []
     for (const file of files(root)) {
       const source = readFileSync(file, 'utf8')
+      const inAssistant = relative(root, file).replace(/\\/g, '/').startsWith('modules/ai/')
       for (const match of source.matchAll(/(?:^|\n)\s*(?:import|export)\b[^'"\n;]*?from\s+['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)|require\(\s*['"]([^'"]+)['"]\s*\)/g)) {
         const target = match[1] ?? match[2] ?? match[3]
-        if (!target.startsWith('node:') && !target.startsWith('./') && !target.startsWith('../')) offenders.push(`${relative(root, file)} -> ${target}`)
+        if (!target.startsWith('node:') && !target.startsWith('./') && !target.startsWith('../') && !(inAssistant && ASSISTANT_PACKAGES.has(target))) offenders.push(`${relative(root, file)} -> ${target}`)
       }
     }
     expect(offenders).toEqual([])

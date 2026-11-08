@@ -61,6 +61,69 @@ export interface EmailConfig {
   maxAttempts: number
 }
 
+/**
+ * What an administrator may change about the assistant while the server runs (stored in `settings`, modules/ai/settings.ts).
+ * The environment gives the starting values; a saved value wins. The model, the API key and the address of the provider are
+ * NOT here: they are the operator's, set in the environment, and the browser cannot choose them.
+ */
+export interface AiSettings {
+  /** The assistant's availability switch. With it off the website simply does not offer the assistant. */
+  enabled: boolean
+  plannerEnabled: boolean
+  /** Whether an approved plan may be sent to the quote-request system. */
+  quoteEnabled: boolean
+  languages: Language[]
+  /** Limits of one message and of what is kept and replayed. */
+  maxInputChars: number
+  maxHistoryMessages: number
+  maxConversationMessages: number
+  /** Includes the model's thinking: the provider counts it. */
+  maxOutputTokens: number
+  /** Model steps (tool rounds) in one answer. */
+  maxToolCalls: number
+  maxRequestsPerSession: number
+  /** Per client address in a ten minute window (kept in memory). */
+  maxRequestsPerIp: number
+  maxDailyConversations: number
+  dailyRequests: number
+  dailyTokenBudget: number
+  /** USD. A request that could take the day or the month over its budget is refused before it starts. */
+  dailyBudgetUsd: number
+  monthlyBudgetUsd: number
+  conversationMaxHours: number
+  /** Days the words of a conversation are kept (counts and numbers are kept longer). */
+  retentionDays: number
+  effort: 'low' | 'medium' | 'high'
+  thinking: 'adaptive' | 'disabled'
+  /** USD per million tokens, as published by the provider on `pricesAsOf`; they are configuration, never a guess in code. */
+  priceInputPerMTok: number
+  priceOutputPerMTok: number
+  pricesAsOf: string
+  /** Empty: the built-in text. */
+  welcome: Record<Language, string>
+  /** Empty: the built-in chips. */
+  suggestions: Record<Language, string[]>
+}
+
+export interface AiConfig {
+  /** `AI_ASSISTANT_ENABLED`: the operator's master switch. The assistant is offered only with this on AND an API key. */
+  enabled: boolean
+  /** `ANTHROPIC_API_KEY`. A secret: server only, never logged, never in an answer. */
+  apiKey: string | null
+  /** `ANTHROPIC_BASE_URL`: another address for the provider's API (a proxy, or the local stand-in the tests use). */
+  baseUrl: string | null
+  /** `ANTHROPIC_MODEL`: the one model the assistant uses. */
+  model: string
+  /** Signs the anonymous session tokens (`AI_SESSION_SECRET`, or derived from APP_SECRET). */
+  sessionSecret: string
+  /** `AI_TIMEOUT_MS`: the longest one answer may take, tool rounds included; a stalled provider is cut off after this. */
+  timeoutMs: number
+  /** The starting values of the settings an administrator can change. */
+  defaults: AiSettings
+}
+
+export const AI_DEFAULT_MODEL = 'claude-haiku-5-5'
+
 export interface Config {
   env: AppEnv
   host: string
@@ -94,6 +157,7 @@ export interface Config {
   mediaDir: string
   /** The largest image an administrator may upload, in bytes. */
   mediaMaxBytes: number
+  ai: AiConfig
 }
 
 export class ConfigError extends Error {
@@ -305,7 +369,80 @@ export function loadConfig(env: Env = process.env): Config {
   const mediaMaxBytes = integer('MEDIA_MAX_BYTES', 6 * 1024 * 1024, 100 * 1024, 25 * 1024 * 1024)
   const mediaDir = text('MEDIA_DIR') ?? (databasePath === ':memory:' ? join(tmpdir(), `cc-media-${process.pid}`) : join(dirname(databasePath), 'media'))
 
+  // ---- the assistant (PROMPT 16) ----
+  const decimal = (name: string, fallback: number, min: number, max: number): number => {
+    const raw = text(name)
+    if (raw === null) return fallback
+    const value = Number(raw)
+    if (!Number.isFinite(value) || value < min || value > max) {
+      bad(name, `must be a number from ${min} to ${max} (got "${raw}")`)
+      return fallback
+    }
+    return value
+  }
+  const aiModel = text('ANTHROPIC_MODEL') ?? AI_DEFAULT_MODEL
+  if (!/^claude-[a-z0-9][a-z0-9.-]{2,60}$/.test(aiModel)) bad('ANTHROPIC_MODEL', `must be a Claude model identifier such as ${AI_DEFAULT_MODEL} (got "${aiModel}")`)
+  const aiKey = text('ANTHROPIC_API_KEY')
+  if (aiKey !== null && (aiKey.length < 20 || /\s/.test(aiKey))) bad('ANTHROPIC_API_KEY', 'does not look like an API key')
+  let aiBaseUrl: string | null = null
+  const aiBaseRaw = text('ANTHROPIC_BASE_URL')
+  if (aiBaseRaw !== null) {
+    try {
+      const url = new URL(aiBaseRaw)
+      if (url.protocol !== 'https:' && !(isLocalOrigin(url.origin) && !production)) bad('ANTHROPIC_BASE_URL', 'must be an https address (plain http only for a local stand-in outside production)')
+      else aiBaseUrl = aiBaseRaw.replace(/\/+$/, '')
+    } catch {
+      bad('ANTHROPIC_BASE_URL', 'is not a valid URL')
+    }
+  }
+  const aiSessionSecret = text('AI_SESSION_SECRET')
+  if (aiSessionSecret !== null && production && aiSessionSecret.length < 32) bad('AI_SESSION_SECRET', 'at least 32 characters in production')
+  const aiEffort = text('AI_EFFORT') ?? 'low'
+  if (!['low', 'medium', 'high'].includes(aiEffort)) bad('AI_EFFORT', `must be low, medium or high (got "${aiEffort}")`)
+  const aiThinking = text('AI_THINKING') ?? 'adaptive'
+  if (!['adaptive', 'disabled'].includes(aiThinking)) bad('AI_THINKING', `must be adaptive or disabled (got "${aiThinking}")`)
+  const noText: Record<Language, string> = { hu: '', en: '', nl: '' }
+  const aiDefaults: AiSettings = {
+    enabled: true,
+    plannerEnabled: true,
+    quoteEnabled: true,
+    languages: [...LANGUAGES],
+    maxInputChars: integer('AI_MAX_INPUT_CHARS', 1200, 100, 8000),
+    maxHistoryMessages: integer('AI_MAX_HISTORY_MESSAGES', 20, 2, 100),
+    maxConversationMessages: integer('AI_MAX_CONVERSATION_MESSAGES', 60, 4, 400),
+    maxOutputTokens: integer('AI_MAX_OUTPUT_TOKENS', 1500, 200, 16000),
+    maxToolCalls: integer('AI_MAX_TOOL_CALLS', 6, 1, 20),
+    maxRequestsPerSession: integer('AI_MAX_REQUESTS_PER_SESSION', 40, 1, 2000),
+    maxRequestsPerIp: integer('AI_MAX_REQUESTS_PER_IP', 30, 1, 2000),
+    maxDailyConversations: integer('AI_MAX_DAILY_CONVERSATIONS', 100, 1, 100000),
+    dailyRequests: integer('AI_DAILY_REQUESTS', 1000, 1, 1000000),
+    dailyTokenBudget: integer('AI_DAILY_TOKEN_BUDGET', 2_000_000, 1000, 1_000_000_000),
+    dailyBudgetUsd: decimal('AI_DAILY_BUDGET', 1, 0, 100000),
+    monthlyBudgetUsd: decimal('AI_MONTHLY_BUDGET', 10, 0, 1000000),
+    conversationMaxHours: integer('AI_CONVERSATION_MAX_HOURS', 24, 1, 720),
+    retentionDays: integer('AI_RETENTION_DAYS', 7, 1, 365),
+    effort: aiEffort as AiSettings['effort'],
+    thinking: aiThinking as AiSettings['thinking'],
+    // The prices Anthropic lists for Claude Haiku 5.5 (prompts up to 100K tokens) on 2026-10-06. Change them here or in the
+    // administration when the provider changes them; the code holds no other price.
+    priceInputPerMTok: decimal('AI_PRICE_INPUT_PER_MTOK', 0.1, 0, 1000),
+    priceOutputPerMTok: decimal('AI_PRICE_OUTPUT_PER_MTOK', 0.5, 0, 1000),
+    pricesAsOf: text('AI_PRICES_AS_OF') ?? '2026-10-06',
+    welcome: noText,
+    suggestions: { hu: [], en: [], nl: [] },
+  }
+  const ai: AiConfig = {
+    enabled: flag('AI_ASSISTANT_ENABLED', true),
+    apiKey: aiKey,
+    baseUrl: aiBaseUrl,
+    model: aiModel,
+    sessionSecret: aiSessionSecret ?? '',
+    timeoutMs: integer('AI_TIMEOUT_MS', 90_000, 200, 600_000),
+    defaults: aiDefaults,
+  }
+
   if (problems.length > 0) throw new ConfigError(problems)
+  ai.sessionSecret = aiSessionSecret ?? `${appSecret}:control-room-ai`
 
   return {
     env: appEnv,
@@ -347,6 +484,7 @@ export function loadConfig(env: Env = process.env): Config {
     bodyLimitBytes,
     mediaDir,
     mediaMaxBytes,
+    ai,
   }
 }
 
@@ -378,5 +516,6 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     servesWebsite: config.staticDir !== null,
     mediaDir: config.mediaDir,
     mediaMaxBytes: config.mediaMaxBytes,
+    assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : 'missing', model: config.ai.model, customBaseUrl: config.ai.baseUrl !== null },
   }
 }

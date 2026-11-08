@@ -1,4 +1,5 @@
 import { del, get, post, put, patch, request, queryString, type Envelope } from './client'
+import type { AiSummary, AiUsage } from '../lib/ai'
 import type {
   ContentRecord, DashboardData, ExtraRecord, Inquiry, InquiryDetail, ListQuery, LoginData, NotificationPreferences, NotificationsData, EmailCheck, Orderable, Page, PackageRecord, Preferences, Profile, Quote, QuoteDetail,
   ServiceRecord, SessionData, SessionView, SystemData, TranslationGroup, TranslationItem, TranslationOverview,
@@ -141,4 +142,12 @@ export const media = {
 export const texts = {
   list: (signal?: AbortSignal) => get<{ keys: TextKey[] }>(`${base}/texts`, { signal }).then((answer) => answer.data.keys),
   save: (key: string, values: Record<string, string>) => put<TextKey>(`${base}/texts/${encodeURIComponent(key)}`, { values }).then((answer) => answer.data),
+}
+
+// ---- the AI assistant (PROMPT 16): usage, settings and the knowledge it reads ----
+export const ai = {
+  summary: (signal?: AbortSignal) => get<AiSummary>(`${base}/ai`, { signal }).then((answer) => answer.data),
+  usage: (range: string, signal?: AbortSignal) => get<AiUsage>(`${base}/ai/usage`, { query: { range }, signal }).then((answer) => answer.data),
+  save: (settings: Record<string, unknown>) => put<AiSummary>(`${base}/ai/settings`, settings).then((answer) => answer.data),
+  refresh: () => post<AiSummary>(`${base}/ai/knowledge/refresh`, {}).then((answer) => answer.data),
 }

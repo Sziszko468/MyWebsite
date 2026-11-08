@@ -25,7 +25,9 @@ export type PackagePageId = `package-${PackageId}`
 export type ShopPageId = 'configure' | 'cart' | 'full-experience' | 'full-experience-start'
 /** The privacy and cookie notice, linked from the footer. */
 export type LegalPageId = 'privacy'
-export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | 'designSystem'
+/** CONTROL ROOM AI: the assistant's own page. */
+export type AiPageId = 'control-room'
+export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | 'designSystem'
 
 export interface PageDef<Id extends PageId = PageId> {
   id: Id
@@ -118,10 +120,13 @@ export function serviceIdOfPage(id: PageId): ServiceId | null {
 /** The legal pages the footer links to (config/site.ts `legal`). They are not in the navigation and exist in every language. */
 export const LEGAL_PAGES: readonly PageDef<LegalPageId>[] = [page<LegalPageId>('privacy', '/privacy')]
 
+/** The assistant's page: indexable, exists in every language (its content is the visitor's own conversation, drawn by the browser). */
+export const AI_PAGES: readonly PageDef<AiPageId>[] = [page<AiPageId>('control-room', '/control-room')]
+
 /** Dev-only reference page; absent from production builds. */
 const DEV_PAGES: readonly PageDef[] = import.meta.env.DEV ? [page('designSystem', '/design-system', LANGUAGES, false)] : []
 
-export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...LEGAL_PAGES, ...DEV_PAGES]
+export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...DEV_PAGES]
 
 function normalize(path: string): string {
   const trimmed = path.replace(/\/+$/, '')

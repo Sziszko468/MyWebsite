@@ -1,4 +1,5 @@
 import { analyticsEndpoint } from '../analytics/endpointProvider'
+import { API_BASE } from '../config/api'
 import { contactConfig } from '../config/contact'
 import { quoteConfig } from '../config/quote'
 import { DEFAULT_LANGUAGE } from '../i18n/config'
@@ -96,7 +97,8 @@ export function buildSiteFiles(template: string, hashes: InlineHashes, ctx: SeoC
 
   files._headers = buildHeadersFile({
     ...hashes,
-    connectOrigins: [...new Set([originOf(contactConfig.endpoint), originOf(quoteConfig.endpoint), originOf(analyticsEndpoint)].filter((o): o is string => o !== null))],
+    // The backend's own origin too: the assistant and the catalogue talk to it even when a form handler of another kind is configured.
+    connectOrigins: [...new Set([originOf(API_BASE), originOf(contactConfig.endpoint), originOf(quoteConfig.endpoint), originOf(analyticsEndpoint)].filter((o): o is string => o !== null))],
   })
   return { files, warnings }
 }

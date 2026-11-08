@@ -1,0 +1,309 @@
+@use '../../styles/mixins' as m;
+
+/* The assistant's screen: the availability line, the budget meters, the charts and their tables. Colours come from the administration's own tokens. */
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+
+  &[data-state='on'] {
+    border-left-color: var(--admin-success);
+  }
+
+  &[data-state='off'] {
+    border-left-color: var(--admin-danger);
+  }
+}
+
+.statusText {
+  margin: 0;
+  font-weight: var(--fw-semibold);
+}
+
+.statusMeta {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.stats {
+  display: grid;
+  gap: var(--space-3);
+  /* Wide enough for an amount with its decimals ("US$0.00666") at the card's figure size: one column on a phone, two to four wider up. */
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+
+  /* The dashboard's first card spans the row on a phone; here every card is alike. */
+  > div:first-child {
+    grid-column: auto;
+  }
+}
+
+.twoColumns {
+  display: grid;
+  gap: var(--space-5);
+
+  @include m.up(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.meters {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.meter {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.meterHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--fs-sm);
+
+  span {
+    color: var(--color-text-secondary);
+  }
+}
+
+.meterBar {
+  width: 100%;
+  height: 0.75rem;
+  border-radius: var(--radius-pill);
+  accent-color: var(--color-secondary);
+
+  &::-webkit-meter-bar {
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-subtle);
+  }
+
+  &::-webkit-meter-optimum-value,
+  &::-webkit-meter-suboptimum-value,
+  &::-webkit-meter-even-less-good-value {
+    border-radius: var(--radius-pill);
+    background: var(--color-secondary);
+  }
+
+  &::-moz-meter-bar {
+    border-radius: var(--radius-pill);
+    background: var(--color-secondary);
+  }
+}
+
+.meterWarning {
+  accent-color: var(--admin-warning);
+
+  &::-webkit-meter-optimum-value,
+  &::-webkit-meter-suboptimum-value,
+  &::-webkit-meter-even-less-good-value {
+    background: var(--admin-warning);
+  }
+
+  &::-moz-meter-bar {
+    background: var(--admin-warning);
+  }
+}
+
+.meterDanger {
+  accent-color: var(--admin-danger);
+
+  &::-webkit-meter-optimum-value,
+  &::-webkit-meter-suboptimum-value,
+  &::-webkit-meter-even-less-good-value {
+    background: var(--admin-danger);
+  }
+
+  &::-moz-meter-bar {
+    background: var(--admin-danger);
+  }
+}
+
+/* ---- charts ---- */
+
+.charts {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.chart {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  min-width: 0;
+}
+
+.chartTitle {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  font-weight: var(--fw-semibold);
+}
+
+.chartTotal {
+  color: var(--color-text-secondary);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-sm);
+}
+
+.chartSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 640 / 170;
+  max-height: 12rem;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg);
+}
+
+.chartAxis {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+
+.chartBar {
+  fill: var(--color-secondary);
+}
+
+.chartBarAlt {
+  fill: var(--color-accent);
+}
+
+.chartAxisLabels {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.chartEmpty {
+  margin: 0;
+  padding: var(--space-5) var(--space-4);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--color-text-secondary);
+}
+
+.legendItem {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 2px;
+  background-color: var(--color-secondary);
+}
+
+.swatchAlt {
+  background-color: var(--color-accent);
+}
+
+.chartTable {
+  font-size: var(--fs-sm);
+
+  summary {
+    min-height: var(--size-touch);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+  }
+}
+
+.tableScroll {
+  overflow-x: auto;
+  max-height: 16rem;
+  overflow-y: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: var(--space-1) var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-divider);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ---- tables of tools, topics and errors ---- */
+
+.rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: var(--border-width) solid var(--color-divider);
+  font-size: var(--fs-sm);
+
+  dt,
+  .rowName {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  dd,
+  .rowValue {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.sectionGap {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.checks {
+  display: grid;
+  gap: var(--space-2);
+}

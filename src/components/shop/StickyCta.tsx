@@ -74,7 +74,7 @@ export function StickyCta({ label, action, to, onActivate, after, hideOn = NONE,
   }, [visible])
 
   return (
-    <div className={styles.bar} data-visible={visible || undefined} inert={!visible}>
+    <div className={styles.bar} data-bottom-bar data-visible={visible || undefined} inert={!visible}>
       <p className={styles.label}>{label}</p>
       <Button to={to} size="md" arrow onClick={onActivate}>
         {action}

@@ -15,6 +15,7 @@ import type { MailMessage } from '../src/modules/notifications/mime.ts'
 import { MailError } from '../src/modules/notifications/smtp.ts'
 import { createUser } from '../src/modules/auth/users.ts'
 import type { Role } from '../src/modules/auth/permissions.ts'
+import type { ModelProvider } from '../src/modules/ai/gateway.ts'
 
 /** A clock a test moves by hand. */
 export class TestClock implements Clock {
@@ -79,9 +80,11 @@ const baseEnv: Record<string, string> = {
   NOTIFY_LANGUAGE: 'en',
   BRAND_NAME: 'Test Brand',
   RATE_LIMITS: 'false',
+  // The assistant is switched on in tests; the key is a placeholder that never leaves the machine (tests give it a mock model).
+  ANTHROPIC_API_KEY: 'test-key-not-real-0123456789abcdef',
 }
 
-export async function startServer(options: { env?: Record<string, string>; seed?: boolean; mailer?: Mailer | null; realMailer?: boolean; databasePath?: string; fetch?: FetchLike; dns?: DnsResolver } = {}): Promise<TestServer> {
+export async function startServer(options: { env?: Record<string, string>; seed?: boolean; mailer?: Mailer | null; realMailer?: boolean; databasePath?: string; fetch?: FetchLike; dns?: DnsResolver; aiModel?: ModelProvider } = {}): Promise<TestServer> {
   const env = { ...baseEnv, ...options.env }
   if (options.databasePath) env.DATABASE_PATH = options.databasePath
   const config = loadConfig(env)
@@ -91,7 +94,7 @@ export async function startServer(options: { env?: Record<string, string>; seed?
   const logs: string[] = []
   const log: Logger = createLogger({ level: 'debug', write: (line) => void logs.push(line) })
   const mailer = options.realMailer ? createMailer(config.email) : options.mailer === undefined ? new RecordingMailer() : options.mailer
-  const app = createApp({ config, db, clock, log, mailer, fetch: options.fetch, dns: options.dns })
+  const app = createApp({ config, db, clock, log, mailer, fetch: options.fetch, dns: options.dns, aiModel: options.aiModel })
   if (options.seed !== false) {
     seedCatalog(app.context)
     seedShopDocuments(app.context)

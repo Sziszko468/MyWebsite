@@ -8,6 +8,11 @@ export interface Reply {
   status: number
   headers: Record<string, string>
   body: string | Buffer
+  /**
+   * A body written as it is produced (the assistant's streamed answer): `body` is then empty, no `Content-Length` is sent, and
+   * the framework cancels the stream when the client goes away. Only the assistant's chat route uses it.
+   */
+  stream?: ReadableStream<Uint8Array>
 }
 
 const JSON_TYPE = 'application/json; charset=utf-8'

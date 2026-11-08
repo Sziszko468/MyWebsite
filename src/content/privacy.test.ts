@@ -21,6 +21,7 @@ const posix = (path: string) => relative(SRC, path).split(sep).join('/')
  * added here, which is the moment to add its item to content/privacy.ts and say what it keeps.
  */
 const STORAGE_USERS = [
+  'ai/client.ts',
   'analytics/consent.ts',
   'components/intro/introPolicy.ts',
   'components/lab/artifacts/artifactDb.ts',
@@ -33,6 +34,7 @@ const STORAGE_USERS = [
 
 /** Where each stored item's name is written in the code (some files are handed a storage by another). */
 const KEY_OWNERS: Record<string, string[]> = {
+  'ai/client.ts': ['cc-ai'],
   'analytics/consent.ts': ['cc-consent-v1'],
   'components/intro/introPolicy.ts': ['intro:seen', 'intro:skip'],
   'components/lab/artifacts/artifactDb.ts': ['lab-artifacts'],

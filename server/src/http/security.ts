@@ -36,7 +36,7 @@ export function corsHeaders(origin: string | null, config: Config): Record<strin
 }
 
 export const PREFLIGHT_HEADERS: Record<string, string> = {
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, If-None-Match',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, If-None-Match, X-AI-Session',
   'Access-Control-Max-Age': '600',
 }

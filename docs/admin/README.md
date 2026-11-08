@@ -31,6 +31,7 @@ Languages of the interface: **Hungarian and English** (the owner's two languages
 | FULL EXPERIENCE | `/admin/full-experience` | More | The flagship offer: copy, stages, components, the configurator's questions and options (the budget ranges), FAQ, with a draft and an explicit publish |
 | Services & packages (Szolgáltatások és csomagok) | `/admin/services`, `/admin/services/{service,package,extra}/:key`, `/admin/services/new/{service,package,extra}` | ✓ | Services, packages, add-ons: texts in three languages, price, availability, order |
 | Website content (Weboldal-tartalom) | `/admin/content`, `/admin/content/faq/:slug`, `/admin/content/new` | More | The FAQ (the only content the website reads from the backend) |
+| Control Room AI | `/admin/ai` (`?tab=settings\|knowledge`) | More | The assistant (PROMPT 16, [`../ai/README.md`](../ai/README.md)): usage and **estimated** cost against the budgets, what visitors do (counts only), the settings and limits, and what the assistant can read. |
 | Translations (Fordítások) | `/admin/translations` | More | Every translated field by language, what is missing, edited in place |
 | Notifications (Értesítések) | `/admin/notifications` | More | Whether e-mail is configured, which messages are sent, the delivery log |
 | Settings (Beállítások) | `/admin/settings` (`?tab=profile\|preferences\|security\|system`) | More | Profile, language and theme, password and sessions, and (administrator role) the server's state |
@@ -56,6 +57,8 @@ There is **no separate Media screen**: pictures are chosen and uploaded inside t
 **Projects** (PROMPT 13.1). The portfolio: a list of every project (draft, published, archived) in the order the website shows them, with the state, whether it is featured, whether it has a page of its own, and a mark for each language (*complete*, *incomplete*, *missing*); quick actions per row (edit, preview, feature, publish, unpublish, archive/restore, duplicate, delete, move up/down — each asks before it does anything that hides or deletes). The editor has seven tabs (General, Images, Descriptions, Technical, Sections, Links, Publication) and a language bar; saving writes the draft (incomplete is fine), publishing is a separate confirmed step that the server may refuse with a list of what is missing. *Categories and publishing* sets the Work page's filter categories and the all-languages rule. Details: [`../cms/README.md`](../cms/README.md).
 
 **Website texts** (PROMPT 13.1). The website's own wording that may be changed without code (the home page, the shop's buttons, the request builder's questions and answers): search, group filter, "changed only"; each row shows the original in the three languages and a field per language; an empty field brings the original back; `{placeholders}` must be kept.
+
+**Control Room AI.** *Overview*: today, this month and all time against the daily and monthly budgets (cost is labelled an estimate from token counts and the configured prices, never a bill), requests, conversations, tokens, failures by cause, latency, question categories, tools used, plans completed and quote requests sent from a conversation, with charts over 30 days / 12 weeks / 12 months and a table behind each. *Settings*: the assistant, planner and quote-sending switches, languages, every limit and budget, effort and thinking, prices and their date, and the welcome message and suggested questions per language; the server refuses an unacceptable value and the field says which. *Knowledge*: what the assistant can read, with counts and a fingerprint, and a refresh button. It never shows the key or any conversation text. Reading needs `system:read`, saving needs `system:write`.
 
 **Translations.** Every translated record of services, packages, add-ons and FAQ entries, grouped, with a language chooser, an "only what is missing" filter and a summary of how many fields are missing per language. Each record opens to its texts in the chosen language with the other languages beside them for reference, and one save for what changed, with its own saving/saved/error state. **Nothing is translated automatically.** "Missing" means: empty here, filled in another language.
 
@@ -91,6 +94,7 @@ There is **no separate Media screen**: pictures are chosen and uploaded inside t
 | `GET/POST /api/admin/projects` · `GET/PUT/PATCH/DELETE …/projects/:id` · `GET …/projects/:id/preview` · `POST …/projects/:id/{duplicate,publish,unpublish,archive,restore}` · `GET/PUT …/project-settings` · `PUT …/project-order` · `GET …/project-preview` | The portfolio (PROMPT 13.1; [`../cms/README.md`](../cms/README.md)) |
 | `GET/POST /api/admin/media` · `DELETE …/media/:id` | The picture library: the upload takes the image itself as the request body |
 | `GET /api/admin/texts` · `PUT …/texts/:key` | The website's changeable wording |
+| `GET /api/admin/ai` · `PUT …/ai/settings` · `GET …/ai/usage?range=daily\|weekly\|monthly` · `POST …/ai/knowledge/refresh` | The assistant: overview with settings and knowledge, saving settings, the usage series, refreshing what the assistant can read |
 | `GET/PUT /api/admin/shop/documents/:code` · `POST …/shop/documents/:code/{publish,unpublish}` | The shop's two documents (`comparison`, `full_experience`): the draft and the published copy, saving a draft (`{ document, expectedUpdatedAt }`), publishing and taking it back (PROMPT 09.1) |
 
 Every route needs a session; every write needs the CSRF token and a same-origin request; each is checked for its permission in the business function, not in the route (a test calls every route without a session and with the wrong role). The old server-rendered HTML pages (`/admin/*` as forms) are **gone**: the HTML renderer, its forms and its templates were deleted, and their tests rewritten against the JSON API.
@@ -106,6 +110,8 @@ One forward-only migration, `server/src/db/migrations/0002_admin_dashboard.sql` 
 - `settings` (key/value, for the notification switches).
 
 No data is dropped; rolling back means restoring a backup (§9 of the backend README).
+
+PROMPT 16 added `0006_control_room_ai.sql`: the assistant's `ai_sessions`, `ai_conversations`, `ai_messages`, `ai_requests`, `ai_tool_calls` and `ai_approvals` tables, and `quote_requests.source` (`website` or `ai_assistant`, so a request written through the assistant is marked in the Quotes list). The words of a conversation are deleted after the retention period; the counts stay (see [`../ai/README.md`](../ai/README.md)).
 
 PROMPT 09.1 added `0005_shop_experience.sql`: the `shop_documents` table (the comparison and the FULL EXPERIENCE offer, each a draft and a published JSON) and, on `quote_requests`, `kind` (`catalogue` or `full_experience`), `company` and `brief_json`.
 

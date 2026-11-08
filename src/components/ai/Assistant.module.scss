@@ -1,0 +1,174 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The floating panel. A native <dialog> pinned to the dark tokens (Carbon Black with Racing Red, in either theme). On a phone it is
+ * the whole screen, sized by the VISIBLE height (`--vvh`, set from the visual viewport) so the on-screen keyboard never hides the
+ * input; on a large screen it is a panel in the bottom-right corner that leaves the page usable.
+ */
+
+.panel {
+  /* Reset the dialog's own box. */
+  position: fixed;
+  inset: 0;
+  top: var(--vvt, 0px);
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: none;
+  height: var(--vvh, 100dvh);
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  overflow: hidden;
+
+  &:not([open]) {
+    display: none;
+  }
+
+  &::backdrop {
+    background-color: var(--color-overlay);
+  }
+
+  @include m.up('md') {
+    inset: auto var(--gutter) calc(var(--space-4) + var(--safe-bottom)) auto;
+    top: auto;
+    width: min(26rem, calc(100vw - 2 * var(--gutter)));
+    height: min(40rem, calc(100dvh - 6rem));
+    border: var(--border-width) solid var(--color-border-strong);
+    border-top: 3px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.large {
+  @include m.up('md') {
+    width: min(44rem, calc(100vw - 2 * var(--gutter)));
+    height: min(52rem, calc(100dvh - 4rem));
+  }
+}
+
+.header {
+  flex: none;
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: calc(var(--space-3) + var(--safe-top)) var(--space-3) var(--space-1) var(--space-4);
+
+  @include m.up('md') {
+    padding-top: var(--space-3);
+  }
+}
+
+.status {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent);
+  flex: none;
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--fs-md);
+  letter-spacing: var(--ls-wide);
+}
+
+.tools {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.tool {
+  display: inline-grid;
+  place-items: center;
+  width: var(--size-touch);
+  height: var(--size-touch);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+
+  @include m.hover {
+    background-color: var(--color-surface-raised);
+    color: var(--color-text);
+  }
+}
+
+.active {
+  background-color: var(--color-surface-raised);
+  color: var(--color-accent-text);
+}
+
+.closer {
+  color: var(--color-text);
+}
+
+.tagline {
+  flex: none;
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+.tabs {
+  flex: none;
+  display: flex;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.tab {
+  position: relative;
+  min-height: var(--size-touch);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+
+  &[aria-selected='true'] {
+    border-bottom-color: var(--color-accent);
+    color: var(--color-text);
+  }
+}
+
+.dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: var(--space-2);
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  > * {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

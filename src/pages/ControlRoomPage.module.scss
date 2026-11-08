@@ -1,0 +1,271 @@
+@use '../styles/mixins' as m;
+
+/*
+ * Control Room AI as a workspace. Under 64rem: one column (the conversation or the plan, chosen with the two tabs; the
+ * conversations in a drawer), as tall as what is really visible so the box to write in stays above the on-screen keyboard. From
+ * 64rem: the conversations on the left, the conversation in the middle, the plan on the right, all at once.
+ */
+
+.page {
+  display: grid;
+  gap: var(--space-5);
+  width: min(100% - 2 * var(--gutter), 90rem);
+  margin-inline: auto;
+  padding-block: var(--space-6) var(--space-7);
+}
+
+.loading,
+.unavailable {
+  width: min(100% - 2 * var(--gutter), 40rem);
+  margin: var(--space-8) auto;
+  color: var(--color-text-secondary);
+}
+
+.unavailable {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+
+  p {
+    margin: 0;
+  }
+}
+
+.link {
+  color: var(--color-accent-text);
+  text-underline-offset: 0.15em;
+}
+
+.intro {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 46rem;
+}
+
+.eyebrow {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.led {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--fs-2xl, 2rem);
+  letter-spacing: var(--ls-tight, 0);
+  text-transform: uppercase;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--color-accent-text);
+  font-weight: var(--fw-semibold);
+}
+
+.lead {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}
+
+.workspace {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  height: max(32rem, calc(var(--vvh, 100dvh) - var(--header-height) - var(--space-5)));
+  min-height: 0;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-top: 3px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--color-border) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-border) 45%, transparent) 1px, transparent 1px);
+  background-size: 2rem 2rem;
+  overflow: hidden;
+
+  @include m.up('lg') {
+    grid-template-columns: 17rem minmax(0, 1fr) 23rem;
+    grid-template-rows: minmax(0, 1fr);
+    height: max(36rem, calc(100dvh - var(--header-height) - 14rem));
+  }
+}
+
+.bar {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background-color: var(--color-surface);
+
+  @include m.up('lg') {
+    display: none;
+  }
+}
+
+.barButton,
+.tab {
+  min-height: var(--size-touch);
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+}
+
+.switch {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.tab {
+  border-color: transparent;
+
+  &[aria-selected='true'] {
+    border-color: var(--color-accent);
+    background-color: var(--color-surface-raised);
+  }
+}
+
+.dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: var(--space-2);
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+.history,
+.chat,
+.plan {
+  min-width: 0;
+  min-height: 0;
+  background-color: var(--color-surface);
+}
+
+.chat,
+.plan {
+  grid-column: 1;
+  grid-row: 2;
+  overflow: hidden;
+
+  @include m.up('lg') {
+    grid-row: 1;
+  }
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+
+  > * {
+    flex: 1;
+    min-height: 0;
+  }
+
+  @include m.up('lg') {
+    grid-column: 2;
+    border-inline: var(--border-width) solid var(--color-border);
+  }
+}
+
+.plan {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  @include m.up('lg') {
+    grid-column: 3;
+  }
+}
+
+.note {
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+/* Under 64rem one pane at a time. */
+.workspace[data-pane='chat'] .plan,
+.workspace[data-pane='plan'] .chat {
+  display: none;
+
+  @include m.up('lg') {
+    display: block;
+  }
+}
+
+.workspace[data-pane='chat'] .chat {
+  @include m.up('lg') {
+    display: flex;
+  }
+}
+
+.history {
+  position: absolute;
+  inset: 3.6rem auto 0 0;
+  z-index: 3;
+  width: min(20rem, 86%);
+  overflow-y: auto;
+  border-right: var(--border-width) solid var(--color-border-strong);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-102%);
+  visibility: hidden;
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    visibility 0s linear var(--dur-base);
+
+  .workspace[data-drawer] & {
+    transform: none;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  @include m.up('lg') {
+    position: static;
+    inset: auto;
+    z-index: auto;
+    width: auto;
+    box-shadow: none;
+    transform: none;
+    visibility: visible;
+    border-right: 0;
+  }
+}
+
+.scrim {
+  position: absolute;
+  inset: 3.6rem 0 0 0;
+  z-index: 2;
+  border: 0;
+  background-color: var(--color-overlay);
+  cursor: pointer;
+
+  @include m.up('lg') {
+    display: none;
+  }
+}

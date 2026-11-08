@@ -158,6 +158,18 @@ export function publicList(app: AppContext): { projects: PublicProject[]; catego
   return { projects, categories: categories(app).filter((category) => used.has(category.key)) }
 }
 
+/**
+ * Every published project in full (the same shape its public page gets: hidden sections already removed, no notes, only
+ * links the administrator marked as checked), including the ones that have no page of their own. For read-only callers
+ * that must see exactly what a visitor can see (the assistant's tools): a draft or an archived project is not in it.
+ */
+export function publicFull(app: AppContext): PublicProject[] {
+  const list = rows(app, "WHERE status = 'published'")
+  const contents = list.map(parseContent)
+  const pictures = picturesFor(app, contents)
+  return list.map((row, index) => publicProject(row, contents[index], pictures, true))
+}
+
 /** A published project with a page of its own, in full. Anything else is "not found": a draft is not even acknowledged. */
 export function publicOne(app: AppContext, slug: string): { project: PublicProject; neighbours: { previous: PublicProject; next: PublicProject } | null } {
   const published = rows(app, "WHERE status = 'published'")

@@ -74,6 +74,8 @@
 
 .stat {
   display: grid;
+  /* The one column may not grow past the card: a value that cannot break (a long amount) would otherwise widen it and poke out. */
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: var(--space-2);
   min-width: 0;
@@ -115,6 +117,12 @@
   font-weight: var(--fw-black);
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* For figures that are long by nature (an amount with its decimals, "1 234 ms"): a size that fits a card of a few rem. */
+.statValueCompact {
+  font-size: var(--fs-lg);
 }
 
 .statNote {

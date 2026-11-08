@@ -1,0 +1,318 @@
+{
+  "version": 1,
+  "name": null,
+  "story": {
+    "title": {
+      "hu": "A fejlődés nem egyenes vonal.",
+      "en": "Growth is not a straight line.",
+      "nl": "Groei is geen rechte lijn."
+    },
+    "paragraphs": [
+      {
+        "hu": "Korábban logisztikai területen dolgoztam, ma szoftverfejlesztéssel foglalkozom. A váltás nem sodródás volt, hanem tudatos döntés: az informatika és a szoftverfejlesztés felé fordultam.",
+        "en": "I used to work in logistics; today I work in software development. The change was not drift but a conscious decision: I turned towards IT and software development.",
+        "nl": "Ik werkte eerder in de logistiek; nu houd ik me bezig met softwareontwikkeling. De overstap was geen toeval maar een bewuste keuze: ik koos voor IT en softwareontwikkeling."
+      },
+      {
+        "hu": "Nem a nulláról indultam. Amit a logisztikában megtanultam, az nem maradt a múltban: átlátni a folyamatokat, szervezni, ügyfelekkel és csapattal egyeztetni, rendszerben gondolkodni. Ezekkel az eszközökkel nyúlok ma egy weboldal vagy egy webalkalmazás problémáihoz.",
+        "en": "I did not start from zero. What I learned in logistics did not stay in the past: seeing through processes, organising, aligning with customers and a team, thinking in systems. These are the tools I bring to the problems of a website or a web application today.",
+        "nl": "Ik begon niet bij nul. Wat ik in de logistiek leerde, bleef niet in het verleden: processen doorzien, organiseren, afstemmen met klanten en een team, in systemen denken. Met die gereedschappen pak ik vandaag de problemen van een website of webapplicatie aan."
+      },
+      {
+        "hu": "Egy jó fejlesztő nem csak kódot ír: megérti, kinek és mire épít, és úgy alakítja a megoldást, hogy az illeszkedjen a valós működéshez. Ebben a különböző szakmai háttér nem hátrány, hanem plusz nézőpont.",
+        "en": "A good developer does more than write code: they understand who they are building for and why, and shape the solution to fit how things really work. In that, a different professional background is not a disadvantage but an extra point of view.",
+        "nl": "Een goede ontwikkelaar schrijft meer dan code: hij of zij begrijpt voor wie en waarom er gebouwd wordt, en vormt de oplossing naar de werkelijke gang van zaken. Daarbij is een andere beroepsachtergrond geen nadeel maar een extra gezichtspunt."
+      }
+    ],
+    "thought": {
+      "hu": "A különböző területeken megszerzett tapasztalatok megtanítottak arra, hogy minden problémának több nézőpontja van. Ezt a szemléletet viszem tovább a fejlesztésben is.",
+      "en": "The experience I gained in different fields taught me that every problem has more than one point of view. I carry that outlook into development as well.",
+      "nl": "De ervaring die ik in verschillende vakgebieden heb opgedaan, heeft me geleerd dat elk probleem meerdere gezichtspunten heeft. Die kijk neem ik ook mee in softwareontwikkeling."
+    }
+  },
+  "strengths": [
+    {
+      "id": "problem-solving",
+      "name": {
+        "hu": "Problémamegoldás",
+        "en": "Problem solving",
+        "nl": "Probleemoplossing"
+      },
+      "text": {
+        "hu": "Egy hibánál, egy zavaros folyamatnál vagy egy lassú oldalnál is az okot keresem, nem a tünetet.",
+        "en": "With a bug, a confusing process or a slow page, I look for the cause, not the symptom.",
+        "nl": "Bij een bug, een onduidelijk proces of een trage pagina zoek ik de oorzaak, niet het symptoom."
+      }
+    },
+    {
+      "id": "process",
+      "name": {
+        "hu": "Folyamatok átlátása",
+        "en": "Seeing the whole process",
+        "nl": "Processen doorzien"
+      },
+      "text": {
+        "hu": "Látom, hogyan kapcsolódik egymáshoz egy folyamat minden lépése, ezért a felület a valódi működést követi.",
+        "en": "I can see how every step of a process connects, so the interface follows how things actually work.",
+        "nl": "Ik zie hoe elke stap van een proces samenhangt, zodat de interface de werkelijke gang van zaken volgt."
+      }
+    },
+    {
+      "id": "organisation",
+      "name": {
+        "hu": "Szervezés",
+        "en": "Organisation",
+        "nl": "Organisatie"
+      },
+      "text": {
+        "hu": "Rendbe teszem a feladatokat és a prioritásokat, így a fejlesztés átlátható és követhető marad.",
+        "en": "I put tasks and priorities in order, so development stays clear and easy to follow.",
+        "nl": "Ik breng taken en prioriteiten in volgorde, zodat de ontwikkeling overzichtelijk en te volgen blijft."
+      }
+    },
+    {
+      "id": "communication",
+      "name": {
+        "hu": "Ügyfélkommunikáció",
+        "en": "Client communication",
+        "nl": "Klantcommunicatie"
+      },
+      "text": {
+        "hu": "Megkérdezem, mire van valójában szükség, és érthetően elmondom, mi miért történik.",
+        "en": "I ask what is really needed and explain clearly what happens and why.",
+        "nl": "Ik vraag wat er echt nodig is en leg duidelijk uit wat er gebeurt en waarom."
+      }
+    },
+    {
+      "id": "teamwork",
+      "name": {
+        "hu": "Csapatmunka",
+        "en": "Teamwork",
+        "nl": "Samenwerking"
+      },
+      "text": {
+        "hu": "A jó eredmény közös munka: egyeztetek, visszajelzést kérek és adok.",
+        "en": "Good results are shared work: I align, ask for feedback and give it.",
+        "nl": "Goede resultaten zijn teamwerk: ik stem af, vraag feedback en geef die."
+      }
+    },
+    {
+      "id": "systems",
+      "name": {
+        "hu": "Rendszerszemlélet",
+        "en": "Systems thinking",
+        "nl": "Systeemdenken"
+      },
+      "text": {
+        "hu": "Egy változtatást a teljes rendszerre gondolva mérlegelek: a felületre, az adatra és az emberekre is.",
+        "en": "I weigh a change with the whole system in mind: the interface, the data and the people.",
+        "nl": "Ik weeg een wijziging af met het hele systeem in gedachten: de interface, de data en de mensen."
+      }
+    },
+    {
+      "id": "learning",
+      "name": {
+        "hu": "Folyamatos tanulás",
+        "en": "Continuous learning",
+        "nl": "Blijven leren"
+      },
+      "text": {
+        "hu": "Az iparágváltás maga is tanulás volt, és ma is így dolgozom: újat tanulok, kipróbálom, finomítom.",
+        "en": "Changing field was learning in itself, and I still work that way: learn something new, try it, refine it.",
+        "nl": "De overstap naar een ander vakgebied was zelf al leren, en zo werk ik nog steeds: iets nieuws leren, uitproberen, verfijnen."
+      }
+    }
+  ],
+  "technologies": [
+    {
+      "id": "frontend",
+      "label": {
+        "hu": "Frontend",
+        "en": "Frontend",
+        "nl": "Frontend"
+      },
+      "items": [
+        "HTML5",
+        "CSS3",
+        "SCSS",
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Vue.js"
+      ]
+    },
+    {
+      "id": "backend",
+      "label": {
+        "hu": "Backend",
+        "en": "Backend",
+        "nl": "Backend"
+      },
+      "items": [
+        "Python",
+        "Django",
+        "PHP",
+        "Laravel"
+      ]
+    },
+    {
+      "id": "database",
+      "label": {
+        "hu": "Adatbázis",
+        "en": "Database",
+        "nl": "Database"
+      },
+      "items": [
+        "SQL",
+        "MySQL",
+        "PostgreSQL"
+      ]
+    },
+    {
+      "id": "tools",
+      "label": {
+        "hu": "Eszközök és munkafolyamat",
+        "en": "Tools & workflow",
+        "nl": "Tools en workflow"
+      },
+      "items": [
+        "Git",
+        "GitHub",
+        "REST API",
+        "Vite"
+      ]
+    }
+  ],
+  "approach": [
+    {
+      "id": "understand",
+      "name": "Understand",
+      "text": {
+        "hu": "Először megértem a problémát és a felhasználói igényeket.",
+        "en": "First I understand the problem and what users need.",
+        "nl": "Eerst begrijp ik het probleem en wat gebruikers nodig hebben."
+      }
+    },
+    {
+      "id": "design",
+      "name": "Design",
+      "text": {
+        "hu": "Átgondolom a struktúrát, az élményt és a vizuális megjelenést.",
+        "en": "I think through the structure, the experience and the visual look.",
+        "nl": "Ik denk de structuur, de ervaring en de visuele uitstraling goed door."
+      }
+    },
+    {
+      "id": "build",
+      "name": "Build",
+      "text": {
+        "hu": "A megfelelő technológiákkal megvalósítom a megoldást.",
+        "en": "I build the solution with the right technologies.",
+        "nl": "Ik bouw de oplossing met de juiste technologieën."
+      }
+    },
+    {
+      "id": "refine",
+      "name": "Refine",
+      "text": {
+        "hu": "Tesztelem, finomítom és továbbfejlesztem a terméket.",
+        "en": "I test, refine and keep developing the product.",
+        "nl": "Ik test, verfijn en ontwikkel het product verder."
+      }
+    }
+  ],
+  "focus": [
+    {
+      "id": "frontend",
+      "title": {
+        "hu": "Modern frontend fejlesztés",
+        "en": "Modern frontend development",
+        "nl": "Moderne frontendontwikkeling"
+      },
+      "text": {
+        "hu": "Reszponzív, hozzáférhető felületek React-tel és TypeScripttel.",
+        "en": "Responsive, accessible interfaces with React and TypeScript.",
+        "nl": "Responsieve, toegankelijke interfaces met React en TypeScript."
+      }
+    },
+    {
+      "id": "fullstack",
+      "title": {
+        "hu": "Full-stack webalkalmazások",
+        "en": "Full-stack web applications",
+        "nl": "Full-stack webapplicaties"
+      },
+      "text": {
+        "hu": "A felülettől az adatbázisig: frontend és backend egy működő egészként.",
+        "en": "From the interface to the database: frontend and back end as one working whole.",
+        "nl": "Van de interface tot de database: frontend en back-end als één werkend geheel."
+      }
+    },
+    {
+      "id": "python",
+      "title": {
+        "hu": "Python és Django",
+        "en": "Python and Django",
+        "nl": "Python en Django"
+      },
+      "text": {
+        "hu": "Backend és API fejlesztés Pythonnal és Djangóval.",
+        "en": "Back-end and API development with Python and Django.",
+        "nl": "Back-end- en API-ontwikkeling met Python en Django."
+      }
+    },
+    {
+      "id": "api",
+      "title": {
+        "hu": "API-integrációk",
+        "en": "API integrations",
+        "nl": "API-integraties"
+      },
+      "text": {
+        "hu": "Külső szolgáltatások és saját API-k összekapcsolása.",
+        "en": "Connecting external services and APIs of my own.",
+        "nl": "Externe diensten en eigen API’s met elkaar verbinden."
+      }
+    },
+    {
+      "id": "responsive",
+      "title": {
+        "hu": "Reszponzív alkalmazások",
+        "en": "Responsive applications",
+        "nl": "Responsieve applicaties"
+      },
+      "text": {
+        "hu": "Ugyanaz a jó élmény telefonon, tableten és asztali gépen.",
+        "en": "The same good experience on a phone, a tablet and a desktop.",
+        "nl": "Dezelfde goede ervaring op telefoon, tablet en desktop."
+      }
+    },
+    {
+      "id": "interactive",
+      "title": {
+        "hu": "Interaktív digitális élmények",
+        "en": "Interactive digital experiences",
+        "nl": "Interactieve digitale ervaringen"
+      },
+      "text": {
+        "hu": "Mozgás, pointerreakció és vizuális részletek, amelyek segítik a használatot, nem akadályozzák.",
+        "en": "Motion, pointer response and visual detail that help use rather than get in its way.",
+        "nl": "Beweging, aanwijzerreactie en visuele details die het gebruik helpen in plaats van hinderen."
+      }
+    }
+  ],
+  "siteStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "SCSS Modules",
+    "Three.js",
+    "React Three Fiber",
+    "React Router"
+  ],
+  "contact": {
+    "email": null,
+    "social": [],
+    "contactPagePath": "/contact"
+  }
+}

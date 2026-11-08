@@ -10,6 +10,8 @@ export const TIMINGS = ['unsure', 'asap', 'weeks', 'months', 'flexible'] as cons
 
 export const QUOTE_KINDS = ['catalogue', 'full_experience'] as const
 export type QuoteKind = (typeof QUOTE_KINDS)[number]
+/** Where a request was written: the website's own forms, or the assistant (modules/ai) after a visitor approved a project plan. */
+export type QuoteSource = 'website' | 'ai_assistant'
 
 export interface QuoteRow {
   id: string
@@ -17,6 +19,8 @@ export interface QuoteRow {
   language: Language
   /** `catalogue`: built from the cart (items). `full_experience`: the flagship offer's configurator (no items, a brief). */
   kind: QuoteKind
+  /** Defaults to `website`. */
+  source?: QuoteSource
   name: string
   email: string
   phone: string | null
@@ -61,9 +65,9 @@ export interface ItemView {
 
 export function insertQuote(db: Database, row: QuoteRow, items: readonly NewItem[]): void {
   db.run(
-    `INSERT INTO quote_requests (id, reference, language, kind, name, email, phone, company, description, objective, reference_notes, timing, requirements, brief_json, status, archived_at, consent_at, ip_hash, content_hash, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [row.id, row.reference, row.language, row.kind, row.name, row.email, row.phone, row.company, row.description, row.objective, row.reference_notes, row.timing, row.requirements, row.brief_json, row.status, row.archived_at, row.consent_at, row.ip_hash, row.content_hash, row.created_at, row.updated_at],
+    `INSERT INTO quote_requests (id, reference, language, kind, name, email, phone, company, description, objective, reference_notes, timing, requirements, brief_json, status, archived_at, consent_at, ip_hash, content_hash, created_at, updated_at, source)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [row.id, row.reference, row.language, row.kind, row.name, row.email, row.phone, row.company, row.description, row.objective, row.reference_notes, row.timing, row.requirements, row.brief_json, row.status, row.archived_at, row.consent_at, row.ip_hash, row.content_hash, row.created_at, row.updated_at, row.source ?? 'website'],
   )
   for (const item of items) {
     const result = db.run('INSERT INTO quote_request_items (quote_request_id, position, need, service_id, package_id, plan, price_snapshot) VALUES (?, ?, ?, ?, ?, ?, ?)', [

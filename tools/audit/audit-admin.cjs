@@ -28,6 +28,7 @@ const SIZES = arg('sizes', '1920x1080,1440x900,1366x768,1024x768,768x1024,430x93
 const THEMES = arg('themes', 'dark,light').split(',')
 const LANGS = arg('langs', 'hu,en').split(',')
 const OUT = arg('out', '')
+const ONLY = arg('only', '').split(',').filter(Boolean)
 if (!EMAIL || !PASSWORD) {
   console.error('Give --email and --password (or ADMIN_EMAIL and ADMIN_PASSWORD) of an administrator in a throw-away database.')
   process.exit(2)
@@ -145,7 +146,7 @@ function measure(page) {
         const experience = quotes.find((item) => item.kind === 'full_experience')?.id
         // The portfolio's content management (PROMPT 13.1): the list, a new project, the settings, the editor of the first project, the wording.
         const project = (await api('/api/admin/projects'))?.projects?.[0]?.id
-        const screens = ['/admin', '/admin/projects', '/admin/projects/new', '/admin/projects/settings', project && `/admin/projects/${project}`, '/admin/texts', '/admin/inquiries', inquiry && `/admin/inquiries/${inquiry}`, '/admin/quotes', quote && `/admin/quotes/${quote}`, experience && experience !== quote && `/admin/quotes/${experience}`, '/admin/comparison', '/admin/full-experience', '/admin/services', '/admin/content', '/admin/translations', '/admin/notifications', '/admin/settings', '/admin/settings?tab=security', '/admin/not-a-screen'].filter(Boolean)
+        const screens = ['/admin', '/admin/projects', '/admin/projects/new', '/admin/projects/settings', project && `/admin/projects/${project}`, '/admin/texts', '/admin/inquiries', inquiry && `/admin/inquiries/${inquiry}`, '/admin/quotes', quote && `/admin/quotes/${quote}`, experience && experience !== quote && `/admin/quotes/${experience}`, '/admin/comparison', '/admin/full-experience', '/admin/services', '/admin/content', '/admin/translations', '/admin/notifications', '/admin/ai', '/admin/ai?tab=settings', '/admin/ai?tab=knowledge', '/admin/settings', '/admin/settings?tab=security', '/admin/not-a-screen'].filter(Boolean).filter((screen) => !ONLY.length || ONLY.some((prefix) => screen.startsWith(prefix)))
         for (const path of screens) {
           await page.goto(BASE + path, { waitUntil: 'domcontentloaded' })
           await settle(page)

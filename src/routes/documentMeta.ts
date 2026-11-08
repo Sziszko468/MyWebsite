@@ -1,4 +1,5 @@
 import { findExperiment } from '../content/lab'
+import { aiMeta } from '../content/ai/meta'
 import { experimentSummary, labMeta } from '../content/labMeta'
 import { privacyMeta } from '../content/privacyMeta'
 import { projectMeta } from '../content/projectDetails/meta'
@@ -99,6 +100,7 @@ export function buildDocumentMeta(
     : undefined
   if (shop) return { ...site, title: `${shop.title[lang]} — ${brandName}`, description: shop.description[lang] }
 
+  if (page.id === 'control-room') return { ...site, title: `${aiMeta.title[lang]} — ${brandName}`, description: aiMeta.description[lang] }
   if (page.id === 'privacy') return { ...site, title: `${privacyMeta.title[lang]} — ${brandName}`, description: privacyMeta.description[lang] }
 
   // These pages describe themselves: what they offer is worth more in a search result than a menu label.

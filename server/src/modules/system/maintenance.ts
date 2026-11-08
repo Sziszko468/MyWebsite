@@ -2,6 +2,9 @@ import type { AppContext } from '../../context.ts'
 import { addMs, DAY, iso } from '../../lib/time.ts'
 import { normalizeEmail } from '../auth/users.ts'
 import { purgeExpiredSessions } from '../auth/sessions.ts'
+import { sweepAbandoned } from '../ai/budget.ts'
+import { loadSettings } from '../ai/settings.ts'
+import { purge as purgeAssistant } from '../ai/store.ts'
 
 /**
  * Housekeeping and the deletion procedures. Nothing here runs unless it is asked to: the maintenance task is
@@ -16,11 +19,14 @@ export interface MaintenanceResult {
   quoteRequests: number
   deliveries: number
   retentionDays: number | null
+  /** The assistant: conversations whose words were removed, idle sessions removed, expired approvals cleared, reservations that never reconciled. */
+  assistant: { conversations: number; sessions: number; approvals: number; abandonedRequests: number }
 }
 
 export function runMaintenance(app: AppContext): MaintenanceResult {
   const { db, clock, config } = app
-  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, deliveries: 0, retentionDays: config.retentionDays }
+  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, deliveries: 0, retentionDays: config.retentionDays, assistant: { conversations: 0, sessions: 0, approvals: 0, abandonedRequests: 0 } }
+  result.assistant = { ...purgeAssistant(db, clock, loadSettings(app).retentionDays), abandonedRequests: sweepAbandoned(app) }
   if (config.retentionDays !== null) {
     const cutoff = iso(addMs(clock.now(), -config.retentionDays * DAY))
     db.transaction(() => {

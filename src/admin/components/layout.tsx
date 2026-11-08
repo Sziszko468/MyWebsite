@@ -50,11 +50,11 @@ export function DetailPanel({ title, children, className, actions }: { title?: s
 }
 
 /** One of the numbers on the dashboard; a link when there is a list behind it. */
-export function DashboardStatCard({ label, value, note, to, tone }: { label: string; value: string; note?: string; to?: string; tone?: 'accent' | 'info' | 'warning' | 'success' }) {
+export function DashboardStatCard({ label, value, note, to, tone, compact }: { label: string; value: string; note?: string; to?: string; tone?: 'accent' | 'info' | 'warning' | 'success'; compact?: boolean }) {
   const body = (
     <>
       <span className={page.statLabel}>{label}</span>
-      <span className={cx(page.statValue, tone && page[`tone_${tone}`])}>{value}</span>
+      <span className={cx(page.statValue, compact && page.statValueCompact, tone && page[`tone_${tone}`])}>{value}</span>
       {note && <span className={page.statNote}>{note}</span>}
     </>
   )

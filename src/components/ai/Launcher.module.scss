@@ -1,0 +1,81 @@
+@use '../../styles/mixins' as m;
+
+/* The floating button: Carbon Black with a Racing Red ring and a small indicator, above everything but the menu, the intro and the cookie notice. */
+
+.launcher {
+  position: fixed;
+  z-index: calc(var(--z-nav) - 10);
+  right: max(var(--gutter), var(--space-4));
+  bottom: calc(var(--space-4) + var(--safe-bottom));
+  /* Rises above the bars standing along the bottom edge (--assistant-lift); a translation, so no layout is animated. */
+  translate: 0 calc(var(--assistant-lift, 0px) * -1);
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0;
+  border: 2px solid var(--brand-red);
+  border-radius: 50%;
+  background-color: var(--brand-black);
+  color: var(--brand-paper);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition:
+    translate var(--dur-base) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+
+  @include m.hover {
+    transform: translateY(-2px);
+  }
+
+  @include m.up('md') {
+    right: var(--space-5);
+    bottom: calc(var(--space-5) + var(--safe-bottom));
+  }
+}
+
+.mark {
+  display: block;
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+.led {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 2px solid var(--brand-black);
+  border-radius: 50%;
+  background-color: var(--brand-red);
+
+  /* A ring that grows and fades: a scale and an opacity, nothing that moves layout. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 2px solid var(--brand-red);
+    opacity: 0;
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: led 2.8s ease-out infinite;
+    }
+  }
+}
+
+@keyframes led {
+  0%,
+  60% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}

@@ -7,6 +7,7 @@ import type { Logger } from './lib/logger.ts'
 import type { Clock } from './lib/time.ts'
 import type { EmailChecks } from './modules/notifications/checks.ts'
 import type { Notifier } from './modules/notifications/notifier.ts'
+import type { Assistant } from './modules/ai/gateway.ts'
 
 /** The few counters the System page shows, kept since the process started. */
 export interface Stats {
@@ -27,6 +28,8 @@ export interface AppContext {
   notifier: Notifier
   /** What can be verified about the e-mail set-up (checks.ts). */
   emailChecks: EmailChecks
+  /** The AI assistant (modules/ai): its knowledge, limits and the model behind it. */
+  assistant: Assistant
   stats: Stats
 }
 
@@ -61,6 +64,8 @@ export interface RequestCtx {
   raw(): Promise<Buffer>
   /** The body as it arrived with a limit of the route's own (an image upload), instead of the small default of the JSON API. */
   body(limit: number): Promise<Buffer>
+  /** Aborted when the client goes away before the answer was finished, so a streamed answer can stop paying for itself. */
+  signal: AbortSignal
 }
 
 export type Handler = (ctx: RequestCtx) => Promise<Reply> | Reply

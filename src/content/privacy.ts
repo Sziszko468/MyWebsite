@@ -86,6 +86,15 @@ export const storedItems: readonly StoredItem[] = [
     ),
   },
   {
+    name: 'cc-ai',
+    where: 'sessionStorage',
+    purpose: tri(
+      'Az AI-asszisztens munkamenet-kódja és annak a beszélgetésnek az azonosítója, amelyben éppen vagy. Név, e-mail-cím és üzenet nincs benne. A kódot az oldal saját szervere kapja meg, amikor az asszisztenst használod. A lap bezárásáig marad meg.',
+      'The AI assistant’s session code and the id of the conversation you are in. It holds no name, e-mail address or message. The code is sent to this site’s own server when you use the assistant. It lasts until the tab is closed.',
+      'De sessiecode van de AI-assistent en het id van het gesprek waarin je zit. Er staan geen naam, e-mailadres of bericht in. De code gaat naar de eigen server van deze site als je de assistent gebruikt. Hij blijft tot je het tabblad sluit.',
+    ),
+  },
+  {
     name: 'cc-consent-v1',
     where: 'localStorage',
     onlyWithMeasurement: true,
@@ -115,9 +124,9 @@ export const privacyText = {
   stored: {
     title: tri('Mit tárol az oldal a böngésződben', 'What the site keeps in your browser', 'Wat de site in je browser bewaart'),
     text: tri(
-      'Az alábbi beállítások csak ezen az eszközön vannak, és csak az oldal működéséhez kellenek. Nem kerülnek elküldésre sehová.',
-      'The items below stay on this device and are only there to make the site work. They are not sent anywhere.',
-      'De onderstaande gegevens blijven op dit apparaat en dienen alleen om de site te laten werken. Ze worden nergens naartoe gestuurd.',
+      'Az alábbi beállítások csak ezen az eszközön vannak, és csak az oldal működéséhez kellenek. Nem kerülnek elküldésre sehová, kivéve az AI-asszisztens munkamenet-kódját, amelyet az oldal saját szervere kap meg, amikor az asszisztenst használod.',
+      'The items below stay on this device and are only there to make the site work. They are not sent anywhere, except the AI assistant’s session code, which goes to this site’s own server when you use the assistant.',
+      'De onderstaande gegevens blijven op dit apparaat en dienen alleen om de site te laten werken. Ze worden nergens naartoe gestuurd, behalve de sessiecode van de AI-assistent, die naar de eigen server van deze site gaat als je de assistent gebruikt.',
     ),
     where: tri('Hol', 'Where', 'Waar'),
   },
@@ -143,6 +152,36 @@ export const privacyText = {
         'Hogy mi történik egy üzenettel, miután megérkezett, az oldal tulajdonosának dolga. Kérdezd tőle a Kapcsolat oldalon keresztül.',
         'What happens to a message once it has arrived is up to the site’s owner. Ask them through the Contact page.',
         'Wat er met een bericht gebeurt zodra het is aangekomen, is aan de eigenaar van de site. Vraag het via de contactpagina.',
+      ),
+    ],
+  },
+  assistant: {
+    title: tri('A Control Room AI', 'Control Room AI', 'Control Room AI'),
+    items: [
+      tri(
+        'Ha a Control Room AI-t használod, az üzeneteid és a válaszai ennek az oldalnak a szerverén keresztül eljutnak az AI-szolgáltatóhoz (Anthropic, Claude), hogy megírhassa a választ. Ez csak akkor történik, ha az asszisztenst megnyitod és üzenetet küldesz.',
+        'When you use Control Room AI, your messages and its answers pass through this site’s server to the AI provider (Anthropic, Claude) so that it can write the answer. That happens only when you open the assistant and send a message.',
+        'Als je Control Room AI gebruikt, gaan je berichten en de antwoorden via de server van deze site naar de AI-aanbieder (Anthropic, Claude), zodat die het antwoord kan schrijven. Dat gebeurt alleen als je de assistent opent en een bericht verstuurt.',
+      ),
+      tri(
+        'A szerver a beszélgetés szövegét a folytatáshoz tárolja, korlátozott ideig (az oldal tulajdonosa állítja be; a beszélgetés ablakában látod, hány napig). Egy beszélgetést bármikor törölhetsz, ilyenkor a szövege azonnal törlődik. A szám jellegű adatok (hány kérés, hány token) szöveg nélkül tovább megmaradnak, hogy az oldal költségei kézben maradjanak.',
+        'The server keeps the conversation text so the conversation can continue, for a limited time (the site’s owner sets it; the conversation window shows how many days). You can delete a conversation at any time, and its text is removed at once. Counts and numbers (how many requests, how many tokens) are kept without the text, so the site’s costs stay under control.',
+        'De server bewaart de tekst van het gesprek om het te kunnen voortzetten, gedurende beperkte tijd (de eigenaar van de site stelt die in; het gespreksvenster toont hoeveel dagen). Je kunt een gesprek op elk moment verwijderen, waarna de tekst direct wordt gewist. Aantallen en cijfers (hoeveel verzoeken, hoeveel tokens) blijven zonder tekst bewaard, zodat de kosten van de site beheersbaar blijven.',
+      ),
+      tri(
+        'Ne írj be érzékeny személyes adatot. Az asszisztens csak abból válaszol, ami az oldalon közzé van téve.',
+        'Do not enter sensitive personal data. The assistant answers only from what is published on the site.',
+        'Voer geen gevoelige persoonsgegevens in. De assistent antwoordt alleen op basis van wat op de site is gepubliceerd.',
+      ),
+      tri(
+        'Ha az asszisztensen át ajánlatot kérsz, a nevedet és az e-mail-címedet a terv melletti panelen adod meg, és csak az ajánlatkéréshez kerülnek: az AI-modell nem látja őket. Semmi nem megy el a jóváhagyásod nélkül.',
+        'If you ask for a quote through the assistant, you enter your name and e-mail address in the panel next to the plan, and they go only into the quote request: the AI model does not see them. Nothing is sent without your approval.',
+        'Vraag je via de assistent een offerte aan, dan vul je je naam en e-mailadres in het paneel naast het plan in; ze komen alleen in de offerteaanvraag terecht: het AI-model ziet ze niet. Er wordt niets verstuurd zonder jouw goedkeuring.',
+      ),
+      tri(
+        'Hogy az AI-szolgáltató a hozzá küldött szöveggel mit tesz, a szolgáltató saját feltételei szabják meg. Ezt az oldal tulajdonosának kell átnéznie és itt megadnia az indulás előtt.',
+        'What the AI provider does with the text sent to it is governed by the provider’s own terms. The site’s owner has to review those and state them here before launch.',
+        'Wat de AI-aanbieder met de aan hem gestuurde tekst doet, wordt bepaald door de eigen voorwaarden van de aanbieder. De eigenaar van de site moet die voor de lancering nalezen en hier vermelden.',
       ),
     ],
   },

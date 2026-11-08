@@ -65,6 +65,34 @@ Needs a **fresh** scratch server for every run (it signs in several times, the s
 | **F** Administrator: FULL EXPERIENCE | edit the headline in three languages and add a budget range → save and publish → a new visitor sees the copy and the new option → unpublish → the website's own text returns and requests are not accepted meanwhile → put back as it was | the budget ranges are the administrator's; withdrawing the offer is honest |
 | **G** Administrator on a phone | 390×844: both shop screens load without sideways scrolling, Publish is visible and Save is a tappable size | the editors are usable by thumb |
 
+## Control Room AI (PROMPT 16)
+
+`ai-journey.cjs` drives the floating assistant and the `/control-room` page in a real Chrome against the **built** site served by the real backend, whose model is a local stand-in for Anthropic's Messages API (`anthropic-standin.ts`). The real `@ai-sdk/anthropic` provider, the real streaming protocol, the real tools and the real database are in play; nothing is spent and nothing leaves the machine.
+
+```bash
+MSYS_NO_PATHCONV=1 VITE_API_URL=/ npm run build
+node tools/e2e/anthropic-standin.ts 9911 &                       # prints its address; GET/DELETE /__requests shows or clears what it received
+ANTHROPIC_API_KEY=test-key-not-real-0123456789abcdef ANTHROPIC_BASE_URL=http://127.0.0.1:9911/v1 STATIC_DIR=$PWD/dist \
+  DATABASE_PATH=/tmp/e2e/app.sqlite APP_SECRET=<32+ characters> APP_ENV=development PORT=8788 node server/src/main.ts &
+AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/ai-journey.cjs --base=http://127.0.0.1:8788 --standin=http://127.0.0.1:9911 \
+  --email=admin@example.test --password=<the test password> [--out=<dir>]     # --out also saves a picture of every failing step
+```
+
+The stand-in answers according to markers in the visitor's last message: `TOOL:<name>:<json>` makes the model call that tool, `FAIL:<status>` answers with an HTTP error, `SLOW` writes the answer word by word, and the "I approved the plan" sentences (in all three languages) make it call `submitApprovedQuoteRequest`. Everything else gets a plain answer. It never reproduces real model behaviour: this checks **our** code, not Haiku.
+
+| | Steps |
+| --- | --- |
+| **A** The floating assistant | the button appears when idle and no AI code or session exists before it is pressed → the panel opens with the cursor in the box, the welcome and six suggested questions → a streamed answer → Escape and focus → the same conversation again → "Open the full Control Room" shows the same conversation |
+| **B** The page | three areas on a desktop → the conversation survives a reload → the button on another page opens the same conversation |
+| **C** Stop, retry, copy, delete | stopping a long answer keeps what was written → copy and regenerate → a provider failure becomes a sentence with "Try again" and no provider text → deleting a conversation |
+| **D** Plan and approval | the plan fills through the tool → the visitor edits it → sending validates name, e-mail and acknowledgement → after approval the request is sent and the reference shown → the provider never received the name or e-mail address → the administration lists the request, marked as written by the assistant |
+| **E** Languages | the same conversation continues in Hungarian and Dutch and the model is told which language to answer in |
+| **F** Switches | switching the assistant off removes the button and the page says so; an exhausted budget gives a friendly message; a welcome message and chips written in the administration replace the built-in ones |
+| **G** The administration | the AI screen shows usage, tokens, cost (an estimate) and tools in charts with tables; the settings form saves and refuses a budget the server will not accept |
+| **H** A phone | full-screen modal with the box visible → the keyboard shrinks the panel → the plan tab → the button rises above the shop's sticky bar → the page is one column with a drawer and a tab |
+
+It needs a fresh server (sign-in is limited to 10 per 15 minutes) and an administrator of a **throw-away database**; it changes the assistant's settings (and puts them back) and creates one quote request. This journey found a real defect: the second answer of a conversation was not being saved (its message id was empty), which is why steps D and E continue one conversation across several turns and a reload.
+
 ## Security probe
 
 ```bash

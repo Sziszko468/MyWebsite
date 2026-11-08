@@ -13,6 +13,8 @@ import { hmacHex } from './lib/crypto.ts'
 import { redactText, registerSecret, type Logger } from './lib/logger.ts'
 import type { Clock } from './lib/time.ts'
 import { adminRoutes } from './modules/admin/routes.ts'
+import { Assistant, type ModelProvider } from './modules/ai/gateway.ts'
+import { aiRoutes } from './modules/ai/routes.ts'
 import { originIsThisHost, resolveSession, sameOrigin, sessionCookieName, verifySessionCsrf } from './modules/auth/sessions.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { contactRoutes } from './modules/contact/routes.ts'
@@ -48,6 +50,8 @@ export interface AppDeps {
   /** For the e-mail checks: the way they reach a provider's and Cloudflare's APIs and the public DNS (tests pass fakes; the defaults are the real ones). */
   fetch?: FetchLike
   dns?: DnsResolver
+  /** Where the assistant's model comes from; tests pass a mock, production leaves it out and the configured Anthropic model is used. */
+  aiModel?: ModelProvider
 }
 
 export interface App {
@@ -65,17 +69,21 @@ const REQUEST_ID = /^[A-Za-z0-9_-]{8,64}$/
 export function createApp(deps: AppDeps): App {
   const { config, db, clock, log } = deps
   // Whatever a provider's error text or a library's exception quotes of these is masked in every log line and every stored reason.
-  for (const secret of [config.email.apiKey, config.email.webhookSecret, config.email.smtp?.password, config.email.cloudflare?.apiToken]) registerSecret(secret)
+  for (const secret of [config.email.apiKey, config.email.webhookSecret, config.email.smtp?.password, config.email.cloudflare?.apiToken, config.ai.apiKey]) registerSecret(secret)
   const stats: Stats = { startedAt: Date.now(), requests: 0, clientErrors: 0, serverErrors: 0, rateLimited: 0 }
   const limiters = new Limiters(clock, config.rateLimitsEnabled)
   const notifier = new Notifier({ db, config, clock, log, mailer: deps.mailer })
   const emailChecks = new EmailChecks({ config, db, clock, log, fetch: deps.fetch, dns: deps.dns })
-  const context: AppContext = { config, db, clock, log, limiters, notifier, emailChecks, stats }
+  const context = { config, db, clock, log, limiters, notifier, emailChecks, stats } as AppContext
+  context.assistant = new Assistant(context, deps.aiModel ?? null)
 
   const router = new Router()
-  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...emailRoutes(context), ...adminRoutes(context))
+  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
 
-  const sweeper = setInterval(() => limiters.sweep(), 60_000)
+  const sweeper = setInterval(() => {
+    limiters.sweep()
+    context.assistant.sweep()
+  }, 60_000)
   sweeper.unref()
 
   function toReply(error: unknown, requestId: string, requestLog: Logger): Reply {
@@ -134,6 +142,11 @@ export function createApp(deps: AppDeps): App {
       limiters.check('global', ip)
 
       let formCache: Promise<URLSearchParams> | null = null
+      // A client that closes the connection before the response was written completely cancels what the request started.
+      const gone = new AbortController()
+      res.on('close', () => {
+        if (!res.writableFinished) gone.abort()
+      })
       const ctx: RequestCtx = {
         app: context,
         req,
@@ -152,6 +165,7 @@ export function createApp(deps: AppDeps): App {
         form: () => (formCache ??= readForm(req, config.bodyLimitBytes)),
         raw: () => readBody(req, config.bodyLimitBytes),
         body: (limit) => readBody(req, limit),
+        signal: gone.signal,
       }
 
       if (method === 'OPTIONS') {
@@ -200,6 +214,28 @@ export function createApp(deps: AppDeps): App {
 
     if (reply.status >= 500) stats.serverErrors += 1
     else if (reply.status >= 400) stats.clientErrors += 1
+    if (reply.stream && method !== 'HEAD' && !res.headersSent) {
+      // A streamed answer: headers now, then each chunk as it arrives; the stream is cancelled if the client leaves.
+      res.writeHead(reply.status, { ...securityHeaders(area, config), ...reply.headers, 'X-Request-Id': requestId, 'X-Accel-Buffering': 'no' })
+      res.flushHeaders()
+      const reader = reply.stream.getReader()
+      res.on('close', () => void reader.cancel().catch(() => undefined))
+      try {
+        for (;;) {
+          const chunk = await reader.read()
+          if (chunk.done) break
+          if (!res.write(chunk.value)) await new Promise<void>((resolve) => res.once('drain', resolve).once('close', resolve))
+          if (res.destroyed) break
+        }
+        res.end()
+      } catch (error) {
+        requestLog.warn('streamed response failed', { error: error instanceof Error ? { name: error.name, message: redactText(error.message) } : 'unknown' })
+        res.destroy()
+      }
+      requestLog.info('request', { method, route: label, status: reply.status, ms: Math.round(performance.now() - started) })
+      return
+    }
+    if (reply.stream) void reply.stream.cancel().catch(() => undefined)
     const body = method === 'HEAD' || reply.status === 204 || reply.status === 304 ? '' : reply.body
     const headers: Record<string, string | number> = {
       ...securityHeaders(area, config),

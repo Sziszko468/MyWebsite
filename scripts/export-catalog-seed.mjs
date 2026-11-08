@@ -3,6 +3,7 @@
 //   server/seed/shop.seed.json        the tier comparison and the FULL EXPERIENCE offer (documents)
 //   server/seed/projects.seed.json    the four projects, their categories and the pictures that ship with the website
 //   server/seed/texts.manifest.json   the wordings an administrator may override
+//   server/seed/profile.seed.json     the public profile the AI assistant answers from (the About page's content)
 // The website's modules import each other without file extensions, so they are loaded through Vite, not Node.
 import { createHash } from 'node:crypto'
 import { readFileSync, statSync } from 'node:fs'
@@ -34,6 +35,12 @@ try {
   })
   await writeFile(join(root, 'server', 'seed', 'projects.seed.json'), `${JSON.stringify(projects, null, 2)}\n`)
   console.log(`projects seed: ${projects.projects.length} projects, ${projects.categories.length} categories, ${projects.media.length} pictures -> server/seed/projects.seed.json`)
+
+  const { buildProfileSeed } = await vite.ssrLoadModule('/src/content/profileExport.ts')
+  const profile = buildProfileSeed()
+  await writeFile(join(root, 'server', 'seed', 'profile.seed.json'), `${JSON.stringify(profile, null, 2)}
+`)
+  console.log(`profile seed: ${profile.technologies.length} technology groups, ${profile.focus.length} focus topics -> server/seed/profile.seed.json`)
 
   const { buildTextsManifest } = await vite.ssrLoadModule('/src/content/textsExport.ts')
   const manifest = buildTextsManifest()

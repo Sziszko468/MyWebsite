@@ -27,6 +27,8 @@ interface Words {
   newQuote: string
   newMessageIntro: string
   newQuoteIntro: string
+  /** What a request written by the assistant is called where a catalogue request lists its items. */
+  aiPlan: string
   replyHint: string
   reference: string
   status: string
@@ -73,6 +75,7 @@ const WORDS: Record<Language, Words> = {
     newQuote: 'Új ajánlatkérés',
     newMessageIntro: 'Egy látogató üzenetet küldött a kapcsolatfelvételi űrlapon.',
     newQuoteIntro: 'Egy látogató ajánlatot kért az ajánlatkérő összeállítón.',
+    aiPlan: 'Control Room AI: projektterv',
     replyHint: 'Erre az e-mailre válaszolva közvetlenül a feladónak írsz.',
     reference: 'Azonosító',
     status: 'Állapot',
@@ -120,6 +123,7 @@ const WORDS: Record<Language, Words> = {
     newQuote: 'New quote request',
     newMessageIntro: 'A visitor sent a message through the contact form.',
     newQuoteIntro: 'A visitor asked for a quote through the request builder.',
+    aiPlan: 'Control Room AI: project plan',
     replyHint: 'Reply to this e-mail to answer the sender directly.',
     reference: 'Reference',
     status: 'Status',
@@ -165,6 +169,7 @@ const WORDS: Record<Language, Words> = {
     newQuote: 'Nieuwe offerteaanvraag',
     newMessageIntro: 'Een bezoeker heeft een bericht gestuurd via het contactformulier.',
     newQuoteIntro: 'Een bezoeker heeft een offerte aangevraagd via de aanvraagbouwer.',
+    aiPlan: 'Control Room AI: projectplan',
     replyHint: 'Antwoord op deze e-mail om de afzender rechtstreeks te antwoorden.',
     reference: 'Referentie',
     status: 'Status',
@@ -315,7 +320,7 @@ export function renderQuoteReceived(quote: QuoteRow, items: readonly ItemView[],
     { label: w.email, value: quote.email },
     ...(quote.phone ? [{ label: w.phone, value: quote.phone }] : []),
     { label: w.language, value: w.languages[quote.language] },
-    { label: w.services, value: quote.kind === 'full_experience' ? 'FULL EXPERIENCE' : items.map((item) => itemText(item, w, packageName)).join('\n') },
+    { label: w.services, value: quote.kind === 'full_experience' ? (quote.source === 'ai_assistant' ? w.aiPlan : 'FULL EXPERIENCE') : items.map((item) => itemText(item, w, packageName)).join('\n') },
     ...(quote.kind === 'full_experience' ? briefRows(quote, lang) : [{ label: w.pricing, value: totalsText(totals, w) }]),
     { label: w.description, value: quote.description },
     ...(quote.objective ? [{ label: w.objective, value: w.objectives[quote.objective] ?? quote.objective }] : []),
@@ -324,7 +329,7 @@ export function renderQuoteReceived(quote: QuoteRow, items: readonly ItemView[],
     ...(quote.reference_notes ? [{ label: w.references, value: quote.reference_notes }] : []),
   ]
   const parts = { brand, title: `${w.newQuote} ${quote.reference}`, intro: `${w.newQuoteIntro} ${w.replyHint}`, rows, footer: w.ownerFooter }
-  const preview = `${oneLine(quote.name, 40)}: ${oneLine(quote.kind === 'full_experience' ? 'FULL EXPERIENCE' : items.map((item) => itemText(item, w, packageName)).join('; '), 100)}`
+  const preview = `${oneLine(quote.name, 40)}: ${oneLine(quote.kind === 'full_experience' ? (quote.source === 'ai_assistant' ? w.aiPlan : 'FULL EXPERIENCE') : items.map((item) => itemText(item, w, packageName)).join('; '), 100)}`
   return { subject: `${w.newQuote} (${quote.reference}): ${oneLine(quote.name, 40)}`, preview, text: plain(parts), html: layout({ lang, preview, ...parts }) }
 }
 
@@ -440,7 +445,7 @@ export function renderQuoteConfirmation(quote: QuoteRow, items: readonly ItemVie
   const rows: Row[] = [
     { label: w.reference, value: quote.reference },
     { label: w.received, value: dateText(quote.created_at, lang) },
-    { label: w.services, value: quote.kind === 'full_experience' ? 'FULL EXPERIENCE' : items.map((item) => itemText(item, w, packageName)).join('\n') },
+    { label: w.services, value: quote.kind === 'full_experience' ? (quote.source === 'ai_assistant' ? w.aiPlan : 'FULL EXPERIENCE') : items.map((item) => itemText(item, w, packageName)).join('\n') },
   ]
   const parts = { brand, title: c.quoteTitle, intro: `${w.hello(oneLine(quote.name, 60))} ${c.quoteBody}`, rows, note: responseNote ? { title: c.noteTitle, text: responseNote } : undefined, footer: `${c.ignore} ${c.footer}` }
   return { subject: c.quoteSubject(quote.reference), preview: c.quoteBody, text: plain(parts), html: layout({ lang, preview: c.quoteBody, ...parts }) }

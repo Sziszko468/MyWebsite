@@ -1,0 +1,146 @@
+@use '../../styles/mixins' as m;
+
+.history {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  align-content: start;
+  color: var(--color-text);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-md);
+}
+
+.new {
+  min-height: var(--size-touch);
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--color-accent);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-accent-text);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+
+  @include m.hover {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+}
+
+.empty,
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+}
+
+.list {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-1);
+  align-items: stretch;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.current {
+  border-color: var(--color-accent);
+}
+
+.open {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+  min-height: var(--size-touch);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.name {
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.when {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+.remove {
+  display: grid;
+  place-items: center;
+  width: var(--size-touch);
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+
+  @include m.hover {
+    color: var(--color-accent-text);
+  }
+}
+
+.confirm {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-3);
+  font-size: var(--fs-sm);
+}
+
+.danger,
+.ghost {
+  min-height: var(--size-touch);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+}
+
+.danger {
+  border: var(--border-width) solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent-text);
+}
+
+.ghost {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+}
