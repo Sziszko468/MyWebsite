@@ -310,6 +310,10 @@ describe('the inquiry', () => {
       name: 'Ada',
       email: 'ada@example.com',
       phone: null,
+      company: null,
+      companyWebsite: null,
+      budgetRange: null,
+      marketing: false,
       consent: true,
     })
     expect(() => toRequest(cartOf({ need: 'website' }), GOOD, 'hu')).toThrow()

@@ -2,7 +2,7 @@ import { cx } from '../../utils/cx'
 import { statusLabel, useText } from '../i18n'
 import styles from '../styles/ui.module.scss'
 
-type Kind = 'inquiry' | 'quote' | 'delivery' | 'availability'
+type Kind = 'inquiry' | 'quote' | 'quotation' | 'delivery' | 'availability'
 
 const TONES: Record<string, string> = {
   // inquiries
@@ -11,11 +11,19 @@ const TONES: Record<string, string> = {
   waiting_client: styles.toneWarning,
   completed: styles.toneSuccess,
   // quote requests
-  in_review: styles.toneInfo,
-  quoted: styles.toneWarning,
+  under_review: styles.toneInfo,
+  waiting_customer: styles.toneWarning,
+  quote_preparation: styles.toneInfo,
+  quote_sent: styles.toneWarning,
   accepted: styles.toneSuccess,
   declined: styles.toneNeutral,
-  closed: styles.toneSuccess,
+  cancelled: styles.toneNeutral,
+  // (quote requests) in_progress and completed share the inquiry words' tones above
+  // quotations
+  draft: styles.toneNeutral,
+  sent: styles.toneWarning,
+  superseded: styles.toneNeutral,
+  withdrawn: styles.toneNeutral,
   // availability
   active: styles.toneSuccess,
   disabled: styles.toneNeutral,
@@ -41,7 +49,17 @@ const DELIVERY_TONES: Record<string, string> = {
 export function StatusBadge({ kind, status, archived = false }: { kind: Kind; status: string; archived?: boolean }) {
   const t = useText()
   const label =
-    kind === 'availability' ? (status === 'active' ? t.common.active : status === 'disabled' ? t.common.disabled : status) : kind === 'delivery' ? ((t.status.delivery as Record<string, string>)[status] ?? status) : statusLabel(t, kind, status)
+    kind === 'availability'
+      ? status === 'active'
+        ? t.common.active
+        : status === 'disabled'
+          ? t.common.disabled
+          : status
+      : kind === 'delivery'
+        ? ((t.status.delivery as Record<string, string>)[status] ?? status)
+        : kind === 'quotation'
+          ? ((t.quotation.quotationStatus as Record<string, string>)[status] ?? status)
+          : statusLabel(t, kind, status)
   return (
     <span className={styles.rowTight}>
       <span className={cx(styles.badge, (kind === 'delivery' ? DELIVERY_TONES : TONES)[status] ?? styles.toneNeutral)}>

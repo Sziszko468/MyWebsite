@@ -15,6 +15,27 @@ export const EMAIL_MAX = 254
 export const isEmail = (value: string): boolean => value.length <= EMAIL_MAX && EMAIL.test(value) && !value.includes('..')
 export const isPhone = (value: string): boolean => PHONE_CHARACTERS.test(value) && (value.match(/\d/g)?.length ?? 0) >= 6
 
+/**
+ * A website address as the site stores it: `https://` added when the person left the scheme off, only http and https, a host with a dot
+ * and no sign-in details in it, no whitespace. `null` when it is not one. The result is what `new URL` makes of it, so it carries no
+ * surprises (no `javascript:`, no `//evil` tricks) into a link in the administration.
+ */
+export function normalizeUrl(value: string): string | null {
+  const text = value.trim()
+  if (!text || /\s/.test(text) || text.length > 300 || text.startsWith('/')) return null
+  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text : /^[a-z][a-z0-9+.-]*:/i.test(text) ? null : `https://${text}`
+  if (!withScheme) return null
+  try {
+    const url = new URL(withScheme)
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null
+    if (url.username || url.password) return null
+    if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(url.hostname.replace(/\.$/, ''))) return null
+    return url.toString()
+  } catch {
+    return null
+  }
+}
+
 export class Fields {
   readonly errors: FieldErrors = {}
   private readonly body: Record<string, unknown>
@@ -54,6 +75,19 @@ export class Fields {
       if (code) this.fail(field, code)
     }
     return value
+  }
+
+  /** An optional website address, normalised (see `normalizeUrl`); `invalidUrl` when it is not one. */
+  url(field: string, rule: { max: number }): string | null {
+    const typed = this.text(field, { max: rule.max })
+    if (typed === null) return null
+    if (field in this.errors) return null
+    const normalised = normalizeUrl(typed)
+    if (normalised === null || normalised.length > 300) {
+      this.fail(field, 'invalidUrl')
+      return null
+    }
+    return normalised
   }
 
   oneOf<T extends string>(field: string, allowed: readonly T[], options: { required: true }): T | null

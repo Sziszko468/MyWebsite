@@ -113,6 +113,7 @@ describe('the request', () => {
       name: 'Eszter Varga',
       email: 'eszter@example.com',
       company: 'Gym Network',
+      marketing: false,
       consent: true,
     })
     expect(JSON.stringify(request)).not.toMatch(/price|amount|currency/)

@@ -9,7 +9,8 @@ import type { SmtpConfig } from '../src/config.ts'
 import { createMailer } from '../src/modules/notifications/mailer.ts'
 import { assertSingleLine, buildMime, encodeWords, formatAddress, MimeError, splitSender, type MailMessage } from '../src/modules/notifications/mime.ts'
 import { MailError, sendSmtp } from '../src/modules/notifications/smtp.ts'
-import { renderInquiryReceived, renderQuoteReceived, renderStatusChange } from '../src/modules/notifications/templates.ts'
+import { renderRequestNotification } from '../src/modules/notifications/quoteTemplates.ts'
+import { renderInquiryReceived, renderStatusChange } from '../src/modules/notifications/templates.ts'
 import { contact, quote, startServer, type TestServer } from './helpers.ts'
 
 // ---- helpers -------------------------------------------------------------------------------------------------------------
@@ -40,6 +41,7 @@ const row = (overrides: Record<string, unknown> = {}) =>
   ({
     id: 'id-1', reference: 'C-ABCD2345', language: 'en', kind: 'project', name: 'Anna Kovács', email: 'anna@example.com', subject: 'A new website',
     message: 'I would like a small website.', status: 'new', archived_at: null, consent_at: '2026-11-03T10:00:00.000Z', ip_hash: 'x', content_hash: 'y',
+    request_type: 'package_quote', source: 'shop', company: null, website: null, budget_range: null,
     created_at: '2026-11-03T10:00:00.000Z', updated_at: '2026-11-03T10:00:00.000Z', ...overrides,
   }) as never
 
@@ -75,17 +77,17 @@ describe('the e-mail templates', () => {
 
   it('describes a quote request with its parts and the pricing it can state, and says nothing about a price it does not have', () => {
     const items = [{ id: 1, position: 0, need: 'website', package: 'launch', extras: ['pages'], snapshot: { plan: null, extras: [] } }] as never
-    const none = renderQuoteReceived(row({ reference: 'Q-ABCD2345', description: 'A bakery site.', objective: 'present', timing: 'months', requirements: null, reference_notes: null, phone: null }), items, { fixed: [], quotedParts: 2 }, 'en', 'Test Brand', () => 'Launch')
+    const none = renderRequestNotification({ request: row({ reference: 'Q-ABCD2345', description: 'A bakery site.', objective: 'present', timing: 'months', requirements: null, reference_notes: null, phone: null }), items, totals: { fixed: [], quotedParts: 2 }, packageName: () => 'Launch' }, 'en', 'Test Brand', null)
     expect(none.text).toContain('Launch')
     expect(none.text).toContain('pages')
     expect(none.text).not.toMatch(/\d+ (EUR|HUF)/)
-    const some = renderQuoteReceived(row({ reference: 'Q-ABCD2345', description: 'A bakery site.', objective: null, timing: null, requirements: null, reference_notes: null, phone: '+31 6 1234 5678' }), items, { fixed: [{ currency: 'EUR', amount: 900, vat: 'excluded' }], quotedParts: 1 }, 'en', 'Test Brand', () => 'Launch')
+    const some = renderRequestNotification({ request: row({ reference: 'Q-ABCD2345', description: 'A bakery site.', objective: null, timing: null, requirements: null, reference_notes: null, phone: '+31 6 1234 5678' }), items, totals: { fixed: [{ currency: 'EUR', amount: 900, vat: 'excluded' }], quotedParts: 1 }, packageName: () => 'Launch' }, 'en', 'Test Brand', null)
     expect(some.text).toMatch(/900 EUR/)
     expect(some.text).toContain('+31 6 1234 5678')
   })
 
   it('tells the customer a status, in their language, with the note an administrator wrote, and never claims a delivery', () => {
-    const quoteRow = { reference: 'Q-ABCD2345', name: 'Anna Kovács', status: 'quoted', language: 'nl' as const }
+    const quoteRow = { reference: 'Q-ABCD2345', name: 'Anna Kovács', status: 'quote_sent', language: 'nl' as const }
     const dutch = renderStatusChange('quote', quoteRow, 'Het voorstel zit in de bijlage.', 'nl', 'Test Brand')
     expect(dutch.subject).toContain('Q-ABCD2345')
     expect(dutch.text).toContain('Het voorstel zit in de bijlage.')
@@ -492,10 +494,11 @@ describe('the outbox', () => {
     const response = await server.api('/api/quote-requests', { body: quote() })
     expect(response.status).toBe(201)
     await settle()
-    expect(server.mailer.sent).toHaveLength(1)
+    // The owner's notification and the visitor's confirmation (on by default for a quote request).
+    expect(server.mailer.sent).toHaveLength(2)
     expect(server.mailer.sent[0].subject).toBe(`New quote request (${response.json.data.reference}): Anna Kovács`)
     expect(server.mailer.sent[0].text).toContain('Launch')
-    expect(deliveries()[0]).toMatchObject({ kind: 'quote_received', status: 'accepted' })
+    expect(deliveries().find((row) => row.kind === 'quote_received')).toMatchObject({ kind: 'quote_received', status: 'accepted' })
   })
 
   it('sends nothing, and says nothing is pending, when no provider is configured', async () => {

@@ -122,6 +122,14 @@ export const configurator = {
         flexible: tri('Nem sürgős', 'No rush', 'Geen haast'),
       },
     },
+    budget: {
+      label: tri('Költségkeret', 'Budget', 'Budget'),
+      hint: tri(
+        'Ha van elképzelésed a költségkeretről, írd le a saját szavaiddal. Nem kötelező, és semmire nem kötelez.',
+        'If you have an idea of your budget, write it in your own words. Optional, and it commits you to nothing.',
+        'Heb je een idee van je budget, schrijf het dan in je eigen woorden. Optioneel en het verplicht je tot niets.',
+      ),
+    },
     requirements: {
       label: tri('Van még valami, amit tudnom kell?', 'Anything else I should know?', 'Is er nog iets wat ik moet weten?'),
       hint: tri(
@@ -164,6 +172,27 @@ export const configurator = {
       label: tri('Telefonszám', 'Phone number', 'Telefoonnummer'),
       hint: tri('Csak akkor, ha inkább telefonálnál.', 'Only if you would rather talk by phone.', 'Alleen als je liever belt.'),
     },
+    company: {
+      label: tri('Cég vagy szervezet', 'Company or organisation', 'Bedrijf of organisatie'),
+      hint: tri('Ha cég nevében kérsz ajánlatot.', 'If you are asking on behalf of a company.', 'Als je namens een bedrijf een offerte aanvraagt.'),
+    },
+    website: {
+      label: tri('A cég weboldala', 'Company website', 'Website van het bedrijf'),
+      hint: tri('Például: pelda.hu', 'For example: example.com', 'Bijvoorbeeld: voorbeeld.nl'),
+    },
+    marketing: {
+      label: tri(
+        'Szívesen hallanék rólatok más újdonságokról is. (Nem kötelező; az ajánlatkéréstől független.)',
+        'I would also like to hear from you about other news. (Optional; separate from the quote request.)',
+        'Ik hoor graag ook van jullie over ander nieuws. (Optioneel; los van de offerteaanvraag.)',
+      ),
+    },
+    summaryTitle: tri('Mielőtt elküldöd', 'Before you send', 'Voordat je verstuurt'),
+    summaryHelp: tri(
+      'Ez megy el, pontosan így. Bármelyik lépésre visszaléphetsz, és kijavíthatod.',
+      'This is what will be sent, exactly as shown. You can go back to any step and change it.',
+      'Dit wordt verstuurd, precies zoals het er staat. Je kunt naar elke stap terug en het aanpassen.',
+    ),
     consent: {
       label: tri(
         'Tudomásul veszem, hogy a megadott adatokat az ajánlatkérés megválaszolására használják fel.',
@@ -201,6 +230,11 @@ export const configurator = {
       'Use digits, spaces and the characters + ( ) - . /, with at least 6 digits.',
       'Gebruik cijfers, spaties en de tekens + ( ) - . /, met minstens 6 cijfers.',
     ),
+    invalidUrl: tri(
+      'Ez nem tűnik weboldal-címnek. Például: pelda.hu vagy https://pelda.hu',
+      'That does not look like a website address. For example: example.com or https://example.com',
+      'Dat lijkt geen websiteadres. Bijvoorbeeld: voorbeeld.nl of https://voorbeeld.nl',
+    ),
     consentRequired: tri('A küldéshez ezt be kell jelölnöd.', 'You need to tick this to send the request.', 'Je moet dit aanvinken om de aanvraag te versturen.'),
     summary: tri('Javítsd, ami piros, mielőtt továbblépsz.', 'Fix what is marked before you go on.', 'Herstel wat is gemarkeerd voordat je verdergaat.'),
   },
@@ -225,6 +259,9 @@ export const configurator = {
       reference: tri('Meglévő oldal vagy példa', 'Existing site or reference', 'Bestaande site of voorbeeld'),
       timing: tri('Időzítés', 'Timing', 'Timing'),
       requirements: tri('További követelmények', 'Further requirements', 'Verdere eisen'),
+      budget: tri('Költségkeret', 'Budget', 'Budget'),
+      company: tri('Cég', 'Company', 'Bedrijf'),
+      website: tri('Weboldal', 'Website', 'Website'),
       name: tri('Név', 'Name', 'Naam'),
       email: tri('E-mail', 'Email', 'E-mail'),
       phone: tri('Telefon', 'Phone', 'Telefoon'),
@@ -281,9 +318,9 @@ export const configurator = {
   sent: {
     title: tri('Elküldve', 'Sent', 'Verstuurd'),
     text: tri(
-      'Az ajánlatkérésed elküldtem. A megadott e-mail-címen jelentkezem.',
-      'Your quote request has been sent. I will get back to you at the email address you gave.',
-      'Je offerteaanvraag is verstuurd. Ik neem contact met je op via het e-mailadres dat je hebt opgegeven.',
+      'Az ajánlatkérésed megérkezett, és el van mentve. A megadott e-mail-címen jelentkezem.',
+      'Your quote request has arrived and is saved. I will get back to you at the email address you gave.',
+      'Je offerteaanvraag is aangekomen en opgeslagen. Ik neem contact met je op via het e-mailadres dat je hebt opgegeven.',
     ),
     next: tri('Mi történik most?', 'What happens now?', 'Wat gebeurt er nu?'),
     again: tri('Új ajánlatkérés', 'New quote request', 'Nieuwe offerteaanvraag'),

@@ -15,6 +15,7 @@ import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { NotificationsPage } from './pages/NotificationsPage'
 import { QuoteDetailPage } from './pages/QuoteDetailPage'
+import { QuotationPage, QuotationStartPage } from './pages/QuotationPage'
 import { ProjectEditPage } from './pages/ProjectEditPage'
 import { ProjectSettingsPage } from './pages/ProjectSettingsPage'
 import { ProjectsPage } from './pages/ProjectsPage'
@@ -85,6 +86,8 @@ function Gate() {
           <Route path="inquiries/:id" element={<InquiryDetailPage />} />
           <Route path="quotes" element={<QuotesPage />} />
           <Route path="quotes/:id" element={<QuoteDetailPage />} />
+          <Route path="quotes/:id/create" element={<QuotationStartPage />} />
+          <Route path="quotes/:id/versions/:quoteId" element={<QuotationPage />} />
           <Route path="services" element={<ServicesPage />} />
           <Route path="services/new/service" element={<ServiceEditPage />} />
           <Route path="services/service/:slug" element={<ServiceEditPage />} />

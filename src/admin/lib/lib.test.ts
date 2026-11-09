@@ -12,7 +12,7 @@ import { DEFAULT_ORDER, hasFilters, readListState, toListQuery, writeListState }
 
 describe('list state in the address', () => {
   it('reads defaults from an empty address', () => {
-    expect(readListState(new URLSearchParams())).toEqual({ q: '', status: '', kind: '', from: '', to: '', order: DEFAULT_ORDER, page: 1 })
+    expect(readListState(new URLSearchParams())).toEqual({ q: '', status: '', kind: '', type: '', priority: '', source: '', from: '', to: '', order: DEFAULT_ORDER, page: 1 })
   })
 
   it('refuses what is not a page or a day, and caps the search text', () => {
@@ -119,7 +119,7 @@ describe('what the activity says', () => {
   })
 
   it('does not claim an e-mail it did not send', () => {
-    expect(describeActivity(en, { action: 'quote.status', detail: { from: 'new', to: 'quoted' } })).not.toContain(en.activity.emailed)
+    expect(describeActivity(en, { action: 'quote.status', detail: { from: 'new', to: 'quote_sent' } })).not.toContain(en.activity.emailed)
   })
 
   it('names the language of a translation change, and the inquiry a quote was linked to', () => {

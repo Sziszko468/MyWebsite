@@ -194,6 +194,13 @@ export function createApp(deps: AppDeps): App {
             const shell = serveStatic(config.staticDir, `/${projectPage[1]}/work/`)
             if (shell && shell.status === 200) served = shell
           }
+          // A customer's private page (`/hu/quote/<secret>`, `/hu/request/<secret>`) is never prerendered, whatever the secret is: the same quiet
+          // shell answers for every address, is never cached or indexed, and the application then asks the API with the secret.
+          const customerPage = /^\/(hu|en|nl)\/(quote|request)\/[A-Za-z0-9_-]{20,64}\/?$/.exec(url.pathname)
+          if (customerPage && (!served || served.status === 404)) {
+            const shell = serveStatic(config.staticDir, `/${customerPage[1]}/${customerPage[2]}/`)
+            if (shell && shell.status === 200) served = { ...shell, headers: { ...shell.headers, 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'Referrer-Policy': 'no-referrer' } }
+          }
           if (!served) throw notFound('The address')
           label = 'static'
           reply = served

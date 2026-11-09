@@ -16,7 +16,7 @@ export function useItemsSummary(): (items: Quote['items']) => string {
       .join(', ')
 }
 
-export function QuoteRequestList({ rows, statuses, canChange, busyId, onStatus }: { rows: readonly Quote[]; statuses: readonly string[]; canChange: boolean; busyId: string | null; onStatus: (row: Quote, status: string) => void }) {
+export function QuoteRequestList({ rows, moves, canChange, busyId, onStatus }: { rows: readonly Quote[]; moves: Readonly<Record<string, readonly string[]>>; canChange: boolean; busyId: string | null; onStatus: (row: Quote, status: string) => void }) {
   const t = useText()
   const language = useInterfaceLanguage()
   const summary = useItemsSummary()
@@ -36,14 +36,16 @@ export function QuoteRequestList({ rows, statuses, canChange, busyId, onStatus }
     },
     {
       key: 'services',
-      header: t.quotes.columns.services,
+      header: t.quotation.list.columns.type,
       cell: (row) => (
         <span className={styles.cellMain}>
-          <span>{row.kind === 'full_experience' ? t.shop.quote.kind : summary(row.items) || t.common.noValue}</span>
+          <span>{(t.quotation.types as Record<string, string>)[row.request_type] ?? row.request_type}</span>
+          <span className={cx(styles.muted, styles.small)}>{row.kind === 'full_experience' ? t.shop.quote.kind : summary(row.items) || t.common.noValue}</span>
           <span className={cx(styles.muted, styles.small, styles.mono)}>{row.reference}</span>
         </span>
       ),
     },
+    { key: 'priority', header: t.quotation.list.columns.priority, cell: (row) => (t.quotation.priorities as Record<string, string>)[row.priority] ?? row.priority },
     { key: 'received', header: t.quotes.columns.received, cell: (row) => formatDateTime(row.created_at, language) },
     {
       key: 'status',
@@ -51,7 +53,7 @@ export function QuoteRequestList({ rows, statuses, canChange, busyId, onStatus }
       cell: (row) =>
         canChange ? (
           <span className={styles.cellMain}>
-            <QuickStatus name={row.name} value={row.status} statuses={statuses} kind="quote" disabled={busyId === row.id} onChange={(status) => onStatus(row, status)} />
+            <QuickStatus name={row.name} value={row.status} statuses={[row.status, ...(moves[row.status] ?? [])]} kind="quote" disabled={busyId === row.id || (moves[row.status] ?? []).length === 0} onChange={(status) => onStatus(row, status)} />
             {row.archived_at && <StatusBadge kind="quote" status={row.status} archived />}
           </span>
         ) : (
@@ -77,12 +79,15 @@ export function QuoteRequestList({ rows, statuses, canChange, busyId, onStatus }
             </span>
             <StatusBadge kind="quote" status={row.status} archived={row.archived_at !== null} />
           </div>
-          <p className={styles.small}>{row.kind === 'full_experience' ? t.shop.quote.kind : summary(row.items) || t.common.noValue}</p>
+          <p className={styles.small}>
+            {(t.quotation.types as Record<string, string>)[row.request_type] ?? row.request_type} · {row.kind === 'full_experience' ? t.shop.quote.kind : summary(row.items) || t.common.noValue}
+          </p>
           <div className={styles.listCardMeta}>
             <span className={styles.mono}>{row.reference}</span>
+            <span>{(t.quotation.priorities as Record<string, string>)[row.priority] ?? row.priority}</span>
             <span>{formatDateTime(row.created_at, language)}</span>
           </div>
-          {canChange && <QuickStatus name={row.name} value={row.status} statuses={statuses} kind="quote" disabled={busyId === row.id} onChange={(status) => onStatus(row, status)} />}
+          {canChange && <QuickStatus name={row.name} value={row.status} statuses={[row.status, ...(moves[row.status] ?? [])]} kind="quote" disabled={busyId === row.id || (moves[row.status] ?? []).length === 0} onChange={(status) => onStatus(row, status)} />}
         </>
       )}
     />

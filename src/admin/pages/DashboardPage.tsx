@@ -51,7 +51,7 @@ export function DashboardPage() {
             <DashboardStatCard label={t.dashboard.stats.inquiries} value={formatNumber(data.inquiries.total, language)} note={fill(t.dashboard.stats.inquiriesNote, { archived: data.inquiries.archived })} to="/inquiries" />
             <DashboardStatCard label={t.dashboard.stats.newInquiries} value={formatNumber(data.inquiries.new, language)} note={fill(t.dashboard.stats.newInquiriesNote, { count: data.inquiries.last7Days })} to="/inquiries?status=new" tone="accent" />
             <DashboardStatCard label={t.dashboard.stats.inProgress} value={formatNumber(data.inquiries.inProgress, language)} note={fill(t.dashboard.stats.inProgressNote, { waiting: data.inquiries.waitingClient })} to="/inquiries?status=in_progress" tone="info" />
-            <DashboardStatCard label={t.dashboard.stats.pendingQuotes} value={formatNumber(data.quotes.pending, language)} note={fill(t.dashboard.stats.pendingQuotesNote, { quoted: data.quotes.quoted, total: data.quotes.total })} to="/quotes?status=new" tone="warning" />
+            <DashboardStatCard label={t.dashboard.stats.pendingQuotes} value={formatNumber(data.quotes.pending, language)} note={fill(t.dashboard.stats.pendingQuotesNote, { quoted: data.quotes.quoteSent, total: data.quotes.total })} to="/quotes?status=new" tone="warning" />
             <DashboardStatCard label={t.dashboard.stats.completed} value={formatNumber(data.completedRequests, language)} note={fill(t.dashboard.stats.completedNote, { inquiries: data.inquiries.completed, quotes: data.quotes.completed })} tone="success" />
           </section>
 

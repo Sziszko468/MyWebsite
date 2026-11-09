@@ -13,8 +13,34 @@
  * is posted to the address the owner configured.
  */
 
+/**
+ * What the backend answered when it stored a request: the reference to quote, when it arrived, the secret of the private status page (shown
+ * once to the person who sent it) and whether a confirmation e-mail is on its way. A form handler of another kind may answer nothing of the
+ * sort, and then there is no receipt: the form says it was sent and nothing more.
+ */
+export interface Receipt {
+  reference: string
+  createdAt: string | null
+  statusToken: string | null
+  confirmationEmail: 'queued' | 'not_sent' | null
+}
+
+/** Reads the backend's `{ data: { reference, createdAt, statusToken, confirmationEmail } }`; `null` for anything else. */
+export function parseReceipt(body: unknown): Receipt | null {
+  const data = typeof body === 'object' && body !== null ? (body as { data?: unknown }).data : null
+  if (typeof data !== 'object' || data === null) return null
+  const fields = data as Record<string, unknown>
+  if (typeof fields.reference !== 'string' || !/^[A-Za-z0-9-]{3,40}$/.test(fields.reference)) return null
+  return {
+    reference: fields.reference,
+    createdAt: typeof fields.createdAt === 'string' && !Number.isNaN(Date.parse(fields.createdAt)) ? fields.createdAt : null,
+    statusToken: typeof fields.statusToken === 'string' && /^[A-Za-z0-9_-]{43}$/.test(fields.statusToken) ? fields.statusToken : null,
+    confirmationEmail: fields.confirmationEmail === 'queued' || fields.confirmationEmail === 'not_sent' ? fields.confirmationEmail : null,
+  }
+}
+
 export type SubmitOutcome =
-  | { status: 'sent' }
+  | { status: 'sent'; receipt?: Receipt }
   | { status: 'unavailable' }
   | { status: 'failed'; reason: 'network' | 'timeout' | 'rejected' }
 
@@ -69,7 +95,10 @@ export function endpointTransport<T extends object>(
           referrerPolicy: 'no-referrer',
           signal: controller.signal,
         })
-        return response.ok ? { status: 'sent' } : { status: 'failed', reason: 'rejected' }
+        if (!response.ok) return { status: 'failed', reason: 'rejected' }
+        // The request is stored whether or not the answer can be read: only a readable one adds a receipt.
+        const receipt = parseReceipt(await response.json().catch(() => null))
+        return receipt ? { status: 'sent', receipt } : { status: 'sent' }
       } catch (error) {
         const aborted = error instanceof DOMException && error.name === 'AbortError'
         return { status: 'failed', reason: aborted ? 'timeout' : 'network' }

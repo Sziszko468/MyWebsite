@@ -204,22 +204,30 @@ describe('quote requests', () => {
     const ids = await quotes(3, (i) => ({ name: i === 1 ? 'Béla Minta' : 'Anna Kovács', email: i === 1 ? 'bela@company.example' : 'anna@example.com' }))
     const list = await get('/api/admin/quote-requests')
     expect(list.json.meta).toEqual({ page: 1, pageSize: 25, total: 3 })
-    expect(list.json.data[0].reference).toMatch(/^Q-[A-Z0-9]{8}$/)
+    expect(list.json.data[0].reference).toMatch(/^CC-\d{4}-\d{6}$/)
     expect(list.text).not.toMatch(/ip_hash|content_hash/)
     expect((await get('/api/admin/quote-requests?q=company.example')).json.meta.total).toBe(1)
     expect((await get('/api/admin/quote-requests?q=Request%20number%202')).json.meta.total).toBe(1)
-    expect((await get('/api/admin/quote-requests?status=quoted')).json.meta.total).toBe(0)
-    await send('PATCH', `/api/admin/quote-requests/${ids[0]}`, { status: 'quoted', addNote: 'Sent the proposal.' })
-    expect((await get('/api/admin/quote-requests?status=quoted')).json.meta.total).toBe(1)
+    expect((await get('/api/admin/quote-requests?status=under_review')).json.meta.total).toBe(0)
+    await send('PATCH', `/api/admin/quote-requests/${ids[0]}`, { status: 'under_review', addNote: 'Reading it now.' })
+    expect((await get('/api/admin/quote-requests?status=under_review')).json.meta.total).toBe(1)
     const detail = (await get(`/api/admin/quote-requests/${ids[0]}`)).json.data
-    expect(detail).toMatchObject({ id: ids[0], status: 'quoted', items: [{ need: 'website', plan: 'launch', extras: ['pages'] }], pricing: { fixed: [], quotedParts: 2 }, notes: [{ body: 'Sent the proposal.' }] })
+    expect(detail).toMatchObject({ id: ids[0], status: 'under_review', items: [{ need: 'website', plan: 'launch', extras: ['pages'] }], pricing: { fixed: [], quotedParts: 2 }, notes: [{ body: 'Reading it now.' }] })
   })
 
-  it('moves a request through its whole vocabulary and refuses anything else', async () => {
+  it('moves a request only along the allowed transitions, keeps the history, and refuses anything else', async () => {
     const [id] = await quotes(1)
-    for (const status of ['in_review', 'quoted', 'accepted', 'declined', 'closed', 'new']) expect((await send('PATCH', `/api/admin/quote-requests/${id}`, { status })).json.data.status, status).toBe(status)
-    for (const body of [{ status: 'answered' }, { status: '' }, {}, { status: 'closed', price: 1 }]) expect((await send('PATCH', `/api/admin/quote-requests/${id}`, body)).status, JSON.stringify(body)).toBe(422)
-    expect((await send('PATCH', '/api/admin/quote-requests/nope', { status: 'closed' })).status).toBe(404)
+    const patch = (body: Record<string, unknown>) => send('PATCH', `/api/admin/quote-requests/${id}`, body)
+    for (const status of ['under_review', 'waiting_customer', 'quote_preparation', 'cancelled', 'under_review']) expect((await patch({ status })).json.data.status, status).toBe(status)
+    // Not every move is allowed: a request that was only looked at is not completed, and "quote sent" is what sending a quotation does.
+    expect((await patch({ status: 'completed' })).status).toBe(409)
+    expect((await patch({ status: 'quote_sent' })).json.error.details.reason).toBe('system_only')
+    // An acceptance written down by hand needs the reason it was written down by hand.
+    expect((await patch({ status: 'accepted' })).status).toBe(409)
+    for (const body of [{ status: 'answered' }, { status: '' }, {}, { status: 'new', price: 1 }]) expect((await patch(body)).status, JSON.stringify(body)).toBe(422)
+    expect((await send('PATCH', '/api/admin/quote-requests/nope', { status: 'cancelled' })).status).toBe(404)
+    const history = (await get(`/api/admin/quote-requests/${id}`)).json.data.history
+    expect(history.map((event: { type: string; to: string | null }) => [event.type, event.to])).toEqual([['request_created', 'new'], ...['under_review', 'waiting_customer', 'quote_preparation', 'cancelled', 'under_review'].map((to) => ['status_changed', to])])
   })
 
   it('archives, restores and deletes, taking the items, add-ons, notes and e-mails along', async () => {
@@ -241,7 +249,7 @@ describe('quote requests', () => {
   it('e-mails the customer about a decision only when asked', async () => {
     const [id] = await quotes(1)
     server.db.run('DELETE FROM email_deliveries')
-    expect((await send('PATCH', `/api/admin/quote-requests/${id}`, { status: 'quoted', notify: true, note: 'The proposal is attached.' })).json.meta.notification).toBe('queued')
+    expect((await send('PATCH', `/api/admin/quote-requests/${id}`, { status: 'under_review', notify: true, note: 'The proposal is attached.' })).json.meta.notification).toBe('queued')
     expect(server.db.all('SELECT kind, recipient, related_type, note FROM email_deliveries')).toEqual([{ kind: 'quote_status', recipient: 'anna@example.com', related_type: 'quote_request', note: 'The proposal is attached.' }])
   })
 
@@ -250,11 +258,11 @@ describe('quote requests', () => {
     await send('PATCH', `/api/admin/quote-requests/${id}`, { addNote: 'Looks good.' })
     const api = await get(`/api/admin/quote-requests/${id}/export`)
     expect(api.status).toBe(200)
-    expect(api.json.data).toMatchObject({ reference: expect.stringMatching(/^Q-/), name: 'Anna Kovács', email: 'anna@example.com', items: [{ need: 'website', plan: 'launch' }], pricing: { quotedParts: 2 }, notes: [{ author: 'admin@site.test', body: 'Looks good.' }] })
+    expect(api.json.data).toMatchObject({ reference: expect.stringMatching(/^CC-/), name: 'Anna Kovács', email: 'anna@example.com', items: [{ need: 'website', plan: 'launch' }], pricing: { quotedParts: 2 }, notes: [{ author: 'admin@site.test', body: 'Looks good.' }] })
     expect(api.text).not.toMatch(/ip_hash|content_hash|"id":/)
     const file = await server.fetch(`/api/admin/quote-requests/${id}/export.json`, { headers: { Cookie: admin.cookie } })
     expect(file.headers.get('content-type')).toBe('application/json; charset=utf-8')
-    expect(file.headers.get('content-disposition')).toMatch(/^attachment; filename="Q-[A-Z0-9]{8}\.json"$/)
+    expect(file.headers.get('content-disposition')).toMatch(/^attachment; filename="CC-\d{4}-\d{6}\.json"$/)
     expect(JSON.parse(await file.text()).reference).toBe(api.json.data.reference)
   })
 
@@ -267,7 +275,7 @@ describe('quote requests', () => {
     expect(response.headers.get('content-type')).toBe('text/csv; charset=utf-8')
     expect(response.headers.get('content-disposition')).toBe('attachment; filename="quote-requests.csv"')
     const csv = await response.text()
-    expect(csv.startsWith('reference,received,status,name,email,phone,language,services,objective,timing,description,requirements,references,kind,company,brief\r\n')).toBe(true)
+    expect(csv.startsWith('reference,received,status,type,source,priority,name,email,phone,language,services,objective,timing,budget,description,requirements,references,kind,company,website,brief\r\n')).toBe(true)
     expect(csv).toContain('"\'=HYPERLINK(""http://evil.example"",""click"")"')
     expect(csv).toContain('"\'+36 Nagy, Péter"')
     expect(csv).toContain('"Line one,\nline ""two"", with a comma."')

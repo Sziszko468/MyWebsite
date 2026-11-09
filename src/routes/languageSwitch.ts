@@ -23,7 +23,9 @@ export function resolveLanguageSwitch(
   // The registered pages, and (on the real registry) a project the administration published: a project is in every language.
   const page = pages === PAGES ? resolvePage(rest) : findPage(rest, pages)
   if (page?.languages.includes(next)) {
-    return { path: localizedPath(next, page.path), samePage: true }
+    // A customer's private page keeps the secret in its address: the same page, the same link, another language.
+    const keepsAddress = page.id === 'customer-quote' || page.id === 'customer-request'
+    return { path: localizedPath(next, keepsAddress ? rest : page.path), samePage: true }
   }
   return { path: localizedPath(next), samePage: false }
 }

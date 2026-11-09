@@ -1,14 +1,16 @@
 import type { AppContext } from '../../context.ts'
 import { LANGUAGES, type Language } from '../../config.ts'
-import { ConstraintError, HttpError, validationFailed, type FieldErrors } from '../../http/errors.ts'
-import { newId, newReference } from '../../lib/crypto.ts'
+import { HttpError, validationFailed, type FieldErrors } from '../../http/errors.ts'
 import { addMs, iso } from '../../lib/time.ts'
 import { countLinks, isRecord } from '../../lib/text.ts'
 import { Fields, isEmail, isPhone } from '../../lib/validate.ts'
 import { contentHashOf, DUPLICATE_WINDOW_MS } from '../contact/service.ts'
 import { loadCatalog, NEEDS, type Need } from '../catalog/repository.ts'
 import { snapshot, totalsOf, type PriceSnapshot, type Totals } from '../shop/pricing.ts'
-import { findRecentQuoteDuplicate, insertQuote, OBJECTIVES, TIMINGS, type NewItem, type QuoteRow } from './repository.ts'
+import { afterRequestStored, confirmationStatus, createQuoteRequest } from './create.ts'
+import { findRecentQuoteDuplicate, OBJECTIVES, TIMINGS, type NewItem } from './repository.ts'
+import type { RequestType } from './status.ts'
+import { mintViewToken } from './tokens.ts'
 
 /**
  * The quote request: what the website's builder sends (src/shop/inquiry.ts `QuoteRequest`, version 2). The
@@ -26,6 +28,9 @@ export const QUOTE_LIMITS = {
   name: { min: 2, max: 100 },
   email: { max: 254 },
   phone: { max: 30 },
+  company: { max: 100 },
+  website: { max: 200 },
+  budget: { max: 80 },
   items: { max: 8 },
   extrasPerItem: { max: 12 },
 } as const
@@ -47,7 +52,12 @@ export interface QuoteInput {
   name: string
   email: string
   phone: string | null
+  company: string | null
+  website: string | null
+  budgetRange: string | null
   consent: boolean
+  /** The separate, optional agreement to hear about other things; it never affects the request. */
+  marketing: boolean
 }
 
 /** The service a need leads to (the same rule as src/content/services/ids.ts): `improve` is the website service, `unsure` has none. */
@@ -67,7 +77,12 @@ export function parseQuote(body: Record<string, unknown>, requireConsent: boolea
   const name = fields.text('name', { ...QUOTE_LIMITS.name, required: true })
   const email = fields.text('email', { max: QUOTE_LIMITS.email.max, required: true }, (value) => (isEmail(value) ? undefined : 'invalidEmail'))
   const phone = fields.text('phone', { max: QUOTE_LIMITS.phone.max }, (value) => (isPhone(value) ? undefined : 'invalidPhone'))
+  const company = fields.text('company', { max: QUOTE_LIMITS.company.max })
+  // `website` is the hidden trap field (a person never sees it); the customer's own address is `companyWebsite`.
+  const website = fields.url('companyWebsite', { max: QUOTE_LIMITS.website.max })
+  const budgetRange = fields.text('budgetRange', { max: QUOTE_LIMITS.budget.max })
   const consent = fields.consent('consent', requireConsent)
+  const marketing = body.marketing === true
 
   const items: QuoteLine[] = []
   const rawItems = body.items
@@ -101,7 +116,7 @@ export function parseQuote(body: Record<string, unknown>, requireConsent: boolea
   if (typeof body.website === 'string' && body.website.trim() !== '') throw new HttpError(422, 'spam_suspected', 'The request was not accepted.')
   if (countLinks(`${description} ${reference ?? ''} ${requirements ?? ''}`) > 5) throw new HttpError(422, 'spam_suspected', 'The request was not accepted.')
 
-  return { language: language!, items, description: description!, objective, reference, timing, requirements, name: name!, email: email!, phone, consent }
+  return { language: language!, items, description: description!, objective, reference, timing, requirements, name: name!, email: email!, phone, company, website, budgetRange, consent, marketing }
 }
 
 export interface QuoteResult {
@@ -109,6 +124,19 @@ export interface QuoteResult {
   createdAt: string
   duplicate: boolean
   pricing: Totals
+  /** The secret of the customer's status link, for the person who just sent the request. */
+  statusToken: string
+  /** Whether a confirmation e-mail is on its way. The request is saved either way. */
+  confirmationEmail: 'queued' | 'not_sent'
+}
+
+/** What kind of request a cart is: decided here from the lines, never taken from the browser. */
+export function requestTypeOf(lines: readonly QuoteLine[]): RequestType {
+  const custom = lines.filter((line) => line.plan === 'custom')
+  if (custom.length === 0) return 'package_quote'
+  if (custom.length === lines.length && lines.every((line) => line.need === 'website' || line.need === 'improve')) return 'custom_website'
+  if (custom.length === lines.length && lines.every((line) => line.need === 'webapp')) return 'custom_application'
+  return 'custom_service'
 }
 
 /** Checks the cart against the catalogue and builds what is stored for each line. */
@@ -135,6 +163,11 @@ function resolveItems(app: AppContext, lines: readonly QuoteLine[]): { items: Ne
       const known = extras.filter((extra) => extra !== undefined)
       const shot = snapshot(pack, known)
       snapshots.push(shot)
+      const names = {
+        service: service ? Object.fromEntries(LANGUAGES.map((language) => [language, service.translations[language]?.title ?? service.slug])) : null,
+        package: pack ? Object.fromEntries(LANGUAGES.map((language) => [language, pack.translations[language]?.name ?? pack.code])) : null,
+        extras: known.map((extra) => ({ code: extra.code, names: Object.fromEntries(LANGUAGES.map((language) => [language, extra.translations[language]?.name ?? extra.code])) })),
+      }
       items.push({
         position: index,
         need: line.need,
@@ -143,6 +176,7 @@ function resolveItems(app: AppContext, lines: readonly QuoteLine[]): { items: Ne
         plan: line.plan,
         extraIds: known.map((extra) => extra.id),
         snapshot: shot,
+        names,
       })
     }
   })
@@ -156,52 +190,44 @@ export function submitQuote(app: AppContext, input: QuoteInput, ipHash: string):
 
   const existing = findRecentQuoteDuplicate(app.db, hash, iso(addMs(now, -DUPLICATE_WINDOW_MS)))
   if (existing) {
-    // The same request again (a retry after a slow answer, a double click): the answer is the first one.
-    return { reference: existing.reference, createdAt: existing.created_at, duplicate: true, pricing: totalsOf(storedSnapshots(app, existing.id)) }
+    // The same request again (a retry after a slow answer, a double click): the answer is the first one, and nothing is sent a second time.
+    return {
+      reference: existing.reference,
+      createdAt: existing.created_at,
+      duplicate: true,
+      pricing: totalsOf(storedSnapshots(app, existing.id)),
+      statusToken: app.db.transaction(() => mintViewToken(app, { requestId: existing.id, quoteId: null }).token),
+      confirmationEmail: confirmationStatus(app, existing.id),
+    }
   }
 
   const { items, snapshots } = resolveItems(app, input.items)
-  let row: QuoteRow | null = null
-  app.db.transaction(() => {
-    for (let attempt = 0; attempt < 5 && !row; attempt += 1) {
-      const candidate: QuoteRow = {
-        id: newId(),
-        reference: newReference('Q'),
-        language: input.language,
-        kind: 'catalogue',
-        name: input.name,
-        email: input.email,
-        phone: input.phone,
-        company: null,
-        description: input.description,
-        objective: input.objective,
-        reference_notes: input.reference,
-        timing: input.timing,
-        requirements: input.requirements,
-        brief_json: null,
-        status: 'new',
-        inquiry_id: null,
-        archived_at: null,
-        consent_at: input.consent ? iso(now) : null,
-        ip_hash: ipHash,
-        content_hash: hash,
-        created_at: iso(now),
-        updated_at: iso(now),
-      }
-      try {
-        insertQuote(app.db, candidate, items)
-        row = candidate
-      } catch (error) {
-        if (!(error instanceof ConstraintError && error.kind === 'unique')) throw error
-      }
-    }
+  const created = createQuoteRequest(app, {
+    language: input.language,
+    kind: 'catalogue',
+    requestType: requestTypeOf(input.items),
+    source: 'shop',
+    name: input.name,
+    email: input.email,
+    phone: input.phone,
+    company: input.company,
+    website: input.website,
+    description: input.description,
+    objective: input.objective,
+    referenceNotes: input.reference,
+    timing: input.timing,
+    requirements: input.requirements,
+    budgetRange: input.budgetRange,
+    briefJson: null,
+    consent: input.consent,
+    marketingConsent: input.marketing,
+    ipHash,
+    contentHash: hash,
+    items,
+    actor: { type: 'system' },
   })
-  if (!row) throw new Error('Could not allocate a unique quote reference.')
-  const saved: QuoteRow = row
-
-  app.notifier.notifyOwner('quote_received', saved.id)
-  app.notifier.confirmSubmitter('quote', saved.id)
-  return { reference: saved.reference, createdAt: saved.created_at, duplicate: false, pricing: totalsOf(snapshots) }
+  const { confirmationEmail } = afterRequestStored(app, created.row)
+  return { reference: created.row.reference, createdAt: created.row.created_at, duplicate: false, pricing: totalsOf(snapshots), statusToken: created.statusToken, confirmationEmail }
 }
 
 function storedSnapshots(app: AppContext, quoteId: string): PriceSnapshot[] {

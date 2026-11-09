@@ -7,6 +7,7 @@ import { addonsFor } from '../../content/services/addons'
 import { afterInquirySteps } from '../../content/services/process'
 import { NEED_IDS, PLAN_IDS, type NeedId, type PlanId } from '../../content/services/ids'
 import { createTransport } from '../../forms/submit'
+import { LANGUAGE_META } from '../../i18n/config'
 import { useI18n } from '../../i18n/useI18n'
 import { clearCart } from '../../shop/cart'
 import { cartActions, cartStore } from '../../shop/cartStore'
@@ -21,6 +22,7 @@ import {
   describeLine,
   errorText,
   firstInvalidStep,
+  summaryRows,
   toRequest,
   validateStep,
   type FieldKey,
@@ -33,6 +35,7 @@ import { useShopText } from '../../shop/useShopText'
 import { fill, pad } from '../../utils/format'
 import { Button } from '../Button/Button'
 import { CheckboxField, ChoiceGroup, FIRST_INVALID, TextField } from '../form/fields'
+import { SentReceipt } from '../form/SentReceipt'
 import { SubmissionNotice, SubmissionResult } from '../form/Submission'
 import { useSubmission } from '../form/useSubmission'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
@@ -54,7 +57,7 @@ const OPTIONS = { requireConsent: quoteConfig.requireConsent }
 export function Configurator() {
   const { lang, t } = useI18n()
   const text = useShopText()
-  const { configurator: c, common } = text
+  const { configurator: c, common, receipt: receiptWords } = text
   const cart = useCart()
   const { details, step: storedStep, pendingPlan } = useInquiry()
 
@@ -63,6 +66,8 @@ export function Configurator() {
 
   const [tried, setTried] = useState<ReadonlySet<StepId>>(() => new Set())
   const [attempts, setAttempts] = useState(0)
+  // What was sent, as the visitor saw it, kept for the receipt: the form itself is cleared the moment the server has the request.
+  const [sentRows, setSentRows] = useState<ReadonlyArray<readonly [string, string]>>([])
   const formRef = useRef<HTMLFormElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const movedRef = useRef(false)
@@ -121,7 +126,9 @@ export function Configurator() {
       return
     }
     const items = cart.lines.length
+    const rows = summaryRows(cart, details, lang, summaryText, { contact: true }).filter(([, value]) => value !== c.summary.empty)
     await submit(toRequest(cart, details, lang), () => {
+      setSentRows(rows)
       track('quote_request_submitted', { form: 'inquiry', items })
       cartStore.update(clearCart)
       inquiryActions.reset()
@@ -157,6 +164,7 @@ export function Configurator() {
             {c.sent.title}
           </h2>
           <p>{c.sent.text}</p>
+          <SentReceipt receipt={phase.receipt} rows={sentRows} lang={lang} words={receiptWords} />
           <h3 className={styles.subTitle}>{c.sent.next}</h3>
           <ol className={styles.after}>
             {afterInquirySteps.map((item, position) => (
@@ -358,6 +366,15 @@ export function Configurator() {
                 error={message('timing')}
               />
               <TextField
+                label={c.details.budget.label}
+                optionalText={common.optional}
+                hint={c.details.budget.hint}
+                autoComplete="off"
+                value={details.budget}
+                onChange={(event) => inquiryActions.setDetail('budget', event.target.value)}
+                error={message('budget')}
+              />
+              <TextField
                 multiline
                 label={c.details.requirements.label}
                 optionalText={common.optional}
@@ -441,6 +458,10 @@ export function Configurator() {
                     <dt>{c.summary.labels.requirements}</dt>
                     <dd>{details.requirements.trim() || c.summary.empty}</dd>
                   </div>
+                  <div>
+                    <dt>{c.summary.labels.budget}</dt>
+                    <dd>{details.budget.trim() || c.summary.empty}</dd>
+                  </div>
                 </dl>
                 <div className={styles.reviewButtons}>
                   <Button type="button" variant="secondary" size="sm" onClick={() => goTo('details')}>
@@ -482,6 +503,26 @@ export function Configurator() {
                 onChange={(event) => inquiryActions.setDetail('phone', event.target.value)}
                 error={message('phone')}
               />
+              <TextField
+                label={c.send.company.label}
+                optionalText={common.optional}
+                hint={c.send.company.hint}
+                autoComplete="organization"
+                value={details.company}
+                onChange={(event) => inquiryActions.setDetail('company', event.target.value)}
+                error={message('company')}
+              />
+              <TextField
+                type="url"
+                inputMode="url"
+                label={c.send.website.label}
+                optionalText={common.optional}
+                hint={c.send.website.hint}
+                autoComplete="url"
+                value={details.website}
+                onChange={(event) => inquiryActions.setDetail('website', event.target.value)}
+                error={message('website')}
+              />
               {quoteConfig.requireConsent && (
                 <div className={styles.consent}>
                   <CheckboxField
@@ -500,6 +541,21 @@ export function Configurator() {
                   )}
                 </div>
               )}
+              <CheckboxField label={c.send.marketing.label} checked={details.marketing} onChange={(checked) => inquiryActions.setDetail('marketing', checked)} />
+              <section aria-labelledby="send-summary" className={styles.reviewBlock}>
+                <h3 id="send-summary" className={styles.subTitle}>
+                  {c.send.summaryTitle}
+                </h3>
+                <p className={styles.help}>{c.send.summaryHelp}</p>
+                <dl className={styles.facts}>
+                  {[...summaryRows(cart, details, lang, summaryText, { contact: true }), [c.summary.labels.language, LANGUAGE_META[lang].name] as const].map(([label, value]) => (
+                    <div key={label}>
+                      <dt>{label}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
               <p className={styles.memory}>{c.send.memory}</p>
             </>
           )}

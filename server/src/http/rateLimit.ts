@@ -62,6 +62,10 @@ export const LIMITS = {
   /** A new assistant session, and the assistant's reads (the session's conversations, the public configuration). */
   aiSession: { windowMs: HOUR, max: 20 },
   aiRead: { windowMs: MINUTE, max: 120 },
+  /** The customer's pages (a quotation, a request's status) and what they do there. */
+  customer: { windowMs: MINUTE, max: 90 },
+  /** Answers to a link that does not exist or no longer works are counted separately, against whoever keeps asking: guessing a token costs the guesser. */
+  tokenMiss: { windowMs: 15 * MINUTE, max: 20 },
   /** The e-mail provider's webhook: a handful of events per message, far below this, and a flood of unsigned ones is refused cheaply. */
   webhook: { windowMs: MINUTE, max: 240 },
 } as const
@@ -75,7 +79,7 @@ export class Limiters {
   constructor(clock: Clock, enabled: boolean) {
     this.enabled = enabled
     const make = (name: LimitName) => new RateLimiter(clock, LIMITS[name].windowMs, LIMITS[name].max)
-    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), webhook: make('webhook') }
+    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), customer: make('customer'), tokenMiss: make('tokenMiss'), webhook: make('webhook') }
   }
 
   /** Counts one request against a limit and throws the 429 when it is over. */

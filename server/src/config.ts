@@ -157,6 +157,10 @@ export interface Config {
   mediaDir: string
   /** The largest image an administrator may upload, in bytes. */
   mediaMaxBytes: number
+  /** `QUOTE_REFERENCE_FORMAT`: how a quote request's public reference is written, for example `CC-{YYYY}-{NNNNNN}` (the Ns are the padded sequence number). */
+  quoteReferenceFormat: string
+  /** `CUSTOMER_LINK_DAYS`: how long the link in a customer's e-mail (the quotation, the status page) works. */
+  customerLinkDays: number
   ai: AiConfig
 }
 
@@ -368,6 +372,9 @@ export function loadConfig(env: Env = process.env): Config {
   const bodyLimitBytes = integer('BODY_LIMIT_BYTES', 65536, 1024, 1048576)
   const mediaMaxBytes = integer('MEDIA_MAX_BYTES', 6 * 1024 * 1024, 100 * 1024, 25 * 1024 * 1024)
   const mediaDir = text('MEDIA_DIR') ?? (databasePath === ':memory:' ? join(tmpdir(), `cc-media-${process.pid}`) : join(dirname(databasePath), 'media'))
+  const quoteReferenceFormat = text('QUOTE_REFERENCE_FORMAT') ?? 'CC-{YYYY}-{NNNNNN}'
+  if (!/^[A-Za-z0-9-]{0,16}(\{YYYY\}|\{YY\})?[A-Za-z0-9-]{0,16}\{N{3,10}\}[A-Za-z0-9-]{0,16}$/.test(quoteReferenceFormat)) bad('QUOTE_REFERENCE_FORMAT', `must be letters, digits and hyphens around one sequence placeholder such as {NNNNNN}, optionally with {YYYY} or {YY} before it (got "${quoteReferenceFormat}")`)
+  const customerLinkDays = integer('CUSTOMER_LINK_DAYS', 90, 1, 365)
 
   // ---- the assistant (PROMPT 16) ----
   const decimal = (name: string, fallback: number, min: number, max: number): number => {
@@ -484,6 +491,8 @@ export function loadConfig(env: Env = process.env): Config {
     bodyLimitBytes,
     mediaDir,
     mediaMaxBytes,
+    quoteReferenceFormat,
+    customerLinkDays,
     ai,
   }
 }
@@ -516,6 +525,8 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     servesWebsite: config.staticDir !== null,
     mediaDir: config.mediaDir,
     mediaMaxBytes: config.mediaMaxBytes,
+    quoteReferenceFormat: config.quoteReferenceFormat,
+    customerLinkDays: config.customerLinkDays,
     assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : 'missing', model: config.ai.model, customBaseUrl: config.ai.baseUrl !== null },
   }
 }

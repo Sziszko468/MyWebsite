@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { CORE_QUESTIONS, FEATURE_LEVELS, LIMITS, seedShopDocuments, parseComparison, parseFullExperience, SEED_SHOP_FILE } from '../src/modules/shop/documents.ts'
 import { briefRows, readBrief } from '../src/modules/shop/brief.ts'
-import { renderQuoteReceived } from '../src/modules/notifications/templates.ts'
+import { renderRequestNotification } from '../src/modules/notifications/quoteTemplates.ts'
 import { quoteItems, getQuote } from '../src/modules/quotes/repository.ts'
 import { startServer, type TestServer } from './helpers.ts'
 
@@ -151,7 +151,7 @@ describe('a FULL EXPERIENCE request', () => {
   it('is saved in the same list as the builder\'s quotes, with the brief as the answers were worded when it was sent', async () => {
     const response = await server.api('/api/quote-requests', { body: fullExperience() })
     expect(response.status).toBe(201)
-    expect(response.json.data.reference).toMatch(/^F-/)
+    expect(response.json.data.reference).toMatch(/^CC-\d{4}-\d{6}$/)
     expect(response.json.data.pricing.fixed).toEqual([])
 
     const list = await send('GET', '/api/admin/quote-requests')
@@ -229,7 +229,7 @@ describe('a FULL EXPERIENCE request', () => {
     expect(rows.find((r) => r.label.startsWith('Which components'))!.value).toBe('Frontend, Backend')
     expect(rows.find((r) => r.label.startsWith('When would you like'))!.value).toBe('(skipped)')
 
-    const mail = renderQuoteReceived(row, quoteItems(server.db, row.id), { fixed: [], quotedParts: 0 } as never, 'en', 'Brand', (code) => code)
+    const mail = renderRequestNotification({ request: row, items: quoteItems(server.db, row.id), totals: { fixed: [], quotedParts: 0 }, packageName: (code: string) => code }, 'en', 'Brand', null)
     expect(mail.text).toContain('FULL EXPERIENCE')
     expect(mail.text).toContain('Web application')
     expect(mail.text).toContain('Gym Network Ltd')

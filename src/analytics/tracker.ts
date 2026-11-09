@@ -47,7 +47,8 @@ export function track<N extends EventName>(name: N, props: AnalyticsEvents[N]): 
   const event: AnalyticsEvent = {
     name,
     props: sanitize(props),
-    page: rest,
+    // The secret in a customer's private address never leaves the page.
+    page: rest.replace(/^\/(quote|request)\/[^/]+/, '/$1'),
     lang: lang ?? 'hu',
     time: Date.now(),
   }

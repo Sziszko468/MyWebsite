@@ -3991,6 +3991,28 @@
    }
   },
   {
+   "key": "shop.configurator.details.budget.label",
+   "group": "Shop: configurator",
+   "label": "configurator › details › budget › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Költségkeret",
+    "en": "Budget",
+    "nl": "Budget"
+   }
+  },
+  {
+   "key": "shop.configurator.details.budget.hint",
+   "group": "Shop: configurator",
+   "label": "configurator › details › budget › hint",
+   "placeholders": [],
+   "default": {
+    "hu": "Ha van elképzelésed a költségkeretről, írd le a saját szavaiddal. Nem kötelező, és semmire nem kötelez.",
+    "en": "If you have an idea of your budget, write it in your own words. Optional, and it commits you to nothing.",
+    "nl": "Heb je een idee van je budget, schrijf het dan in je eigen woorden. Optioneel en het verplicht je tot niets."
+   }
+  },
+  {
    "key": "shop.configurator.details.requirements.label",
    "group": "Shop: configurator",
    "label": "configurator › details › requirements › label",
@@ -4248,6 +4270,83 @@
    }
   },
   {
+   "key": "shop.configurator.send.company.label",
+   "group": "Shop: configurator",
+   "label": "configurator › send › company › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Cég vagy szervezet",
+    "en": "Company or organisation",
+    "nl": "Bedrijf of organisatie"
+   }
+  },
+  {
+   "key": "shop.configurator.send.company.hint",
+   "group": "Shop: configurator",
+   "label": "configurator › send › company › hint",
+   "placeholders": [],
+   "default": {
+    "hu": "Ha cég nevében kérsz ajánlatot.",
+    "en": "If you are asking on behalf of a company.",
+    "nl": "Als je namens een bedrijf een offerte aanvraagt."
+   }
+  },
+  {
+   "key": "shop.configurator.send.website.label",
+   "group": "Shop: configurator",
+   "label": "configurator › send › website › label",
+   "placeholders": [],
+   "default": {
+    "hu": "A cég weboldala",
+    "en": "Company website",
+    "nl": "Website van het bedrijf"
+   }
+  },
+  {
+   "key": "shop.configurator.send.website.hint",
+   "group": "Shop: configurator",
+   "label": "configurator › send › website › hint",
+   "placeholders": [],
+   "default": {
+    "hu": "Például: pelda.hu",
+    "en": "For example: example.com",
+    "nl": "Bijvoorbeeld: voorbeeld.nl"
+   }
+  },
+  {
+   "key": "shop.configurator.send.marketing.label",
+   "group": "Shop: configurator",
+   "label": "configurator › send › marketing › label",
+   "placeholders": [],
+   "default": {
+    "hu": "Szívesen hallanék rólatok más újdonságokról is. (Nem kötelező; az ajánlatkéréstől független.)",
+    "en": "I would also like to hear from you about other news. (Optional; separate from the quote request.)",
+    "nl": "Ik hoor graag ook van jullie over ander nieuws. (Optioneel; los van de offerteaanvraag.)"
+   }
+  },
+  {
+   "key": "shop.configurator.send.summaryTitle",
+   "group": "Shop: configurator",
+   "label": "configurator › send › summaryTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Mielőtt elküldöd",
+    "en": "Before you send",
+    "nl": "Voordat je verstuurt"
+   }
+  },
+  {
+   "key": "shop.configurator.send.summaryHelp",
+   "group": "Shop: configurator",
+   "label": "configurator › send › summaryHelp",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez megy el, pontosan így. Bármelyik lépésre visszaléphetsz, és kijavíthatod.",
+    "en": "This is what will be sent, exactly as shown. You can go back to any step and change it.",
+    "nl": "Dit wordt verstuurd, precies zoals het er staat. Je kunt naar elke stap terug en het aanpassen."
+   }
+  },
+  {
    "key": "shop.configurator.send.consent.label",
    "group": "Shop: configurator",
    "label": "configurator › send › consent › label",
@@ -4405,6 +4504,17 @@
     "hu": "Számjegyeket, szóközöket és a + ( ) - . / jeleket használj, legalább 6 számjeggyel.",
     "en": "Use digits, spaces and the characters + ( ) - . /, with at least 6 digits.",
     "nl": "Gebruik cijfers, spaties en de tekens + ( ) - . /, met minstens 6 cijfers."
+   }
+  },
+  {
+   "key": "shop.configurator.errors.invalidUrl",
+   "group": "Shop: configurator",
+   "label": "configurator › errors › invalidUrl",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez nem tűnik weboldal-címnek. Például: pelda.hu vagy https://pelda.hu",
+    "en": "That does not look like a website address. For example: example.com or https://example.com",
+    "nl": "Dat lijkt geen websiteadres. Bijvoorbeeld: voorbeeld.nl of https://voorbeeld.nl"
    }
   },
   {
@@ -4592,6 +4702,39 @@
     "hu": "További követelmények",
     "en": "Further requirements",
     "nl": "Verdere eisen"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.budget",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › budget",
+   "placeholders": [],
+   "default": {
+    "hu": "Költségkeret",
+    "en": "Budget",
+    "nl": "Budget"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.company",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › company",
+   "placeholders": [],
+   "default": {
+    "hu": "Cég",
+    "en": "Company",
+    "nl": "Bedrijf"
+   }
+  },
+  {
+   "key": "shop.configurator.summary.labels.website",
+   "group": "Shop: configurator",
+   "label": "configurator › summary › labels › website",
+   "placeholders": [],
+   "default": {
+    "hu": "Weboldal",
+    "en": "Website",
+    "nl": "Website"
    }
   },
   {
@@ -4809,9 +4952,9 @@
    "label": "configurator › sent › text",
    "placeholders": [],
    "default": {
-    "hu": "Az ajánlatkérésed elküldtem. A megadott e-mail-címen jelentkezem.",
-    "en": "Your quote request has been sent. I will get back to you at the email address you gave.",
-    "nl": "Je offerteaanvraag is verstuurd. Ik neem contact met je op via het e-mailadres dat je hebt opgegeven."
+    "hu": "Az ajánlatkérésed megérkezett, és el van mentve. A megadott e-mail-címen jelentkezem.",
+    "en": "Your quote request has arrived and is saved. I will get back to you at the email address you gave.",
+    "nl": "Je offerteaanvraag is aangekomen en opgeslagen. Ik neem contact met je op via het e-mailadres dat je hebt opgegeven."
    }
   },
   {
@@ -6755,6 +6898,39 @@
    }
   },
   {
+   "key": "shop.experience.start.website",
+   "group": "Shop: experience",
+   "label": "experience › start › website",
+   "placeholders": [],
+   "default": {
+    "hu": "A cég weboldala",
+    "en": "Company website",
+    "nl": "Website van het bedrijf"
+   }
+  },
+  {
+   "key": "shop.experience.start.websiteHint",
+   "group": "Shop: experience",
+   "label": "experience › start › websiteHint",
+   "placeholders": [],
+   "default": {
+    "hu": "Például: pelda.hu",
+    "en": "For example: example.com",
+    "nl": "Bijvoorbeeld: voorbeeld.nl"
+   }
+  },
+  {
+   "key": "shop.experience.start.marketing",
+   "group": "Shop: experience",
+   "label": "experience › start › marketing",
+   "placeholders": [],
+   "default": {
+    "hu": "Szívesen hallanék rólatok más újdonságokról is. (Nem kötelező; az ajánlatkéréstől független.)",
+    "en": "I would also like to hear from you about other news. (Optional; separate from the quote request.)",
+    "nl": "Ik hoor graag ook van jullie over ander nieuws. (Optioneel; los van de offerteaanvraag.)"
+   }
+  },
+  {
    "key": "shop.experience.start.preferredLanguage",
    "group": "Shop: experience",
    "label": "experience › start › preferredLanguage",
@@ -6959,6 +7135,17 @@
    }
   },
   {
+   "key": "shop.experience.start.errors.invalidUrl",
+   "group": "Shop: experience",
+   "label": "experience › start › errors › invalidUrl",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez nem tűnik weboldal-címnek. Például: pelda.hu",
+    "en": "This does not look like a website address. For example: example.com",
+    "nl": "Dit lijkt geen websiteadres. Bijvoorbeeld: voorbeeld.nl"
+   }
+  },
+  {
    "key": "shop.experience.start.errors.consentRequired",
    "group": "Shop: experience",
    "label": "experience › start › errors › consentRequired",
@@ -6986,9 +7173,9 @@
    "label": "experience › start › sent › text",
    "placeholders": [],
    "default": {
-    "hu": "Köszönjük! Átnézzük a válaszaidat, és a megadott e-mail-címen jelentkezünk.",
-    "en": "Thank you! We will go through your answers and get back to you at the e-mail address you gave.",
-    "nl": "Bedankt! We bekijken je antwoorden en nemen contact met je op via het e-mailadres dat je opgaf."
+    "hu": "Köszönjük! A kérésed megérkezett és el van mentve. Átnézzük a válaszaidat, és a megadott e-mail-címen jelentkezünk.",
+    "en": "Thank you! Your request has arrived and is saved. We will go through your answers and get back to you at the e-mail address you gave.",
+    "nl": "Bedankt! Je aanvraag is aangekomen en opgeslagen. We bekijken je antwoorden en nemen contact met je op via het e-mailadres dat je opgaf."
    }
   },
   {
@@ -7176,6 +7363,105 @@
     "hu": "Elérhetőség",
     "en": "Contact",
     "nl": "Contact"
+   }
+  },
+  {
+   "key": "shop.receipt.reference",
+   "group": "Shop: receipt",
+   "label": "receipt › reference",
+   "placeholders": [],
+   "default": {
+    "hu": "Hivatkozási szám",
+    "en": "Reference number",
+    "nl": "Referentienummer"
+   }
+  },
+  {
+   "key": "shop.receipt.referenceHint",
+   "group": "Shop: receipt",
+   "label": "receipt › referenceHint",
+   "placeholders": [],
+   "default": {
+    "hu": "Ezt add meg, ha rákérdezel a kérésedre.",
+    "en": "Quote this if you ask about your request.",
+    "nl": "Noem dit nummer als je naar je aanvraag vraagt."
+   }
+  },
+  {
+   "key": "shop.receipt.submitted",
+   "group": "Shop: receipt",
+   "label": "receipt › submitted",
+   "placeholders": [],
+   "default": {
+    "hu": "Beküldve",
+    "en": "Submitted",
+    "nl": "Ingediend"
+   }
+  },
+  {
+   "key": "shop.receipt.summary",
+   "group": "Shop: receipt",
+   "label": "receipt › summary",
+   "placeholders": [],
+   "default": {
+    "hu": "A beküldött kérés",
+    "en": "What you submitted",
+    "nl": "Wat je hebt ingediend"
+   }
+  },
+  {
+   "key": "shop.receipt.emailQueued",
+   "group": "Shop: receipt",
+   "label": "receipt › emailQueued",
+   "placeholders": [],
+   "default": {
+    "hu": "Visszaigazoló e-mailt küldünk a megadott címre. Ha nem érkezik meg, nézd meg a levélszemét mappát is.",
+    "en": "We are sending a confirmation e-mail to the address you gave. If it does not arrive, check your spam folder too.",
+    "nl": "We sturen een bevestigingsmail naar het opgegeven adres. Komt die niet aan, kijk dan ook in je spammap."
+   }
+  },
+  {
+   "key": "shop.receipt.emailNotSent",
+   "group": "Shop: receipt",
+   "label": "receipt › emailNotSent",
+   "placeholders": [],
+   "default": {
+    "hu": "A kérésed el van mentve, de visszaigazoló e-mailt most nem tudtunk küldeni. Őrizd meg a hivatkozási számot.",
+    "en": "Your request is saved, but a confirmation e-mail could not be sent right now. Keep your reference number.",
+    "nl": "Je aanvraag is opgeslagen, maar een bevestigingsmail kon nu niet worden verstuurd. Bewaar je referentienummer."
+   }
+  },
+  {
+   "key": "shop.receipt.statusLink",
+   "group": "Shop: receipt",
+   "label": "receipt › statusLink",
+   "placeholders": [],
+   "default": {
+    "hu": "A kérésem állapota",
+    "en": "See the status of my request",
+    "nl": "De status van mijn aanvraag bekijken"
+   }
+  },
+  {
+   "key": "shop.receipt.statusHint",
+   "group": "Shop: receipt",
+   "label": "receipt › statusHint",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez egy személyes, titkos link: csak te férsz hozzá vele. Ne oszd meg másokkal.",
+    "en": "This is a private link that only you have. Please do not share it.",
+    "nl": "Dit is een persoonlijke, geheime link die alleen jij hebt. Deel hem niet met anderen."
+   }
+  },
+  {
+   "key": "shop.receipt.noPayment",
+   "group": "Shop: receipt",
+   "label": "receipt › noPayment",
+   "placeholders": [],
+   "default": {
+    "hu": "Ebben a szakaszban nem kérünk fizetést.",
+    "en": "No payment is asked for at this stage.",
+    "nl": "In deze fase vragen we geen betaling."
    }
   }
  ]

@@ -29,7 +29,7 @@ describe('StatusBadge', () => {
   })
 
   it('speaks the administrator’s language', () => {
-    expect(render(h(StatusBadge, { kind: 'quote', status: 'quoted' }), 'hu')).toContain(hu.status.quote.quoted)
+    expect(render(h(StatusBadge, { kind: 'quote', status: 'quote_sent' }), 'hu')).toContain(hu.status.quote.quote_sent)
   })
 
   it('adds an Archived badge beside the status, not instead of it', () => {

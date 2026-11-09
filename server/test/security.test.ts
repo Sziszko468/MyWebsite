@@ -290,7 +290,7 @@ describe('abuse of the public forms', () => {
     // Only the windows still running are remembered, so the table does not grow with every address ever seen.
     server.clock.advance(16 * 60_000)
     limiters.sweep()
-    expect(Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0])
+    expect(Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
     expect(() => new Limiters(server.clock, false).check('contact', 'x')).not.toThrow()
   })
 
@@ -438,7 +438,7 @@ describe('what is kept out of the logs and the answers', () => {
     expect(Object.keys(response.json.data).sort()).toEqual(['createdAt', 'reference', 'status'])
     expect(response.text).not.toMatch(/anna|example\.com|bakery|ip_hash|content_hash|"id"/i)
     const quoted = await server.api('/api/quote-requests', { body: quote() })
-    expect(Object.keys(quoted.json.data).sort()).toEqual(['createdAt', 'pricing', 'reference', 'status'])
+    expect(Object.keys(quoted.json.data).sort()).toEqual(['confirmationEmail', 'createdAt', 'pricing', 'reference', 'status', 'statusToken'])
     for (const path of ['/api/health', '/api/ready']) {
       const probe = await server.api(path)
       expect(probe.text, path).not.toMatch(/secret|password|\.sqlite|:memory:|smtp|owner@site\.test|C:\\|\/home\//i)

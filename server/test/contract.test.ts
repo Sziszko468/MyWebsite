@@ -134,7 +134,8 @@ describe('what the contact form sends', () => {
   it('travels through the website\'s own transport: "sent" for a stored message, a refusal for anything else, never a false success', async () => {
     const transport = submit.endpointTransport(`${server.url}/api/contact`)
     const request = contactValidation.toContactRequest(unique(draft()), 'nl')
-    expect(await transport.submit(request)).toEqual({ status: 'sent' })
+    // The website reads the server's answer: the reference to quote, and (for a quote request) the private status link and whether a confirmation is on its way.
+    expect(await transport.submit(request)).toMatchObject({ status: 'sent', receipt: { reference: expect.stringMatching(/^(C-[A-Z0-9]{8}|CC-\d{4}-\d{6})$/) } })
     expect(server.db.get('SELECT COUNT(*) AS n FROM inquiries')).toEqual({ n: 1 })
     expect(await transport.submit({ ...request, email: 'not an address', subject: 'Another subject' })).toEqual({ status: 'failed', reason: 'rejected' })
     expect(await transport.submit({ ...request, consent: false, subject: 'No consent' })).toEqual({ status: 'failed', reason: 'rejected' })
@@ -254,7 +255,7 @@ describe('what the quote configurator sends', () => {
   it('does not let the website name a price: the backend takes the codes and reads the prices from its own catalogue', async () => {
     const { request } = build([{ need: 'website', plan: 'launch', extras: ['pages'] }])
     const keys = Object.keys(request).sort()
-    expect(keys).toEqual(['consent', 'description', 'email', 'form', 'items', 'language', 'name', 'objective', 'phone', 'reference', 'requirements', 'timing', 'version'])
+    expect(keys).toEqual(['budgetRange', 'company', 'companyWebsite', 'consent', 'description', 'email', 'form', 'items', 'language', 'marketing', 'name', 'objective', 'phone', 'reference', 'requirements', 'timing', 'version'])
     expect(JSON.stringify(request)).not.toMatch(/price|amount|currency|total|vat/i)
     // Even a request that does name prices (a modified page, a script) is priced from the catalogue alone: the figures are not read.
     const response = await server.api('/api/quote-requests', { body: { ...request, items: [{ ...request.items[0], price: 1, amount: 1, snapshot: { plan: { code: 'launch', price: { kind: 'from', amount: 1, currency: 'EUR' }, vat: 'included' } } }], total: 1, pricing: { fixed: [{ currency: 'EUR', amount: 1, vat: 'included' }] } } })
@@ -268,7 +269,8 @@ describe('what the quote configurator sends', () => {
   it('travels through the website\'s own transport', async () => {
     const transport = submit.endpointTransport(`${server.url}/api/quote-requests`)
     const { request } = build([{ need: 'website', plan: 'launch', extras: ['pages'] }])
-    expect(await transport.submit(request)).toEqual({ status: 'sent' })
+    // The website reads the server's answer: the reference to quote, and (for a quote request) the private status link and whether a confirmation is on its way.
+    expect(await transport.submit(request)).toMatchObject({ status: 'sent', receipt: { reference: expect.stringMatching(/^(C-[A-Z0-9]{8}|CC-\d{4}-\d{6})$/) } })
     expect(await transport.submit({ ...request, items: [{ need: 'website', plan: 'platinum', extras: [] }] })).toEqual({ status: 'failed', reason: 'rejected' })
     expect(server.db.get('SELECT COUNT(*) AS n FROM quote_requests')).toEqual({ n: 1 })
   })

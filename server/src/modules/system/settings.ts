@@ -49,15 +49,17 @@ export function setSetting(db: Database, clock: Clock, key: string, value: strin
 
 /**
  * The owner's own notifications default to on (an owner who configured an address wants to hear about what arrives
- * until they say otherwise); the confirmations to visitors default to OFF (nobody gets an e-mail they did not ask for
- * from a site whose owner has not decided to send them).
+ * until they say otherwise). The confirmation to a visitor who asked for a QUOTATION defaults to on too (they expect it, and the
+ * brief for the quotation system requires it); the confirmation of a plain contact message stays OFF (nobody gets an e-mail they
+ * did not ask for from a site whose owner has not decided to send them).
  */
 export function notificationPreferences(db: Database): NotificationPreferences {
   return {
     newInquiry: getSetting(db, KEYS.newInquiry) !== '0',
     newQuote: getSetting(db, KEYS.newQuote) !== '0',
     confirmInquiry: getSetting(db, KEYS.confirmInquiry) === '1',
-    confirmQuote: getSetting(db, KEYS.confirmQuote) === '1',
+    // A person who asked for a quotation expects to hear that the request arrived (PROMPT 17): on unless an administrator switched it off.
+    confirmQuote: getSetting(db, KEYS.confirmQuote) !== '0',
     responseNote: { hu: getSetting(db, KEYS.note('hu')) ?? '', en: getSetting(db, KEYS.note('en')) ?? '', nl: getSetting(db, KEYS.note('nl')) ?? '' },
   }
 }

@@ -6,7 +6,8 @@ import { ConstraintError } from '../src/http/errors.ts'
 import { CONFIRMATIONS_PER_ADDRESS_PER_DAY } from '../src/modules/notifications/notifier.ts'
 import { createResendMailer, failureOf } from '../src/modules/notifications/resend.ts'
 import { MailError } from '../src/modules/notifications/smtp.ts'
-import { renderInquiryConfirmation, renderQuoteConfirmation, renderTestEmail } from '../src/modules/notifications/templates.ts'
+import { renderRequestConfirmation } from '../src/modules/notifications/quoteTemplates.ts'
+import { renderInquiryConfirmation, renderTestEmail } from '../src/modules/notifications/templates.ts'
 import { contact, quote, startServer, TestClock, type TestServer } from './helpers.ts'
 import { API_KEY, mockResend, WEBHOOK_SECRET, type MockResend } from './resendMock.ts'
 
@@ -249,7 +250,7 @@ describe('a stored request does not depend on its e-mail', () => {
     expect(response.status).toBe(201)
     await settle()
     expect(server.db.get('SELECT COUNT(*) AS n FROM quote_requests')).toEqual({ n: 1 })
-    expect(rows()[0]).toMatchObject({ kind: 'quote_received', status: 'pending' })
+    expect(rows().find((row) => row.kind === 'quote_received')).toMatchObject({ kind: 'quote_received', status: 'pending' })
   })
 
   it('a message sent twice gives one stored request and one notification', async () => {
@@ -271,13 +272,21 @@ describe('the confirmation to the person who wrote', () => {
   }
   const toVisitor = () => provider.sends().map((request) => request.body as { to: string[]; from: string; reply_to: string; subject: string; text: string; html: string }).filter((body) => body.to[0] === 'anna@example.com')
 
-  it('is off until an administrator turns it on: a visitor gets nothing', async () => {
+  it('is off for a message until an administrator turns it on, and on for a quote request until they turn it off', async () => {
     await server.api('/api/contact', { body: contact() })
-    await server.api('/api/quote-requests', { body: quote() })
     await settle()
     await settle()
     expect(toVisitor()).toEqual([])
-    expect(rows().map((row) => row.kind).sort()).toEqual(['inquiry_received', 'quote_received'])
+    await server.api('/api/quote-requests', { body: quote() })
+    await settle()
+    await settle()
+    expect(toVisitor()).toHaveLength(1)
+    expect(rows().map((row) => row.kind).sort()).toEqual(['inquiry_received', 'quote_confirmation', 'quote_received'])
+    await turnOn({ newInquiry: true, newQuote: true, confirmInquiry: false, confirmQuote: false })
+    await server.api('/api/quote-requests', { body: quote({ description: 'A second request, written after the confirmation was switched off.' }) })
+    await settle()
+    await settle()
+    expect(toVisitor()).toHaveLength(1)
   })
 
   it('confirms a message once it is on: in the visitor’s language, from the verified sender, answered at the public address', async () => {
@@ -303,8 +312,8 @@ describe('the confirmation to the person who wrote', () => {
     await settle()
     await settle()
     const [mail] = toVisitor()
-    expect(mail.subject).toMatch(/^We received your quote request \(Q-/)
-    expect(mail.text).toContain('Thank you for your quote request! It has been received.')
+    expect(mail.subject).toMatch(/^We will review your enquiry soon — CC-\d{4}-\d{6}$/)
+    expect(mail.text).toContain('Your request has been received and we will review it soon')
     expect(mail.text).toMatch(/Website/)
     expect(mail.text).not.toMatch(/€|EUR|HUF|\bFt\b|price|prijs|ár\b|estimate|\$/i)
     expect(mail.text).not.toMatch(/guarantee|appointment|accepted|will start|within/i)
@@ -397,10 +406,10 @@ describe('the confirmation to the person who wrote', () => {
 
   it('has its own words in Hungarian, English and Dutch for the two confirmations and the test message', () => {
     const inquiry = { id: 'i', reference: 'C-TEST', language: 'en', kind: 'project', name: 'Anna', email: 'a@example.com', subject: 'S', message: 'm', status: 'new', archived_at: null, consent_at: null, ip_hash: 'x', content_hash: 'y', created_at: '2026-11-03T10:00:00.000Z', updated_at: '2026-11-03T10:00:00.000Z' } as never
-    const quoteRow = { ...(inquiry as object), reference: 'Q-TEST', description: 'd', objective: null, reference_notes: null, timing: null, requirements: null, phone: null, inquiry_id: null } as never
+    const quoteRow = { ...(inquiry as object), reference: 'CC-2026-000001', kind: 'catalogue', request_type: 'package_quote', source: 'shop', description: 'd', objective: null, reference_notes: null, timing: null, requirements: null, phone: null, company: null, website: null, budget_range: null, inquiry_id: null } as never
     const subjects = new Set<string>()
     for (const language of ['hu', 'en', 'nl'] as const) {
-      for (const mail of [renderInquiryConfirmation(inquiry, language, 'Brand', null), renderQuoteConfirmation(quoteRow, [], language, 'Brand', (code) => code, null), renderTestEmail(language, 'Brand', 'resend', new Date('2026-11-03T10:00:00Z'))]) {
+      for (const mail of [renderInquiryConfirmation(inquiry, language, 'Brand', null), renderRequestConfirmation({ request: quoteRow, items: [], totals: { fixed: [], quotedParts: 0 }, packageName: (code: string) => code }, language, 'Brand', null, null), renderTestEmail(language, 'Brand', 'resend', new Date('2026-11-03T10:00:00Z'))]) {
         expect(mail.subject.length).toBeGreaterThan(5)
         expect(mail.html).toContain('</html>')
         subjects.add(mail.subject)

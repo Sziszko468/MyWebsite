@@ -146,7 +146,7 @@ describe('POST /api/quote-requests', () => {
   it('stores the request, its items and add-ons, and answers with a reference and the pricing it can state', async () => {
     const response = await server.api('/api/quote-requests', { body: quote({ items: [{ need: 'website', plan: 'launch', extras: ['pages', 'motion'] }, { need: 'integrations', plan: 'custom', extras: ['api'] }], phone: '+36 30 123 4567', requirements: 'Dark theme.', reference: 'https://example.com' }) })
     expect(response.status).toBe(201)
-    expect(response.json.data.reference).toMatch(/^Q-[A-Z0-9]{8}$/)
+    expect(response.json.data.reference).toMatch(/^CC-\d{4}-\d{6}$/)
     // No price is published, so there is nothing to add up: every part is quoted.
     expect(response.json.data.pricing).toEqual({ fixed: [], quotedParts: 5 })
     const request = rows('quote_requests')[0] as Record<string, unknown>
@@ -236,7 +236,8 @@ describe('POST /api/quote-requests', () => {
     expect(second.json.data.reference).toBe(first.json.data.reference)
     expect(rows('quote_requests')).toHaveLength(1)
     await server.app.context.notifier.processDue()
-    expect(server.mailer.sent).toHaveLength(1)
+    // One message to the owner and one confirmation to the visitor: the repeat sent neither again.
+    expect(server.mailer.sent.map((mail) => mail.to).sort()).toEqual(['anna@example.com', 'owner@site.test'])
     // The order of the lines and of the add-ons does not make it a different request.
     const reordered = await server.api('/api/quote-requests', { body: quote({ items: [{ need: 'website', plan: 'launch', extras: ['pages'] }] }) })
     expect(reordered.status).toBe(200)
@@ -245,9 +246,9 @@ describe('POST /api/quote-requests', () => {
   it('tells the owner about it: every service, package, add-on and answer in the e-mail, in the owner\'s language', async () => {
     await server.api('/api/quote-requests', { body: quote({ items: [{ need: 'website', plan: 'launch', extras: ['pages'] }], requirements: 'Dark theme please.', phone: '+31 6 1234 5678' }) })
     await server.app.context.notifier.processDue()
-    const mail = server.mailer.sent[0]
-    expect(mail.subject).toMatch(/^New quote request \(Q-[A-Z0-9]{8}\): Anna Kovács$/)
-    for (const part of ['Website — Package: Launch + pages', 'Dark theme please.', '+31 6 1234 5678', 'No part has a published price']) expect(mail.text).toContain(part)
+    const mail = server.mailer.sent.find((sent) => sent.to === 'owner@site.test')!
+    expect(mail.subject).toMatch(/^New quote request \(CC-\d{4}-\d{6}\): Anna Kovács$/)
+    for (const part of ['Website — Package: Launch + Additional pages', 'Dark theme please.', '+31 6 1234 5678', 'No part has a published price']) expect(mail.text).toContain(part)
     expect(mail.replyTo).toBe('anna@example.com')
   })
 })

@@ -269,7 +269,6 @@ describe('housekeeping and the right to be forgotten', () => {
   async function populate(): Promise<void> {
     const admin = await server.signIn()
     const patch = (id: string, body: unknown) => server.api(`/api/admin/inquiries/${id}`, { method: 'PATCH', body, headers: { Cookie: admin.cookie, 'X-CSRF-Token': admin.csrf } })
-    const patchQuote = (id: string, body: unknown) => server.api(`/api/admin/quote-requests/${id}`, { method: 'PATCH', body, headers: { Cookie: admin.cookie, 'X-CSRF-Token': admin.csrf } })
     for (const subject of ['open', 'closed', 'archived', 'answered']) await server.api('/api/contact', { body: contact({ subject, email: `${subject}@example.com` }) })
     const id = (subject: string) => server.db.get<{ id: string }>('SELECT id FROM inquiries WHERE subject = ?', [subject])!.id
     await patch(id('closed'), { status: 'completed' })
@@ -277,9 +276,8 @@ describe('housekeeping and the right to be forgotten', () => {
     await patch(id('answered'), { status: 'waiting_client' })
     for (const description of ['open request for the site', 'declined request for the site', 'closed request for the site', 'accepted request for the site']) await server.api('/api/quote-requests', { body: quote({ description, email: `${description.split(' ')[0]}@example.com` }) })
     const quoteId = (word: string) => server.db.get<{ id: string }>('SELECT id FROM quote_requests WHERE description LIKE ?', [`${word}%`])!.id
-    await patchQuote(quoteId('declined'), { status: 'declined' })
-    await patchQuote(quoteId('closed'), { status: 'closed' })
-    await patchQuote(quoteId('accepted'), { status: 'accepted' })
+    // The decision statuses are reached through a quotation and the work (their own tests); here only what retention does with them matters.
+    for (const [word, status] of [['declined', 'declined'], ['closed', 'completed'], ['accepted', 'accepted']] as const) server.db.run('UPDATE quote_requests SET status = ? WHERE id = ?', [status, quoteId(word)])
     await server.app.context.notifier.processDue()
   }
 

@@ -1,12 +1,13 @@
 import type { AppContext } from '../../context.ts'
 import { LANGUAGES, type Language } from '../../config.ts'
-import { ConstraintError, HttpError, validationFailed, type FieldErrors } from '../../http/errors.ts'
-import { newId, newReference } from '../../lib/crypto.ts'
+import { HttpError, validationFailed, type FieldErrors } from '../../http/errors.ts'
 import { countLinks, isRecord } from '../../lib/text.ts'
 import { addMs, iso } from '../../lib/time.ts'
 import { Fields, isEmail } from '../../lib/validate.ts'
 import { contentHashOf, DUPLICATE_WINDOW_MS } from '../contact/service.ts'
-import { findRecentQuoteDuplicate, insertQuote, type QuoteRow } from '../quotes/repository.ts'
+import { afterRequestStored, confirmationStatus, createQuoteRequest } from '../quotes/create.ts'
+import { findRecentQuoteDuplicate } from '../quotes/repository.ts'
+import { mintViewToken } from '../quotes/tokens.ts'
 import type { Brief, BriefQuestion } from './brief.ts'
 import { publishedDocuments, type FullExperienceDoc } from './documents.ts'
 import { totalsOf, type Totals } from './pricing.ts'
@@ -26,6 +27,7 @@ export const FE_LIMITS = {
   name: { min: 2, max: 100 },
   email: { max: 254 },
   company: { max: 100 },
+  website: { max: 200 },
 } as const
 
 export interface FullExperienceInput {
@@ -37,7 +39,9 @@ export interface FullExperienceInput {
   name: string
   email: string
   company: string | null
+  website: string | null
   consent: boolean
+  marketing: boolean
 }
 
 export function parseFullExperienceRequest(body: Record<string, unknown>, requireConsent: boolean): FullExperienceInput {
@@ -51,7 +55,9 @@ export function parseFullExperienceRequest(body: Record<string, unknown>, requir
   const name = fields.text('name', { ...FE_LIMITS.name, required: true })
   const email = fields.text('email', { max: FE_LIMITS.email.max, required: true }, (value) => (isEmail(value) ? undefined : 'invalidEmail'))
   const company = fields.text('company', { max: FE_LIMITS.company.max })
+  const website = fields.url('companyWebsite', { max: FE_LIMITS.website.max })
   const consent = fields.consent('consent', requireConsent)
+  const marketing = body.marketing === true
 
   const answers: Record<string, string[]> = {}
   if (body.answers !== undefined && !isRecord(body.answers)) fields.fail('answers', 'invalid')
@@ -74,7 +80,7 @@ export function parseFullExperienceRequest(body: Record<string, unknown>, requir
   if (typeof body.website === 'string' && body.website.trim() !== '') throw new HttpError(422, 'spam_suspected', 'The request was not accepted.')
   if (countLinks(description ?? '') > 5) throw new HttpError(422, 'spam_suspected', 'The request was not accepted.')
 
-  return { language: language!, preferredLanguage: preferred ?? language!, answers, description: description!, name: name!, email: email!, company: company || null, consent }
+  return { language: language!, preferredLanguage: preferred ?? language!, answers, description: description!, name: name!, email: email!, company: company || null, website, consent, marketing }
 }
 
 /** Checks the answers against the published configurator and builds the brief that is stored. */
@@ -104,6 +110,8 @@ export interface FullExperienceResult {
   createdAt: string
   duplicate: boolean
   pricing: Totals
+  statusToken: string
+  confirmationEmail: 'queued' | 'not_sent'
 }
 
 export function submitFullExperience(app: AppContext, input: FullExperienceInput, ipHash: string): FullExperienceResult {
@@ -115,46 +123,41 @@ export function submitFullExperience(app: AppContext, input: FullExperienceInput
   const hash = contentHashOf(app.config.appSecret, 'full_experience', input.email, input.description, answersKey)
 
   const existing = findRecentQuoteDuplicate(app.db, hash, iso(addMs(now, -DUPLICATE_WINDOW_MS)))
-  if (existing) return { reference: existing.reference, createdAt: existing.created_at, duplicate: true, pricing: totalsOf([]) }
-
-  let row: QuoteRow | null = null
-  app.db.transaction(() => {
-    for (let attempt = 0; attempt < 5 && !row; attempt += 1) {
-      const candidate: QuoteRow = {
-        id: newId(),
-        reference: newReference('F'),
-        language: input.language,
-        kind: 'full_experience',
-        name: input.name,
-        email: input.email,
-        phone: null,
-        company: input.company,
-        description: input.description,
-        objective: null,
-        reference_notes: null,
-        timing: null,
-        requirements: null,
-        brief_json: JSON.stringify(brief),
-        status: 'new',
-        inquiry_id: null,
-        archived_at: null,
-        consent_at: input.consent ? iso(now) : null,
-        ip_hash: ipHash,
-        content_hash: hash,
-        created_at: iso(now),
-        updated_at: iso(now),
-      }
-      try {
-        insertQuote(app.db, candidate, [])
-        row = candidate
-      } catch (error) {
-        if (!(error instanceof ConstraintError && error.kind === 'unique')) throw error
-      }
+  if (existing) {
+    return {
+      reference: existing.reference,
+      createdAt: existing.created_at,
+      duplicate: true,
+      pricing: totalsOf([]),
+      statusToken: app.db.transaction(() => mintViewToken(app, { requestId: existing.id, quoteId: null }).token),
+      confirmationEmail: confirmationStatus(app, existing.id),
     }
+  }
+
+  const created = createQuoteRequest(app, {
+    language: input.language,
+    kind: 'full_experience',
+    requestType: 'full_experience',
+    source: 'shop',
+    name: input.name,
+    email: input.email,
+    phone: null,
+    company: input.company,
+    website: input.website,
+    description: input.description,
+    objective: null,
+    referenceNotes: null,
+    timing: null,
+    requirements: null,
+    budgetRange: null,
+    briefJson: JSON.stringify(brief),
+    consent: input.consent,
+    marketingConsent: input.marketing,
+    ipHash,
+    contentHash: hash,
+    items: [],
+    actor: { type: 'system' },
   })
-  if (!row) throw new Error('Could not allocate a unique request reference.')
-  const saved: QuoteRow = row
-  app.notifier.notifyOwner('quote_received', saved.id)
-  app.notifier.confirmSubmitter('quote', saved.id)
-  return { reference: saved.reference, createdAt: saved.created_at, duplicate: false, pricing: totalsOf([]) }
+  const { confirmationEmail } = afterRequestStored(app, created.row)
+  return { reference: created.row.reference, createdAt: created.row.created_at, duplicate: false, pricing: totalsOf([]), statusToken: created.statusToken, confirmationEmail }
 }

@@ -119,6 +119,8 @@ Not done: rendering in real mail clients (Gmail, Outlook, Apple Mail, mobile app
 
 ## 7. The webhook
 
+The quotation workflow (PROMPT 17) adds seven kinds to the same outbox, in the same table: `quote_sent`, `quote_revised`, `quote_accepted` and `quote_accepted_admin`, `quote_declined` and `quote_declined_admin`, `revision_requested_admin`; the confirmation of a quote request is now on by default, and the request notification and confirmation carry a link to the request in the administration and to the customer's status page. The link in a customer's mail is a secret minted when the message is written. See [`docs/quotes/README.md`](../quotes/README.md) §6 and §8.
+
 `POST /api/webhooks/email` — the provider reports what happened to a message. Set it up in the provider's dashboard (Webhooks → add endpoint: `https://<your API host>/api/webhooks/email`; events: `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.failed`, `email.suppressed`; **not** opens or clicks, which would track recipients) and copy the signing secret to `EMAIL_WEBHOOK_SECRET`.
 
 - **Signature.** Svix scheme: `svix-id`, `svix-timestamp`, `svix-signature` headers; the signed text is `id.timestamp.rawBody`; the key is the base64 part of the `whsec_…` secret; HMAC-SHA256, compared in constant time; several signatures are allowed (secret rotation); the timestamp must be within 5 minutes of the server's clock either way (replay). A request that fails any of it is a **401** and changes nothing; with no `EMAIL_WEBHOOK_SECRET` the address answers **404** (it does not exist). The body is read raw and limited.

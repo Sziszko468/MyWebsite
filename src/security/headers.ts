@@ -75,6 +75,11 @@ export function buildHeadersFile(input: HeaderInput): string {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Strict-Transport-Security': 'max-age=31536000',
     }),
+    // A customer's private page (`/hu/quote/<secret>`, `/en/request/<secret>`): the secret is in the address, so nothing may carry the address
+    // elsewhere (no referrer), nothing may keep a copy (no cache) and no search engine may list it.
+    ...['quote', 'request'].flatMap((page) =>
+      ['hu', 'en', 'nl'].map((lang) => block(`/${lang}/${page}/*`, { 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })),
+    ),
     // Built files carry a hash of their content in their name, so they never change under that name.
     block('/assets/*', { 'Cache-Control': IMMUTABLE }),
     // Pictures and the shared image keep their names, so they are revalidated after a day.

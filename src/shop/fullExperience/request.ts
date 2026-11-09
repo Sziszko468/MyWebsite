@@ -1,6 +1,6 @@
 import type { FullExperience, Question } from '../../content/shop/fullExperience'
 import type { Language } from '../../i18n/config'
-import { isEmail } from '../../forms/validate'
+import { isEmail, isWebsite } from '../../forms/validate'
 
 /**
  * The FULL EXPERIENCE configurator without a screen: its steps (the offer's questions in the administrator's order, then the
@@ -14,6 +14,7 @@ export const FE_LIMITS = {
   name: { min: 2, max: 100 },
   email: { max: 254 },
   company: { max: 100 },
+  website: { max: 200 },
 } as const
 
 export type Answers = Record<string, string[]>
@@ -24,11 +25,14 @@ export interface Draft {
   name: string
   email: string
   company: string
+  website: string
   preferredLanguage: Language
   consent: boolean
+  /** The separate, optional agreement to hear about other things. Never needed to send the request. */
+  marketing: boolean
 }
 
-export const emptyDraft = (language: Language): Draft => ({ answers: {}, description: '', name: '', email: '', company: '', preferredLanguage: language, consent: false })
+export const emptyDraft = (language: Language): Draft => ({ answers: {}, description: '', name: '', email: '', company: '', website: '', preferredLanguage: language, consent: false, marketing: false })
 
 /** A step is a question (`q:type`), the description, or the contact details. */
 export type StepKey = `q:${string}` | 'description' | 'contact'
@@ -57,8 +61,8 @@ export function toggleAnswer(question: Question, answers: Answers, optionId: str
   return out
 }
 
-export type ErrorCode = 'required' | 'tooShort' | 'tooLong' | 'invalidEmail' | 'consentRequired'
-export type Errors = Partial<Record<'answer' | 'description' | 'name' | 'email' | 'company' | 'consent', ErrorCode>>
+export type ErrorCode = 'required' | 'tooShort' | 'tooLong' | 'invalidEmail' | 'invalidUrl' | 'consentRequired'
+export type Errors = Partial<Record<'answer' | 'description' | 'name' | 'email' | 'company' | 'website' | 'consent', ErrorCode>>
 
 const lengthOf = (value: string): number => [...value.trim()].length
 
@@ -84,6 +88,9 @@ export function validateStep(step: StepKey, offer: FullExperience, draft: Draft,
   if (email === '') errors.email = 'required'
   else if (email.length > FE_LIMITS.email.max || !isEmail(email)) errors.email = 'invalidEmail'
   if (lengthOf(draft.company) > FE_LIMITS.company.max) errors.company = 'tooLong'
+  const website = draft.website.trim()
+  if (website !== '') errors.website = website.length > FE_LIMITS.website.max ? 'tooLong' : isWebsite(website) ? undefined : 'invalidUrl'
+  if (errors.website === undefined) delete errors.website
   if (options.requireConsent && !draft.consent) errors.consent = 'consentRequired'
   return errors
 }
@@ -107,6 +114,9 @@ export interface FullExperienceRequest {
   name: string
   email: string
   company?: string
+  /** The company's website (the server calls the field `companyWebsite`: `website` is its hidden trap). */
+  companyWebsite?: string
+  marketing: boolean
   consent: boolean
 }
 
@@ -118,6 +128,7 @@ export function toRequest(draft: Draft, offer: FullExperience, language: Languag
     if (chosen.length > 0) answers[question.id] = chosen
   }
   const company = draft.company.trim()
+  const website = draft.website.trim()
   return {
     form: 'full_experience',
     version: 1,
@@ -128,8 +139,20 @@ export function toRequest(draft: Draft, offer: FullExperience, language: Languag
     name: draft.name.trim(),
     email: draft.email.trim(),
     ...(company ? { company } : {}),
+    ...(website ? { companyWebsite: website } : {}),
+    marketing: draft.marketing,
     consent: draft.consent,
   }
+}
+
+/** The request as label and value pairs: every question with its answer, the idea and the contact. What the receipt shows after sending. */
+export function summaryRows(offer: FullExperience, draft: Draft, lang: Language, text: SummaryText): Array<[label: string, value: string]> {
+  const rows: Array<[string, string]> = offer.configurator.questions.map((question) => {
+    const chosen = (draft.answers[question.id] ?? []).map((id) => question.options.find((option) => option.id === id)?.label[lang]).filter((label): label is string => Boolean(label))
+    return [question.title[lang], chosen.length > 0 ? chosen.join(', ') : text.skipped]
+  })
+  rows.push([text.description, draft.description.trim()], [text.contact, [draft.name.trim(), draft.email.trim(), draft.company.trim(), draft.website.trim()].filter(Boolean).join('\n')])
+  return rows
 }
 
 export interface SummaryText {

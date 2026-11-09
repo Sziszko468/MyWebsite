@@ -16,7 +16,10 @@ import { INQUIRY_KINDS, INQUIRY_STATUSES, LIST_SORTS, type InquiryRow } from '..
 import * as notifications from '../notifications/admin.ts'
 import type { DeliveryRow } from '../notifications/notifier.ts'
 import * as quotes from '../quotes/admin.ts'
-import { QUOTE_STATUSES, type QuoteRow } from '../quotes/repository.ts'
+import * as lifecycle from '../quotes/lifecycle.ts'
+import * as quotations from '../quotes/quotations.ts'
+import type { QuoteRow } from '../quotes/repository.ts'
+import { nextStatuses, PRIORITIES, REQUEST_STATUSES, REQUEST_TYPES, SOURCES } from '../quotes/status.ts'
 import { audit, recentAudit } from '../system/audit.ts'
 import { runMaintenance } from '../system/maintenance.ts'
 import { dashboard } from './dashboard.ts'
@@ -40,6 +43,11 @@ const quoteOut = (row: QuoteRow) => {
   const { ip_hash: _a, content_hash: _b, ...rest } = row
   return rest
 }
+/** A request with everything the detail screen shows: the row without its fingerprints, plus the parts around it. */
+const requestOut = (data: ReturnType<typeof quotes.detailForAdmin>) => {
+  const { quote, ...around } = data
+  return { ...quoteOut(quote), ...around }
+}
 
 function systemData(app: AppContext, who: ReturnType<typeof session>) {
   requirePermission(who, 'system:read')
@@ -61,7 +69,11 @@ function sessionOut(app: AppContext, who: ReturnType<typeof session>) {
     user: { email: me.email, role: me.role, permissions: permissionsOf(me.role), preferences: me.preferences },
     csrfToken: who.csrfToken,
     meta: {
-      statuses: { inquiry: INQUIRY_STATUSES, quote: QUOTE_STATUSES },
+      statuses: { inquiry: INQUIRY_STATUSES, quote: REQUEST_STATUSES },
+      quoteMeta: { types: REQUEST_TYPES, priorities: PRIORITIES, sources: SOURCES },
+      quotationsReady: app.notifier.canSendQuotations,
+      // Where a request in each status may be moved by hand ("quote sent" is reached only by sending a quotation).
+      quoteTransitions: Object.fromEntries(REQUEST_STATUSES.map((status) => [status, nextStatuses(status).filter((next) => next !== 'quote_sent')])),
       kinds: INQUIRY_KINDS,
       sorts: LIST_SORTS,
       languages: LANGUAGES,
@@ -85,6 +97,7 @@ function contentType(value: string): ContentType {
 }
 
 const PATCH_KEYS = ['status', 'notify', 'note', 'archived', 'addNote']
+const QUOTE_PATCH_KEYS = [...PATCH_KEYS, 'inquiryId', 'show', 'internalNote', 'priority', 'update']
 
 export function adminRoutes(_app: AppContext): RouteDef[] {
   const api = (method: RouteDef['method'], pattern: string, handler: RouteDef['handler'], limit?: RouteDef['limit']): RouteDef => ({ method, pattern, area: 'admin', auth: true, handler, ...(limit ? { limit } : {}) })
@@ -144,10 +157,9 @@ export function adminRoutes(_app: AppContext): RouteDef[] {
       return json(data.rows.map((row) => ({ ...quoteOut(row), items: data.itemsOf[row.id] ?? [] })), { meta: { page: data.filters.page, pageSize: data.filters.pageSize, total: data.total } })
     }),
     api('GET', '/api/admin/quote-requests/export.csv', (ctx) => textReply(quotes.exportCsv(ctx.app, ctx.session, ctx.query), 'text/csv; charset=utf-8', 200, { 'Content-Disposition': 'attachment; filename="quote-requests.csv"' })),
-    api('GET', '/api/admin/quote-requests/:id', (ctx) => {
-      const data = quotes.detailForAdmin(ctx.app, ctx.session, ctx.params.id)
-      return json({ ...quoteOut(data.quote), items: data.items, notes: data.notes, pricing: data.pricing, inquiry: data.inquiry, candidates: data.candidates, activity: data.activity })
-    }),
+    api('GET', '/api/admin/quote-requests/overview', (ctx) => json(quotes.overview(ctx.app, ctx.session))),
+    api('POST', '/api/admin/quote-requests', async (ctx) => json(quoteOut(quotes.createByAdmin(ctx.app, ctx.session, await ctx.json(), null)), { status: 201 })),
+    api('GET', '/api/admin/quote-requests/:id', (ctx) => json(requestOut(quotes.detailForAdmin(ctx.app, ctx.session, ctx.params.id)))),
     api('GET', '/api/admin/quote-requests/:id/export', (ctx) => json(quotes.exportOne(ctx.app, ctx.session, ctx.params.id))),
     api('GET', '/api/admin/quote-requests/:id/export.json', (ctx) => {
       const data = quotes.exportOne(ctx.app, ctx.session, ctx.params.id)
@@ -155,14 +167,54 @@ export function adminRoutes(_app: AppContext): RouteDef[] {
     }),
     api('PATCH', '/api/admin/quote-requests/:id', async (ctx) => {
       const body = await ctx.json()
-      if (!Object.keys(body).every((key) => [...PATCH_KEYS, 'inquiryId'].includes(key)) || Object.keys(body).length === 0) throw validationFailed({ body: 'invalid' })
+      if (!Object.keys(body).every((key) => QUOTE_PATCH_KEYS.includes(key)) || Object.keys(body).length === 0) throw validationFailed({ body: 'invalid' })
       let notified = 'not_requested'
-      if ('status' in body) notified = quotes.changeStatus(ctx.app, ctx.session, ctx.params.id, { status: body.status, notify: body.notify === true, note: body.note }).notified
+      if ('status' in body) notified = quotes.changeStatus(ctx.app, ctx.session, ctx.params.id, { status: body.status, notify: body.notify === true, show: body.show === true, note: body.note, internalNote: body.internalNote }).notified
+      if ('priority' in body) quotes.setPriority(ctx.app, ctx.session, ctx.params.id, body.priority)
       if ('inquiryId' in body) quotes.linkInquiry(ctx.app, ctx.session, ctx.params.id, body.inquiryId)
       if (typeof body.archived === 'boolean') quotes.archive(ctx.app, ctx.session, ctx.params.id, body.archived)
       if ('addNote' in body) quotes.addNote(ctx.app, ctx.session, ctx.params.id, body.addNote)
-      const data = quotes.detailForAdmin(ctx.app, ctx.session, ctx.params.id)
-      return json({ ...quoteOut(data.quote), items: data.items, notes: data.notes, pricing: data.pricing, inquiry: data.inquiry, candidates: data.candidates, activity: data.activity }, { meta: { notification: notified } })
+      if ('update' in body) {
+        const update = typeof body.update === 'object' && body.update !== null ? (body.update as Record<string, unknown>) : {}
+        notified = quotes.postUpdate(ctx.app, ctx.session, ctx.params.id, { message: update.message, notify: update.notify === true }).notified
+      }
+      return json(requestOut(quotes.detailForAdmin(ctx.app, ctx.session, ctx.params.id)), { meta: { notification: notified } })
+    }),
+    api('POST', '/api/admin/quote-requests/:id/resend-confirmation', async (ctx) => {
+      await ctx.json()
+      return json(quotes.resendConfirmation(ctx.app, ctx.session, ctx.params.id), { status: 202 })
+    }),
+    api('POST', '/api/admin/quote-requests/:id/quotes', async (ctx) => {
+      const body = await ctx.json()
+      const draft = quotations.createDraft(ctx.app, ctx.session, ctx.params.id, { from: typeof body.from === 'string' ? body.from : null, reason: body.reason })
+      return json(quotes.quotationDetail(ctx.app, ctx.session, draft.id), { status: 201 })
+    }),
+    api('POST', '/api/admin/inquiries/:id/quote-request', async (ctx) => json(quoteOut(quotes.createByAdmin(ctx.app, ctx.session, await ctx.json(), ctx.params.id)), { status: 201 })),
+
+    // ---- quotations (versions of the offer for a request) ----
+    api('GET', '/api/admin/quotes/:id', (ctx) => json(quotes.quotationDetail(ctx.app, ctx.session, ctx.params.id))),
+    api('PUT', '/api/admin/quotes/:id', async (ctx) => {
+      quotations.saveDraft(ctx.app, ctx.session, ctx.params.id, await ctx.json())
+      return json(quotes.quotationDetail(ctx.app, ctx.session, ctx.params.id))
+    }),
+    api('DELETE', '/api/admin/quotes/:id', (ctx) => {
+      quotations.discardDraft(ctx.app, ctx.session, ctx.params.id)
+      return empty(204)
+    }),
+    api('POST', '/api/admin/quotes/:id/send', async (ctx) => {
+      const body = await ctx.json()
+      lifecycle.sendQuotation(ctx.app, ctx.session, ctx.params.id, { note: body.note })
+      return json(quotes.quotationDetail(ctx.app, ctx.session, ctx.params.id))
+    }),
+    api('POST', '/api/admin/quotes/:id/resend', async (ctx) => {
+      await ctx.json()
+      lifecycle.resendQuotation(ctx.app, ctx.session, ctx.params.id)
+      return json({ queued: true }, { status: 202 })
+    }),
+    api('POST', '/api/admin/quotes/:id/withdraw', async (ctx) => {
+      await ctx.json()
+      lifecycle.withdrawQuotation(ctx.app, ctx.session, ctx.params.id)
+      return json(quotes.quotationDetail(ctx.app, ctx.session, ctx.params.id))
     }),
     api('DELETE', '/api/admin/quote-requests/:id', (ctx) => {
       quotes.remove(ctx.app, ctx.session, ctx.params.id)

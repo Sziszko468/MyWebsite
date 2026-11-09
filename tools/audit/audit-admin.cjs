@@ -142,11 +142,25 @@ function measure(page) {
         const inquiry = inquiries[0]?.id
         const quotes = await api('/api/admin/quote-requests')
         const quote = quotes[0]?.id
+        // PROMPT 17: the quotation editor, for a request that has a quotation (the run's e-mail journey makes one), and the page that starts one.
+        // One draft (editable) and one version that was sent (read only), when the run has them.
+        const quotationScreens = []
+        const seen = new Set()
+        for (const row of quotes) {
+          const detail = await api(`/api/admin/quote-requests/${row.id}`)
+          for (const version of detail?.quotations ?? []) {
+            const kind = version.status === 'draft' ? 'draft' : 'sent'
+            if (!seen.has(kind)) {
+              seen.add(kind)
+              quotationScreens.push(`/admin/quotes/${row.id}/versions/${version.id}`)
+            }
+          }
+        }
         // A FULL EXPERIENCE request (PROMPT 09.1) has a brief of its own on the detail screen; the run submits one first (see README).
         const experience = quotes.find((item) => item.kind === 'full_experience')?.id
         // The portfolio's content management (PROMPT 13.1): the list, a new project, the settings, the editor of the first project, the wording.
         const project = (await api('/api/admin/projects'))?.projects?.[0]?.id
-        const screens = ['/admin', '/admin/projects', '/admin/projects/new', '/admin/projects/settings', project && `/admin/projects/${project}`, '/admin/texts', '/admin/inquiries', inquiry && `/admin/inquiries/${inquiry}`, '/admin/quotes', quote && `/admin/quotes/${quote}`, experience && experience !== quote && `/admin/quotes/${experience}`, '/admin/comparison', '/admin/full-experience', '/admin/services', '/admin/content', '/admin/translations', '/admin/notifications', '/admin/ai', '/admin/ai?tab=settings', '/admin/ai?tab=knowledge', '/admin/settings', '/admin/settings?tab=security', '/admin/not-a-screen'].filter(Boolean).filter((screen) => !ONLY.length || ONLY.some((prefix) => screen.startsWith(prefix)))
+        const screens = ['/admin', '/admin/projects', '/admin/projects/new', '/admin/projects/settings', project && `/admin/projects/${project}`, '/admin/texts', '/admin/inquiries', inquiry && `/admin/inquiries/${inquiry}`, '/admin/quotes', quote && `/admin/quotes/${quote}`, quote && `/admin/quotes/${quote}/create`, ...quotationScreens, experience && experience !== quote && `/admin/quotes/${experience}`, '/admin/comparison', '/admin/full-experience', '/admin/services', '/admin/content', '/admin/translations', '/admin/notifications', '/admin/ai', '/admin/ai?tab=settings', '/admin/ai?tab=knowledge', '/admin/settings', '/admin/settings?tab=security', '/admin/not-a-screen'].filter(Boolean).filter((screen) => !ONLY.length || ONLY.some((prefix) => screen.startsWith(prefix)))
         for (const path of screens) {
           await page.goto(BASE + path, { waitUntil: 'domcontentloaded' })
           await settle(page)

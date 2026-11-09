@@ -95,6 +95,9 @@ export function buildSiteFiles(template: string, hashes: InlineHashes, ctx: SeoC
     warnings.push('The brand name in src/config/site.ts is still the placeholder, so structured data does not describe a person or a website by it.')
   }
 
+  // A static host serves a customer's private page (a secret after /quote/ or /request/) with the quiet shell the build wrote for that path;
+  // the application then asks the API with the secret. (The backend does the same itself when it serves the site.)
+  files._redirects = ['hu', 'en', 'nl'].flatMap((lang) => ['quote', 'request'].map((page) => `/${lang}/${page}/*  /${lang}/${page}/  200`)).join('\n') + '\n'
   files._headers = buildHeadersFile({
     ...hashes,
     // The backend's own origin too: the assistant and the catalogue talk to it even when a form handler of another kind is configured.

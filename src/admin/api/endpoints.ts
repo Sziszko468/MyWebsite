@@ -1,7 +1,7 @@
 import { del, get, post, put, patch, request, queryString, type Envelope } from './client'
 import type { AiSummary, AiUsage } from '../lib/ai'
 import type {
-  ContentRecord, DashboardData, ExtraRecord, Inquiry, InquiryDetail, ListQuery, LoginData, NotificationPreferences, NotificationsData, EmailCheck, Orderable, Page, PackageRecord, Preferences, Profile, Quote, QuoteDetail,
+  ContentRecord, DashboardData, ExtraRecord, Inquiry, InquiryDetail, ListQuery, LoginData, NotificationPreferences, NotificationsData, EmailCheck, Orderable, Page, PackageRecord, Preferences, Profile, Quote, QuoteDetail, QuoteOverview, QuotationDetail, QuotationForm,
   ServiceRecord, SessionData, SessionView, SystemData, TranslationGroup, TranslationItem, TranslationOverview,
 } from './types'
 
@@ -36,12 +36,29 @@ export const quotes = {
     return { rows: data, page: pageOf(meta) }
   },
   get: (id: string, signal?: AbortSignal) => get<QuoteDetail>(`${base}/quote-requests/${encodeURIComponent(id)}`, { signal }),
-  update: (id: string, changes: { status?: string; notify?: boolean; note?: string; archived?: boolean; addNote?: string; inquiryId?: string | null }) =>
-    patch<QuoteDetail>(`${base}/quote-requests/${encodeURIComponent(id)}`, changes),
+  update: (
+    id: string,
+    changes: { status?: string; notify?: boolean; show?: boolean; note?: string; internalNote?: string; priority?: string; archived?: boolean; addNote?: string; inquiryId?: string | null; update?: { message: string; notify: boolean } },
+  ) => patch<QuoteDetail>(`${base}/quote-requests/${encodeURIComponent(id)}`, changes),
   remove: (id: string) => del(`${base}/quote-requests/${encodeURIComponent(id)}`),
+  overview: (signal?: AbortSignal) => get<QuoteOverview>(`${base}/quote-requests/overview`, { signal }).then((answer) => answer.data),
+  create: (body: unknown) => post<Quote>(`${base}/quote-requests`, body),
+  fromInquiry: (inquiryId: string, body: unknown) => post<Quote>(`${base}/inquiries/${encodeURIComponent(inquiryId)}/quote-request`, body),
+  resendConfirmation: (id: string) => post<{ queued: boolean }>(`${base}/quote-requests/${encodeURIComponent(id)}/resend-confirmation`, {}),
+  /** Starts a quotation for the request, or (with `from`) the next version of one that was sent. */
+  startQuotation: (id: string, body: { from?: string; reason?: string } = {}) => post<QuotationDetail>(`${base}/quote-requests/${encodeURIComponent(id)}/quotes`, body),
   /** Plain links: the browser downloads these with its own session cookie. */
   csvUrl: (query: ListQuery) => `${base}/quote-requests/export.csv${queryString(listQuery({ ...query, page: undefined, pageSize: undefined }))}`,
   jsonUrl: (id: string) => `${base}/quote-requests/${encodeURIComponent(id)}/export.json`,
+}
+
+export const quotations = {
+  get: (id: string, signal?: AbortSignal) => get<QuotationDetail>(`${base}/quotes/${encodeURIComponent(id)}`, { signal }),
+  save: (id: string, form: QuotationForm) => put<QuotationDetail>(`${base}/quotes/${encodeURIComponent(id)}`, form),
+  discard: (id: string) => del(`${base}/quotes/${encodeURIComponent(id)}`),
+  send: (id: string, note: string) => post<QuotationDetail>(`${base}/quotes/${encodeURIComponent(id)}/send`, { note }),
+  resend: (id: string) => post<{ queued: boolean }>(`${base}/quotes/${encodeURIComponent(id)}/resend`, {}),
+  withdraw: (id: string) => post<QuotationDetail>(`${base}/quotes/${encodeURIComponent(id)}/withdraw`, {}),
 }
 
 export const catalog = {

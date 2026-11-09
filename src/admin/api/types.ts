@@ -17,6 +17,11 @@ export interface SessionData {
   csrfToken: string
   meta: {
     statuses: { inquiry: string[]; quote: string[] }
+    quoteMeta: { types: string[]; priorities: string[]; sources: string[] }
+    /** Whether quotations can be sent at all: e-mail and the site's address are configured. */
+    quotationsReady: boolean
+    /** Where a request in each status may be moved by hand. */
+    quoteTransitions: Record<string, string[]>
     kinds: string[]
     sorts: string[]
     languages: Language[]
@@ -98,6 +103,8 @@ export interface QuoteItem {
   package: string | null
   extras: string[]
   snapshot: { plan: PricedPart | null; extras: PricedPart[] }
+  /** Names as they were when the request was made (each in every language); empty for a request made before they were saved. */
+  names: Record<string, unknown>
 }
 
 export interface Quote {
@@ -106,10 +113,16 @@ export interface Quote {
   language: Language
   /** `full_experience`: the flagship offer's configurator (no cart lines, a brief); `catalogue`: built from the cart. */
   kind: 'catalogue' | 'full_experience'
+  request_type: string
+  source: string
+  priority: string
   name: string
   email: string
   phone: string | null
   company: string | null
+  website: string | null
+  budget_range: string | null
+  customer_status: string
   /** A FULL EXPERIENCE request's answers as stored (lib/brief.ts reads it). */
   brief_json: string | null
   description: string
@@ -121,6 +134,7 @@ export interface Quote {
   inquiry_id: string | null
   archived_at: string | null
   consent_at: string | null
+  marketing_consent_at: string | null
   created_at: string
   updated_at: string
   /** Only in the list: a short summary of what was asked for. */
@@ -136,19 +150,155 @@ export interface InquirySummary {
   created_at: string
 }
 
+export interface Money {
+  minor: number
+  text: string
+}
+
+export interface QuotationLine {
+  kind: 'item' | 'optional' | 'discount'
+  description: string
+  detail: string
+  quantity: number
+  unitPrice: string
+  justification: string
+}
+
+/** The shape the editor sends and the server returns for a draft: every amount is text, so what is typed round-trips exactly. */
+export interface QuotationForm {
+  language: Language
+  title: string
+  introduction: string
+  understanding: string
+  scope: string
+  deliverables: string
+  exclusions: string
+  paymentTerms: string
+  terms: string
+  notes: string
+  estimatedTimeline: string
+  validUntil: string
+  pricingMode: 'fixed' | 'itemized' | 'custom'
+  pricingNote: string
+  currency: string
+  taxMode: 'unspecified' | 'excluded' | 'included' | 'exempt'
+  taxRatePercent: string
+  taxVerified: boolean
+  taxNote: string
+  fixedAmount: string
+  lines: QuotationLine[]
+}
+
+export interface QuotationView {
+  reference: string
+  requestReference: string
+  version: number
+  language: Language
+  status: string
+  expired: boolean
+  title: string
+  validUntil: string | null
+  pricing: {
+    mode: string
+    note: string
+    currency: string | null
+    lines: Array<{ kind: string; description: string; detail: string; quantity: number; unit: Money; total: Money; justification: string }>
+    fixed: Money | null
+    subtotal: Money | null
+    discount: Money | null
+    optional: Money | null
+    tax: { mode: string; ratePercent: string | null; amount: Money | null; verified: boolean; note: string }
+    total: Money | null
+  }
+  [key: string]: unknown
+}
+
+export interface Quotation {
+  id: string
+  quote_request_id: string
+  version: number
+  reference: string
+  status: 'draft' | 'sent' | 'accepted' | 'declined' | 'superseded' | 'withdrawn'
+  language: Language
+  title: string
+  valid_until: string | null
+  pricing_mode: string
+  currency: string | null
+  total_minor: number | null
+  revision_reason: string | null
+  created_at: string
+  updated_at: string
+  sent_at: string | null
+  accepted_at: string | null
+  declined_at: string | null
+  decline_reason: string | null
+  view: QuotationView
+  form: QuotationForm
+}
+
+export interface QuotationDetail {
+  request: { id: string; reference: string; name: string; email: string; company: string | null; language: Language; status: string; request_type: string }
+  quotation: Quotation
+  problems: Record<string, string>
+  canSend: boolean
+  siblings: Array<{ id: string; version: number; reference: string; status: string }>
+}
+
+export interface RequestDelivery {
+  id: string
+  kind: string
+  relatedType: string
+  recipient: string
+  status: string
+  attempts: number
+  lastError: string | null
+  errorCode: string | null
+  provider: string | null
+  providerEvent: string | null
+  createdAt: string
+  acceptedAt: string | null
+  deliveredAt: string | null
+}
+
+export interface HistoryEvent {
+  id: number
+  at: string
+  type: string
+  actorType: 'admin' | 'customer' | 'system' | 'assistant'
+  actor: string | null
+  quoteReference: string | null
+  from: string | null
+  to: string | null
+  summary: string | null
+}
+
+export interface QuoteOverview {
+  total: number
+  archived: number
+  open: { total: number; new: number; underReview: number; waitingCustomer: number; quotePreparation: number; quoteSent: number; accepted: number; declined: number; activeProjects: number; completed: number; cancelled: number; archived: number }
+}
+
 export interface QuoteDetail extends Quote {
   items: QuoteItem[]
   notes: Note[]
   pricing: { fixed: { currency: string; amount: number; vat: string }[]; quotedParts: number }
   inquiry: InquirySummary | null
   candidates: InquirySummary[]
-  activity: ActivityEvent[]
+  quotations: Quotation[]
+  revisions: Array<{ id: string; quote_id: string; message: string; created_at: string; handled_at: string | null }>
+  deliveries: RequestDelivery[]
+  history: HistoryEvent[]
+  customerUpdates: Array<{ id: number; kind: string; status: string | null; body: string; created_at: string }>
+  nextStatuses: string[]
 }
 
 export interface ListQuery {
   q?: string
   status?: string
   kind?: string
+  type?: string
+  priority?: string
+  source?: string
   archived?: 'only' | 'all'
   from?: string
   to?: string
@@ -177,7 +327,7 @@ export interface EmailSummary {
 
 export interface DashboardData {
   inquiries: { total: number; new: number; inProgress: number; waitingClient: number; completed: number; archived: number; last7Days: number; last30Days: number }
-  quotes: { total: number; new: number; inReview: number; quoted: number; accepted: number; declined: number; closed: number; pending: number; completed: number; archived: number; last7Days: number; last30Days: number }
+  quotes: { total: number; new: number; underReview: number; waitingCustomer: number; quotePreparation: number; quoteSent: number; accepted: number; declined: number; inProgress: number; cancelled: number; pending: number; completed: number; archived: number; last7Days: number; last30Days: number }
   completedRequests: number
   recentInquiries: Inquiry[]
   recentQuotes: Quote[]

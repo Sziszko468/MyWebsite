@@ -27,7 +27,9 @@ export type ShopPageId = 'configure' | 'cart' | 'full-experience' | 'full-experi
 export type LegalPageId = 'privacy'
 /** CONTROL ROOM AI: the assistant's own page. */
 export type AiPageId = 'control-room'
-export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | 'designSystem'
+/** The customer's private pages (PROMPT 17): a quotation and a request's status. Each is reached only through a secret in its address. */
+export type CustomerPageId = 'customer-quote' | 'customer-request'
+export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | 'designSystem'
 
 export interface PageDef<Id extends PageId = PageId> {
   id: Id
@@ -123,10 +125,22 @@ export const LEGAL_PAGES: readonly PageDef<LegalPageId>[] = [page<LegalPageId>('
 /** The assistant's page: indexable, exists in every language (its content is the visitor's own conversation, drawn by the browser). */
 export const AI_PAGES: readonly PageDef<AiPageId>[] = [page<AiPageId>('control-room', '/control-room')]
 
+/**
+ * The customer's private pages. Their address is `/quote/<secret>` and `/request/<secret>`; the registered path is the bare `/quote` and `/request`
+ * (a quiet "this link is incomplete" page, prerendered as a noindex shell). They exist in every language, are never indexed, and are in no menu.
+ */
+export const CUSTOMER_PAGES: readonly PageDef<CustomerPageId>[] = [
+  page<CustomerPageId>('customer-quote', '/quote', LANGUAGES, false),
+  page<CustomerPageId>('customer-request', '/request', LANGUAGES, false),
+]
+
+/** The secret part of a customer page's address: 256 random bits as base64url are 43 characters; a little room either way. */
+const CUSTOMER_PATH = /^\/(quote|request)\/[A-Za-z0-9_-]{20,64}$/
+
 /** Dev-only reference page; absent from production builds. */
 const DEV_PAGES: readonly PageDef[] = import.meta.env.DEV ? [page('designSystem', '/design-system', LANGUAGES, false)] : []
 
-export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...DEV_PAGES]
+export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...CUSTOMER_PAGES, ...DEV_PAGES]
 
 function normalize(path: string): string {
   const trimmed = path.replace(/\/+$/, '')
@@ -153,6 +167,9 @@ export function resolvePage(path: string): PageDef | undefined {
   const known = findPage(path)
   if (known) return known
   const wanted = normalize(path)
+  // A customer's private page: the page is the registered one, whatever the secret in the address is.
+  const customer = CUSTOMER_PATH.exec(wanted)
+  if (customer) return findPage(`/${customer[1]}`)
   const preview = PREVIEW_PATH.exec(wanted)
   if (preview) {
     if (!dynamic.has(wanted)) dynamic.set(wanted, page<ProjectPageId>('project-preview', wanted, LANGUAGES, false))

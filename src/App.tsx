@@ -5,7 +5,7 @@ import { localizedPath } from './i18n/paths'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { lazyRoute } from './motion/loading'
-import { PAGES, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type AiPageId, type LegalPageId, type NavPageId, type PageDef, type ShopPageId } from './routes/pages'
+import { PAGES, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type AiPageId, type CustomerPageId, type LegalPageId, type NavPageId, type PageDef, type ShopPageId } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
 import { IntroProvider } from './components/intro/IntroProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
@@ -40,6 +40,11 @@ const ContactPage = lazyRoute(() => import('./pages/ContactPage').then((module) 
 // CONTROL ROOM AI's page: the workspace, the AI SDK's client and the conversation load only here (or when the floating assistant is opened).
 const ControlRoomPage = lazyRoute(() => import('./pages/ControlRoomPage').then((module) => ({ default: module.ControlRoomPage })))
 
+// The customer's private pages (a quotation, a request's status): their own chunk, loaded only when one of their links is opened.
+const QuotePage = lazyRoute(() => import('./pages/CustomerPages').then((module) => ({ default: module.QuotePage })))
+const RequestStatusPage = lazyRoute(() => import('./pages/CustomerPages').then((module) => ({ default: module.RequestStatusPage })))
+const IncompleteLinkPage = lazyRoute(() => import('./pages/CustomerPages').then((module) => ({ default: module.IncompleteLinkPage })))
+
 // The privacy and cookie notice carries its text in three languages: its own chunk too.
 const PrivacyPage = lazyRoute(() => import('./pages/PrivacyPage').then((module) => ({ default: module.PrivacyPage })))
 
@@ -56,7 +61,7 @@ const LabExperimentPage = lazyRoute(() =>
 // The pages that are chunks carry no Suspense of their own: the one boundary above the page frame
 // (routes/LanguageLayout.tsx) stays mounted from page to page, so a navigation keeps the page on
 // screen until the next one's code has arrived instead of swapping it for a blank placeholder.
-const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | AiPageId | 'designSystem', ReactElement | null> = {
+const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | 'designSystem', ReactElement | null> = {
   home: <HomePage />,
   work: <WorkPage />,
   services: <ServicesPage />,
@@ -69,6 +74,9 @@ const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | AiPageId | 'd
   contact: <ContactPage />,
   privacy: <PrivacyPage />,
   'control-room': <ControlRoomPage />,
+  // The registered paths are the bare ones: a visit without the secret says where to find it. The real ones, with the secret, are the two routes below.
+  'customer-quote': <IncompleteLinkPage />,
+  'customer-request': <IncompleteLinkPage />,
   designSystem: DesignSystemPage && <DesignSystemPage />,
 }
 
@@ -79,7 +87,7 @@ function elementFor(page: PageDef): ReactElement | null {
   if (pack) return <PackagePage packageId={pack} />
   const experiment = labIdOfPage(page.id)
   if (experiment) return <LabExperimentPage id={experiment} />
-  return PAGE_ELEMENTS[page.id as NavPageId | ShopPageId | LegalPageId | AiPageId | 'designSystem']
+  return PAGE_ELEMENTS[page.id as NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | 'designSystem']
 }
 
 export default function App() {
@@ -93,6 +101,8 @@ export default function App() {
               {/* A project's page is one route for every slug: the data decides which project (or "not found") it shows. */}
               <Route path="work/preview/:id" element={<ProjectRoute preview />} />
               <Route path="work/:slug" element={<ProjectRoute />} />
+              <Route path="quote/:token" element={<QuotePage />} />
+              <Route path="request/:token" element={<RequestStatusPage />} />
               {PAGES.filter((page) => projectIdOfPage(page.id) === null).map((page) =>
                 page.path === '/' ? (
                   <Route key={page.id} index element={elementFor(page)} />

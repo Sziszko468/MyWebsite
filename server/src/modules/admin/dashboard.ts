@@ -54,8 +54,9 @@ export function dashboard(app: AppContext, session: SessionInfo | null) {
   const recentInquiries = listInquiries(app.db, { page: 1, pageSize: 5, archived: 'exclude' }).rows.map(withoutFingerprints)
   const recentQuotes = listQuotes(app.db, { page: 1, pageSize: 5, archived: 'exclude' }).rows.map(withoutFingerprints)
 
-  const quotePending = count(qts.byStatus, 'new') + count(qts.byStatus, 'in_review')
-  const quoteDone = count(qts.byStatus, 'accepted') + count(qts.byStatus, 'declined') + count(qts.byStatus, 'closed')
+  // Waiting for the administrator to do something: new, being looked at, or being quoted. Finished means the work is completed.
+  const quotePending = count(qts.byStatus, 'new') + count(qts.byStatus, 'under_review') + count(qts.byStatus, 'quote_preparation')
+  const quoteDone = count(qts.byStatus, 'completed')
   const inquiryDone = count(inq.byStatus, 'completed')
 
   return {
@@ -72,11 +73,14 @@ export function dashboard(app: AppContext, session: SessionInfo | null) {
     quotes: {
       total: qts.total,
       new: count(qts.byStatus, 'new'),
-      inReview: count(qts.byStatus, 'in_review'),
-      quoted: count(qts.byStatus, 'quoted'),
+      underReview: count(qts.byStatus, 'under_review'),
+      waitingCustomer: count(qts.byStatus, 'waiting_customer'),
+      quotePreparation: count(qts.byStatus, 'quote_preparation'),
+      quoteSent: count(qts.byStatus, 'quote_sent'),
       accepted: count(qts.byStatus, 'accepted'),
       declined: count(qts.byStatus, 'declined'),
-      closed: count(qts.byStatus, 'closed'),
+      inProgress: count(qts.byStatus, 'in_progress'),
+      cancelled: count(qts.byStatus, 'cancelled'),
       pending: quotePending,
       completed: quoteDone,
       archived: qts.archived,

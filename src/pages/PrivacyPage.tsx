@@ -56,6 +56,15 @@ export function PrivacyPage() {
           </ul>
         </section>
 
+        <section className={styles.section} aria-labelledby="privacy-quotations">
+          <h2 id="privacy-quotations">{text.quotations.title[lang]}</h2>
+          <ul>
+            {text.quotations.items.map((item) => (
+              <li key={item.en}>{item[lang]}</li>
+            ))}
+          </ul>
+        </section>
+
         <section className={styles.section} aria-labelledby="privacy-assistant">
           <h2 id="privacy-assistant">{text.assistant.title[lang]}</h2>
           <ul>

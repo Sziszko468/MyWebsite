@@ -5,7 +5,7 @@ import { getAddon, type ExtraId } from '../content/services/addons'
 import type { NeedId, PlanId } from '../content/services/ids'
 import type { Localized } from '../content/trilingual'
 import type { ShopText } from '../content/shop'
-import { EMAIL_MAX, isEmail, isPhone } from '../forms/validate'
+import { EMAIL_MAX, isEmail, isPhone, isWebsite } from '../forms/validate'
 import { fill } from '../utils/format'
 import { isCartComplete, type Cart } from './cart'
 
@@ -35,7 +35,13 @@ export interface Details {
   name: string
   email: string
   phone: string
+  /** The company the request is for (optional), its website (optional) and the budget in the visitor's own words (optional). */
+  company: string
+  website: string
+  budget: string
   consent: boolean
+  /** The separate, optional agreement to hear about other things; it is never needed to send the request. */
+  marketing: boolean
 }
 
 export const EMPTY_DETAILS: Details = {
@@ -47,7 +53,11 @@ export const EMPTY_DETAILS: Details = {
   name: '',
   email: '',
   phone: '',
+  company: '',
+  website: '',
+  budget: '',
   consent: false,
+  marketing: false,
 }
 
 export const LIMITS = {
@@ -57,10 +67,13 @@ export const LIMITS = {
   name: { min: 2, max: 100 },
   email: { max: EMAIL_MAX },
   phone: { max: 30 },
+  company: { max: 100 },
+  website: { max: 200 },
+  budget: { max: 80 },
 } as const
 
 /** The reason an answer is not accepted; the configurator turns it into a sentence in the visitor's language. */
-export type ErrorCode = 'required' | 'tooShort' | 'tooLong' | 'invalidEmail' | 'invalidPhone' | 'consentRequired'
+export type ErrorCode = 'required' | 'tooShort' | 'tooLong' | 'invalidEmail' | 'invalidPhone' | 'invalidUrl' | 'consentRequired'
 /** Where an error belongs: a field, or the package question of one line of the cart (`plan:website`). */
 export type FieldKey = 'need' | `plan:${NeedId}` | keyof Details
 export type Errors = Partial<Record<FieldKey, ErrorCode>>
@@ -109,6 +122,7 @@ export function validateStep(step: StepId, cart: Cart, details: Details, options
       fail('description', required(details.description, LIMITS.description))
       fail('reference', optional(details.reference, LIMITS.reference.max))
       fail('requirements', optional(details.requirements, LIMITS.requirements.max))
+      fail('budget', optional(details.budget, LIMITS.budget.max))
       if (details.objective !== null && !OBJECTIVES.includes(details.objective)) errors.objective = 'required'
       if (details.timing !== null && !TIMINGS.includes(details.timing)) errors.timing = 'required'
       break
@@ -116,6 +130,8 @@ export function validateStep(step: StepId, cart: Cart, details: Details, options
       fail('name', required(details.name, LIMITS.name))
       fail('email', required(details.email, LIMITS.email, (value) => (isEmail(value) ? undefined : 'invalidEmail')))
       fail('phone', optional(details.phone, LIMITS.phone.max, (value) => (isPhone(value) ? undefined : 'invalidPhone')))
+      fail('company', optional(details.company, LIMITS.company.max))
+      fail('website', optional(details.website, LIMITS.website.max, (value) => (isWebsite(value) ? undefined : 'invalidUrl')))
       if (options.requireConsent && !details.consent) errors.consent = 'consentRequired'
       break
     case 'extras':
@@ -157,6 +173,12 @@ export interface QuoteRequest {
   name: string
   email: string
   phone: string | null
+  company: string | null
+  /** The company's website (the server calls the field `companyWebsite`: `website` is its hidden trap). */
+  companyWebsite: string | null
+  budgetRange: string | null
+  /** Whether the visitor ticked the separate, optional box about hearing from us again. Never needed to send the request. */
+  marketing: boolean
   /** Whether the visitor ticked the acknowledgement of how the data is used (the server records when, and can insist: REQUIRE_CONSENT). */
   consent: boolean
 }
@@ -179,6 +201,10 @@ export function toRequest(cart: Cart, details: Details, language: Language): Quo
     name: details.name.trim(),
     email: details.email.trim(),
     phone: orNull(details.phone),
+    company: orNull(details.company),
+    companyWebsite: orNull(details.website),
+    budgetRange: orNull(details.budget),
+    marketing: details.marketing,
     consent: details.consent,
   }
 }
@@ -235,8 +261,9 @@ export function summaryRows(
     [labels.reference, answer(details.reference)],
     [labels.timing, details.timing ? text.configurator.details.timing.options[details.timing] : empty],
     [labels.requirements, answer(details.requirements)],
+    [labels.budget, answer(details.budget)],
   ]
-  if (contact) rows.push([labels.name, answer(details.name)], [labels.email, answer(details.email)], [labels.phone, answer(details.phone)])
+  if (contact) rows.push([labels.name, answer(details.name)], [labels.email, answer(details.email)], [labels.phone, answer(details.phone)], [labels.company, answer(details.company)], [labels.website, answer(details.website)])
   return rows
 }
 

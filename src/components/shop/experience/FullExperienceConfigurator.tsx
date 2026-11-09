@@ -14,6 +14,7 @@ import {
   FE_LIMITS,
   questionOf,
   stepsOf,
+  summaryRows,
   toggleAnswer,
   toRequest,
   validateStep,
@@ -27,6 +28,7 @@ import { useShopText } from '../../../shop/useShopText'
 import { fill } from '../../../utils/format'
 import { Button } from '../../Button/Button'
 import { CheckboxField, ChoiceGroup, FIRST_INVALID, TextField } from '../../form/fields'
+import { SentReceipt } from '../../form/SentReceipt'
 import { SubmissionNotice, SubmissionResult } from '../../form/Submission'
 import { useSubmission } from '../../form/useSubmission'
 import { LocalizedLink } from '../../LocalizedLink/LocalizedLink'
@@ -47,7 +49,7 @@ const OPTIONS = { requireConsent: quoteConfig.requireConsent }
 export function FullExperienceConfigurator() {
   useCatalogVersion()
   const { lang, t } = useI18n()
-  const { experience } = useShopText()
+  const { experience, receipt: receiptWords } = useShopText()
   const c = experience.start
   const steps = stepsOf(offer)
 
@@ -57,6 +59,8 @@ export function FullExperienceConfigurator() {
   const [step, setStep] = useState<StepKey>(steps[0])
   const [tried, setTried] = useState<ReadonlySet<StepKey>>(() => new Set())
   const [attempts, setAttempts] = useState(0)
+  // What was sent, as the visitor saw it, kept for the receipt: the draft is cleared when the visitor starts again.
+  const [sentRows, setSentRows] = useState<ReadonlyArray<readonly [string, string]>>([])
   const headingRef = useRef<HTMLHeadingElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const movedRef = useRef(false)
@@ -105,7 +109,9 @@ export function FullExperienceConfigurator() {
       setAttempts((count) => count + 1)
       return
     }
+    const rows = summaryRows(offer, draft, lang, { skipped: c.reviewSkipped, description: c.summaryDescription, contact: c.summaryContact, heading: c.summaryHeading })
     await submit(toRequest(draft, offer, lang), () => {
+      setSentRows(rows)
       // No cart lines: `items: 0` is how a FULL EXPERIENCE request is told apart from the builder's (a count, never what was answered).
       track('quote_request_submitted', { form: 'inquiry', items: 0 })
     })
@@ -145,6 +151,7 @@ export function FullExperienceConfigurator() {
             {c.sent.title}
           </h2>
           <p>{c.sent.text}</p>
+          <SentReceipt receipt={phase.receipt} rows={sentRows} lang={lang} words={receiptWords} />
           <div className={styles.sentActions}>
             <Button type="button" variant="secondary" onClick={startAgain}>
               {c.sent.again}
@@ -225,6 +232,7 @@ export function FullExperienceConfigurator() {
               <TextField label={c.name} autoComplete="name" value={draft.name} onChange={(event) => set('name', event.target.value)} error={message('name', { min: FE_LIMITS.name.min, max: FE_LIMITS.name.max })} />
               <TextField type="email" inputMode="email" label={c.email} hint={c.emailHint} autoComplete="email" value={draft.email} onChange={(event) => set('email', event.target.value)} error={message('email')} />
               <TextField label={c.company} optionalText={c.optional} autoComplete="organization" value={draft.company} onChange={(event) => set('company', event.target.value)} error={message('company', { max: FE_LIMITS.company.max })} />
+              <TextField type="url" inputMode="url" label={c.website} optionalText={c.optional} hint={c.websiteHint} autoComplete="url" value={draft.website} onChange={(event) => set('website', event.target.value)} error={message('website')} />
               <ChoiceGroup
                 legend={c.preferredLanguage}
                 value={draft.preferredLanguage}
@@ -242,6 +250,7 @@ export function FullExperienceConfigurator() {
                   )}
                 </div>
               )}
+              <CheckboxField label={c.marketing} checked={draft.marketing} onChange={(checked) => set('marketing', checked)} />
               <p className={styles.memory}>{c.memory}</p>
 
               <section className={styles.review} aria-label={c.reviewTitle}>

@@ -59,7 +59,7 @@ describe('migration 0002', () => {
       db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, created_at, updated_at) VALUES ('d1', 'inquiry_status', 'inquiry', 'i3', 'n@x.test', 'en', 'accepted', ?, ?)", [now, now])
       expect(migrationStatus(db, directory)).toMatchObject({ current: 1, pending: 0 })
 
-      expect(migrate(db, clock)).toEqual([2, 3, 4, 5, 6])
+      expect(migrate(db, clock)).toEqual([2, 3, 4, 5, 6, 7])
 
       expect(db.all('SELECT id, status FROM inquiries ORDER BY id')).toEqual([
         { id: 'i1', status: 'new' }, { id: 'i2', status: 'in_progress' }, { id: 'i3', status: 'waiting_client' }, { id: 'i4', status: 'completed' },
@@ -104,12 +104,14 @@ describe('the dashboard', () => {
     await send('PATCH', `/api/admin/inquiries/${ids[1]}`, { status: 'waiting_client' })
     await send('PATCH', `/api/admin/inquiries/${ids[2]}`, { status: 'completed' })
     await send('PATCH', `/api/admin/inquiries/${ids[3]}`, { archived: true })
-    await send('PATCH', `/api/admin/quote-requests/${quoteIds[0]}`, { status: 'in_review' })
-    await send('PATCH', `/api/admin/quote-requests/${quoteIds[1]}`, { status: 'quoted' })
-    await send('PATCH', `/api/admin/quote-requests/${quoteIds[2]}`, { status: 'accepted' })
+    await send('PATCH', `/api/admin/quote-requests/${quoteIds[0]}`, { status: 'under_review' })
+    await send('PATCH', `/api/admin/quote-requests/${quoteIds[1]}`, { status: 'quote_preparation' })
+    // Accepted and completed are reached through the quotation and the work (their own tests); here only the counting is looked at.
+    server.db.run("UPDATE quote_requests SET status = 'accepted' WHERE id = ?", [quoteIds[2]])
+    server.db.run("UPDATE quote_requests SET status = 'completed' WHERE id = ?", [quoteIds[3]])
     const data = (await get('/api/admin/dashboard')).json.data
     expect(data.inquiries).toMatchObject({ total: 5, new: 1, inProgress: 1, waitingClient: 1, completed: 1, archived: 1, last7Days: 5, last30Days: 5 })
-    expect(data.quotes).toMatchObject({ total: 4, new: 1, inReview: 1, quoted: 1, accepted: 1, pending: 2, completed: 1, last7Days: 4 })
+    expect(data.quotes).toMatchObject({ total: 4, new: 0, underReview: 1, quotePreparation: 1, accepted: 1, pending: 2, completed: 1, last7Days: 4 })
     expect(data.completedRequests).toBe(2)
     expect(data.recentInquiries).toHaveLength(4) // the archived one is not "recent work"
     expect(data.recentInquiries[0].subject).toBe('Subject 4') // newest first
@@ -166,9 +168,9 @@ describe('searching, filtering by date, sorting and paging the lists', () => {
     expect(await names('sort=name;DROP TABLE inquiries&dir=sideways')).toEqual(['Bob', 'Alice', 'Charlie'])
     expect(await names("sort=(SELECT 1)")).toEqual(['Bob', 'Alice', 'Charlie'])
     const quoteIds = await quotes(2, (i) => ({ name: ['Zed', 'Amy'][i] }))
-    await send('PATCH', `/api/admin/quote-requests/${quoteIds[0]}`, { status: 'quoted' })
+    await send('PATCH', `/api/admin/quote-requests/${quoteIds[0]}`, { status: 'under_review' })
     const order = (await get('/api/admin/quote-requests?sort=status&dir=asc')).json.data.map((row: { status: string }) => row.status)
-    expect(order).toEqual(['new', 'quoted'])
+    expect(order).toEqual(['new', 'under_review'])
   })
 
   it('pages by a size the caller chooses, within limits', async () => {
@@ -221,7 +223,7 @@ describe('the history of a record, and linking a quote request to an inquiry', (
     expect(linked.json.data.inquiry).toMatchObject({ id: first, reference: expect.stringMatching(/^C-/), subject: 'Subject 0' })
     expect((await get(`/api/admin/inquiries/${first}`)).json.data.quotes).toEqual([expect.objectContaining({ id: quoteId, status: 'new' })])
     expect((await get(`/api/admin/inquiries/${second}`)).json.data.quotes).toEqual([])
-    expect((await get(`/api/admin/quote-requests/${quoteId}`)).json.data.activity.map((event: { action: string }) => event.action)).toEqual(['received', 'quote.link'])
+    expect((await get(`/api/admin/quote-requests/${quoteId}`)).json.data.history.map((event: { type: string }) => event.type)).toEqual(['request_created', 'request_updated'])
     // An inquiry that does not exist, or a value that is not an id, is refused and changes nothing.
     expect((await send('PATCH', `/api/admin/quote-requests/${quoteId}`, { inquiryId: 'no-such-inquiry' })).status).toBe(422)
     expect((await send('PATCH', `/api/admin/quote-requests/${quoteId}`, { inquiryId: 42 })).status).toBe(422)
@@ -383,9 +385,9 @@ describe('notifications', () => {
     expect(on.types).toEqual([
       { id: 'new_inquiry', automatic: true, enabled: true, active: true },
       { id: 'new_quote', automatic: true, enabled: true, active: true },
-      // Confirmations to the person who wrote exist, and are off until an administrator turns them on.
+      // The confirmation of a message is off until an administrator turns it on; the confirmation of a quote request is on until they turn it off.
       { id: 'confirm_inquiry', automatic: true, enabled: false, active: false },
-      { id: 'confirm_quote', automatic: true, enabled: false, active: false },
+      { id: 'confirm_quote', automatic: true, enabled: true, active: true },
       { id: 'status_update', automatic: false, enabled: true, active: true },
     ])
     await server.close()
@@ -403,7 +405,7 @@ describe('notifications', () => {
     admin = await server.signIn('admin', 'admin@site.test')
     const data = await overview()
     expect(data.integration).toMatchObject({ enabled: true, ownerAddressConfigured: false })
-    expect(data.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, false, false, true])
+    expect(data.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, false, true, true]) // the confirmation of a quote request is on unless switched off
   })
 
   it('lists the delivery log with each message\'s real state and the reference of its record', async () => {
@@ -415,23 +417,23 @@ describe('notifications', () => {
     await new Promise((resolve) => setImmediate(resolve))
     await server.app.context.notifier.processDue()
     const data = await overview()
-    expect(data.deliveries.map((d: { kind: string; status: string }) => [d.kind, d.status]).sort()).toEqual([['inquiry_received', 'pending'], ['quote_received', 'accepted']].sort())
-    expect(data.deliveries.find((d: { kind: string }) => d.kind === 'quote_received').reference).toMatch(/^Q-/)
-    expect(data.counts.sent).toBe(1)
+    expect(data.deliveries.map((d: { kind: string; status: string }) => [d.kind, d.status]).sort()).toEqual([['inquiry_received', 'pending'], ['quote_confirmation', 'accepted'], ['quote_received', 'accepted']].sort())
+    expect(data.deliveries.find((d: { kind: string }) => d.kind === 'quote_received').reference).toMatch(/^CC-/)
+    expect(data.counts.sent).toBe(2)
   })
 
   it('switches the owner notification for messages or quote requests off and on, and records who did it', async () => {
     const off = await send('PUT', '/api/admin/notifications/preferences', { newInquiry: false, newQuote: true })
-    expect(off.json.data).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: false, responseNote: { hu: '', en: '', nl: '' } })
+    expect(off.json.data).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: true, responseNote: { hu: '', en: '', nl: '' } })
     server.db.run('DELETE FROM email_deliveries')
     await server.api('/api/contact', { body: contact() })
     await quotes(1)
     await new Promise((resolve) => setImmediate(resolve))
     await server.app.context.notifier.processDue()
-    expect(server.db.all('SELECT kind FROM email_deliveries')).toEqual([{ kind: 'quote_received' }])
+    expect(server.db.all<{ kind: string }>('SELECT kind FROM email_deliveries').map((row) => row.kind).sort()).toEqual(['quote_confirmation', 'quote_received'])
     const data = await overview()
     expect(data.types[0]).toMatchObject({ id: 'new_inquiry', enabled: false, active: false })
-    expect(data.preferences).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: false, responseNote: { hu: '', en: '', nl: '' } })
+    expect(data.preferences).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: true, responseNote: { hu: '', en: '', nl: '' } })
     expect((await send('PUT', '/api/admin/notifications/preferences', { newInquiry: true, newQuote: true })).status).toBe(200)
     expect(server.db.all("SELECT action FROM audit_log WHERE action = 'settings.notifications'")).toHaveLength(2)
     for (const body of [{}, { newInquiry: 'yes', newQuote: true }, { newInquiry: true }]) expect((await send('PUT', '/api/admin/notifications/preferences', body)).status).toBe(422)
@@ -476,7 +478,7 @@ describe('settings', () => {
     expect(session.user).toMatchObject({ email: 'admin@site.test', role: 'admin', preferences: { language: null, theme: null } })
     expect(session.user.permissions).toContain('system:write')
     expect(session.meta).toMatchObject({
-      statuses: { inquiry: ['new', 'in_progress', 'waiting_client', 'completed'], quote: ['new', 'in_review', 'quoted', 'accepted', 'declined', 'closed'] },
+      statuses: { inquiry: ['new', 'in_progress', 'waiting_client', 'completed'], quote: ['new', 'under_review', 'waiting_customer', 'quote_preparation', 'quote_sent', 'accepted', 'declined', 'in_progress', 'completed', 'cancelled'] },
       kinds: ['job', 'collaboration', 'project', 'other'],
       languages: ['hu', 'en', 'nl'],
       interfaceLanguages: ['hu', 'en'],

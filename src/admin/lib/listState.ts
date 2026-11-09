@@ -11,6 +11,10 @@ export interface ListState {
   /** A status, `archived` (the archive), or empty (everything that is not archived). */
   status: string
   kind: string
+  /** The quote requests' own filters: the type of request, its priority and where it came from. */
+  type: string
+  priority: string
+  source: string
   from: string
   to: string
   /** `created_desc`, `name_asc`, …: the column and the direction in one word. */
@@ -32,6 +36,9 @@ export function readListState(params: URLSearchParams): ListState {
     q: (params.get('q') ?? '').slice(0, 100),
     status: params.get('status') ?? '',
     kind: params.get('kind') ?? '',
+    type: params.get('type') ?? '',
+    priority: params.get('priority') ?? '',
+    source: params.get('source') ?? '',
     from: day('from'),
     to: day('to'),
     order: params.get('order') ?? DEFAULT_ORDER,
@@ -49,6 +56,9 @@ export function toListQuery(state: ListState): ListQuery {
     status: state.status && state.status !== 'archived' ? state.status : undefined,
     archived: state.status === 'archived' ? 'only' : undefined,
     kind: state.kind || undefined,
+    type: state.type || undefined,
+    priority: state.priority || undefined,
+    source: state.source || undefined,
     from: state.from || undefined,
     to: state.to || undefined,
     sort: sort && state.order !== DEFAULT_ORDER ? sort : undefined,
@@ -68,4 +78,4 @@ export function writeListState(current: URLSearchParams, patch: Partial<ListStat
   return next
 }
 
-export const hasFilters = (state: ListState): boolean => Boolean(state.q || state.status || state.kind || state.from || state.to)
+export const hasFilters = (state: ListState): boolean => Boolean(state.q || state.status || state.kind || state.type || state.priority || state.source || state.from || state.to)

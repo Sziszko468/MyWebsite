@@ -1,11 +1,11 @@
 import type { Language } from '../../config.ts'
 import type { AppContext } from '../../context.ts'
-import { ConstraintError, HttpError, validationFailed } from '../../http/errors.ts'
-import { newId, newReference } from '../../lib/crypto.ts'
+import { HttpError, validationFailed } from '../../http/errors.ts'
 import { addMs, iso } from '../../lib/time.ts'
 import { Fields, isEmail } from '../../lib/validate.ts'
 import { contentHashOf, DUPLICATE_WINDOW_MS } from '../contact/service.ts'
-import { findRecentQuoteDuplicate, insertQuote, type QuoteRow } from '../quotes/repository.ts'
+import { afterRequestStored, createQuoteRequest } from '../quotes/create.ts'
+import { findRecentQuoteDuplicate } from '../quotes/repository.ts'
 import { FE_LIMITS } from '../shop/fullExperience.ts'
 import { isReady, planBrief, planDescription, planHash, readStoredPlan, type ProjectPlan } from './plan.ts'
 import { APPROVAL_TTL_MS, consumeApproval, insertApproval, liveApproval, markQuoteSent, type ConversationRow } from './store.ts'
@@ -89,51 +89,40 @@ export function submit(app: AppContext, settings: AiSettings, conversation: Conv
     return { ok: true, reference: existing.reference, duplicate: true }
   }
 
-  let row: QuoteRow | null = null
-  app.db.transaction(() => {
-    for (let attempt = 0; attempt < 5 && !row; attempt += 1) {
-      const candidate: QuoteRow = {
-        id: newId(),
-        reference: newReference('A'),
-        language,
-        kind: 'full_experience',
-        source: 'ai_assistant',
-        name: approval.name!,
-        email: approval.email!,
-        phone: null,
-        company: approval.company,
-        description,
-        objective: null,
-        reference_notes: null,
-        timing: null,
-        requirements: null,
-        brief_json: JSON.stringify(brief),
-        status: 'new',
-        inquiry_id: null,
-        archived_at: null,
-        consent_at: approval.consent_at,
-        ip_hash: ipHash,
-        content_hash: hash,
-        created_at: iso(now),
-        updated_at: iso(now),
-      }
-      try {
-        insertQuote(app.db, candidate, [])
-        row = candidate
-      } catch (error) {
-        if (!(error instanceof ConstraintError && error.kind === 'unique')) throw error
-      }
-    }
-    if (row) {
-      consumeApproval(app.db, app.clock, approval.id, (row as QuoteRow).reference)
-      markQuoteSent(app.db, conversation.id, (row as QuoteRow).reference)
-    }
-  })
-  if (!row) throw new Error('Could not allocate a unique request reference.')
-  const saved: QuoteRow = row
-  app.notifier.notifyOwner('quote_received', saved.id)
-  app.notifier.confirmSubmitter('quote', saved.id)
-  return { ok: true, reference: saved.reference, duplicate: false }
+  // The same store, reference, history, status page and e-mails as every other request; only the type and the source say it was the assistant's.
+  const created = createQuoteRequest(
+    app,
+    {
+      language,
+      kind: 'full_experience',
+      requestType: 'ai_project',
+      source: 'control_room_ai',
+      name: approval.name!,
+      email: approval.email!,
+      phone: null,
+      company: approval.company,
+      website: null,
+      description,
+      objective: null,
+      referenceNotes: null,
+      timing: null,
+      requirements: null,
+      budgetRange: null,
+      briefJson: JSON.stringify(brief),
+      consent: approval.consent_at !== null,
+      marketingConsent: false,
+      ipHash,
+      contentHash: hash,
+      items: [],
+      actor: { type: 'assistant' },
+    },
+    (row) => {
+      consumeApproval(app.db, app.clock, approval.id, row.reference)
+      markQuoteSent(app.db, conversation.id, row.reference)
+    },
+  )
+  afterRequestStored(app, created.row)
+  return { ok: true, reference: created.row.reference, duplicate: false }
 }
 
 export { APPROVAL_TTL_MS }

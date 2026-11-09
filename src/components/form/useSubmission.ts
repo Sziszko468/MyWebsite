@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { Transport } from '../../forms/submit'
+import type { Receipt, Transport } from '../../forms/submit'
 
 export type SubmissionPhase =
   | { kind: 'editing' }
   | { kind: 'sending' }
   | { kind: 'failed'; reason: 'network' | 'timeout' | 'rejected' }
   | { kind: 'unavailable' }
-  | { kind: 'sent' }
+  | { kind: 'sent'; receipt: Receipt | null }
 
 /**
  * What happens between pressing "send" and a result, for any form that sends through a transport
@@ -34,7 +34,7 @@ export function useSubmission<T extends object>(transport: Transport<T>) {
       const outcome = await transport.submit(request)
       if (outcome.status === 'sent') {
         onSent?.()
-        setPhase({ kind: 'sent' })
+        setPhase({ kind: 'sent', receipt: outcome.receipt ?? null })
       } else if (outcome.status === 'unavailable') {
         setPhase({ kind: 'unavailable' })
       } else {

@@ -1,9 +1,6 @@
 import type { Language } from '../../config.ts'
 import { html, joinHtml, raw } from '../../lib/html.ts'
 import type { InquiryRow } from '../inquiries/repository.ts'
-import type { ItemView, QuoteRow } from '../quotes/repository.ts'
-import { briefRows } from '../shop/brief.ts'
-import type { Totals } from '../shop/pricing.ts'
 
 /**
  * The e-mails, in Hungarian, English and Dutch, as a branded HTML part and a plain-text part. Every value that
@@ -12,7 +9,22 @@ import type { Totals } from '../shop/pricing.ts'
  * the rest; the colours are the site's (carbon, racing red, paper). Nothing here says a message was "delivered".
  */
 
-export type EmailKind = 'inquiry_received' | 'quote_received' | 'inquiry_status' | 'quote_status' | 'inquiry_confirmation' | 'quote_confirmation' | 'test'
+export type EmailKind =
+  | 'inquiry_received'
+  | 'quote_received'
+  | 'inquiry_status'
+  | 'quote_status'
+  | 'inquiry_confirmation'
+  | 'quote_confirmation'
+  | 'test'
+  // PROMPT 17: the quotation's life (quoteTemplates.ts)
+  | 'quote_sent'
+  | 'quote_revised'
+  | 'quote_accepted'
+  | 'quote_accepted_admin'
+  | 'quote_declined'
+  | 'quote_declined_admin'
+  | 'revision_requested_admin'
 
 export interface Rendered {
   subject: string
@@ -111,7 +123,7 @@ const WORDS: Record<Language, Words> = {
     ownerFooter: 'Ez az értesítés a weboldal kapcsolatfelvételi rendszeréből érkezett.',
     kinds: { job: 'Állásajánlat', collaboration: 'Együttműködés', project: 'Webfejlesztési projekt', other: 'Egyéb' },
     inquiryStatus: { new: 'Beérkezett', in_progress: 'Feldolgozás alatt', waiting_client: 'Válaszodra várunk', completed: 'Lezárva' },
-    quoteStatus: { new: 'Beérkezett', in_review: 'Áttekintés alatt', quoted: 'Ajánlat elküldve', accepted: 'Elfogadva', declined: 'Elutasítva', closed: 'Lezárva' },
+    quoteStatus: { new: 'Beérkezett', under_review: 'Áttekintés alatt', waiting_customer: 'Válaszodra várunk', quote_preparation: 'Az ajánlat készül', quote_sent: 'Ajánlat elküldve', accepted: 'Elfogadva', declined: 'Elutasítva', in_progress: 'Folyamatban', completed: 'Befejezve', cancelled: 'Lemondva' },
     objectives: { present: 'Bemutatkozás', leads: 'Megkeresések gyűjtése', sell: 'Értékesítés', process: 'Folyamat támogatása', improve: 'Meglévő fejlesztése', other: 'Egyéb' },
     timings: { unsure: 'Még nem tudom', asap: 'Minél hamarabb', weeks: 'Néhány héten belül', months: 'Néhány hónapon belül', flexible: 'Rugalmas' },
     needs: { website: 'Weboldal', webapp: 'Webalkalmazás', improve: 'Meglévő weboldal fejlesztése', ui: 'UI-megvalósítás', integrations: 'API és integrációk', unsure: 'Még nem tudom' },
@@ -157,7 +169,7 @@ const WORDS: Record<Language, Words> = {
     ownerFooter: 'This notification comes from the website’s contact system.',
     kinds: { job: 'A job opportunity', collaboration: 'Collaboration', project: 'A web development project', other: 'Something else' },
     inquiryStatus: { new: 'Received', in_progress: 'Being handled', waiting_client: 'Waiting for your reply', completed: 'Completed' },
-    quoteStatus: { new: 'Received', in_review: 'Being reviewed', quoted: 'Quote sent', accepted: 'Accepted', declined: 'Declined', closed: 'Closed' },
+    quoteStatus: { new: 'Received', under_review: 'Being reviewed', waiting_customer: 'Waiting for your reply', quote_preparation: 'Quotation being prepared', quote_sent: 'Quotation sent', accepted: 'Accepted', declined: 'Declined', in_progress: 'In progress', completed: 'Completed', cancelled: 'Cancelled' },
     objectives: { present: 'Present myself or my business', leads: 'Get enquiries', sell: 'Sell', process: 'Support a process', improve: 'Improve what exists', other: 'Something else' },
     timings: { unsure: 'Not sure yet', asap: 'As soon as possible', weeks: 'Within a few weeks', months: 'Within a few months', flexible: 'Flexible' },
     needs: { website: 'Website', webapp: 'Web application', improve: 'Improve an existing website', ui: 'UI implementation', integrations: 'API and integrations', unsure: 'Not sure yet' },
@@ -203,7 +215,7 @@ const WORDS: Record<Language, Words> = {
     ownerFooter: 'Deze melding komt uit het contactsysteem van de website.',
     kinds: { job: 'Een baan', collaboration: 'Samenwerking', project: 'Een webontwikkelingsproject', other: 'Iets anders' },
     inquiryStatus: { new: 'Ontvangen', in_progress: 'In behandeling', waiting_client: 'Wacht op jouw reactie', completed: 'Afgerond' },
-    quoteStatus: { new: 'Ontvangen', in_review: 'In beoordeling', quoted: 'Offerte verstuurd', accepted: 'Geaccepteerd', declined: 'Afgewezen', closed: 'Gesloten' },
+    quoteStatus: { new: 'Ontvangen', under_review: 'In beoordeling', waiting_customer: 'Wacht op jouw reactie', quote_preparation: 'Offerte wordt opgesteld', quote_sent: 'Offerte verstuurd', accepted: 'Geaccepteerd', declined: 'Afgewezen', in_progress: 'In uitvoering', completed: 'Afgerond', cancelled: 'Geannuleerd' },
     objectives: { present: 'Mezelf of mijn bedrijf presenteren', leads: 'Aanvragen krijgen', sell: 'Verkopen', process: 'Een proces ondersteunen', improve: 'Verbeteren wat er is', other: 'Iets anders' },
     timings: { unsure: 'Nog niet zeker', asap: 'Zo snel mogelijk', weeks: 'Binnen enkele weken', months: 'Binnen enkele maanden', flexible: 'Flexibel' },
     needs: { website: 'Website', webapp: 'Webapplicatie', improve: 'Een bestaande website verbeteren', ui: 'UI-implementatie', integrations: 'API en integraties', unsure: 'Nog niet zeker' },
@@ -221,13 +233,21 @@ const RED = '#ff161f'
 const PAPER = '#f4f0e8'
 const MUTED = '#5c5a55'
 
-interface Row {
+export interface Row {
   label: string
   value: string
 }
 
-function layout(options: { lang: Language; brand: string; title: string; preview: string; intro: string; rows: Row[]; note?: { title: string; text: string }; footer: string }): string {
-  const { lang, brand, title, preview, intro, rows, note, footer } = options
+/** A button that works in a mail client: a table cell with a background and a link inside; the address is also printed below it, for a client that blocks links. */
+export interface Cta {
+  label: string
+  url: string
+  /** The sentence above the printed address. */
+  fallback: string
+}
+
+export function layout(options: { lang: Language; brand: string; title: string; preview: string; intro: string; rows: Row[]; note?: { title: string; text: string }; cta?: Cta; footer: string }): string {
+  const { lang, brand, title, preview, intro, rows, note, cta, footer } = options
   const rowHtml = rows.map(
     (row) => html`<tr>
       <td style="padding:10px 16px 10px 0;vertical-align:top;color:${MUTED};font:600 12px/1.4 Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">${row.label}</td>
@@ -236,6 +256,10 @@ function layout(options: { lang: Language; brand: string; title: string; preview
   )
   const noteHtml = note
     ? html`<div style="margin:24px 0 0;padding:16px;border-left:4px solid ${RED};background:#ffffff;color:${INK};font:15px/1.5 Arial,Helvetica,sans-serif;white-space:pre-wrap"><strong>${note.title}</strong><br>${note.text}</div>`
+    : ''
+  const ctaHtml = cta
+    ? html`<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 8px"><tr><td style="background:${RED};border-radius:2px"><a href="${cta.url}" style="display:inline-block;padding:14px 24px;color:#ffffff;font:700 15px/1.2 Arial,Helvetica,sans-serif;text-decoration:none">${cta.label}</a></td></tr></table>
+      <p style="margin:8px 0 0;color:${MUTED};font:12px/1.5 Arial,Helvetica,sans-serif;word-break:break-all">${cta.fallback}<br><a href="${cta.url}" style="color:${MUTED}">${cta.url}</a></p>`
     : ''
   return html`<!doctype html>
 <html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title></head>
@@ -251,6 +275,7 @@ function layout(options: { lang: Language; brand: string; title: string; preview
       <p style="margin:0 0 16px;color:${MUTED};font:15px/1.5 Arial,Helvetica,sans-serif">${intro}</p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ddd8cc">${joinHtml(rowHtml)}</table>
       ${noteHtml}
+      ${ctaHtml}
     </td></tr>
     <tr><td style="padding:16px 24px 24px;color:${MUTED};font:12px/1.5 Arial,Helvetica,sans-serif;border-top:1px solid #ddd8cc">${footer}</td></tr>
   </table>
@@ -258,31 +283,22 @@ function layout(options: { lang: Language; brand: string; title: string; preview
 </body></html>`.value
 }
 
-function plain(options: { brand: string; title: string; intro: string; rows: Row[]; note?: { title: string; text: string }; footer: string }): string {
+export function plain(options: { brand: string; title: string; intro: string; rows: Row[]; note?: { title: string; text: string }; cta?: Cta; footer: string }): string {
   const lines = [options.brand.toUpperCase(), '', options.title, options.intro, '']
   for (const row of options.rows) lines.push(`${row.label}: ${row.value.includes('\n') ? `\n${row.value}` : row.value}`)
   if (options.note) lines.push('', `${options.note.title}: ${options.note.text}`)
+  if (options.cta) lines.push('', `${options.cta.label}:`, options.cta.url)
   lines.push('', '--', options.footer)
   return lines.join('\n')
 }
 
 /** A person's one-line text made safe for a subject line (no line breaks, a sensible length). */
-const oneLine = (value: string, max = 90): string => (value.replace(/\s+/g, ' ').trim().slice(0, max))
+export const oneLine = (value: string, max = 90): string => (value.replace(/\s+/g, ' ').trim().slice(0, max))
 
-function dateText(iso: string, lang: Language): string {
+export function dateText(iso: string, lang: Language): string {
   const date = new Date(iso)
   const locale = lang === 'hu' ? 'hu-HU' : lang === 'nl' ? 'nl-NL' : 'en-GB'
   return `${new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(date)} UTC`
-}
-
-function totalsText(totals: Totals, words: Words): string {
-  const parts: string[] = []
-  if (totals.fixed.length === 0) parts.push(words.noPublishedPrices)
-  else {
-    parts.push(`${words.fixedPrefix}: ${totals.fixed.map((sum) => `${sum.amount} ${sum.currency} (${words.vat[sum.vat] ?? sum.vat})`).join(', ')}.`)
-    if (totals.quotedParts > 0) parts.push(words.quotedParts(totals.quotedParts))
-  }
-  return parts.join(' ')
 }
 
 // ---- the four e-mails --------------------------------------------------------------------------------------------
@@ -304,36 +320,7 @@ export function renderInquiryReceived(inquiry: InquiryRow, lang: Language, brand
   return { subject: `${w.newMessage} (${inquiry.reference}): ${oneLine(inquiry.subject)}`, preview, text: plain(parts), html: layout({ lang, preview, ...parts }) }
 }
 
-function itemText(item: ItemView, words: Words, packageName: (code: string) => string): string {
-  const need = words.needs[item.need] ?? item.need
-  const plan = item.package ? packageName(item.package) : words.customPlan
-  const extras = item.extras.length > 0 ? ` + ${item.extras.join(', ')}` : ''
-  return `${need} — ${words.package}: ${plan}${extras}`
-}
-
-export function renderQuoteReceived(quote: QuoteRow, items: readonly ItemView[], totals: Totals, lang: Language, brand: string, packageName: (code: string) => string): Rendered {
-  const w = WORDS[lang]
-  const rows: Row[] = [
-    { label: w.reference, value: quote.reference },
-    { label: w.received, value: dateText(quote.created_at, lang) },
-    { label: w.name, value: quote.name },
-    { label: w.email, value: quote.email },
-    ...(quote.phone ? [{ label: w.phone, value: quote.phone }] : []),
-    { label: w.language, value: w.languages[quote.language] },
-    { label: w.services, value: quote.kind === 'full_experience' ? (quote.source === 'ai_assistant' ? w.aiPlan : 'FULL EXPERIENCE') : items.map((item) => itemText(item, w, packageName)).join('\n') },
-    ...(quote.kind === 'full_experience' ? briefRows(quote, lang) : [{ label: w.pricing, value: totalsText(totals, w) }]),
-    { label: w.description, value: quote.description },
-    ...(quote.objective ? [{ label: w.objective, value: w.objectives[quote.objective] ?? quote.objective }] : []),
-    ...(quote.timing ? [{ label: w.timing, value: w.timings[quote.timing] ?? quote.timing }] : []),
-    ...(quote.requirements ? [{ label: w.requirements, value: quote.requirements }] : []),
-    ...(quote.reference_notes ? [{ label: w.references, value: quote.reference_notes }] : []),
-  ]
-  const parts = { brand, title: `${w.newQuote} ${quote.reference}`, intro: `${w.newQuoteIntro} ${w.replyHint}`, rows, footer: w.ownerFooter }
-  const preview = `${oneLine(quote.name, 40)}: ${oneLine(quote.kind === 'full_experience' ? (quote.source === 'ai_assistant' ? w.aiPlan : 'FULL EXPERIENCE') : items.map((item) => itemText(item, w, packageName)).join('; '), 100)}`
-  return { subject: `${w.newQuote} (${quote.reference}): ${oneLine(quote.name, 40)}`, preview, text: plain(parts), html: layout({ lang, preview, ...parts }) }
-}
-
-export function renderStatusChange(kind: 'inquiry' | 'quote', row: { reference: string; name: string; status: string; language: Language }, note: string | null, lang: Language, brand: string): Rendered {
+export function renderStatusChange(kind: 'inquiry' | 'quote', row: { reference: string; name: string; status: string; language: Language }, note: string | null, lang: Language, brand: string, link: { label: string; url: string; fallback: string } | null = null): Rendered {
   const w = WORDS[lang]
   const statusLabel = (kind === 'inquiry' ? w.inquiryStatus : w.quoteStatus)[row.status] ?? row.status
   const title = w.statusSubject(kind, row.reference)
@@ -342,7 +329,7 @@ export function renderStatusChange(kind: 'inquiry' | 'quote', row: { reference: 
     { label: w.status, value: statusLabel },
   ]
   const intro = `${w.hello(oneLine(row.name, 60))} ${w.statusMessage(kind, row.reference, statusLabel)}`
-  const parts = { brand, title, intro, rows, note: note ? { title: w.noteTitle, text: note } : undefined, footer: w.statusFooter }
+  const parts = { brand, title, intro, rows, note: note ? { title: w.noteTitle, text: note } : undefined, cta: link ?? undefined, footer: w.statusFooter }
   const preview = w.statusMessage(kind, row.reference, statusLabel)
   return { subject: title, preview, text: plain(parts), html: layout({ lang, preview, ...parts }) }
 }
@@ -357,11 +344,8 @@ export function renderStatusChange(kind: 'inquiry' | 'quote', row: { reference: 
  */
 interface ConfirmWords {
   inquirySubject: (reference: string) => string
-  quoteSubject: (reference: string) => string
   inquiryTitle: string
-  quoteTitle: string
   inquiryBody: string
-  quoteBody: string
   noteTitle: string
   ignore: string
   footer: string
@@ -376,11 +360,8 @@ interface ConfirmWords {
 const CONFIRM: Record<Language, ConfirmWords> = {
   hu: {
     inquirySubject: (reference) => `Megkaptuk az üzeneted (${reference})`,
-    quoteSubject: (reference) => `Megkaptuk az ajánlatkérésed (${reference})`,
     inquiryTitle: 'Üzeneted megérkezett',
-    quoteTitle: 'Ajánlatkérésed megérkezett',
     inquiryBody: 'Köszönjük, hogy felvetted velünk a kapcsolatot! Üzeneted sikeresen megérkezett. Hamarosan áttekintjük a megkeresésedet.',
-    quoteBody: 'Köszönjük az ajánlatkérésedet! A kérésed sikeresen megérkezett. Hamarosan áttekintjük a megkeresésedet.',
     noteTitle: 'Tájékoztatás',
     ignore: 'Ha nem te küldted ezt az üzenetet, nyugodtan figyelmen kívül hagyhatod ezt az e-mailt.',
     footer: 'Ez automatikus visszaigazolás. Ha ki szeretnél egészíteni valamit, válaszolj erre az e-mailre.',
@@ -393,11 +374,8 @@ const CONFIRM: Record<Language, ConfirmWords> = {
   },
   en: {
     inquirySubject: (reference) => `We received your message (${reference})`,
-    quoteSubject: (reference) => `We received your quote request (${reference})`,
     inquiryTitle: 'Your message has arrived',
-    quoteTitle: 'Your quote request has arrived',
     inquiryBody: 'Thank you for getting in touch! Your message has been received. We will review your enquiry soon.',
-    quoteBody: 'Thank you for your quote request! It has been received. We will review your enquiry soon.',
     noteTitle: 'Information',
     ignore: 'If you did not send this message, you can safely ignore this e-mail.',
     footer: 'This is an automatic confirmation. If you want to add something, reply to this e-mail.',
@@ -410,11 +388,8 @@ const CONFIRM: Record<Language, ConfirmWords> = {
   },
   nl: {
     inquirySubject: (reference) => `We hebben je bericht ontvangen (${reference})`,
-    quoteSubject: (reference) => `We hebben je offerteaanvraag ontvangen (${reference})`,
     inquiryTitle: 'Je bericht is aangekomen',
-    quoteTitle: 'Je offerteaanvraag is aangekomen',
     inquiryBody: 'Bedankt voor je bericht! Je bericht is goed aangekomen. We bekijken je vraag binnenkort.',
-    quoteBody: 'Bedankt voor je offerteaanvraag! Je aanvraag is goed aangekomen. We bekijken je vraag binnenkort.',
     noteTitle: 'Informatie',
     ignore: 'Heb je dit bericht niet zelf verstuurd, dan kun je deze e-mail gerust negeren.',
     footer: 'Dit is een automatische bevestiging. Wil je iets toevoegen, antwoord dan op deze e-mail.',
@@ -437,18 +412,6 @@ export function renderInquiryConfirmation(inquiry: InquiryRow, lang: Language, b
   ]
   const parts = { brand, title: c.inquiryTitle, intro: `${w.hello(oneLine(inquiry.name, 60))} ${c.inquiryBody}`, rows, note: responseNote ? { title: c.noteTitle, text: responseNote } : undefined, footer: `${c.ignore} ${c.footer}` }
   return { subject: c.inquirySubject(inquiry.reference), preview: c.inquiryBody, text: plain(parts), html: layout({ lang, preview: c.inquiryBody, ...parts }) }
-}
-
-export function renderQuoteConfirmation(quote: QuoteRow, items: readonly ItemView[], lang: Language, brand: string, packageName: (code: string) => string, responseNote: string | null): Rendered {
-  const w = WORDS[lang]
-  const c = CONFIRM[lang]
-  const rows: Row[] = [
-    { label: w.reference, value: quote.reference },
-    { label: w.received, value: dateText(quote.created_at, lang) },
-    { label: w.services, value: quote.kind === 'full_experience' ? (quote.source === 'ai_assistant' ? w.aiPlan : 'FULL EXPERIENCE') : items.map((item) => itemText(item, w, packageName)).join('\n') },
-  ]
-  const parts = { brand, title: c.quoteTitle, intro: `${w.hello(oneLine(quote.name, 60))} ${c.quoteBody}`, rows, note: responseNote ? { title: c.noteTitle, text: responseNote } : undefined, footer: `${c.ignore} ${c.footer}` }
-  return { subject: c.quoteSubject(quote.reference), preview: c.quoteBody, text: plain(parts), html: layout({ lang, preview: c.quoteBody, ...parts }) }
 }
 
 /** The administrator's test message: what the provider accepted, in the owner's language. */

@@ -155,6 +155,36 @@ export const privacyText = {
       ),
     ],
   },
+  quotations: {
+    title: tri('Ajánlatkérés és árajánlat', 'Quote requests and quotations', 'Offerteaanvragen en offertes'),
+    items: [
+      tri(
+        'Amikor ajánlatot kérsz, az oldal eltárolja, amit beírtál (a neved, az e-mail-címed, a leírást, és ha megadtad, a cég nevét, weboldalát, a költségkeretet és a telefonszámod), a kiválasztott szolgáltatásokat, valamint hogy mikor érkezett, és a hálózati címed egyirányú ujjlenyomatát (magát a címet nem). Ha árajánlat készül neked, az árajánlat és a rá adott válaszod (elfogadás, elutasítás vagy kérdés) is tárolódik.',
+        'When you ask for a quotation, the site stores what you typed (your name, e-mail address, the description and, if you gave them, the company, its website, a budget and your phone number), the services you chose, when it arrived and a one-way fingerprint of your network address (not the address itself). If a quotation is prepared for you, the quotation and your answer to it (accepted, declined or a question) are stored too.',
+        'Als je een offerte aanvraagt, bewaart de site wat je typte (je naam, e-mailadres, de omschrijving en, als je ze opgaf, het bedrijf, de website, een budget en je telefoonnummer), de gekozen diensten, wanneer het aankwam en een eenrichtingsvingerafdruk van je netwerkadres (niet het adres zelf). Wordt er een offerte voor je opgesteld, dan worden ook de offerte en je reactie erop (geaccepteerd, afgewezen of een vraag) bewaard.',
+      ),
+      tri(
+        'Az e-mailjeidben lévő linkek személyesek: mindegyiknek csak az egyirányú ujjlenyomata van eltárolva, korlátozott ideig működnek, és aki ismeri a linket, megnyithatja az oldalt, ezért ne oszd meg másokkal.',
+        'The links in your e-mails are private: only a one-way fingerprint of each is stored, a link works for a limited time, and anyone who has the link can open that page, so please do not share it.',
+        'De links in je e-mails zijn persoonlijk: van elke link wordt alleen een eenrichtingsvingerafdruk bewaard, een link werkt beperkte tijd en wie de link heeft kan die pagina openen, deel hem dus niet met anderen.',
+      ),
+      tri(
+        'A visszaigazolást, az árajánlatot és a döntésed visszaigazolását egy tranzakciós e-mail-szolgáltatáson keresztül kapod. Az üzenetekről naplót vezetünk (kinek, mikor, és hogy a szolgáltató elfogadta-e), az üzenetek szövege nélkül.',
+        'You receive the confirmation, the quotation and the confirmation of your decision through a transactional e-mail service. The messages are logged (to whom, when and whether the provider accepted them), without their text.',
+        'Je ontvangt de bevestiging, de offerte en de bevestiging van je beslissing via een transactionele e-maildienst. De berichten worden gelogd (aan wie, wanneer en of de aanbieder ze accepteerde), zonder de tekst.',
+      ),
+      tri(
+        'A kérésedtől független, nem kötelező jelölőnégyzet (más hírekről) külön választás. Ez az oldal nem küld marketing-e-mailt, és nem kér, nem fogad és nem tárol fizetési adatot.',
+        'The optional tick-box about hearing about other news is a separate choice from your request. This site sends no marketing e-mail, and asks for, takes and stores no payment details.',
+        'Het optionele vakje over ander nieuws is een aparte keuze, los van je aanvraag. Deze site verstuurt geen marketing-e-mail en vraagt, ontvangt en bewaart geen betaalgegevens.',
+      ),
+      tri(
+        'Hogy meddig őrizzük a kéréseket, az oldal tulajdonosának döntése. Ha látni, javíttatni vagy törölni szeretnéd a rólad tárolt adatokat, kérd tőle a Kapcsolat oldalon keresztül.',
+        'How long requests are kept is the site owner’s decision. If you want to see, correct or delete what is stored about you, ask them through the Contact page.',
+        'Hoe lang aanvragen worden bewaard is de beslissing van de eigenaar van de site. Wil je zien, laten corrigeren of laten verwijderen wat over je is opgeslagen, vraag het dan via de contactpagina.',
+      ),
+    ],
+  },
   assistant: {
     title: tri('A Control Room AI', 'Control Room AI', 'Control Room AI'),
     items: [

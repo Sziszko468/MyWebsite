@@ -1,7 +1,9 @@
 import type { AdminText } from './en'
+import { quotationHu } from './quotation'
 
 /** A kezelőfelület szövegei magyarul. Pontosan ugyanazok a kulcsok, mint az `en.ts`-ben; a `{név}` a képernyő által beillesztett érték. */
 export const hu: AdminText = {
+  quotation: quotationHu,
   app: {
     name: 'Kezelőfelület',
     skip: 'Ugrás a tartalomra',
@@ -140,7 +142,7 @@ export const hu: AdminText = {
 
   status: {
     inquiry: { new: 'Új', in_progress: 'Folyamatban', waiting_client: 'Ügyfélre vár', completed: 'Lezárva' },
-    quote: { new: 'Új', in_review: 'Áttekintés alatt', quoted: 'Ajánlat elküldve', accepted: 'Elfogadva', declined: 'Elutasítva', closed: 'Lezárva' },
+    quote: { new: 'Új', under_review: 'Áttekintés alatt', waiting_customer: 'Az ügyfélre várunk', quote_preparation: 'Az ajánlat készül', quote_sent: 'Ajánlat elküldve', accepted: 'Elfogadva', declined: 'Elutasítva', in_progress: 'Folyamatban', completed: 'Befejezve', cancelled: 'Lemondva' },
     archived: 'Archivált',
     unknown: 'Ismeretlen',
     delivery: { pending: 'Várakozik', retrying: 'Újrapróbálásra vár', sending: 'Feldolgozás alatt', accepted: 'Elküldve', delivered: 'Kézbesítve', bounced: 'Visszapattant', complained: 'Spamnek jelölve', failed: 'Sikertelen', cancelled: 'Visszavonva' },

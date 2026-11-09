@@ -3,7 +3,10 @@
  * (it is typed against this one, and i18n.test.ts checks the placeholders and that nothing is left empty).
  * `{name}` is a value filled in by the screen (utils/format.ts `fill`).
  */
+import { quotationEn } from './quotation'
+
 export const en = {
+  quotation: quotationEn,
   app: {
     name: 'Administration',
     skip: 'Skip to the content',
@@ -142,7 +145,7 @@ export const en = {
 
   status: {
     inquiry: { new: 'New', in_progress: 'In progress', waiting_client: 'Waiting for client', completed: 'Completed' },
-    quote: { new: 'New', in_review: 'In review', quoted: 'Quoted', accepted: 'Accepted', declined: 'Declined', closed: 'Closed' },
+    quote: { new: 'New', under_review: 'Under review', waiting_customer: 'Waiting for the customer', quote_preparation: 'Quotation being prepared', quote_sent: 'Quotation sent', accepted: 'Accepted', declined: 'Declined', in_progress: 'In progress', completed: 'Completed', cancelled: 'Cancelled' },
     archived: 'Archived',
     unknown: 'Unknown',
     delivery: { pending: 'Waiting', retrying: 'Waiting to retry', sending: 'Processing', accepted: 'Sent', delivered: 'Delivered', bounced: 'Bounced', complained: 'Marked as spam', failed: 'Failed', cancelled: 'Cancelled' },
