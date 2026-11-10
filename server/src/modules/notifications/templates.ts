@@ -249,7 +249,7 @@ export interface Cta {
 export function layout(options: { lang: Language; brand: string; title: string; preview: string; intro: string; rows: Row[]; note?: { title: string; text: string }; cta?: Cta; footer: string }): string {
   const { lang, brand, title, preview, intro, rows, note, cta, footer } = options
   const rowHtml = rows.map(
-    (row, index) => html`<tr>
+    (row) => html`<tr>
       <td style="width:34%;padding:15px 14px 15px 0;vertical-align:top;color:${MUTED};font:700 10px/1.5 Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.09em;border-bottom:1px solid #ece8e0">${row.label}</td>
       <td style="padding:14px 0;vertical-align:top;color:${INK};font:15px/1.65 Arial,Helvetica,sans-serif;white-space:pre-wrap;word-break:break-word;border-bottom:1px solid #ece8e0">${row.value}</td>
     </tr>`,
