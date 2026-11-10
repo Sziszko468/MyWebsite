@@ -604,6 +604,8 @@ The site is a single-page app, so what a search engine or a link preview sees fi
 
 ### Serving the site
 
+**On Cloudflare (Workers, static assets)**: build command `npm run build`, deploy command `npx wrangler deploy`. `wrangler.jsonc` tells Wrangler to upload `dist/` as static assets and to answer an unknown address with `404.html` and status 404. Keep that file: without any Wrangler configuration, `wrangler deploy` tries to *auto-configure* the project (it installs `@cloudflare/vite-plugin`, edits `vite.config.ts` and sets a single-page-application fallback that answers every address with `index.html`), which fails in the build and would be wrong for this site anyway. `"name"` in it must be the name of the Worker in the Cloudflare dashboard. `_headers` and `_redirects` from the build are honoured by Cloudflare as they are (12 header rules and 6 redirect rules parsed, checked locally with `wrangler dev`). Only the public website runs there: the administration, the forms' API and the customer pages' data need the Node backend (`VITE_API_URL` in the build variables points the site at it; without `VITE_SITE_URL` every page says `noindex`).
+
 `dist/` is static files. Every page exists as `…/index.html`; an unknown address should get `404.html` with status 404 (the app also shows its own 404 page and says `noindex` if a host answers every address with `index.html`). `dist/_headers` is written for Netlify and Cloudflare Pages; for another host, copy its values:
 
 | Header | Why |
