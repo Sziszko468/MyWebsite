@@ -40,7 +40,7 @@ export const BRAND_PLACEHOLDER = 'Your Name'
 // they stay hidden in production and show as muted labels in development.
 export const siteConfig: SiteConfig = {
   siteUrl: normalizeSiteUrl(import.meta.env.VITE_SITE_URL),
-  brandName: BRAND_PLACEHOLDER,
+  brandName: 'Szilárd Kiss',
   monogram: null,
   contact: {
     email: null,
