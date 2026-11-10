@@ -249,36 +249,51 @@ export interface Cta {
 export function layout(options: { lang: Language; brand: string; title: string; preview: string; intro: string; rows: Row[]; note?: { title: string; text: string }; cta?: Cta; footer: string }): string {
   const { lang, brand, title, preview, intro, rows, note, cta, footer } = options
   const rowHtml = rows.map(
-    (row) => html`<tr>
-      <td style="padding:10px 16px 10px 0;vertical-align:top;color:${MUTED};font:600 12px/1.4 Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">${row.label}</td>
-      <td style="padding:10px 0;vertical-align:top;color:${INK};font:15px/1.5 Arial,Helvetica,sans-serif;white-space:pre-wrap;word-break:break-word">${row.value}</td>
+    (row, index) => html`<tr>
+      <td style="width:34%;padding:15px 14px 15px 0;vertical-align:top;color:${MUTED};font:700 10px/1.5 Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.09em;border-bottom:1px solid #ece8e0">${row.label}</td>
+      <td style="padding:14px 0;vertical-align:top;color:${INK};font:15px/1.65 Arial,Helvetica,sans-serif;white-space:pre-wrap;word-break:break-word;border-bottom:1px solid #ece8e0">${row.value}</td>
     </tr>`,
   )
+  const noteLabel = lang === 'hu' ? 'FONTOS INFORMÁCIÓ' : lang === 'nl' ? 'BELANGRIJKE INFORMATIE' : 'IMPORTANT INFORMATION'
+  const detailsLabel = lang === 'hu' ? 'A MEGKERESÉS RÉSZLETEI' : lang === 'nl' ? 'GEGEVENS VAN JE AANVRAAG' : 'REQUEST DETAILS'
   const noteHtml = note
-    ? html`<div style="margin:24px 0 0;padding:16px;border-left:4px solid ${RED};background:#ffffff;color:${INK};font:15px/1.5 Arial,Helvetica,sans-serif;white-space:pre-wrap"><strong>${note.title}</strong><br>${note.text}</div>`
+    ? html`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;background:#fff8f0;border:1px solid #f0dfd0"><tr><td width="4" style="background:${RED};font-size:0;line-height:0">&nbsp;</td><td style="padding:17px 18px;color:${INK};font:14px/1.65 Arial,Helvetica,sans-serif;white-space:pre-wrap"><span style="display:block;margin:0 0 7px;color:${RED};font:700 10px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase">${note.title || noteLabel}</span>${note.text}</td></tr></table>`
     : ''
   const ctaHtml = cta
-    ? html`<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 8px"><tr><td style="background:${RED};border-radius:2px"><a href="${cta.url}" style="display:inline-block;padding:14px 24px;color:#ffffff;font:700 15px/1.2 Arial,Helvetica,sans-serif;text-decoration:none">${cta.label}</a></td></tr></table>
-      <p style="margin:8px 0 0;color:${MUTED};font:12px/1.5 Arial,Helvetica,sans-serif;word-break:break-all">${cta.fallback}<br><a href="${cta.url}" style="color:${MUTED}">${cta.url}</a></p>`
+    ? html`<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px"><tr><td align="center" bgcolor="${RED}" style="background:${RED};border-radius:4px"><a href="${cta.url}" style="display:inline-block;padding:15px 25px;color:#ffffff;font:700 14px/1.2 Arial,Helvetica,sans-serif;text-decoration:none;letter-spacing:.02em;border:1px solid ${RED}">${cta.label}</a></td></tr></table>
+      <p style="margin:10px 0 0;color:${MUTED};font:12px/1.6 Arial,Helvetica,sans-serif;word-break:break-all">${cta.fallback}<br><a href="${cta.url}" style="color:${INK};text-decoration:underline">${cta.url}</a></p>`
     : ''
+  const safeBrand = brand.trim() || 'Portfolio'
   return html`<!doctype html>
-<html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title></head>
-<body style="margin:0;background:${PAPER}">
+<html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${title}</title></head>
+<body style="margin:0;padding:0;background:${PAPER};-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:${PAPER}">${preview}${raw('&#847;&zwnj;&nbsp;'.repeat(40))}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PAPER}"><tr><td align="center" style="padding:24px 12px">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border:1px solid #ddd8cc">
-    <tr><td style="background:${INK};padding:20px 24px;border-bottom:4px solid ${RED}">
-      <span style="color:${PAPER};font:700 14px/1 Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase">${brand}</span><span style="color:${RED};font:700 14px/1 Arial,Helvetica,sans-serif">.</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:${PAPER}"><tr><td align="center" style="padding:32px 14px">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:620px;background:#ffffff;border:1px solid #e4dfd5">
+    <tr><td height="5" bgcolor="${RED}" style="height:5px;background:${RED};font-size:0;line-height:0">&nbsp;</td></tr>
+    <tr><td bgcolor="${INK}" style="background:${INK};padding:23px 28px 25px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        <td style="color:${PAPER};font:700 15px/1.2 Arial,Helvetica,sans-serif;letter-spacing:.13em;text-transform:uppercase">${safeBrand}<span style="color:${RED}">.</span></td>
+        <td align="right" style="color:#aaa69f;font:700 9px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.14em;text-transform:uppercase">PERSONAL PORTFOLIO</td>
+      </tr></table>
+      <div style="height:25px;line-height:25px;font-size:1px">&nbsp;</div>
+      <div style="width:34px;height:3px;background:${RED};font-size:0;line-height:0">&nbsp;</div>
+      <h1 style="margin:15px 0 10px;color:#ffffff;font:700 26px/1.2 Arial,Helvetica,sans-serif;letter-spacing:-.035em">${title}</h1>
+      <p style="margin:0;color:#c3c0ba;font:14px/1.65 Arial,Helvetica,sans-serif">${intro}</p>
     </td></tr>
-    <tr><td style="padding:28px 24px 8px">
-      <h1 style="margin:0 0 12px;color:${INK};font:700 22px/1.25 Arial,Helvetica,sans-serif">${title}</h1>
-      <p style="margin:0 0 16px;color:${MUTED};font:15px/1.5 Arial,Helvetica,sans-serif">${intro}</p>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ddd8cc">${joinHtml(rowHtml)}</table>
+    <tr><td style="padding:27px 28px 30px;background:#ffffff">
+      <p style="margin:0 0 12px;color:${RED};font:700 10px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.12em">${detailsLabel}</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-top:1px solid #ece8e0">${joinHtml(rowHtml)}</table>
       ${noteHtml}
       ${ctaHtml}
     </td></tr>
-    <tr><td style="padding:16px 24px 24px;color:${MUTED};font:12px/1.5 Arial,Helvetica,sans-serif;border-top:1px solid #ddd8cc">${footer}</td></tr>
+    <tr><td bgcolor="#f8f6f1" style="padding:19px 28px 22px;background:#f8f6f1;border-top:1px solid #e9e4da">
+      <p style="margin:0 0 7px;color:${INK};font:700 12px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.04em">${safeBrand}<span style="color:${RED}">.</span></p>
+      <p style="margin:0;color:${MUTED};font:11px/1.6 Arial,Helvetica,sans-serif">${footer}</p>
+      <p style="margin:13px 0 0;color:#8b877f;font:10px/1.5 Arial,Helvetica,sans-serif">szilardkiss.com</p>
+    </td></tr>
   </table>
+  <p style="margin:14px 0 0;color:#8b877f;font:10px/1.5 Arial,Helvetica,sans-serif">DESIGNED WITH INTENT · BUILT WITH CARE</p>
 </td></tr></table>
 </body></html>`.value
 }
