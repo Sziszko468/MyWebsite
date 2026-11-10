@@ -59,7 +59,7 @@ describe('migration 0002', () => {
       db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, created_at, updated_at) VALUES ('d1', 'inquiry_status', 'inquiry', 'i3', 'n@x.test', 'en', 'accepted', ?, ?)", [now, now])
       expect(migrationStatus(db, directory)).toMatchObject({ current: 1, pending: 0 })
 
-      expect(migrate(db, clock)).toEqual([2, 3, 4, 5, 6, 7])
+      expect(migrate(db, clock)).toEqual([2, 3, 4, 5, 6, 7, 8])
 
       expect(db.all('SELECT id, status FROM inquiries ORDER BY id')).toEqual([
         { id: 'i1', status: 'new' }, { id: 'i2', status: 'in_progress' }, { id: 'i3', status: 'waiting_client' }, { id: 'i4', status: 'completed' },

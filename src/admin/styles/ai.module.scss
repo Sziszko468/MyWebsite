@@ -307,3 +307,110 @@
   display: grid;
   gap: var(--space-2);
 }
+
+/* ---- model, connection, alerts ---- */
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-weight: var(--fw-semibold);
+
+  &[data-tone='success'] .dot {
+    background: var(--admin-success);
+  }
+
+  &[data-tone='warning'] .dot {
+    background: var(--admin-warning);
+  }
+
+  &[data-tone='danger'] .dot {
+    background: var(--admin-danger);
+  }
+
+  &[data-tone='neutral'] .dot {
+    background: var(--color-border-strong);
+  }
+}
+
+.dot {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-border-strong);
+}
+
+.warning {
+  margin: 0;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--admin-danger);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+}
+
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+.alerts {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+
+  &[data-level='info'] {
+    border-left-color: var(--color-border-strong);
+  }
+
+  &[data-level='warning'] {
+    border-left-color: var(--admin-warning);
+  }
+
+  &[data-level='critical'] {
+    border-left-color: var(--admin-danger);
+  }
+
+  &[data-seen='true'] {
+    opacity: 0.75;
+  }
+}
+
+.alertBody {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
+.alertText {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

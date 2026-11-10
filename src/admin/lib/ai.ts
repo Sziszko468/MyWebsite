@@ -10,6 +10,7 @@ export type AiRange = 'daily' | 'weekly' | 'monthly'
 export const AI_RANGES: readonly AiRange[] = ['daily', 'weekly', 'monthly']
 
 export interface AiSettings {
+  /** The administrator's activation. It is changed only by the activation switch on the Model tab (never with the other settings). */
   enabled: boolean
   plannerEnabled: boolean
   quoteEnabled: boolean
@@ -26,6 +27,7 @@ export interface AiSettings {
   dailyTokenBudget: number
   dailyBudgetUsd: number
   monthlyBudgetUsd: number
+  alertPercent: number
   conversationMaxHours: number
   retentionDays: number
   effort: 'low' | 'medium' | 'high'
@@ -37,7 +39,7 @@ export interface AiSettings {
   suggestions: Record<Language, string[]>
 }
 
-export type Unavailable = 'operator_disabled' | 'admin_disabled' | 'no_api_key'
+export type Unavailable = 'operator_disabled' | 'admin_disabled' | 'no_api_key' | 'model_lock' | 'model_unverified'
 
 export interface AiOverview {
   range: AiRange
@@ -70,8 +72,76 @@ export interface AiPoint {
   conversations: number
 }
 
+export type ConnectionStatus = 'connected' | 'not_tested' | 'failed' | 'stale' | 'no_key' | 'model_lock'
+export type BudgetState = 'ok' | 'warning' | 'exhausted'
+export type AlertKind =
+  | 'cost_day_warning'
+  | 'cost_day_exhausted'
+  | 'cost_month_warning'
+  | 'cost_month_exhausted'
+  | 'tokens_day_warning'
+  | 'tokens_day_exhausted'
+  | 'requests_day_warning'
+  | 'requests_day_exhausted'
+  | 'model_unverified'
+  | 'model_mismatch'
+  | 'model_not_found'
+  | 'provider_auth'
+  | 'provider_billing'
+
+export interface AiAlert {
+  id: string
+  kind: AlertKind
+  level: 'info' | 'warning' | 'critical'
+  period: string
+  detail: { used?: number; limit?: number; percent?: number; reason?: string; reported?: string | null } | null
+  createdAt: string
+  acknowledgedAt: string | null
+}
+
+export interface AiConnectionTest {
+  id: string
+  at: string
+  outcome: 'verified' | 'failed'
+  reason: string | null
+  reportedModel: string | null
+  latencyMs: number | null
+  inputTokens: number | null
+  outputTokens: number | null
+  costUsd: number | null
+}
+
+/** What the connection test answered: codes, identifiers and numbers only; `message` is the server's safe English sentence. */
+export interface AiTestResult {
+  ok: boolean
+  outcome: 'verified' | 'failed'
+  reason: string | null
+  message: string
+  requestedModel: string
+  reportedModel: string | null
+  endpoint: string
+  latencyMs: number | null
+  usage: { inputTokens: number; outputTokens: number } | null
+  estimatedCostUsd: number | null
+  testedAt: string
+}
+
 export interface AiSummary {
-  model: { id: string; provider: string; changeableBy: string }
+  /** The required model. `id` is the configured identifier; it cannot be edited here (`editable` is always false). */
+  model: { requiredName: string; id: string; provider: string; editable: false; changeableBy: string; overrideRejected: boolean }
+  connection: {
+    status: ConnectionStatus
+    endpoint: string
+    keyConfigured: boolean
+    verification: { status: 'unverified' | 'verified' | 'failed' | 'stale'; reportedModel: string | null; checkedAt: string | null; verifiedAt: string | null; reason: string | null }
+    lastSuccessfulTest: { at: string; latencyMs: number | null; reportedModel: string | null } | null
+    lastError: { at: string; source: 'chat' | 'test'; code: string } | null
+    tests: AiConnectionTest[]
+  }
+  /** Why the assistant cannot be switched on yet (null: it can). */
+  activation: { blocker: Unavailable | null }
+  totals: { requests: number; modelVerifiedRequests: number; modelUnreportedRequests: number; modelMismatchedRequests: number; tokens: number; estimatedCostUsd: number; monthTokens: number }
+  alerts: { open: number; items: AiAlert[] }
   apiKey: 'set' | 'missing'
   operatorEnabled: boolean
   availability: { available: true } | { available: false; reason: Unavailable }
@@ -79,8 +149,9 @@ export interface AiSummary {
   ranges: Record<string, [number, number]>
   canWrite: boolean
   budget: {
-    day: { spentUsd: number; budgetUsd: number; tokens: number; tokenBudget: number; requests: number; requestLimit: number }
-    month: { spentUsd: number; budgetUsd: number }
+    day: { spentUsd: number; budgetUsd: number; tokens: number; tokenBudget: number; requests: number; requestLimit: number; state: BudgetState }
+    month: { spentUsd: number; budgetUsd: number; state: BudgetState }
+    alertPercent: number
   }
   pricing: { inputPerMTok: number; outputPerMTok: number; asOf: string; note: string }
   knowledge: {
@@ -106,7 +177,6 @@ export interface AiUsage extends AiOverview {
 
 /** The settings form's state: numbers as the text in their boxes, the chips as one line each. */
 export interface AiForm {
-  enabled: boolean
   plannerEnabled: boolean
   quoteEnabled: boolean
   languages: Language[]
@@ -121,6 +191,7 @@ export interface AiForm {
 export const NUMERIC_SETTINGS = [
   'dailyBudgetUsd',
   'monthlyBudgetUsd',
+  'alertPercent',
   'dailyTokenBudget',
   'dailyRequests',
   'maxDailyConversations',
@@ -140,7 +211,6 @@ export type NumericSetting = (typeof NUMERIC_SETTINGS)[number]
 
 export function formFrom(settings: AiSettings): AiForm {
   return {
-    enabled: settings.enabled,
     plannerEnabled: settings.plannerEnabled,
     quoteEnabled: settings.quoteEnabled,
     languages: [...settings.languages],
@@ -163,8 +233,8 @@ export function payloadFrom(form: AiForm): Record<string, unknown> {
     }),
   )
   const lines = (text: string) => text.split('\n').map((line) => line.trim()).filter(Boolean)
+  // Not `enabled`: switching the assistant on or off is its own action (it needs a verified model), so saving other settings can never do it.
   return {
-    enabled: form.enabled,
     plannerEnabled: form.plannerEnabled,
     quoteEnabled: form.quoteEnabled,
     languages: form.languages,

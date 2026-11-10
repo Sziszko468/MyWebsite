@@ -1,5 +1,5 @@
 import { del, get, post, put, patch, request, queryString, type Envelope } from './client'
-import type { AiSummary, AiUsage } from '../lib/ai'
+import type { AiSummary, AiTestResult, AiUsage } from '../lib/ai'
 import type {
   ContentRecord, DashboardData, ExtraRecord, Inquiry, InquiryDetail, ListQuery, LoginData, NotificationPreferences, NotificationsData, EmailCheck, Orderable, Page, PackageRecord, Preferences, Profile, Quote, QuoteDetail, QuoteOverview, QuotationDetail, QuotationForm,
   ServiceRecord, SessionData, SessionView, SystemData, TranslationGroup, TranslationItem, TranslationOverview,
@@ -167,4 +167,9 @@ export const ai = {
   usage: (range: string, signal?: AbortSignal) => get<AiUsage>(`${base}/ai/usage`, { query: { range }, signal }).then((answer) => answer.data),
   save: (settings: Record<string, unknown>) => put<AiSummary>(`${base}/ai/settings`, settings).then((answer) => answer.data),
   refresh: () => post<AiSummary>(`${base}/ai/knowledge/refresh`, {}).then((answer) => answer.data),
+  /** The server-side connection test: one minimal request to the required model. It never switches the assistant on. */
+  test: () => post<{ result: AiTestResult; summary: AiSummary }>(`${base}/ai/connection-test`, {}).then((answer) => answer.data),
+  /** The administrator's activation switch; refused (409 verification_required) while the required model is not verified. */
+  setEnabled: (enabled: boolean) => put<AiSummary>(`${base}/ai/settings`, { enabled }).then((answer) => answer.data),
+  acknowledge: (id?: string) => post<AiSummary>(`${base}/ai/alerts/acknowledge`, id ? { id } : {}).then((answer) => answer.data),
 }

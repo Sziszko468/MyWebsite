@@ -13,19 +13,20 @@ import { useToast } from '../components/Toast'
 import { useResource } from '../hooks/useResource'
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges'
 import { fill, formatDateTime, formatNumber, useInterfaceLanguage, useText } from '../i18n'
-import { AI_RANGES, dollars, duration, formFrom, payloadFrom, sameForm, share, type AiForm, type AiRange, type AiSummary, type AiUsage, type NumericSetting } from '../lib/ai'
+import { AI_RANGES, dollars, duration, formFrom, payloadFrom, sameForm, share, type AiAlert, type AiForm, type AiRange, type AiSummary, type AiTestResult, type AiUsage, type ConnectionStatus, type NumericSetting } from '../lib/ai'
 import { describeError, fieldErrors } from '../lib/errors'
 import { useSession } from '../session/SessionProvider'
 import ai from '../styles/ai.module.scss'
 import page from '../styles/pages.module.scss'
 import styles from '../styles/ui.module.scss'
 
-const TABS = ['overview', 'settings', 'knowledge'] as const
+const TABS = ['model', 'overview', 'settings', 'knowledge'] as const
 type Tab = (typeof TABS)[number]
 
 /**
- * The AI assistant's screen: real usage, the budgets and what is left of them, the settings (enforced by the server), and the
- * sources the assistant reads. Reading needs the system-read permission and changing needs system-write, which only an
+ * The AI assistant's screen: the required model and the state of its connection (with the connection test and the activation
+ * switch), real usage, the budgets and what is left of them, the alerts, the settings (enforced by the server), and the sources the
+ * assistant reads. The model itself cannot be changed here. Reading needs the system-read permission and changing needs system-write, which only an
  * administrator has; the server checks both regardless of what this screen shows.
  */
 export function AiPage() {
@@ -41,14 +42,17 @@ function Screen({ summary, onChanged, reload }: { summary: AiSummary; onChanged:
   // The tab is in the address (?tab=settings), like the Settings screen's, so a link can point at it.
   const [params, setParams] = useSearchParams()
   const requested = params.get('tab') as Tab | null
-  const tab: Tab = requested && TABS.includes(requested) ? requested : 'overview'
+  const tab: Tab = requested && TABS.includes(requested) ? requested : 'model'
   const base = useId()
   return (
     <>
       <PageHeader title={t.ai.title} lead={t.ai.lead} />
       <div className={styles.stackLg}>
-        <Availability summary={summary} />
+        <Availability summary={summary} onAlerts={() => setParams({ tab: 'model' }, { replace: true })} />
         <Tabs label={t.ai.tabs.label} idBase={base} value={tab} onChange={(id) => setParams({ tab: id }, { replace: true })} tabs={TABS.map((id) => ({ id, label: t.ai.tabs[id] }))} />
+        <TabPanel id="model" idBase={base} active={tab === 'model'}>
+          <ModelPanel summary={summary} onChanged={onChanged} />
+        </TabPanel>
         <TabPanel id="overview" idBase={base} active={tab === 'overview'}>
           <Overview summary={summary} />
         </TabPanel>
@@ -63,7 +67,7 @@ function Screen({ summary, onChanged, reload }: { summary: AiSummary; onChanged:
   )
 }
 
-function Availability({ summary }: { summary: AiSummary }) {
+function Availability({ summary, onAlerts }: { summary: AiSummary; onAlerts: () => void }) {
   const t = useText()
   const s = t.ai.status
   const on = summary.availability.available
@@ -74,10 +78,246 @@ function Availability({ summary }: { summary: AiSummary }) {
         {!summary.availability.available && ` ${s.reasons[summary.availability.reason]}`}
       </p>
       <p className={ai.statusMeta}>
-        {s.model}: <strong>{summary.model.id}</strong> · {s.provider}: {summary.model.provider} · {s.key}: {summary.apiKey === 'set' ? s.keySet : s.keyMissing}
+        {s.model}: <strong>{summary.model.requiredName}</strong> (<code>{summary.model.id}</code>) · {s.provider}: {summary.model.provider} · {s.key}: {summary.apiKey === 'set' ? s.keySet : s.keyMissing}
       </p>
       <p className={ai.statusMeta}>{s.modelNote}</p>
+      {summary.alerts.open > 0 && (
+        <p className={ai.statusMeta} role="status">
+          <button type="button" className={ai.linkButton} onClick={onAlerts}>
+            {fill(s.openAlerts, { count: summary.alerts.open })}
+          </button>
+        </p>
+      )}
     </section>
+  )
+}
+
+// ---------------------------------------------------------------------------------------------------------------- model
+
+const TONE: Record<ConnectionStatus, 'success' | 'warning' | 'danger' | 'neutral'> = { connected: 'success', not_tested: 'neutral', failed: 'danger', stale: 'warning', no_key: 'danger', model_lock: 'danger' }
+
+/** The required model, the state of the connection, the connection test, the activation switch, usage against budget, and the alerts. */
+function ModelPanel({ summary, onChanged }: { summary: AiSummary; onChanged: (summary: AiSummary) => void }) {
+  const t = useText()
+  const toast = useToast()
+  const language = useInterfaceLanguage()
+  const m = t.ai.model
+  const [testing, setTesting] = useState(false)
+  const [switching, setSwitching] = useState(false)
+  const [result, setResult] = useState<AiTestResult | null>(null)
+  const c = summary.connection
+  const fmt = (value: number) => formatNumber(value, language)
+  const when = (value: string | null) => (value ? formatDateTime(value, language) : m.never)
+  const reasonText = (code: string | null) => (code ? ((m.reasons as Record<string, string>)[code] ?? code) : m.none)
+  const writable = summary.canWrite
+  const enabled = summary.settings.enabled
+  const blocker = summary.activation.blocker
+
+  const runTest = async () => {
+    setTesting(true)
+    try {
+      const answer = await endpoints.ai.test()
+      setResult(answer.result)
+      onChanged(answer.summary)
+      if (answer.result.ok) toast.success(m.testOk)
+      else toast.error(m.testFailed)
+    } catch (error) {
+      toast.error(describeError(t, error))
+    } finally {
+      setTesting(false)
+    }
+  }
+
+  const switchTo = async (next: boolean) => {
+    setSwitching(true)
+    try {
+      onChanged(await endpoints.ai.setEnabled(next))
+      toast.success(next ? m.switchedOn : m.switchedOff)
+    } catch (error) {
+      toast.error(error instanceof ApiError && error.status === 409 ? m.needsVerification : describeError(t, error))
+    } finally {
+      setSwitching(false)
+    }
+  }
+
+  const acknowledge = async (id?: string) => {
+    try {
+      onChanged(await endpoints.ai.acknowledge(id))
+      toast.success(m.acknowledged)
+    } catch (error) {
+      toast.error(describeError(t, error))
+    }
+  }
+
+  const alertText = (alert: AiAlert): string => {
+    const detail = alert.detail ?? {}
+    const money = alert.kind.startsWith('cost_')
+    const amount = (value: number | undefined) => (value === undefined ? '' : money ? dollars(value, language) : fmt(value))
+    return fill((m.alertKinds as Record<string, string>)[alert.kind] ?? alert.kind, { percent: detail.percent ?? '', used: amount(detail.used), limit: amount(detail.limit), reason: reasonText(detail.reason ?? null), reported: detail.reported ?? '' })
+  }
+
+  const b = summary.budget
+  const totals = summary.totals
+  return (
+    <div className={ai.sectionGap}>
+      <div className={ai.twoColumns}>
+        <DetailPanel title={m.requiredTitle}>
+          <Rows
+            empty=""
+            rows={[
+              { name: m.required, value: summary.model.requiredName },
+              { name: m.configured, value: summary.model.id },
+              { name: m.provider, value: summary.model.provider },
+            ]}
+          />
+          <p className={ai.note}>{m.fixed}</p>
+          {summary.model.overrideRejected && (
+            <p className={ai.warning} role="alert">
+              {m.override}
+            </p>
+          )}
+        </DetailPanel>
+
+        <DetailPanel title={m.connectionTitle}>
+          <p className={ai.state} data-tone={TONE[c.status]} role="status">
+            <span className={ai.dot} aria-hidden="true" />
+            {m.connection[c.status]}
+          </p>
+          <Rows
+            empty=""
+            rows={[
+              { name: m.key, value: c.keyConfigured ? m.keySet : m.keyMissing },
+              { name: m.endpoint, value: c.endpoint },
+              { name: m.reported, value: c.verification.reportedModel ?? m.never },
+              { name: m.lastTest, value: c.lastSuccessfulTest ? `${when(c.lastSuccessfulTest.at)}${c.lastSuccessfulTest.latencyMs === null ? '' : ` · ${fill(m.latency, { ms: fmt(c.lastSuccessfulTest.latencyMs) })}`}` : m.never },
+              { name: m.lastError, value: c.lastError ? fill(m.errorLine, { code: reasonText(c.lastError.code), source: m.source[c.lastError.source], time: when(c.lastError.at) }) : m.none },
+            ]}
+          />
+        </DetailPanel>
+      </div>
+
+      <div className={ai.twoColumns}>
+        <DetailPanel title={m.testTitle}>
+          <p className={ai.note}>{m.testLead}</p>
+          {writable ? (
+            <div className={page.actions}>
+              <AdminButton type="button" variant="secondary" loading={testing} loadingLabel={m.running} onClick={() => void runTest()}>
+                {m.run}
+              </AdminButton>
+            </div>
+          ) : (
+            <p className={ai.note}>{m.readOnly}</p>
+          )}
+          {result && (
+            <p className={ai.state} data-tone={result.ok ? 'success' : 'danger'} role="status">
+              <span className={ai.dot} aria-hidden="true" />
+              {result.ok ? m.testOk : `${m.testFailed} ${reasonText(result.reason)}.`}
+              {result.latencyMs !== null && ` ${fill(m.latency, { ms: fmt(result.latencyMs) })}`}
+            </p>
+          )}
+        </DetailPanel>
+
+        <DetailPanel title={m.activationTitle}>
+          <p className={ai.state} data-tone={enabled ? 'success' : 'neutral'} role="status">
+            <span className={ai.dot} aria-hidden="true" />
+            {enabled ? m.on : m.off}
+          </p>
+          <p className={ai.note}>{m.activationLead}</p>
+          {writable ? (
+            <div className={page.actions}>
+              {enabled ? (
+                <AdminButton type="button" variant="secondary" danger loading={switching} loadingLabel={m.switching} onClick={() => void switchTo(false)}>
+                  {m.switchOff}
+                </AdminButton>
+              ) : (
+                <AdminButton type="button" variant="primary" loading={switching} loadingLabel={m.switching} disabled={blocker !== null} onClick={() => void switchTo(true)}>
+                  {m.switchOn}
+                </AdminButton>
+              )}
+            </div>
+          ) : (
+            <p className={ai.note}>{m.readOnly}</p>
+          )}
+          {!enabled && blocker !== null && <p className={ai.note}>{fill(m.blocked, { reason: t.ai.status.reasons[blocker] })}</p>}
+        </DetailPanel>
+      </div>
+
+      <DetailPanel title={m.usageTitle}>
+        <section aria-label={m.usageTitle} className={ai.stats}>
+          <DashboardStatCard
+            compact
+            label={m.requests}
+            value={fmt(totals.requests)}
+            note={[fmt(totals.modelVerifiedRequests) + ' ' + m.verified, totals.modelUnreportedRequests > 0 ? `${fmt(totals.modelUnreportedRequests)} ${m.unreported}` : '', totals.modelMismatchedRequests > 0 ? `${fmt(totals.modelMismatchedRequests)} ${m.mismatched}` : ''].filter(Boolean).join(' · ')}
+            tone={totals.modelMismatchedRequests > 0 ? 'warning' : undefined}
+          />
+          <DashboardStatCard compact label={m.tokens} value={fmt(totals.tokens)} note={fill(m.tokensNote, { month: fmt(totals.monthTokens) })} />
+          <DashboardStatCard compact label={m.cost} value={dollars(totals.estimatedCostUsd, language)} note={m.costNote} tone="info" />
+          <DashboardStatCard compact label={`${m.today} · ${m.cost}`} value={fill(m.budgetValue, { used: dollars(b.day.spentUsd, language), budget: dollars(b.day.budgetUsd, language) })} note={m.states[b.day.state]} tone={b.day.state === 'ok' ? undefined : 'warning'} />
+          <DashboardStatCard compact label={`${m.month} · ${m.cost}`} value={fill(m.budgetValue, { used: dollars(b.month.spentUsd, language), budget: dollars(b.month.budgetUsd, language) })} note={m.states[b.month.state]} tone={b.month.state === 'ok' ? undefined : 'warning'} />
+        </section>
+        <p className={ai.note}>{fill(m.alertAt, { percent: b.alertPercent })}</p>
+      </DetailPanel>
+
+      <DetailPanel title={m.alertsTitle}>
+        {summary.alerts.items.length === 0 ? (
+          <p className={ai.note}>{m.alertsNone}</p>
+        ) : (
+          <ul className={ai.alerts}>
+            {summary.alerts.items.map((alert) => (
+              <li key={alert.id} className={ai.alert} data-level={alert.level} data-seen={alert.acknowledgedAt ? 'true' : 'false'}>
+                <div className={ai.alertBody}>
+                  <p className={ai.alertText}>
+                    <strong>{m.level[alert.level]}</strong> {alertText(alert)}
+                  </p>
+                  <p className={ai.statusMeta}>
+                    {when(alert.createdAt)}
+                    {alert.acknowledgedAt ? ` · ${m.seen}` : ''}
+                  </p>
+                </div>
+                {writable && !alert.acknowledgedAt && (
+                  <AdminButton type="button" variant="text" onClick={() => void acknowledge(alert.id)}>
+                    {m.acknowledge}
+                  </AdminButton>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {writable && summary.alerts.open > 1 && (
+          <div className={page.actions}>
+            <AdminButton type="button" variant="secondary" onClick={() => void acknowledge()}>
+              {m.acknowledgeAll}
+            </AdminButton>
+          </div>
+        )}
+      </DetailPanel>
+
+      <DetailPanel title={m.testsTitle}>
+        {c.tests.length === 0 && <p className={ai.note}>{m.testsNone}</p>}
+        <DataList
+          caption={m.testsTitle}
+          rows={c.tests}
+          rowKey={(row) => row.id}
+          columns={[
+            { key: 'when', header: m.when, cell: (row) => when(row.at) },
+            { key: 'outcome', header: m.outcome, cell: (row) => m.outcomes[row.outcome] },
+            { key: 'reason', header: m.reason, cell: (row) => (row.reason ? reasonText(row.reason) : m.none) },
+            { key: 'model', header: m.modelColumn, cell: (row) => row.reportedModel ?? m.none },
+            { key: 'time', header: m.time, cell: (row) => (row.latencyMs === null ? '–' : fill(m.latency, { ms: fmt(row.latencyMs) })) },
+            { key: 'tokens', header: m.tokensColumn, cell: (row) => (row.inputTokens === null ? '–' : `${fmt(row.inputTokens)} + ${fmt(row.outputTokens ?? 0)}`) },
+          ]}
+          card={(row) => (
+            <div className={styles.cellMain}>
+              <span className={styles.cellTitle}>
+                {m.outcomes[row.outcome]} · {when(row.at)}
+              </span>
+              <span>{row.reason ? reasonText(row.reason) : (row.reportedModel ?? m.none)}</span>
+            </div>
+          )}
+        />
+      </DetailPanel>
+    </div>
   )
 }
 
@@ -185,7 +425,7 @@ function Rows({ rows, empty }: { rows: { name: string; value: string }[]; empty:
 // ---------------------------------------------------------------------------------------------------------------- settings
 
 const GROUPS: { title: 'budgets' | 'limits'; keys: NumericSetting[] }[] = [
-  { title: 'budgets', keys: ['dailyBudgetUsd', 'monthlyBudgetUsd', 'dailyTokenBudget', 'dailyRequests', 'maxDailyConversations'] },
+  { title: 'budgets', keys: ['dailyBudgetUsd', 'monthlyBudgetUsd', 'alertPercent', 'dailyTokenBudget', 'dailyRequests', 'maxDailyConversations'] },
   { title: 'limits', keys: ['maxRequestsPerSession', 'maxRequestsPerIp', 'maxInputChars', 'maxHistoryMessages', 'maxConversationMessages', 'maxOutputTokens', 'maxToolCalls', 'conversationMaxHours', 'retentionDays'] },
 ]
 
@@ -231,7 +471,6 @@ function SettingsForm({ summary, onSaved }: { summary: AiSummary; onSaved: (summ
       <fieldset className={styles.fieldset} disabled={!writable || busy}>
         <legend className={styles.legend}>{a.availability}</legend>
         <div className={ai.checks}>
-          <SwitchField label={a.enabled} checked={form.enabled} onChange={(enabled) => setForm({ ...form, enabled })} />
           <SwitchField label={a.planner} checked={form.plannerEnabled} onChange={(plannerEnabled) => setForm({ ...form, plannerEnabled })} />
           <SwitchField label={a.quote} checked={form.quoteEnabled} onChange={(quoteEnabled) => setForm({ ...form, quoteEnabled })} />
         </div>

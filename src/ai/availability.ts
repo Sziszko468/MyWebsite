@@ -11,6 +11,8 @@ import type { Language } from '../i18n/config'
 
 export interface AiPublicConfig {
   available: boolean
+  /** `model`: the assistant was switched on but the required AI model could not be verified; the page says so. Otherwise null. */
+  unavailableReason?: 'model' | null
   languages: Language[]
   plannerEnabled: boolean
   quoteEnabled: boolean

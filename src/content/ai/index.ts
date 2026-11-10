@@ -100,6 +100,24 @@ export const aiText = {
     network: tri('A kapcsolat megszakadt. Ellenőrizd az internetet, és próbáld újra.', 'The connection was lost. Check your internet and try again.', 'De verbinding is verbroken. Controleer je internet en probeer het opnieuw.'),
     rate_limited: tri('Túl sok kérés rövid idő alatt. Várj egy kicsit, aztán próbáld újra.', 'Too many requests in a short time. Please wait a moment and try again.', 'Te veel verzoeken in korte tijd. Wacht even en probeer het opnieuw.'),
     session_requests: tri('Ebben a munkamenetben elérted a kérdések számának korlátját. Kezdj egy új munkamenetet később, vagy írj az ajánlatkérőn keresztül.', 'You have reached the limit of questions for this session. Try again later, or write through the quote request form.', 'Je hebt de limiet aan vragen voor deze sessie bereikt. Probeer het later opnieuw of schrijf via het offerteformulier.'),
+    // The model the assistant must run on could not be verified (or answered as another model, or does not exist for this account):
+    // one fixed message, whatever the cause; the cause is for the administration. Nothing is answered by another model instead.
+    model_unverified: tri(
+      'A CONTROL ROOM AI átmenetileg nem érhető el. A szükséges AI-modellt nem sikerült ellenőrizni.',
+      'CONTROL ROOM AI is temporarily unavailable. The required AI model could not be verified.',
+      'CONTROL ROOM AI is tijdelijk niet beschikbaar. Het vereiste AI-model kon niet worden geverifieerd.',
+    ),
+    model_mismatch: tri(
+      'A CONTROL ROOM AI átmenetileg nem érhető el. A szükséges AI-modellt nem sikerült ellenőrizni.',
+      'CONTROL ROOM AI is temporarily unavailable. The required AI model could not be verified.',
+      'CONTROL ROOM AI is tijdelijk niet beschikbaar. Het vereiste AI-model kon niet worden geverifieerd.',
+    ),
+    model_not_found: tri(
+      'A CONTROL ROOM AI átmenetileg nem érhető el. A szükséges AI-modellt nem sikerült ellenőrizni.',
+      'CONTROL ROOM AI is temporarily unavailable. The required AI model could not be verified.',
+      'CONTROL ROOM AI is tijdelijk niet beschikbaar. Het vereiste AI-model kon niet worden geverifieerd.',
+    ),
+    provider_billing: tri('Az asszisztens most nem működik megfelelően. Az üzemeltető értesítést kapott.', 'The assistant is not working properly right now.', 'De assistent werkt nu niet goed.'),
     unavailable: tri('A Control Room AI most nem elérhető. A weboldal többi része természetesen működik.', 'Control Room AI is not available right now. The rest of the site works as usual.', 'Control Room AI is nu niet beschikbaar. De rest van de site werkt gewoon.'),
     budget: tri('A Control Room AI mára elérte a kapacitását, és most nem elérhető. Próbáld újra később, vagy írj az elérhetőségi oldalon keresztül.', 'Control Room AI has reached its capacity for now and is not available. Please try again later, or write through the contact page.', 'Control Room AI heeft voorlopig zijn capaciteit bereikt en is niet beschikbaar. Probeer het later opnieuw of schrijf via de contactpagina.'),
     conversation_expired: tri('Ez a beszélgetés lejárt. Kezdj egy újat.', 'This conversation has expired. Start a new one.', 'Dit gesprek is verlopen. Begin een nieuw gesprek.'),
@@ -199,6 +217,11 @@ export const aiText = {
     lead: tri('Kérdezz a projektekről, a technológiákról és a szolgáltatásokról, hasonlítsd össze a csomagokat, vagy tervezd meg a saját digitális termékedet, és kérj hozzá ajánlatot.', 'Ask about the projects, the technologies and the services, compare the packages, or plan your own digital product and ask for a quote.', 'Stel vragen over de projecten, de technologieën en de diensten, vergelijk de pakketten of plan je eigen digitale product en vraag een offerte aan.'),
     unavailableTitle: tri('A Control Room AI most nem elérhető', 'Control Room AI is not available right now', 'Control Room AI is nu niet beschikbaar'),
     unavailableText: tri('A weboldal többi része természetesen működik. Kérdéseiddel írj az elérhetőségi oldalon, vagy kérj ajánlatot az űrlapon.', 'The rest of the site works as usual. For questions, use the contact page, or ask for a quote with the form.', 'De rest van de site werkt gewoon. Heb je vragen, gebruik dan de contactpagina of vraag een offerte aan met het formulier.'),
+    modelUnavailableTitle: tri(
+        'A CONTROL ROOM AI átmenetileg nem érhető el. A szükséges AI-modellt nem sikerült ellenőrizni.',
+        'CONTROL ROOM AI is temporarily unavailable. The required AI model could not be verified.',
+        'CONTROL ROOM AI is tijdelijk niet beschikbaar. Het vereiste AI-model kon niet worden geverifieerd.',
+      ),
     contact: tri('Kapcsolat', 'Contact', 'Contact'),
     loading: tri('A Control Room betöltése…', 'Loading the Control Room…', 'De Control Room laden…'),
     skip: tri('Ugrás a beszélgetésre', 'Skip to the conversation', 'Naar het gesprek'),

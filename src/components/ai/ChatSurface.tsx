@@ -222,7 +222,7 @@ export function ChatSurface({ variant, composerRef }: { variant: 'panel' | 'page
   if (room.unavailable) {
     return (
       <div className={styles.unavailable} role="status">
-        <p>{room.unavailable === 'budget' ? text.errors.budget : text.errors.unavailable}</p>
+        <p>{room.unavailable === 'budget' ? text.errors.budget : room.unavailable === 'model_unverified' ? text.errors.model_unverified : text.errors.unavailable}</p>
         <LocalizedLink to="/contact" className={styles.link}>
           {text.page.contact}
         </LocalizedLink>
@@ -266,7 +266,7 @@ export function ChatSurface({ variant, composerRef }: { variant: 'panel' | 'page
         {errorText && (
           <div className={styles.error} role="alert">
             <p>{errorText}</p>
-            {code !== 'unavailable' && code !== 'budget' && code !== 'conversation_expired' && code !== 'conversation_full' && (
+            {code !== 'unavailable' && code !== 'budget' && code !== 'model_unverified' && code !== 'model_mismatch' && code !== 'model_not_found' && code !== 'conversation_expired' && code !== 'conversation_full' && (
               <button type="button" className={styles.retry} onClick={retry}>
                 {text.actions.retry}
               </button>

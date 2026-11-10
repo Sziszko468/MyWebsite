@@ -5,8 +5,9 @@ import { empty, json, type Reply } from '../../http/reply.ts'
 import type { RouteDef } from '../../http/router.ts'
 import { sha256Hex } from '../../lib/crypto.ts'
 import { isRecord } from '../../lib/text.ts'
+import { acknowledgeAlerts } from './alerts.ts'
 import { summaryOf, usageOverview, usageSeries } from './admin.ts'
-import { classify, type Trigger } from './gateway.ts'
+import { classify, unavailable, type Trigger } from './gateway.ts'
 import { isReady, missingFields, readPlanChanges, readStoredPlan, planHash, emptyPlan, type ProjectPlan } from './plan.ts'
 import { approve, parseApproval } from './quote.ts'
 import { availability, loadSettings, publicConfig, saveSettings } from './settings.ts'
@@ -23,6 +24,7 @@ import { requirePermission } from '../auth/permissions.ts'
  *            PUT/DELETE /api/ai/conversations/:id/plan   the visitor edits or restarts the project plan
  *            POST /api/ai/conversations/:id/quote-approval   "Send this request": the approval the submit tool needs
  *   admin    GET /api/admin/ai · PUT /api/admin/ai/settings · GET /api/admin/ai/usage · POST /api/admin/ai/knowledge/refresh
+ *            POST /api/admin/ai/connection-test (the server-side test of the required model) · POST /api/admin/ai/alerts/acknowledge
  *
  * A session token travels in the `X-AI-Session` header (not a cookie: the public API is cookie-free and may sit on another
  * origin). A conversation belongs to the session that started it; another session gets "not found", never "forbidden".
@@ -75,7 +77,8 @@ export function aiRoutes(_app: AppContext): RouteDef[] {
       '/api/ai/session',
       async (ctx) => {
         await ctx.json().catch(() => ({}))
-        if (!availability(ctx.app).available) throw new HttpError(503, 'service_unavailable', 'The assistant is not available right now.', { details: { reason: 'unavailable' } })
+        const state = availability(ctx.app)
+        if (!state.available) throw unavailable(state.reason)
         const session = createSession(ctx.app.db, ctx.app.clock, ctx.app.config.ai.sessionSecret, ctx.ipHash)
         return json({ token: session.token, expiresAt: session.expiresAt }, { status: 201 })
       },
@@ -173,6 +176,19 @@ export function aiRoutes(_app: AppContext): RouteDef[] {
     admin('GET', '/api/admin/ai', (ctx) => json(summaryOf(ctx.app, ctx.session))),
     admin('PUT', '/api/admin/ai/settings', async (ctx) => {
       saveSettings(ctx.app, ctx.session, await ctx.json())
+      return json(summaryOf(ctx.app, ctx.session))
+    }),
+    // The server-side connection test: one minimal request to the required model. It records the result and never switches the assistant on.
+    admin('POST', '/api/admin/ai/connection-test', async (ctx) => {
+      const actor = requirePermission(ctx.session, 'system:write')
+      await ctx.json().catch(() => ({}))
+      const result = await ctx.app.assistant.connectionTest(actor.userId)
+      return json({ result, summary: summaryOf(ctx.app, ctx.session) })
+    }),
+    admin('POST', '/api/admin/ai/alerts/acknowledge', async (ctx) => {
+      const body = await ctx.json().catch(() => ({}))
+      const id = isRecord(body) && typeof body.id === 'string' ? body.id : null
+      acknowledgeAlerts(ctx.app, ctx.session, id)
       return json(summaryOf(ctx.app, ctx.session))
     }),
     admin('GET', '/api/admin/ai/usage', (ctx) => {

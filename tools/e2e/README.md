@@ -78,10 +78,11 @@ AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/ai-journey.cjs --base=http:/
   --email=admin@example.test --password=<the test password> [--out=<dir>]     # --out also saves a picture of every failing step
 ```
 
-The stand-in answers according to markers in the visitor's last message: `TOOL:<name>:<json>` makes the model call that tool, `FAIL:<status>` answers with an HTTP error, `SLOW` writes the answer word by word, and the "I approved the plan" sentences (in all three languages) make it call `submitApprovedQuoteRequest`. Everything else gets a plain answer. It never reproduces real model behaviour: this checks **our** code, not Haiku.
+The stand-in can be told how to behave for **every** request while it runs (`POST /__control` with JSON, or `standIn.behaviour` in a test): `reportModel` is the model its replies name (default: the one asked for; another identifier, or `null` for none, shows what the assistant does when it is not Claude Haiku 5.5) and `failStatus` answers everything with an HTTP error (401, 402, 403, 404, 429, 5xx, 529). Otherwise it answers according to markers in the visitor's last message: `TOOL:<name>:<json>` makes the model call that tool, `FAIL:<status>` answers with an HTTP error, `SLOW` writes the answer word by word, and the "I approved the plan" sentences (in all three languages) make it call `submitApprovedQuoteRequest`. Everything else gets a plain answer. It never reproduces real model behaviour: this checks **our** code, not Haiku.
 
 | | Steps |
 | --- | --- |
+| **0** Verification and activation (PROMPT 16.1) | the assistant starts off and the switch refuses → the Model and connection tab shows the required model, the key as set and no way to change the model → "Run connection test" sends exactly one request for `claude-haiku-5-5`, shows the model the provider named, and does **not** switch the assistant on → the administrator switches it on and the website offers it |
 | **A** The floating assistant | the button appears when idle and no AI code or session exists before it is pressed → the panel opens with the cursor in the box, the welcome and six suggested questions → a streamed answer → Escape and focus → the same conversation again → "Open the full Control Room" shows the same conversation |
 | **B** The page | three areas on a desktop → the conversation survives a reload → the button on another page opens the same conversation |
 | **C** Stop, retry, copy, delete | stopping a long answer keeps what was written → copy and regenerate → a provider failure becomes a sentence with "Try again" and no provider text → deleting a conversation |
@@ -89,7 +90,10 @@ The stand-in answers according to markers in the visitor's last message: `TOOL:<
 | **E** Languages | the same conversation continues in Hungarian and Dutch and the model is told which language to answer in |
 | **F** Switches | switching the assistant off removes the button and the page says so; an exhausted budget gives a friendly message; a welcome message and chips written in the administration replace the built-in ones |
 | **G** The administration | the AI screen shows usage, tokens, cost (an estimate) and tools in charts with tables; the settings form saves and refuses a budget the server will not accept |
+| **G2** The model cannot be verified (PROMPT 16.1) | a reply from another model is discarded and the visitor reads "The required AI model could not be verified." with a contact link → the assistant is unavailable, the page says so and the provider is not contacted → the administration shows the failure and the alert → a new test brings it back → an invalid key (401) is a failed test with its reason and no key or provider text on the page |
 | **H** A phone | full-screen modal with the box visible → the keyboard shrinks the panel → the plan tab → the button rises above the shop's sticky bar → the page is one column with a drawer and a tab |
+
+The assistant starts **switched off and unverified**, as in production, so the journey's first section is the administrator doing it in the browser. A script that needs a working assistant but is not about the activation (`audit-ai.cjs`) runs `node tools/e2e/ai-activate.cjs --base=… --email=… --password=…` first: it uses the administration's own API (connection test, then the switch).
 
 It needs a fresh server (sign-in is limited to 10 per 15 minutes) and an administrator of a **throw-away database**; it changes the assistant's settings (and puts them back) and creates one quote request. This journey found a real defect: the second answer of a conversation was not being saved (its message id was empty), which is why steps D and E continue one conversation across several turns and a reload.
 

@@ -226,7 +226,7 @@ describe('the operator\'s commands', () => {
 
   it('migrate and seed are safe to run again', async () => {
     const e = env(folder())
-    expect((await cli(['migrate'], e)).stdout).toMatch(/Applied migrations: 1, 2, 3, 4, 5, 6, 7\.\s+Schema version 7\./)
+    expect((await cli(['migrate'], e)).stdout).toMatch(/Applied migrations: 1, 2, 3, 4, 5, 6, 7, 8\.\s+Schema version 8\./)
     expect((await cli(['migrate'], e)).stdout).toMatch(/The schema is up to date\./)
     expect((await cli(['seed'], e)).stdout).toContain('Loaded 4 services, 4 packages, 8 add-ons and 6 FAQ entries.')
     expect((await cli(['seed'], e)).stdout).toContain('The catalogue is not empty: nothing was changed.')

@@ -49,8 +49,8 @@ Everything here is read from, or enforced by, the code in this repository. Where
 
 | Package | Version installed | Where |
 |---|---|---|
-| `ai` (Vercel AI SDK) | 7.0.164 | server (streaming, tools, UI message protocol) and the chat client's types |
-| `@ai-sdk/anthropic` | 4.0.98 | server only: the Anthropic provider |
+| `ai` (Vercel AI SDK) | 7.0.166 | server (streaming, tools, UI message protocol) and the chat client's types |
+| `@ai-sdk/anthropic` | 4.0.99 | server only: the Anthropic provider |
 | `@ai-sdk/react` | 4.0.168 | website: `Chat` / `useChat` over the site's own endpoint |
 | `zod` | 4.6.7 | server: tool input schemas |
 
@@ -63,27 +63,92 @@ All variables are in `.env.example` (section "CONTROL ROOM AI"). The ones that m
 | Variable | Meaning | Default |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | The provider key. Secret; backend only. Empty = the assistant is not offered. | empty |
-| `ANTHROPIC_MODEL` | The exact model identifier. Nothing replaces it silently. | `claude-haiku-5-5` |
+| ~~`ANTHROPIC_MODEL`~~ | **Not a setting any more** (PROMPT 16.1). The model is a constant in code. A leftover value other than `claude-haiku-5-5` is ignored and keeps the assistant switched off (see "The model lock"). | n/a |
 | `ANTHROPIC_BASE_URL` | Another provider address ending in `/v1` (a proxy, or the test stand-in). | Anthropic |
-| `AI_ASSISTANT_ENABLED` | The operator's master switch. | `true` |
+| `AI_ASSISTANT_ENABLED` | The operator's master switch. The administrator's own activation (a setting, **off** until switched on) comes on top of it. | `true` |
 | `AI_SESSION_SECRET` | Signs anonymous session tokens; derived from `APP_SECRET` when empty (≥ 32 characters if set, in production). | derived |
 | `AI_EFFORT`, `AI_THINKING` | `low\|medium\|high` and `adaptive\|disabled`. Thinking counts as output tokens. | `low`, `adaptive` |
 | `AI_PRICE_INPUT_PER_MTOK`, `AI_PRICE_OUTPUT_PER_MTOK`, `AI_PRICES_AS_OF` | USD per million tokens, and when they were read. **Check them against the provider's price list**: costs are computed from these. | 0.10 / 0.50, 2026-10-06 |
 | `AI_DAILY_BUDGET`, `AI_MONTHLY_BUDGET` | USD. | 1 / 10 |
+| `AI_ALERT_PERCENT` | An administration alert is raised when a budget (cost, tokens, requests) reaches this percentage, and again when it is used up. | 80 |
 | `AI_DAILY_TOKEN_BUDGET`, `AI_DAILY_REQUESTS`, `AI_MAX_DAILY_CONVERSATIONS` | Daily ceilings. | 2 000 000 / 1000 / 100 |
 | `AI_MAX_INPUT_CHARS`, `AI_MAX_HISTORY_MESSAGES`, `AI_MAX_CONVERSATION_MESSAGES`, `AI_MAX_OUTPUT_TOKENS`, `AI_MAX_TOOL_CALLS` | Per message / per answer. | 1200 / 20 / 60 / 1500 / 6 |
 | `AI_MAX_REQUESTS_PER_SESSION`, `AI_MAX_REQUESTS_PER_IP` | Per visitor session, and per address in 10 minutes. | 40 / 30 |
 | `AI_CONVERSATION_MAX_HOURS`, `AI_TIMEOUT_MS` | A conversation's lifetime, and one answer's total time. | 24 / 90000 |
 | `AI_RETENTION_DAYS` | Days the **words** of a conversation stay on the server. | 7 |
 
-The environment gives the **starting values**; what an administrator saves in the AI screen wins, field by field. The model, the key and the provider address are never settings: they are environment only.
+The environment gives the **starting values**; what an administrator saves in the AI screen wins, field by field. The key and the provider address are never settings: they are environment only. **The model is not even that**: it is fixed in code.
 
-## The model and the key
+## The model lock
 
-- Model: **`claude-haiku-5-5`**, from `ANTHROPIC_MODEL`. If the provider refuses the identifier, the request fails with a clear error and an administrator-visible log line; there is **no fallback model**.
+**CONTROL ROOM AI runs exclusively on Anthropic Claude Haiku 5.5. If that model cannot be reached or verified, the assistant stays unavailable. It never switches to another model or provider, and availability is never bought with a different model.** The rest of the website, the shop, the quote requests and the e-mail do not depend on the assistant and keep working.
+
+| What | Value |
+|---|---|
+| Provider | Anthropic, through the Vercel AI SDK (`ai` 7.0.166, `@ai-sdk/anthropic` 4.0.99) |
+| Model identifier | **`claude-haiku-5-5`** (Claude Haiku 5.5; Active; no dated alias, so no other string is ever accepted for it) |
+| Where it is defined | one constant, `AI_MODEL_ID`, in `server/src/modules/ai/model.ts`. Nothing else in the server contains a model identifier. |
+| How it is changed | by a **developer**, by editing that constant, reviewing and deploying it. Not by an environment variable, an administration field or a request. |
+
+How the lock is built:
+
+- `createAiModel` (`model.ts`) is the only place the Anthropic provider is created, and it is only ever asked for `AI_MODEL_ID`. The key and the address come from the server's own configuration.
+- Every model call (`streamText` in `gateway.ts`, `generateText` in the connection test) receives the model through `guardModel`: it refuses a bare string (the AI SDK would resolve one through the Vercel AI Gateway, i.e. another provider), any model not named `claude-haiku-5-5`, and any provider whose name does not start with `anthropic`.
+- There is **no** fallback list, router, model setting, alternative provider package, or "try another model" branch. The only retry the SDK makes is one more attempt against the same model for a transient error (`maxRetries: 1`).
+- `ANTHROPIC_MODEL` was removed as a setting. If a leftover value is present and differs from `claude-haiku-5-5`, the server still starts (the website must not depend on the assistant) but the assistant is unavailable with the reason `model_lock`, and the connection test reports it without calling the provider.
+- `server/test/aiModelLock.test.ts` fails if the server source names any other model or model family, imports any other provider package, creates the provider anywhere but `model.ts`, adds a fallback construct or a model-selecting variable, lets a request body carry a model, puts a model name or key in the website's source, or adds another AI provider to `package.json`. Its runtime half hands the gateway other models, a model from another provider, a string, and a model that lies about its identity, and checks each one is refused and nothing was requested from it.
+
+## Identity verification
+
+Asking for a model is not proof that it answered. The assistant therefore reads the model the **provider reports back** (`message.model` in Anthropic's reply, surfaced by the SDK as the `response-metadata` part of a stream, or `response.modelId` of a non-streamed call) and compares it **exactly** with `claude-haiku-5-5`. A dated variant, a different case or any other family does not match.
+
+- **A request** whose reply names another model fails before any of its text is passed on: the stream ends with the error code `model_mismatch`, the request is recorded with the requested and the reported identifier (`ai_requests.model`, `actual_model`, `model_verified`), the verification is marked **failed**, an administration alert is raised, and the assistant is unavailable until a connection test succeeds again. Nothing is retried with another model.
+- A request whose reply reports **no** model at all is allowed to finish (a visitor is not punished for a provider that omits a field) but is recorded as **not verified**; the administration counts such requests separately and never counts them as "answered by Claude Haiku 5.5".
+- The administration shows, for the whole history: how many requests were **confirmed by the provider** as the required model, how many had no model statement, and how many were answered by another model (and so refused).
+- The record `ai.verification` (one row of `settings`) holds the state `unverified | verified | failed`, the identifier it is about, what the provider reported, when, and a **keyed one-way fingerprint** of (model, provider address, API key). The key itself is never stored. If the key or the address changes, the earlier proof no longer matches the fingerprint and the assistant is unavailable (`stale`) until the test is run again, because another key is another account and another proof is needed.
+
+## The connection test and activation
+
+The server-side connection test (`POST /api/admin/ai/connection-test`, the administration's "Run connection test" button, or `npm run server:cli -- ai check`) does this, in order:
+
+1. checks that a key is configured and that the model lock is intact (no leftover `ANTHROPIC_MODEL`);
+2. sends **one minimal request** (a short sentence, at most 400 output tokens, no retry) to `claude-haiku-5-5` with the server's key and address;
+3. requires the provider's reply to name `claude-haiku-5-5` as the model that answered;
+4. records the result (the history of tests, the verification record, the last error) and, on failure, raises alerts;
+5. returns codes and numbers only: never the key, never the provider's message.
+
+A successful test **verifies** the model. It does **not** switch the assistant on. Visitors are offered the assistant only while **all** of these hold: the operator's master switch is on, the administrator has switched the assistant on, a key is set, no model override is present, and the model is verified for the configured key and address. Switching it on while the model is not verified is refused (`409`, `verification_required`); switching it off is always allowed. Saving other settings can never switch the assistant on or off: the activation is its own action (`PUT /api/admin/ai/settings` with `{ "enabled": … }`, audited as `ai.activate` / `ai.deactivate`).
+
+## Failure handling
+
+Every failure ends the same way: a short code, a safe log line (no key, no provider text, no prompt), an alert where the administrator has to act, **no retry with another model**, the customer's quote requests untouched, and a friendly message with a contact alternative.
+
+| Case | Code | Effect on the assistant | Administration |
+|---|---|---|---|
+| Missing key | `no_api_key` | unavailable | status "No API key"; the test does not call anyone |
+| Invalid key (401) | `provider_auth` / `invalid_key` | requests fail; the verification stays (it is bound to the key) | alert `provider_auth`; last error |
+| No credit / billing (402) | `provider_billing` / `billing` | requests fail | alert `provider_billing` |
+| Key may not use the model (403) | `provider_auth` / `permission` | requests fail | alert `provider_auth` |
+| Model not found (404) | `model_not_found` | **verification failed**: unavailable until a test succeeds | alerts `model_not_found`, `model_unverified` |
+| Another model answered | `model_mismatch` | **verification failed**; the reply is discarded | alerts `model_mismatch`, `model_unverified` |
+| No model statement in a test | `model_unreported` | the test fails: not verified | alert `model_unverified` |
+| Rate limited (429) | `provider_rate_limit` | that request fails; one retry against the same model by the SDK | last error |
+| Provider down / overloaded (5xx, 529) | `provider_unavailable` | that request fails | last error |
+| Network error / timeout | `network` / `timeout` | that request fails | last error |
+| Invalid tool call | the tool's own refusal | the model is told; nothing is executed | tool statistics |
+| Budget used up | `daily_budget`, `monthly_budget`, … | new answers pause; clear message | alert `cost_*_exhausted` etc. |
+
+A `404` is read as "the provider does not know the required model", which is what Anthropic answers for an unknown model identifier; the same status also comes from a wrong `ANTHROPIC_BASE_URL` (a missing `/v1`, for example). The effect is the safe one either way (the assistant is unavailable until a test succeeds), but if the test says "model not found" on a fresh set-up, check the address first.
+
+What a visitor sees: when the administrator has switched the assistant on but the model is not verified (or a reply came from another model), the Control Room page and the chat say, in the visitor's language, **"CONTROL ROOM AI is temporarily unavailable. The required AI model could not be verified."** (Hungarian and Dutch texts are in `src/content/ai/index.ts`), followed by the contact page link and the note that the rest of the site works. A budget that is used up says the assistant "has reached its capacity for now" with the same alternatives. The floating button is simply not drawn while the assistant is unavailable.
+
+## The key
+
+- The key is `ANTHROPIC_API_KEY`, in the backend environment only. It is never hardcoded, never has a `VITE_` name, is never sent to the browser, never stored in the database (only the keyed fingerprint above), never committed, never written to a log, and never part of an error message (a provider error that contains it is redacted: `server/test/aiLimits.test.ts` and `aiVerification.test.ts` check the visitor's response, the administration's responses and the log).
+- It is read once at start-up, registered with the log redactor, and is not part of `redactedConfig` (which says only "set" or "missing"). Use separate keys for development and production.
+- A search of the built site finds no key and no model identifier in the public bundles; the administration shows the model name it is told by the server.
 - Requests go out with adaptive thinking and low effort (`providerOptions.anthropic`), `maxOutputTokens` from the settings, and no temperature (the model family does not take one). The wire format was captured against the local stand-in: `thinking: {type: "adaptive"}`, `output_config: {effort: "low"}`, `tool_choice: {type: "auto"}`, `stream: true`, and the eight tool definitions.
-- The key is read once at start-up into the backend's configuration. It is registered with the log redactor, is not part of `redactedConfig`, and never appears in an API response (`server/test/aiLimits.test.ts` feeds a provider error that contains a key and checks that neither the visitor nor the log gets it). The key is not in any browser bundle: a search of the built site finds the *names* `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` only in the administration's help text (which tells an administrator what to set), and no key or model setting in the public website's bundles.
-- `npm run server:cli -- ai status` says whether the assistant is available and why not. `npm run server:cli -- ai check "Say hello"` sends **one real request** (a few tokens) to prove the key, the model and the address. Nothing in the test suite does that: the suite uses a scripted mock model, and the browser journey uses a local stand-in for Anthropic's API.
+- `npm run server:cli -- ai status` says whether the assistant is available and why not (the key is shown as "set"/"missing"). `npm run server:cli -- ai check` runs the connection test: **one real request** (a few tokens). Nothing in the test suite does that: the suite uses a scripted mock model and a local stand-in for Anthropic's API.
 
 ## The eight tools
 
@@ -152,8 +217,9 @@ New tables (migration `0006_control_room_ai.sql`): `ai_sessions` (random id, key
 
 `/admin/ai` (reading needs the `system:read` permission; saving settings and refreshing the knowledge need `system:write`):
 
+- **Model and connection** (the first tab): the required model (Claude Haiku 5.5) and its configured identifier, shown but **not editable**; the provider, the API key's state ("set"/"missing", never the value), the connection state (connected / not tested / failed / stale / no key / blocked by the lock), the model the provider named in its last proof, the last successful test and the last API error; the **Run connection test** button; the **activation** switch (off until switched on, refused while the model is unverified); total requests with how many the provider confirmed as the required model, tokens, estimated cost, today and this month against the budgets with their state (within budget / warning / used up); the **alerts** (mark as seen); and the recent tests. An administrator can switch the assistant on and off here; nobody can switch its model.
 - **Overview**: today, this month and all time against the budgets; requests, conversations, tokens, **estimated** cost, failures by cause, latency; "What visitors do" (counts only): question categories, tools used (calls, refusals/failures, time), project plans completed, quote requests sent from a conversation, average conversation length; and charts over the last 30 days, 12 weeks or 12 months, each with a "Show the numbers" table alternative.
-- **Settings**: the switches (assistant, planner, quote sending), languages, every limit and budget, effort and thinking, prices and their date, welcome message and suggested questions per language. The server validates every field and marks the ones it refuses (a daily budget above the monthly one, for example).
+- **Settings**: the switches (planner, quote sending), languages, every limit and budget, the alert percentage, effort and thinking, prices and their date, welcome message and suggested questions per language. The server validates every field and marks the ones it refuses (a daily budget above the monthly one, for example).
 - **Knowledge**: what the assistant can read (profile, projects, services, packages, FULL EXPERIENCE) with counts and a fingerprint, and a button that refreshes the cache. It shows nothing the assistant cannot say.
 
 The administration never shows the key, and no conversation text is listed there: it has statistics, not transcripts.
@@ -168,22 +234,23 @@ The administration never shows the key, and no conversation text is listed there
 
 ## API
 
-Public (`/api/ai`): `GET /config`, `POST /session`, `POST /chat` (streamed UI message protocol), `GET|DELETE /conversations[/:id]`, `PUT|DELETE /conversations/:id/plan`, `POST /conversations/:id/quote-approval`. Administration (`/api/admin/ai`): `GET /`, `PUT /settings`, `GET /usage?range=daily|weekly|monthly`, `POST /knowledge/refresh`. Session creation and the reads are rate-limited; the chat is governed by the limits above.
+Public (`/api/ai`): `GET /config`, `POST /session`, `POST /chat` (streamed UI message protocol), `GET|DELETE /conversations[/:id]`, `PUT|DELETE /conversations/:id/plan`, `POST /conversations/:id/quote-approval`. Administration (`/api/admin/ai`): `GET /`, `PUT /settings`, `GET /usage?range=daily|weekly|monthly`, `POST /knowledge/refresh`, `POST /connection-test`, `POST /alerts/acknowledge`. Session creation and the reads are rate-limited; the chat is governed by the limits above.
 
 ## Operating it
 
-1. Set `ANTHROPIC_API_KEY` in the backend environment (never in a `VITE_` variable) and check `ai status`; run `ai check` once to prove the key, the model id and the address.
+1. Set `ANTHROPIC_API_KEY` in the backend environment (never in a `VITE_` variable) and check `ai status`. Remove any `ANTHROPIC_MODEL`. Then run the **connection test** (`ai check`, or AI > Model and connection > Run connection test): it must say the provider named `claude-haiku-5-5`.
 2. Check the prices in the environment against the provider's current list, and set the budgets you are comfortable with. The defaults are deliberately small (USD 1 a day, 10 a month).
 3. Read the privacy section and adapt it to your situation (processor, location, contact for data requests).
 4. After deployment, look at the AI screen: errors, refusals, latency, and the estimated cost against the provider's own usage page. **Do not trust the estimate over the provider's bill.**
-5. To switch the assistant off at once: the AI screen's master switch (the button disappears, the page says so) or `AI_ASSISTANT_ENABLED=false`.
+5. Switch the assistant **on** on the Model and connection tab (it starts off, and a successful test does not switch it on). To switch it off at once: the same switch (the button disappears, the page says so) or `AI_ASSISTANT_ENABLED=false`.
+   If Anthropic renames or retires `claude-haiku-5-5`, the assistant becomes unavailable by itself (404 or a changed identifier) until a developer updates `AI_MODEL_ID`, reviews it and deploys it.
 6. The migration runs with the others at start-up (`npm run server:migrate`); backups include the new tables.
 
 Nothing in this change deploys itself.
 
 ## Tests and checks
 
-- **Backend (vitest)**: `server/test/ai.test.ts` (routes, sessions, ownership, streaming protocol, stored conversation, retention, deletion), `aiTools.test.ts` (each tool, plan, approval and submission, every refusal), `aiLimits.test.ts` (limits, atomic reservation under concurrency, reconciliation, abandoned sweep, budgets, administration), `aiProvider.test.ts` (the real `@ai-sdk/anthropic` provider over HTTP against the stand-in: wire format, streaming, errors, no key/model leakage). The model is the AI SDK's `MockLanguageModelV4` fed a script.
+- **Backend (vitest)**: `server/test/ai.test.ts` (routes, sessions, ownership, streaming protocol, stored conversation, retention, deletion), `aiTools.test.ts` (each tool, plan, approval and submission, every refusal), `aiLimits.test.ts` (limits, atomic reservation under concurrency, reconciliation, abandoned sweep, budgets, administration), `aiProvider.test.ts` (the real `@ai-sdk/anthropic` provider over HTTP against the stand-in: wire format, streaming, errors, no key/model leakage), `aiModelLock.test.ts` (the model lock: source scans and the runtime refusals), `aiVerification.test.ts` (the connection test, identity verification, activation, every provider failure, alerts and budget limits, with the real provider package over HTTP). The model is the AI SDK's `MockLanguageModelV4` fed a script.
 - **Website (vitest)**: interface texts (three languages, placeholders, no price/promise), safe rich text, error mapping and session storage, the administration's form and charts, the privacy notice's storage list.
 - **Browser journey** (`tools/e2e/ai-journey.cjs`, real Chrome, real backend, stand-in provider): 31 steps from opening the panel to the request appearing in the administration, including a phone with the keyboard open. See `tools/e2e/README.md`.
 - **Audits** (`tools/audit/audit-ai.cjs`): the page and the panel in every state at nine viewport sizes, with the layout checks and axe.
@@ -198,7 +265,7 @@ Nothing in this change deploys itself.
 
 ## What was not verified
 
-- **No real Haiku call was made**: there was no API key to use. The assistant's behaviour with the real model (how well it follows the instructions, calls tools, resists prompt injection in free text, answers in the right language, its real latency, token use and cost) is **unmeasured**. The protection against misuse is structural and tested without the model, but the model's own conduct needs a real run (`ai check`, then a manual session) before release.
+- **No real Haiku call was made**: there was no API key to use. The model identifier `claude-haiku-5-5` was checked against the model table in the Claude API reference available to the build (Claude Haiku 5.5, Active, no dated alias, USD 0.10 / 0.50 per million tokens), **not** against Anthropic's live API: that check is the connection test, and it has not been run with a real key. The assistant's behaviour with the real model (how well it follows the instructions, calls tools, resists prompt injection in free text, answers in the right language, its real latency, token use and cost) is **unmeasured**. The protection against misuse is structural and tested without the model, but the model's own conduct needs a real run (`ai check`, then a manual session) before release.
 - The numbers produced by tests and the journey come from the stand-in: tokens and cost there are **not** real usage.
 - Physical devices, Safari and Firefox, a screen reader, and real-world network conditions were not tested; the browser checks ran in Chromium (system Chrome) with emulated phones.
 - Hungarian and Dutch texts were written without a native proofreader.

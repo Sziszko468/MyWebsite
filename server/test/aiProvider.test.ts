@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { startStandIn, type StandIn } from '../../tools/e2e/anthropic-standin.ts'
 import { TOOL_NAMES } from '../src/modules/ai/tools.ts'
 import { answerText, parseSse } from './aiMock.ts'
-import { startServer, type TestServer } from './helpers.ts'
+import { activateThroughAdmin, startServer, type TestServer } from './helpers.ts'
 
 /**
  * The REAL provider package (`@ai-sdk/anthropic`) talking real HTTP to a local stand-in for Anthropic's Messages API: what the
@@ -25,6 +25,11 @@ afterEach(async () => {
 async function start(env: Record<string, string> = {}) {
   standIn = await startStandIn()
   server = await startServer({ env: { MEDIA_DIR: mkdtempSync(join(tmpdir(), 'cc-ai-media-')), ANTHROPIC_BASE_URL: `http://127.0.0.1:${standIn.port}/v1`, ...env } })
+  // The real activation path: a connection test over HTTP that must verify the required model, then the administrator's switch.
+  const activated = await activateThroughAdmin(server)
+  if (activated.status !== 200) throw new Error(`the assistant could not be activated in the test: ${JSON.stringify(activated.result)}`)
+  // The test itself is the stand-in's first request; the tests below count the requests of the conversation, so forget it.
+  standIn.requests.length = 0
   const created = await server.api('/api/ai/session', { body: {} })
   const headers = { 'X-AI-Session': created.json.data.token as string }
   const say = async (text: string, id = 'conv-provider-0123456789', language = 'en') => {

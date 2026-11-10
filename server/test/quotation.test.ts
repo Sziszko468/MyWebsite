@@ -147,7 +147,7 @@ describe('migration 0007', () => {
       db.run("INSERT INTO quote_request_items (quote_request_id, position, need, plan) VALUES ('r1', 0, 'website', 'launch')")
       db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, created_at, updated_at) VALUES ('d1', 'quote_received', 'quote_request', 'r1', 'o@x.test', 'en', 'accepted', ?, ?)", [now, now])
 
-      expect(migrate(db, clock)).toEqual([7])
+      expect(migrate(db, clock)).toEqual([7, 8])
       expect(db.all('PRAGMA foreign_key_check')).toEqual([])
       expect(db.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 })
       const rows = db.all<{ id: string; status: string; customer_status: string; source: string; request_type: string; priority: string }>('SELECT id, status, customer_status, source, request_type, priority FROM quote_requests ORDER BY id')

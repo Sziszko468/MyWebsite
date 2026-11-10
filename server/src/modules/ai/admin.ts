@@ -1,9 +1,12 @@
 import type { AppContext, SessionInfo } from '../../context.ts'
 import { addMs, DAY } from '../../lib/time.ts'
 import { can, requirePermission } from '../auth/permissions.ts'
+import { listAlerts, openAlertCount } from './alerts.ts'
 import { spent } from './budget.ts'
-import { availability, loadSettings, RANGES } from './settings.ts'
-import { dayOf } from './store.ts'
+import { AI_MODEL_ID, AI_MODEL_NAME, AI_PROVIDER_NAME } from './model.ts'
+import { activationBlocker, availability, loadSettings, RANGES } from './settings.ts'
+import { dayOf, monthOf } from './store.ts'
+import { endpointOf, lastSuccessfulTest, readLastError, readVerification, recentConnectionTests, verificationLabel } from './verification.ts'
 
 /**
  * What the administration shows of the assistant: real numbers read from what was recorded, privacy-conscious aggregates (no
@@ -123,14 +126,71 @@ export function usageSeries(app: AppContext, rangeValue: string | null) {
   return { range, points: [...buckets.values()] }
 }
 
+/** Everything the model-and-connection panel shows: facts read from what was recorded, nothing guessed. */
+function modelPanel(app: AppContext) {
+  const record = readVerification(app)
+  const label = verificationLabel(app, record)
+  const key = app.config.ai.apiKey !== null
+  const success = lastSuccessfulTest(app)
+  // "Connected" is claimed only for a proof that is current for this key and address; every other state says what is missing.
+  const connection = !key ? 'no_key' : app.config.ai.modelOverride !== null ? 'model_lock' : label === 'verified' ? 'connected' : label === 'failed' ? 'failed' : label === 'stale' ? 'stale' : 'not_tested'
+  return {
+    /** The model the assistant must use, and the identifier it is configured with. Neither can be changed from the administration. */
+    model: {
+      requiredName: AI_MODEL_NAME,
+      id: AI_MODEL_ID,
+      provider: AI_PROVIDER_NAME,
+      editable: false,
+      changeableBy: 'a developer, in the source code (server/src/modules/ai/model.ts)',
+      overrideRejected: app.config.ai.modelOverride !== null,
+    },
+    connection: {
+      status: connection,
+      endpoint: endpointOf(app),
+      keyConfigured: key,
+      verification: { status: label, reportedModel: record.reportedModel, checkedAt: record.checkedAt, verifiedAt: record.verifiedAt, reason: record.reason },
+      lastSuccessfulTest: success ? { at: success.created_at, latencyMs: success.latency_ms, reportedModel: success.reported_model } : null,
+      lastError: readLastError(app),
+      tests: recentConnectionTests(app, 8).map((row) => ({ id: row.id, at: row.created_at, outcome: row.outcome, reason: row.reason, reportedModel: row.reported_model, latencyMs: row.latency_ms, inputTokens: row.input_tokens, outputTokens: row.output_tokens, costUsd: row.cost_usd })),
+    },
+    activation: { blocker: activationBlocker(app) },
+  }
+}
+
+/** Requests, tokens and cost since the start, with how many requests have the provider's own word that the required model answered. */
+function totalsOf(app: AppContext) {
+  const row = app.db.get<{ requests: number; verified: number | null; unreported: number | null; other: number | null; tokens: number | null; cost: number | null }>(
+    `SELECT COUNT(*) AS requests, SUM(model_verified) AS verified,
+            SUM(CASE WHEN status = 'completed' AND actual_model IS NULL THEN 1 ELSE 0 END) AS unreported,
+            SUM(CASE WHEN actual_model IS NOT NULL AND model_verified = 0 THEN 1 ELSE 0 END) AS other,
+            SUM(COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0)) AS tokens,
+            SUM(COALESCE(actual_cost_usd, reserved_cost_usd)) AS cost
+       FROM ai_requests`,
+  )
+  const month = app.db.get<{ tokens: number | null }>('SELECT SUM(COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0)) AS tokens FROM ai_requests WHERE day >= ?', [`${monthOf(app.clock.now())}-01`])
+  return {
+    requests: row?.requests ?? 0,
+    /** Requests whose provider reply named exactly the required model. */
+    modelVerifiedRequests: row?.verified ?? 0,
+    /** Completed requests for which the provider reported no model at all (not counted as verified). */
+    modelUnreportedRequests: row?.unreported ?? 0,
+    /** Requests answered by a different model: they were refused, and each one broke the verification. */
+    modelMismatchedRequests: row?.other ?? 0,
+    tokens: row?.tokens ?? 0,
+    estimatedCostUsd: row?.cost ?? 0,
+    monthTokens: month?.tokens ?? 0,
+  }
+}
+
 /** The page: settings in force, where today and this month stand against their budgets, the knowledge sources, and a month of numbers. */
 export function summaryOf(app: AppContext, session: SessionInfo | null) {
   const actor = requirePermission(session, 'system:read')
   const settings = loadSettings(app)
   const now = app.clock.now()
   const used = spent(app, now)
+  const budgetState = (spentUsd: number, budgetUsd: number): 'ok' | 'warning' | 'exhausted' => (budgetUsd <= 0 || spentUsd >= budgetUsd ? 'exhausted' : spentUsd >= (budgetUsd * settings.alertPercent) / 100 ? 'warning' : 'ok')
   return {
-    model: { id: app.config.ai.model, provider: 'Anthropic', changeableBy: 'the operator, in the server environment (ANTHROPIC_MODEL)' },
+    ...modelPanel(app),
     apiKey: app.config.ai.apiKey ? 'set' : 'missing',
     operatorEnabled: app.config.ai.enabled,
     availability: availability(app, settings),
@@ -138,9 +198,12 @@ export function summaryOf(app: AppContext, session: SessionInfo | null) {
     ranges: RANGES,
     canWrite: can(actor.role, 'system:write'),
     budget: {
-      day: { spentUsd: used.dayCostUsd, budgetUsd: settings.dailyBudgetUsd, tokens: used.dayTokens, tokenBudget: settings.dailyTokenBudget, requests: used.dayRequests, requestLimit: settings.dailyRequests },
-      month: { spentUsd: used.monthCostUsd, budgetUsd: settings.monthlyBudgetUsd },
+      day: { spentUsd: used.dayCostUsd, budgetUsd: settings.dailyBudgetUsd, tokens: used.dayTokens, tokenBudget: settings.dailyTokenBudget, requests: used.dayRequests, requestLimit: settings.dailyRequests, state: budgetState(used.dayCostUsd, settings.dailyBudgetUsd) },
+      month: { spentUsd: used.monthCostUsd, budgetUsd: settings.monthlyBudgetUsd, state: budgetState(used.monthCostUsd, settings.monthlyBudgetUsd) },
+      alertPercent: settings.alertPercent,
     },
+    totals: totalsOf(app),
+    alerts: { open: openAlertCount(app), items: listAlerts(app, 20).map((row) => ({ id: row.id, kind: row.kind, level: row.level, period: row.period, detail: row.detail ? (JSON.parse(row.detail) as unknown) : null, createdAt: row.created_at, acknowledgedAt: row.acknowledged_at })) },
     pricing: { inputPerMTok: settings.priceInputPerMTok, outputPerMTok: settings.priceOutputPerMTok, asOf: settings.pricesAsOf, note: 'Costs shown are estimates: the token counts the provider reported times these prices. They are not a bill.' },
     knowledge: app.assistant.knowledge.status(),
     overview: usageOverview(app, 'daily'),

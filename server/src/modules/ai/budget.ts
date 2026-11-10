@@ -133,6 +133,9 @@ export interface Outcome {
   errorCode: string | null
   latencyMs: number
   firstTokenMs: number | null
+  /** The model the provider said answered (null: it said nothing) and whether that is exactly the required one. */
+  actualModel?: string | null
+  modelVerified?: boolean
 }
 
 /**
@@ -157,9 +160,9 @@ export function finish(app: AppContext, settings: AiSettings, reservation: Reser
   }
   app.db.run(
     `UPDATE ai_requests SET status = ?, actual_cost_usd = ?, cost_source = ?, input_tokens = ?, output_tokens = ?, cache_read_tokens = ?, cache_write_tokens = ?, reasoning_tokens = ?,
-            steps = ?, tool_calls = ?, error_code = ?, latency_ms = ?, first_token_ms = ?, finished_at = ?
+            steps = ?, tool_calls = ?, error_code = ?, latency_ms = ?, first_token_ms = ?, finished_at = ?, actual_model = ?, model_verified = ?
       WHERE id = ? AND status = 'reserved'`,
-    [outcome.status, cost, source, usage?.inputTokens ?? null, usage?.outputTokens ?? null, usage?.cacheReadTokens ?? null, usage?.cacheWriteTokens ?? null, usage?.reasoningTokens ?? null, outcome.steps, outcome.toolCalls, outcome.errorCode, Math.round(outcome.latencyMs), outcome.firstTokenMs === null ? null : Math.round(outcome.firstTokenMs), iso(now), reservation.id],
+    [outcome.status, cost, source, usage?.inputTokens ?? null, usage?.outputTokens ?? null, usage?.cacheReadTokens ?? null, usage?.cacheWriteTokens ?? null, usage?.reasoningTokens ?? null, outcome.steps, outcome.toolCalls, outcome.errorCode, Math.round(outcome.latencyMs), outcome.firstTokenMs === null ? null : Math.round(outcome.firstTokenMs), iso(now), outcome.actualModel ?? null, outcome.modelVerified ? 1 : 0, reservation.id],
   )
 }
 

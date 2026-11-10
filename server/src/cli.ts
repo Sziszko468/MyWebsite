@@ -186,16 +186,22 @@ async function run(): Promise<void> {
         return
       }
       case 'ai': {
-        const [what, ...rest] = args
+        const [what] = args
         const { availability, loadSettings } = await import('./modules/ai/settings.ts')
+        const { readVerification, verificationLabel } = await import('./modules/ai/verification.ts')
+        const { AI_MODEL_ID, AI_MODEL_NAME } = await import('./modules/ai/model.ts')
         if (what === 'status') {
-          process.stdout.write(`${JSON.stringify({ model: config.ai.model, apiKey: config.ai.apiKey ? 'set' : 'missing', operatorEnabled: config.ai.enabled, availability: availability(app.context), settings: loadSettings(app.context) }, null, 2)}
+          const verification = readVerification(app.context)
+          process.stdout.write(`${JSON.stringify({ requiredModel: `${AI_MODEL_NAME} (${AI_MODEL_ID})`, apiKey: config.ai.apiKey ? 'set' : 'missing', modelOverrideRejected: config.ai.modelOverride !== null, operatorEnabled: config.ai.enabled, verification: { ...verification, fingerprint: undefined, label: verificationLabel(app.context, verification) }, availability: availability(app.context), settings: loadSettings(app.context) }, null, 2)}
 `)
           return
         }
-        if (what !== 'check') throw new Error('Use: ai check [message] | ai status')
-        process.stdout.write(`${JSON.stringify(await app.context.assistant.check(rest.join(' ') || 'Say hello in one short sentence.'), null, 2)}
+        if (what !== 'check') throw new Error('Use: ai check | ai status')
+        // The connection test: one minimal request to the required model; records the result; never switches the assistant on.
+        const result = await app.context.assistant.connectionTest(null)
+        process.stdout.write(`${JSON.stringify(result, null, 2)}
 `)
+        if (!result.ok) process.exitCode = 1
         return
       }
       case 'erase': {

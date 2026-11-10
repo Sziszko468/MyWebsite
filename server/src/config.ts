@@ -1,6 +1,7 @@
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import type { Level } from './lib/logger.ts'
+import { AI_MODEL_ID } from './modules/ai/model.ts'
 
 /**
  * The server's whole configuration, read from the environment once and checked at start-up. A bad value
@@ -67,7 +68,10 @@ export interface EmailConfig {
  * NOT here: they are the operator's, set in the environment, and the browser cannot choose them.
  */
 export interface AiSettings {
-  /** The assistant's availability switch. With it off the website simply does not offer the assistant. */
+  /**
+   * The administrator's activation of the assistant. It starts OFF and can be switched on only while the required model is
+   * verified (a successful connection test); a successful test never switches it on by itself.
+   */
   enabled: boolean
   plannerEnabled: boolean
   /** Whether an approved plan may be sent to the quote-request system. */
@@ -90,6 +94,8 @@ export interface AiSettings {
   /** USD. A request that could take the day or the month over its budget is refused before it starts. */
   dailyBudgetUsd: number
   monthlyBudgetUsd: number
+  /** An administration alert is raised once a day / month when spending reaches this percentage of the daily / monthly budget. */
+  alertPercent: number
   conversationMaxHours: number
   /** Days the words of a conversation are kept (counts and numbers are kept longer). */
   retentionDays: number
@@ -112,8 +118,16 @@ export interface AiConfig {
   apiKey: string | null
   /** `ANTHROPIC_BASE_URL`: another address for the provider's API (a proxy, or the local stand-in the tests use). */
   baseUrl: string | null
-  /** `ANTHROPIC_MODEL`: the one model the assistant uses. */
-  model: string
+  /**
+   * The one model the assistant uses: Claude Haiku 5.5, a constant in code (modules/ai/model.ts). It is not read from the
+   * environment and no setting can change it.
+   */
+  model: typeof AI_MODEL_ID
+  /**
+   * A value found in `ANTHROPIC_MODEL` that is not the required model. It is NOT used for anything: its presence only makes
+   * the assistant unavailable (`model_lock`) and tells the operator why, so a leftover or hostile setting can never pick a model.
+   */
+  modelOverride: string | null
   /** Signs the anonymous session tokens (`AI_SESSION_SECRET`, or derived from APP_SECRET). */
   sessionSecret: string
   /** `AI_TIMEOUT_MS`: the longest one answer may take, tool rounds included; a stalled provider is cut off after this. */
@@ -121,8 +135,6 @@ export interface AiConfig {
   /** The starting values of the settings an administrator can change. */
   defaults: AiSettings
 }
-
-export const AI_DEFAULT_MODEL = 'claude-haiku-5-5'
 
 export interface Config {
   env: AppEnv
@@ -387,8 +399,10 @@ export function loadConfig(env: Env = process.env): Config {
     }
     return value
   }
-  const aiModel = text('ANTHROPIC_MODEL') ?? AI_DEFAULT_MODEL
-  if (!/^claude-[a-z0-9][a-z0-9.-]{2,60}$/.test(aiModel)) bad('ANTHROPIC_MODEL', `must be a Claude model identifier such as ${AI_DEFAULT_MODEL} (got "${aiModel}")`)
+  // The model is fixed in code (modules/ai/model.ts). A leftover ANTHROPIC_MODEL is never used and never stops the server (the
+  // website, the shop and the quote requests must not depend on the assistant): it only keeps the assistant switched off.
+  const aiModelEnv = text('ANTHROPIC_MODEL')
+  const aiModelOverride = aiModelEnv !== null && aiModelEnv !== AI_MODEL_ID ? aiModelEnv.slice(0, 80) : null
   const aiKey = text('ANTHROPIC_API_KEY')
   if (aiKey !== null && (aiKey.length < 20 || /\s/.test(aiKey))) bad('ANTHROPIC_API_KEY', 'does not look like an API key')
   let aiBaseUrl: string | null = null
@@ -410,7 +424,7 @@ export function loadConfig(env: Env = process.env): Config {
   if (!['adaptive', 'disabled'].includes(aiThinking)) bad('AI_THINKING', `must be adaptive or disabled (got "${aiThinking}")`)
   const noText: Record<Language, string> = { hu: '', en: '', nl: '' }
   const aiDefaults: AiSettings = {
-    enabled: true,
+    enabled: false,
     plannerEnabled: true,
     quoteEnabled: true,
     languages: [...LANGUAGES],
@@ -426,6 +440,7 @@ export function loadConfig(env: Env = process.env): Config {
     dailyTokenBudget: integer('AI_DAILY_TOKEN_BUDGET', 2_000_000, 1000, 1_000_000_000),
     dailyBudgetUsd: decimal('AI_DAILY_BUDGET', 1, 0, 100000),
     monthlyBudgetUsd: decimal('AI_MONTHLY_BUDGET', 10, 0, 1000000),
+    alertPercent: integer('AI_ALERT_PERCENT', 80, 1, 100),
     conversationMaxHours: integer('AI_CONVERSATION_MAX_HOURS', 24, 1, 720),
     retentionDays: integer('AI_RETENTION_DAYS', 7, 1, 365),
     effort: aiEffort as AiSettings['effort'],
@@ -442,7 +457,8 @@ export function loadConfig(env: Env = process.env): Config {
     enabled: flag('AI_ASSISTANT_ENABLED', true),
     apiKey: aiKey,
     baseUrl: aiBaseUrl,
-    model: aiModel,
+    model: AI_MODEL_ID,
+    modelOverride: aiModelOverride,
     sessionSecret: aiSessionSecret ?? '',
     timeoutMs: integer('AI_TIMEOUT_MS', 90_000, 200, 600_000),
     defaults: aiDefaults,
@@ -527,6 +543,6 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     mediaMaxBytes: config.mediaMaxBytes,
     quoteReferenceFormat: config.quoteReferenceFormat,
     customerLinkDays: config.customerLinkDays,
-    assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : 'missing', model: config.ai.model, customBaseUrl: config.ai.baseUrl !== null },
+    assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : 'missing', model: config.ai.model, modelOverrideRejected: config.ai.modelOverride !== null, customBaseUrl: config.ai.baseUrl !== null },
   }
 }

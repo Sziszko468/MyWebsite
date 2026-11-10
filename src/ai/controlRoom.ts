@@ -102,7 +102,7 @@ class ControlRoom {
     this.started ??= (async () => {
       const config = await loadAiConfig()
       if (!config || !config.available) {
-        this.set({ config, loading: false, unavailable: config ? 'unavailable' : 'no_backend' })
+        this.set({ config, loading: false, unavailable: config ? (config.unavailableReason === 'model' ? 'model_unverified' : 'unavailable') : 'no_backend' })
         return
       }
       this.set({ config })

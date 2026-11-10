@@ -10,7 +10,8 @@
 //        --email=admin@example.test --password=... [--out=<dir>]
 //
 // Needs a fresh server (the sign-in is limited to 10 per 15 minutes) and an administrator of a THROW-AWAY database: it changes the
-// assistant's settings (and puts them back) and creates one quote request.
+// assistant's settings (and puts them back) and creates one quote request. The assistant starts SWITCHED OFF and unverified (PROMPT
+// 16.1): the journey's first section is the administrator verifying the required model in the browser and switching it on.
 const fs = require('fs')
 const path = require('path')
 const { launch, newPage } = require('../audit/lib.cjs')
@@ -57,6 +58,8 @@ const shot = async (page, name) => {
 }
 const received = async () => (await fetch(`${STANDIN}/__requests`)).json()
 const forget = () => fetch(`${STANDIN}/__requests`, { method: 'DELETE' })
+/** What the stand-in answers to everything: the model it names in its replies, and/or an HTTP error status (see anthropic-standin.ts). */
+const behave = (behaviour) => fetch(`${STANDIN}/__control`, { method: 'POST', body: JSON.stringify(behaviour) })
 
 async function visitor(browser, { width = 1440, height = 900, mobile = false, scheme = 'dark' } = {}) {
   const { context, page } = await newPage(browser, { width, height, mobile, scheme, reduced: true })
@@ -105,6 +108,52 @@ const PLAN = {
 
 ;(async () => {
   const browser = await launch()
+  await forget()
+  await behave({})
+
+  const adm = await admin(browser)
+  console.log('0  The required model is verified and the assistant switched on by the administrator')
+  await step('before anything is verified the website does not offer the assistant, and the switch refuses', async () => {
+    const config = (await (await fetch(`${BASE}/api/ai/config`)).json()).data
+    expect(config.available === false, 'the assistant is offered before it was verified and switched on')
+    const refused = await adm.call('PUT', '/api/admin/ai/settings', { enabled: true })
+    expect(refused.status === 409 && refused.json.error.details.reason === 'verification_required', `the switch did not refuse (${refused.status})`)
+    expect((await received()).length === 0, 'the provider was contacted before any test was asked for')
+  })
+  await step('the Model and connection tab shows the required model, the key as set, and no way to change the model', async () => {
+    await adm.page.goto(`${BASE}/admin/ai`, { waitUntil: 'domcontentloaded' })
+    await adm.page.getByRole('heading', { level: 1, name: 'AI assistant' }).waitFor({ timeout: 15000 })
+    await adm.page.getByRole('tab', { name: 'Model and connection', selected: true }).waitFor()
+    const text = (await adm.page.locator('main').innerText()).replace(/\s+/g, ' ')
+    expect(text.includes('Claude Haiku 5.5') && text.includes('claude-haiku-5-5'), 'the required model is not shown')
+    expect(text.includes('Not tested yet'), 'the connection is not shown as untested')
+    expect(text.includes('fixed in the source code'), 'the lock is not explained')
+    expect((await adm.page.locator('main input[value*="claude"], main select option:has-text("claude")').count()) === 0, 'a field holds a model identifier')
+    expect((await adm.page.locator('[role=tabpanel]:not([hidden]) :is(input, select, textarea)').count()) === 0, 'the model tab has a form field')
+    expect(await adm.page.getByRole('button', { name: 'Switch the assistant on' }).isDisabled(), 'the switch is available before verification')
+    expect(!/test-key-not-real/.test(await adm.page.content()), 'the key is on the page')
+    await noSideways(adm.page, 'the AI screen, Model and connection')
+    await shot(adm.page, '0-model-before')
+  })
+  await step('running the connection test verifies the model, records it, and does NOT switch the assistant on', async () => {
+    await adm.page.getByRole('button', { name: 'Run connection test' }).click()
+    await adm.page.getByText('The required model was verified.').first().waitFor({ timeout: 20000 })
+    await adm.page.getByText('Connected, model verified').waitFor({ timeout: 10000 })
+    const text = (await adm.page.locator('main').innerText()).replace(/\s+/g, ' ')
+    expect(/Model named by the provider in its answer\s*claude-haiku-5-5/.test(text), 'the model the provider named is not shown')
+    expect(text.includes('The assistant is switched off.'), 'the assistant was switched on by the test')
+    const sent = await received()
+    expect(sent.length === 1 && sent[0].body.model === 'claude-haiku-5-5', 'the test did not send exactly one request for the required model')
+    expect((await (await fetch(`${BASE}/api/ai/config`)).json()).data.available === false, 'the website offers the assistant after the test alone')
+    await shot(adm.page, '0-model-verified')
+  })
+  await step('the administrator switches it on, and the website offers it', async () => {
+    await adm.page.getByRole('button', { name: 'Switch the assistant on' }).click()
+    await adm.page.getByText('The assistant is switched on.').first().waitFor({ timeout: 10000 })
+    expect((await (await fetch(`${BASE}/api/ai/config`)).json()).data.available === true, 'the website does not offer the assistant after the switch')
+    await adm.page.getByRole('button', { name: 'Switch the assistant off' }).waitFor()
+    await shot(adm.page, '0-model-on')
+  })
   await forget()
 
   console.log('A  The floating assistant on a desktop')
@@ -278,8 +327,8 @@ const PLAN = {
     const plan = page.locator('aside').nth(1)
     await plan.getByRole('checkbox').check()
     await plan.getByRole('button', { name: 'Send this request' }).click()
-    await plan.getByText(/The request was sent\. Reference: A-[A-Z0-9]{8}/).waitFor({ timeout: 20000 })
-    reference = /Reference: (A-[A-Z0-9]{8})/.exec(await plan.innerText())[1]
+    await plan.getByText(/The request was sent\. Reference: CC-\d{4}-\d{6}/).waitFor({ timeout: 20000 })
+    reference = /Reference: (CC-\d{4}-\d{6})/.exec(await plan.innerText())[1]
     await shot(page, 'D-sent')
   })
   await step('the visitor\'s name and e-mail address never went to the model, and the plan is what was sent', async () => {
@@ -287,11 +336,10 @@ const PLAN = {
     expect(!/Eszter|eszter\.varga|Gym Network/.test(everything), 'contact details reached the provider')
     expect(everything.includes('submitApprovedQuoteRequest'), 'the model was never asked to send')
   })
-  const adm = await admin(browser)
   await step('the administration lists the request, marked as written by the assistant, with the plan as its brief', async () => {
     const list = await adm.call('GET', '/api/admin/quote-requests')
     const row = list.json.data.find((item) => item.reference === reference)
-    expect(row && row.source === 'ai_assistant' && row.kind === 'full_experience', 'not in the list as an assistant request')
+    expect(row && row.source === 'control_room_ai' && row.kind === 'full_experience', 'not in the list as an assistant request')
     expect(row.email === contact.email && row.company === contact.company, 'the contact details are not on the request')
     await adm.page.goto(`${BASE}/admin/quotes/${row.id}`, { waitUntil: 'domcontentloaded' })
     await adm.page.getByText('Dispatch drivers faster').first().waitFor({ timeout: 15000 })
@@ -365,14 +413,22 @@ const PLAN = {
   await step('usage, tokens, cost (called an estimate), tools and the knowledge sources are on the screen, in charts with tables', async () => {
     await adm.page.goto(`${BASE}/admin/ai`, { waitUntil: 'domcontentloaded' })
     await adm.page.getByRole('heading', { level: 1, name: 'AI assistant' }).waitFor({ timeout: 15000 })
-    await adm.page.getByText('An estimate, not a bill').waitFor()
+    await adm.page.getByText('An estimate, not a bill').first().waitFor()
+    const model = (await adm.page.locator('main').innerText()).replace(/\s+/g, ' ')
+    expect(/Requests\s+[1-9]/i.test(model) && /confirmed by the provider as Claude Haiku 5\.5/i.test(model), 'the model tab does not count requests the provider confirmed')
+    expect(!/answered by another model \(refused\)/i.test(model), 'a request was answered by another model')
+    await adm.page.getByRole('tab', { name: 'Overview' }).click()
+    await adm.page.getByText('An estimate, not a bill').first().waitFor()
     const text = await adm.page.locator('main').innerText()
     expect(text.includes('claude-haiku-5-5') && text.includes('The assistant is available'), 'the status is missing')
-    expect(/Requests\s+[1-9]/.test(text.replace(/\n+/g, ' ')), 'no requests counted')
+    expect(/Requests\s+[1-9]/i.test(text.replace(/\n+/g, ' ')), 'no requests counted')
+    // The charts draw when the usage series arrives (the Overview is no longer the tab that opens first, so it is fetched on demand).
+    await adm.page.locator('svg[role=img]').nth(3).waitFor({ timeout: 15000 })
     expect((await adm.page.locator('svg[role=img]').count()) >= 4, 'fewer than four charts')
     expect(!/test-key-not-real/.test(await adm.page.content()), 'the key is on the page')
     await adm.page.getByRole('tab', { name: 'Knowledge' }).click()
-    await adm.page.getByText('Developer profile').waitFor()
+    // The administration's lists draw a table AND a stack of cards (CSS shows one), so the text is in the page twice.
+    await adm.page.getByText('Developer profile').first().waitFor()
     await adm.page.getByRole('tab', { name: 'Settings' }).click()
     await adm.page.getByLabel('Daily budget').waitFor()
     await noSideways(adm.page, 'the AI screen')
@@ -389,6 +445,60 @@ const PLAN = {
     await adm.call('PUT', '/api/admin/ai/settings', { dailyBudgetUsd: 1, monthlyBudgetUsd: 10 })
   })
   await a.context.close()
+
+  console.log('G2 When the required model cannot be verified, the assistant stays unavailable and says so')
+  await step('a reply from another model is discarded, the visitor is told the model could not be verified, and the assistant stays off until it is verified again', async () => {
+    await behave({ reportModel: 'claude-sonnet-5-5' })
+    const fresh = await visitor(browser)
+    await fresh.page.goto(`${BASE}/en/control-room/`, { waitUntil: 'load' })
+    await fresh.page.getByLabel('Your message to Control Room AI').fill('hello there')
+    await fresh.page.getByLabel('Your message to Control Room AI').press('Enter')
+    await fresh.page.getByText('The required AI model could not be verified.').first().waitFor({ timeout: 15000 })
+    const text = await fresh.page.locator('body').innerText()
+    expect(!/Stand-in answer/.test(text), 'text from the other model reached the visitor')
+    expect(!/model_mismatch|claude-sonnet/.test(text), 'a raw code or the other model is shown')
+    expect((await fresh.page.getByRole('link', { name: 'Contact' }).count()) > 0, 'no contact alternative')
+    await shot(fresh.page, 'G2-visitor-mismatch')
+    await fresh.context.close()
+    // Unavailable from now on, with the friendly reason on the page and no new contact with the provider.
+    await behave({})
+    const before = (await received()).length
+    const again = await visitor(browser)
+    await again.page.goto(`${BASE}/en/control-room/`, { waitUntil: 'load' })
+    await again.page.getByRole('heading', { level: 1, name: /CONTROL ROOM AI is temporarily unavailable/ }).waitFor({ timeout: 15000 })
+    expect(/The required AI model could not be verified\./i.test(await again.page.locator('body').innerText()), 'the fixed message is missing')
+    expect((await again.page.getByRole('link', { name: 'Contact' }).count()) > 0, 'no contact alternative')
+    expect((await again.page.getByRole('button', { name: 'Open Control Room AI' }).count()) === 0, 'the button is offered')
+    expect(!again.problems.length, again.problems.join(' | '))
+    await noSideways(again.page, 'the unavailable page')
+    await shot(again.page, 'G2-page-unavailable')
+    await again.context.close()
+    expect((await received()).length === before, 'the provider was contacted by an unavailable assistant')
+  })
+  await step('the administration shows the failed verification and the alert, and a new test brings the assistant back without a new switch', async () => {
+    await adm.page.goto(`${BASE}/admin/ai`, { waitUntil: 'domcontentloaded' })
+    await adm.page.getByText('A reply came from a model other than Claude Haiku 5.5').first().waitFor({ timeout: 15000 })
+    const text = (await adm.page.locator('main').innerText()).replace(/\s+/g, ' ')
+    expect(text.includes('Failed') && /answered by another model \(refused\)/.test(text), 'the failure is not shown')
+    expect(text.includes('Needs action'), 'the alert has no level')
+    await shot(adm.page, 'G2-admin-failed')
+    await adm.page.getByRole('button', { name: 'Run connection test' }).click()
+    await adm.page.getByText('Connected, model verified').waitFor({ timeout: 20000 })
+    expect((await (await fetch(`${BASE}/api/ai/config`)).json()).data.available === true, 'the assistant did not come back after a successful test')
+    await adm.page.getByRole('button', { name: 'Mark all as seen' }).click()
+    await adm.page.getByText('The alerts were marked as seen.').first().waitFor({ timeout: 8000 })
+  })
+  await step('an invalid key (401) is reported as a failed test with the right reason and never shows the key or the provider\'s words', async () => {
+    await behave({ failStatus: 401 })
+    await adm.page.getByRole('button', { name: 'Run connection test' }).click()
+    await adm.page.getByText(/could not be verified\. the key was rejected/i).first().waitFor({ timeout: 20000 })
+    const html = await adm.page.content()
+    expect(!/test-key-not-real|secret detail/.test(html), 'the key or the provider\'s words are on the page')
+    await behave({})
+    await adm.page.getByRole('button', { name: 'Run connection test' }).click()
+    await adm.page.getByText('Connected, model verified').waitFor({ timeout: 20000 })
+    for (const request of await received()) expect(request.body.model === 'claude-haiku-5-5', 'a request named another model')
+  })
 
   console.log('H  A phone: full screen, keyboard, plan, and clear of the bars at the bottom')
   const h = await visitor(browser, { width: 390, height: 844, mobile: true })

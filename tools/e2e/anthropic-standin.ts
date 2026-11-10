@@ -14,6 +14,12 @@ import { createServer, type IncomingMessage, type Server } from 'node:http'
  * It also answers GET /__requests with what it has received (the e2e journeys read it) and DELETE /__requests to forget it.
  *   anything else              "Stand-in answer."
  *
+ * Behaviour for EVERY request, changed while it runs (`standIn.behaviour`, or `POST /__control` with the same JSON):
+ *   reportModel   the model named in the reply (`message.model`). Default: the model the request asked for. A string: that
+ *                 identifier (to see what the assistant does when a different model answers). null: no model in the reply.
+ *   failStatus    answer every request with an HTTP error of this status (401 invalid key, 402 billing, 403 permission,
+ *                 404 model not found, 429, 500, 529 …), whatever the text says. 0 or absent: no failure.
+ *
  * It records every request it receives, so a test can check what the provider sent (the model, the limits, the tools, the
  * thinking setting, the absence of settings the model rejects). It is NOT the real model and proves nothing about how that
  * behaves; it proves that the integration speaks to the provider's API correctly.
@@ -26,12 +32,21 @@ export interface Received {
   body: Record<string, any>
 }
 
+export interface Behaviour {
+  reportModel?: string | null
+  failStatus?: number
+}
+
 export interface StandIn {
   server: Server
   port: number
   requests: Received[]
+  /** What every request gets, changed while the stand-in runs (see the header comment). */
+  behaviour: Behaviour
   close(): Promise<void>
 }
+
+const ERROR_TYPES: Record<number, string> = { 400: 'invalid_request_error', 401: 'authentication_error', 402: 'billing_error', 403: 'permission_error', 404: 'not_found_error', 429: 'rate_limit_error', 529: 'overloaded_error' }
 
 const sse = (event: string, data: unknown) => `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -50,6 +65,7 @@ function lastUserText(body: Record<string, any>): string {
 
 export async function startStandIn(port = 0): Promise<StandIn> {
   const requests: Received[] = []
+  const behaviour: Behaviour = {}
   const server = createServer((req, res) => {
     const chunks: Buffer[] = []
     req.on('data', (chunk: Buffer) => chunks.push(chunk))
@@ -59,6 +75,14 @@ export async function startStandIn(port = 0): Promise<StandIn> {
         res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(requests))
         return
       }
+      if (req.url === '/__control' && req.method === 'POST') {
+        const next = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}') as Behaviour
+        delete behaviour.reportModel
+        delete behaviour.failStatus
+        Object.assign(behaviour, next)
+        res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(behaviour))
+        return
+      }
       if (req.method !== 'POST' || !req.url?.startsWith('/v1/messages')) {
         res.writeHead(404, { 'Content-Type': 'application/json' }).end(JSON.stringify({ type: 'error', error: { type: 'not_found_error', message: 'not found' } }))
         return
@@ -66,19 +90,22 @@ export async function startStandIn(port = 0): Promise<StandIn> {
       const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as Record<string, any>
       requests.push({ headers: req.headers, body })
       const text = lastUserText(body)
-      const fail = /FAIL:(\d{3})/.exec(text)
+      const fail = behaviour.failStatus ? [null, String(behaviour.failStatus)] : /FAIL:(\d{3})/.exec(text)
       if (fail) {
-        res.writeHead(Number(fail[1]), { 'Content-Type': 'application/json' }).end(JSON.stringify({ type: 'error', error: { type: Number(fail[1]) === 529 ? 'overloaded_error' : 'api_error', message: 'stand-in failure with a secret detail' } }))
+        const status = Number(fail[1])
+        res.writeHead(status, { 'Content-Type': 'application/json' }).end(JSON.stringify({ type: 'error', error: { type: ERROR_TYPES[status] ?? 'api_error', message: 'stand-in failure with a secret detail' } }))
         return
       }
+      // The model the reply names: what was asked for unless the stand-in is told otherwise (null: none at all).
+      const reported = behaviour.reportModel === undefined ? body.model : behaviour.reportModel
       const inputTokens = 120 + requests.length
       if (!body.stream) {
         // The non-streamed form of the same API (used by the operator's `ai check`).
-        res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ id: `msg_${requests.length}`, type: 'message', role: 'assistant', model: body.model, content: [{ type: 'text', text: 'Stand-in answer.' }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: inputTokens, output_tokens: 12 } }))
+        res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ id: `msg_${requests.length}`, type: 'message', role: 'assistant', ...(reported === null ? {} : { model: reported }), content: [{ type: 'text', text: 'Stand-in answer.' }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: inputTokens, output_tokens: 12 } }))
         return
       }
       res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' })
-      res.write(sse('message_start', { type: 'message_start', message: { id: `msg_${requests.length}`, type: 'message', role: 'assistant', model: body.model, content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: inputTokens, output_tokens: 1 } } }))
+      res.write(sse('message_start', { type: 'message_start', message: { id: `msg_${requests.length}`, type: 'message', role: 'assistant', ...(reported === null ? {} : { model: reported }), content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: inputTokens, output_tokens: 1 } } }))
       const approved = /approved the plan|jóváhagytam a tervet|goedgekeurd/i.test(text) && text !== '<tool_result>'
       const tool = approved ? [text, 'submitApprovedQuoteRequest', '{}'] : /TOOL:([A-Za-z]+):(\{.*\})/.exec(text)
       if (tool) {
@@ -109,6 +136,7 @@ export async function startStandIn(port = 0): Promise<StandIn> {
     server,
     port: actual,
     requests,
+    behaviour,
     close: () => new Promise<void>((resolve) => { server.closeAllConnections?.(); server.close(() => resolve()) }),
   }
 }

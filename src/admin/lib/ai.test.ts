@@ -22,6 +22,7 @@ const settings: AiSettings = {
   dailyTokenBudget: 2_000_000,
   dailyBudgetUsd: 1,
   monthlyBudgetUsd: 10,
+  alertPercent: 80,
   conversationMaxHours: 24,
   retentionDays: 7,
   effort: 'low',
@@ -39,8 +40,10 @@ describe('the assistant\'s settings form', () => {
     expect(form.numbers.dailyBudgetUsd).toBe('1')
     expect(form.suggestions.en).toBe('A\nB')
     const payload = payloadFrom(form)
-    expect(payload).toMatchObject({ enabled: true, dailyBudgetUsd: 1, monthlyBudgetUsd: 10, maxOutputTokens: 1500, priceInputPerMTok: 0.1, effort: 'low', suggestions: { en: ['A', 'B'], hu: [], nl: [] }, welcome: { en: 'Hello' } })
+    expect(payload).toMatchObject({ plannerEnabled: true, alertPercent: 80, dailyBudgetUsd: 1, monthlyBudgetUsd: 10, maxOutputTokens: 1500, priceInputPerMTok: 0.1, effort: 'low', suggestions: { en: ['A', 'B'], hu: [], nl: [] }, welcome: { en: 'Hello' } })
     expect(payload).not.toHaveProperty('model')
+    // Saving settings can never switch the assistant on or off: that is a separate action that needs a verified model.
+    expect(payload).not.toHaveProperty('enabled')
     expect(payload).not.toHaveProperty('apiKey')
   })
 
@@ -60,7 +63,7 @@ describe('the assistant\'s settings form', () => {
   it('knows when the form differs from what was saved', () => {
     const form = formFrom(settings)
     expect(sameForm(form, formFrom(settings))).toBe(true)
-    expect(sameForm({ ...form, enabled: false }, form)).toBe(false)
+    expect(sameForm({ ...form, plannerEnabled: false }, form)).toBe(false)
   })
 })
 

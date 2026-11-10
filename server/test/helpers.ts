@@ -16,6 +16,10 @@ import { MailError } from '../src/modules/notifications/smtp.ts'
 import { createUser } from '../src/modules/auth/users.ts'
 import type { Role } from '../src/modules/auth/permissions.ts'
 import type { ModelProvider } from '../src/modules/ai/gateway.ts'
+import { AI_MODEL_ID } from '../src/modules/ai/model.ts'
+import { recordVerified } from '../src/modules/ai/verification.ts'
+import { getSetting, setSetting } from '../src/modules/system/settings.ts'
+import type { AppContext } from '../src/context.ts'
 
 /** A clock a test moves by hand. */
 export class TestClock implements Clock {
@@ -84,7 +88,32 @@ const baseEnv: Record<string, string> = {
   ANTHROPIC_API_KEY: 'test-key-not-real-0123456789abcdef',
 }
 
-export async function startServer(options: { env?: Record<string, string>; seed?: boolean; mailer?: Mailer | null; realMailer?: boolean; databasePath?: string; fetch?: FetchLike; dns?: DnsResolver; aiModel?: ModelProvider } = {}): Promise<TestServer> {
+/**
+ * Puts the assistant in the state the administration leaves it in after a successful connection test and the administrator's
+ * activation: the required model verified for the configured key and address, and the switch on. A test that is about the
+ * assistant's behaviour starts from here; a test about the activation itself starts from a server that is not activated.
+ */
+export function activateAssistant(app: AppContext): void {
+  recordVerified(app, AI_MODEL_ID, null)
+  const saved = JSON.parse(getSetting(app.db, 'ai.settings') ?? '{}') as Record<string, unknown>
+  setSetting(app.db, app.clock, 'ai.settings', JSON.stringify({ ...saved, enabled: true }), null)
+}
+
+/**
+ * The administrator's own path to a working assistant, through the real endpoints: run the connection test (which must verify the
+ * required model) and then switch the assistant on. Returns what the test said. A test of the real provider package over HTTP
+ * uses this, so the activation flow is exercised wherever the provider is real.
+ */
+export async function activateThroughAdmin(server: TestServer): Promise<{ status: number; result: any }> {
+  const admin = await server.signIn('admin')
+  const headers = { Cookie: admin.cookie, 'X-CSRF-Token': admin.csrf }
+  const tested = await server.api('/api/admin/ai/connection-test', { method: 'POST', body: {}, headers })
+  if (tested.status !== 200 || tested.json.data.result.ok !== true) return { status: tested.status, result: tested.json?.data?.result ?? tested.json }
+  const switched = await server.api('/api/admin/ai/settings', { method: 'PUT', body: { enabled: true }, headers })
+  return { status: switched.status, result: tested.json.data.result }
+}
+
+export async function startServer(options: { env?: Record<string, string>; seed?: boolean; mailer?: Mailer | null; realMailer?: boolean; databasePath?: string; fetch?: FetchLike; dns?: DnsResolver; aiModel?: ModelProvider; /** Start with the assistant verified and switched on (default: yes when a model is handed in). */ aiActive?: boolean } = {}): Promise<TestServer> {
   const env = { ...baseEnv, ...options.env }
   if (options.databasePath) env.DATABASE_PATH = options.databasePath
   const config = loadConfig(env)
@@ -99,6 +128,7 @@ export async function startServer(options: { env?: Record<string, string>; seed?
     seedCatalog(app.context)
     seedShopDocuments(app.context)
   }
+  if (options.aiActive ?? options.aiModel !== undefined) activateAssistant(app.context)
   await new Promise<void>((resolve) => app.server.listen(0, '127.0.0.1', () => resolve()))
   const address = app.server.address()
   const url = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`

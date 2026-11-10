@@ -58,7 +58,7 @@ export function ControlRoomPage() {
   if (!config?.available || !config.languages.includes(lang)) {
     return (
       <div className={styles.unavailable}>
-        <h1 className={styles.heading}>{text.page.unavailableTitle}</h1>
+        <h1 className={styles.heading}>{config?.unavailableReason === 'model' ? text.page.modelUnavailableTitle : text.page.unavailableTitle}</h1>
         <p>{text.page.unavailableText}</p>
         <LocalizedLink to="/contact" className={styles.link}>
           {text.page.contact}

@@ -6,6 +6,11 @@
 //
 // usage: AUDIT_PLAYWRIGHT=... node tools/audit/audit-ai.cjs --base=http://127.0.0.1:8811 --standin=http://127.0.0.1:9911 \
 //          --sizes=320x640,360x740,390x844,430x932,768x1024,1024x768,1366x768,1440x900,1920x1080 [--langs=en,hu,nl] [--themes=dark,light] [--no-axe] [--out=dir]
+//
+// The assistant must be verified and switched on first (node tools/e2e/ai-activate.cjs ...). With --unavailable the script audits ONE
+// other state instead: the /control-room page after the required model could not be verified (PROMPT 16.1). It makes the stand-in name
+// another model, sends one message to break the verification, audits the page, and puts the stand-in right again; the assistant stays
+// unverified afterwards (run ai-activate.cjs again before auditing anything else).
 const { launch, newPage, axeRun, layoutCheck, fs, path } = require('./lib.cjs')
 
 const arg = (name, fallback) => {
@@ -18,6 +23,8 @@ const langs = arg('langs', 'en').split(',')
 const themes = arg('themes', 'dark').split(',')
 const OUT = arg('out', '')
 const WITH_AXE = !process.argv.includes('--no-axe')
+const UNAVAILABLE = process.argv.includes('--unavailable')
+const STANDIN = arg('standin', 'http://127.0.0.1:9911').replace(/\/$/, '')
 if (OUT) fs.mkdirSync(OUT, { recursive: true })
 
 const WORDS = {
@@ -51,8 +58,51 @@ async function inspect(page, label) {
   if (OUT && process.argv.includes('--shots')) await page.screenshot({ path: path.join(OUT, `${label.replace(/[^a-z0-9]+/gi, '-')}.png`) })
 }
 
+/** The model-unavailable state: one visitor message answered by "another model" breaks the verification; then the page is audited. */
+async function auditUnavailable(browser) {
+  await fetch(`${STANDIN}/__control`, { method: 'POST', body: JSON.stringify({ reportModel: 'claude-sonnet-5-5' }) })
+  const created = await (await fetch(`${BASE}/api/ai/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).json()
+  const chat = await fetch(`${BASE}/api/ai/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-AI-Session': created.data.token },
+    body: JSON.stringify({ conversationId: 'conv-audit-unverified-0123', trigger: 'submit-user-message', language: 'en', text: 'hello' }),
+  })
+  const body = await chat.text()
+  await fetch(`${STANDIN}/__control`, { method: 'POST', body: '{}' })
+  if (/Stand-in answer/.test(body) || !/model_mismatch/.test(body)) throw new Error('the reply of the other model was not refused')
+  for (const [w, h] of sizes) {
+    for (const theme of themes) {
+      for (const lang of langs) {
+        const tag = `${w}x${h} ${theme} ${lang}`
+        const { context, page } = await newPage(browser, { width: w, height: h, mobile: w <= 820 || h <= 500, reduced: true, scheme: theme })
+        await context.addInitScript(`try { localStorage.setItem('theme', '${theme}') } catch (e) {}`)
+        try {
+          await page.goto(`${BASE}/${lang}/control-room/`, { waitUntil: 'load' })
+          await page.getByRole('heading', { level: 1 }).waitFor({ timeout: 20000 })
+          const text = await page.locator('main').innerText()
+          const expected = { en: /required AI model could not be verified/i, hu: /nem sikerült ellenőrizni/i, nl: /kon niet worden geverifieerd/i }[lang]
+          if (!expected.test(text)) findings.push({ label: `${tag} page: unavailable`, issues: ['the fixed message about the model is not on the page'] })
+          if (!(await page.getByRole('link', { name: { en: 'Contact', hu: 'Kapcsolat', nl: 'Contact' }[lang] }).count())) findings.push({ label: `${tag} page: unavailable`, issues: ['no contact alternative'] })
+          await inspect(page, `${tag} page: the required model could not be verified`)
+        } catch (error) {
+          findings.push({ label: tag, issues: [`the audit could not continue: ${String(error.message || error).split('\n')[0]}`] })
+        }
+        await context.close()
+      }
+    }
+  }
+}
+
 ;(async () => {
   const browser = await launch()
+  if (UNAVAILABLE) {
+    await auditUnavailable(browser)
+    console.log(`ai audit (model could not be verified): ${states} states at ${sizes.map((s) => s.join('x')).join(', ')} (${themes.join('+')}, ${langs.join('+')}${WITH_AXE ? ', axe' : ''})`)
+    if (!findings.length) console.log('ai audit: no findings')
+    for (const f of findings) console.log(`- ${f.label}: ${f.issues.join('  ||  ')}`)
+    await browser.close()
+    process.exit(findings.length ? 1 : 0)
+  }
   for (const [w, h] of sizes) {
     for (const theme of themes) {
       for (const lang of langs) {

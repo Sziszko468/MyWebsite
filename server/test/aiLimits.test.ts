@@ -160,7 +160,7 @@ describe('the budget reservation', () => {
     const settings = loadSettings(s.app.context)
     const estimate = worstCase(settings, Math.ceil((1800 + 300) / 3)).costUsd
     // Room for exactly three worst cases (and not a fourth).
-    s.db.run("INSERT INTO settings (key, value, updated_at, updated_by) VALUES ('ai.settings', ?, ?, NULL)", [JSON.stringify({ dailyBudgetUsd: estimate * 3.6, monthlyBudgetUsd: estimate * 3.6 }), s.clock.now().toISOString()])
+    s.db.run("INSERT OR REPLACE INTO settings (key, value, updated_at, updated_by) VALUES ('ai.settings', ?, ?, NULL)", [JSON.stringify({ enabled: true, dailyBudgetUsd: estimate * 3.6, monthlyBudgetUsd: estimate * 3.6 }), s.clock.now().toISOString()])
     const sessions = await Promise.all(Array.from({ length: 10 }, () => newSession(s)))
     const inflight = sessions.map((headers) => post(s, headers, 'a question of ordinary length'))
     await waitFor(() => s.db.get<{ n: number }>("SELECT COUNT(*) AS n FROM ai_requests WHERE status = 'reserved'")!.n >= 3)

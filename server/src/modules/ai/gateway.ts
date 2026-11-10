@@ -5,12 +5,16 @@ import { HttpError, notFound, rateLimited } from '../../http/errors.ts'
 import { newId } from '../../lib/crypto.ts'
 import { cleanBlock } from '../../lib/text.ts'
 import { addMs, HOUR } from '../../lib/time.ts'
-import { finish, IpLimiter, estimateTokens, reserve, type Outcome, type Reservation, type Usage } from './budget.ts'
+import { alertForRefusal, checkThresholds, raiseProviderAlert } from './alerts.ts'
+import { BudgetRefusal, finish, IpLimiter, estimateTokens, reserve, type Outcome, type Reservation, type Usage } from './budget.ts'
+import { runConnectionTest, type ConnectionResult } from './connection.ts'
 import { Knowledge } from './knowledge.ts'
+import { AI_MODEL_ID, createAiModel, guardModel, ModelLockError, ModelObservation, type LockedModel } from './model.ts'
 import { instructionsFor } from './prompt.ts'
 import { availability, loadSettings } from './settings.ts'
 import { createConversation, getConversation, loadMessages, saveMessages, setLanguage, setTitle, type ConversationRow, type StoredMessage } from './store.ts'
 import { buildTools } from './tools.ts'
+import { recordFailed, recordLastError } from './verification.ts'
 
 /**
  * The gateway: one visitor's message in, a streamed answer out, with every guard in front of the model and every number
@@ -54,12 +58,26 @@ export class Assistant {
     this.provider = provider
   }
 
-  /** The configured model, created on first use (the provider's package is loaded then, not at start-up). */
-  private async model(): Promise<LanguageModel> {
-    if (this.provider) return this.provider()
-    const { createAnthropic } = await import('@ai-sdk/anthropic')
-    const { apiKey, baseUrl, model } = this.app.config.ai
-    return createAnthropic({ apiKey: apiKey ?? undefined, ...(baseUrl ? { baseURL: baseUrl } : {}) })(model)
+  /**
+   * THE model instance: Claude Haiku 5.5 from the Anthropic provider (model.ts), created once, on first use. The only other
+   * way to get a model here is the `provider` a test hands in, and it passes the same lock (`guardModel`): it must be named
+   * `claude-haiku-5-5` and come from an `anthropic…` provider, or it is refused.
+   */
+  private base: Promise<LockedModel> | null = null
+  private baseModel(): Promise<LockedModel> {
+    this.base ??= (async () => {
+      if (this.provider) return (await this.provider()) as LockedModel
+      const { apiKey, baseUrl } = this.app.config.ai
+      if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not set.')
+      return createAiModel({ apiKey, baseUrl })
+    })()
+    return this.base
+  }
+
+  /** The model for one request, wrapped so that what the provider reports about itself is checked and kept in `observation`. */
+  private async model(observation: ModelObservation): Promise<LockedModel> {
+    if (this.app.config.ai.modelOverride !== null) throw new ModelLockError('model_not_locked', this.app.config.ai.modelOverride)
+    return guardModel(await this.baseModel(), observation)
   }
 
   sweep(): void {
@@ -67,43 +85,20 @@ export class Assistant {
   }
 
   /**
-   * One small request to the configured model, outside any conversation, for the operator (`npm run server:cli -- ai check`):
-   * proves the key, the model identifier and the address work, and shows the token counts the provider reports and what they
-   * cost at the configured prices. It spends a few tokens of real money, so it only runs when asked.
+   * The connection test (administration and `npm run server:cli -- ai check`): one minimal request to the required model that
+   * proves the key, the address and the model identifier work AND that the provider names Claude Haiku 5.5 as the model that
+   * answered. It spends a few tokens of real money, so it only runs when asked. The result is recorded; it never switches the
+   * assistant on.
    */
-  async check(message: string): Promise<Record<string, unknown>> {
-    const { app } = this
-    if (!app.config.ai.apiKey) throw new Error('ANTHROPIC_API_KEY is not set.')
-    const settings = loadSettings(app)
-    const { generateText } = await import('ai')
-    const started = performance.now()
-    const result = await generateText({
-      model: await this.model(),
-      instructions: 'You are a connection test. Answer with one short sentence.',
-      prompt: message,
-      maxOutputTokens: 400,
-      maxRetries: 0,
-      providerOptions: { anthropic: { effort: 'low' } },
-    })
-    const usage = usageOf(result.usage)
-    return {
-      model: app.config.ai.model,
-      baseUrl: app.config.ai.baseUrl ?? 'https://api.anthropic.com/v1 (default)',
-      answer: result.text.slice(0, 300),
-      finishReason: result.finishReason,
-      latencyMs: Math.round(performance.now() - started),
-      usage,
-      estimatedCostUsd: usage ? (usage.inputTokens * settings.priceInputPerMTok + usage.outputTokens * settings.priceOutputPerMTok) / 1_000_000 : null,
-      pricesUsed: { inputPerMTok: settings.priceInputPerMTok, outputPerMTok: settings.priceOutputPerMTok, asOf: settings.pricesAsOf },
-      note: 'The cost is the reported tokens times the configured prices: an estimate, not a bill.',
-    }
+  async connectionTest(actorId: string | null): Promise<ConnectionResult> {
+    return runConnectionTest(this.app, (observation) => this.model(observation), actorId)
   }
 
   async chat(request: ChatRequest): Promise<Response> {
     const { app } = this
     const settings = loadSettings(app)
     const state = availability(app, settings)
-    if (!state.available) throw new HttpError(503, 'service_unavailable', 'The assistant is not available right now.', { details: { reason: 'unavailable' } })
+    if (!state.available) throw unavailable(state.reason)
     if (!settings.languages.includes(request.language)) throw new HttpError(422, 'validation_failed', 'This language is not offered by the assistant.', { details: { fields: { language: 'invalid' } } })
     this.ipLimiter.check(request.ip, settings.maxRequestsPerIp)
 
@@ -149,10 +144,12 @@ export class Assistant {
     if (!conversation) conversation = createConversation(app.db, app.clock, request.sessionId, request.conversationId, request.language)
     let reservation: Reservation
     try {
-      reservation = reserve(app, settings, { conversationId: conversation.id, sessionId: request.sessionId, ipHash: request.ipHash, model: app.config.ai.model, promptTokens, newConversation: isNew })
+      reservation = reserve(app, settings, { conversationId: conversation.id, sessionId: request.sessionId, ipHash: request.ipHash, model: AI_MODEL_ID, promptTokens, newConversation: isNew })
     } catch (error) {
       // A brand-new conversation that was refused leaves nothing behind.
       if (isNew) app.db.run('DELETE FROM ai_conversations WHERE id = ?', [conversation.id])
+      // A limit that stopped a visitor is something the administrator should hear about (once a day / month per limit).
+      if (error instanceof BudgetRefusal) alertForRefusal(app, settings, error.reason)
       throw error
     }
 
@@ -173,8 +170,35 @@ export class Assistant {
       return await this.stream({ request, settings, conversation, reservation, messages, windowed, instructions, release })
     } catch (error) {
       release()
-      finish(app, settings, reservation, { status: 'failed', usage: null, steps: 0, toolCalls: 0, errorCode: classify(error), latencyMs: 0, firstTokenMs: null })
-      throw error
+      const code = classify(error)
+      finish(app, settings, reservation, { status: 'failed', usage: null, steps: 0, toolCalls: 0, errorCode: code, latencyMs: 0, firstTokenMs: null })
+      this.afterFailure(code, null)
+      // A model that is not the required one is refused before a single token is requested: a controlled "not available".
+      throw error instanceof ModelLockError ? unavailable('model_unverified') : error
+    }
+  }
+
+  /**
+   * What a failed request means for the administration. A reply from another model, or a provider that does not know the
+   * required model, breaks the verification on the spot (the assistant is unavailable until a connection test succeeds again);
+   * a refused key or an empty account raises an alert. Whatever happened, nothing is retried with another model: there is none.
+   */
+  private afterFailure(code: string, observation: ModelObservation | null): void {
+    const { app } = this
+    try {
+      if (code === 'model_mismatch') {
+        recordFailed(app, 'model_mismatch', observation?.mismatch ?? null, null)
+        raiseProviderAlert(app, 'model_mismatch', { reported: observation?.mismatch ?? null })
+        raiseProviderAlert(app, 'model_unverified', { reason: 'model_mismatch' })
+      } else if (code === 'model_not_found') {
+        recordFailed(app, 'model_not_found', null, null)
+        raiseProviderAlert(app, 'model_not_found')
+        raiseProviderAlert(app, 'model_unverified', { reason: 'model_not_found' })
+      } else if (code === 'provider_auth') raiseProviderAlert(app, 'provider_auth')
+      else if (code === 'provider_billing') raiseProviderAlert(app, 'provider_billing')
+      if (code.startsWith('provider_') || code.startsWith('model_')) recordLastError(app, 'chat', code)
+    } catch (error) {
+      app.log.warn('assistant failure could not be recorded', { error: error instanceof Error ? { name: error.name } : 'unknown' })
     }
   }
 
@@ -191,7 +215,8 @@ export class Assistant {
     const { app } = this
     const { request, settings, conversation, reservation, messages, windowed, instructions, release } = input
     const { streamText, isStepCount, convertToModelMessages, toUIMessageStream, createUIMessageStreamResponse } = await import('ai')
-    const model = await this.model()
+    const observation = new ModelObservation()
+    const model = await this.model(observation)
     const counter = { calls: 0 }
     const tools = await buildTools({ app, knowledge: this.knowledge, settings, conversationId: conversation.id, sessionId: request.sessionId, language: request.language, ipHash: request.ipHash, requestId: reservation.id, counter })
     const modelMessages = await convertToModelMessages(windowed, { tools, ignoreIncompleteToolCalls: true })
@@ -206,7 +231,13 @@ export class Assistant {
       if (finalized) return
       finalized = true
       release()
-      finish(app, settings, reservation, { ...outcome, steps, toolCalls: counter.calls, errorCode: outcome.status === 'completed' ? null : errorCode ?? (outcome.status === 'aborted' ? 'aborted' : 'failed'), latencyMs: performance.now() - started, firstTokenMs: firstToken })
+      finish(app, settings, reservation, { ...outcome, steps, toolCalls: counter.calls, errorCode: outcome.status === 'completed' ? null : errorCode ?? (outcome.status === 'aborted' ? 'aborted' : 'failed'), latencyMs: performance.now() - started, firstTokenMs: firstToken, actualModel: observation.reported, modelVerified: observation.verified })
+      // What this request used may have taken a limit to its warning level; the administrator hears about it (never fatal).
+      try {
+        checkThresholds(app, settings)
+      } catch (error) {
+        app.log.warn('assistant threshold check failed', { error: error instanceof Error ? { name: error.name } : 'unknown' })
+      }
     }
 
     const thinking = settings.thinking === 'disabled' ? ({ type: 'disabled' } as const) : ({ type: 'adaptive' } as const)
@@ -229,6 +260,7 @@ export class Assistant {
         errorCode = classify(error)
         app.log.warn('assistant request failed', { code: errorCode, error: error instanceof Error ? { name: error.name } : 'unknown' })
         settle({ status: 'failed', usage: null })
+        this.afterFailure(errorCode, observation)
       },
       onAbort: ({ steps: done }) => {
         // The visitor going away aborts through the request's signal; the SDK's own timeouts abort without it.
@@ -329,18 +361,36 @@ function sumUsage(list: UsageLike[]): Usage | null {
 /**
  * A short code for what went wrong, safe to show a visitor (the website words it in three languages) and to store: the
  * provider's message, which may quote a request, is never sent to the browser or kept.
+ *
+ * Codes that mean "the required model is not usable" (`model_mismatch`, `model_not_found`, `model_unverified`) and the ones
+ * for an account the provider will not serve (`provider_auth`, `provider_billing`) are shown to a visitor as one friendly
+ * "not available" message with the contact alternative; the difference is for the administration.
  */
 export function classify(error: unknown): string {
   if (error instanceof HttpError) return error.code
-  const e = error as { name?: string; statusCode?: number; status?: number; isRetryable?: boolean } | null
+  if (error instanceof ModelLockError) return 'model_mismatch'
+  const e = error as { name?: string; statusCode?: number; status?: number; isRetryable?: boolean; lastError?: unknown } | null
+  // The SDK wraps a failed retry; what matters is what the last attempt failed with.
+  if (e?.name === 'AI_RetryError' && e.lastError !== undefined && e.lastError !== error) {
+    const inner = classify(e.lastError)
+    if (inner !== 'assistant_error') return inner
+  }
   const status = e?.statusCode ?? e?.status
   if (e?.name === 'AbortError' || e?.name === 'TimeoutError') return 'timeout'
   if (status === 401 || status === 403) return 'provider_auth'
+  if (status === 402) return 'provider_billing'
+  if (status === 404) return 'model_not_found'
   if (status === 429) return 'provider_rate_limit'
   if (status === 529 || (typeof status === 'number' && status >= 500)) return 'provider_unavailable'
   if (typeof status === 'number' && status >= 400) return 'provider_error'
   if (e?.name === 'AI_RetryError' || e?.name === 'AI_APICallError') return 'provider_unavailable'
   return 'assistant_error'
+}
+
+/** The 503 a visitor gets when the assistant is not available; the reason says only whether it is the model (the website words that). */
+export function unavailable(reason: string): HttpError {
+  const model = reason === 'model_unverified' || reason === 'model_lock'
+  return new HttpError(503, 'service_unavailable', 'The assistant is not available right now.', { details: { reason: model ? 'model_unverified' : 'unavailable' } })
 }
 
 export { addMs }

@@ -1,9 +1,11 @@
 import { LANGUAGES, type AiSettings, type Language } from '../../config.ts'
 import type { AppContext, SessionInfo } from '../../context.ts'
-import { validationFailed, type FieldCode, type FieldErrors } from '../../http/errors.ts'
+import { HttpError, validationFailed, type FieldCode, type FieldErrors } from '../../http/errors.ts'
 import { isRecord } from '../../lib/text.ts'
 import { requirePermission } from '../auth/permissions.ts'
+import { audit } from '../system/audit.ts'
 import { getSetting, setSetting } from '../system/settings.ts'
+import { isVerified } from './verification.ts'
 
 /**
  * The assistant's settings as an administrator can change them. The environment (config.ts) gives the starting values; what is
@@ -28,6 +30,7 @@ export const RANGES = {
   dailyTokenBudget: [1000, 1_000_000_000],
   dailyBudgetUsd: [0, 100000],
   monthlyBudgetUsd: [0, 1000000],
+  alertPercent: [1, 100],
   conversationMaxHours: [1, 720],
   retentionDays: [1, 365],
   priceInputPerMTok: [0, 1000],
@@ -35,7 +38,7 @@ export const RANGES = {
 } as const satisfies Partial<Record<keyof AiSettings, readonly [number, number]>>
 
 type NumericKey = keyof typeof RANGES
-const INTEGERS: ReadonlySet<NumericKey> = new Set(['maxInputChars', 'maxHistoryMessages', 'maxConversationMessages', 'maxOutputTokens', 'maxToolCalls', 'maxRequestsPerSession', 'maxRequestsPerIp', 'maxDailyConversations', 'dailyRequests', 'dailyTokenBudget', 'conversationMaxHours', 'retentionDays'])
+const INTEGERS: ReadonlySet<NumericKey> = new Set(['maxInputChars', 'maxHistoryMessages', 'maxConversationMessages', 'maxOutputTokens', 'maxToolCalls', 'maxRequestsPerSession', 'maxRequestsPerIp', 'maxDailyConversations', 'dailyRequests', 'dailyTokenBudget', 'alertPercent', 'conversationMaxHours', 'retentionDays'])
 const BOOLEANS = ['enabled', 'plannerEnabled', 'quoteEnabled'] as const
 
 export const WELCOME_MAX = 400
@@ -149,12 +152,21 @@ export function saveSettings(app: AppContext, session: SessionInfo | null, body:
   const unknown = Object.keys(body).filter((field) => !(field in app.config.ai.defaults))
   for (const field of unknown) errors[field] = 'unknown'
   if (Object.keys(errors).length > 0) throw validationFailed(errors)
+  // Switching the assistant ON is the administrator's own decision and needs proof: the required model verified for this key and
+  // address (a connection test). Switching it off is always allowed.
+  const before = loadSettings(app).enabled
+  if (value.enabled === true && !before) {
+    const blocker = activationBlocker(app)
+    if (blocker) throw new HttpError(409, 'conflict', 'The assistant cannot be switched on until the required model is verified.', { details: { reason: 'verification_required', cause: blocker } })
+  }
   const merged = { ...stored(app), ...value }
   // Monetary budgets are coherent only when the day does not exceed the month.
   const effective = { ...loadSettingsFrom(app, merged) }
   if (effective.dailyBudgetUsd > effective.monthlyBudgetUsd) throw validationFailed({ dailyBudgetUsd: 'tooLong' }, 'The daily budget cannot be larger than the monthly budget.')
   setSetting(app.db, app.clock, KEY, JSON.stringify(merged), actor.userId)
-  return loadSettings(app)
+  const after = loadSettings(app)
+  if (after.enabled !== before) audit(app, actor, after.enabled ? 'ai.activate' : 'ai.deactivate', 'ai_settings', null)
+  return after
 }
 
 function loadSettingsFrom(app: AppContext, saved: Record<string, unknown>): AiSettings {
@@ -166,15 +178,34 @@ function loadSettingsFrom(app: AppContext, saved: Record<string, unknown>): AiSe
   return merged
 }
 
-export type Unavailable = 'operator_disabled' | 'admin_disabled' | 'no_api_key'
+export type Unavailable = 'operator_disabled' | 'admin_disabled' | 'no_api_key' | 'model_lock' | 'model_unverified'
 
-/** Whether the assistant can answer at all, and if not, why (the website only needs to know "not available"). */
+/**
+ * Whether the assistant can answer at all, and if not, why. In this order: the operator's master switch, the administrator's
+ * activation, the key, the model lock (a leftover `ANTHROPIC_MODEL` naming another model), and the verification that the
+ * REQUIRED model answers for the configured key and address. Nothing else can make the assistant available: there is no
+ * "try another model" state.
+ */
 export function availability(app: AppContext, settings: AiSettings = loadSettings(app)): { available: true } | { available: false; reason: Unavailable } {
   if (!app.config.ai.enabled) return { available: false, reason: 'operator_disabled' }
   if (!settings.enabled) return { available: false, reason: 'admin_disabled' }
   if (!app.config.ai.apiKey) return { available: false, reason: 'no_api_key' }
+  if (app.config.ai.modelOverride !== null) return { available: false, reason: 'model_lock' }
+  if (!isVerified(app)) return { available: false, reason: 'model_unverified' }
   return { available: true }
 }
+
+/** Why the assistant cannot be switched on yet (null: it can). Used by the activation switch; a visitor never sees these. */
+export function activationBlocker(app: AppContext): Unavailable | null {
+  if (!app.config.ai.enabled) return 'operator_disabled'
+  if (!app.config.ai.apiKey) return 'no_api_key'
+  if (app.config.ai.modelOverride !== null) return 'model_lock'
+  if (!isVerified(app)) return 'model_unverified'
+  return null
+}
+
+/** The part of the reason a visitor is told: that the required model could not be verified (the other reasons stay private). */
+export const publicReason = (state: ReturnType<typeof availability>): 'model' | null => (!state.available && (state.reason === 'model_unverified' || state.reason === 'model_lock') ? 'model' : null)
 
 /** What the browser is told: whether to offer the assistant, in which languages, and the texts the administrator chose. No limit, price or key. */
 export function publicConfig(app: AppContext): Record<string, unknown> {
@@ -182,6 +213,8 @@ export function publicConfig(app: AppContext): Record<string, unknown> {
   const state = availability(app, settings)
   return {
     available: state.available,
+    // 'model': the administrator switched the assistant on but the required model could not be verified (the visitor is told so).
+    unavailableReason: publicReason(state),
     languages: settings.languages,
     plannerEnabled: settings.plannerEnabled,
     quoteEnabled: settings.quoteEnabled,

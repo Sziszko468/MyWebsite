@@ -1,5 +1,6 @@
 import { simulateReadableStream } from 'ai'
 import { MockLanguageModelV4 } from 'ai/test'
+import { AI_MODEL_ID } from '../src/modules/ai/model.ts'
 
 /**
  * A scripted language model for the assistant's tests: the AI SDK's own mock, fed one stream per model call. It stands in for
@@ -24,9 +25,23 @@ export interface Scripted {
 
 const finish = (reason: 'stop' | 'tool-calls' | 'error', tokens: Tokens): Chunk => ({ type: 'finish', finishReason: { unified: reason, raw: reason === 'stop' ? 'end_turn' : reason }, usage: usage(tokens) })
 
+/**
+ * What the provider says about itself at the start of every answer (Anthropic: `message.model` in `message_start`). The
+ * assistant checks it against the required model; a test passes another identifier (or `null`: nothing reported) to see what
+ * happens when the answer does not come from Claude Haiku 5.5.
+ */
+export const identity = (reported: string | null = AI_MODEL_ID): Chunk[] => (reported === null ? [] : [{ type: 'response-metadata', id: 'msg_test', modelId: reported }])
+
+export interface CallOptions {
+  delayMs?: number
+  gate?: Promise<void>
+  /** The model the provider claims answered (default: the required one); `null`: the provider reports none. */
+  reportedModel?: string | null
+}
+
 /** A model call that answers with text. */
-export function say(text: string, tokens: Tokens = { input: 400, output: 60 }, options: { delayMs?: number; gate?: Promise<void> } = {}): Scripted {
-  const chunks: Chunk[] = [{ type: 'stream-start', warnings: [] }, { type: 'text-start', id: 't1' }]
+export function say(text: string, tokens: Tokens = { input: 400, output: 60 }, options: CallOptions = {}): Scripted {
+  const chunks: Chunk[] = [{ type: 'stream-start', warnings: [] }, ...identity(options.reportedModel), { type: 'text-start', id: 't1' }]
   for (const word of text.split(/(?<= )/)) chunks.push({ type: 'text-delta', id: 't1', delta: word })
   chunks.push({ type: 'text-end', id: 't1' }, finish('stop', tokens))
   return scripted(chunks, options)
@@ -35,12 +50,12 @@ export function say(text: string, tokens: Tokens = { input: 400, output: 60 }, o
 let calls = 0
 
 /** A model call that asks for a tool. */
-export function callTool(toolName: string, input: Record<string, unknown>, tokens: Tokens = { input: 500, output: 30 }): Scripted {
+export function callTool(toolName: string, input: Record<string, unknown>, tokens: Tokens = { input: 500, output: 30 }, options: CallOptions = {}): Scripted {
   calls += 1
-  return scripted([{ type: 'stream-start', warnings: [] }, { type: 'tool-call', toolCallId: `call-${calls}`, toolName, input: JSON.stringify(input) }, finish('tool-calls', tokens)], {})
+  return scripted([{ type: 'stream-start', warnings: [] }, ...identity(options.reportedModel), { type: 'tool-call', toolCallId: `call-${calls}`, toolName, input: JSON.stringify(input) }, finish('tool-calls', tokens)], {})
 }
 
-function scripted(chunks: Chunk[], options: { delayMs?: number; gate?: Promise<void> }): Scripted {
+function scripted(chunks: Chunk[], options: CallOptions): Scripted {
   if (options.gate) {
     // Nothing is produced until the test opens the gate: lets a test hold many requests open at once.
     const source = simulateReadableStream({ chunks, initialDelayInMs: 0, chunkDelayInMs: 0 })
@@ -63,7 +78,7 @@ function scripted(chunks: Chunk[], options: { delayMs?: number; gate?: Promise<v
 export function scriptedModel(script: Scripted[] | ((callNumber: number, options: { prompt: unknown; tools?: unknown }) => Scripted | Promise<Scripted>)) {
   let index = 0
   const model = new MockLanguageModelV4({
-    modelId: 'claude-haiku-5-5',
+    modelId: AI_MODEL_ID,
     provider: 'anthropic.messages',
     doStream: (async (options: { prompt: unknown; tools?: unknown }) => {
       const number = index

@@ -6,9 +6,9 @@ Written from what was run, not from what was intended. Full manual: [`../ai/READ
 
 | | |
 |---|---|
-| Model | **`claude-haiku-5-5`** (exact identifier, from `ANTHROPIC_MODEL`; no fallback model; adaptive thinking, low effort, no temperature) |
-| `ai` (Vercel AI SDK) | 7.0.164 |
-| `@ai-sdk/anthropic` | 4.0.98 (server only) |
+| Model | **`claude-haiku-5-5`** (a constant in code since PROMPT 16.1, no longer read from `ANTHROPIC_MODEL`; no fallback model; adaptive thinking, low effort, no temperature). See [`docs/ai/model-lock-report.md`](../ai/model-lock-report.md). |
+| `ai` (Vercel AI SDK) | 7.0.166 |
+| `@ai-sdk/anthropic` | 4.0.99 (server only) |
 | `@ai-sdk/react` | 4.0.168 (website, lazy chunk) |
 | `zod` | 4.6.7 (tool schemas) |
 
