@@ -4,6 +4,7 @@ import { ConstraintError, conflict, notFound, validationFailed, type FieldCode, 
 import { iso } from '../../lib/time.ts'
 import { cleanBlock, cleanLine, isRecord, length } from '../../lib/text.ts'
 import { requirePermission } from '../auth/permissions.ts'
+import { languageGaps, PUBLISH_FIELDS } from './completeness.ts'
 import { audit } from '../system/audit.ts'
 import {
   CURRENCIES,
@@ -148,6 +149,15 @@ function translationsOf(body: Record<string, unknown>, check: Checker): Record<L
   return out
 }
 
+/**
+ * An `active` record is on the website, so it must be complete in every language (modules/catalog/completeness.ts); a `disabled`
+ * record is a draft and may be saved half-finished. Each gap is reported on the field that is empty, the way every other error is.
+ */
+function requireAllLanguages(c: Checker, status: Status, translations: Record<Language, object>, fields: readonly string[]): void {
+  if (status !== 'active') return
+  for (const gap of languageGaps(translations as Record<Language, Record<string, string | readonly string[] | null>>, fields)) c.fail(`translations.${gap.language}.${gap.field}`, 'required')
+}
+
 const now = (app: AppContext) => iso(app.clock.now())
 
 function guard<T>(work: () => T, what: string): T {
@@ -195,6 +205,7 @@ export function parseService(body: Record<string, unknown>, options: { slug?: st
     }
   }
   const packages = c.list('packages', body.packages, 40, 20)
+  requireAllLanguages(c, status, translations, PUBLISH_FIELDS.service)
   c.done()
   return { slug, category, status, position, translations, packages }
 }
@@ -308,6 +319,7 @@ export function parsePackage(body: Record<string, unknown>, options: { code?: st
   }
   const needs = c.needs('needs', body.needs)
   const extras = c.list('extras', body.extras, 40, 30)
+  requireAllLanguages(c, status, translations, PUBLISH_FIELDS.package)
   c.done()
   return { code, status, featured, position, price, vat, quoteRequired, translations, needs, extras }
 }
@@ -415,6 +427,7 @@ export function parseExtra(body: Record<string, unknown>, options: { code?: stri
     translations[language] = { name: c.text(`translations.${language}.name`, t.name, 80, { required: true }), summary: c.text(`translations.${language}.summary`, t.summary, 400, { multiline: true }) }
   }
   const appliesTo = c.needs('appliesTo', body.appliesTo)
+  requireAllLanguages(c, status, translations, PUBLISH_FIELDS.extra)
   c.done()
   return { code, status, position, price, vat, translations, appliesTo }
 }
@@ -508,6 +521,7 @@ export function parseContent(body: Record<string, unknown>, options: { type?: Co
     const at = (field: string) => `translations.${language}.${field}`
     translations[language] = { title: c.text(at('title'), t.title, 300, { required: true }), description: c.text(at('description'), t.description, 3000, { multiline: true }) }
   }
+  requireAllLanguages(c, status, translations, PUBLISH_FIELDS.content)
   c.done()
   return { type: type!, slug, status, position, translations }
 }

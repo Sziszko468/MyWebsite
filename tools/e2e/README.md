@@ -112,3 +112,21 @@ node tools/e2e/quote-journey.cjs --base=http://127.0.0.1:8788 --mail=/tmp/e2e/ma
 ```
 
 The scratch backend needs `PUBLIC_URL=http://127.0.0.1:8788` (the links in the e-mails point at it). A visitor on a 390 px phone builds a request (an invalid website is refused), sees the receipt (reference, date, summary, the private status link), the owner's notification and the visitor's confirmation are read from the `.eml` files; the administrator signs in, filters, opens the request, sets a priority, writes a quotation (the total is the server's whole-unit sum, with no VAT figure because none was confirmed) and sends it after a confirmation; the customer opens the secure link on a phone, is refused without the confirmation box, accepts; the page becomes a record, both sides were e-mailed once, no wording says a payment was made; the administrator sees *Accepted* (not *In progress*) and the history. 20 steps; needs a fresh server. A note that cost time: the site's brand ("Your Name") also matches `getByLabel('Your name')`, so the form's own fields are found by role and exact name.
+
+## Languages (PROMPT 18)
+
+**`l10n-journey.cjs`**: the starting language by country, the saved choice, and the language of the Shop, in a real Chrome against `wrangler dev` (the real Workers runtime). 31 checks: HU/NL/DE/FR/US/`XX`/`T1` and a VPN exit, the Shop in each starting language (no English fallback sentence, no raw key), the configurator's validation message in each language, a manual choice that survives navigation, a refresh, a new tab and a different country, an explicit `/nl/` address that is not redirected, a crawler that is not redirected, and a forged `CF-IPCountry` header that is ignored.
+
+```bash
+npm run build
+npx wrangler dev --port 8799 --var SIMULATE_COUNTRY:1     # SIMULATE_COUNTRY only exists on this command line, never in wrangler.jsonc
+AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/l10n-journey.cjs http://127.0.0.1:8799
+```
+
+**`quote-languages-journey.cjs`**: a quote request completed on a 390 × 844 touch phone in each language, through the six-step builder and the FULL EXPERIENCE questionnaire (55 checks), against the built site served by the real backend (set it up as above; use `RATE_LIMITS=false` for the throw-away server, six requests exceed the sending limit of one address).
+
+```bash
+AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/quote-languages-journey.cjs --base=http://127.0.0.1:8788 --mail=<the mail folder>
+```
+
+The older `journeys.cjs` journey A now accepts `/hu/`, `/en/` or `/nl/` after `/` (without the edge Worker the starting language is the saved choice, else English).

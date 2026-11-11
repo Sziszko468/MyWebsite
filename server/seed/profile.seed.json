@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "name": null,
+  "name": "Szilárd Kiss",
   "story": {
     "title": {
       "hu": "A fejlődés nem egyenes vonal.",
@@ -73,7 +73,7 @@
     {
       "id": "communication",
       "name": {
-        "hu": "Ügyfélkommunikáció",
+        "hu": "Ügyfél-kommunikáció",
         "en": "Client communication",
         "nl": "Klantcommunicatie"
       },

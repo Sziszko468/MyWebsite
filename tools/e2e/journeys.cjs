@@ -112,7 +112,8 @@ async function journeyA(browser) {
   try {
     await step(page, 'open the homepage (first visit)', async () => {
       await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' })
-      await page.waitForURL(/\/hu\/$/)
+      // `/` moves on to the visitor's language: here (no edge Worker) the saved choice, else English (PROMPT 18); any of the three is right.
+      await page.waitForURL(/\/(hu|en|nl)\/$/)
       return page.url().replace(BASE, '')
     })
     await step(page, 'the introduction opens and can be entered', async () => {

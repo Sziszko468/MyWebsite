@@ -1,0 +1,43 @@
+name: CI
+
+# The checks a change has to pass before it is merged. The language checks are part of it (PROMPT 18): a text that is missing in
+# Hungarian, English or Dutch, a placeholder that was lost in translation, a word the dictionary does not know, or a customer-facing
+# word written into a component fails the run.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18
+          cache: npm
+
+      - run: npm ci
+
+      # The Hungarian, English and Dutch dictionaries are read by Hunspell. `hunspell-asm` is not a dependency of the project (it pulls in
+      # an old package with published advisories), so it is installed for this run only. Without it the Hungarian spelling is reported as
+      # NOT CHECKED, never as passed.
+      - name: Install the spell checker for this run
+        run: npm install --no-save hunspell-asm
+
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+      - name: Language checks
+        run: |
+          npm run i18n:check
+          npm run i18n:validate
+
+      - name: Build and check the pages the build wrote
+        run: |
+          npm run build
+          npm run check:seo

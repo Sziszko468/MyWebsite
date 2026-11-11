@@ -66,7 +66,7 @@ describe('the personal story', () => {
       'Problémamegoldás',
       'Folyamatok átlátása',
       'Szervezés',
-      'Ügyfélkommunikáció',
+      'Ügyfél-kommunikáció',
       'Csapatmunka',
       'Rendszerszemlélet',
       'Folyamatos tanulás',

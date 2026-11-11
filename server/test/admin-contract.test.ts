@@ -96,8 +96,12 @@ describe('what the editors let through, the save accepts; what they warn about, 
     }
   })
 
-  it.each(cases.filter(([, field]) => !field.required && field.kind !== 'list'))('%s.%s: not required, an empty value is fine', (group, field) => {
-    expect(() => parse(group, body(group, { language: 'nl', field: field.name, value: '' }))).not.toThrow()
+  it.each(cases.filter(([, field]) => !field.required && field.kind !== 'list'))('%s.%s: not required; empty in one language it stops a published record, not a draft', (group, field) => {
+    const input = body(group, { language: 'nl', field: field.name, value: '' })
+    // A draft (disabled) may be half-finished: that is how it is kept.
+    expect(() => parse(group, { ...input, status: 'disabled' })).not.toThrow()
+    // A published record says the same in every language, so the language that lacks it is named (PROMPT 18).
+    expect(failure(() => parse(group, input))).toEqual({ [`translations.nl.${field.name}`]: 'required' })
   })
 })
 

@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
-import { DEFAULT_LANGUAGE } from './i18n/config'
 import { localizedPath } from './i18n/paths'
+import { startingLanguage } from './i18n/preference'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { lazyRoute } from './motion/loading'
@@ -96,7 +96,11 @@ export default function App() {
       <IntroProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Navigate to={localizedPath(DEFAULT_LANGUAGE)} replace />} />
+            {/*
+              "/" names no language. At the edge the Worker already sent the visitor to the language of their saved choice or their
+              country (worker/); this is the same rule for a host without it: the saved choice, else English.
+            */}
+            <Route path="/" element={<Navigate to={localizedPath(startingLanguage())} replace />} />
             <Route path=":lang" element={<LanguageLayout />}>
               {/* A project's page is one route for every slug: the data decides which project (or "not found") it shows. */}
               <Route path="work/preview/:id" element={<ProjectRoute preview />} />

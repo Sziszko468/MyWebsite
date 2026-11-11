@@ -131,7 +131,7 @@ function ServiceForm({ record, packages, position }: { record: ServiceRecord | n
         </DetailPanel>
         <DetailPanel title={e.texts}>
           <p className={styles.hint}>{e.textsHelp}</p>
-          <TextsEditor fields={SERVICE_FIELDS} values={texts} errors={errors} idBase="service-texts" onChange={(language: Language, name, value) => setTexts({ ...texts, [language]: { ...texts[language], [name]: value } })} />
+          <TextsEditor published={active} fields={SERVICE_FIELDS} values={texts} errors={errors} idBase="service-texts" onChange={(language: Language, name, value) => setTexts({ ...texts, [language]: { ...texts[language], [name]: value } })} />
         </DetailPanel>
         <Footer busy={busy} label={record ? e.save : e.create} back={back} />
       </form>
@@ -220,7 +220,7 @@ function PackageForm({ record, extras, position }: { record: PackageRecord | nul
         </DetailPanel>
         <DetailPanel title={e.texts}>
           <p className={styles.hint}>{e.textsHelp}</p>
-          <TextsEditor fields={PACKAGE_FIELDS} values={texts} errors={errors} idBase="package-texts" onChange={(language: Language, name, value) => setTexts({ ...texts, [language]: { ...texts[language], [name]: value } })} />
+          <TextsEditor published={active} fields={PACKAGE_FIELDS} values={texts} errors={errors} idBase="package-texts" onChange={(language: Language, name, value) => setTexts({ ...texts, [language]: { ...texts[language], [name]: value } })} />
         </DetailPanel>
         <Footer busy={busy} label={record ? e.save : e.create} back={back} />
       </form>
@@ -289,7 +289,7 @@ function ExtraForm({ record, position }: { record: ExtraRecord | null; position:
         </DetailPanel>
         <DetailPanel title={e.texts}>
           <p className={styles.hint}>{e.textsHelp}</p>
-          <TextsEditor fields={EXTRA_FIELDS} values={texts} errors={errors} idBase="extra-texts" onChange={(language: Language, name, value) => setTexts({ ...texts, [language]: { ...texts[language], [name]: value } })} />
+          <TextsEditor published={active} fields={EXTRA_FIELDS} values={texts} errors={errors} idBase="extra-texts" onChange={(language: Language, name, value) => setTexts({ ...texts, [language]: { ...texts[language], [name]: value } })} />
         </DetailPanel>
         <Footer busy={busy} label={record ? e.save : e.create} back={back} />
       </form>

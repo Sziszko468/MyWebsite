@@ -226,7 +226,7 @@ describe('a FULL EXPERIENCE request', () => {
     const rows = briefRows(row, 'en')
     expect(rows.find((r) => r.label === 'Company')!.value).toBe('Gym Network Ltd')
     expect(rows.find((r) => r.label === 'Preferred reply language')!.value).toBe('Dutch')
-    expect(rows.find((r) => r.label.startsWith('Which components'))!.value).toBe('Frontend, Backend')
+    expect(rows.find((r) => r.label.startsWith('What does your project need'))!.value).toBe('Screens that people see and use, Rules and processes behind the scenes')
     expect(rows.find((r) => r.label.startsWith('When would you like'))!.value).toBe('(skipped)')
 
     const mail = renderRequestNotification({ request: row, items: quoteItems(server.db, row.id), totals: { fixed: [], quotedParts: 0 }, packageName: (code: string) => code }, 'en', 'Brand', null)

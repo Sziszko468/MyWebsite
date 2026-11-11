@@ -77,7 +77,7 @@ export const transferableSkills: readonly TransferableSkill[] = [
   },
   {
     id: 'communication',
-    name: tri('Ügyfélkommunikáció', 'Client communication', 'Klantcommunicatie'),
+    name: tri('Ügyfél-kommunikáció', 'Client communication', 'Klantcommunicatie'),
     text: tri(
       'Megkérdezem, mire van valójában szükség, és érthetően elmondom, mi miért történik.',
       'I ask what is really needed and explain clearly what happens and why.',

@@ -62,7 +62,7 @@
    "placeholders": [],
    "default": {
     "hu": "Beszéljünk a projektedről",
-    "en": "Let's talk about your project",
+    "en": "Let’s talk about your project",
     "nl": "Laten we over je project praten"
    }
   },
@@ -117,7 +117,7 @@
    "placeholders": [],
    "default": {
     "hu": "Együtt építsünk valami értékeset.",
-    "en": "Let's build something worthwhile together.",
+    "en": "Let’s build something worthwhile together.",
     "nl": "Laten we samen iets waardevols bouwen."
    }
   },
@@ -161,7 +161,7 @@
    "placeholders": [],
    "default": {
     "hu": "Van egy ötleted? Valósítsuk meg.",
-    "en": "Got an idea? Let's make it real.",
+    "en": "Got an idea? Let’s make it real.",
     "nl": "Heb je een idee? Laten we het realiseren."
    }
   },
@@ -171,9 +171,9 @@
    "label": "home › path › clients › text",
    "placeholders": [],
    "default": {
-    "hu": "Modern, reszponzív weboldalak és webalkalmazások üzleti célokra, átgondolt tervezéssel és fejlesztéssel.",
-    "en": "Modern, responsive websites and web applications for business goals, with thoughtful design and development.",
-    "nl": "Moderne, responsieve websites en webapplicaties voor zakelijke doelen, met doordacht ontwerp en doordachte ontwikkeling."
+    "hu": "Modern, minden eszközön jól működő weboldalak és webalkalmazások üzleti célokra, átgondolt tervezéssel és fejlesztéssel.",
+    "en": "Modern websites and web applications that work well on every device, for business goals, with thoughtful design and development.",
+    "nl": "Moderne websites en webapplicaties die op elk apparaat goed werken, voor zakelijke doelen, met doordacht ontwerp en doordachte ontwikkeling."
    }
   },
   {
@@ -294,9 +294,9 @@
    "label": "home › build › items › websites › text",
    "placeholders": [],
    "default": {
-    "hu": "Reszponzív, modern weboldalak, egyedi vizuális megjelenéssel.",
-    "en": "Responsive, modern websites with a distinctive visual identity.",
-    "nl": "Responsieve, moderne websites met een eigen visuele identiteit."
+    "hu": "Minden eszközön jól működő, modern weboldalak, egyedi vizuális megjelenéssel.",
+    "en": "Modern websites that work well on every device, with a distinctive visual identity.",
+    "nl": "Moderne websites die op elk apparaat goed werken, met een eigen visuele identiteit."
    }
   },
   {
@@ -361,8 +361,8 @@
    "placeholders": [],
    "default": {
     "hu": "API-k és digitális szolgáltatások összekapcsolása a projekt tényleges igényei szerint.",
-    "en": "Connecting APIs and digital services according to the project's actual needs.",
-    "nl": "API's en digitale diensten koppelen op basis van wat het project echt nodig heeft."
+    "en": "Connecting APIs and digital services according to the project’s actual needs.",
+    "nl": "API’s en digitale diensten koppelen op basis van wat het project echt nodig heeft."
    }
   },
   {
@@ -449,7 +449,7 @@
    "placeholders": [],
    "default": {
     "hu": "Az eszközök ennek az oldalnak a forráskódjából származnak.",
-    "en": "The tools are taken from this site's own source code.",
+    "en": "The tools are taken from this site’s own source code.",
     "nl": "De hulpmiddelen komen uit de broncode van deze site zelf."
    }
   },
@@ -570,7 +570,7 @@
    "placeholders": [],
    "default": {
     "hu": "Valósítsuk meg.",
-    "en": "Let's make it real.",
+    "en": "Let’s make it real.",
     "nl": "Laten we het realiseren."
    }
   },
@@ -581,7 +581,7 @@
    "placeholders": [],
    "default": {
     "hu": "Mesélj az ötletedről, és nézzük meg, hogyan válhat belőle működő digitális élmény.",
-    "en": "Tell me about your idea, and let's see how it can become a working digital experience.",
+    "en": "Tell me about your idea, and let’s see how it can become a working digital experience.",
     "nl": "Vertel over je idee, dan kijken we hoe er een werkende digitale ervaring uit kan ontstaan."
    }
   },
@@ -592,7 +592,7 @@
    "placeholders": [],
    "default": {
     "hu": "Beszéljünk a projektedről",
-    "en": "Let's talk about your project",
+    "en": "Let’s talk about your project",
     "nl": "Laten we over je project praten"
    }
   },
@@ -977,7 +977,7 @@
    "placeholders": [],
    "default": {
     "hu": "Összeállító",
-    "en": "Configure",
+    "en": "Build a request",
     "nl": "Samenstellen"
    }
   },
@@ -1261,7 +1261,7 @@
    "default": {
     "hu": "Kiegészítő",
     "en": "Add-on",
-    "nl": "Toevoeging"
+    "nl": "Extra"
    }
   },
   {
@@ -1424,9 +1424,9 @@
    "label": "common › needs › webapp › text",
    "placeholders": [],
    "default": {
-    "hu": "Egyedi felhasználói folyamatokkal és adatkezeléssel.",
-    "en": "With custom user flows and data handling.",
-    "nl": "Met maatwerk gebruikersflows en gegevensbeheer."
+    "hu": "Böngészőben használható program, a te folyamatodra szabva.",
+    "en": "Software people use in their browser, built around your process.",
+    "nl": "Software die mensen in hun browser gebruiken, gebouwd rond jouw werkwijze."
    }
   },
   {
@@ -1457,9 +1457,9 @@
    "label": "common › needs › ui › title",
    "placeholders": [],
    "default": {
-    "hu": "UI-megvalósítás",
-    "en": "UI implementation",
-    "nl": "UI-implementatie"
+    "hu": "A terved megvalósítása",
+    "en": "Building from your design",
+    "nl": "Bouwen vanuit jouw ontwerp"
    }
   },
   {
@@ -1468,9 +1468,9 @@
    "label": "common › needs › ui › text",
    "placeholders": [],
    "default": {
-    "hu": "Meglévő designterv minőségi webes megvalósítása.",
-    "en": "A quality web build of a design you already have.",
-    "nl": "Een hoogwaardige webuitwerking van een ontwerp dat je al hebt."
+    "hu": "Ha már van terved, weboldalt építünk belőle.",
+    "en": "If you already have a design, we build it as a website.",
+    "nl": "Heb je al een ontwerp, dan bouwen we er een website van."
    }
   },
   {
@@ -1479,9 +1479,9 @@
    "label": "common › needs › integrations › title",
    "placeholders": [],
    "default": {
-    "hu": "API-integráció",
-    "en": "API integration",
-    "nl": "API-integratie"
+    "hu": "Összekötés más szolgáltatásokkal",
+    "en": "Connecting to other services",
+    "nl": "Koppelen met andere diensten"
    }
   },
   {
@@ -1490,9 +1490,9 @@
    "label": "common › needs › integrations › text",
    "placeholders": [],
    "default": {
-    "hu": "Szolgáltatások és rendszerek összekötése.",
-    "en": "Connecting services and systems.",
-    "nl": "Diensten en systemen met elkaar verbinden."
+    "hu": "A weboldal összekötése az eszközeiddel és szolgáltatásaiddal.",
+    "en": "Connecting your website to the tools and services you use.",
+    "nl": "Je website koppelen aan de tools en diensten die je gebruikt."
    }
   },
   {
@@ -1745,7 +1745,7 @@
    "default": {
     "hu": "Keresés szolgáltatások, csomagok és kiegészítők között",
     "en": "Search services, packages and add-ons",
-    "nl": "Zoek in diensten, pakketten en toevoegingen"
+    "nl": "Zoek in diensten, pakketten en extra’s"
    }
   },
   {
@@ -1754,9 +1754,9 @@
    "label": "landing › discovery › finder › placeholder",
    "placeholders": [],
    "default": {
-    "hu": "pl. API, nyelv, mobil",
-    "en": "e.g. API, language, mobile",
-    "nl": "bijv. API, taal, mobiel"
+    "hu": "pl. nyelv, mobil, foglalás",
+    "en": "e.g. language, mobile, booking",
+    "nl": "bijv. taal, mobiel, boeking"
    }
   },
   {
@@ -1811,7 +1811,7 @@
    "default": {
     "hu": "Kiegészítők",
     "en": "Add-ons",
-    "nl": "Toevoegingen"
+    "nl": "Extra’s"
    }
   },
   {
@@ -1844,7 +1844,7 @@
    "default": {
     "hu": "Kiegészítő",
     "en": "Add-on",
-    "nl": "Toevoeging"
+    "nl": "Extra"
    }
   },
   {
@@ -2044,9 +2044,9 @@
    "label": "landing › packages › intro",
    "placeholders": [],
    "default": {
-    "hu": "Négy kiindulási szerkezet. Nem végleges ajánlatok: a pontos tartalom, ár és időzítés az ajánlatkérés után, a projekt ismeretében dől el.",
-    "en": "Four starting structures. They are not final offers: the exact content, price and timing are settled after a quote request, once the project is known.",
-    "nl": "Vier startstructuren. Het zijn geen definitieve offertes: de exacte inhoud, prijs en timing worden na een offerteaanvraag vastgesteld, als het project bekend is."
+    "hu": "Négy csomag, amelyből kiindulhatsz. Nem végleges ajánlatok: a pontos tartalom, ár és időzítés az ajánlatkérés után, a projekt ismeretében dől el.",
+    "en": "Four packages to start from. They are not final offers: the exact content, price and timing are settled after a quote request, once the project is known.",
+    "nl": "Vier pakketten om mee te beginnen. Het zijn geen definitieve offertes: de exacte inhoud, prijs en timing worden na een offerteaanvraag vastgesteld, als het project bekend is."
    }
   },
   {
@@ -2077,9 +2077,9 @@
    "label": "landing › packages › rows › deliverables",
    "placeholders": [],
    "default": {
-    "hu": "Fő eredmények",
-    "en": "Main deliverables",
-    "nl": "Belangrijkste resultaten"
+    "hu": "Amit kapsz",
+    "en": "What you get",
+    "nl": "Wat je krijgt"
    }
   },
   {
@@ -2100,8 +2100,8 @@
    "placeholders": [],
    "default": {
     "hu": "Választható kiegészítők",
-    "en": "Optional extras",
-    "nl": "Optionele toevoegingen"
+    "en": "Optional add-ons",
+    "nl": "Optionele extra’s"
    }
   },
   {
@@ -2326,9 +2326,9 @@
    "label": "landing › compare › intro",
    "placeholders": [],
    "default": {
-    "hu": "Tartalom, terjedelem, kiegészítők, támogatás és testreszabhatóság egymás mellett. Telefonon soronként olvasható.",
-    "en": "Content, scope, extras, support and customisation side by side. On a phone it reads row by row.",
-    "nl": "Inhoud, omvang, toevoegingen, ondersteuning en aanpasbaarheid naast elkaar. Op een telefoon lees je het rij voor rij."
+    "hu": "Mit kapsz, mekkora projektre szól, mit kérhetsz hozzá, és milyen támogatást kapsz: egymás mellett. Telefonon soronként olvasható.",
+    "en": "What you get, how big a project it suits, what you can add and what support you have: side by side. On a phone it reads row by row.",
+    "nl": "Inhoud, omvang, extra’s, ondersteuning en aanpasbaarheid naast elkaar. Op een telefoon lees je het rij voor rij."
    }
   },
   {
@@ -2403,9 +2403,9 @@
    "label": "landing › compare › rows › scope",
    "placeholders": [],
    "default": {
-    "hu": "Projektterjedelem",
-    "en": "Project scope",
-    "nl": "Projectomvang"
+    "hu": "Mekkora projektre szól",
+    "en": "How big a project it suits",
+    "nl": "Voor hoe groot een project"
    }
   },
   {
@@ -2414,9 +2414,9 @@
    "label": "landing › compare › rows › customization",
    "placeholders": [],
    "default": {
-    "hu": "Testreszabhatóság",
-    "en": "Customisation",
-    "nl": "Aanpasbaarheid"
+    "hu": "Mennyi készül kifejezetten neked",
+    "en": "How much is made for you",
+    "nl": "Hoeveel speciaal voor jou wordt gemaakt"
    }
   },
   {
@@ -2426,8 +2426,8 @@
    "placeholders": [],
    "default": {
     "hu": "Választható kiegészítők",
-    "en": "Available extras",
-    "nl": "Beschikbare toevoegingen"
+    "en": "Available add-ons",
+    "nl": "Beschikbare extra’s"
    }
   },
   {
@@ -2481,8 +2481,8 @@
    "placeholders": [],
    "default": {
     "hu": "Hat rövid lépés: mire van szükséged, melyik csomag, milyen kiegészítők, a projekt részletei, áttekintés, ajánlatkérés. Bármikor visszaléphetsz, és semmire nem kötelez.",
-    "en": "Six short steps: what you need, which package, which extras, the project details, a review and the request. You can go back at any time and it commits you to nothing.",
-    "nl": "Zes korte stappen: wat je nodig hebt, welk pakket, welke toevoegingen, de projectdetails, een overzicht en de aanvraag. Je kunt altijd terug en het verplicht je tot niets."
+    "en": "Six short steps: what you need, which package, which add-ons, the project details, a review and the request. You can go back at any time and it commits you to nothing.",
+    "nl": "Zes korte stappen: wat je nodig hebt, welk pakket, welke extra’s, de projectdetails, een overzicht en de aanvraag. Je kunt altijd terug en het verplicht je tot niets."
    }
   },
   {
@@ -2856,7 +2856,7 @@
    "default": {
     "hu": "Választható kiegészítők",
     "en": "Available add-ons",
-    "nl": "Beschikbare toevoegingen"
+    "nl": "Beschikbare extra’s"
    }
   },
   {
@@ -2955,7 +2955,7 @@
    "default": {
     "hu": "Kiegészítők",
     "en": "Add-ons",
-    "nl": "Toevoegingen"
+    "nl": "Extra’s"
    }
   },
   {
@@ -3076,7 +3076,7 @@
    "default": {
     "hu": "Ehhez a szolgáltatáshoz nincs választható kiegészítő.",
     "en": "No add-ons are available for this service.",
-    "nl": "Voor deze dienst zijn geen toevoegingen beschikbaar."
+    "nl": "Voor deze dienst zijn geen extra’s beschikbaar."
    }
   },
   {
@@ -3100,7 +3100,7 @@
    "default": {
     "hu": "Kiegészítők",
     "en": "Add-ons",
-    "nl": "Toevoegingen"
+    "nl": "Extra’s"
    }
   },
   {
@@ -3232,7 +3232,7 @@
    "default": {
     "hu": "Kiegészítők",
     "en": "Add-ons",
-    "nl": "Toevoegingen"
+    "nl": "Extra’s"
    }
   },
   {
@@ -3265,7 +3265,7 @@
    "default": {
     "hu": "Nincs kiegészítő",
     "en": "No add-ons",
-    "nl": "Geen toevoegingen"
+    "nl": "Geen extra’s"
    }
   },
   {
@@ -3478,8 +3478,8 @@
    "placeholders": [],
    "default": {
     "hu": "Kiegészítők",
-    "en": "Extras",
-    "nl": "Toevoegingen"
+    "en": "Add-ons",
+    "nl": "Extra’s"
    }
   },
   {
@@ -3544,8 +3544,8 @@
    "placeholders": [],
    "default": {
     "hu": "Válassz kiegészítőket",
-    "en": "Select additional services",
-    "nl": "Kies extra diensten"
+    "en": "Choose your add-ons",
+    "nl": "Kies je extra’s"
    }
   },
   {
@@ -3611,7 +3611,7 @@
    "default": {
     "hu": "Mind nem kötelező. Csak azok a kiegészítők jelennek meg, amelyek a választásodhoz illenek.",
     "en": "All optional. Only the add-ons that fit your choices are shown.",
-    "nl": "Allemaal optioneel. Alleen de toevoegingen die bij je keuzes passen worden getoond."
+    "nl": "Allemaal optioneel. Alleen de extra’s die bij je keuzes passen worden getoond."
    }
   },
   {
@@ -3751,7 +3751,7 @@
    "default": {
     "hu": "Kiegészítők ehhez: {name}",
     "en": "Add-ons for {name}",
-    "nl": "Toevoegingen voor {name}"
+    "nl": "Extra’s voor {name}"
    }
   },
   {
@@ -3762,7 +3762,7 @@
    "default": {
     "hu": "Ehhez nincs választható kiegészítő.",
     "en": "No add-ons are available for this one.",
-    "nl": "Hiervoor zijn geen toevoegingen beschikbaar."
+    "nl": "Hiervoor zijn geen extra’s beschikbaar."
    }
   },
   {
@@ -4075,7 +4075,7 @@
    "default": {
     "hu": "Kiegészítők",
     "en": "Add-ons",
-    "nl": "Toevoegingen"
+    "nl": "Extra’s"
    }
   },
   {
@@ -4145,7 +4145,7 @@
    "default": {
     "hu": "Kiegészítők módosítása: {name}",
     "en": "Change the add-ons: {name}",
-    "nl": "Toevoegingen wijzigen: {name}"
+    "nl": "Extra’s wijzigen: {name}"
    }
   },
   {
@@ -4374,9 +4374,9 @@
    "label": "configurator › send › consent › pending",
    "placeholders": [],
    "default": {
-    "hu": "Az adatkezelési tájékoztató elérési útja még nincs beállítva: src/config/site.ts",
-    "en": "The privacy notice path is not set yet: src/config/site.ts",
-    "nl": "Het pad van de privacyverklaring is nog niet ingesteld: src/config/site.ts"
+    "hu": "Az adatkezelési tájékoztató még nem érhető el.",
+    "en": "The privacy notice is not available yet.",
+    "nl": "De privacyverklaring is nog niet beschikbaar."
    }
   },
   {
@@ -4501,9 +4501,9 @@
    "label": "configurator › errors › invalidPhone",
    "placeholders": [],
    "default": {
-    "hu": "Számjegyeket, szóközöket és a + ( ) - . / jeleket használj, legalább 6 számjeggyel.",
-    "en": "Use digits, spaces and the characters + ( ) - . /, with at least 6 digits.",
-    "nl": "Gebruik cijfers, spaties en de tekens + ( ) - . /, met minstens 6 cijfers."
+    "hu": "Legalább 6 számjegyet adj meg. Szóközt és a + ( ) - . / jeleket is használhatsz.",
+    "en": "Enter at least 6 digits. Spaces and the characters + ( ) - . / are allowed.",
+    "nl": "Vul minstens 6 cijfers in. Spaties en de tekens + ( ) - . / zijn toegestaan."
    }
   },
   {
@@ -5141,7 +5141,7 @@
    "default": {
     "hu": "Választható kiegészítő egy szolgáltatáson.",
     "en": "An optional add-on on a service.",
-    "nl": "Een optionele toevoeging op een dienst."
+    "nl": "Een optionele extra op een dienst."
    }
   },
   {
@@ -5198,7 +5198,7 @@
    "default": {
     "hu": "Kiegészítők",
     "en": "Add-ons",
-    "nl": "Toevoegingen"
+    "nl": "Extra’s"
    }
   },
   {
@@ -5235,7 +5235,7 @@
    "default": {
     "hu": "Kiegészítők ehhez: {name}",
     "en": "Add-ons for {name}",
-    "nl": "Toevoegingen voor {name}"
+    "nl": "Extra’s voor {name}"
    }
   },
   {
@@ -5246,7 +5246,7 @@
    "default": {
     "hu": "Ehhez nincs választható kiegészítő.",
     "en": "No add-ons are available for this one.",
-    "nl": "Hiervoor zijn geen toevoegingen beschikbaar."
+    "nl": "Hiervoor zijn geen extra’s beschikbaar."
    }
   },
   {
@@ -5325,7 +5325,7 @@
    "default": {
     "hu": "Kiegészítők",
     "en": "Add-ons",
-    "nl": "Toevoegingen"
+    "nl": "Extra’s"
    }
   },
   {
@@ -5586,9 +5586,9 @@
    "label": "tiers › compare › intro",
    "placeholders": [],
    "default": {
-    "hu": "A Launch az alap, a Grow bővebb lehetőségeket ad, a Build összetettebb megoldás, a Care pedig a folyamatos támogatás. Minden lépcső megmutatja, mit tesz hozzá az előzőhöz.",
-    "en": "Launch is the foundation, Grow adds capabilities, Build is the more advanced solution and Care is continuous support. Each step shows what it adds to the one before.",
-    "nl": "Launch is de basis, Grow voegt mogelijkheden toe, Build is de uitgebreidere oplossing en Care is voortdurende ondersteuning. Elke stap laat zien wat hij aan de vorige toevoegt."
+    "hu": "A Launch a kiindulópont, a Grow több lehetőséget ad, a Build összetettebb megoldás, a Care pedig folyamatos támogatás. Minden lépcső megmutatja, mit tesz hozzá az előzőhöz.",
+    "en": "Launch is the starting point, Grow adds more possibilities, Build is the more advanced solution and Care is ongoing support. Each step shows what it adds to the one before.",
+    "nl": "Launch is het startpunt, Grow voegt mogelijkheden toe, Build is de uitgebreidere oplossing en Care is doorlopende ondersteuning. Elke stap laat zien wat hij aan de vorige toevoegt."
    }
   },
   {
@@ -5619,9 +5619,9 @@
    "label": "tiers › compare › featureHeader",
    "placeholders": [],
    "default": {
-    "hu": "Tulajdonság",
-    "en": "Feature",
-    "nl": "Kenmerk"
+    "hu": "Mit tartalmaz",
+    "en": "What is included",
+    "nl": "Wat zit erin"
    }
   },
   {
@@ -5654,7 +5654,7 @@
    "default": {
     "hu": "Kiegészítő",
     "en": "Add-on",
-    "nl": "Optie"
+    "nl": "Extra"
    }
   },
   {
@@ -5698,7 +5698,7 @@
    "default": {
     "hu": "Választható kiegészítőként kérhető",
     "en": "Available as an optional add-on",
-    "nl": "Beschikbaar als optionele toevoeging"
+    "nl": "Beschikbaar als optionele extra"
    }
   },
   {
@@ -5854,7 +5854,7 @@
    "default": {
     "hu": "Csak kiegészítőként vagy egyedi szolgáltatásként",
     "en": "Only as an add-on or a custom service",
-    "nl": "Alleen als optie of dienst op maat"
+    "nl": "Alleen als extra of dienst op maat"
    }
   },
   {
@@ -6194,9 +6194,9 @@
    "label": "tiers › page › sections › features",
    "placeholders": [],
    "default": {
-    "hu": "Részletes tulajdonságok",
-    "en": "Detailed features",
-    "nl": "Gedetailleerde kenmerken"
+    "hu": "A részletek: mi tartozik bele, és mi nem",
+    "en": "The details: what is and is not included",
+    "nl": "De details: wat er wel en niet bij zit"
    }
   },
   {
@@ -6218,7 +6218,7 @@
    "default": {
     "hu": "Választható kiegészítők",
     "en": "Optional add-ons",
-    "nl": "Optionele toevoegingen"
+    "nl": "Optionele extra’s"
    }
   },
   {
@@ -6271,9 +6271,9 @@
    "label": "tiers › page › scope",
    "placeholders": [],
    "default": {
-    "hu": "Terjedelem",
-    "en": "Scope",
-    "nl": "Omvang"
+    "hu": "Projektméret",
+    "en": "Project size",
+    "nl": "Projectgrootte"
    }
   },
   {
@@ -6282,9 +6282,9 @@
    "label": "tiers › page › customization",
    "placeholders": [],
    "default": {
-    "hu": "Testreszabhatóság",
-    "en": "Customisation",
-    "nl": "Aanpasbaarheid"
+    "hu": "Mennyi készül kifejezetten neked",
+    "en": "How much is made for you",
+    "nl": "Hoeveel speciaal voor jou wordt gemaakt"
    }
   },
   {
@@ -6328,7 +6328,7 @@
    "default": {
     "hu": "Választható kiegészítőként",
     "en": "Available as an optional add-on",
-    "nl": "Beschikbaar als optionele toevoeging"
+    "nl": "Beschikbaar als optionele extra"
    }
   },
   {
@@ -6398,7 +6398,7 @@
    "default": {
     "hu": "Ehhez a csomaghoz jelenleg nincs választható kiegészítő.",
     "en": "There are no optional add-ons for this package at the moment.",
-    "nl": "Er zijn momenteel geen optionele toevoegingen voor dit pakket."
+    "nl": "Er zijn momenteel geen optionele extra’s voor dit pakket."
    }
   },
   {
@@ -6871,7 +6871,7 @@
    "placeholders": [],
    "default": {
     "hu": "E-mail-címed",
-    "en": "Your e-mail address",
+    "en": "Your email address",
     "nl": "Je e-mailadres"
    }
   },
@@ -7130,7 +7130,7 @@
    "placeholders": [],
    "default": {
     "hu": "Ez nem tűnik érvényes e-mail-címnek.",
-    "en": "This does not look like a valid e-mail address.",
+    "en": "This does not look like a valid email address.",
     "nl": "Dit lijkt geen geldig e-mailadres."
    }
   },
@@ -7174,7 +7174,7 @@
    "placeholders": [],
    "default": {
     "hu": "Köszönjük! A kérésed megérkezett és el van mentve. Átnézzük a válaszaidat, és a megadott e-mail-címen jelentkezünk.",
-    "en": "Thank you! Your request has arrived and is saved. We will go through your answers and get back to you at the e-mail address you gave.",
+    "en": "Thank you! Your request has arrived and is saved. We will go through your answers and get back to you at the email address you gave.",
     "nl": "Bedankt! Je aanvraag is aangekomen en opgeslagen. We bekijken je antwoorden en nemen contact met je op via het e-mailadres dat je opgaf."
    }
   },
@@ -7306,7 +7306,7 @@
    "placeholders": [],
    "default": {
     "hu": "E-mail megnyitása",
-    "en": "Open an e-mail",
+    "en": "Open an email",
     "nl": "E-mail openen"
    }
   },
@@ -7317,7 +7317,7 @@
    "placeholders": [],
    "default": {
     "hu": "Az e-mail csak akkor megy el, ha te elküldöd.",
-    "en": "The e-mail only leaves when you send it.",
+    "en": "The email only leaves when you send it.",
     "nl": "De e-mail vertrekt pas als jij hem verstuurt."
    }
   },
@@ -7416,7 +7416,7 @@
    "placeholders": [],
    "default": {
     "hu": "Visszaigazoló e-mailt küldünk a megadott címre. Ha nem érkezik meg, nézd meg a levélszemét mappát is.",
-    "en": "We are sending a confirmation e-mail to the address you gave. If it does not arrive, check your spam folder too.",
+    "en": "We are sending a confirmation email to the address you gave. If it does not arrive, check your spam folder too.",
     "nl": "We sturen een bevestigingsmail naar het opgegeven adres. Komt die niet aan, kijk dan ook in je spammap."
    }
   },
@@ -7427,7 +7427,7 @@
    "placeholders": [],
    "default": {
     "hu": "A kérésed el van mentve, de visszaigazoló e-mailt most nem tudtunk küldeni. Őrizd meg a hivatkozási számot.",
-    "en": "Your request is saved, but a confirmation e-mail could not be sent right now. Keep your reference number.",
+    "en": "Your request is saved, but a confirmation email could not be sent right now. Keep your reference number.",
     "nl": "Je aanvraag is opgeslagen, maar een bevestigingsmail kon nu niet worden verstuurd. Bewaar je referentienummer."
    }
   },

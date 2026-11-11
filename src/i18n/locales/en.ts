@@ -36,7 +36,7 @@ export const en: Dictionary = {
     ctaTouch: 'Tap to enter',
     hint: 'Move to distort. Click to enter.',
     hintTouch: 'Drag to distort. Tap to enter.',
-    skip: "Don't show this again",
+    skip: "Don’t show this again",
   },
   hero: {
     titleLine1: 'Digital experiences.',
@@ -44,7 +44,7 @@ export const en: Dictionary = {
     description:
       'I design and build websites and web applications where technology, creativity and attention to detail meet.',
     ctaPrimary: 'Explore my work',
-    ctaSecondary: "Let's talk about your project",
+    ctaSecondary: "Let’s talk about your project",
     scrollCue: 'Scroll to explore',
   },
   theme: {
@@ -58,7 +58,7 @@ export const en: Dictionary = {
     navLabel: 'Footer navigation',
     pagesHeading: 'Pages',
     contactHeading: 'Contact',
-    contactIntro: "Have an idea or a question? Let's talk.",
+    contactIntro: "Have an idea or a question? Let’s talk.",
     contactLink: 'Get in touch',
     socialHeading: 'Social profiles',
     legalLabel: 'Legal',
@@ -94,14 +94,14 @@ export const en: Dictionary = {
       title: 'Choose your path',
       career: {
         label: 'Careers & employers',
-        title: "Let's build something worthwhile together.",
+        title: "Let’s build something worthwhile together.",
         text: 'Get to know my projects, my technical background and the way I approach problems.',
         cta: 'View portfolio',
       },
       clients: {
         label: 'Clients & businesses',
-        title: "Got an idea? Let's make it real.",
-        text: 'Modern, responsive websites and web applications for business goals, with thoughtful design and development.',
+        title: "Got an idea? Let’s make it real.",
+        text: 'Modern websites and web applications that work well on every device, for business goals, with thoughtful design and development.',
         cta: 'Start a project',
       },
     },
@@ -140,7 +140,7 @@ export const en: Dictionary = {
       items: {
         websites: {
           title: 'Websites',
-          text: 'Responsive, modern websites with a distinctive visual identity.',
+          text: 'Modern websites that work well on every device, with a distinctive visual identity.',
         },
         webapps: {
           title: 'Web Applications',
@@ -152,7 +152,7 @@ export const en: Dictionary = {
         },
         integrations: {
           title: 'Integrations',
-          text: "Connecting APIs and digital services according to the project's actual needs.",
+          text: "Connecting APIs and digital services according to the project’s actual needs.",
         },
       },
     },
@@ -162,7 +162,7 @@ export const en: Dictionary = {
       principles: ['Considered', 'Usable', 'Distinctive'],
       principlesLabel: 'Three words that sum up the aim',
       stackHeading: 'What this site is built with',
-      stackNote: "The tools are taken from this site's own source code.",
+      stackNote: "The tools are taken from this site’s own source code.",
       more: 'More about me',
     },
     lab: {
@@ -179,9 +179,9 @@ export const en: Dictionary = {
       cta: 'Request a quote',
     },
     final: {
-      title: "Let's make it real.",
-      text: "Tell me about your idea, and let's see how it can become a working digital experience.",
-      cta: "Let's talk about your project",
+      title: "Let’s make it real.",
+      text: "Tell me about your idea, and let’s see how it can become a working digital experience.",
+      cta: "Let’s talk about your project",
       emailLead: 'Or write directly:',
     },
   },
@@ -255,7 +255,7 @@ export const en: Dictionary = {
         title: 'Good to know',
         items: [
           'Until you send it, your message exists only on this page, in your browser’s memory: I do not save it anywhere. Reloading the page clears it.',
-          'I only need your name and your e-mail address, so that I can reply.',
+          'I only need your name and your email address, so that I can reply.',
         ],
       },
       fields: {
@@ -395,7 +395,7 @@ export const en: Dictionary = {
       source: 'Documented in',
     },
     architecture: {
-      label: "The system's layers, top to bottom",
+      label: "The system’s layers, top to bottom",
       connections: 'Connections',
       status: {
         built: 'Works',
@@ -466,11 +466,11 @@ export const en: Dictionary = {
   },
   notFound: {
     title: 'Page not found',
-    description: "This address doesn't exist, or the page has moved.",
+    description: "This address doesn’t exist, or the page has moved.",
     suggestions: 'You can carry on from here:',
   },
   errors: {
-    title: "This page didn't load",
+    title: "This page didn’t load",
     text: 'Something went wrong while loading the page. Try again; if that does not help, reload the page.',
     offline: 'You seem to be offline. Check your connection, then try again.',
     outdated: 'The site was updated while this page was open, so this part is not available. Reload the page.',

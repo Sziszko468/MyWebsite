@@ -141,7 +141,7 @@ describe('canonical addresses and language alternates', () => {
       const head = headOf(page.id, lang)
       expect(head.alternates.map((a) => a.hreflang)).toEqual([...page.languages, 'x-default'])
       expect(head.alternates.find((a) => a.hreflang === lang)?.href).toBe(head.canonical)
-      expect(head.alternates.find((a) => a.hreflang === 'x-default')?.href).toBe(`${SITE}${seoPath('hu', page.path)}`)
+      expect(head.alternates.find((a) => a.hreflang === 'x-default')?.href).toBe(`${SITE}${seoPath('en', page.path)}`)
     }
   })
 
@@ -331,7 +331,7 @@ describe('the page files the build writes', () => {
   })
 
   it('canonicalises / to the default language', () => {
-    expect(built.files['index.html']).toContain('<link rel="canonical" href="https://example.test/hu/" data-seo>')
+    expect(built.files['index.html']).toContain('<link rel="canonical" href="https://example.test/en/" data-seo>')
   })
 
   it('warns, and writes no sitemap, while the site address is not configured', () => {

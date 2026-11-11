@@ -8,9 +8,9 @@ export const eggText = {
     'Geheim: open de verborgen race-ervaring',
   ),
   hint: tri(
-    'Psszt. Ezen az oldalon egy piros pont gyorsabb a többinél.',
+    'Pszt. Ezen az oldalon egy piros pont gyorsabb a többinél.',
     'Psst. One red dot on this page is faster than the rest.',
-    'Psst. Eén rode stip op deze pagina is sneller dan de rest.',
+    'Psst. Één rode stip op deze pagina is sneller dan de rest.',
   ),
   intro: tri('Belépés a boxutcába', 'Entering the pit lane', 'De pitstraat in'),
   dialogLabel: tri('Rejtett versenyélmény: NFSU2', 'Hidden racing experience: NFSU2', 'Verborgen race-ervaring: NFSU2'),

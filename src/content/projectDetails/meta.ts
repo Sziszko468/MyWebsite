@@ -36,7 +36,7 @@ export const projectMeta: Partial<Record<ProjectId, ProjectMeta>> = {
     ),
     description: tri(
       'BookingHub esettanulmány: Next.js időpontfoglaló prototípus nyilvános foglalási űrlappal, e-mail-visszaigazolással és admin felülettel. Mi működik, és mi nem.',
-      'BookingHub case study: a Next.js appointment-booking prototype with a public booking form, e-mail confirmation and an admin area. What works and what does not.',
+      'BookingHub case study: a Next.js appointment-booking prototype with a public booking form, email confirmation and an admin area. What works and what does not.',
       'BookingHub-casestudy: een Next.js-prototype voor afsprakenboeking met een openbaar boekingsformulier, e-mailbevestiging en een beheeromgeving. Wat werkt en wat niet.',
     ),
     image: { src: '/projects/bookinghub/calendar.webp', width: 1440, height: 900 },

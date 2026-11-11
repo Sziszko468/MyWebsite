@@ -27,6 +27,15 @@ export function PrivacyPage() {
           <p>{text.cookies.text[lang]}</p>
         </section>
 
+        <section className={styles.section} aria-labelledby="privacy-language">
+          <h2 id="privacy-language">{text.language.title[lang]}</h2>
+          <ul>
+            {text.language.items.map((item) => (
+              <li key={item.en}>{item[lang]}</li>
+            ))}
+          </ul>
+        </section>
+
         <section className={styles.section} aria-labelledby="privacy-stored">
           <h2 id="privacy-stored">{text.stored.title[lang]}</h2>
           <p>{text.stored.text[lang]}</p>

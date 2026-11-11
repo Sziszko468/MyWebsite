@@ -12,12 +12,12 @@ export const receipt = {
   summary: tri('A beküldött kérés', 'What you submitted', 'Wat je hebt ingediend'),
   emailQueued: tri(
     'Visszaigazoló e-mailt küldünk a megadott címre. Ha nem érkezik meg, nézd meg a levélszemét mappát is.',
-    'We are sending a confirmation e-mail to the address you gave. If it does not arrive, check your spam folder too.',
+    'We are sending a confirmation email to the address you gave. If it does not arrive, check your spam folder too.',
     'We sturen een bevestigingsmail naar het opgegeven adres. Komt die niet aan, kijk dan ook in je spammap.',
   ),
   emailNotSent: tri(
     'A kérésed el van mentve, de visszaigazoló e-mailt most nem tudtunk küldeni. Őrizd meg a hivatkozási számot.',
-    'Your request is saved, but a confirmation e-mail could not be sent right now. Keep your reference number.',
+    'Your request is saved, but a confirmation email could not be sent right now. Keep your reference number.',
     'Je aanvraag is opgeslagen, maar een bevestigingsmail kon nu niet worden verstuurd. Bewaar je referentienummer.',
   ),
   statusLink: tri('A kérésem állapota', 'See the status of my request', 'De status van mijn aanvraag bekijken'),

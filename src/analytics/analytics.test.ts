@@ -134,7 +134,8 @@ describe('the shipped site measures nothing', () => {
     for (const file of sources()) {
       const text = readFileSync(file, 'utf8')
       expect(text, file).not.toMatch(vendors)
-      expect(text, file).not.toMatch(/document\.cookie/)
+      // The one cookie is the visitor's own language choice (i18n/preference.ts, listed in the privacy notice and checked there).
+      if (!file.endsWith(join('i18n', 'preference.ts'))) expect(text, file).not.toMatch(/document\.cookie/)
     }
   })
 

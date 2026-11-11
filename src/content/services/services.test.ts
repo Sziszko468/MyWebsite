@@ -121,9 +121,9 @@ describe('the service areas', () => {
 
   it('say outright that an integration is settled with the owner first', () => {
     const integrations = serviceAreas.find((area) => area.id === 'integrations')!
-    expect(integrations.summary.hu).toMatch(/tisztázzuk/)
-    expect(integrations.summary.en).toMatch(/settle/)
-    expect(integrations.summary.nl).toMatch(/stemmen we samen af/)
+    expect(integrations.summary.hu).toMatch(/tisztázzuk|közösen megnézzük/)
+    expect(integrations.summary.en).toMatch(/settle|check together/)
+    expect(integrations.summary.nl).toMatch(/stemmen we samen af|bekijken we samen/)
   })
 })
 

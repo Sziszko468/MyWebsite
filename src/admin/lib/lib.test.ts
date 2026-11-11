@@ -274,3 +274,26 @@ describe('the project editor helpers', async () => {
     expect(needsOptimizing('image/gif', 9_000_000, 4000, 3000)).toBe(false)
   })
 })
+
+describe('the language status of a record (PROMPT 18)', () => {
+  const fields = [
+    { name: 'title', kind: 'line', max: 100, required: true },
+    { name: 'features', kind: 'list', max: 100 },
+  ] as const
+  const full = { title: 'T', features: 'one\ntwo' }
+
+  it('is complete when every language has what another has', async () => {
+    const { missingByLanguage } = await import('./catalog')
+    expect(missingByLanguage(fields, { hu: full, en: full, nl: full })).toEqual({ hu: 0, en: 0, nl: 0 })
+  })
+
+  it('counts the fields a language lacks, and treats a blank list as empty', async () => {
+    const { missingByLanguage } = await import('./catalog')
+    expect(missingByLanguage(fields, { hu: full, en: { title: 'T', features: '  \n ' }, nl: { title: '', features: '' } })).toEqual({ hu: 0, en: 1, nl: 2 })
+  })
+
+  it('does not count a field that is empty everywhere', async () => {
+    const { missingByLanguage } = await import('./catalog')
+    expect(missingByLanguage(fields, { hu: { title: 'T', features: '' }, en: { title: 'T', features: '' }, nl: { title: 'T', features: '' } })).toEqual({ hu: 0, en: 0, nl: 0 })
+  })
+})

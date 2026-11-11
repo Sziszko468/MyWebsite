@@ -19,7 +19,7 @@ export const logistics: ProjectDetail = {
   sourceUrl: null,
 
   summary: tri(
-    'Fuvarozás- és flottakezelő rendszer egy fiktív közúti fuvarozócégnek: szabályellenőrzött szállítmány-munkafolyamat, sofőrök, vontatók és pótkocsik, karbantartás, költségek és jelentések, élő frissítéssel és szerepkör-alapú hozzáféréssel. Bemutató projekt: nincs éles használatban, minden adata kitalált.',
+    'Fuvarozás- és flottakezelő rendszer egy fiktív közúti fuvarozócégnek: szabályokkal ellenőrzött szállítmány-munkafolyamat, sofőrök, vontatók és pótkocsik, karbantartás, költségek és jelentések, élő frissítéssel és szerepkör-alapú hozzáféréssel. Bemutató projekt: nincs éles használatban, minden adata kitalált.',
     'A transport and fleet management system for a fictional road-freight company: a rule-checked shipment workflow, drivers, trucks and trailers, maintenance, costs and reports, with live updates and role-based access. A demonstration project: it is not in production and all of its data is fictional.',
     'Een transport- en vlootbeheersysteem voor een fictief wegtransportbedrijf: een door regels gecontroleerde zendingsworkflow, chauffeurs, trekkers en opleggers, onderhoud, kosten en rapporten, met live updates en rolgebaseerde toegang. Een demonstratieproject: het is niet in productie en alle data is fictief.',
   ),
@@ -71,7 +71,7 @@ export const logistics: ProjectDetail = {
     ),
     problem: tri(
       'A kis és közepes fuvarozócégek a napot gyakran táblázatokon, telefonhívásokon, e-mailen és papír szállítólevelen viszik, amíg ki nem derül, hogy egy kocsit két rakományra is ígértek, egy sofőr jogosítványa észrevétlenül lejárt, vagy senki nem tudja megmondani, mit hozott egy szállítmány.',
-      'Small and mid-sized freight companies often run the day on spreadsheets, phone calls, e-mail and paper consignment notes, until a truck is promised to two loads, a driver’s licence expires unnoticed, or nobody can say what a shipment earned.',
+      'Small and mid-sized freight companies often run the day on spreadsheets, phone calls, email and paper consignment notes, until a truck is promised to two loads, a driver’s licence expires unnoticed, or nobody can say what a shipment earned.',
       'Kleine en middelgrote transportbedrijven draaien de dag vaak op spreadsheets, telefoontjes, e-mail en papieren vrachtbrieven, totdat een truck aan twee ladingen is beloofd, een rijbewijs ongemerkt verloopt of niemand kan zeggen wat een zending opleverde.',
     ),
     goal: tri(
@@ -138,7 +138,7 @@ export const logistics: ProjectDetail = {
       solution: tri(
         'A demócéget előbb megtervezik, majd ugyanazokkal a szabályokkal ellenőrzik, amelyeket az API is alkalmaz; a dátumok a mai naptól számolódnak, így a vezérlőpult a létrehozás pillanatában él.',
         'The demo company is planned first and then checked against the same rules the API applies; it is dated from today, so the dashboard is alive whenever it is created.',
-        'Het democedrijf wordt eerst gepland en daarna gecontroleerd tegen dezelfde regels die de API toepast; het is gedateerd vanaf vandaag, zodat het dashboard leeft op het moment van aanmaken.',
+        'Het demobedrijf wordt eerst gepland en daarna gecontroleerd tegen dezelfde regels die de API toepast; het is gedateerd vanaf vandaag, zodat het dashboard leeft op het moment van aanmaken.',
       ),
       source: 'docs/architecture.md · Decisions worth knowing about · docs/demo-data.md',
     },
@@ -154,7 +154,7 @@ export const logistics: ProjectDetail = {
       ),
     },
     {
-      title: tri('Egy tranzakció, három hatás', 'One transaction, three effects', 'Eén transactie, drie effecten'),
+      title: tri('Egy tranzakció, három hatás', 'One transaction, three effects', 'Één transactie, drie effecten'),
       text: tri(
         'A változás, az auditbejegyzés és az esemény ugyanabban a tranzakcióban van: a visszagörgetett változás nem hagy bejegyzést és nem értesít senkit; a megtartott változásnak mindig van bejegyzése.',
         'The change, the audit entry and the event are in the same transaction: a rolled-back change leaves no entry and tells nobody; a kept change always has both.',
@@ -165,8 +165,8 @@ export const logistics: ProjectDetail = {
       title: tri('A háttérmunka vékony marad', 'Background work stays thin', 'Achtergrondwerk blijft dun'),
       text: tri(
         'A Celery-feladatok a szolgáltatások vékony burkolói és idempotensek, pontosan egy ütemezővel; az API Redis nélkül is működik (az állapotjelzés ekkor „degraded”, nem „nem elérhető”).',
-        'Celery tasks are thin wrappers over services and idempotent, with exactly one scheduler; the API works without Redis (the readiness check then says "degraded", not "unavailable").',
-        'Celery-taken zijn dunne wrappers rond services en idempotent, met precies één scheduler; de API werkt zonder Redis (de readiness-check meldt dan "degraded", niet "unavailable").',
+        'Celery tasks are thin wrappers over services and idempotent, with exactly one scheduler; the API works without Redis (the readiness check then says “degraded”, not “unavailable”).',
+        'Celery-taken zijn dunne wrappers rond services en idempotent, met precies één scheduler; de API werkt zonder Redis (de readiness-check meldt dan ‘degraded’, niet ‘unavailable’).',
       ),
     },
     {
@@ -314,11 +314,11 @@ export const logistics: ProjectDetail = {
     },
     {
       status: 'done',
-      title: tri('Szabályellenőrzött hozzárendelés', 'Rule-checked assignment', 'Regelgecontroleerde toewijzing'),
+      title: tri('Szabályokkal ellenőrzött hozzárendelés', 'Rule-checked assignment', 'Regelgecontroleerde toewijzing'),
       text: tri(
         'Sofőr, vontató és pótkocsi csak akkor rendelhető, ha a jogosítvány, a GKI, az orvosi alkalmasság, a biztosítás és a műszaki vizsga a kiszállítás napján érvényes, nincs átfedő nyitott fuvar, és semmi nincs a műhelyben.',
         'A driver, truck and trailer can be assigned only if the licence, GKI, medical certificate, insurance and inspection are valid on the delivery day, no other open shipment overlaps, and nothing is in the workshop.',
-        'Een chauffeur, trekker en oplegger kunnen alleen worden toegewezen als rijbewijs, GKI, medisch certificaat, verzekering en keuring op de leverdag geldig zijn, geen andere open zending overlapt en niets in de werkplaats staat.',
+        'Een chauffeur, trekker en oplegger kunnen alleen worden toegewezen als rijbewijs, GKI, medisch certificaat, verzekering en keuring op de dag van levering geldig zijn, geen andere open zending overlapt en niets in de werkplaats staat.',
       ),
       image: 'shipments',
     },
@@ -366,7 +366,7 @@ export const logistics: ProjectDetail = {
       title: tri('Értesítések és élő frissítés', 'Notifications and live updates', 'Notificaties en live updates'),
       text: tri(
         'Ütemezett feladatok értesítést küldenek késő szállítmányokról, lejáró papírokról és késő karbantartásról (az alkalmazásban, sürgős esetben e-mailben is); a képernyők WebSockettel maguktól frissülnek. Az események jelzések, nem napló: nem tárolódnak és nem játszhatók vissza.',
-        'Scheduled jobs raise notifications about late shipments, expiring papers and overdue maintenance (in the app, and by e-mail when urgent); screens refresh by themselves over a WebSocket. Events are hints, not a log: they are not stored or replayed.',
+        'Scheduled jobs raise notifications about late shipments, expiring papers and overdue maintenance (in the app, and by email when urgent); screens refresh by themselves over a WebSocket. Events are hints, not a log: they are not stored or replayed.',
         'Geplande taken sturen notificaties over late zendingen, verlopende papieren en achterstallig onderhoud (in de app en bij urgentie per e-mail); schermen verversen zichzelf via een WebSocket. Events zijn hints, geen log: ze worden niet opgeslagen of herhaald.',
       ),
       image: 'dashboard',
@@ -421,7 +421,7 @@ export const logistics: ProjectDetail = {
       title: tri('Fiókok megerősítése', 'Hardening accounts', 'Accounts verstevigen'),
       text: tri(
         'Frissítő tokenek szerveroldali visszavonással, jelszómódosítás és -visszaállítás e-mailben, opcionális kétfaktoros bejelentkezés. Ma a hozzáférési tokenek egy óráig élnek, és nem vonhatók vissza.',
-        'Refresh tokens with server-side revocation, password change and reset by e-mail, optional two-factor sign-in. Today access tokens last an hour and cannot be revoked.',
+        'Refresh tokens with server-side revocation, password change and reset by email, optional two-factor sign-in. Today access tokens last an hour and cannot be revoked.',
         'Refresh-tokens met intrekking aan serverzijde, wachtwoordwijziging en -herstel per e-mail, optioneel tweefactoraanmelden. Nu duren toegangstokens een uur en kunnen ze niet worden ingetrokken.',
       ),
     },
@@ -464,8 +464,8 @@ export const logistics: ProjectDetail = {
       title: tri('A menü csak azt mutatja, amit a szerepkör megnyithat', 'The menu shows only what the role may open', 'Het menu toont alleen wat de rol mag openen'),
       text: tri(
         'Az oldalsáv a bejelentkezett szerepkörnek megfelelően szűkül; aki mégis begépeli a címet, „hozzáférés megtagadva” képernyőt kap, és ugyanaz a kérés közvetlenül az API-nak 403. A felület csak megjeleníti a szabályt, az API érvényesíti.',
-        'The sidebar narrows to the signed-in role; someone who types the address anyway gets an "access denied" screen, and the same request straight to the API is a 403. The interface only shows the rule; the API enforces it.',
-        'De zijbalk past zich aan de ingelogde rol aan; wie het adres toch intypt krijgt een "toegang geweigerd"-scherm en hetzelfde verzoek rechtstreeks naar de API is een 403. De interface toont de regel alleen; de API dwingt hem af.',
+        'The sidebar narrows to the signed-in role; someone who types the address anyway gets an “access denied” screen, and the same request straight to the API is a 403. The interface only shows the rule; the API enforces it.',
+        'De zijbalk past zich aan de ingelogde rol aan; wie het adres toch intypt krijgt een ‘toegang geweigerd’-scherm en hetzelfde verzoek rechtstreeks naar de API is een 403. De interface toont de regel alleen; de API dwingt hem af.',
       ),
     },
     {
@@ -473,7 +473,7 @@ export const logistics: ProjectDetail = {
       text: tri(
         'A keresés, a szűrők, a rendezés és az oldal a címsorban van, így a lista könyvjelzőzhető, és a Vissza gomb oda tér vissza.',
         'Search, filters, sort and page are in the address, so a list can be bookmarked and Back returns to it.',
-        'Zoeken, filters, sortering en pagina staan in het adres, zodat een lijst kan worden gebookmarkt en Terug ernaar terugkeert.',
+        'Zoeken, filters, sortering en pagina staan in het adres, zodat een lijst als bladwijzer kan worden opgeslagen en Terug ernaar terugkeert.',
       ),
     },
     {
@@ -488,8 +488,8 @@ export const logistics: ProjectDetail = {
       title: tri('Billentyűzet-barát extrák', 'Keyboard-friendly extras', 'Toetsenbordvriendelijke extra’s'),
       text: tri(
         'Globális keresés (Ctrl/Cmd+K vagy „/”), morzsamenü, a fókuszt csapdába ejtő és visszaadó párbeszédablakok, a WCAG 1.4.13-at követő tippek; minden diagramhoz tartozik az adatai táblázata a képernyőolvasóknak.',
-        'A global search (Ctrl/Cmd+K or "/"), breadcrumbs, dialogs that trap and return focus, tooltips that follow WCAG 1.4.13; every chart comes with its data as a table for screen readers.',
-        'Een globale zoekfunctie (Ctrl/Cmd+K of "/"), kruimelpaden, dialogen die de focus vangen en teruggeven, tooltips die WCAG 1.4.13 volgen; elke grafiek komt met zijn data als tabel voor schermlezers.',
+        'A global search (Ctrl/Cmd+K or “/”), breadcrumbs, dialogs that trap and return focus, tooltips that follow WCAG 1.4.13; every chart comes with its data as a table for screen readers.',
+        'Een globale zoekfunctie (Ctrl/Cmd+K of ‘/’), kruimelpaden, dialogen die de focus vangen en teruggeven, tooltips die WCAG 1.4.13 volgen; elke grafiek komt met zijn data als tabel voor schermlezers.',
       ),
     },
   ],
@@ -505,7 +505,7 @@ export const logistics: ProjectDetail = {
     tri(
       'Útvonal-optimalizálás: több megállós utak sorrendje és a legolcsóbb jármű kiválasztása.',
       'Route optimisation: sequencing multi-stop trips and choosing the truck that makes the plan cheapest.',
-      'Routeoptimalisatie: meerdere stops volgordelijk plannen en de truck kiezen die het plan het goedkoopst maakt.',
+      'Routeoptimalisatie: meerdere stops in volgorde plannen en de truck kiezen die het plan het goedkoopst maakt.',
     ),
     tri(
       'Üzemeltetett demó TLS mögött, mentésekkel és megfigyeléssel.',
@@ -553,7 +553,7 @@ export const logistics: ProjectDetail = {
         'A shipment’s details: the status workflow with the moves allowed right now, and the planned route on a map with distance and driving time.',
         'De details van een zending: de statusworkflow met de nu toegestane stappen en de geplande route op een kaart met afstand en rijtijd.',
       ),
-      caption: tri('Szállítmány részletei', 'Shipment details', 'Zendingdetails'),
+      caption: tri('Szállítmány részletei', 'Shipment details', 'Zendingsdetails'),
     },
     {
       id: 'fleet',

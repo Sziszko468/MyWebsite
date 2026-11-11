@@ -18,7 +18,7 @@ export const configurator = {
   steps: {
     need: tri('Igény', 'Need', 'Behoefte'),
     plan: tri('Csomag', 'Package', 'Pakket'),
-    extras: tri('Kiegészítők', 'Extras', 'Toevoegingen'),
+    extras: tri('Kiegészítők', 'Add-ons', 'Extra’s'),
     details: tri('Részletek', 'Details', 'Details'),
     review: tri('Áttekintés', 'Review', 'Overzicht'),
     send: tri('Ajánlatkérés', 'Request', 'Aanvraag'),
@@ -26,7 +26,7 @@ export const configurator = {
   titles: {
     need: tri('Mire van szükséged?', 'What do you need?', 'Wat heb je nodig?'),
     plan: tri('Válassz csomagot', 'Choose a package', 'Kies een pakket'),
-    extras: tri('Válassz kiegészítőket', 'Select additional services', 'Kies extra diensten'),
+    extras: tri('Válassz kiegészítőket', 'Choose your add-ons', 'Kies je extra’s'),
     details: tri('Mesélj a projektről', 'Tell me about the project', 'Vertel over het project'),
     review: tri('Nézd át a kérésed', 'Review your request', 'Bekijk je aanvraag'),
     send: tri('Kérd az ajánlatot', 'Request your quote', 'Vraag je offerte aan'),
@@ -45,7 +45,7 @@ export const configurator = {
     extras: tri(
       'Mind nem kötelező. Csak azok a kiegészítők jelennek meg, amelyek a választásodhoz illenek.',
       'All optional. Only the add-ons that fit your choices are shown.',
-      'Allemaal optioneel. Alleen de toevoegingen die bij je keuzes passen worden getoond.',
+      'Allemaal optioneel. Alleen de extra’s die bij je keuzes passen worden getoond.',
     ),
     details: tri(
       'Csak az első kérdés kötelező. A többi segít, de üresen hagyhatod.',
@@ -81,8 +81,8 @@ export const configurator = {
     backToNeed: tri('Vissza az igényekhez', 'Back to the needs', 'Terug naar de behoeften'),
   },
   extras: {
-    forNeed: tri('Kiegészítők ehhez: {name}', 'Add-ons for {name}', 'Toevoegingen voor {name}'),
-    none: tri('Ehhez nincs választható kiegészítő.', 'No add-ons are available for this one.', 'Hiervoor zijn geen toevoegingen beschikbaar.'),
+    forNeed: tri('Kiegészítők ehhez: {name}', 'Add-ons for {name}', 'Extra’s voor {name}'),
+    none: tri('Ehhez nincs választható kiegészítő.', 'No add-ons are available for this one.', 'Hiervoor zijn geen extra’s beschikbaar.'),
     selected: tri('{count} kiválasztva', '{count} selected', '{count} gekozen'),
     skipHint: tri('Nem kell semmit választanod: léphetsz tovább.', 'You do not have to pick anything: just go on.', 'Je hoeft niets te kiezen: ga gewoon verder.'),
   },
@@ -144,13 +144,13 @@ export const configurator = {
     lines: tri('A kiválasztott szolgáltatások', 'Your selected services', 'Je gekozen diensten'),
     details: tri('A projekt részletei', 'Project details', 'Projectdetails'),
     package: tri('Csomag', 'Package', 'Pakket'),
-    addons: tri('Kiegészítők', 'Add-ons', 'Toevoegingen'),
+    addons: tri('Kiegészítők', 'Add-ons', 'Extra’s'),
     none: tri('nincs', 'none', 'geen'),
     notChosen: tri('nincs kiválasztva', 'not chosen', 'niet gekozen'),
     change: tri('Módosítás', 'Change', 'Wijzigen'),
     changeNeed: tri('Igények módosítása', 'Change needs', 'Behoeften wijzigen'),
     changePlan: tri('Csomag módosítása: {name}', 'Change the package: {name}', 'Pakket wijzigen: {name}'),
-    changeExtras: tri('Kiegészítők módosítása: {name}', 'Change the add-ons: {name}', 'Toevoegingen wijzigen: {name}'),
+    changeExtras: tri('Kiegészítők módosítása: {name}', 'Change the add-ons: {name}', 'Extra’s wijzigen: {name}'),
     changeDetails: tri('Részletek módosítása', 'Change the details', 'Details wijzigen'),
     addAnother: tri('Másik szolgáltatás hozzáadása', 'Add another service', 'Nog een dienst toevoegen'),
     price: tri('Ár', 'Price', 'Prijs'),
@@ -200,7 +200,7 @@ export const configurator = {
         'Ik begrijp dat de opgegeven gegevens worden gebruikt om deze offerteaanvraag te beantwoorden.',
       ),
       privacy: tri('Adatkezelési tájékoztató', 'Privacy notice', 'Privacyverklaring'),
-      pending: tri('Az adatkezelési tájékoztató elérési útja még nincs beállítva: src/config/site.ts', 'The privacy notice path is not set yet: src/config/site.ts', 'Het pad van de privacyverklaring is nog niet ingesteld: src/config/site.ts'),
+      pending: tri('Az adatkezelési tájékoztató még nem érhető el.', 'The privacy notice is not available yet.', 'De privacyverklaring is nog niet beschikbaar.'),
     },
     memory: tri(
       'Amíg el nem küldöd, a válaszaid csak ezen az oldalon, a böngésződ memóriájában vannak: a személyes adataidat és a leírásodat sehol nem mentem el. Újratöltéskor törlődnek. A kiválasztott szolgáltatások a kosárban maradnak.',
@@ -226,9 +226,9 @@ export const configurator = {
       'Dat lijkt geen geldig e-mailadres. Controleer of er een @-teken met daarna een domein in staat.',
     ),
     invalidPhone: tri(
-      'Számjegyeket, szóközöket és a + ( ) - . / jeleket használj, legalább 6 számjeggyel.',
-      'Use digits, spaces and the characters + ( ) - . /, with at least 6 digits.',
-      'Gebruik cijfers, spaties en de tekens + ( ) - . /, met minstens 6 cijfers.',
+      'Legalább 6 számjegyet adj meg. Szóközt és a + ( ) - . / jeleket is használhatsz.',
+      'Enter at least 6 digits. Spaces and the characters + ( ) - . / are allowed.',
+      'Vul minstens 6 cijfers in. Spaties en de tekens + ( ) - . / zijn toegestaan.',
     ),
     invalidUrl: tri(
       'Ez nem tűnik weboldal-címnek. Például: pelda.hu vagy https://pelda.hu',

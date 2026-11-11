@@ -22,7 +22,7 @@ export const bookinghub: ProjectDetail = {
 
   summary: tri(
     'Egy Next.js időpontfoglaló prototípus: nyilvános foglalási űrlap e-mail-visszaigazolással, és admin felület vezérlőpulttal, időpontlistával, naptárral és ügyfélnézettel. Az adatok ma a böngészőben élnek; a tárolóréteg arra készült, hogy később háttérrendszerre váltson.',
-    'A Next.js appointment-booking prototype: a public booking form with e-mail confirmation, and an admin area with a dashboard, an appointment list, a calendar and a client view. The data lives in the browser today; the storage layer is built to move to a backend later.',
+    'A Next.js appointment-booking prototype: a public booking form with email confirmation, and an admin area with a dashboard, an appointment list, a calendar and a client view. The data lives in the browser today; the storage layer is built to move to a backend later.',
     'Een Next.js-prototype voor afsprakenboeking: een openbaar boekingsformulier met e-mailbevestiging en een beheeromgeving met dashboard, afsprakenlijst, kalender en klantoverzicht. De data leeft nu in de browser; de opslaglaag is gebouwd om later naar een backend te verhuizen.',
   ),
 
@@ -75,24 +75,24 @@ export const bookinghub: ProjectDetail = {
       solution: tri(
         'Egyetlen időpont-szolgáltatás választ egy localStorage-szolgáltató és egy API-szolgáltató (időtúllépéses fetch-burkoló típusos hibákkal) között egyetlen konfigurációs kapcsoló alapján; a képernyők csak a szolgáltatást és egy hookot hívnak. Az API-szolgáltató megírt, de háttérrendszer híján még nem futott ellene, mert a tárolóban nincs ilyen.',
         'A single appointment service chooses between a localStorage provider and an API provider (a fetch wrapper with a timeout and typed errors) from one configuration switch; the screens only call the service and a hook. The API provider is written, but it has not been run against a backend, because the repository has none.',
-        'Eén afsprakenservice kiest tussen een localStorage-provider en een API-provider (een fetch-wrapper met timeout en getypeerde fouten) op basis van één configuratieschakelaar; de schermen roepen alleen de service en een hook aan. De API-provider is geschreven, maar nog niet tegen een backend gedraaid, omdat de repository er geen heeft.',
+        'Één afsprakenservice kiest tussen een localStorage-provider en een API-provider (een fetch-wrapper met timeout en getypeerde fouten) op basis van één configuratieschakelaar; de schermen roepen alleen de service en een hook aan. De API-provider is geschreven, maar nog niet tegen een backend gedraaid, omdat de repository er geen heeft.',
       ),
       source: 'src/services/appointmentApi.ts · apiClient.ts',
     },
     {
       title: tri(
         'A foglalás nem bukhat el egy e-mail miatt',
-        'A booking must not fail because an e-mail did',
+        'A booking must not fail because an email did',
         'Een boeking mag niet mislukken door een e-mail',
       ),
       problem: tri(
         'A visszaigazoló e-mail egy külső szolgáltatástól és egy API-kulcstól függ, amely hiányozhat.',
-        'The confirmation e-mail depends on an external service and an API key that may be missing.',
+        'The confirmation email depends on an external service and an API key that may be missing.',
         'De bevestigingsmail hangt af van een externe dienst en een API-sleutel die kan ontbreken.',
       ),
       solution: tri(
         'A foglalás előbb mentődik; az e-mailt egy szerveroldali útvonal küldi utána, és a hibája elkapva naplózódik, a foglalást nem blokkolja. Kulcs nélkül az útvonal egyértelműen jelzett teszt módban fut, amely csak szimulálja a küldést.',
-        'The booking is saved first; the e-mail is sent through a server-side route afterwards, and its failure is caught and logged without blocking the booking. Without a key the route runs in a clearly reported test mode that only simulates sending.',
+        'The booking is saved first; the email is sent through a server-side route afterwards, and its failure is caught and logged without blocking the booking. Without a key the route runs in a clearly reported test mode that only simulates sending.',
         'De boeking wordt eerst opgeslagen; de e-mail wordt daarna via een serverroute verstuurd en een fout daarin wordt opgevangen en gelogd zonder de boeking te blokkeren. Zonder sleutel draait de route in een duidelijk gemelde testmodus die het versturen alleen simuleert.',
       ),
       source: 'src/app/book/page.tsx · src/services/emailService.ts',
@@ -122,12 +122,12 @@ export const bookinghub: ProjectDetail = {
       title: tri('Foglalás → mentés → visszaigazolás', 'Book, save, confirm', 'Boeken, opslaan, bevestigen'),
       text: tri(
         'A nyilvános űrlap ellenőrzi a kötelező mezőket, az e-mail formátumát és hogy a dátum ne legyen múltbeli; az időpont-szolgáltatáson át ment, majd megkéri a szerveroldali útvonalat a visszaigazolás elküldésére. A látogató összefoglalót kap az időpontról.',
-        'The public form checks the required fields, the e-mail format and that the date is not in the past; it saves through the appointment service, then asks the server route to send the confirmation. The visitor gets a summary of the appointment.',
+        'The public form checks the required fields, the email format and that the date is not in the past; it saves through the appointment service, then asks the server route to send the confirmation. The visitor gets a summary of the appointment.',
         'Het openbare formulier controleert de verplichte velden, het e-mailformaat en dat de datum niet in het verleden ligt; het slaat op via de afsprakenservice en vraagt dan de serverroute de bevestiging te versturen. De bezoeker krijgt een samenvatting van de afspraak.',
       ),
     },
     {
-      title: tri('Egyetlen adatszolgáltatás', 'One data service', 'Eén dataservice'),
+      title: tri('Egyetlen adatszolgáltatás', 'One data service', 'Één dataservice'),
       text: tri(
         'Az összes képernyő ugyanazon a szolgáltatáson és egy hookon át olvas és ír; a szolgáltató cseréje egy kapcsoló, nem képernyőnkénti átírás.',
         'Every screen reads and writes through the same service and one hook; swapping the provider is a switch, not a rewrite of each screen.',
@@ -138,7 +138,7 @@ export const bookinghub: ProjectDetail = {
       title: tri('Az admin felület útvonalcsoportként', 'The admin area as a route group', 'De beheeromgeving als routegroep'),
       text: tri(
         'A Next.js App Routerben egy (protected) csoport: vezérlőpult, időpontok (keresés, állapotszűrő, szerkesztés jegyzettel, törlés), naptár, ügyfelek és e-mail-beállítások. Az elrendezésben asztalon oldalsáv, telefonon alsó sáv van.',
-        'In the Next.js App Router, a (protected) group: dashboard, appointments (search, status filter, edit with notes, delete), calendar, clients and e-mail settings. The layout has a sidebar on desktop and a bottom bar on phones.',
+        'In the Next.js App Router, a (protected) group: dashboard, appointments (search, status filter, edit with notes, delete), calendar, clients and email settings. The layout has a sidebar on desktop and a bottom bar on phones.',
         'In de Next.js App Router een (protected)-groep: dashboard, afspraken (zoeken, statusfilter, bewerken met notities, verwijderen), kalender, klanten en e-mailinstellingen. De layout heeft een zijbalk op desktop en een onderbalk op telefoons.',
       ),
     },
@@ -146,7 +146,7 @@ export const bookinghub: ProjectDetail = {
       title: tri('Származtatott adat, nem kétszer tárolt', 'Derived data, not stored twice', 'Afgeleide data, niet dubbel opgeslagen'),
       text: tri(
         'Az ügyfeleket az időpontokból összesíti a kód (név, e-mail, foglalások száma, utolsó látogatás), a vezérlőpult statisztikái ugyanabból a listából számolódnak.',
-        'Clients are aggregated from the appointments (name, e-mail, number of bookings, last visit), and the dashboard statistics are computed from the same list.',
+        'Clients are aggregated from the appointments (name, email, number of bookings, last visit), and the dashboard statistics are computed from the same list.',
         'Klanten worden uit de afspraken samengesteld (naam, e-mail, aantal boekingen, laatste bezoek) en de dashboardstatistieken worden uit dezelfde lijst berekend.',
       ),
     },
@@ -169,7 +169,7 @@ export const bookinghub: ProjectDetail = {
             label: 'localStorage',
             detail: tri(
               'időpontok, bejelentkezési jelző, e-mail-beállítások',
-              'appointments, sign-in flag, e-mail settings',
+              'appointments, sign-in flag, email settings',
               'afspraken, aanmeldvlag, e-mailinstellingen',
             ),
             status: 'built',
@@ -205,7 +205,7 @@ export const bookinghub: ProjectDetail = {
           {
             id: 'resend',
             label: 'Resend',
-            detail: tri('tranzakciós e-mail; kulcs nélkül teszt mód', 'transactional e-mail; test mode without a key', 'transactionele e-mail; testmodus zonder sleutel'),
+            detail: tri('tranzakciós e-mail; kulcs nélkül teszt mód', 'transactional email; test mode without a key', 'transactionele e-mail; testmodus zonder sleutel'),
             status: 'built',
           },
         ],
@@ -230,14 +230,14 @@ export const bookinghub: ProjectDetail = {
       title: tri('Nyilvános foglalási űrlap', 'Public booking form', 'Openbaar boekingsformulier'),
       text: tri(
         'Név, e-mail, szolgáltatás (hat mintaszolgáltatás időtartammal és árral), dátum mától és időpont. Kötelező mezők és e-mail-formátum ellenőrzése, hibaüzenet, majd összefoglaló képernyő a foglalás adataival.',
-        'Name, e-mail, service (six sample services with a duration and a price), a date from today and a time. Required-field and e-mail-format checks, an error message, then a summary screen with the booking details.',
+        'Name, email, service (six sample services with a duration and a price), a date from today and a time. Required-field and email-format checks, an error message, then a summary screen with the booking details.',
         'Naam, e-mail, dienst (zes voorbeelddiensten met duur en prijs), een datum vanaf vandaag en een tijd. Controle op verplichte velden en e-mailformaat, een foutmelding en daarna een samenvattingsscherm met de boekingsgegevens.',
       ),
       image: 'booking-form',
     },
     {
       status: 'done',
-      title: tri('Visszaigazoló e-mail', 'Confirmation e-mail', 'Bevestigingsmail'),
+      title: tri('Visszaigazoló e-mail', 'Confirmation email', 'Bevestigingsmail'),
       text: tri(
         'A foglalás után egy szerveroldali útvonal elküldi a visszaigazolást a Resend szolgáltatáson át. API-kulcs nélkül teszt módban fut, amely csak szimulál, és ezt az admin felület ki is írja.',
         'After a booking, a server route sends the confirmation through Resend. Without an API key it runs in a test mode that only simulates, and the admin area says so.',
@@ -259,8 +259,8 @@ export const bookinghub: ProjectDetail = {
       title: tri('Havi naptár', 'Monthly calendar', 'Maandkalender'),
       text: tri(
         'Hónapok közti lapozás, „Ma” gomb, a szomszédos hónapok napjai halványan, minden naphoz az időpontok állapot szerint színezett bejegyzései és jelmagyarázat.',
-        'Navigation between months, a "Today" button, neighbouring months’ days shown dimmed, and for each day its appointments coloured by status, with a legend.',
-        'Navigatie tussen maanden, een "Vandaag"-knop, dagen van aangrenzende maanden gedimd weergegeven en per dag de afspraken gekleurd naar status, met een legenda.',
+        'Navigation between months, a “Today” button, neighbouring months’ days shown dimmed, and for each day its appointments coloured by status, with a legend.',
+        'Navigatie tussen maanden, een ‘Vandaag’-knop, dagen van aangrenzende maanden gedimd weergegeven en per dag de afspraken gekleurd naar status, met een legenda.',
       ),
       image: 'calendar',
     },
@@ -280,7 +280,7 @@ export const bookinghub: ProjectDetail = {
       text: tri(
         'Egy CSS-változókészlet két témához; alapból sötét, a fejlécben kapcsoló, a választás a böngészőben megmarad. A téma nem követi a rendszerbeállítást.',
         'One set of CSS variables for two themes; dark by default, a toggle in the header, and the choice is remembered in the browser. The theme does not follow the system setting.',
-        'Eén set CSS-variabelen voor twee thema’s; standaard donker, een schakelaar in de koptekst en de keuze wordt in de browser onthouden. Het thema volgt de systeeminstelling niet.',
+        'Één set CSS-variabelen voor twee thema’s; standaard donker, een schakelaar in de koptekst en de keuze wordt in de browser onthouden. Het thema volgt de systeeminstelling niet.',
       ),
       image: 'calendar-light',
     },
@@ -295,7 +295,7 @@ export const bookinghub: ProjectDetail = {
     },
     {
       status: 'partial',
-      title: tri('E-mail-beállítások', 'E-mail settings', 'E-mailinstellingen'),
+      title: tri('E-mail-beállítások', 'Email settings', 'E-mailinstellingen'),
       text: tri(
         'A kapcsolók (visszaigazolás, emlékeztető és időzítése, lemondás) csak a böngészőben mentődnek, és nem vezérlik a küldést. Az emlékeztető és a lemondás sablonja megvan, de semmi nem küldi el őket.',
         'The toggles (confirmation, reminder and its timing, cancellation) are saved in the browser only and do not control sending. Templates for the reminder and the cancellation exist, but nothing sends them.',
@@ -325,7 +325,7 @@ export const bookinghub: ProjectDetail = {
 
   limits: [
     tri(
-      'Nincs szabadidőpont- vagy ütközésellenőrzés: bármely dátum és időpont kérhető, kétszeres foglalás megelőzése nincs.',
+      'Nincs szabadidőpont- vagy ütközés-ellenőrzés: bármely dátum és időpont kérhető, kétszeres foglalás megelőzése nincs.',
       'There is no availability or conflict check: any date and time can be requested, and double bookings are not prevented.',
       'Er is geen beschikbaarheids- of conflictcontrole: elke datum en tijd kan worden aangevraagd en dubbele boekingen worden niet voorkomen.',
     ),
@@ -359,7 +359,7 @@ export const bookinghub: ProjectDetail = {
       title: tri('A foglalás előtt látszik, mit választottál', 'You see what you chose before you book', 'Je ziet wat je koos voordat je boekt'),
       text: tri(
         'Az űrlap a kiválasztott szolgáltatás időtartamát és árát az űrlapon belül mutatja, és a foglalás után egy összefoglaló képernyő ismétli meg az adatokat és azt az e-mail-címet, ahová a visszaigazolás ment.',
-        'The form shows the chosen service’s duration and price in place, and after booking a summary screen repeats the details and the e-mail address the confirmation was sent to.',
+        'The form shows the chosen service’s duration and price in place, and after booking a summary screen repeats the details and the email address the confirmation was sent to.',
         'Het formulier toont de duur en prijs van de gekozen dienst ter plekke en na het boeken herhaalt een samenvattingsscherm de gegevens en het e-mailadres waarheen de bevestiging ging.',
       ),
     },
@@ -390,7 +390,7 @@ export const bookinghub: ProjectDetail = {
       'De voorbereide API-provider koppelen aan een echte backend en de demo-aanmelding vervangen door echte authenticatie.',
     ),
     tri(
-      'Szabadidőpont- és ütközésellenőrzés a foglalási folyamatban.',
+      'Szabadidőpont- és ütközés-ellenőrzés a foglalási folyamatban.',
       'Availability and conflict checks in the booking flow.',
       'Beschikbaarheids- en conflictcontroles in de boekingsstroom.',
     ),
@@ -424,7 +424,7 @@ export const bookinghub: ProjectDetail = {
       device: 'desktop',
       alt: tri(
         'A nyilvános foglalási űrlap: név, e-mail, szolgáltatás időtartammal és árral, dátum és időpont.',
-        'The public booking form: name, e-mail, a service with duration and price, date and time.',
+        'The public booking form: name, email, a service with duration and price, date and time.',
         'Het openbare boekingsformulier: naam, e-mail, een dienst met duur en prijs, datum en tijd.',
       ),
       caption: tri('Nyilvános foglalási űrlap', 'Public booking form', 'Openbaar boekingsformulier'),
@@ -459,10 +459,10 @@ export const bookinghub: ProjectDetail = {
       device: 'desktop',
       alt: tri(
         'Az e-mail-beállítások oldal: „TEST MODE” jelzés, három kapcsoló és egy beállítási útmutató.',
-        'The e-mail settings page: a "TEST MODE" notice, three toggles and a setup guide.',
-        'De pagina met e-mailinstellingen: een "TEST MODE"-melding, drie schakelaars en een installatiehandleiding.',
+        'The email settings page: a “TEST MODE” notice, three toggles and a setup guide.',
+        'De pagina met e-mailinstellingen: een ‘TEST MODE’-melding, drie schakelaars en een installatiehandleiding.',
       ),
-      caption: tri('E-mail-beállítások teszt módban', 'E-mail settings in test mode', 'E-mailinstellingen in testmodus'),
+      caption: tri('E-mail-beállítások teszt módban', 'Email settings in test mode', 'E-mailinstellingen in testmodus'),
     },
     {
       id: 'mobile-booking-form',

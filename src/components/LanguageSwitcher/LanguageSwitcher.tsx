@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router'
 import { LANGUAGES, LANGUAGE_META } from '../../i18n/config'
+import { saveLanguage } from '../../i18n/preference'
 import { useI18n } from '../../i18n/useI18n'
 import { resolveLanguageSwitch } from '../../routes/languageSwitch'
 import styles from './LanguageSwitcher.module.scss'
@@ -29,6 +30,8 @@ export function LanguageSwitcher({ label }: { label?: string } = {}) {
                 lang={code}
                 hrefLang={code}
                 aria-current={isCurrent ? 'true' : undefined}
+                // Choosing a language is the only thing that saves one (i18n/preference.ts): from then on it beats the country.
+                onClick={() => saveLanguage(code)}
               >
                 {label}
                 <span className="visually-hidden">: {name}</span>

@@ -84,6 +84,13 @@ export function incompleteLanguages(fields: readonly FieldSpec[], values: TextVa
   return LANGUAGES.filter((language) => fields.some((field) => emptyValue(field, values[language]) && LANGUAGES.some((other) => other !== language && !emptyValue(field, values[other]))))
 }
 
+/** How many fields are missing per language (empty there while another language has them): 0 means the language is complete. */
+export function missingByLanguage(fields: readonly FieldSpec[], values: TextValues): Record<Language, number> {
+  return Object.fromEntries(
+    LANGUAGES.map((language) => [language, fields.filter((field) => emptyValue(field, values[language]) && LANGUAGES.some((other) => other !== language && !emptyValue(field, values[other]))).length]),
+  ) as Record<Language, number>
+}
+
 // ---- prices -----------------------------------------------------------------------------------------------------
 
 export interface PriceForm {

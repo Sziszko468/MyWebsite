@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && npm run build:seo",
+    "build": "tsc -b && npm run i18n:check && vite build && npm run build:seo",
     "build:seo": "vite build --ssr src/seo/entry.ts --outDir node_modules/.cache/seo --emptyOutDir && node scripts/prerender.mjs",
     "check:seo": "node scripts/check-seo.mjs",
     "catalog:seed-export": "node scripts/export-catalog-seed.mjs",
@@ -24,6 +24,10 @@
     "typecheck": "tsc -b",
     "lint": "oxlint",
     "test": "vitest run",
+    "i18n": "npm run i18n:check && npm run i18n:validate",
+    "i18n:check": "node scripts/i18n.mjs check",
+    "i18n:validate": "node scripts/i18n.mjs validate",
+    "i18n:report": "node scripts/i18n.mjs report",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -40,10 +44,15 @@
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
+    "@types/nspell": "^2.1.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "dictionary-en-gb": "^3.0.0",
+    "dictionary-hu": "^3.0.0",
+    "dictionary-nl": "^2.0.0",
+    "nspell": "^2.1.5",
     "oxlint": "^1.88.0",
     "sass": "^1.106.1",
     "typescript": "~6.0.3",

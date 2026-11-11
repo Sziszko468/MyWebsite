@@ -67,7 +67,7 @@ for (const [path, page] of pages) {
   check(page.og('twitter:card').length === 1, where, 'expected one twitter:card')
   if (path !== '/404.html') {
     const first = path.split('/')[1]
-    const expectedLang = ['hu', 'en', 'nl'].includes(first) ? first : 'hu'
+    const expectedLang = ['hu', 'en', 'nl'].includes(first) ? first : 'en'
     check(page.lang === expectedLang, where, `<html lang="${page.lang}"> should be "${expectedLang}"`)
   }
   if (!configured) {
@@ -104,7 +104,7 @@ if (configured) {
     const where = page.rel
     const self = `${origin}${path}`
     if (path === '/') {
-      check(page.canonical[0] === `${origin}/hu/`, where, 'the root page should canonicalise to /hu/')
+      check(page.canonical[0] === `${origin}/en/`, where, 'the root page should canonicalise to /en/ (English is the fallback language, i18n/config.ts)')
       continue
     }
     check(page.canonical.length === 1 && page.canonical[0] === self, where, `canonical should be ${self}, is ${page.canonical.join(', ') || 'missing'}`)

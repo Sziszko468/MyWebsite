@@ -52,12 +52,12 @@ export const experimentText: Record<LabId, ExperimentText> = {
       ),
     ],
     hint: tri(
-      'Mozogj a részecskék között. Kattints a szétlöveléshez.',
+      'Mozogj a részecskék között. Kattints, és szétrobbanthatod őket.',
       'Move through the particles. Click to blast them.',
       'Beweeg door de deeltjes. Klik om ze uiteen te blazen.',
     ),
     hintTouch: tri(
-      'Húzd az ujjad a részecskék között. Koppints a szétlöveléshez.',
+      'Húzd az ujjad a részecskék között. Koppints, és szétrobbanthatod őket.',
       'Drag through the particles. Tap to blast them.',
       'Sleep door de deeltjes. Tik om ze uiteen te blazen.',
     ),
@@ -71,7 +71,7 @@ export const experimentText: Record<LabId, ExperimentText> = {
     description: tri(
       'Egy forma, négy anyagállapot. A felületet a vertex shader deformálja, procedurális stúdiófény világítja meg, és anyagváltáskor újraárnyékolódik: nem színcsere, hanem más fényviselkedés, más viszkozitás és más lüktetés.',
       'One form, four states of matter. The surface is displaced in the vertex shader, lit by a procedural studio and re-shaded when you switch material: not a colour swap, but different light behaviour, a different viscosity and a different pulse.',
-      'Eén vorm, vier toestanden. Het oppervlak wordt in de vertex-shader vervormd, belicht door een procedurele studio en opnieuw geschaduwd als je van materiaal wisselt: geen kleurwissel, maar ander lichtgedrag, een andere viscositeit en een andere puls.',
+      'Één vorm, vier toestanden. Het oppervlak wordt in de vertex-shader vervormd, belicht door een procedurele studio en opnieuw geschaduwd als je van materiaal wisselt: geen kleurwissel, maar ander lichtgedrag, een andere viscositeit en een andere puls.',
     ),
     interactions: [
       tri(
