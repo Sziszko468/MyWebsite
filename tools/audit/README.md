@@ -32,3 +32,5 @@ They use the system Chrome (`channel: 'chrome'`, with `--ignore-gpu-blocklist`, 
 | `mapsize.cjs` | What is inside a bundle (`npx vite build --sourcemap --outDir /tmp/map --emptyOutDir`, then `node mapsize.cjs /tmp/map index-`). |
 
 All of this is emulation in Chromium: no physical device, no Safari or Firefox, no screen reader.
+
+**`audit-shop-languages.cjs`** (PROMPT 18): the layout checks of `audit-matrix.cjs` on the 13 Shop pages × Hungarian, English, Dutch × the nine widths of the brief (320 to 1920 px), plus three widths in the light theme (468 loads). Start any server of the built site (for example `npx wrangler dev --port 8799`) and run `node tools/audit/audit-shop-languages.cjs http://127.0.0.1:8799`.

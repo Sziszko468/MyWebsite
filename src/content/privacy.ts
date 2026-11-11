@@ -10,7 +10,7 @@ import { tri, type Trilingual } from './trilingual'
 export interface StoredItem {
   /** The name the browser stores it under: a proper noun, shown as is. */
   name: string
-  where: 'localStorage' | 'sessionStorage' | 'IndexedDB'
+  where: 'localStorage' | 'sessionStorage' | 'IndexedDB' | 'cookie'
   /** What it is for, and what it holds. */
   purpose: Trilingual
   /** Listed only when the site measures visits, because only then does it exist. */
@@ -22,6 +22,15 @@ export interface StoredItem {
  * `STORAGE_USERS` (privacy.test.ts fails when a new one appears without a line here).
  */
 export const storedItems: readonly StoredItem[] = [
+  {
+    name: 'cc_lang',
+    where: 'cookie',
+    purpose: tri(
+      'A nyelv kódja (hu, en vagy nl), ha a nyelvválasztóval magad választottál nyelvet. Ez az oldal egyetlen sütije.',
+      'The language code (hu, en or nl), when you chose a language yourself with the language switcher. It is the only cookie this site sets.',
+      'De taalcode (hu, en of nl), als je zelf een taal hebt gekozen met de taalkeuze. Het is het enige cookie dat deze site plaatst.',
+    ),
+  },
   {
     name: 'theme',
     where: 'localStorage',
@@ -36,7 +45,7 @@ export const storedItems: readonly StoredItem[] = [
     where: 'localStorage',
     purpose: tri(
       'Az ajánlatkéréshez kiválasztott szolgáltatások, csomagok és kiegészítők. Név, e-mail-cím és üzenet nincs benne.',
-      'The services, packages and add-ons you picked for a quote request. It holds no name, e-mail address or message.',
+      'The services, packages and add-ons you picked for a quote request. It holds no name, email address or message.',
       'De diensten, pakketten en extra’s die je voor een offerteaanvraag hebt gekozen. Er staan geen naam, e-mailadres of bericht in.',
     ),
   },
@@ -90,7 +99,7 @@ export const storedItems: readonly StoredItem[] = [
     where: 'sessionStorage',
     purpose: tri(
       'Az AI-asszisztens munkamenet-kódja és annak a beszélgetésnek az azonosítója, amelyben éppen vagy. Név, e-mail-cím és üzenet nincs benne. A kódot az oldal saját szervere kapja meg, amikor az asszisztenst használod. A lap bezárásáig marad meg.',
-      'The AI assistant’s session code and the id of the conversation you are in. It holds no name, e-mail address or message. The code is sent to this site’s own server when you use the assistant. It lasts until the tab is closed.',
+      'The AI assistant’s session code and the id of the conversation you are in. It holds no name, email address or message. The code is sent to this site’s own server when you use the assistant. It lasts until the tab is closed.',
       'De sessiecode van de AI-assistent en het id van het gesprek waarin je zit. Er staan geen naam, e-mailadres of bericht in. De code gaat naar de eigen server van deze site als je de assistent gebruikt. Hij blijft tot je het tabblad sluit.',
     ),
   },
@@ -116,10 +125,25 @@ export const privacyText = {
   cookies: {
     title: tri('Sütik', 'Cookies', 'Cookies'),
     text: tri(
-      'Ez az oldal nem állít be sütiket.',
-      'This site does not set any cookies.',
-      'Deze site plaatst geen cookies.',
+      'Az oldal egyetlen apró sütit használ, és csak akkor, ha te magad választasz nyelvet a nyelvválasztóval. A süti neve cc_lang, csak a nyelv kódját tartalmazza (hu, en vagy nl), egy évig érvényes, és arra való, hogy az oldal legközelebb is a választott nyelven nyíljon meg. Személyes adat nincs benne. Más célra az oldal nem használ sütit.',
+      'This site uses one small cookie, and only when you choose a language yourself with the language switcher. The cookie is called cc_lang, holds only the language code (hu, en or nl), lasts for a year, and exists so that the site opens in your chosen language next time. It contains no personal data. The site uses no cookies for anything else.',
+      'Deze site gebruikt één klein cookie, en alleen als je zelf een taal kiest met de taalkeuze. Het cookie heet cc_lang, bevat alleen de taalcode (hu, en of nl), blijft een jaar bewaard en zorgt ervoor dat de site de volgende keer in de gekozen taal opent. Er staan geen persoonsgegevens in. De site gebruikt geen cookies voor iets anders.',
     ),
+  },
+  language: {
+    title: tri('Nyelv és ország', 'Language and country', 'Taal en land'),
+    items: [
+      tri(
+        'Ha nyelv nélküli címet nyitsz meg (például csak az oldal nevét írod be), az oldal a kapcsolatod országa alapján választ nyelvet: Magyarországról magyart, Hollandiából hollandot, minden más vagy ismeretlen országból angolt. Az országot az oldalt kiszolgáló hálózat (Cloudflare) adja át kétbetűs kódként. Az oldal saját kódja nem olvassa, nem tárolja és nem naplózza az IP-címedet, az országot sem őrzi meg, és nem is küldi tovább.',
+        'When you open an address without a language (for example, you just type the site’s name), the site picks a language from the country of your connection: Hungarian from Hungary, Dutch from the Netherlands, and English from every other or unknown country. The country is passed on as a two-letter code by the network that serves the site (Cloudflare). The site’s own code does not read, store or log your IP address, does not keep the country, and does not pass it on.',
+        'Open je een adres zonder taal (bijvoorbeeld door alleen de naam van de site te typen), dan kiest de site een taal op basis van het land van je verbinding: Hongaars vanuit Hongarije, Nederlands vanuit Nederland en Engels vanuit elk ander of onbekend land. Het land wordt als tweeletterige code doorgegeven door het netwerk dat de site aanbiedt (Cloudflare). De eigen code van de site leest, bewaart of logt je IP-adres niet, onthoudt het land niet en geeft het niet door.',
+      ),
+      tri(
+        'Pontos helyadatot nem használ az oldal, és a böngésződtől sem kér helymeghatározást. Az ország csak a kezdő nyelvet dönti el. A nyelvet bármikor átállíthatod, és amit egyszer választottál, azt az oldal nem írja felül.',
+        'The site does not use your precise location and never asks your browser for it. The country only decides the starting language. You can change the language at any time, and once you have chosen one, the site does not override it.',
+        'De site gebruikt je exacte locatie niet en vraagt er ook nooit naar in je browser. Het land bepaalt alleen de taal waarmee je begint. Je kunt de taal op elk moment wijzigen en wat je eenmaal hebt gekozen, overschrijft de site niet.',
+      ),
+    ],
   },
   stored: {
     title: tri('Mit tárol az oldal a böngésződben', 'What the site keeps in your browser', 'Wat de site in je browser bewaart'),
@@ -136,7 +160,7 @@ export const privacyText = {
       tri(
         'Az oldal a betűtípusait és a képeit önmagától tölti be. Nem használ külső betűtípus-, térkép-, videó- vagy közösségimédia-szolgáltatást.',
         'The site loads its own fonts and images. It uses no external font, map, video or social-media service.',
-        'De site laadt zijn eigen lettertypen en afbeeldingen. Hij gebruikt geen externe lettertype-, kaart-, video- of socialemediadiensten.',
+        'De site laadt zijn eigen lettertypen en afbeeldingen. Hij gebruikt geen externe diensten voor lettertypen, kaarten, video of sociale media.',
       ),
       tri(
         'A kapcsolatfelvételi űrlap és az ajánlatkérő csak akkor küld el adatot, ha megnyomod az elküldés gombot, és csak az oldal tulajdonosa által beállított címre. Az elküldésig amit beírsz, csak a memóriában van, a böngésző tárolójába nem kerül.',
@@ -156,11 +180,11 @@ export const privacyText = {
     ],
   },
   quotations: {
-    title: tri('Ajánlatkérés és árajánlat', 'Quote requests and quotations', 'Offerteaanvragen en offertes'),
+    title: tri('Ajánlatkérés és ajánlat', 'Quote requests and quotes', 'Offerteaanvragen en offertes'),
     items: [
       tri(
-        'Amikor ajánlatot kérsz, az oldal eltárolja, amit beírtál (a neved, az e-mail-címed, a leírást, és ha megadtad, a cég nevét, weboldalát, a költségkeretet és a telefonszámod), a kiválasztott szolgáltatásokat, valamint hogy mikor érkezett, és a hálózati címed egyirányú ujjlenyomatát (magát a címet nem). Ha árajánlat készül neked, az árajánlat és a rá adott válaszod (elfogadás, elutasítás vagy kérdés) is tárolódik.',
-        'When you ask for a quotation, the site stores what you typed (your name, e-mail address, the description and, if you gave them, the company, its website, a budget and your phone number), the services you chose, when it arrived and a one-way fingerprint of your network address (not the address itself). If a quotation is prepared for you, the quotation and your answer to it (accepted, declined or a question) are stored too.',
+        'Amikor ajánlatot kérsz, az oldal eltárolja, amit beírtál (a neved, az e-mail-címed, a leírást, és ha megadtad, a cég nevét, weboldalát, a költségkeretet és a telefonszámod), a kiválasztott szolgáltatásokat, valamint hogy mikor érkezett, és a hálózati címed egyirányú ujjlenyomatát (magát a címet nem). Ha ajánlat készül neked, az ajánlat és a rá adott válaszod (elfogadás, elutasítás vagy kérdés) is tárolódik.',
+        'When you ask for a quote, the site stores what you typed (your name, email address, the description and, if you gave them, the company, its website, a budget and your phone number), the services you chose, when it arrived and a one-way fingerprint of your network address (not the address itself). If a quote is prepared for you, the quote and your answer to it (accepted, declined or a question) are stored too.',
         'Als je een offerte aanvraagt, bewaart de site wat je typte (je naam, e-mailadres, de omschrijving en, als je ze opgaf, het bedrijf, de website, een budget en je telefoonnummer), de gekozen diensten, wanneer het aankwam en een eenrichtingsvingerafdruk van je netwerkadres (niet het adres zelf). Wordt er een offerte voor je opgesteld, dan worden ook de offerte en je reactie erop (geaccepteerd, afgewezen of een vraag) bewaard.',
       ),
       tri(
@@ -169,13 +193,13 @@ export const privacyText = {
         'De links in je e-mails zijn persoonlijk: van elke link wordt alleen een eenrichtingsvingerafdruk bewaard, een link werkt beperkte tijd en wie de link heeft kan die pagina openen, deel hem dus niet met anderen.',
       ),
       tri(
-        'A visszaigazolást, az árajánlatot és a döntésed visszaigazolását egy tranzakciós e-mail-szolgáltatáson keresztül kapod. Az üzenetekről naplót vezetünk (kinek, mikor, és hogy a szolgáltató elfogadta-e), az üzenetek szövege nélkül.',
-        'You receive the confirmation, the quotation and the confirmation of your decision through a transactional e-mail service. The messages are logged (to whom, when and whether the provider accepted them), without their text.',
+        'A visszaigazolást, az ajánlatot és a döntésed visszaigazolását egy tranzakciós e-mail-szolgáltatáson keresztül kapod. Az üzenetekről naplót vezetünk (kinek, mikor, és hogy a szolgáltató elfogadta-e), az üzenetek szövege nélkül.',
+        'You receive the confirmation, the quote and the confirmation of your decision through a transactional email service. The messages are logged (to whom, when and whether the provider accepted them), without their text.',
         'Je ontvangt de bevestiging, de offerte en de bevestiging van je beslissing via een transactionele e-maildienst. De berichten worden gelogd (aan wie, wanneer en of de aanbieder ze accepteerde), zonder de tekst.',
       ),
       tri(
         'A kérésedtől független, nem kötelező jelölőnégyzet (más hírekről) külön választás. Ez az oldal nem küld marketing-e-mailt, és nem kér, nem fogad és nem tárol fizetési adatot.',
-        'The optional tick-box about hearing about other news is a separate choice from your request. This site sends no marketing e-mail, and asks for, takes and stores no payment details.',
+        'The optional tick-box about hearing about other news is a separate choice from your request. This site sends no marketing email, and asks for, takes and stores no payment details.',
         'Het optionele vakje over ander nieuws is een aparte keuze, los van je aanvraag. Deze site verstuurt geen marketing-e-mail en vraagt, ontvangt en bewaart geen betaalgegevens.',
       ),
       tri(
@@ -205,7 +229,7 @@ export const privacyText = {
       ),
       tri(
         'Ha az asszisztensen át ajánlatot kérsz, a nevedet és az e-mail-címedet a terv melletti panelen adod meg, és csak az ajánlatkéréshez kerülnek: az AI-modell nem látja őket. Semmi nem megy el a jóváhagyásod nélkül.',
-        'If you ask for a quote through the assistant, you enter your name and e-mail address in the panel next to the plan, and they go only into the quote request: the AI model does not see them. Nothing is sent without your approval.',
+        'If you ask for a quote through the assistant, you enter your name and email address in the panel next to the plan, and they go only into the quote request: the AI model does not see them. Nothing is sent without your approval.',
         'Vraag je via de assistent een offerte aan, dan vul je je naam en e-mailadres in het paneel naast het plan in; ze komen alleen in de offerteaanvraag terecht: het AI-model ziet ze niet. Er wordt niets verstuurd zonder jouw goedkeuring.',
       ),
       tri(

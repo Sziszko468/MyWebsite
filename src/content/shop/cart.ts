@@ -31,7 +31,7 @@ export const cart = {
     title: tri('Mit jelentenek a címkék?', 'What the labels mean', 'Wat de labels betekenen'),
     fixed: tri('Közzétett ára van: az összeg látszik és összeadódik.', 'It has a published price: the amount is shown and added up.', 'Er is een gepubliceerde prijs: het bedrag wordt getoond en opgeteld.'),
     quote: tri('Nincs közzétett ára: az ajánlatban kapod meg.', 'It has no published price: you get it in the quote.', 'Er is geen gepubliceerde prijs: je krijgt die in de offerte.'),
-    addon: tri('Választható kiegészítő egy szolgáltatáson.', 'An optional add-on on a service.', 'Een optionele toevoeging op een dienst.'),
+    addon: tri('Választható kiegészítő egy szolgáltatáson.', 'An optional add-on on a service.', 'Een optionele extra op een dienst.'),
   },
 
   line: {
@@ -39,11 +39,11 @@ export const cart = {
     packageFor: tri('Csomag ehhez: {name}', 'Package for {name}', 'Pakket voor {name}'),
     suggested: tri('ajánlott', 'suggested', 'voorgesteld'),
     notChosen: tri('Válassz csomagot', 'Choose a package', 'Kies een pakket'),
-    addons: tri('Kiegészítők', 'Add-ons', 'Toevoegingen'),
+    addons: tri('Kiegészítők', 'Add-ons', 'Extra’s'),
     addonsSelected: tri('{count} kiválasztva', '{count} selected', '{count} gekozen'),
     price: tri('Ár', 'Price', 'Prijs'),
-    addonsFor: tri('Kiegészítők ehhez: {name}', 'Add-ons for {name}', 'Toevoegingen voor {name}'),
-    noAddons: tri('Ehhez nincs választható kiegészítő.', 'No add-ons are available for this one.', 'Hiervoor zijn geen toevoegingen beschikbaar.'),
+    addonsFor: tri('Kiegészítők ehhez: {name}', 'Add-ons for {name}', 'Extra’s voor {name}'),
+    noAddons: tri('Ehhez nincs választható kiegészítő.', 'No add-ons are available for this one.', 'Hiervoor zijn geen extra’s beschikbaar.'),
     remove: tri('Eltávolítás', 'Remove', 'Verwijderen'),
     removeNamed: tri('{name} eltávolítása', 'Remove {name}', '{name} verwijderen'),
     view: tri('Szolgáltatás oldala', 'Service page', 'Dienstpagina'),
@@ -53,7 +53,7 @@ export const cart = {
   summary: {
     title: tri('Összegzés', 'Summary', 'Overzicht'),
     services: tri('Szolgáltatások', 'Services', 'Diensten'),
-    addons: tri('Kiegészítők', 'Add-ons', 'Toevoegingen'),
+    addons: tri('Kiegészítők', 'Add-ons', 'Extra’s'),
     fixedTotal: tri('Fix áras tételek összesen', 'Fixed-price total', 'Totaal vaste prijzen'),
     startingTotal: tri('Kezdőár összesen', 'Starting total', 'Totaal vanaf-prijzen'),
     quoted: tri('Az ajánlatban kapod meg', 'Priced in your quote', 'Prijs in je offerte'),

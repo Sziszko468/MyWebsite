@@ -1,4 +1,4 @@
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -338,7 +338,7 @@ describe('the administration of the assistant', () => {
     expect(summary.overview.topics.find((topic: { topic: string }) => topic.topic === 'packages').n).toBe(1)
     expect(summary.overview.errors[0]).toMatchObject({ code: 'provider_unavailable', n: 1 })
     expect(summary.budget.day.requests).toBe(3)
-    expect(summary.knowledge.sources).toMatchObject({ packages: { published: 4 }, services: { published: 4 }, comparison: { published: true }, fullExperience: { published: true }, developerProfile: { available: true, nameSet: false } })
+    expect(summary.knowledge.sources).toMatchObject({ packages: { published: 4 }, services: { published: 4 }, comparison: { published: true }, fullExperience: { published: true }, developerProfile: { available: true, nameSet: (JSON.parse(readFileSync(new URL('../seed/profile.seed.json', import.meta.url), 'utf8')).name as string | null) !== null } })
     // No conversation text anywhere in what the administration receives.
     expect(JSON.stringify(summary)).not.toMatch(/compare the packages|and again/)
 

@@ -9,7 +9,7 @@ export const pageText = {
     lead: tri(
       'Öt interaktív élmény. Végtelen lehetőség. Egy digitális játszótér.',
       'Five interactive environments. Endless possibilities. One digital playground.',
-      'Vijf interactieve omgevingen. Eindeloze mogelijkheden. Eén digitale speeltuin.',
+      'Vijf interactieve omgevingen. Eindeloze mogelijkheden. Één digitale speeltuin.',
     ),
     create: tri('Kezdd az elsővel', 'Start with the first', 'Begin met de eerste'),
     explore: tri('Az öt élmény', 'The five experiences', 'De vijf ervaringen'),
@@ -68,7 +68,7 @@ export const pageText = {
         ),
       },
       {
-        name: tri('Generatív vizuálok', 'Generative visuals', 'Generatieve beelden'),
+        name: tri('Generatív látványelemek', 'Generative visuals', 'Generatieve beelden'),
         text: tri(
           'Szabályok és egy mag rajzolják a képet: ugyanazok a számok mindig ugyanazt adják, más mag mást.',
           'Rules and a seed make the picture: the same numbers always make the same piece, another seed another one.',
@@ -76,9 +76,9 @@ export const pageText = {
         ),
       },
       {
-        name: tri('Valós idejű renderelés', 'Real-time rendering', 'Realtime renderen'),
+        name: tri('Valós idejű megjelenítés', 'Real-time rendering', 'Realtime renderen'),
         text: tri(
-          'Mindent élőben a te böngésződ és videókártyád rajzol, az eszközödhöz igazodó minőségben.',
+          'Mindent élőben a te böngésződ és videokártyád rajzol, az eszközödhöz igazodó minőségben.',
           'All of it is drawn live by your browser and graphics card, at a quality that follows your device.',
           'Alles wordt live getekend door je browser en videokaart, in een kwaliteit die bij je apparaat past.',
         ),

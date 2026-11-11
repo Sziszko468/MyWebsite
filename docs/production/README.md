@@ -34,7 +34,8 @@ APP_ENV=production APP_SECRET=… DATABASE_PATH=/var/lib/… PUBLIC_URL=https://
 | Dependency vulnerabilities | **Verified** 2026-11-05 | `npm audit`: 0. Six runtime dependencies on the website (React, React DOM, React Router, three, @react-three/fiber, the Archivo font package); none in the server. Re-run before every release: the registry changes. |
 | Secrets in the repository and the bundles | **Verified** 2026-11-05 | Key-pattern scan of `dist/` (none); `.env*` is git-ignored and only `.env.example` is tracked; the server never reads a `.env` file. |
 | Debug mode off in production | **Verified** | There is no debug flag. `APP_ENV=production` refuses an unsafe configuration (`server:cli -- check` exits 78 without an `APP_SECRET`, with a wildcard or `http` origin, the `file` mail provider, clear-text SMTP, an in-memory database); a production-like configuration exits 0. Errors are plain JSON with a request id and no stack (security probe). |
-| CI | **Not implemented** | No workflow file. The commands above are what a pipeline would run (`npm ci && npm test && npm run build && npm run check:seo`). |
+| CI | **Written, not run on GitHub** | `.github/workflows/ci.yml` (PROMPT 18): typecheck, lint, tests, `i18n:check`, `i18n:validate`, build, `check:seo`. It has not run yet: push it and read the first result. |
+| Starting language by country (the edge Worker, `worker/`) | **Verified locally; not on the deployed site** | `wrangler dev` (the real Workers runtime) answered 302 to `/hu/`, `/nl/`, `/en/` for HU, NL and every other or unknown country; a saved choice and a crawler were respected (`tools/e2e/l10n-journey.cjs`, 31/31). After the next deploy check it from a Hungarian and a Dutch connection. See [docs/i18n](../i18n/README.md). |
 
 ### Configuration
 

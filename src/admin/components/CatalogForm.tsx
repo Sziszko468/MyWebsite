@@ -1,8 +1,9 @@
 import { useId, useState } from 'react'
 import { LANGUAGES, type Language } from '../../i18n/config'
 import type { Price } from '../api/types'
-import { CURRENCIES, FAQ_LABELS, VAT_MODES, emptyValue, incompleteLanguages, type FieldSpec, type PriceForm, type TextValues } from '../lib/catalog'
+import { CURRENCIES, FAQ_LABELS, VAT_MODES, emptyValue, incompleteLanguages, linesOf, missingByLanguage, type FieldSpec, type PriceForm, type TextValues } from '../lib/catalog'
 import { fill, useText } from '../i18n'
+import { cx } from '../../utils/cx'
 import page from '../styles/pages.module.scss'
 import styles from '../styles/ui.module.scss'
 import { SelectField, TextAreaField, TextField } from './form'
@@ -13,15 +14,29 @@ import { TabPanel, Tabs } from './layout'
  * (empty while another language has it). Lists are one item per line. Errors from the server arrive keyed
  * `translations.<language>.<field>` and are shown on the field they belong to, on the tab they belong to.
  */
-export function TextsEditor({ fields, values, onChange, errors, idBase, faq = false }: { fields: readonly FieldSpec[]; values: TextValues; onChange: (language: Language, name: string, value: string) => void; errors: Record<string, string>; idBase: string; faq?: boolean }) {
+export function TextsEditor({ fields, values, onChange, errors, idBase, faq = false, published = false }: { fields: readonly FieldSpec[]; values: TextValues; onChange: (language: Language, name: string, value: string) => void; errors: Record<string, string>; idBase: string; faq?: boolean; published?: boolean }) {
   const t = useText()
   const [active, setActive] = useState<Language>('hu')
   const incomplete = incompleteLanguages(fields, values)
+  const missing = missingByLanguage(fields, values)
+  const languageName = (code: string) => (t.languages as Record<string, string>)[code] ?? code
   const label = (name: string) => (t.services.fields as Record<string, string>)[faq ? (FAQ_LABELS[name] ?? name) : name] ?? name
   const errorOn = (language: Language) => fields.some((field) => errors[`translations.${language}.${field.name}`])
 
   return (
     <div>
+      <ul className={page.summaryChips} aria-label={t.services.edit.languageStatus}>
+        {LANGUAGES.map((language) => (
+          <li key={language} className={cx(styles.badge, missing[language] > 0 ? styles.toneWarning : styles.toneSuccess)}>
+            {languageName(language)}: {missing[language] > 0 ? fill(t.services.edit.languageMissingCount, { count: missing[language] }) : t.services.edit.languageComplete}
+          </li>
+        ))}
+      </ul>
+      {published && incomplete.length > 0 && (
+        <p className={styles.hint} role="status">
+          {t.services.edit.publishNeedsAll}
+        </p>
+      )}
       <Tabs
         idBase={idBase}
         label={t.services.edit.texts}
@@ -57,6 +72,32 @@ export function TextsEditor({ fields, values, onChange, errors, idBase, faq = fa
           </div>
         </TabPanel>
       ))}
+      <details className={page.preview}>
+        <summary>{t.services.edit.previewTitle}</summary>
+        <p className={styles.hint}>{t.services.edit.previewNote}</p>
+        <div className={page.previewColumns}>
+          {LANGUAGES.map((language) => (
+            <section key={language} lang={language} aria-label={languageName(language)}>
+              <h4>{languageName(language)}</h4>
+              {fields.map((field) => {
+                const value = values[language][field.name] ?? ''
+                if (emptyValue(field, values[language])) return null
+                return field.kind === 'list' ? (
+                  <ul key={field.name}>
+                    {linesOf(value).map((line, index) => (
+                      <li key={`${index}-${line}`}>{line}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p key={field.name} className={field.name === fields[0].name ? page.previewTitle : undefined}>
+                    {value}
+                  </p>
+                )
+              })}
+            </section>
+          ))}
+        </div>
+      </details>
     </div>
   )
 }

@@ -1,6 +1,10 @@
 {
-  // Cloudflare Workers, static assets only: `npm run build` writes the whole website to dist/ (one HTML file per page and
-  // language, 404.html, _headers, _redirects) and `npx wrangler deploy` uploads it. There is no Worker script.
+  // Cloudflare Workers with static assets: `npm run build` writes the whole website to dist/ (one HTML file per page and
+  // language, 404.html, _headers, _redirects) and `npx wrangler deploy` uploads it.
+  //
+  // The one script (worker/index.ts) chooses the starting language of a visitor who opened an address WITHOUT a language
+  // (`/`): their saved choice, else the language of their country (Hungary -> Hungarian, the Netherlands -> Dutch), else English.
+  // It reads only request.cf.country, never the IP address, and writes nothing. See docs/i18n/README.md.
   //
   // With this file present, Wrangler does not try to detect the framework and reconfigure the project (it would install
   // @cloudflare/vite-plugin, edit vite.config.ts and set "single-page-application" fallback, which would answer every
@@ -8,10 +12,17 @@
   //
   // "name" must be the name of the Worker in the Cloudflare dashboard (Workers & Pages); a different name here fails the build.
   "name": "mywebsite",
+  "main": "./worker/index.ts",
   "compatibility_date": "2026-11-10",
+  // Nothing is logged by the script, and no log is wanted for a language redirect.
+  "observability": { "enabled": false },
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     // An unknown address gets the nearest 404.html with status 404 (the site prerenders its own), never index.html with 200.
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // The script runs first ONLY for addresses that are not a language page or a built asset: `/` and a path typed without its
+    // language. Pages (/hu/…, /en/…, /nl/…), assets and pictures never invoke it (they are not billed as requests to the script).
+    "run_worker_first": ["/*", "!/hu/*", "!/en/*", "!/nl/*", "!/assets/*", "!/projects/*", "!/og/*"]
   }
 }

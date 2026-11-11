@@ -229,7 +229,7 @@
         "summary": {
           "hu": "Személyes pénzügyi platform: kiadások rögzítése (vagy a blokk beolvasása), havi költségkeretek, és egy vezérlőpult, amely érthetően elmondja, mi változott. Egyetlen API szolgálja ki a webes és a mobil klienst.",
           "en": "A personal finance platform: record spending (or scan the receipt), set monthly budgets, and read a dashboard that says in plain language what changed. One API serves the web and the mobile client.",
-          "nl": "Een persoonlijk financieel platform: uitgaven vastleggen (of de bon scannen), maandbudgetten instellen en een dashboard lezen dat in gewone taal zegt wat er veranderd is. Eén API bedient de web- en de mobiele client."
+          "nl": "Een persoonlijk financieel platform: uitgaven vastleggen (of de bon scannen), maandbudgetten instellen en een dashboard lezen dat in gewone taal zegt wat er veranderd is. Één API bedient de web- en de mobiele client."
         },
         "detailPage": true,
         "projectStatus": "demo",
@@ -518,7 +518,7 @@
             "solution": {
               "hu": "Egyetlen kiegészített queryset számolja ki a listához az elköltött összeget egy lekérdezésben, és egyetlen függvény tartalmazza a maradék és a felhasználás képletét. Az API, a vezérlőpult, az észrevételek és a push-ellenőrzések mind ezt használják; egy teszt rögzíti, hogy a lekérdezések száma nem nő a költségkeretek számával.",
               "en": "One annotated queryset works out the spent amount for the whole list in a single query, and one function holds the formula for remaining amount and usage. The API, the dashboard, the insights and the push checks all use them; a test pins that the query count does not grow with the number of budgets.",
-              "nl": "Eén geannoteerde queryset berekent het uitgegeven bedrag voor de hele lijst in één query en één functie bevat de formule voor het restbedrag en het gebruik. De API, het dashboard, de inzichten en de pushcontroles gebruiken ze allemaal; een test legt vast dat het aantal queries niet groeit met het aantal budgetten."
+              "nl": "Één geannoteerde queryset berekent het uitgegeven bedrag voor de hele lijst in één query en één functie bevat de formule voor het restbedrag en het gebruik. De API, het dashboard, de inzichten en de pushcontroles gebruiken ze allemaal; een test legt vast dat het aantal queries niet groeit met het aantal budgetten."
             },
             "source": "docs/code-review.md · H2"
           },
@@ -530,13 +530,13 @@
             },
             "problem": {
               "hu": "A tizedesvesszős billentyűzetű telefonokon nem lehetett fillért beírni: az űrlapok az „1250,50”-et Number()-rel olvasták, ami NaN, és úgy küldték volna el, ahogy beírták.",
-              "en": "On phones with a decimal-comma keypad cents could not be entered: the forms read \"1250,50\" with Number(), which gives NaN, and would have sent it as typed.",
-              "nl": "Op telefoons met een toetsenbord met decimale komma konden centen niet worden ingevoerd: de formulieren lazen \"1250,50\" met Number(), wat NaN geeft, en zouden het verstuurd hebben zoals het getypt was."
+              "en": "On phones with a decimal-comma keypad cents could not be entered: the forms read “1250,50” with Number(), which gives NaN, and would have sent it as typed.",
+              "nl": "Op telefoons met een toetsenbord met decimale komma konden centen niet worden ingevoerd: de formulieren lazen ‘1250,50’ met Number(), wat NaN geeft, en zouden het verstuurd hebben zoals het getypt was."
             },
             "solution": {
               "hu": "Egyetlen normalizáló függvény az „1 250,50”-et „1250.50”-re alakítja küldés előtt; a teszteket előbb úgy írtam meg, hogy elbukjanak. A webes űrlap number mezőt használ, ahol ezt a böngésző intézi.",
-              "en": "One normalising function turns \"1 250,50\" into \"1250.50\" before sending; the tests were written to fail first. The web form uses a number input, where the browser does it.",
-              "nl": "Eén normaliseerfunctie maakt van \"1 250,50\" \"1250.50\" vóór het versturen; de tests zijn eerst zo geschreven dat ze faalden. Het webformulier gebruikt een number-invoer, waar de browser dit doet."
+              "en": "One normalising function turns “1 250,50” into “1250.50” before sending; the tests were written to fail first. The web form uses a number input, where the browser does it.",
+              "nl": "Één normaliseerfunctie maakt van ‘1 250,50’ ‘1250.50’ vóór het versturen; de tests zijn eerst zo geschreven dat ze faalden. Het webformulier gebruikt een number-invoer, waar de browser dit doet."
             },
             "source": "docs/code-review.md · B2"
           },
@@ -612,7 +612,7 @@
             "title": {
               "hu": "Egy origin élesben",
               "en": "One origin in production",
-              "nl": "Eén origin in productie"
+              "nl": "Één origin in productie"
             },
             "text": {
               "hu": "Az nginx kiszolgálja a webes buildet, és az /api kéréseket az alkalmazásszerverre továbbítja, így egyetlen tanúsítvány kell, és nincs CORS-beállítás. A mobilalkalmazások ugyanezt a címet hívják.",
@@ -833,7 +833,7 @@
               "from": "api",
               "to": "ecb",
               "label": {
-                "hu": "referenciaárfolyamok",
+                "hu": "referencia-árfolyamok",
                 "en": "reference rates",
                 "nl": "referentiekoersen"
               }
@@ -962,7 +962,7 @@
             },
             "text": {
               "hu": "Chat a weben és mobilon. A modell nem éri el az adatbázist: hét csak olvasó háttér-eszközt hívhat, amelyek aggregált számokat adnak vissza azonosítók, név és e-mail nélkül. A válaszoknak ezekből kell származniuk; ha nem elég az adat, az asszisztens ezt mondja, nem találgat. Kulcs nélkül ki van kapcsolva.",
-              "en": "A chat on web and mobile. The model never touches the database: it can only call seven read-only backend tools that return aggregated figures with no ids, name or e-mail. Answers must come from those results; when they are not enough the assistant says so instead of guessing. Off unless a provider key is set.",
+              "en": "A chat on web and mobile. The model never touches the database: it can only call seven read-only backend tools that return aggregated figures with no ids, name or email. Answers must come from those results; when they are not enough the assistant says so instead of guessing. Off unless a provider key is set.",
               "nl": "Een chat op web en mobiel. Het model raakt de database nooit aan: het kan alleen zeven alleen-lezen backendtools aanroepen die geaggregeerde cijfers teruggeven zonder id’s, naam of e-mail. Antwoorden moeten uit die resultaten komen; als die niet genoeg zijn, zegt de assistent dat in plaats van te gokken. Uit zolang er geen providersleutel is."
             },
             "status": "done"
@@ -1056,8 +1056,8 @@
             },
             "text": {
               "hu": "Egy napló minden befizetésről és kivételről (a cél most csak az egyenlegét őrzi), amely megtakarítási ráta diagramot és „a céldátumra időben vagy” jelzéseket tenne lehetővé.",
-              "en": "A log of each deposit and withdrawal (a goal currently keeps only its balance), which would enable a savings-rate chart and \"on track for the target date\" hints.",
-              "nl": "Een log van elke storting en opname (een doel bewaart nu alleen zijn saldo), waarmee een spaarquotegrafiek en \"op schema voor de streefdatum\"-hints mogelijk worden."
+              "en": "A log of each deposit and withdrawal (a goal currently keeps only its balance), which would enable a savings-rate chart and “on track for the target date” hints.",
+              "nl": "Een log van elke storting en opname (een doel bewaart nu alleen zijn saldo), waarmee een spaarquotegrafiek en ‘op schema voor de streefdatum’-hints mogelijk worden."
             },
             "status": "planned"
           }
@@ -1080,7 +1080,7 @@
           },
           {
             "hu": "Nincs jelszó-visszaállítás e-mailben.",
-            "en": "There is no password reset by e-mail.",
+            "en": "There is no password reset by email.",
             "nl": "Er is geen wachtwoordherstel per e-mail."
           }
         ],
@@ -1105,8 +1105,8 @@
             },
             "text": {
               "hu": "A bevétel „+”, a kiadás „−”; a költségkeret „A terv szerint / Határon / Túllépve” szöveget és ikont kap; a változás nyilat és előjelet. A hosszú listákban a kiadások a normál szövegszínt használják, hogy egy oldalnyi kiadás ne legyen piros fal. A kontrasztot teszt védi mindkét témában.",
-              "en": "Income is \"+\" and spending is \"−\"; budgets say \"On track / Near limit / Over budget\" with an icon; changes carry an arrow and a sign. In long lists expenses use the normal text colour, so a page of spending is not a wall of red. Contrast is guarded by a test in both themes.",
-              "nl": "Inkomsten zijn \"+\" en uitgaven \"−\"; budgetten zeggen \"Op schema / Bijna op limiet / Overschreden\" met een pictogram; wijzigingen dragen een pijl en een teken. In lange lijsten gebruiken uitgaven de gewone tekstkleur, zodat een pagina met uitgaven geen rode muur is. Contrast wordt in beide thema’s door een test bewaakt."
+              "en": "Income is “+” and spending is “−”; budgets say “On track / Near limit / Over budget” with an icon; changes carry an arrow and a sign. In long lists expenses use the normal text colour, so a page of spending is not a wall of red. Contrast is guarded by a test in both themes.",
+              "nl": "Inkomsten zijn ‘+’ en uitgaven ‘−’; budgetten zeggen ‘Op schema / Bijna op limiet / Overschreden’ met een pictogram; wijzigingen dragen een pijl en een teken. In lange lijsten gebruiken uitgaven de gewone tekstkleur, zodat een pagina met uitgaven geen rode muur is. Contrast wordt in beide thema’s door een test bewaakt."
             }
           },
           {
@@ -1198,7 +1198,7 @@
         },
         "summary": {
           "hu": "Egy Next.js időpontfoglaló prototípus: nyilvános foglalási űrlap e-mail-visszaigazolással, és admin felület vezérlőpulttal, időpontlistával, naptárral és ügyfélnézettel. Az adatok ma a böngészőben élnek; a tárolóréteg arra készült, hogy később háttérrendszerre váltson.",
-          "en": "A Next.js appointment-booking prototype: a public booking form with e-mail confirmation, and an admin area with a dashboard, an appointment list, a calendar and a client view. The data lives in the browser today; the storage layer is built to move to a backend later.",
+          "en": "A Next.js appointment-booking prototype: a public booking form with email confirmation, and an admin area with a dashboard, an appointment list, a calendar and a client view. The data lives in the browser today; the storage layer is built to move to a backend later.",
           "nl": "Een Next.js-prototype voor afsprakenboeking: een openbaar boekingsformulier met e-mailbevestiging en een beheeromgeving met dashboard, afsprakenlijst, kalender en klantoverzicht. De data leeft nu in de browser; de opslaglaag is gebouwd om later naar een backend te verhuizen."
         },
         "detailPage": true,
@@ -1259,7 +1259,7 @@
             "device": "desktop",
             "alt": {
               "hu": "A nyilvános foglalási űrlap: név, e-mail, szolgáltatás időtartammal és árral, dátum és időpont.",
-              "en": "The public booking form: name, e-mail, a service with duration and price, date and time.",
+              "en": "The public booking form: name, email, a service with duration and price, date and time.",
               "nl": "Het openbare boekingsformulier: naam, e-mail, een dienst met duur en prijs, datum en tijd."
             },
             "caption": {
@@ -1304,12 +1304,12 @@
             "device": "desktop",
             "alt": {
               "hu": "Az e-mail-beállítások oldal: „TEST MODE” jelzés, három kapcsoló és egy beállítási útmutató.",
-              "en": "The e-mail settings page: a \"TEST MODE\" notice, three toggles and a setup guide.",
-              "nl": "De pagina met e-mailinstellingen: een \"TEST MODE\"-melding, drie schakelaars en een installatiehandleiding."
+              "en": "The email settings page: a “TEST MODE” notice, three toggles and a setup guide.",
+              "nl": "De pagina met e-mailinstellingen: een ‘TEST MODE’-melding, drie schakelaars en een installatiehandleiding."
             },
             "caption": {
               "hu": "E-mail-beállítások teszt módban",
-              "en": "E-mail settings in test mode",
+              "en": "Email settings in test mode",
               "nl": "E-mailinstellingen in testmodus"
             },
             "hero": false
@@ -1372,24 +1372,24 @@
             "solution": {
               "hu": "Egyetlen időpont-szolgáltatás választ egy localStorage-szolgáltató és egy API-szolgáltató (időtúllépéses fetch-burkoló típusos hibákkal) között egyetlen konfigurációs kapcsoló alapján; a képernyők csak a szolgáltatást és egy hookot hívnak. Az API-szolgáltató megírt, de háttérrendszer híján még nem futott ellene, mert a tárolóban nincs ilyen.",
               "en": "A single appointment service chooses between a localStorage provider and an API provider (a fetch wrapper with a timeout and typed errors) from one configuration switch; the screens only call the service and a hook. The API provider is written, but it has not been run against a backend, because the repository has none.",
-              "nl": "Eén afsprakenservice kiest tussen een localStorage-provider en een API-provider (een fetch-wrapper met timeout en getypeerde fouten) op basis van één configuratieschakelaar; de schermen roepen alleen de service en een hook aan. De API-provider is geschreven, maar nog niet tegen een backend gedraaid, omdat de repository er geen heeft."
+              "nl": "Één afsprakenservice kiest tussen een localStorage-provider en een API-provider (een fetch-wrapper met timeout en getypeerde fouten) op basis van één configuratieschakelaar; de schermen roepen alleen de service en een hook aan. De API-provider is geschreven, maar nog niet tegen een backend gedraaid, omdat de repository er geen heeft."
             },
             "source": "src/services/appointmentApi.ts · apiClient.ts"
           },
           {
             "title": {
               "hu": "A foglalás nem bukhat el egy e-mail miatt",
-              "en": "A booking must not fail because an e-mail did",
+              "en": "A booking must not fail because an email did",
               "nl": "Een boeking mag niet mislukken door een e-mail"
             },
             "problem": {
               "hu": "A visszaigazoló e-mail egy külső szolgáltatástól és egy API-kulcstól függ, amely hiányozhat.",
-              "en": "The confirmation e-mail depends on an external service and an API key that may be missing.",
+              "en": "The confirmation email depends on an external service and an API key that may be missing.",
               "nl": "De bevestigingsmail hangt af van een externe dienst en een API-sleutel die kan ontbreken."
             },
             "solution": {
               "hu": "A foglalás előbb mentődik; az e-mailt egy szerveroldali útvonal küldi utána, és a hibája elkapva naplózódik, a foglalást nem blokkolja. Kulcs nélkül az útvonal egyértelműen jelzett teszt módban fut, amely csak szimulálja a küldést.",
-              "en": "The booking is saved first; the e-mail is sent through a server-side route afterwards, and its failure is caught and logged without blocking the booking. Without a key the route runs in a clearly reported test mode that only simulates sending.",
+              "en": "The booking is saved first; the email is sent through a server-side route afterwards, and its failure is caught and logged without blocking the booking. Without a key the route runs in a clearly reported test mode that only simulates sending.",
               "nl": "De boeking wordt eerst opgeslagen; de e-mail wordt daarna via een serverroute verstuurd en een fout daarin wordt opgevangen en gelogd zonder de boeking te blokkeren. Zonder sleutel draait de route in een duidelijk gemelde testmodus die het versturen alleen simuleert."
             },
             "source": "src/app/book/page.tsx · src/services/emailService.ts"
@@ -1422,7 +1422,7 @@
             },
             "text": {
               "hu": "A nyilvános űrlap ellenőrzi a kötelező mezőket, az e-mail formátumát és hogy a dátum ne legyen múltbeli; az időpont-szolgáltatáson át ment, majd megkéri a szerveroldali útvonalat a visszaigazolás elküldésére. A látogató összefoglalót kap az időpontról.",
-              "en": "The public form checks the required fields, the e-mail format and that the date is not in the past; it saves through the appointment service, then asks the server route to send the confirmation. The visitor gets a summary of the appointment.",
+              "en": "The public form checks the required fields, the email format and that the date is not in the past; it saves through the appointment service, then asks the server route to send the confirmation. The visitor gets a summary of the appointment.",
               "nl": "Het openbare formulier controleert de verplichte velden, het e-mailformaat en dat de datum niet in het verleden ligt; het slaat op via de afsprakenservice en vraagt dan de serverroute de bevestiging te versturen. De bezoeker krijgt een samenvatting van de afspraak."
             }
           },
@@ -1430,7 +1430,7 @@
             "title": {
               "hu": "Egyetlen adatszolgáltatás",
               "en": "One data service",
-              "nl": "Eén dataservice"
+              "nl": "Één dataservice"
             },
             "text": {
               "hu": "Az összes képernyő ugyanazon a szolgáltatáson és egy hookon át olvas és ír; a szolgáltató cseréje egy kapcsoló, nem képernyőnkénti átírás.",
@@ -1446,7 +1446,7 @@
             },
             "text": {
               "hu": "A Next.js App Routerben egy (protected) csoport: vezérlőpult, időpontok (keresés, állapotszűrő, szerkesztés jegyzettel, törlés), naptár, ügyfelek és e-mail-beállítások. Az elrendezésben asztalon oldalsáv, telefonon alsó sáv van.",
-              "en": "In the Next.js App Router, a (protected) group: dashboard, appointments (search, status filter, edit with notes, delete), calendar, clients and e-mail settings. The layout has a sidebar on desktop and a bottom bar on phones.",
+              "en": "In the Next.js App Router, a (protected) group: dashboard, appointments (search, status filter, edit with notes, delete), calendar, clients and email settings. The layout has a sidebar on desktop and a bottom bar on phones.",
               "nl": "In de Next.js App Router een (protected)-groep: dashboard, afspraken (zoeken, statusfilter, bewerken met notities, verwijderen), kalender, klanten en e-mailinstellingen. De layout heeft een zijbalk op desktop en een onderbalk op telefoons."
             }
           },
@@ -1458,7 +1458,7 @@
             },
             "text": {
               "hu": "Az ügyfeleket az időpontokból összesíti a kód (név, e-mail, foglalások száma, utolsó látogatás), a vezérlőpult statisztikái ugyanabból a listából számolódnak.",
-              "en": "Clients are aggregated from the appointments (name, e-mail, number of bookings, last visit), and the dashboard statistics are computed from the same list.",
+              "en": "Clients are aggregated from the appointments (name, email, number of bookings, last visit), and the dashboard statistics are computed from the same list.",
               "nl": "Klanten worden uit de afspraken samengesteld (naam, e-mail, aantal boekingen, laatste bezoek) en de dashboardstatistieken worden uit dezelfde lijst berekend."
             }
           }
@@ -1493,7 +1493,7 @@
                   "label": "localStorage",
                   "detail": {
                     "hu": "időpontok, bejelentkezési jelző, e-mail-beállítások",
-                    "en": "appointments, sign-in flag, e-mail settings",
+                    "en": "appointments, sign-in flag, email settings",
                     "nl": "afspraken, aanmeldvlag, e-mailinstellingen"
                   },
                   "status": "built"
@@ -1543,7 +1543,7 @@
                   "label": "Resend",
                   "detail": {
                     "hu": "tranzakciós e-mail; kulcs nélkül teszt mód",
-                    "en": "transactional e-mail; test mode without a key",
+                    "en": "transactional email; test mode without a key",
                     "nl": "transactionele e-mail; testmodus zonder sleutel"
                   },
                   "status": "built"
@@ -1605,7 +1605,7 @@
             },
             "text": {
               "hu": "Név, e-mail, szolgáltatás (hat mintaszolgáltatás időtartammal és árral), dátum mától és időpont. Kötelező mezők és e-mail-formátum ellenőrzése, hibaüzenet, majd összefoglaló képernyő a foglalás adataival.",
-              "en": "Name, e-mail, service (six sample services with a duration and a price), a date from today and a time. Required-field and e-mail-format checks, an error message, then a summary screen with the booking details.",
+              "en": "Name, email, service (six sample services with a duration and a price), a date from today and a time. Required-field and email-format checks, an error message, then a summary screen with the booking details.",
               "nl": "Naam, e-mail, dienst (zes voorbeelddiensten met duur en prijs), een datum vanaf vandaag en een tijd. Controle op verplichte velden en e-mailformaat, een foutmelding en daarna een samenvattingsscherm met de boekingsgegevens."
             },
             "status": "done",
@@ -1614,7 +1614,7 @@
           {
             "title": {
               "hu": "Visszaigazoló e-mail",
-              "en": "Confirmation e-mail",
+              "en": "Confirmation email",
               "nl": "Bevestigingsmail"
             },
             "text": {
@@ -1646,8 +1646,8 @@
             },
             "text": {
               "hu": "Hónapok közti lapozás, „Ma” gomb, a szomszédos hónapok napjai halványan, minden naphoz az időpontok állapot szerint színezett bejegyzései és jelmagyarázat.",
-              "en": "Navigation between months, a \"Today\" button, neighbouring months’ days shown dimmed, and for each day its appointments coloured by status, with a legend.",
-              "nl": "Navigatie tussen maanden, een \"Vandaag\"-knop, dagen van aangrenzende maanden gedimd weergegeven en per dag de afspraken gekleurd naar status, met een legenda."
+              "en": "Navigation between months, a “Today” button, neighbouring months’ days shown dimmed, and for each day its appointments coloured by status, with a legend.",
+              "nl": "Navigatie tussen maanden, een ‘Vandaag’-knop, dagen van aangrenzende maanden gedimd weergegeven en per dag de afspraken gekleurd naar status, met een legenda."
             },
             "status": "done",
             "imageMediaPath": "/projects/bookinghub/calendar.webp"
@@ -1675,7 +1675,7 @@
             "text": {
               "hu": "Egy CSS-változókészlet két témához; alapból sötét, a fejlécben kapcsoló, a választás a böngészőben megmarad. A téma nem követi a rendszerbeállítást.",
               "en": "One set of CSS variables for two themes; dark by default, a toggle in the header, and the choice is remembered in the browser. The theme does not follow the system setting.",
-              "nl": "Eén set CSS-variabelen voor twee thema’s; standaard donker, een schakelaar in de koptekst en de keuze wordt in de browser onthouden. Het thema volgt de systeeminstelling niet."
+              "nl": "Één set CSS-variabelen voor twee thema’s; standaard donker, een schakelaar in de koptekst en de keuze wordt in de browser onthouden. Het thema volgt de systeeminstelling niet."
             },
             "status": "done",
             "imageMediaPath": "/projects/bookinghub/calendar-light.webp"
@@ -1696,7 +1696,7 @@
           {
             "title": {
               "hu": "E-mail-beállítások",
-              "en": "E-mail settings",
+              "en": "Email settings",
               "nl": "E-mailinstellingen"
             },
             "text": {
@@ -1736,7 +1736,7 @@
         ],
         "limits": [
           {
-            "hu": "Nincs szabadidőpont- vagy ütközésellenőrzés: bármely dátum és időpont kérhető, kétszeres foglalás megelőzése nincs.",
+            "hu": "Nincs szabadidőpont- vagy ütközés-ellenőrzés: bármely dátum és időpont kérhető, kétszeres foglalás megelőzése nincs.",
             "en": "There is no availability or conflict check: any date and time can be requested, and double bookings are not prevented.",
             "nl": "Er is geen beschikbaarheids- of conflictcontrole: elke datum en tijd kan worden aangevraagd en dubbele boekingen worden niet voorkomen."
           },
@@ -1777,7 +1777,7 @@
             },
             "text": {
               "hu": "Az űrlap a kiválasztott szolgáltatás időtartamát és árát az űrlapon belül mutatja, és a foglalás után egy összefoglaló képernyő ismétli meg az adatokat és azt az e-mail-címet, ahová a visszaigazolás ment.",
-              "en": "The form shows the chosen service’s duration and price in place, and after booking a summary screen repeats the details and the e-mail address the confirmation was sent to.",
+              "en": "The form shows the chosen service’s duration and price in place, and after booking a summary screen repeats the details and the email address the confirmation was sent to.",
               "nl": "Het formulier toont de duur en prijs van de gekozen dienst ter plekke en na het boeken herhaalt een samenvattingsscherm de gegevens en het e-mailadres waarheen de bevestiging ging."
             }
           },
@@ -1815,7 +1815,7 @@
             "nl": "De voorbereide API-provider koppelen aan een echte backend en de demo-aanmelding vervangen door echte authenticatie."
           },
           {
-            "hu": "Szabadidőpont- és ütközésellenőrzés a foglalási folyamatban.",
+            "hu": "Szabadidőpont- és ütközés-ellenőrzés a foglalási folyamatban.",
             "en": "Availability and conflict checks in the booking flow.",
             "nl": "Beschikbaarheids- en conflictcontroles in de boekingsstroom."
           },
@@ -1950,7 +1950,7 @@
           "nl": "Een applicatieconcept voor het digitaliseren van logistieke en transportprocessen."
         },
         "summary": {
-          "hu": "Fuvarozás- és flottakezelő rendszer egy fiktív közúti fuvarozócégnek: szabályellenőrzött szállítmány-munkafolyamat, sofőrök, vontatók és pótkocsik, karbantartás, költségek és jelentések, élő frissítéssel és szerepkör-alapú hozzáféréssel. Bemutató projekt: nincs éles használatban, minden adata kitalált.",
+          "hu": "Fuvarozás- és flottakezelő rendszer egy fiktív közúti fuvarozócégnek: szabályokkal ellenőrzött szállítmány-munkafolyamat, sofőrök, vontatók és pótkocsik, karbantartás, költségek és jelentések, élő frissítéssel és szerepkör-alapú hozzáféréssel. Bemutató projekt: nincs éles használatban, minden adata kitalált.",
           "en": "A transport and fleet management system for a fictional road-freight company: a rule-checked shipment workflow, drivers, trucks and trailers, maintenance, costs and reports, with live updates and role-based access. A demonstration project: it is not in production and all of its data is fictional.",
           "nl": "Een transport- en vlootbeheersysteem voor een fictief wegtransportbedrijf: een door regels gecontroleerde zendingsworkflow, chauffeurs, trekkers en opleggers, onderhoud, kosten en rapporten, met live updates en rolgebaseerde toegang. Een demonstratieproject: het is niet in productie en alle data is fictief."
         },
@@ -2082,7 +2082,7 @@
             "caption": {
               "hu": "Szállítmány részletei",
               "en": "Shipment details",
-              "nl": "Zendingdetails"
+              "nl": "Zendingsdetails"
             },
             "hero": false
           },
@@ -2150,7 +2150,7 @@
           },
           "problem": {
             "hu": "A kis és közepes fuvarozócégek a napot gyakran táblázatokon, telefonhívásokon, e-mailen és papír szállítólevelen viszik, amíg ki nem derül, hogy egy kocsit két rakományra is ígértek, egy sofőr jogosítványa észrevétlenül lejárt, vagy senki nem tudja megmondani, mit hozott egy szállítmány.",
-            "en": "Small and mid-sized freight companies often run the day on spreadsheets, phone calls, e-mail and paper consignment notes, until a truck is promised to two loads, a driver’s licence expires unnoticed, or nobody can say what a shipment earned.",
+            "en": "Small and mid-sized freight companies often run the day on spreadsheets, phone calls, email and paper consignment notes, until a truck is promised to two loads, a driver’s licence expires unnoticed, or nobody can say what a shipment earned.",
             "nl": "Kleine en middelgrote transportbedrijven draaien de dag vaak op spreadsheets, telefoontjes, e-mail en papieren vrachtbrieven, totdat een truck aan twee ladingen is beloofd, een rijbewijs ongemerkt verloopt of niemand kan zeggen wat een zending opleverde."
           },
           "goal": {
@@ -2228,7 +2228,7 @@
             "solution": {
               "hu": "A demócéget előbb megtervezik, majd ugyanazokkal a szabályokkal ellenőrzik, amelyeket az API is alkalmaz; a dátumok a mai naptól számolódnak, így a vezérlőpult a létrehozás pillanatában él.",
               "en": "The demo company is planned first and then checked against the same rules the API applies; it is dated from today, so the dashboard is alive whenever it is created.",
-              "nl": "Het democedrijf wordt eerst gepland en daarna gecontroleerd tegen dezelfde regels die de API toepast; het is gedateerd vanaf vandaag, zodat het dashboard leeft op het moment van aanmaken."
+              "nl": "Het demobedrijf wordt eerst gepland en daarna gecontroleerd tegen dezelfde regels die de API toepast; het is gedateerd vanaf vandaag, zodat het dashboard leeft op het moment van aanmaken."
             },
             "source": "docs/architecture.md · Decisions worth knowing about · docs/demo-data.md"
           }
@@ -2250,7 +2250,7 @@
             "title": {
               "hu": "Egy tranzakció, három hatás",
               "en": "One transaction, three effects",
-              "nl": "Eén transactie, drie effecten"
+              "nl": "Één transactie, drie effecten"
             },
             "text": {
               "hu": "A változás, az auditbejegyzés és az esemény ugyanabban a tranzakcióban van: a visszagörgetett változás nem hagy bejegyzést és nem értesít senkit; a megtartott változásnak mindig van bejegyzése.",
@@ -2266,8 +2266,8 @@
             },
             "text": {
               "hu": "A Celery-feladatok a szolgáltatások vékony burkolói és idempotensek, pontosan egy ütemezővel; az API Redis nélkül is működik (az állapotjelzés ekkor „degraded”, nem „nem elérhető”).",
-              "en": "Celery tasks are thin wrappers over services and idempotent, with exactly one scheduler; the API works without Redis (the readiness check then says \"degraded\", not \"unavailable\").",
-              "nl": "Celery-taken zijn dunne wrappers rond services en idempotent, met precies één scheduler; de API werkt zonder Redis (de readiness-check meldt dan \"degraded\", niet \"unavailable\")."
+              "en": "Celery tasks are thin wrappers over services and idempotent, with exactly one scheduler; the API works without Redis (the readiness check then says “degraded”, not “unavailable”).",
+              "nl": "Celery-taken zijn dunne wrappers rond services en idempotent, met precies één scheduler; de API werkt zonder Redis (de readiness-check meldt dan ‘degraded’, niet ‘unavailable’)."
             }
           },
           {
@@ -2560,14 +2560,14 @@
           },
           {
             "title": {
-              "hu": "Szabályellenőrzött hozzárendelés",
+              "hu": "Szabályokkal ellenőrzött hozzárendelés",
               "en": "Rule-checked assignment",
               "nl": "Regelgecontroleerde toewijzing"
             },
             "text": {
               "hu": "Sofőr, vontató és pótkocsi csak akkor rendelhető, ha a jogosítvány, a GKI, az orvosi alkalmasság, a biztosítás és a műszaki vizsga a kiszállítás napján érvényes, nincs átfedő nyitott fuvar, és semmi nincs a műhelyben.",
               "en": "A driver, truck and trailer can be assigned only if the licence, GKI, medical certificate, insurance and inspection are valid on the delivery day, no other open shipment overlaps, and nothing is in the workshop.",
-              "nl": "Een chauffeur, trekker en oplegger kunnen alleen worden toegewezen als rijbewijs, GKI, medisch certificaat, verzekering en keuring op de leverdag geldig zijn, geen andere open zending overlapt en niets in de werkplaats staat."
+              "nl": "Een chauffeur, trekker en oplegger kunnen alleen worden toegewezen als rijbewijs, GKI, medisch certificaat, verzekering en keuring op de dag van levering geldig zijn, geen andere open zending overlapt en niets in de werkplaats staat."
             },
             "status": "done",
             "imageMediaPath": "/projects/logistics-platform/shipments.webp"
@@ -2635,7 +2635,7 @@
             },
             "text": {
               "hu": "Ütemezett feladatok értesítést küldenek késő szállítmányokról, lejáró papírokról és késő karbantartásról (az alkalmazásban, sürgős esetben e-mailben is); a képernyők WebSockettel maguktól frissülnek. Az események jelzések, nem napló: nem tárolódnak és nem játszhatók vissza.",
-              "en": "Scheduled jobs raise notifications about late shipments, expiring papers and overdue maintenance (in the app, and by e-mail when urgent); screens refresh by themselves over a WebSocket. Events are hints, not a log: they are not stored or replayed.",
+              "en": "Scheduled jobs raise notifications about late shipments, expiring papers and overdue maintenance (in the app, and by email when urgent); screens refresh by themselves over a WebSocket. Events are hints, not a log: they are not stored or replayed.",
               "nl": "Geplande taken sturen notificaties over late zendingen, verlopende papieren en achterstallig onderhoud (in de app en bij urgentie per e-mail); schermen verversen zichzelf via een WebSocket. Events zijn hints, geen log: ze worden niet opgeslagen of herhaald."
             },
             "status": "done",
@@ -2714,7 +2714,7 @@
             },
             "text": {
               "hu": "Frissítő tokenek szerveroldali visszavonással, jelszómódosítás és -visszaállítás e-mailben, opcionális kétfaktoros bejelentkezés. Ma a hozzáférési tokenek egy óráig élnek, és nem vonhatók vissza.",
-              "en": "Refresh tokens with server-side revocation, password change and reset by e-mail, optional two-factor sign-in. Today access tokens last an hour and cannot be revoked.",
+              "en": "Refresh tokens with server-side revocation, password change and reset by email, optional two-factor sign-in. Today access tokens last an hour and cannot be revoked.",
               "nl": "Refresh-tokens met intrekking aan serverzijde, wachtwoordwijziging en -herstel per e-mail, optioneel tweefactoraanmelden. Nu duren toegangstokens een uur en kunnen ze niet worden ingetrokken."
             },
             "status": "planned"
@@ -2764,8 +2764,8 @@
             },
             "text": {
               "hu": "Az oldalsáv a bejelentkezett szerepkörnek megfelelően szűkül; aki mégis begépeli a címet, „hozzáférés megtagadva” képernyőt kap, és ugyanaz a kérés közvetlenül az API-nak 403. A felület csak megjeleníti a szabályt, az API érvényesíti.",
-              "en": "The sidebar narrows to the signed-in role; someone who types the address anyway gets an \"access denied\" screen, and the same request straight to the API is a 403. The interface only shows the rule; the API enforces it.",
-              "nl": "De zijbalk past zich aan de ingelogde rol aan; wie het adres toch intypt krijgt een \"toegang geweigerd\"-scherm en hetzelfde verzoek rechtstreeks naar de API is een 403. De interface toont de regel alleen; de API dwingt hem af."
+              "en": "The sidebar narrows to the signed-in role; someone who types the address anyway gets an “access denied” screen, and the same request straight to the API is a 403. The interface only shows the rule; the API enforces it.",
+              "nl": "De zijbalk past zich aan de ingelogde rol aan; wie het adres toch intypt krijgt een ‘toegang geweigerd’-scherm en hetzelfde verzoek rechtstreeks naar de API is een 403. De interface toont de regel alleen; de API dwingt hem af."
             }
           },
           {
@@ -2777,7 +2777,7 @@
             "text": {
               "hu": "A keresés, a szűrők, a rendezés és az oldal a címsorban van, így a lista könyvjelzőzhető, és a Vissza gomb oda tér vissza.",
               "en": "Search, filters, sort and page are in the address, so a list can be bookmarked and Back returns to it.",
-              "nl": "Zoeken, filters, sortering en pagina staan in het adres, zodat een lijst kan worden gebookmarkt en Terug ernaar terugkeert."
+              "nl": "Zoeken, filters, sortering en pagina staan in het adres, zodat een lijst als bladwijzer kan worden opgeslagen en Terug ernaar terugkeert."
             }
           },
           {
@@ -2800,8 +2800,8 @@
             },
             "text": {
               "hu": "Globális keresés (Ctrl/Cmd+K vagy „/”), morzsamenü, a fókuszt csapdába ejtő és visszaadó párbeszédablakok, a WCAG 1.4.13-at követő tippek; minden diagramhoz tartozik az adatai táblázata a képernyőolvasóknak.",
-              "en": "A global search (Ctrl/Cmd+K or \"/\"), breadcrumbs, dialogs that trap and return focus, tooltips that follow WCAG 1.4.13; every chart comes with its data as a table for screen readers.",
-              "nl": "Een globale zoekfunctie (Ctrl/Cmd+K of \"/\"), kruimelpaden, dialogen die de focus vangen en teruggeven, tooltips die WCAG 1.4.13 volgen; elke grafiek komt met zijn data als tabel voor schermlezers."
+              "en": "A global search (Ctrl/Cmd+K or “/”), breadcrumbs, dialogs that trap and return focus, tooltips that follow WCAG 1.4.13; every chart comes with its data as a table for screen readers.",
+              "nl": "Een globale zoekfunctie (Ctrl/Cmd+K of ‘/’), kruimelpaden, dialogen die de focus vangen en teruggeven, tooltips die WCAG 1.4.13 volgen; elke grafiek komt met zijn data als tabel voor schermlezers."
             }
           }
         ],
@@ -2816,7 +2816,7 @@
           {
             "hu": "Útvonal-optimalizálás: több megállós utak sorrendje és a legolcsóbb jármű kiválasztása.",
             "en": "Route optimisation: sequencing multi-stop trips and choosing the truck that makes the plan cheapest.",
-            "nl": "Routeoptimalisatie: meerdere stops volgordelijk plannen en de truck kiezen die het plan het goedkoopst maakt."
+            "nl": "Routeoptimalisatie: meerdere stops in volgorde plannen en de truck kiezen die het plan het goedkoopst maakt."
           },
           {
             "hu": "Üzemeltetett demó TLS mögött, mentésekkel és megfigyeléssel.",

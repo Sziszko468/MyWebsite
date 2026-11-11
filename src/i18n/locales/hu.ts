@@ -1,4 +1,4 @@
-// Hungarian is the default language and the source of the dictionary shape:
+// Hungarian is the source of the dictionary shape (English is the fallback language of the site, i18n/config.ts):
 // en.ts and nl.ts are typed against it, so a missing or extra key fails the build.
 export const hu = {
   meta: {
@@ -85,7 +85,7 @@ export const hu = {
     priceExact: 'A pontos összeg az ajánlatban szerepel.',
     vat: {
       excluded: '+ ÁFA',
-      included: 'ÁFÁval együtt',
+      included: 'ÁFÁ-val együtt',
       exempt: 'ÁFA-mentes',
     },
   },
@@ -101,7 +101,7 @@ export const hu = {
       clients: {
         label: 'Ügyfelek és vállalkozások',
         title: 'Van egy ötleted? Valósítsuk meg.',
-        text: 'Modern, reszponzív weboldalak és webalkalmazások üzleti célokra, átgondolt tervezéssel és fejlesztéssel.',
+        text: 'Modern, minden eszközön jól működő weboldalak és webalkalmazások üzleti célokra, átgondolt tervezéssel és fejlesztéssel.',
         cta: 'Indítsunk projektet',
       },
     },
@@ -140,7 +140,7 @@ export const hu = {
       items: {
         websites: {
           title: 'Weboldalak',
-          text: 'Reszponzív, modern weboldalak, egyedi vizuális megjelenéssel.',
+          text: 'Minden eszközön jól működő, modern weboldalak, egyedi vizuális megjelenéssel.',
         },
         webapps: {
           title: 'Webalkalmazások',

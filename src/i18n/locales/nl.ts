@@ -55,8 +55,8 @@ export const nl: Dictionary = {
   },
   footer: {
     role: 'Websites en webapplicaties, ontworpen en gebouwd.',
-    navLabel: 'Footermenu',
-    pagesHeading: "Pagina's",
+    navLabel: 'Menu onderaan de pagina',
+    pagesHeading: "Pagina’s",
     contactHeading: 'Contact',
     contactIntro: 'Heb je een idee of een vraag? Laten we praten.',
     contactLink: 'Neem contact op',
@@ -101,7 +101,7 @@ export const nl: Dictionary = {
       clients: {
         label: 'Klanten en bedrijven',
         title: 'Heb je een idee? Laten we het realiseren.',
-        text: 'Moderne, responsieve websites en webapplicaties voor zakelijke doelen, met doordacht ontwerp en doordachte ontwikkeling.',
+        text: 'Moderne websites en webapplicaties die op elk apparaat goed werken, voor zakelijke doelen, met doordacht ontwerp en doordachte ontwikkeling.',
         cta: 'Start een project',
       },
     },
@@ -140,7 +140,7 @@ export const nl: Dictionary = {
       items: {
         websites: {
           title: 'Websites',
-          text: 'Responsieve, moderne websites met een eigen visuele identiteit.',
+          text: 'Moderne websites die op elk apparaat goed werken, met een eigen visuele identiteit.',
         },
         webapps: {
           title: 'Webapplicaties',
@@ -152,7 +152,7 @@ export const nl: Dictionary = {
         },
         integrations: {
           title: 'Integraties',
-          text: "API's en digitale diensten koppelen op basis van wat het project echt nodig heeft.",
+          text: "API’s en digitale diensten koppelen op basis van wat het project echt nodig heeft.",
         },
       },
     },
@@ -231,7 +231,7 @@ export const nl: Dictionary = {
   contactPage: {
     meta: {
       title: 'Contact',
-      description: 'Schrijf me over een professionele kans, een samenwerking of een webontwikkelproject.',
+      description: 'Schrijf me over een professionele kans, een samenwerking of een project voor webontwikkeling.',
     },
     hero: {
       title: 'Heb je een goed idee?',
@@ -264,9 +264,9 @@ export const nl: Dictionary = {
         kind: {
           label: 'Waarover wil je praten?',
           options: {
-            job: 'Een baankans',
+            job: 'Een baan',
             collaboration: 'Samenwerking',
-            project: 'Een webontwikkelproject',
+            project: 'Een project voor webontwikkeling',
             other: 'Iets anders',
           },
         },
@@ -285,7 +285,7 @@ export const nl: Dictionary = {
       subjects: {
         job: 'Een professionele kans',
         collaboration: 'Samenwerking',
-        project: 'Een webontwikkelproject',
+        project: 'Een project voor webontwikkeling',
       },
       errors: {
         required: {

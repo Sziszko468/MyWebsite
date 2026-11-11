@@ -160,3 +160,13 @@ Run on 2026-11-07 (Windows 11, Node 22, system Chrome through Playwright).
 ## Not verified
 
 A physical phone or tablet (the swipe and the on-screen keyboard in particular), Safari and Firefox, a screen reader (the markup uses tabs with roving tabindex, native radios and checkboxes, fieldsets, live regions and disclosure buttons, but it was not listened to), forced-colours mode, a real mail provider and a real endpoint (the e-mails were written to files by the `file` provider), and the Hungarian and Dutch copy by a native reader.
+
+## Plain language (PROMPT 18)
+
+The Shop's words were rewritten for people with no technical background: packages, services, add-ons, the comparison, FULL EXPERIENCE and its questionnaire. Nothing was added or removed as an offer: ids, levels
+(included / add-on / custom / none), prices (none) and every limit are the same; only the words changed. The rules, the list of replaced expressions, the glossary (one word per concept in each language) and the
+checks that keep it so are in [docs/i18n](../i18n/README.md); the audit is in [docs/i18n/language-audit-report.md](../i18n/language-audit-report.md).
+
+* The owner's own wording from earlier briefs stayed as written (shop headline and lead, "Custom Quote", the FULL EXPERIENCE headline and its two English buttons).
+* After editing any Shop copy run `npm run catalog:seed-export` (the backend's seed must equal the website's content: `server/test/contract.test.ts`) and `npm run i18n`.
+* The administration refuses to publish a catalogue record (service, package, add-on, FAQ) that is missing a language; a disabled record is a draft. The FULL EXPERIENCE questionnaire's six core questions and their ids are unchanged, only their labels and examples.

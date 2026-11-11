@@ -29,7 +29,7 @@ export const experimentSummary: Record<LabId, Trilingual> = {
   'liquid-matter': tri(
     'Egy forma, négy anyagállapot: vertex shaderrel deformált felület, procedurális stúdiófény, és anyagváltáskor más viszkozitás és lüktetés.',
     'One form, four states of matter: a surface displaced in the vertex shader, lit by a procedural studio and re-shaded when you switch material.',
-    'Eén vorm, vier toestanden: een in de vertex-shader vervormd oppervlak, procedureel studiolicht en een nieuwe schaduwing bij elke materiaalwissel.',
+    'Één vorm, vier toestanden: een in de vertex-shader vervormd oppervlak, procedureel studiolicht en een nieuwe schaduwing bij elke materiaalwissel.',
   ),
   'type-in-motion': tri(
     'Minden betű valódi mélységű rétegek halmaza: a pointer felé dőlnek, lencse alatt hajlanak és rétegekre bomlanak, de a mondat olvasható marad.',

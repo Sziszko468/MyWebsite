@@ -39,6 +39,7 @@ const KEY_OWNERS: Record<string, string[]> = {
   'components/intro/introPolicy.ts': ['intro:seen', 'intro:skip'],
   'components/lab/artifacts/artifactDb.ts': ['lab-artifacts'],
   'components/lab/core/labMode.ts': ['lab:view'],
+  'i18n/locale.ts': ['cc_lang'],
   'components/lab/core/quality.ts': ['lab:quality'],
   'motion/scrollRestoration.ts': ['cc:scroll-positions'],
   'shop/cartStore.ts': ['cc-shop-cart-v1'],
@@ -78,9 +79,26 @@ describe('the privacy notice', () => {
     }
   })
 
-  it('says, truthfully, that no cookie is set', () => {
-    for (const file of sources()) expect(readFileSync(file, 'utf8'), posix(file)).not.toMatch(/document\.cookie|Set-Cookie/i)
-    for (const lang of LANGUAGES) expect(privacyText.cookies.text[lang].length).toBeGreaterThan(10)
+  it('says, truthfully, that exactly one cookie is set: the language choice, written in one place', () => {
+    const users = sources()
+      .filter((file) => /document\.cookie|Set-Cookie/i.test(readFileSync(file, 'utf8')))
+      .map(posix)
+    expect(users).toEqual(['i18n/preference.ts'])
+    expect(storedItems.filter((item) => item.where === 'cookie').map((item) => item.name)).toEqual(['cc_lang'])
+    for (const lang of LANGUAGES) {
+      expect(privacyText.cookies.text[lang]).toContain('cc_lang')
+      expect(privacyText.cookies.text[lang].length).toBeGreaterThan(100)
+    }
+  })
+
+  it('explains the country-based starting language without claiming what the code does not do', () => {
+    for (const lang of LANGUAGES) {
+      const text = privacyText.language.items.map((item) => item[lang]).join(' ')
+      expect(text, lang).toMatch(/Cloudflare/)
+    }
+    // The Worker reads the country only: its source must not read an IP address or log anything.
+    const worker = readFileSync(join(process.cwd(), 'worker', 'routing.ts'), 'utf8') + readFileSync(join(process.cwd(), 'worker', 'index.ts'), 'utf8')
+    expect(worker).not.toMatch(/request\.headers\.get\('(cf-connecting-ip|x-forwarded-for|x-real-ip)'|console\./i)
   })
 
   it('does not promise what only the owner can decide: no retention periods, legal bases, guarantees or named recipients', () => {

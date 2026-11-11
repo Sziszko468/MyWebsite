@@ -12,9 +12,9 @@ function flatten(value: unknown, prefix = ''): Record<string, string> {
 }
 
 describe('languages', () => {
-  it('supports hu, en and nl with Hungarian as default', () => {
+  it('supports hu, en and nl with English as the fallback for every visitor the site cannot place', () => {
     expect([...LANGUAGES]).toEqual(['hu', 'en', 'nl'])
-    expect(DEFAULT_LANGUAGE).toBe('hu')
+    expect(DEFAULT_LANGUAGE).toBe('en')
   })
 
   it('recognises only supported languages', () => {
@@ -27,7 +27,7 @@ describe('languages', () => {
 describe('dictionaries', () => {
   const reference = flatten(dictionaries[DEFAULT_LANGUAGE])
 
-  it.each(LANGUAGES)('%s has exactly the Hungarian keys', (lang) => {
+  it.each(LANGUAGES)('%s has exactly the same keys as the fallback language', (lang) => {
     expect(Object.keys(flatten(dictionaries[lang])).sort()).toEqual(Object.keys(reference).sort())
   })
 

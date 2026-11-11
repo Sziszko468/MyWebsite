@@ -43,7 +43,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts', 'server/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'server/**/*.test.ts', 'worker/**/*.test.ts', 'scripts/**/*.test.ts'],
     // Tests read tokens.css as text (?raw); by default Vitest blanks every non-module CSS file.
     css: { include: [/tokens\.css/] },
   },

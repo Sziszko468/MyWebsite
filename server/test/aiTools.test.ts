@@ -1,4 +1,4 @@
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -113,12 +113,14 @@ describe('the tool set', () => {
 })
 
 describe('what the knowledge tools may read', () => {
-  it('describes the developer from what the About page says and lists what is NOT published; it has no name or e-mail address to give while the site has none', async () => {
+  it('describes the developer from what the About page says and lists what is NOT published; it gives a name only if the site has published one, and no e-mail address while the site has none', async () => {
     const s = await start()
     const h = await harness(s)
     const profile = await h.run('getDeveloperProfile')
-    expect(profile).toMatchObject({ available: true, name: null })
-    expect(profile.nameNote).toMatch(/not published|do not give/i)
+    const seedName = JSON.parse(readFileSync(new URL('../seed/profile.seed.json', import.meta.url), 'utf8')).name as string | null
+    expect(profile).toMatchObject({ available: true, name: seedName })
+    if (seedName === null) expect(profile.nameNote).toMatch(/not published|do not give/i)
+    else expect(profile.nameNote).toBeNull()
     expect(profile.contact.email).toBeNull()
     expect(profile.contact.contactPage).toBe('/en/contact')
     expect(profile.technologies.flatMap((group: { items: string[] }) => group.items)).toContain('React')

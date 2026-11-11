@@ -79,7 +79,7 @@ function FaqForm({ record, position }: { record: ContentRecord | null; position:
         </DetailPanel>
         <DetailPanel title={e.texts}>
           <p className={styles.hint}>{e.textsHelp}</p>
-          <TextsEditor faq fields={FAQ_FIELDS} values={texts} errors={errors} idBase="faq-texts" onChange={(language: Language, name, value) => setTexts({ ...texts, [language]: { ...texts[language], [name]: value } })} />
+          <TextsEditor faq published={active} fields={FAQ_FIELDS} values={texts} errors={errors} idBase="faq-texts" onChange={(language: Language, name, value) => setTexts({ ...texts, [language]: { ...texts[language], [name]: value } })} />
         </DetailPanel>
         <div className={styles.formActions}>
           <AdminButton type="submit" variant="primary" loading={busy} loadingLabel={t.common.saving}>

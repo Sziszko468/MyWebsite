@@ -123,7 +123,7 @@ describe('the request', () => {
   it('has a summary with every question, skipped ones marked, the description and the contact', () => {
     const text = buildSummary(offer, { ...complete(), answers: { type: ['web-app'], stage: ['idea'], components: ['frontend', 'database'] }, company: 'Gym Network' }, 'en', { skipped: '(skipped)', description: 'Description', contact: 'Contact', heading: 'Your request summary' })
     expect(text).toContain('What kind of project is it?: Web application')
-    expect(text).toContain('Which components are needed? (choose any): Frontend, Database')
+    expect(text).toContain('What does your project need? (choose any): Screens that people see and use, Saving and managing information')
     expect(text).toContain('When would you like it?: (skipped)')
     expect(text).toContain('A booking platform for a small network of gyms')
     expect(text).toMatch(/Eszter Varga\neszter@example.com\nGym Network$/)

@@ -136,7 +136,7 @@ const WORDS: Record<Language, Words> = {
     newMessageIntro: 'A visitor sent a message through the contact form.',
     newQuoteIntro: 'A visitor asked for a quote through the request builder.',
     aiPlan: 'Control Room AI: project plan',
-    replyHint: 'Reply to this e-mail to answer the sender directly.',
+    replyHint: 'Reply to this email to answer the sender directly.',
     reference: 'Reference',
     status: 'Status',
     received: 'Received',
@@ -165,11 +165,11 @@ const WORDS: Record<Language, Words> = {
       kind === 'inquiry' ? `The status of your message (reference ${reference}) is now: ${status}.` : `The status of your quote request (reference ${reference}) is now: ${status}.`,
     statusSubject: (kind, reference) => (kind === 'inquiry' ? `Update on your message (${reference})` : `Update on your quote request (${reference})`),
     noteTitle: 'Note',
-    statusFooter: 'If you have any questions, reply to this e-mail.',
+    statusFooter: 'If you have any questions, reply to this email.',
     ownerFooter: 'This notification comes from the website’s contact system.',
     kinds: { job: 'A job opportunity', collaboration: 'Collaboration', project: 'A web development project', other: 'Something else' },
     inquiryStatus: { new: 'Received', in_progress: 'Being handled', waiting_client: 'Waiting for your reply', completed: 'Completed' },
-    quoteStatus: { new: 'Received', under_review: 'Being reviewed', waiting_customer: 'Waiting for your reply', quote_preparation: 'Quotation being prepared', quote_sent: 'Quotation sent', accepted: 'Accepted', declined: 'Declined', in_progress: 'In progress', completed: 'Completed', cancelled: 'Cancelled' },
+    quoteStatus: { new: 'Received', under_review: 'Being reviewed', waiting_customer: 'Waiting for your reply', quote_preparation: 'Quote being prepared', quote_sent: 'Quote sent', accepted: 'Accepted', declined: 'Declined', in_progress: 'In progress', completed: 'Completed', cancelled: 'Cancelled' },
     objectives: { present: 'Present myself or my business', leads: 'Get enquiries', sell: 'Sell', process: 'Support a process', improve: 'Improve what exists', other: 'Something else' },
     timings: { unsure: 'Not sure yet', asap: 'As soon as possible', weeks: 'Within a few weeks', months: 'Within a few months', flexible: 'Flexible' },
     needs: { website: 'Website', webapp: 'Web application', improve: 'Improve an existing website', ui: 'UI implementation', integrations: 'API and integrations', unsure: 'Not sure yet' },
@@ -213,7 +213,7 @@ const WORDS: Record<Language, Words> = {
     noteTitle: 'Opmerking',
     statusFooter: 'Heb je vragen, antwoord dan op deze e-mail.',
     ownerFooter: 'Deze melding komt uit het contactsysteem van de website.',
-    kinds: { job: 'Een baan', collaboration: 'Samenwerking', project: 'Een webontwikkelingsproject', other: 'Iets anders' },
+    kinds: { job: 'Een baan', collaboration: 'Samenwerking', project: 'Een project voor webontwikkeling', other: 'Iets anders' },
     inquiryStatus: { new: 'Ontvangen', in_progress: 'In behandeling', waiting_client: 'Wacht op jouw reactie', completed: 'Afgerond' },
     quoteStatus: { new: 'Ontvangen', under_review: 'In beoordeling', waiting_customer: 'Wacht op jouw reactie', quote_preparation: 'Offerte wordt opgesteld', quote_sent: 'Offerte verstuurd', accepted: 'Geaccepteerd', declined: 'Afgewezen', in_progress: 'In uitvoering', completed: 'Afgerond', cancelled: 'Geannuleerd' },
     objectives: { present: 'Mezelf of mijn bedrijf presenteren', leads: 'Aanvragen krijgen', sell: 'Verkopen', process: 'Een proces ondersteunen', improve: 'Verbeteren wat er is', other: 'Iets anders' },
@@ -372,7 +372,8 @@ interface ConfirmWords {
   sentAt: string
 }
 
-const CONFIRM: Record<Language, ConfirmWords> = {
+/** Exported so the language checks (src/i18n/quality/) can read the confirmation e-mails like every other text. */
+export const CONFIRM: Record<Language, ConfirmWords> = {
   hu: {
     inquirySubject: (reference) => `Megkaptuk az üzeneted (${reference})`,
     inquiryTitle: 'Üzeneted megérkezett',
@@ -392,12 +393,12 @@ const CONFIRM: Record<Language, ConfirmWords> = {
     inquiryTitle: 'Your message has arrived',
     inquiryBody: 'Thank you for getting in touch! Your message has been received. We will review your enquiry soon.',
     noteTitle: 'Information',
-    ignore: 'If you did not send this message, you can safely ignore this e-mail.',
-    footer: 'This is an automatic confirmation. If you want to add something, reply to this e-mail.',
-    testSubject: 'Test e-mail from the administration',
-    testTitle: 'Test e-mail',
+    ignore: 'If you did not send this message, you can safely ignore this email.',
+    footer: 'This is an automatic confirmation. If you want to add something, reply to this email.',
+    testSubject: 'Test email from the administration',
+    testTitle: 'Test email',
     testBody: 'This test message was started from the administration. If you can read it, the provider accepted it; whether it was delivered can only be confirmed by the provider’s notification (webhook).',
-    testFooter: 'You do not need to reply to this e-mail.',
+    testFooter: 'You do not need to reply to this email.',
     provider: 'Provider',
     sentAt: 'Sent',
   },

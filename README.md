@@ -20,7 +20,8 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 | `src/styles/tokens.css` | The design tokens. Brand palette, scales, and one semantic colour block per theme. Change values here only. |
 | `src/styles/global.scss`, `_mixins.scss` | Reset, global focus ring, theme-transition rule; breakpoints and interaction mixins. |
 | `src/theme/` | `ThemeProvider`, `useTheme`, storage and resolution logic. `index.html` holds the matching pre-paint script. |
-| `src/i18n/` | `config.ts` (languages), `locales/*.ts` (dictionaries), `paths.ts` (URL helpers), `I18nProvider`. |
+| `src/i18n/` | `config.ts` (languages; `DEFAULT_LANGUAGE` is English), `locale.ts` (which language a visitor starts in), `preference.ts` (the saved choice), `locales/*.ts` (dictionaries), `paths.ts` (URL helpers), `I18nProvider`, `quality/` (the language checks). See [docs/i18n](docs/i18n/README.md). |
+| `worker/` | The edge Worker (Cloudflare): sends `/` to the visitor's language before any page is drawn. It reads the country, never the IP address. |
 | `src/routes/pages.ts` | The page registry: which pages exist, their paths and languages. Router, navigation, footer, titles and the language switcher all read it. |
 | `src/routes/` | `LanguageLayout` (`/:lang/*` guard, providers, shell) and `languageSwitch.ts`. |
 | `src/components/` | UI kit (Button, Container, SectionHeading, Badge, ProjectCard, ServiceCard) and the global frame: `AppShell`, `SiteHeader`, `MainNav`, `BrandMark`, `MobileMenu`, `SiteFooter`, `MainContent`, `SceneLayer`, `ThemeToggle`, `LanguageSwitcher`. |
@@ -75,6 +76,17 @@ npm test           # vitest: contrast, i18n parity, page registry, language swit
 | `.env.example` | Every setting of the backend and of the website's build, with descriptions and no secret. |
 | `src/config/api.ts` | `VITE_API_URL`: where the backend is. The forms' endpoints (`config/contact.ts`, `config/quote.ts`) default to its `/api/contact` and `/api/quote-requests`. |
 | `src/content/catalogExport.ts`, `catalogOverlay.ts` | The static catalogue as seed data for the backend, and the overlay that lays the backend's edited prices, texts and FAQ over it at build time (`npm run catalog:pull`). The files with the packages, add-ons and FAQ export their static `base…` lists and the overlaid ones. |
+
+## Languages
+
+The site is in Hungarian, English and Dutch. A visitor who opens an address without a language (`/`) starts in the language they chose before; otherwise in Hungarian from Hungary, Dutch from the Netherlands, English from everywhere else or when the country is not known. A language in the address (`/hu/…`) is never overridden. The decision is taken at the edge (`worker/`), from the country Cloudflare reports, before any page is sent. The one cookie, `cc_lang`, is written only when the visitor uses the language switcher.
+
+```bash
+npm run i18n          # i18n:check (every text in all languages, same placeholders and numbers, one word per concept, no word hidden in a component) + i18n:validate (spelling with Hunspell)
+npm run i18n:report   # counts and the keys that look unused
+```
+
+`npm run build` runs `i18n:check`. The spell checker needs `npm install --no-save hunspell-asm` (not a dependency of the project, to keep `npm audit` clean). [docs/i18n/README.md](docs/i18n/README.md) explains the rule, the Worker, the checks and the privacy side; [docs/i18n/language-audit-report.md](docs/i18n/language-audit-report.md) is the audit with its honest limits.
 
 ## Conventions
 

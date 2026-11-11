@@ -6,6 +6,7 @@ import { ShopFallback } from '../components/shop/ShopFallback'
 import { DEFAULT_LANGUAGE, isLanguage } from '../i18n/config'
 import { I18nProvider } from '../i18n/I18nProvider'
 import { localizedPath, splitLanguage } from '../i18n/paths'
+import { startingLanguage } from '../i18n/preference'
 import { useI18n } from '../i18n/useI18n'
 import { applyHead } from '../seo/apply'
 import { buildHead } from '../seo/head'
@@ -73,7 +74,8 @@ export function LanguageLayout() {
   useProjectsVersion()
 
   if (!isLanguage(lang)) {
-    return <Navigate to={`${localizedPath(DEFAULT_LANGUAGE, pathname)}${search}${hash}`} replace />
+    // An address without a language: the visitor's saved language, else English (the edge Worker already did this for the first request).
+    return <Navigate to={`${localizedPath(startingLanguage(), pathname)}${search}${hash}`} replace />
   }
 
   const { rest } = splitLanguage(pathname)

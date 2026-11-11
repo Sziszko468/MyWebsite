@@ -21,7 +21,7 @@ export const spendly: ProjectDetail = {
   summary: tri(
     'Személyes pénzügyi platform: kiadások rögzítése (vagy a blokk beolvasása), havi költségkeretek, és egy vezérlőpult, amely érthetően elmondja, mi változott. Egyetlen API szolgálja ki a webes és a mobil klienst.',
     'A personal finance platform: record spending (or scan the receipt), set monthly budgets, and read a dashboard that says in plain language what changed. One API serves the web and the mobile client.',
-    'Een persoonlijk financieel platform: uitgaven vastleggen (of de bon scannen), maandbudgetten instellen en een dashboard lezen dat in gewone taal zegt wat er veranderd is. Eén API bedient de web- en de mobiele client.',
+    'Een persoonlijk financieel platform: uitgaven vastleggen (of de bon scannen), maandbudgetten instellen en een dashboard lezen dat in gewone taal zegt wat er veranderd is. Één API bedient de web- en de mobiele client.',
   ),
 
   role: tri(
@@ -100,7 +100,7 @@ export const spendly: ProjectDetail = {
       solution: tri(
         'Egyetlen kiegészített queryset számolja ki a listához az elköltött összeget egy lekérdezésben, és egyetlen függvény tartalmazza a maradék és a felhasználás képletét. Az API, a vezérlőpult, az észrevételek és a push-ellenőrzések mind ezt használják; egy teszt rögzíti, hogy a lekérdezések száma nem nő a költségkeretek számával.',
         'One annotated queryset works out the spent amount for the whole list in a single query, and one function holds the formula for remaining amount and usage. The API, the dashboard, the insights and the push checks all use them; a test pins that the query count does not grow with the number of budgets.',
-        'Eén geannoteerde queryset berekent het uitgegeven bedrag voor de hele lijst in één query en één functie bevat de formule voor het restbedrag en het gebruik. De API, het dashboard, de inzichten en de pushcontroles gebruiken ze allemaal; een test legt vast dat het aantal queries niet groeit met het aantal budgetten.',
+        'Één geannoteerde queryset berekent het uitgegeven bedrag voor de hele lijst in één query en één functie bevat de formule voor het restbedrag en het gebruik. De API, het dashboard, de inzichten en de pushcontroles gebruiken ze allemaal; een test legt vast dat het aantal queries niet groeit met het aantal budgetten.',
       ),
       source: 'docs/code-review.md · H2',
     },
@@ -112,13 +112,13 @@ export const spendly: ProjectDetail = {
       ),
       problem: tri(
         'A tizedesvesszős billentyűzetű telefonokon nem lehetett fillért beírni: az űrlapok az „1250,50”-et Number()-rel olvasták, ami NaN, és úgy küldték volna el, ahogy beírták.',
-        'On phones with a decimal-comma keypad cents could not be entered: the forms read "1250,50" with Number(), which gives NaN, and would have sent it as typed.',
-        'Op telefoons met een toetsenbord met decimale komma konden centen niet worden ingevoerd: de formulieren lazen "1250,50" met Number(), wat NaN geeft, en zouden het verstuurd hebben zoals het getypt was.',
+        'On phones with a decimal-comma keypad cents could not be entered: the forms read “1250,50” with Number(), which gives NaN, and would have sent it as typed.',
+        'Op telefoons met een toetsenbord met decimale komma konden centen niet worden ingevoerd: de formulieren lazen ‘1250,50’ met Number(), wat NaN geeft, en zouden het verstuurd hebben zoals het getypt was.',
       ),
       solution: tri(
         'Egyetlen normalizáló függvény az „1 250,50”-et „1250.50”-re alakítja küldés előtt; a teszteket előbb úgy írtam meg, hogy elbukjanak. A webes űrlap number mezőt használ, ahol ezt a böngésző intézi.',
-        'One normalising function turns "1 250,50" into "1250.50" before sending; the tests were written to fail first. The web form uses a number input, where the browser does it.',
-        'Eén normaliseerfunctie maakt van "1 250,50" "1250.50" vóór het versturen; de tests zijn eerst zo geschreven dat ze faalden. Het webformulier gebruikt een number-invoer, waar de browser dit doet.',
+        'One normalising function turns “1 250,50” into “1250.50” before sending; the tests were written to fail first. The web form uses a number input, where the browser does it.',
+        'Één normaliseerfunctie maakt van ‘1 250,50’ ‘1250.50’ vóór het versturen; de tests zijn eerst zo geschreven dat ze faalden. Het webformulier gebruikt een number-invoer, waar de browser dit doet.',
       ),
       source: 'docs/code-review.md · B2',
     },
@@ -176,7 +176,7 @@ export const spendly: ProjectDetail = {
       ),
     },
     {
-      title: tri('Egy origin élesben', 'One origin in production', 'Eén origin in productie'),
+      title: tri('Egy origin élesben', 'One origin in production', 'Één origin in productie'),
       text: tri(
         'Az nginx kiszolgálja a webes buildet, és az /api kéréseket az alkalmazásszerverre továbbítja, így egyetlen tanúsítvány kell, és nincs CORS-beállítás. A mobilalkalmazások ugyanezt a címet hívják.',
         'nginx serves the web build and proxies /api to the application server, so there is one certificate and no CORS setup. The mobile apps call the same address.',
@@ -285,7 +285,7 @@ export const spendly: ProjectDetail = {
       { from: 'api', to: 'ocr', label: tri('blokkfotó → javaslatok, semmi sem mentődik', 'receipt photo → suggestions, nothing saved', 'bonfoto → suggesties, niets opgeslagen') },
       { from: 'api', to: 'push', label: tri('értesítések küldése', 'sends notifications', 'verstuurt notificaties') },
       { from: 'api', to: 'ai', label: tri('csak olvasó háttér-eszközök, aggregált számok', 'read-only backend tools, aggregated figures', 'alleen-lezen backendtools, geaggregeerde cijfers') },
-      { from: 'api', to: 'ecb', label: tri('referenciaárfolyamok', 'reference rates', 'referentiekoersen') },
+      { from: 'api', to: 'ecb', label: tri('referencia-árfolyamok', 'reference rates', 'referentiekoersen') },
     ],
     note: tri(
       'Az OCR és a push választható integráció kis felületek mögött; az AI-asszisztens kikapcsolt, amíg nincs beállítva szolgáltatói kulcs.',
@@ -376,7 +376,7 @@ export const spendly: ProjectDetail = {
       title: tri('AI-pénzügyi asszisztens', 'AI finance assistant', 'AI-financiële assistent'),
       text: tri(
         'Chat a weben és mobilon. A modell nem éri el az adatbázist: hét csak olvasó háttér-eszközt hívhat, amelyek aggregált számokat adnak vissza azonosítók, név és e-mail nélkül. A válaszoknak ezekből kell származniuk; ha nem elég az adat, az asszisztens ezt mondja, nem találgat. Kulcs nélkül ki van kapcsolva.',
-        'A chat on web and mobile. The model never touches the database: it can only call seven read-only backend tools that return aggregated figures with no ids, name or e-mail. Answers must come from those results; when they are not enough the assistant says so instead of guessing. Off unless a provider key is set.',
+        'A chat on web and mobile. The model never touches the database: it can only call seven read-only backend tools that return aggregated figures with no ids, name or email. Answers must come from those results; when they are not enough the assistant says so instead of guessing. Off unless a provider key is set.',
         'Een chat op web en mobiel. Het model raakt de database nooit aan: het kan alleen zeven alleen-lezen backendtools aanroepen die geaggregeerde cijfers teruggeven zonder id’s, naam of e-mail. Antwoorden moeten uit die resultaten komen; als die niet genoeg zijn, zegt de assistent dat in plaats van te gokken. Uit zolang er geen providersleutel is.',
       ),
     },
@@ -442,8 +442,8 @@ export const spendly: ProjectDetail = {
       title: tri('Megtakarítási előzmények', 'Savings history', 'Spaargeschiedenis'),
       text: tri(
         'Egy napló minden befizetésről és kivételről (a cél most csak az egyenlegét őrzi), amely megtakarítási ráta diagramot és „a céldátumra időben vagy” jelzéseket tenne lehetővé.',
-        'A log of each deposit and withdrawal (a goal currently keeps only its balance), which would enable a savings-rate chart and "on track for the target date" hints.',
-        'Een log van elke storting en opname (een doel bewaart nu alleen zijn saldo), waarmee een spaarquotegrafiek en "op schema voor de streefdatum"-hints mogelijk worden.',
+        'A log of each deposit and withdrawal (a goal currently keeps only its balance), which would enable a savings-rate chart and “on track for the target date” hints.',
+        'Een log van elke storting en opname (een doel bewaart nu alleen zijn saldo), waarmee een spaarquotegrafiek en ‘op schema voor de streefdatum’-hints mogelijk worden.',
       ),
     },
   ],
@@ -466,7 +466,7 @@ export const spendly: ProjectDetail = {
     ),
     tri(
       'Nincs jelszó-visszaállítás e-mailben.',
-      'There is no password reset by e-mail.',
+      'There is no password reset by email.',
       'Er is geen wachtwoordherstel per e-mail.',
     ),
   ],
@@ -484,8 +484,8 @@ export const spendly: ProjectDetail = {
       title: tri('A szín soha nem az egyetlen jelzés', 'Colour is never the only signal', 'Kleur is nooit het enige signaal'),
       text: tri(
         'A bevétel „+”, a kiadás „−”; a költségkeret „A terv szerint / Határon / Túllépve” szöveget és ikont kap; a változás nyilat és előjelet. A hosszú listákban a kiadások a normál szövegszínt használják, hogy egy oldalnyi kiadás ne legyen piros fal. A kontrasztot teszt védi mindkét témában.',
-        'Income is "+" and spending is "−"; budgets say "On track / Near limit / Over budget" with an icon; changes carry an arrow and a sign. In long lists expenses use the normal text colour, so a page of spending is not a wall of red. Contrast is guarded by a test in both themes.',
-        'Inkomsten zijn "+" en uitgaven "−"; budgetten zeggen "Op schema / Bijna op limiet / Overschreden" met een pictogram; wijzigingen dragen een pijl en een teken. In lange lijsten gebruiken uitgaven de gewone tekstkleur, zodat een pagina met uitgaven geen rode muur is. Contrast wordt in beide thema’s door een test bewaakt.',
+        'Income is “+” and spending is “−”; budgets say “On track / Near limit / Over budget” with an icon; changes carry an arrow and a sign. In long lists expenses use the normal text colour, so a page of spending is not a wall of red. Contrast is guarded by a test in both themes.',
+        'Inkomsten zijn ‘+’ en uitgaven ‘−’; budgetten zeggen ‘Op schema / Bijna op limiet / Overschreden’ met een pictogram; wijzigingen dragen een pijl en een teken. In lange lijsten gebruiken uitgaven de gewone tekstkleur, zodat een pagina met uitgaven geen rode muur is. Contrast wordt in beide thema’s door een test bewaakt.',
       ),
     },
     {

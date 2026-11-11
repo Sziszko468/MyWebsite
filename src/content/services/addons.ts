@@ -7,11 +7,13 @@ import type { NeedId } from './ids'
  * The optional add-ons a visitor can put on a service. Only what the owner is willing to take on
  * belongs here: an add-on that is listed is an add-on that is offered. The brief also named a CMS
  * integration, but nothing on the portfolio shows or states that work, so it is not offered; a
- * visitor who needs one can say so in the configurator's requirements and it is decided together,
+ * visitor who needs one can say so in the request builder's requirements and it is decided together,
  * once the details are known. To offer it, add an entry here and to the packages that allow it.
  *
  * Every price is `quote`: nothing below is a real figure. An add-on that gets a published price
  * is set like a package's (content/packages.ts); the cart then adds it up on its own.
+ *
+ * The one word for these in each language: "add-on" (English), "kiegészítő" (Hungarian), "extra" (Dutch).
  */
 
 export const ADDON_IDS = ['pages', 'responsive', 'motion', 'api', 'performance', 'languages', 'custom', 'care'] as const
@@ -40,9 +42,9 @@ export const baseAddons: readonly Addon[] = [
     id: 'pages',
     name: tri('További oldalak', 'Additional pages', 'Extra pagina’s'),
     summary: tri(
-      'A csomagon felüli oldalak, a megállapodott szerkezetbe illesztve.',
-      'Pages beyond the package, fitted into the agreed structure.',
-      'Pagina’s bovenop het pakket, ingepast in de afgesproken structuur.',
+      'A csomagban lévőnél több oldal, a megegyezett szerkezetbe illesztve.',
+      'More pages than the package includes, added to the agreed structure.',
+      'Meer pagina’s dan in het pakket zitten, ingepast in de afgesproken structuur.',
     ),
     appliesTo: ['website', 'improve'],
     price: { kind: 'quote' },
@@ -50,11 +52,11 @@ export const baseAddons: readonly Addon[] = [
   },
   {
     id: 'responsive',
-    name: tri('Reszponzív átalakítás', 'Responsive adaptation', 'Responsieve aanpassing'),
+    name: tri('Minden képernyőre igazítás', 'Make it work on every screen', 'Geschikt maken voor alle schermen'),
     summary: tri(
-      'Meglévő oldal vagy felület átalakítása, hogy mobiltól asztali gépig jól használható legyen.',
-      'Reworking an existing page or interface so it works well from phone to desktop.',
-      'Een bestaande pagina of interface aanpassen zodat die van telefoon tot desktop goed werkt.',
+      'Egy meglévő oldal átalakítása, hogy telefonon, tableten és számítógépen is jól használható legyen.',
+      'Reworking an existing page so it works well on phones, tablets and computers.',
+      'Een bestaande pagina aanpassen zodat die goed werkt op telefoon, tablet en computer.',
     ),
     appliesTo: ['improve', 'ui'],
     price: { kind: 'quote' },
@@ -62,11 +64,11 @@ export const baseAddons: readonly Addon[] = [
   },
   {
     id: 'motion',
-    name: tri('Animáció és interakciók', 'Animation and interactions', 'Animatie en interactie'),
+    name: tri('Animáció és interaktív részletek', 'Animation and interactive details', 'Animatie en interactieve details'),
     summary: tri(
-      'Visszafogott, célzott mozgás és interaktív részletek; a használhatóság mindig előbbre való.',
-      'Restrained, purposeful motion and interactive details; usability always comes first.',
-      'Ingetogen, doelgerichte beweging en interactieve details; bruikbaarheid gaat altijd voor.',
+      'Visszafogott, célzott mozgás és interaktív részletek. A könnyű használat mindig előbbre való.',
+      'Subtle, purposeful movement and interactive details. Ease of use always comes first.',
+      'Ingetogen, doelgerichte beweging en interactieve details. Gebruiksgemak gaat altijd voor.',
     ),
     appliesTo: ['website', 'webapp', 'improve', 'ui'],
     price: { kind: 'quote' },
@@ -74,11 +76,11 @@ export const baseAddons: readonly Addon[] = [
   },
   {
     id: 'api',
-    name: tri('API-integráció', 'API integration', 'API-integratie'),
+    name: tri('Összekötés egy másik szolgáltatással', 'Connect to another service', 'Koppeling met een andere dienst'),
     summary: tri(
-      'Egy külső szolgáltatás vagy API bekötése; hogy megvalósítható-e, azt az ajánlat előtt tisztázzuk.',
-      'Connecting an external service or API; whether it can be done is settled before the quote.',
-      'Een externe dienst of API koppelen; of dat kan, stemmen we af vóór de offerte.',
+      'A weboldalad összekötése egy szolgáltatással vagy eszközzel, amelyet már használsz. Az ajánlat előtt közösen megnézzük, megvalósítható-e.',
+      'Connecting your website to a service or tool you already use. Before the quote, we check together whether it can be done.',
+      'Je website koppelen aan een dienst of tool die je al gebruikt. Vóór de offerte bekijken we samen of het kan.',
     ),
     appliesTo: ['website', 'webapp', 'improve', 'integrations'],
     price: { kind: 'quote' },
@@ -86,11 +88,11 @@ export const baseAddons: readonly Addon[] = [
   },
   {
     id: 'performance',
-    name: tri('Teljesítmény-optimalizálás', 'Performance optimization', 'Prestatie-optimalisatie'),
+    name: tri('Sebességvizsgálat', 'Speed check', 'Snelheidscontrole'),
     summary: tri(
-      'Egy meglévő oldal vagy alkalmazás sebességének átvilágítása, és a talált szűk keresztmetszetek javítása.',
-      'Reviewing how fast an existing site or application is, and fixing the bottlenecks found.',
-      'Nagaan hoe snel een bestaande site of applicatie is en de gevonden knelpunten verhelpen.',
+      'Megnézzük, mennyire gyors egy meglévő oldal vagy alkalmazás, és javítjuk a lassú pontokat.',
+      'We check how fast an existing site or application is, and fix the slow spots we find.',
+      'We kijken hoe snel een bestaande site of applicatie is en verhelpen de trage plekken die we vinden.',
     ),
     appliesTo: ['website', 'webapp', 'improve', 'ui'],
     price: { kind: 'quote' },
@@ -100,9 +102,9 @@ export const baseAddons: readonly Addon[] = [
     id: 'languages',
     name: tri('További nyelv', 'Additional language', 'Extra taal'),
     summary: tri(
-      'Egy újabb nyelvi változat a meglévő szerkezetben; a szövegek elkészítésének módját az ajánlatban rögzítjük.',
-      'An extra language version in the existing structure; how the texts are produced is agreed in the quote.',
-      'Een extra taalversie in de bestaande structuur; hoe de teksten tot stand komen, leggen we vast in de offerte.',
+      'Egy újabb nyelvi változat a meglévő szerkezetben. A szövegek elkészítésének módját az ajánlatban rögzítjük.',
+      'An extra language version of the site. We agree in the quote how the texts are produced.',
+      'Een extra taalversie van de site. In de offerte leggen we vast hoe de teksten tot stand komen.',
     ),
     appliesTo: ['website', 'webapp', 'improve', 'ui'],
     price: { kind: 'quote' },
@@ -110,10 +112,10 @@ export const baseAddons: readonly Addon[] = [
   },
   {
     id: 'custom',
-    name: tri('Egyedi funkció', 'Custom functionality', 'Maatwerkfunctionaliteit'),
+    name: tri('Egyedi funkció', 'Custom feature', 'Functie op maat'),
     summary: tri(
-      'Valami, ami nincs a listán: leírod, és a részletek ismeretében közösen döntjük el, belefér-e.',
-      'Something that is not on the list: you describe it and, once the details are known, we decide together whether it fits.',
+      'Valami, ami nincs a listán: leírod, és ha a részletek ismertek, közösen döntjük el, hogy belefér-e.',
+      'Something that is not on the list: you describe it, and once the details are known we decide together whether it fits.',
       'Iets dat niet op de lijst staat: jij beschrijft het en als de details bekend zijn, beslissen we samen of het past.',
     ),
     appliesTo: [...REAL_NEEDS, 'unsure'],
@@ -124,7 +126,7 @@ export const baseAddons: readonly Addon[] = [
     id: 'care',
     name: tri('Karbantartás', 'Maintenance', 'Onderhoud'),
     summary: tri(
-      'Folyamatos karbantartás külön megállapodás szerint (lásd a Care csomagot).',
+      'Folyamatos karbantartás külön megállapodással (lásd a Care csomagot).',
       'Ongoing maintenance by separate agreement (see the Care package).',
       'Doorlopend onderhoud volgens aparte afspraak (zie het pakket Care).',
     ),

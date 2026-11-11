@@ -13,7 +13,7 @@ export const common = {
     services: tri('Szolgáltatások', 'Services', 'Diensten'),
     packages: tri('Csomagok', 'Packages', 'Pakketten'),
     fullExperience: tri('FULL EXPERIENCE', 'FULL EXPERIENCE', 'FULL EXPERIENCE'),
-    configure: tri('Összeállító', 'Configure', 'Samenstellen'),
+    configure: tri('Összeállító', 'Build a request', 'Samenstellen'),
     cart: tri('Kosár', 'Cart', 'Winkelmand'),
     search: tri('Keresés', 'Search', 'Zoeken'),
     back: tri('Vissza a szolgáltatásokhoz', 'Back to Services', 'Terug naar Diensten'),
@@ -54,7 +54,7 @@ export const common = {
     kind: {
       fixed: tri('Fix áras termék', 'Fixed-price product', 'Product met vaste prijs'),
       quote: tri('Egyedi ajánlat alapján', 'Custom-quoted service', 'Dienst op offerte'),
-      addon: tri('Kiegészítő', 'Add-on', 'Toevoeging'),
+      addon: tri('Kiegészítő', 'Add-on', 'Extra'),
     },
   },
 
@@ -89,19 +89,19 @@ export const common = {
     },
     webapp: {
       title: tri('Webalkalmazás', 'Web application', 'Webapplicatie'),
-      text: tri('Egyedi felhasználói folyamatokkal és adatkezeléssel.', 'With custom user flows and data handling.', 'Met maatwerk gebruikersflows en gegevensbeheer.'),
+      text: tri('Böngészőben használható program, a te folyamatodra szabva.', 'Software people use in their browser, built around your process.', 'Software die mensen in hun browser gebruiken, gebouwd rond jouw werkwijze.'),
     },
     improve: {
       title: tri('Meglévő weboldal fejlesztése', 'Existing website improvement', 'Bestaande website verbeteren'),
       text: tri('Bővítés, javítás vagy továbbfejlesztés egy már működő oldalon.', 'Extending, fixing or developing a site that already runs.', 'Uitbreiden, herstellen of doorontwikkelen van een site die al draait.'),
     },
     ui: {
-      title: tri('UI-megvalósítás', 'UI implementation', 'UI-implementatie'),
-      text: tri('Meglévő designterv minőségi webes megvalósítása.', 'A quality web build of a design you already have.', 'Een hoogwaardige webuitwerking van een ontwerp dat je al hebt.'),
+      title: tri('A terved megvalósítása', 'Building from your design', 'Bouwen vanuit jouw ontwerp'),
+      text: tri('Ha már van terved, weboldalt építünk belőle.', 'If you already have a design, we build it as a website.', 'Heb je al een ontwerp, dan bouwen we er een website van.'),
     },
     integrations: {
-      title: tri('API-integráció', 'API integration', 'API-integratie'),
-      text: tri('Szolgáltatások és rendszerek összekötése.', 'Connecting services and systems.', 'Diensten en systemen met elkaar verbinden.'),
+      title: tri('Összekötés más szolgáltatásokkal', 'Connecting to other services', 'Koppelen met andere diensten'),
+      text: tri('A weboldal összekötése az eszközeiddel és szolgáltatásaiddal.', 'Connecting your website to the tools and services you use.', 'Je website koppelen aan de tools en diensten die je gebruikt.'),
     },
     unsure: {
       title: tri('Még nem tudom', 'Not sure yet', 'Nog niet zeker'),

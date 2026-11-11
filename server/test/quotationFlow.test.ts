@@ -322,8 +322,8 @@ describe('writing the quotation', () => {
 describe('Scenario B: sending the quotation and the customer\'s decision', () => {
   it('sends the offer with a secure link, which shows the whole document and nothing internal', async () => {
     const made = await kit.sent()
-    expect(made.mail.subject).toBe(`Your quotation: A website for the bakery — ${made.reference}-Q1`)
-    for (const part of ['€3,000.50', 'A website for the bakery', 'Valid until', '31 December 2026', 'Looking forward to it.', 'Opening the link or reading this e-mail is not an acceptance']) expect(made.mail.text, part).toContain(part)
+    expect(made.mail.subject).toBe(`Your quote: A website for the bakery — ${made.reference}-Q1`)
+    for (const part of ['€3,000.50', 'A website for the bakery', 'Valid until', '31 December 2026', 'Looking forward to it.', 'Opening the link or reading this email is not an acceptance']) expect(made.mail.text, part).toContain(part)
     expect(made.mail.html).toContain(`href="https://site.test/en/quote/${made.token}"`)
     expect(made.mail.html).not.toMatch(/<img|src=/i) // nothing essential waits for an image to load
     expect(rowOf(made.id)).toMatchObject({ status: 'quote_sent', customer_status: 'quote_sent' })
@@ -361,7 +361,7 @@ describe('Scenario B: sending the quotation and the customer\'s decision', () =>
     await kit.settle()
     await kit.settle()
     const toCustomer = kit.toCustomer().filter((mail) => mail.subject.startsWith('You accepted'))
-    const toOwner = kit.owner().filter((mail) => mail.subject.startsWith('Quotation accepted'))
+    const toOwner = kit.owner().filter((mail) => mail.subject.startsWith('Quote accepted'))
     expect(toCustomer).toHaveLength(1)
     expect(toOwner).toHaveLength(1)
     expect(toCustomer[0].text).toContain('€3,000.50')
@@ -404,7 +404,7 @@ describe('Scenario B: sending the quotation and the customer\'s decision', () =>
     await kit.settle()
     await kit.settle()
     expect(kit.toCustomer().filter((mail) => mail.subject.startsWith('Confirmation: you declined'))).toHaveLength(1)
-    const toOwner = kit.owner().find((mail) => mail.subject.startsWith('Quotation declined'))!
+    const toOwner = kit.owner().find((mail) => mail.subject.startsWith('Quote declined'))!
     expect(toOwner.text).toContain('We chose another supplier.')
     expect((await kit.act({ token: page.actions.accept, confirm: true })).status).toBeGreaterThanOrEqual(409)
     // The reason is not copied into the history or the audit log.
@@ -510,8 +510,8 @@ describe('Scenario E: a revision', () => {
     await kit.settle()
 
     expect(server.db.all('SELECT version, status FROM quotes ORDER BY version')).toEqual([{ version: 1, status: 'superseded' }, { version: 2, status: 'sent' }])
-    const mail = kit.toCustomer().filter((message) => message.subject.startsWith('Revised quotation')).at(-1)!
-    expect(mail.subject).toBe(`Revised quotation: A website for the bakery — ${first.reference}-Q2`)
+    const mail = kit.toCustomer().filter((message) => message.subject.startsWith('Revised quote')).at(-1)!
+    expect(mail.subject).toBe(`Revised quote: A website for the bakery — ${first.reference}-Q2`)
     expect(mail.text).toContain('€2,500.00')
     expect(mail.text).toContain('no longer works')
     const newToken = linkIn(mail.text, 'quote')
@@ -574,7 +574,7 @@ describe('Scenario E: a revision', () => {
 
 describe('the e-mails in three languages', () => {
   it('writes the quotation in the language of the offer, escapes what a person typed, and keeps the subject on one line', async () => {
-    for (const [language, subject, word] of [['hu', /^Árajánlatod: /, 'Érvényes eddig'], ['nl', /^Je offerte: /, 'Geldig tot'], ['en', /^Your quotation: /, 'Valid until']] as const) {
+    for (const [language, subject, word] of [['hu', /^Ajánlatod: /, 'Érvényes eddig'], ['nl', /^Je offerte: /, 'Geldig tot'], ['en', /^Your quote: /, 'Valid until']] as const) {
       const made = await kit.sent({ language, title: `<script>alert("${language}")</script> Weboldal\r\nBcc: evil@example.com`, introduction: '<b>x</b>' }, { description: `A request for a website, written in ${language}, with enough words.` })
       expect(made.mail.subject, language).toMatch(subject)
       expect(made.mail.subject).not.toMatch(/[\r\n]/)

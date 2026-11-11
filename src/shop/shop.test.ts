@@ -229,8 +229,10 @@ describe('the search', () => {
     const index = buildIndex(lang)
     expect(index).toHaveLength(4 + packages.length + addons.length)
     const text = localize(shopText, lang)
-    expect(searchEntries(index, 'API').some((entry) => entry.kind === 'service' && entry.id === 'integrations')).toBe(true)
-    expect(searchEntries(index, 'API').some((entry) => entry.kind === 'addon' && entry.id === 'api')).toBe(true)
+    // The page says "connecting" (összekötés, koppelen), not "API": a visitor searches by the plain word.
+    const connecting = { hu: 'összekötés', en: 'connect', nl: 'koppel' }[lang]
+    expect(searchEntries(index, connecting).some((entry) => entry.kind === 'service' && entry.id === 'integrations')).toBe(true)
+    expect(searchEntries(index, connecting).some((entry) => entry.kind === 'addon' && entry.id === 'api')).toBe(true)
     expect(searchEntries(index, 'Grow').some((entry) => entry.kind === 'package' && entry.id === 'grow')).toBe(true)
     expect(searchEntries(index, '', 'service')).toHaveLength(4)
     expect(searchEntries(index, '', 'addon')).toHaveLength(addons.length)

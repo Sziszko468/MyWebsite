@@ -585,3 +585,37 @@
   align-items: baseline;
   cursor: pointer;
 }
+
+/* The preview of a record's texts, one column per language (the catalogue editors). */
+.preview {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+}
+
+.previewColumns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+
+  h4 {
+    margin: 0 0 var(--space-2);
+  }
+
+  p,
+  ul {
+    margin: 0 0 var(--space-2);
+    overflow-wrap: anywhere;
+  }
+}
+
+.previewTitle {
+  font-weight: 600;
+}

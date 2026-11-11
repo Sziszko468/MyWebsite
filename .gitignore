@@ -39,3 +39,4 @@ src/content/projects.generated.json.tmp
 *.njsproj
 *.sln
 *.sw?
+.wrangler/
