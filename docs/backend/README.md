@@ -322,6 +322,12 @@ Run on 2026-11-04 (Windows 11, Node 22.23): **1691 passed, 0 failed** over the w
 - The duplicate fingerprint was an unkeyed hash of personal data (now an HMAC); the static server would have served a database or `.env` if pointed at the wrong folder.
 - Two assertions in the admin tests compared against a property that did not exist (caught by the type-check).
 
+### Automatic Google Drive backups
+
+When `GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET` and `GOOGLE_DRIVE_REFRESH_TOKEN` are all set, the server uploads a consistent SQLite snapshot and uploaded media files to a dated folder in Google Drive every day. `BACKUP_HOUR_UTC` controls the daily UTC hour (default 03:00); `BACKUP_RETENTION_DAYS` controls dated-folder retention (default 30 days). An optional `GOOGLE_DRIVE_FOLDER_ID` selects an existing destination folder. If a backup fails, the server logs the failure and sends an owner notification when the existing e-mail provider, `EMAIL_FROM` and `NOTIFY_TO` are configured. Credentials are never exposed in the administration configuration view.
+
+The first scheduled run happens at the next configured UTC hour after the process starts; no immediate backup is run on deploy. The upload uses the Google Drive `drive.file` scope. A successful provider response confirms upload acceptance, not an independent restore test. Restore procedures should be tested separately.
+
 ### What was **not** verified — read this before relying on it
 
 - **No real mail provider.** E-mail was proven against a protocol-speaking mock and a self-signed certificate, not against a real SMTP service (no provider, sender or recipient address exists to test with). Deliverability, SPF/DKIM/DMARC and spam-folder behaviour are the owner's to check; the system only claims *accepted by the provider*.
