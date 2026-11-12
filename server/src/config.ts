@@ -174,6 +174,7 @@ export interface Config {
   /** `CUSTOMER_LINK_DAYS`: how long the link in a customer's e-mail (the quotation, the status page) works. */
   customerLinkDays: number
   ai: AiConfig
+  backup: { enabled: boolean; clientId: string; clientSecret: string; refreshToken: string; folderId: string | null; retentionDays: number; hourUtc: number }
 }
 
 export class ConfigError extends Error {
@@ -388,6 +389,16 @@ export function loadConfig(env: Env = process.env): Config {
   if (!/^[A-Za-z0-9-]{0,16}(\{YYYY\}|\{YY\})?[A-Za-z0-9-]{0,16}\{N{3,10}\}[A-Za-z0-9-]{0,16}$/.test(quoteReferenceFormat)) bad('QUOTE_REFERENCE_FORMAT', `must be letters, digits and hyphens around one sequence placeholder such as {NNNNNN}, optionally with {YYYY} or {YY} before it (got "${quoteReferenceFormat}")`)
   const customerLinkDays = integer('CUSTOMER_LINK_DAYS', 90, 1, 365)
 
+  // ---- Google Drive backups ----
+  const driveClientId = text('GOOGLE_DRIVE_CLIENT_ID')
+  const driveClientSecret = text('GOOGLE_DRIVE_CLIENT_SECRET')
+  const driveRefreshToken = text('GOOGLE_DRIVE_REFRESH_TOKEN')
+  const driveFolderId = text('GOOGLE_DRIVE_FOLDER_ID')
+  const backupParts = [driveClientId, driveClientSecret, driveRefreshToken]
+  if (backupParts.some(Boolean) && backupParts.some((part) => !part)) bad('GOOGLE_DRIVE_CLIENT_ID', 'GOOGLE_DRIVE_CLIENT_ID, GOOGLE_DRIVE_CLIENT_SECRET and GOOGLE_DRIVE_REFRESH_TOKEN must be set together')
+  const backupRetentionDays = integer('BACKUP_RETENTION_DAYS', 30, 1, 365)
+  const backupHourUtc = integer('BACKUP_HOUR_UTC', 3, 0, 23)
+
   // ---- the assistant (PROMPT 16) ----
   const decimal = (name: string, fallback: number, min: number, max: number): number => {
     const raw = text(name)
@@ -510,6 +521,7 @@ export function loadConfig(env: Env = process.env): Config {
     quoteReferenceFormat,
     customerLinkDays,
     ai,
+    backup: { enabled: backupParts.every(Boolean), clientId: driveClientId ?? '', clientSecret: driveClientSecret ?? '', refreshToken: driveRefreshToken ?? '', folderId: driveFolderId, retentionDays: backupRetentionDays, hourUtc: backupHourUtc },
   }
 }
 
@@ -543,6 +555,7 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     mediaMaxBytes: config.mediaMaxBytes,
     quoteReferenceFormat: config.quoteReferenceFormat,
     customerLinkDays: config.customerLinkDays,
+    googleDriveBackup: { enabled: config.backup.enabled, credentials: config.backup.enabled ? 'set' : 'missing', folderIdSet: config.backup.folderId !== null, retentionDays: config.backup.retentionDays, hourUtc: config.backup.hourUtc },
     assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : 'missing', model: config.ai.model, modelOverrideRejected: config.ai.modelOverride !== null, customBaseUrl: config.ai.baseUrl !== null },
   }
 }
