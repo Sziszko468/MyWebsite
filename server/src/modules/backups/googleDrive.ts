@@ -31,7 +31,12 @@ export class GoogleDriveBackup {
   private readonly fetcher: typeof fetch
   private tokenValue = ''
   private tokenUntil = 0
-  constructor(private readonly options: BackupOptions) { this.fetcher = options.fetchImpl ?? fetch }
+  private readonly options: BackupOptions
+
+  constructor(options: BackupOptions) {
+    this.options = options
+    this.fetcher = options.fetchImpl ?? fetch
+  }
 
   private async token(): Promise<string> {
     if (this.tokenValue && Date.now() < this.tokenUntil - 60_000) return this.tokenValue
