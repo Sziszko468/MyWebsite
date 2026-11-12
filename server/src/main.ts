@@ -9,6 +9,7 @@ import { createLogger } from './lib/logger.ts'
 import { DAY, systemClock } from './lib/time.ts'
 import { createMailer } from './modules/notifications/mailer.ts'
 import { runMaintenance } from './modules/system/maintenance.ts'
+import { startBackupScheduler } from './modules/backups/googleDrive.ts'
 
 /**
  * Starts the server: read and check the configuration, open the database, bring the schema up to date, load the
@@ -63,6 +64,9 @@ async function main(): Promise<void> {
   const address = app.server.address()
   log.info('server listening', { host: config.host, port: typeof address === 'object' && address ? address.port : config.port, env: config.env, mailer: config.email.provider, database: config.databasePath === ':memory:' ? 'memory' : 'file' })
 
+  const backupScheduler = config.backup.enabled ? startBackupScheduler({ config, db, log, mailer: createMailer(config.email) }, config.backup.hourUtc) : null
+  if (!config.backup.enabled) log.info('Google Drive backup is not configured; automatic backups are disabled')
+
   const maintenance = setInterval(() => {
     try {
       const result = runMaintenance(app.context)
@@ -81,6 +85,7 @@ async function main(): Promise<void> {
     const force = setTimeout(() => process.exit(code || 1), 10_000)
     force.unref()
     clearInterval(maintenance)
+    backupScheduler?.stop()
     await app.close().catch((error) => log.error('error while closing', { error }))
     db.close()
     process.exit(code)
