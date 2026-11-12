@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { readdir, readFile, rm } from 'node:fs/promises'
-import { join, relative } from 'node:path'
+import { join, relative, sep } from 'node:path'
 import { tmpdir } from 'node:os'
 import type { Config } from '../../config.ts'
 import type { Database } from '../../db/database.ts'
@@ -122,15 +122,18 @@ export class GoogleDriveBackup {
       files++; bytes += database.byteLength
       for (const file of await this.mediaFiles(config.mediaDir)) {
         const data = await readFile(file)
-        const name = `media/${relative(config.mediaDir, file).split('\\\\').join('/')}`
+        const name = `media/${relative(config.mediaDir, file).split(sep).join('/')}`
         await this.upload(day, name, 'application/octet-stream', data)
         files++; bytes += data.byteLength
       }
       const cutoff = new Date(Date.now() - config.backup.retentionDays * 86_400_000).toISOString().slice(0, 10)
       for (const old of await this.list(`'${q(root)}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`)) {
         if (/^\\d{4}-\\d{2}-\\d{2}$/.test(old.name) && old.name < cutoff) {
+          // Delete the dated folder's contents explicitly; deleting a Drive folder alone can orphan its children.
+          const children = await this.list(`'${q(old.id)}' in parents and trashed=false`)
+          for (const child of children) await this.api(`files/${child.id}`, { method: 'DELETE' })
           await this.api(`files/${old.id}`, { method: 'DELETE' })
-          log.info('old Google Drive backup removed', { date: old.name })
+          log.info('old Google Drive backup removed', { date: old.name, files: children.length })
         }
       }
       log.info('Google Drive backup completed', { date, files, bytes })
