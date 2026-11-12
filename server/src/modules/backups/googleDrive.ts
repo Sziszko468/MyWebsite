@@ -128,7 +128,7 @@ export class GoogleDriveBackup {
       }
       const cutoff = new Date(Date.now() - config.backup.retentionDays * 86_400_000).toISOString().slice(0, 10)
       for (const old of await this.list(`'${q(root)}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`)) {
-        if (/^\\d{4}-\\d{2}-\\d{2}$/.test(old.name) && old.name < cutoff) {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(old.name) && old.name < cutoff) {
           // Delete the dated folder's contents explicitly; deleting a Drive folder alone can orphan its children.
           const children = await this.list(`'${q(old.id)}' in parents and trashed=false`)
           for (const child of children) await this.api(`files/${child.id}`, { method: 'DELETE' })
