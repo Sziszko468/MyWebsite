@@ -10,6 +10,7 @@ import { findRecentQuoteDuplicate } from '../quotes/repository.ts'
 import { mintViewToken } from '../quotes/tokens.ts'
 import type { Brief, BriefQuestion } from './brief.ts'
 import { publishedDocuments, type FullExperienceDoc } from './documents.ts'
+import { estimateSize } from './estimate.ts'
 import { totalsOf, type Totals } from './pricing.ts'
 
 /**
@@ -102,7 +103,9 @@ export function buildBrief(doc: FullExperienceDoc, input: Pick<FullExperienceInp
     return { id: question.id, kind: question.kind, title: question.title, answers }
   })
   if (Object.keys(errors).length > 0) throw validationFailed(errors, 'Something in the answers is not on offer.')
-  return { version: 1, preferredLanguage: input.preferredLanguage, questions }
+  // The project size guide is worked out here, from the answers that were just validated: a value in the request is never read.
+  const estimate = estimateSize(Object.fromEntries(questions.map((question) => [question.id, question.answers.map((answer) => answer.id)])))
+  return { version: 1, preferredLanguage: input.preferredLanguage, questions, ...(estimate ? { estimate } : {}) }
 }
 
 export interface FullExperienceResult {

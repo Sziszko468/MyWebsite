@@ -210,9 +210,41 @@ describe('what the quote configurator sends', () => {
     }
   })
 
+  it('gives a FULL EXPERIENCE request the same project size on the page as in the brief, for every combination of answers', async () => {
+    const page = await load('src/shop/fullExperience/estimate.ts')
+    const backend = await import('../src/modules/shop/estimate.ts')
+    expect(page.SIZE_POINTS).toEqual(backend.SIZE_POINTS)
+    expect(page.SIZE_LIMITS).toEqual(backend.SIZE_LIMITS)
+    expect(page.SIZE_BASIS).toEqual(backend.SIZE_BASIS)
+    const components = ['frontend', 'backend', 'database', 'auth', 'admin', 'api', 'payments', 'multilingual', 'interactive', 'mobile']
+    const types = [undefined, 'business-site', 'shop-site', 'web-app', 'internal-app', 'portal', 'custom', 'unsure', 'not-an-option']
+    const stages = [undefined, 'idea', 'redevelopment', 'extension']
+    const complexities = [undefined, 'simple', 'medium', 'complex', 'unsure']
+    let compared = 0
+    for (let mask = 0; mask < 1 << components.length; mask += 1) {
+      const chosen = components.filter((_, index) => (mask >> index) & 1)
+      for (const type of types) {
+        for (const stage of stages) {
+          for (const complexity of complexities) {
+            if ((mask + compared) % 7 !== 0 && mask > 63) continue // every small selection in full, the large ones thinned out deterministically
+            const answers: Record<string, string[]> = {}
+            if (type) answers.type = [type]
+            if (stage) answers.stage = [stage]
+            if (complexity) answers.complexity = [complexity]
+            if (chosen.length > 0) answers.components = chosen
+            expect(page.estimateSize(answers), JSON.stringify(answers)).toEqual(backend.estimateSize(answers))
+            compared += 1
+          }
+        }
+      }
+    }
+    expect(compared).toBeGreaterThan(3000)
+  })
+
   it('is accepted for several services at once, and for every answer the form offers', async () => {
     const lines = [
-      { need: 'website', plan: 'launch', extras: ['pages', 'api'] },
+      // Launch does not list the API add-on (PROMPT 20: the backend now refuses what the package does not allow).
+      { need: 'website', plan: 'launch', extras: ['pages', 'motion'] },
       { need: 'webapp', plan: 'build', extras: [] },
       { need: 'ui', plan: 'grow', extras: ['motion'] },
       { need: 'integrations', plan: 'custom', extras: [] },

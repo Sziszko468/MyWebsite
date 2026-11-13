@@ -175,6 +175,10 @@ describe('POST /api/quote-requests', () => {
     ['an unknown plan', { items: [{ need: 'website', plan: 'platinum', extras: [] }] }, 'items.0.plan', 'unknown'],
     ['an unknown add-on', { items: [{ need: 'website', plan: 'launch', extras: ['cms'] }] }, 'items.0.extras', 'unknown'],
     ['an add-on that does not apply to the need', { items: [{ need: 'website', plan: 'launch', extras: ['responsive'] }] }, 'items.0.extras', 'unknown'],
+    // PROMPT 20: an add-on must be one the chosen PACKAGE lists, not only one that applies to the service. Launch does not list `api` or `performance`.
+    ['an add-on the chosen package does not allow', { items: [{ need: 'website', plan: 'launch', extras: ['api'] }] }, 'items.0.extras', 'unknown'],
+    ['one add-on the package allows and one it does not', { items: [{ need: 'website', plan: 'launch', extras: ['pages', 'performance'] }] }, 'items.0.extras', 'unknown'],
+    ['an add-on of another package on a Build line', { items: [{ need: 'webapp', plan: 'build', extras: ['pages'] }] }, 'items.0.extras', 'unknown'],
     ['a short description', { description: 'too short' }, 'description', 'tooShort'],
     ['a long description', { description: 'x'.repeat(2001) }, 'description', 'tooLong'],
     ['a bad objective', { objective: 'fame' }, 'objective', 'invalid'],
@@ -189,6 +193,22 @@ describe('POST /api/quote-requests', () => {
     expect(response.json.error.details.fields[field]).toBe(code)
     expect(rows('quote_requests')).toHaveLength(0)
     expect(rows('quote_request_items')).toHaveLength(0)
+  })
+
+  it('accepts every add-on a package lists for the service, and any that applies to a custom project (it has no package to disagree with)', async () => {
+    const response = await server.api('/api/quote-requests', {
+      body: quote({ items: [{ need: 'website', plan: 'grow', extras: ['api', 'performance', 'languages'] }, { need: 'webapp', plan: 'build', extras: ['api', 'motion'] }, { need: 'integrations', plan: 'custom', extras: ['api', 'custom'] }] }),
+    })
+    expect(response.status).toBe(201)
+  })
+
+  it('stores nothing when one line of several carries an add-on its package does not allow, and names that line', async () => {
+    const response = await server.api('/api/quote-requests', { body: quote({ items: [{ need: 'website', plan: 'grow', extras: ['api'] }, { need: 'webapp', plan: 'build', extras: ['pages'] }] }) })
+    expect(response.status).toBe(422)
+    expect(response.json.error.details.fields['items.1.extras']).toBe('unknown')
+    expect(response.json.error.details.fields['items.0.extras']).toBeUndefined()
+    expect(rows('quote_requests')).toHaveLength(0)
+    expect(rows('quote_request_item_extras')).toHaveLength(0)
   })
 
   it('never reads a price from the request: whatever it claims, the stored price is the catalogue\'s', async () => {

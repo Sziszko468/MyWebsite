@@ -1,5 +1,7 @@
 # Shop 3.0 — package comparison and FULL EXPERIENCE
 
+> **Shop 4.0 (PROMPT 20)** builds on this page without replacing anything: add-ons follow the package (page and backend), a rule-based package finder, a project size guide, "your request so far" and the Shop's events. See [SHOP_4.md](SHOP_4.md) (what changed, the rules, the tests, the limits) and [SHOP_4_PLAN.md](SHOP_4_PLAN.md) (the plan written first).
+
 PROMPT 09.1 turned the inquiry-based shop (PROMPT 09, see "Shop" in the [main README](../../README.md#shop)) into a premium service marketplace: a four-column **tier comparison** with a dedicated phone version, a **page for every package**, an **add-on** system that offers only what applies, and a separate flagship offer, **FULL EXPERIENCE**, with its own eight-step configurator. All of it is editable in the administration, in Hungarian, English and Dutch.
 
 ## What did not change (on purpose)

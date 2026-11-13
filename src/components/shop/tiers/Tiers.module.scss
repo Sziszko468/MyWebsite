@@ -431,9 +431,14 @@
   }
 }
 
-.cell[data-selected],
-.stickyRow td[data-selected] {
+.cell[data-selected] {
   background-color: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/* The sticky row of names stays OPAQUE (PROMPT 20 audit): content scrolls beneath it, and a see-through tint let whatever passed under it
+   show behind the selected package's name (measured 4.4:1 in the light theme, below the 4.5:1 of WCAG AA). */
+.stickyRow td[data-selected] {
+  background-color: color-mix(in srgb, var(--accent) 7%, var(--color-bg));
 }
 
 /* ── The phone's switcher ─────────────────────────────────────────────────── */

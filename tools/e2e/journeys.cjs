@@ -135,8 +135,8 @@ async function journeyA(browser) {
       await page.locator('header a[href$="/about"]').first().click()
       await page.waitForURL(/\/about\/?$/)
       await h1(page).waitFor()
-      await page.locator('header a[href="/hu/"], header a[href="/hu"]').first().click()
-      await page.waitForURL(/\/hu\/?$/)
+      await page.locator('header a[href="/hu/"], header a[href="/en/"], header a[href="/nl/"]').first().click()
+      await page.waitForURL(/\/(hu|en|nl)\/?$/)
       await page.waitForTimeout(1500)
       expect((await page.locator('dialog[open]').count()) === 0, 'the intro opened again')
       await page.reload({ waitUntil: 'networkidle' })
@@ -322,9 +322,10 @@ async function journeyB(browser) {
       expect(/Content-Type: text\/plain/i.test(mail.text) && /Content-Type: text\/html/i.test(mail.text), 'not multipart plain + HTML')
       return `From ${from} | To ${to} | Reply-To ${reply}`
     })
-    await step(page, 'no confirmation e-mail goes to the visitor while confirmations are off', async () => {
-      const wrongRecipient = mails().find(({ text }) => header(text, 'To').includes(`e2e+${stamp}@example.test`))
-      expect(!wrongRecipient, 'a message was addressed to the visitor')
+    await step(page, 'the visitor gets exactly one confirmation, and it never replies to the owner address', async () => {
+      const toVisitor = mails().filter(({ text }) => header(text, 'To').includes(`e2e+${stamp}@example.test`))
+      expect(toVisitor.length === 1, `${toVisitor.length} messages addressed to the visitor`)
+      expect(!/owner@example\.test/.test(header(toVisitor[0].text, 'Reply-To')), 'the confirmation replies to the owner address')
     })
     await step(page, 'no console errors during the journey', async () => {
       expect(errors.length === 0, errors.slice(0, 3).join(' | '))
@@ -446,8 +447,8 @@ async function journeyC(browser) {
       expect(d.inquiries.total === live(api.inquiries.data), `inquiries total ${d.inquiries.total} vs listed ${live(api.inquiries.data)}`)
       expect(d.quotes.total === live(api.quotes.data), `quotes total ${d.quotes.total} vs listed ${live(api.quotes.data)}`)
       for (const key of ['new', 'inProgress', 'waitingClient', 'completed']) expect(d.inquiries[key] === count(api.inquiries.data, key), `inquiries ${key}: dashboard ${d.inquiries[key]} vs ${count(api.inquiries.data, key)}`)
-      for (const key of ['new', 'inReview', 'quoted', 'accepted', 'declined', 'closed']) expect(d.quotes[key] === count(api.quotes.data, key), `quotes ${key}: dashboard ${d.quotes[key]} vs ${count(api.quotes.data, key)}`)
-      return `inquiries ${d.inquiries.total} (new ${d.inquiries.new}, in progress ${d.inquiries.inProgress}), quotes ${d.quotes.total} (new ${d.quotes.new}, in review ${d.quotes.inReview})`
+      for (const key of ['new', 'underReview', 'waitingCustomer', 'quotePreparation', 'quoteSent', 'accepted', 'declined', 'inProgress', 'cancelled']) expect(d.quotes[key] === count(api.quotes.data, key), `quotes ${key}: dashboard ${d.quotes[key]} vs ${count(api.quotes.data, key)}`)
+      return `inquiries ${d.inquiries.total} (new ${d.inquiries.new}, in progress ${d.inquiries.inProgress}), quotes ${d.quotes.total} (new ${d.quotes.new}, under review ${d.quotes.underReview})`
     })
     await step(page, 'edit a service description in the administration (English overview and tagline)', async () => {
       await page.goto(`${BASE}/admin/services/service/website`, { waitUntil: 'networkidle' })

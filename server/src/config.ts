@@ -163,6 +163,11 @@ export interface Config {
   adminIdleMinutes: number
   deployHookUrl: string | null
   staticDir: string | null
+  /**
+   * `COUNTRY_HEADER` (PROMPT 20): the name of the one request header the visitor's country is read from, for the starting language of an
+   * address without a language (modules/system/language.ts). `CF-IPCountry` behind Cloudflare. `null` (the default) switches it off.
+   */
+  countryHeader: string | null
   rateLimitsEnabled: boolean
   bodyLimitBytes: number
   /** Where uploaded images are kept (never in the database). */
@@ -363,6 +368,8 @@ export function loadConfig(env: Env = process.env): Config {
   const retentionDays = retention === null ? null : integer('RETENTION_DAYS', 0, 1, 3650)
 
   const hook = text('DEPLOY_HOOK_URL')
+  const countryHeader = text('COUNTRY_HEADER')
+  if (countryHeader !== null && !/^[A-Za-z0-9][A-Za-z0-9-]{0,63}$/.test(countryHeader)) bad('COUNTRY_HEADER', 'must be a header name (letters, digits and hyphens), for example CF-IPCountry')
   let deployHookUrl: string | null = null
   if (hook !== null) {
     try {
@@ -514,6 +521,7 @@ export function loadConfig(env: Env = process.env): Config {
     adminIdleMinutes,
     deployHookUrl,
     staticDir: text('STATIC_DIR'),
+    countryHeader,
     rateLimitsEnabled,
     bodyLimitBytes,
     mediaDir,

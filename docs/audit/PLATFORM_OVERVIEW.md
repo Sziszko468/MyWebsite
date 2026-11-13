@@ -35,7 +35,7 @@ Legend: **V** implemented and verified (a test or a live check ran and passed) �
 | Racing Red design system | V | design audit (`audit-design.cjs`), token files present |
 | Three.js / WebGL experiences | V | five Lab experiences, no-WebGL and context-loss audit (see Performance) |
 | Premium Shop (catalogue → request → quote) | V | `quote-journey` 20/20, phone path in `journeys` D; inquiry based, no payment |
-| FULL EXPERIENCE configurator | **IU** | server side covered by backend tests; the **browser journey is stale (shop-journey) and the configurator was not submitted in this audit** |
+| FULL EXPERIENCE configurator | V | `shop-journey` 41/41 incl. the configurator end to end on a phone (201, confirmation, administrator sees every answer); backend tests |
 | Dynamic portfolio | V | CMS journey, security probe (drafts invisible to the public) |
 | Admin Dashboard | V | 94/94 security probe checks, 66 admin routes × 5 methods |
 | CONTROL ROOM AI | IU | built, 99 AI tests pass; **no live Anthropic call was made**, assistant is off in production (`/api/ai/config` → `available:false`) |

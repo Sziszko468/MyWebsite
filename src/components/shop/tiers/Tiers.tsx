@@ -1,4 +1,5 @@
-import { useId } from 'react'
+import { useEffect, useId, useRef } from 'react'
+import { track } from '../../../analytics/tracker'
 import { useCatalogVersion } from '../../../content/liveCatalog'
 import type { PackageId } from '../../../content/packages'
 import { SHOP_PATHS } from '../../../shop/paths'
@@ -9,6 +10,7 @@ import { Container } from '../../Container/Container'
 import { Reveal } from '../../motion/Reveal'
 import { Section } from '../../Section/Section'
 import { SectionHeading } from '../../SectionHeading/SectionHeading'
+import { PackageFinder } from '../finder/PackageFinder'
 import { shopTone } from '../rhythm'
 import { TierMobile } from './TierMobile'
 import { TierTable } from './TierTable'
@@ -33,6 +35,30 @@ export function Tiers({ value, onChange }: TiersProps) {
   const titleId = useId()
   const wide = useMinWidth(TABLE_MIN_REM)
   const copy = landing.packages
+  const compareRef = useRef<HTMLDivElement>(null)
+
+  // "The comparison was opened": it came into view, once per visit to the page. An id, never anything the visitor typed.
+  useEffect(() => {
+    const element = compareRef.current
+    if (!element || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          track('comparison_viewed', {})
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.3 },
+    )
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
+
+  /** The finder's "Choose": select the package in the comparison and bring the comparison into view. Nothing is sent. */
+  const choose = (id: PackageId) => {
+    onChange(id)
+    compareRef.current?.scrollIntoView({ block: 'start' })
+  }
 
   return (
     <Section id="packages" tone={shopTone('packages')} slant labelledBy={titleId}>
@@ -41,9 +67,11 @@ export function Tiers({ value, onChange }: TiersProps) {
           <SectionHeading id={titleId} index="02" title={tiers.compare.title} description={tiers.compare.intro} />
         </Reveal>
 
-        <div className={styles.tiers} data-layout={wide ? 'table' : 'phone'} id="compare">
+        <div className={styles.tiers} data-layout={wide ? 'table' : 'phone'} id="compare" ref={compareRef}>
           {wide ? <TierTable value={value} onChange={onChange} /> : <TierMobile value={value} onChange={onChange} />}
         </div>
+
+        <PackageFinder value={value} onChoose={choose} />
 
         <div className={styles.custom}>
           <div>

@@ -157,7 +157,9 @@ function resolveItems(app: AppContext, lines: readonly QuoteLine[]): { items: Ne
     if (line.plan !== 'custom' && !pack) errors[at('plan')] = 'unknown'
 
     const extras = line.extras.map((code) => catalog.extras.find((candidate) => candidate.code === code))
-    if (extras.some((extra) => !extra || !extra.appliesTo.includes(line.need))) errors[at('extras')] = 'unknown'
+    // An add-on sits on a line only if it applies to the service AND, when the line has a package, the package lists it (PROMPT 20:
+    // the website already offers only those; the server must not accept what the page would never show). A custom project has no package.
+    if (extras.some((extra) => !extra || !extra.appliesTo.includes(line.need) || (pack !== null && !pack.extras.includes(extra.code)))) errors[at('extras')] = 'unknown'
 
     if (!errors[at('need')] && !errors[at('plan')] && !errors[at('extras')]) {
       const known = extras.filter((extra) => extra !== undefined)

@@ -81,7 +81,7 @@ const noSideways = async (page, label) => {
     await step('all four packages are columns of one table, with their tier labels', async () => {
       const heads = await page.locator('table th[scope=col][data-package]').allInnerTexts()
       expect(heads.length === 4, `${heads.length} package columns`)
-      for (const [name, label] of [['Launch', 'Essential foundation'], ['Grow', 'Expanded capabilities'], ['Build', 'Advanced solution'], ['Care', 'Continuous support']]) {
+      for (const [name, label] of [['Launch', 'The essentials'], ['Grow', 'More possibilities'], ['Build', 'A more advanced solution'], ['Care', 'Ongoing support']]) {
         expect(heads.some((text) => text.includes(name) && text.toLowerCase().includes(label.toLowerCase())), `${name} / ${label}`)
       }
     })
@@ -95,10 +95,10 @@ const noSideways = async (page, label) => {
       expect(/WHAT GROW ADDS TO LAUNCH/i.test(text) && /WHAT BUILD ADDS TO GROW/i.test(text), 'the "adds" row is missing')
     })
     await step('a cell is read as a sentence (included, add-on, custom, not included), never only a mark', async () => {
-      const row = page.locator('tr', { has: page.locator('th[scope=row]', { hasText: 'Database integration' }) })
+      const row = page.locator('tr', { has: page.locator('th[scope=row]', { hasText: 'A place to keep your information' }) })
       const cells = await row.locator('td').allInnerTexts()
       expect(cells.length === 4, `${cells.length} cells`)
-      expect(/Included in the package/.test(await row.locator('td').nth(2).innerText()), 'Build should include database integration')
+      expect(/Included in the package/.test(await row.locator('td').nth(2).innerText()), 'Build should include a place to keep your information')
       expect(/Available as a custom service/.test(await row.locator('td').nth(0).innerText()), 'Launch: custom service')
       const legend = await page.locator('dl').filter({ hasText: 'optional add-on' }).first().innerText()
       expect(/Included/.test(legend) && /custom service/.test(legend) && /Not part/.test(legend), 'the key is incomplete')
@@ -120,7 +120,7 @@ const noSideways = async (page, label) => {
       await page.getByRole('link', { name: /View details — Grow/ }).click()
       await page.waitForFunction(() => /packages\/grow/.test(location.pathname) && document.querySelector('h1')?.textContent?.trim() === 'Grow', null, { timeout: 15000 })
       const h2 = await page.locator('main h2').allInnerTexts()
-      for (const wanted of ['Who this package is for', 'Included services', 'What makes this tier different', 'Detailed features', 'Optional add-ons', 'Related services', 'Pricing', 'Questions']) {
+      for (const wanted of ['Who this package is for', 'Included services', 'What makes this tier different', 'The details: what is and is not included', 'Optional add-ons', 'Related services', 'Pricing', 'Questions']) {
         expect(h2.some((text) => text.includes(wanted)), `no section "${wanted}"`)
       }
       expect(!/€|EUR|HUF|Ft\b/.test(await page.locator('main').innerText()), 'a price appears on the page')
@@ -249,10 +249,10 @@ const noSideways = async (page, label) => {
       expect(/Choose an option to continue/.test(await page.locator('form').innerText()), 'stage is required')
       await page.getByRole('radio', { name: /Just an idea/ }).check({ force: true })
       await next()
-      await page.waitForFunction(() => /Which components/.test(document.querySelector('form h2')?.textContent ?? ''))
+      await page.waitForFunction(() => /What does your project need/.test(document.querySelector('form h2')?.textContent ?? ''))
       expect((await page.locator('form button[type=submit]').innerText()).trim().toLowerCase() === 'skip', 'an unanswered optional question offers Skip')
-      await page.getByRole('checkbox', { name: 'Frontend' }).check({ force: true })
-      await page.getByRole('checkbox', { name: 'Database' }).check({ force: true })
+      await page.getByRole('checkbox', { name: /Screens that people see and use/ }).check({ force: true })
+      await page.getByRole('checkbox', { name: /Saving and managing information/ }).check({ force: true })
       expect((await page.locator('form button[type=submit]').innerText()).trim().toLowerCase() === 'next', 'an answered one says Next')
       await next()
       await page.waitForFunction(() => /How complex/.test(document.querySelector('form h2')?.textContent ?? ''))
@@ -261,9 +261,9 @@ const noSideways = async (page, label) => {
     })
     await step('the budget always has a "not sure yet" way out, and no figure is shown', async () => {
       const text = await page.locator('form').innerText()
-      expect(/Not sure yet — let’s discuss it/.test(text), 'no way out')
+      expect(/Not sure yet: let’s talk about it/.test(text), 'no way out')
       expect(!/€|EUR\b|HUF\b/.test(text), 'a figure')
-      await page.getByRole('radio', { name: /Not sure yet — let’s discuss it/ }).check({ force: true })
+      await page.getByRole('radio', { name: /Not sure yet: let’s talk about it/ }).check({ force: true })
       await next()
       await page.waitForFunction(() => /When would you like it/.test(document.querySelector('form h2')?.textContent ?? ''))
       await next() // timeline skipped
@@ -281,10 +281,10 @@ const noSideways = async (page, label) => {
       await page.locator('form button[type=submit]').click()
       const text = await page.locator('form').innerText()
       expect(/This field is required/.test(text) && /valid e-mail|required/.test(text) && /tick this/i.test(text), 'missing messages')
-      expect(/Web application/.test(text) && /Just an idea/.test(text) && /Frontend, Database/.test(text), 'the review misses an answer')
+      expect(/Web application/.test(text) && /Just an idea/.test(text) && /Screens that people see and use, Saving and managing information/.test(text), 'the review misses an answer')
       expect(/When would you like it\?[\s\S]*skipped/.test(text), 'skipped is not shown as skipped')
       await page.getByLabel('Your name', { exact: true }).fill('Eszter Varga')
-      await page.getByLabel('Your e-mail address', { exact: true }).fill('eszter@example.com')
+      await page.getByLabel('Your email address', { exact: true }).fill('eszter@example.com')
       await page.getByLabel(/Company name/).fill('Gym Network Ltd')
       await page.getByRole('radio', { name: 'Dutch' }).check({ force: true })
       await page.getByRole('checkbox', { name: /I understand that my details are used/ }).check({ force: true })
@@ -320,7 +320,7 @@ const noSideways = async (page, label) => {
     await step('the detail shows the company, the language asked for, every question with its answer, skipped ones marked, and the description', async () => {
       await page.waitForSelector('text=The brief')
       const text = await page.locator('main').innerText()
-      for (const wanted of ['Gym Network Ltd', 'Dutch', 'Web application', 'Just an idea', 'Frontend, Database', 'Not sure yet — let’s discuss it', unique]) expect(text.includes(wanted), `the detail lacks "${wanted}"`)
+      for (const wanted of ['Gym Network Ltd', 'Dutch', 'Web application', 'Just an idea', 'Screens that people see and use, Saving and managing information', 'Not sure yet: let’s talk about it', unique]) expect(text.includes(wanted), `the detail lacks "${wanted}"`)
       expect(/When would you like it\?[\s\S]*skipped/.test(text), 'a skipped question is not shown as skipped')
       expect(/no cart lines/i.test(text), 'the note about cart lines')
     })

@@ -47,6 +47,14 @@ node tools/e2e/cms-journey.cjs --base=http://127.0.0.1:8788 --email=admin@exampl
 
 One administrator creates a project through the administration's screens and the PUBLIC side is asked at every step what a visitor would see: sign in → the list shows what the website ships with → a new project saved as a **draft with one language only** → the draft is not in the public list, not at its address, not in the sitemap → the Publication tab lists what is missing and the server refuses to publish (422) → the language bar goes *incomplete / missing / missing* → *complete* after the three languages are written **by hand** → a thumbnail and two gallery pictures are uploaded (a 3200 × 2000 picture is made smaller in the browser: 3.6 MB → 62 kB) and described → an unchecked external link is stored but not public → the preview shows the saved draft with a banner and `noindex`, and shows nothing to a signed-out browser → publish (confirmed) → visible on the Work page and at its address in hu/en/nl **within the 30 s public cache** (the step prints how long it took) → featured → on the home page → moved up → unpublished (gone from list, home page and address; content kept) → published again → archived (out) → restored (a draft, not public) → duplicated → a cancelled delete deletes nothing → deleted. It needs a fresh scratch server for each run (the sign-in is limited to 10 per 15 minutes; the run signs in twice). The run **found a real bug** (the gallery's add button created an undefined item and the editor crashed) which is fixed and has a regression test.
 
+## Shop 4.0: add-ons, the package finder and the project size guide (PROMPT 20)
+
+```bash
+node tools/e2e/shop4-journey.cjs --base=http://127.0.0.1:8788 --email=admin@example.test --password=<the test password> [--only=ABCDE|F|G] [--out=<dir>]
+```
+
+**`shop4-journey.cjs`** (PROMPT 20, Shop 4.0): scenarios **A** package and add-ons (only what the package lists, the rest explained, the live summary, a package change that takes add-ons off and says so, the cart saved, the request accepted), **B** the package finder (a suggestion with reasons, nothing sent, manual choice kept), **C** FULL EXPERIENCE (the project size guide, the answer changed, the administrator reads the size the server worked out), **D** language (three languages, the `cc_lang` cookie), **E** a phone at 390 and 320 px, **F** security over plain HTTP (unknown package, add-on the package does not list, a price in the request, missing fields, a repeat, an unknown answer or language), **G** the rate-limit burst. A and C send one request each and F sends about ten: run **ABCDE** on one fresh server, **F** on a server started with `RATE_LIMITS=false`, and **G** on a fresh server with the real limits (the form allows five requests per fifteen minutes per address).
+
 ## Shop 3.0: comparison and FULL EXPERIENCE (PROMPT 09.1)
 
 ```bash

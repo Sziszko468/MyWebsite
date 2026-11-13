@@ -33,6 +33,11 @@ export const common = {
     removed: tri('{name} kikerült a kosárból.', '{name} was removed from your cart.', '{name} is uit je winkelmand verwijderd.'),
     updated: tri('{name} frissítve a kosárban.', '{name} was updated in your cart.', '{name} is bijgewerkt in je winkelmand.'),
     cleared: tri('A kosár kiürítve.', 'Your cart was cleared.', 'Je winkelmand is geleegd.'),
+    extrasDropped: tri(
+      '{name}: kivettük, mert a választott csomag nem kínálja: {extras}.',
+      '{name}: removed because the package you chose does not offer it: {extras}.',
+      '{name}: eraf gehaald, omdat het gekozen pakket dit niet aanbiedt: {extras}.',
+    ),
   },
 
   price: {

@@ -3,13 +3,13 @@ import { track } from '../../analytics/tracker'
 import { quoteConfig } from '../../config/quote'
 import { siteConfig } from '../../config/site'
 import { getPackage } from '../../content/packages'
-import { addonsFor } from '../../content/services/addons'
 import { afterInquirySteps } from '../../content/services/process'
 import { NEED_IDS, PLAN_IDS, type NeedId, type PlanId } from '../../content/services/ids'
 import { createTransport } from '../../forms/submit'
 import { LANGUAGE_META } from '../../i18n/config'
 import { useI18n } from '../../i18n/useI18n'
-import { clearCart } from '../../shop/cart'
+import { allowedExtras, clearCart } from '../../shop/cart'
+import { addonsFor } from '../../content/services/addons'
 import { cartActions, cartStore } from '../../shop/cartStore'
 import { planForNeed, suggestedPlans } from '../../shop/flow'
 import { useCart, useInquiry } from '../../shop/hooks'
@@ -39,8 +39,10 @@ import { SentReceipt } from '../form/SentReceipt'
 import { SubmissionNotice, SubmissionResult } from '../form/Submission'
 import { useSubmission } from '../form/useSubmission'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
+import { AddonChoices } from './AddonChoices'
 import { ChoiceCard, ChoiceFieldset } from './Choice'
 import { ArrowLeftIcon } from './icons'
+import { RequestSoFar } from './RequestSoFar'
 import styles from './Configurator.module.scss'
 
 const OPTIONS = { requireConsent: quoteConfig.requireConsent }
@@ -95,6 +97,11 @@ export function Configurator() {
   useEffect(() => {
     if (reachedLast) track('configurator_completed', { needs: requested })
   }, [reachedLast, requested])
+  useEffect(() => track('configurator_started', { flow: 'builder' }), [])
+  const inReview = step === 'review'
+  useEffect(() => {
+    if (inReview) track('summary_viewed', { flow: 'builder' })
+  }, [inReview])
 
   useEffect(() => {
     if (attempts > 0) formRef.current?.querySelector<HTMLElement>(FIRST_INVALID)?.focus()
@@ -246,6 +253,8 @@ export function Configurator() {
         </h2>
         <p className={styles.help}>{c.help[step]}</p>
 
+        {(step === 'plan' || step === 'extras') && <RequestSoFar cart={cart} planLabel={planName} needLabel={needTitle} />}
+
         <div className={styles.fields}>
           {step === 'need' && (
             <ChoiceFieldset legend={c.need.legend} hint={fill(c.need.selected, { count: cart.lines.length })} error={message('need')}>
@@ -299,33 +308,21 @@ export function Configurator() {
             ))}
 
           {step === 'extras' &&
-            cart.lines.map((line) => {
-              const available = addonsFor(line.need)
-              return available.length === 0 ? (
+            cart.lines.map((line) =>
+              allowedExtras(line.need, line.plan).length === 0 && addonsFor(line.need).length === 0 ? (
                 <div key={line.need} className={styles.noExtras}>
                   <h3 className={styles.subTitle}>{fill(c.extras.forNeed, { name: needTitle(line.need) })}</h3>
                   <p>{c.extras.none}</p>
                 </div>
               ) : (
-                <ChoiceFieldset
+                <AddonChoices
                   key={line.need}
+                  line={line}
                   legend={fill(c.extras.forNeed, { name: needTitle(line.need) })}
                   hint={fill(c.extras.selected, { count: line.extras.length })}
-                  columns={2}
-                >
-                  {available.map((addon) => (
-                    <ChoiceCard
-                      key={addon.id}
-                      type="checkbox"
-                      checked={line.extras.includes(addon.id)}
-                      onChange={(on) => cartActions.toggleExtra(line.need, addon.id, on)}
-                      title={addon.name[lang]}
-                      text={addon.summary[lang]}
-                    />
-                  ))}
-                </ChoiceFieldset>
-              )
-            })}
+                />
+              ),
+            )}
           {step === 'extras' && <p className={styles.skip}>{c.extras.skipHint}</p>}
 
           {step === 'details' && (
@@ -557,6 +554,7 @@ export function Configurator() {
                 </dl>
               </section>
               <p className={styles.memory}>{c.send.memory}</p>
+              <p className={styles.notPurchase}>{c.review.notPurchase}</p>
             </>
           )}
         </div>

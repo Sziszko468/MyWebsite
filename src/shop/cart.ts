@@ -1,3 +1,4 @@
+import { getPackage } from '../content/packages'
 import { ADDON_IDS, addonsFor, isExtraId, type ExtraId } from '../content/services/addons'
 import { NEED_IDS, isNeedId, isPlanId, type NeedId, type PlanId } from '../content/services/ids'
 
@@ -29,9 +30,21 @@ export const hasLine = (cart: Cart, need: NeedId): boolean => findLine(cart, nee
 export const isLineComplete = (line: CartLine): boolean => line.plan !== null
 export const isCartComplete = (cart: Cart): boolean => cart.lines.length > 0 && cart.lines.every(isLineComplete)
 
-/** The add-ons that can sit on a need, once each and in catalogue order. */
-export function normalizeExtras(need: NeedId, extras: readonly unknown[]): ExtraId[] {
-  const allowed = new Set(addonsFor(need).map((addon) => addon.id))
+/**
+ * The add-ons a line may carry (PROMPT 20): the ones that apply to its service and, when it has a package, only the ones that
+ * package lists. A custom project, or a line with no package chosen yet, has no package to disagree with, so only the service
+ * counts. The backend applies the same rule and refuses the rest, so the page never offers what the server would reject.
+ */
+export function allowedExtras(need: NeedId, plan: PlanId | null): readonly ExtraId[] {
+  const byNeed = addonsFor(need).map((addon) => addon.id)
+  if (plan === null || plan === 'custom') return byNeed
+  const listed = getPackage(plan).extras
+  return byNeed.filter((id) => listed.includes(id))
+}
+
+/** The add-ons that can sit on a line, once each and in catalogue order. */
+export function normalizeExtras(need: NeedId, extras: readonly unknown[], plan: PlanId | null = null): ExtraId[] {
+  const allowed = new Set(allowedExtras(need, plan))
   const wanted = new Set(extras.filter(isExtraId).filter((id) => allowed.has(id)))
   return ADDON_IDS.filter((id) => wanted.has(id))
 }
@@ -45,7 +58,7 @@ function replace(cart: Cart, need: NeedId, change: (line: CartLine) => CartLine)
 
 /** Adds the need as a line, or replaces the line it already has with these choices. */
 export function upsertLine(cart: Cart, line: { need: NeedId; plan?: PlanId | null; extras?: readonly ExtraId[] }): Cart {
-  const next: CartLine = { need: line.need, plan: line.plan ?? null, extras: normalizeExtras(line.need, line.extras ?? []) }
+  const next: CartLine = { need: line.need, plan: line.plan ?? null, extras: normalizeExtras(line.need, line.extras ?? [], line.plan ?? null) }
   if (hasLine(cart, line.need)) return replace(cart, line.need, () => next)
   return { lines: [...cart.lines, next] }
 }
@@ -58,12 +71,19 @@ export function removeLine(cart: Cart, need: NeedId): Cart {
 export function restoreLine(cart: Cart, line: CartLine, index: number): Cart {
   if (hasLine(cart, line.need)) return cart
   const lines = [...cart.lines]
-  lines.splice(Math.min(Math.max(index, 0), lines.length), 0, { ...line, extras: normalizeExtras(line.need, line.extras) })
+  lines.splice(Math.min(Math.max(index, 0), lines.length), 0, { ...line, extras: normalizeExtras(line.need, line.extras, line.plan) })
   return { lines }
 }
 
+/** The add-ons of a line that the given package does not list: what changing to it would take away. */
+export function extrasLostBy(line: CartLine, plan: PlanId | null): ExtraId[] {
+  const kept = new Set(normalizeExtras(line.need, line.extras, plan))
+  return line.extras.filter((id) => !kept.has(id))
+}
+
+/** Chooses the package of a line. Add-ons the new package does not list are taken off (see `extrasLostBy` to tell the visitor which). */
 export function setPlan(cart: Cart, need: NeedId, plan: PlanId | null): Cart {
-  return replace(cart, need, (line) => (line.plan === plan ? line : { ...line, plan }))
+  return replace(cart, need, (line) => (line.plan === plan ? line : { ...line, plan, extras: normalizeExtras(need, line.extras, plan) }))
 }
 
 export function toggleExtra(cart: Cart, need: NeedId, extra: ExtraId, on?: boolean): Cart {
@@ -71,7 +91,9 @@ export function toggleExtra(cart: Cart, need: NeedId, extra: ExtraId, on?: boole
     const has = line.extras.includes(extra)
     const wanted = on ?? !has
     if (wanted === has) return line
-    return { ...line, extras: normalizeExtras(need, wanted ? [...line.extras, extra] : line.extras.filter((id) => id !== extra)) }
+    const extras = normalizeExtras(need, wanted ? [...line.extras, extra] : line.extras.filter((id) => id !== extra), line.plan)
+    // An add-on the package does not list changes nothing: the very same line comes back, so nothing re-renders or is saved.
+    return extras.length === line.extras.length && extras.every((id, index) => id === line.extras[index]) ? line : { ...line, extras }
   })
 }
 
@@ -104,10 +126,11 @@ export function parseCart(raw: unknown): Cart {
     if (typeof entry !== 'object' || entry === null) continue
     const { need, plan, extras } = entry as Record<string, unknown>
     if (!isNeedId(need) || lines.some((line) => line.need === need)) continue
+    const known = isPlanId(plan) ? plan : null
     lines.push({
       need,
-      plan: isPlanId(plan) ? plan : null,
-      extras: normalizeExtras(need, Array.isArray(extras) ? extras : []),
+      plan: known,
+      extras: normalizeExtras(need, Array.isArray(extras) ? extras : [], known),
     })
   }
   return lines.length > 0 ? { lines } : EMPTY_CART

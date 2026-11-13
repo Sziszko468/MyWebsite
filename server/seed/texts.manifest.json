@@ -1133,6 +1133,20 @@
    }
   },
   {
+   "key": "shop.common.announce.extrasDropped",
+   "group": "Shop: common",
+   "label": "common › announce › extrasDropped",
+   "placeholders": [
+    "{name}",
+    "{extras}"
+   ],
+   "default": {
+    "hu": "{name}: kivettük, mert a választott csomag nem kínálja: {extras}.",
+    "en": "{name}: removed because the package you chose does not offer it: {extras}.",
+    "nl": "{name}: eraf gehaald, omdat het gekozen pakket dit niet aanbiedt: {extras}."
+   }
+  },
+  {
    "key": "shop.common.price.customQuote",
    "group": "Shop: common",
    "label": "common › price › customQuote",
@@ -3790,6 +3804,144 @@
    }
   },
   {
+   "key": "shop.configurator.extras.optional",
+   "group": "Shop: configurator",
+   "label": "configurator › extras › optional",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem kötelező",
+    "en": "Optional",
+    "nl": "Niet verplicht"
+   }
+  },
+  {
+   "key": "shop.configurator.extras.worksWith",
+   "group": "Shop: configurator",
+   "label": "configurator › extras › worksWith",
+   "placeholders": [
+    "{packages}"
+   ],
+   "default": {
+    "hu": "Választható csomagok: {packages}",
+    "en": "Works with: {packages}",
+    "nl": "Beschikbaar bij: {packages}"
+   }
+  },
+  {
+   "key": "shop.configurator.extras.notWithTitle",
+   "group": "Shop: configurator",
+   "label": "configurator › extras › notWithTitle",
+   "placeholders": [
+    "{package}"
+   ],
+   "default": {
+    "hu": "Nem választható ehhez a csomaghoz: {package}",
+    "en": "Not available with {package}",
+    "nl": "Niet beschikbaar bij {package}"
+   }
+  },
+  {
+   "key": "shop.configurator.extras.notWithText",
+   "group": "Shop: configurator",
+   "label": "configurator › extras › notWithText",
+   "placeholders": [],
+   "default": {
+    "hu": "Ha ezeket is szeretnéd, válassz másik csomagot:",
+    "en": "Choose another package if you want these:",
+    "nl": "Kies een ander pakket als je deze wilt:"
+   }
+  },
+  {
+   "key": "shop.configurator.extras.availableWith",
+   "group": "Shop: configurator",
+   "label": "configurator › extras › availableWith",
+   "placeholders": [
+    "{packages}"
+   ],
+   "default": {
+    "hu": "Választható ennél: {packages}",
+    "en": "Available with {packages}",
+    "nl": "Beschikbaar bij {packages}"
+   }
+  },
+  {
+   "key": "shop.configurator.live.title",
+   "group": "Shop: configurator",
+   "label": "configurator › live › title",
+   "placeholders": [],
+   "default": {
+    "hu": "A kérésed eddig",
+    "en": "Your request so far",
+    "nl": "Je aanvraag tot nu toe"
+   }
+  },
+  {
+   "key": "shop.configurator.live.package",
+   "group": "Shop: configurator",
+   "label": "configurator › live › package",
+   "placeholders": [],
+   "default": {
+    "hu": "Csomag",
+    "en": "Package",
+    "nl": "Pakket"
+   }
+  },
+  {
+   "key": "shop.configurator.live.addons",
+   "group": "Shop: configurator",
+   "label": "configurator › live › addons",
+   "placeholders": [],
+   "default": {
+    "hu": "Kiegészítők",
+    "en": "Add-ons",
+    "nl": "Extra’s"
+   }
+  },
+  {
+   "key": "shop.configurator.live.none",
+   "group": "Shop: configurator",
+   "label": "configurator › live › none",
+   "placeholders": [],
+   "default": {
+    "hu": "még nincs",
+    "en": "none yet",
+    "nl": "nog geen"
+   }
+  },
+  {
+   "key": "shop.configurator.live.empty",
+   "group": "Shop: configurator",
+   "label": "configurator › live › empty",
+   "placeholders": [],
+   "default": {
+    "hu": "Még nem választottál szolgáltatást.",
+    "en": "You have not chosen a service yet.",
+    "nl": "Je hebt nog geen dienst gekozen."
+   }
+  },
+  {
+   "key": "shop.configurator.live.saved",
+   "group": "Shop: configurator",
+   "label": "configurator › live › saved",
+   "placeholders": [],
+   "default": {
+    "hu": "A választásaid el vannak mentve ezen az eszközön.",
+    "en": "Your choices are saved on this device.",
+    "nl": "Je keuzes zijn op dit apparaat bewaard."
+   }
+  },
+  {
+   "key": "shop.configurator.live.notSaved",
+   "group": "Shop: configurator",
+   "label": "configurator › live › notSaved",
+   "placeholders": [],
+   "default": {
+    "hu": "A választásaid csak ezen az oldalon maradnak meg: ez a böngésző nem engedi a mentést.",
+    "en": "Your choices stay on this page only: this browser does not allow saving.",
+    "nl": "Je keuzes blijven alleen op deze pagina staan: deze browser staat opslaan niet toe."
+   }
+  },
+  {
    "key": "shop.configurator.details.description.label",
    "group": "Shop: configurator",
    "label": "configurator › details › description › label",
@@ -4190,6 +4342,17 @@
     "hu": "Mindegyik tétel ára az ajánlatban szerepel.",
     "en": "The price of every item comes with the quote.",
     "nl": "De prijs van elk onderdeel staat in de offerte."
+   }
+  },
+  {
+   "key": "shop.configurator.review.notPurchase",
+   "group": "Shop: configurator",
+   "label": "configurator › review › notPurchase",
+   "placeholders": [],
+   "default": {
+    "hu": "A kérés elküldése nem jelenti azt, hogy megvásároltál egy szolgáltatást. Átnézzük, mire van szükséged, és személyre szabott ajánlatot készítünk.",
+    "en": "Sending this request does not mean you have bought a service. We will look at what you need and prepare a quote made for you.",
+    "nl": "Het versturen van deze aanvraag betekent niet dat je een dienst hebt gekocht. We bekijken wat je nodig hebt en maken een offerte op maat."
    }
   },
   {
@@ -7019,6 +7182,116 @@
    }
   },
   {
+   "key": "shop.experience.start.size.title",
+   "group": "Shop: experience",
+   "label": "experience › start › size › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Mekkorának látszik a projekt?",
+    "en": "How big the project looks",
+    "nl": "Hoe groot het project lijkt"
+   }
+  },
+  {
+   "key": "shop.experience.start.size.levels.basic.name",
+   "group": "Shop: experience",
+   "label": "experience › start › size › levels › basic › name",
+   "placeholders": [],
+   "default": {
+    "hu": "Alap",
+    "en": "Basic",
+    "nl": "Basis"
+   }
+  },
+  {
+   "key": "shop.experience.start.size.levels.basic.text",
+   "group": "Shop: experience",
+   "label": "experience › start › size › levels › basic › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy kicsi, áttekinthető projekt.",
+    "en": "A small, clear project.",
+    "nl": "Een klein, overzichtelijk project."
+   }
+  },
+  {
+   "key": "shop.experience.start.size.levels.moderate.name",
+   "group": "Shop: experience",
+   "label": "experience › start › size › levels › moderate › name",
+   "placeholders": [],
+   "default": {
+    "hu": "Közepes",
+    "en": "Moderate",
+    "nl": "Gemiddeld"
+   }
+  },
+  {
+   "key": "shop.experience.start.size.levels.moderate.text",
+   "group": "Shop: experience",
+   "label": "experience › start › size › levels › moderate › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy projekt néhány kiegészítő résszel.",
+    "en": "A project with a few extra parts.",
+    "nl": "Een project met een paar extra onderdelen."
+   }
+  },
+  {
+   "key": "shop.experience.start.size.levels.advanced.name",
+   "group": "Shop: experience",
+   "label": "experience › start › size › levels › advanced › name",
+   "placeholders": [],
+   "default": {
+    "hu": "Összetett",
+    "en": "Advanced",
+    "nl": "Uitgebreid"
+   }
+  },
+  {
+   "key": "shop.experience.start.size.levels.advanced.text",
+   "group": "Shop: experience",
+   "label": "experience › start › size › levels › advanced › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Nagyobb projekt, több egymással összefüggő résszel.",
+    "en": "A larger project with several parts that work together.",
+    "nl": "Een groter project met meerdere onderdelen die samenwerken."
+   }
+  },
+  {
+   "key": "shop.experience.start.size.levels.custom.name",
+   "group": "Shop: experience",
+   "label": "experience › start › size › levels › custom › name",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi",
+    "en": "Custom",
+    "nl": "Maatwerk"
+   }
+  },
+  {
+   "key": "shop.experience.start.size.levels.custom.text",
+   "group": "Shop: experience",
+   "label": "experience › start › size › levels › custom › text",
+   "placeholders": [],
+   "default": {
+    "hu": "Nagy vagy szokatlan projekt. Közösen tervezzük meg veled.",
+    "en": "A large or unusual project. We will plan it together with you.",
+    "nl": "Een groot of ongewoon project. We plannen het samen met je."
+   }
+  },
+  {
+   "key": "shop.experience.start.size.note",
+   "group": "Shop: experience",
+   "label": "experience › start › size › note",
+   "placeholders": [],
+   "default": {
+    "hu": "Ez egy durva segédlet a tervezéshez a válaszaid alapján. Nem ajánlat. A végleges terjedelmet és az árat azután döntjük el, hogy átnéztük a projektedet.",
+    "en": "This is a rough guide for our planning, based on your answers. It is not a quote. We decide the final scope and the price after we have looked at your project.",
+    "nl": "Dit is een grove richtlijn voor onze planning, op basis van je antwoorden. Het is geen offerte. De uiteindelijke omvang en de prijs bepalen we nadat we je project hebben bekeken."
+   }
+  },
+  {
    "key": "shop.experience.start.reviewSkipped",
    "group": "Shop: experience",
    "label": "experience › start › reviewSkipped",
@@ -7051,6 +7324,17 @@
     "hu": "{title}: módosítás",
     "en": "Change: {title}",
     "nl": "Wijzigen: {title}"
+   }
+  },
+  {
+   "key": "shop.experience.start.notPurchase",
+   "group": "Shop: experience",
+   "label": "experience › start › notPurchase",
+   "placeholders": [],
+   "default": {
+    "hu": "A kérés elküldése nem jelenti azt, hogy megvásároltál egy szolgáltatást. Átnézzük, mire van szükséged, és személyre szabott ajánlatot készítünk.",
+    "en": "Sending this request does not mean you have bought a service. We will look at what you need and prepare a quote made for you.",
+    "nl": "Het versturen van deze aanvraag betekent niet dat je een dienst hebt gekocht. We bekijken wat je nodig hebt en maken een offerte op maat."
    }
   },
   {
@@ -7462,6 +7746,596 @@
     "hu": "Ebben a szakaszban nem kérünk fizetést.",
     "en": "No payment is asked for at this stage.",
     "nl": "In deze fase vragen we geen betaling."
+   }
+  },
+  {
+   "key": "shop.finder.title",
+   "group": "Shop: finder",
+   "label": "finder › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem tudod, melyik csomag illik hozzád?",
+    "en": "Not sure which package is right for you?",
+    "nl": "Weet je niet welk pakket bij je past?"
+   }
+  },
+  {
+   "key": "shop.finder.intro",
+   "group": "Shop: finder",
+   "label": "finder › intro",
+   "placeholders": [],
+   "default": {
+    "hu": "Válaszolj négy rövid kérdésre. Javaslunk egy csomagot, és megmagyarázzuk, miért. Bármikor választhatsz másikat.",
+    "en": "Answer four short questions. We will suggest a package and explain why. You can always choose a different one.",
+    "nl": "Beantwoord vier korte vragen. We stellen een pakket voor en leggen uit waarom. Je kunt altijd een ander pakket kiezen."
+   }
+  },
+  {
+   "key": "shop.finder.open",
+   "group": "Shop: finder",
+   "label": "finder › open",
+   "placeholders": [],
+   "default": {
+    "hu": "Segíts választani",
+    "en": "Help me choose",
+    "nl": "Help me kiezen"
+   }
+  },
+  {
+   "key": "shop.finder.close",
+   "group": "Shop: finder",
+   "label": "finder › close",
+   "placeholders": [],
+   "default": {
+    "hu": "Bezárás",
+    "en": "Close",
+    "nl": "Sluiten"
+   }
+  },
+  {
+   "key": "shop.finder.progress",
+   "group": "Shop: finder",
+   "label": "finder › progress",
+   "placeholders": [
+    "{current}",
+    "{total}"
+   ],
+   "default": {
+    "hu": "{current}. kérdés / {total}",
+    "en": "Question {current} of {total}",
+    "nl": "Vraag {current} van {total}"
+   }
+  },
+  {
+   "key": "shop.finder.back",
+   "group": "Shop: finder",
+   "label": "finder › back",
+   "placeholders": [],
+   "default": {
+    "hu": "Vissza",
+    "en": "Back",
+    "nl": "Terug"
+   }
+  },
+  {
+   "key": "shop.finder.next",
+   "group": "Shop: finder",
+   "label": "finder › next",
+   "placeholders": [],
+   "default": {
+    "hu": "Tovább",
+    "en": "Next",
+    "nl": "Volgende"
+   }
+  },
+  {
+   "key": "shop.finder.skip",
+   "group": "Shop: finder",
+   "label": "finder › skip",
+   "placeholders": [],
+   "default": {
+    "hu": "Kihagyom",
+    "en": "Skip",
+    "nl": "Overslaan"
+   }
+  },
+  {
+   "key": "shop.finder.show",
+   "group": "Shop: finder",
+   "label": "finder › show",
+   "placeholders": [],
+   "default": {
+    "hu": "Javaslat megmutatása",
+    "en": "Show my suggestion",
+    "nl": "Mijn voorstel tonen"
+   }
+  },
+  {
+   "key": "shop.finder.restart",
+   "group": "Shop: finder",
+   "label": "finder › restart",
+   "placeholders": [],
+   "default": {
+    "hu": "Újrakezdem",
+    "en": "Start again",
+    "nl": "Opnieuw beginnen"
+   }
+  },
+  {
+   "key": "shop.finder.edit",
+   "group": "Shop: finder",
+   "label": "finder › edit",
+   "placeholders": [],
+   "default": {
+    "hu": "Válaszok módosítása",
+    "en": "Change my answers",
+    "nl": "Antwoorden wijzigen"
+   }
+  },
+  {
+   "key": "shop.finder.questions.scope.title",
+   "group": "Shop: finder",
+   "label": "finder › questions › scope › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Mire van szükséged?",
+    "en": "What do you need?",
+    "nl": "Wat heb je nodig?"
+   }
+  },
+  {
+   "key": "shop.finder.questions.scope.help",
+   "group": "Shop: finder",
+   "label": "finder › questions › scope › help",
+   "placeholders": [],
+   "default": {
+    "hu": "Válaszd a legközelebbit.",
+    "en": "Pick the closest one.",
+    "nl": "Kies wat er het dichtst bij komt."
+   }
+  },
+  {
+   "key": "shop.finder.questions.scope.options.simple",
+   "group": "Shop: finder",
+   "label": "finder › questions › scope › options › simple",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy egyszerű weboldal, amely bemutatja a vállalkozásomat",
+    "en": "A simple website that presents my business",
+    "nl": "Een eenvoudige website die mijn bedrijf laat zien"
+   }
+  },
+  {
+   "key": "shop.finder.questions.scope.options.richer",
+   "group": "Shop: finder",
+   "label": "finder › questions › scope › options › richer",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy weboldal több oldallal, és olyan részekkel, amelyeket a látogatók használhatnak",
+    "en": "A website with more pages and parts that visitors can use",
+    "nl": "Een website met meer pagina’s en onderdelen die bezoekers kunnen gebruiken"
+   }
+  },
+  {
+   "key": "shop.finder.questions.scope.options.application",
+   "group": "Shop: finder",
+   "label": "finder › questions › scope › options › application",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy alkalmazás saját működéssel és tárolt információkkal",
+    "en": "An application with its own logic and stored information",
+    "nl": "Een toepassing met een eigen werking en opgeslagen gegevens"
+   }
+  },
+  {
+   "key": "shop.finder.questions.scope.options.unsure",
+   "group": "Shop: finder",
+   "label": "finder › questions › scope › options › unsure",
+   "placeholders": [],
+   "default": {
+    "hu": "Még nem tudom",
+    "en": "I am not sure yet",
+    "nl": "Dat weet ik nog niet"
+   }
+  },
+  {
+   "key": "shop.finder.questions.existing.title",
+   "group": "Shop: finder",
+   "label": "finder › questions › existing › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Van már weboldalad vagy alkalmazásod?",
+    "en": "Do you already have a website or application?",
+    "nl": "Heb je al een website of toepassing?"
+   }
+  },
+  {
+   "key": "shop.finder.questions.existing.help",
+   "group": "Shop: finder",
+   "label": "finder › questions › existing › help",
+   "placeholders": [],
+   "default": {
+    "hu": "Ha van, olyan csomagot keresünk, amely a meglévőt fejleszti tovább.",
+    "en": "If you do, we look for a package that improves what you have.",
+    "nl": "Als je er al een hebt, zoeken we een pakket dat verbetert wat je hebt."
+   }
+  },
+  {
+   "key": "shop.finder.questions.existing.options.yes",
+   "group": "Shop: finder",
+   "label": "finder › questions › existing › options › yes",
+   "placeholders": [],
+   "default": {
+    "hu": "Igen, és fejleszteni szeretném",
+    "en": "Yes, and I want to improve it",
+    "nl": "Ja, en ik wil hem verbeteren"
+   }
+  },
+  {
+   "key": "shop.finder.questions.existing.options.no",
+   "group": "Shop: finder",
+   "label": "finder › questions › existing › options › no",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem, ez új lenne",
+    "en": "No, this would be new",
+    "nl": "Nee, het zou nieuw zijn"
+   }
+  },
+  {
+   "key": "shop.finder.questions.existing.options.unsure",
+   "group": "Shop: finder",
+   "label": "finder › questions › existing › options › unsure",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem vagyok biztos benne",
+    "en": "I am not sure",
+    "nl": "Dat weet ik niet zeker"
+   }
+  },
+  {
+   "key": "shop.finder.questions.stored.title",
+   "group": "Shop: finder",
+   "label": "finder › questions › stored › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Mentenie kell a weboldalnak információkat, például fiókokat, foglalásokat vagy rendeléseket?",
+    "en": "Should the website save information, for example accounts, bookings or orders?",
+    "nl": "Moet de website gegevens bewaren, bijvoorbeeld accounts, boekingen of bestellingen?"
+   }
+  },
+  {
+   "key": "shop.finder.questions.stored.help",
+   "group": "Shop: finder",
+   "label": "finder › questions › stored › help",
+   "placeholders": [],
+   "default": {
+    "hu": "Ehhez a weboldal mögötti rész is kell, ahol az információ biztonságosan tárolódik.",
+    "en": "This needs the part behind the scenes, where the information is kept safely.",
+    "nl": "Daarvoor is ook het deel achter de schermen nodig, waar de gegevens veilig worden bewaard."
+   }
+  },
+  {
+   "key": "shop.finder.questions.stored.options.yes",
+   "group": "Shop: finder",
+   "label": "finder › questions › stored › options › yes",
+   "placeholders": [],
+   "default": {
+    "hu": "Igen",
+    "en": "Yes",
+    "nl": "Ja"
+   }
+  },
+  {
+   "key": "shop.finder.questions.stored.options.no",
+   "group": "Shop: finder",
+   "label": "finder › questions › stored › options › no",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem",
+    "en": "No",
+    "nl": "Nee"
+   }
+  },
+  {
+   "key": "shop.finder.questions.stored.options.unsure",
+   "group": "Shop: finder",
+   "label": "finder › questions › stored › options › unsure",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem vagyok biztos benne",
+    "en": "I am not sure",
+    "nl": "Dat weet ik niet zeker"
+   }
+  },
+  {
+   "key": "shop.finder.questions.support.title",
+   "group": "Shop: finder",
+   "label": "finder › questions › support › title",
+   "placeholders": [],
+   "default": {
+    "hu": "Szeretnéd, hogy az indulás után mi gondoskodjunk róla?",
+    "en": "Do you want us to look after it after launch?",
+    "nl": "Wil je dat wij er na de lancering voor zorgen?"
+   }
+  },
+  {
+   "key": "shop.finder.questions.support.help",
+   "group": "Shop: finder",
+   "label": "finder › questions › support › help",
+   "placeholders": [],
+   "default": {
+    "hu": "Frissítések, hibajavítások és kisebb módosítások.",
+    "en": "Updates, fixes and small changes.",
+    "nl": "Updates, reparaties en kleine aanpassingen."
+   }
+  },
+  {
+   "key": "shop.finder.questions.support.options.yes",
+   "group": "Shop: finder",
+   "label": "finder › questions › support › options › yes",
+   "placeholders": [],
+   "default": {
+    "hu": "Igen, frissítésekkel és javításokkal",
+    "en": "Yes, with updates and fixes",
+    "nl": "Ja, met updates en reparaties"
+   }
+  },
+  {
+   "key": "shop.finder.questions.support.options.no",
+   "group": "Shop: finder",
+   "label": "finder › questions › support › options › no",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem, magam intézem",
+    "en": "No, I will manage it myself",
+    "nl": "Nee, dat regel ik zelf"
+   }
+  },
+  {
+   "key": "shop.finder.questions.support.options.unsure",
+   "group": "Shop: finder",
+   "label": "finder › questions › support › options › unsure",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem vagyok biztos benne",
+    "en": "I am not sure",
+    "nl": "Dat weet ik niet zeker"
+   }
+  },
+  {
+   "key": "shop.finder.result.suggest",
+   "group": "Shop: finder",
+   "label": "finder › result › suggest",
+   "placeholders": [
+    "{package}"
+   ],
+   "default": {
+    "hu": "Ezt javasoljuk: {package}",
+    "en": "We suggest {package}",
+    "nl": "Wij stellen {package} voor"
+   }
+  },
+  {
+   "key": "shop.finder.result.also",
+   "group": "Shop: finder",
+   "label": "finder › result › also",
+   "placeholders": [
+    "{package}"
+   ],
+   "default": {
+    "hu": "Érdemes megnézni még: {package}",
+    "en": "Also worth a look: {package}",
+    "nl": "Ook de moeite waard: {package}"
+   }
+  },
+  {
+   "key": "shop.finder.result.whyTitle",
+   "group": "Shop: finder",
+   "label": "finder › result › whyTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Miért ez a csomag",
+    "en": "Why this package",
+    "nl": "Waarom dit pakket"
+   }
+  },
+  {
+   "key": "shop.finder.result.youNeed",
+   "group": "Shop: finder",
+   "label": "finder › result › youNeed",
+   "placeholders": [],
+   "default": {
+    "hu": "A válaszaid alapján erre van szükséged:",
+    "en": "From your answers, you need:",
+    "nl": "Op basis van je antwoorden heb je dit nodig:"
+   }
+  },
+  {
+   "key": "shop.finder.result.includes",
+   "group": "Shop: finder",
+   "label": "finder › result › includes",
+   "placeholders": [
+    "{package}"
+   ],
+   "default": {
+    "hu": "A(z) {package} tartalmazza:",
+    "en": "{package} includes:",
+    "nl": "{package} bevat:"
+   }
+  },
+  {
+   "key": "shop.finder.result.addon",
+   "group": "Shop: finder",
+   "label": "finder › result › addon",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem kötelező kiegészítőként:",
+    "en": "As an optional add-on:",
+    "nl": "Als optionele extra:"
+   }
+  },
+  {
+   "key": "shop.finder.result.custom",
+   "group": "Shop: finder",
+   "label": "finder › result › custom",
+   "placeholders": [],
+   "default": {
+    "hu": "Egyedi szolgáltatásként, külön ajánlattal:",
+    "en": "As a custom service, quoted separately:",
+    "nl": "Als dienst op maat, apart geoffreerd:"
+   }
+  },
+  {
+   "key": "shop.finder.result.missing",
+   "group": "Shop: finder",
+   "label": "finder › result › missing",
+   "placeholders": [],
+   "default": {
+    "hu": "Nem része a csomagnak:",
+    "en": "Not part of this package:",
+    "nl": "Hoort niet bij dit pakket:"
+   }
+  },
+  {
+   "key": "shop.finder.result.nothingMissing",
+   "group": "Shop: finder",
+   "label": "finder › result › nothingMissing",
+   "placeholders": [],
+   "default": {
+    "hu": "Mindent tartalmaz, amit kértél.",
+    "en": "It includes everything you asked for.",
+    "nl": "Het bevat alles wat je vroeg."
+   }
+  },
+  {
+   "key": "shop.finder.result.existing",
+   "group": "Shop: finder",
+   "label": "finder › result › existing",
+   "placeholders": [],
+   "default": {
+    "hu": "Mivel már van weboldalad vagy alkalmazásod, csak a meglévő fejlesztésére szóló csomagokat vettük figyelembe.",
+    "en": "Because you already have a website or application, we only looked at packages that improve what exists.",
+    "nl": "Omdat je al een website of toepassing hebt, hebben we alleen pakketten bekeken die iets bestaands verbeteren."
+   }
+  },
+  {
+   "key": "shop.finder.result.rule",
+   "group": "Shop: finder",
+   "label": "finder › result › rule",
+   "placeholders": [],
+   "default": {
+    "hu": "A legkisebb olyan csomagot javasoljuk, amely a kért dolgok legalább négyötödét lefedi. Semmit nem küldünk el, és nem választunk helyetted.",
+    "en": "We suggest the smallest package that covers at least four fifths of what you asked for. Nothing is sent and nothing is chosen for you.",
+    "nl": "We stellen het kleinste pakket voor dat minstens vier vijfde van je vragen dekt. Er wordt niets verstuurd en er wordt niets voor je gekozen."
+   }
+  },
+  {
+   "key": "shop.finder.result.fitTitle",
+   "group": "Shop: finder",
+   "label": "finder › result › fitTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Mennyire illik az egyes csomag",
+    "en": "How well each package fits",
+    "nl": "Hoe goed elk pakket past"
+   }
+  },
+  {
+   "key": "shop.finder.result.fit",
+   "group": "Shop: finder",
+   "label": "finder › result › fit",
+   "placeholders": [
+    "{package}",
+    "{percent}"
+   ],
+   "default": {
+    "hu": "{package}: {percent} %",
+    "en": "{package}: {percent} %",
+    "nl": "{package}: {percent} %"
+   }
+  },
+  {
+   "key": "shop.finder.result.choose",
+   "group": "Shop: finder",
+   "label": "finder › result › choose",
+   "placeholders": [
+    "{package}"
+   ],
+   "default": {
+    "hu": "A(z) {package} kiválasztása",
+    "en": "Choose {package}",
+    "nl": "Kies {package}"
+   }
+  },
+  {
+   "key": "shop.finder.result.chosen",
+   "group": "Shop: finder",
+   "label": "finder › result › chosen",
+   "placeholders": [
+    "{package}"
+   ],
+   "default": {
+    "hu": "{package} kiválasztva az összehasonlításban.",
+    "en": "{package} is selected in the comparison.",
+    "nl": "{package} is gekozen in de vergelijking."
+   }
+  },
+  {
+   "key": "shop.finder.result.start",
+   "group": "Shop: finder",
+   "label": "finder › result › start",
+   "placeholders": [
+    "{package}"
+   ],
+   "default": {
+    "hu": "Kezdjük a(z) {package} csomaggal",
+    "en": "Start with {package}",
+    "nl": "Begin met {package}"
+   }
+  },
+  {
+   "key": "shop.finder.result.seeAll",
+   "group": "Shop: finder",
+   "label": "finder › result › seeAll",
+   "placeholders": [],
+   "default": {
+    "hu": "Az összes csomag megtekintése",
+    "en": "See all packages",
+    "nl": "Alle pakketten bekijken"
+   }
+  },
+  {
+   "key": "shop.finder.result.noneTitle",
+   "group": "Shop: finder",
+   "label": "finder › result › noneTitle",
+   "placeholders": [],
+   "default": {
+    "hu": "Egy kicsit többet kell tudnunk",
+    "en": "We need to know a little more",
+    "nl": "We moeten iets meer weten"
+   }
+  },
+  {
+   "key": "shop.finder.result.noneText",
+   "group": "Shop: finder",
+   "label": "finder › result › noneText",
+   "placeholders": [],
+   "default": {
+    "hu": "Mondd el az első kérdésben, mire van szükséged. Ha nem tudod, írd le a projektet, és mi segítünk.",
+    "en": "Tell us what you need in the first question. If you do not know yet, describe your project and we will help.",
+    "nl": "Vertel in de eerste vraag wat je nodig hebt. Weet je het nog niet, beschrijf dan je project en wij helpen je."
+   }
+  },
+  {
+   "key": "shop.finder.result.describe",
+   "group": "Shop: finder",
+   "label": "finder › result › describe",
+   "placeholders": [],
+   "default": {
+    "hu": "Írd le a projektet",
+    "en": "Describe your project",
+    "nl": "Beschrijf je project"
    }
   }
  ]

@@ -18,6 +18,12 @@ export function FullExperienceBrief({ json }: { json: string | null }) {
       <dl className={styles.definitions}>
         <dt>{t.shop.quote.preferred}</dt>
         <dd>{(t.languages as Record<string, string>)[brief.preferredLanguage] ?? brief.preferredLanguage}</dd>
+        {brief.estimate && (
+          <>
+            <dt>{t.shop.quote.size}</dt>
+            <dd>{t.shop.quote.sizes[brief.estimate.level]}</dd>
+          </>
+        )}
       </dl>
       <ul className={styles.briefList} aria-label={t.shop.quote.briefTitle}>
         {brief.questions.map((question) => (

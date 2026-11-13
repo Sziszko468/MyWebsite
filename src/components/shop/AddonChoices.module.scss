@@ -1,0 +1,36 @@
+.root {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.worksWith {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.blocked {
+  min-width: 0;
+}
+
+.blockedIntro {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.blockedList {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+}
+
+.blockedWith {
+  color: var(--color-text-secondary);
+}

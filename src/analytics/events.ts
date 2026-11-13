@@ -1,4 +1,5 @@
 import type { LabId } from '../content/lab'
+import type { ExtraId } from '../content/services/addons'
 import type { NeedId, PlanId, ServiceId } from '../content/services/ids'
 
 /**
@@ -15,8 +16,22 @@ export interface AnalyticsEvents {
   package_selected: { need: NeedId; plan: PlanId }
   /** The request builder reached its last step. `needs` is how many services are in the request. */
   configurator_completed: { needs: number }
-  /** A request or message was sent and the receiving end said it arrived. */
-  quote_request_submitted: { form: 'inquiry' | 'contact'; items: number }
+  /** A request or message was sent and the receiving end said it arrived. `full-experience`: the custom project request (no cart lines). */
+  quote_request_submitted: { form: 'inquiry' | 'contact' | 'full-experience'; items: number }
+  /** The Shop's front page was opened (PROMPT 20). */
+  shop_opened: Record<string, never>
+  /** A package's own page was opened. */
+  package_viewed: { plan: PlanId }
+  /** The package comparison came into view (once per visit to the front page). */
+  comparison_viewed: Record<string, never>
+  /** An add-on was put on a line of the cart: which service and which add-on (ids), never anything typed. */
+  addon_selected: { need: NeedId; extra: ExtraId }
+  /** The request builder or the FULL EXPERIENCE configurator was opened. */
+  configurator_started: { flow: 'builder' | 'full-experience' }
+  /** The package finder showed a suggestion: which package (an id). */
+  recommendation_viewed: { plan: PlanId }
+  /** The review of a request was on the screen before it was sent. */
+  summary_viewed: { flow: 'builder' | 'full-experience' }
   /** A project's page was opened. The project is its address (a slug: lowercase letters, digits and hyphens, chosen by the owner). */
   project_opened: { project: string }
   /** A Lab experience was opened. */
@@ -46,6 +61,13 @@ export const EVENT_NAMES: readonly EventName[] = [
   'package_selected',
   'configurator_completed',
   'quote_request_submitted',
+  'shop_opened',
+  'package_viewed',
+  'comparison_viewed',
+  'addon_selected',
+  'configurator_started',
+  'recommendation_viewed',
+  'summary_viewed',
   'project_opened',
   'lab_experience_opened',
 ]

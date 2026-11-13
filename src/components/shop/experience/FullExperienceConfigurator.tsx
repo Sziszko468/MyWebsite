@@ -34,6 +34,7 @@ import { useSubmission } from '../../form/useSubmission'
 import { LocalizedLink } from '../../LocalizedLink/LocalizedLink'
 import { ChoiceCard, ChoiceFieldset } from '../Choice'
 import { ArrowLeftIcon } from '../icons'
+import { ProjectSizeGuide } from './ProjectSizeGuide'
 import styles from './FullExperienceConfigurator.module.scss'
 
 const OPTIONS = { requireConsent: quoteConfig.requireConsent }
@@ -80,8 +81,12 @@ export function FullExperienceConfigurator() {
   }, [attempts])
   const reachedLast = isLast
   useEffect(() => {
-    if (reachedLast) track('configurator_completed', { needs: 0 })
+    if (reachedLast) {
+      track('configurator_completed', { needs: 0 })
+      track('summary_viewed', { flow: 'full-experience' })
+    }
   }, [reachedLast])
+  useEffect(() => track('configurator_started', { flow: 'full-experience' }), [])
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => setDraft((previous) => ({ ...previous, [key]: value }))
   const goTo = (next: StepKey) => {
@@ -112,8 +117,8 @@ export function FullExperienceConfigurator() {
     const rows = summaryRows(offer, draft, lang, { skipped: c.reviewSkipped, description: c.summaryDescription, contact: c.summaryContact, heading: c.summaryHeading })
     await submit(toRequest(draft, offer, lang), () => {
       setSentRows(rows)
-      // No cart lines: `items: 0` is how a FULL EXPERIENCE request is told apart from the builder's (a count, never what was answered).
-      track('quote_request_submitted', { form: 'inquiry', items: 0 })
+      // No cart lines (`items: 0`), and its own form id so the counts tell the two apart (a count, never what was answered).
+      track('quote_request_submitted', { form: 'full-experience', items: 0 })
     })
   }
 
@@ -252,6 +257,9 @@ export function FullExperienceConfigurator() {
               )}
               <CheckboxField label={c.marketing} checked={draft.marketing} onChange={(checked) => set('marketing', checked)} />
               <p className={styles.memory}>{c.memory}</p>
+              <p className={styles.notPurchase}>{c.notPurchase}</p>
+
+              <ProjectSizeGuide answers={draft.answers} />
 
               <section className={styles.review} aria-label={c.reviewTitle}>
                 <h3 className={styles.reviewTitle}>{c.reviewTitle}</h3>

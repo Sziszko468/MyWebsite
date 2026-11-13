@@ -109,13 +109,26 @@ describe('the catalogue overlay', () => {
     expect(pick(catalog).priceNote).toEqual(staticLaunch.priceNote) // absent is not the same as empty
   })
 
-  it('takes featured and quoteRequired as booleans, and nothing else about what a package is', () => {
+  it('takes featured and quoteRequired as booleans, the list of add-ons it allows, and nothing else about what a package is', () => {
     const catalog = served()
     Object.assign(launch(catalog), { featured: true, quoteRequired: false, needs: ['webapp'], extras: [], id: 'hijack', position: 99 })
     const result = pick(catalog)
-    expect(result).toMatchObject({ featured: true, quoteRequired: false, id: 'launch', needs: staticLaunch.needs, extras: staticLaunch.extras })
+    // PROMPT 20: the backend refuses an add-on its package does not list, so the website follows ITS list (an emptied list means none).
+    expect(result).toMatchObject({ featured: true, quoteRequired: false, id: 'launch', needs: staticLaunch.needs, extras: [] })
     Object.assign(launch(catalog), { featured: 'yes', quoteRequired: 0 })
     expect(pick(catalog)).toMatchObject({ featured: staticLaunch.featured, quoteRequired: staticLaunch.quoteRequired })
+  })
+
+  it('follows the backend\'s list of the add-ons a package allows, and ignores anything that is not a list of texts', () => {
+    const catalog = served()
+    Object.assign(launch(catalog), { extras: ['pages', 'care'] })
+    expect(pick(catalog).extras).toEqual(['pages', 'care'])
+    Object.assign(launch(catalog), { extras: 'all' })
+    expect(pick(catalog).extras).toEqual(staticLaunch.extras)
+    Object.assign(launch(catalog), { extras: ['pages', 7] })
+    expect(pick(catalog).extras).toEqual(staticLaunch.extras)
+    delete (launch(catalog) as Record<string, unknown>).extras
+    expect(pick(catalog).extras).toEqual(staticLaunch.extras)
   })
 
   it('ignores what the website has no place for, and never changes the static content itself', () => {

@@ -26,6 +26,7 @@ import type { FetchLike } from './modules/notifications/resend.ts'
 import { projectRoutes } from './modules/projects/routes.ts'
 import { quoteRoutes } from './modules/quotes/routes.ts'
 import { healthRoutes } from './modules/system/health.ts'
+import { languageRedirect } from './modules/system/language.ts'
 import { serveAdminApp, serveStatic } from './modules/system/static.ts'
 
 /** Whether a project with this address is published (drafts are not acknowledged). */
@@ -140,6 +141,7 @@ export function createApp(deps: AppDeps): App {
       const url = new URL(req.url ?? '/', 'http://localhost')
       area = url.pathname === '/admin' || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/api/admin/') ? 'admin' : url.pathname.startsWith('/api/') ? 'api' : 'static'
       limiters.check('global', ip)
+      const redirect = area === 'static' && config.staticDir ? languageRedirect({ countryHeader: config.countryHeader, method, pathname: url.pathname, search: url.search, headers: req.headers }) : null
 
       let formCache: Promise<URLSearchParams> | null = null
       // A client that closes the connection before the response was written completely cancels what the request started.
@@ -185,6 +187,10 @@ export function createApp(deps: AppDeps): App {
           }
         } else if (match.kind === 'method') {
           throw new HttpError(405, 'method_not_allowed', 'This method is not allowed here.', { headers: { Allow: match.allowed.join(', ') } })
+        } else if (redirect !== null) {
+          // An address without a language, with COUNTRY_HEADER set: the visitor's language (the same rule as the edge Worker's).
+          label = 'language'
+          reply = redirect
         } else if (area === 'static' && config.staticDir && (method === 'GET' || method === 'HEAD')) {
           let served = serveStatic(config.staticDir, url.pathname)
           // A project published after the site was built has no prerendered page of its own: answer with the Work page's shell

@@ -254,6 +254,15 @@ button.stepItem {
   gap: var(--space-2);
 }
 
+.notPurchase {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 0.25rem solid var(--color-accent);
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+}
+
 .reviewNote {
   color: var(--color-text-muted);
   font-size: var(--fs-sm);

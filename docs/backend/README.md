@@ -64,6 +64,7 @@ Everything is an environment variable, validated once at start-up. A bad or miss
 | `RETENTION_DAYS` | unset | Delete finished requests and old delivery records after this many days (1–3650). **Unset keeps everything.** |
 | `DEPLOY_HOOK_URL` | — | https address POSTed to by the admin's "Publish" button (a host's rebuild hook). |
 | `STATIC_DIR` | — | The built website (`dist/`) to serve from this process, with the build's own `_headers`. See §9. |
+| `COUNTRY_HEADER` | — | Optional (with `STATIC_DIR`): the name of the one request header the visitor's country is read from (`CF-IPCountry` behind Cloudflare), to choose the starting language of an address without a language (saved `cc_lang` cookie, then HU → Hungarian, NL → Dutch, else English; crawlers never). The edge Worker's rule, for hosting where the Worker is not in front (Render). Off when empty. See [docs/shop/SHOP_4.md](../shop/SHOP_4.md#localization-section-11). |
 
 ## 3. Database
 

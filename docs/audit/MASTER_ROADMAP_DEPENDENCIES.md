@@ -183,7 +183,7 @@ Order numbers refer to the sequence at the end.
 3. **Command Center, first screen:** client address as seen and the current `TRUST_PROXY`, migration state, disk free space, e-mail checks, AI verification, last deploy commit.
 4. **CI for the deployed branch**, a `check:deploy` script (typecheck, tests, build, `check:seo`), and an optional smoke test of `/api/ready` after deploy.
 5. **Canonical host** set by the owner's choice, verified by `check:seo`; a regression test that the sitemap host equals the host the apex redirect leaves.
-6. **Refresh the browser journeys** (`shop-journey`, three steps of `journeys` A–E) to the current wording or, better, to `data-testid` selectors, exercise the FULL EXPERIENCE configurator end to end, and list "run the journeys" in the pre-release checklist.
+6. **Make the browser journeys copy-independent** (`data-testid` and values instead of English sentences; they were refreshed by the audit and pass, 155 steps, but break at the next wording change) and list "run the journeys" in the pre-release checklist.
 7. A test that reads **every** admin route from the router and fails if the security probe does not cover it (so route coverage cannot drift again).
 
 *In scope (documentation):* the Render and Cloudflare checklists answered in `REMEDIATION_LOG.md`, a restore drill from a real Drive snapshot onto a scratch disk, an incident / recovery runbook.

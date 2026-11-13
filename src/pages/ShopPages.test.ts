@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 import { packages } from '../content/packages'
-import { addonsFor } from '../content/services/addons'
+import { addonsFor, getAddon } from '../content/services/addons'
 import { serviceAreas } from '../content/services/areas'
 import { getServiceDetail } from '../content/services/detail'
 import { faq } from '../content/services/faq'
@@ -365,5 +365,57 @@ describe.each(LANGUAGES)('the FULL EXPERIENCE page in %s', (lang) => {
     expect(html).toContain(escape(fill(text.experience.start.progress, { n: 1, total: baseFullExperience.configurator.questions.length + 2 })))
     expect(plain(html)).not.toMatch(NO_PRICE)
     expect(plain(html)).not.toMatch(NOT_LEAKED)
+  })
+})
+
+describe.each(LANGUAGES)('Shop 4.0 in %s (PROMPT 20)', (lang) => {
+  const text = localize(shopText, lang)
+
+  it('puts the package finder under the comparison, closed: its title, its promise and a button, and no question drawn yet', () => {
+    const html = render(createElement(ServicesPage), lang)
+    expect(html).toContain(escape(text.finder.title))
+    expect(html).toContain(escape(text.finder.intro))
+    expect(html).toContain(escape(text.finder.open))
+    expect(html).not.toContain(escape(text.finder.questions.scope.title))
+    expect(plain(html)).not.toMatch(NOT_LEAKED)
+    expect(plain(html)).not.toMatch(NO_PRICE)
+  })
+
+  it('offers on the add-on step only what the package lists, each marked optional, and names the rest with the packages that list it', () => {
+    cartStore.update(() => cartOf({ need: 'website', plan: 'launch', extras: ['pages'] }))
+    inquiryActions.setStep('extras')
+    const html = render(createElement(ConfiguratorPage), lang, 'dark', '/services/configure')
+    // Launch lists pages, motion, languages, custom and care for a website: five cards, one chosen.
+    expect(inputs(html, { type: 'checkbox' })).toHaveLength(5)
+    expect(inputs(html, { type: 'checkbox', checked: true })).toHaveLength(1)
+    expect(html.split(escape(text.configurator.extras.optional)).length - 1).toBe(5)
+    // The API and speed add-ons apply to a website but Launch does not list them: they are named in the "not available" part, with Grow and Build.
+    expect(html).toContain(escape(fill(text.configurator.extras.notWithTitle, { package: 'Launch' })))
+    expect(html).toContain(escape(getAddon('api').name[lang]))
+    expect(html).toContain(escape(getAddon('performance').name[lang]))
+    expect(html).toContain(escape(fill(text.configurator.extras.availableWith, { packages: 'Grow, Build' })))
+    // "Your request so far" is beside it, with the package and the chosen add-on.
+    expect(html).toContain(escape(text.configurator.live.title))
+    expect(html).toContain(escape(getAddon('pages').name[lang]))
+    expect(plain(html)).not.toMatch(NOT_LEAKED)
+  })
+
+  it('offers everything the service takes while there is no package yet, or for a custom project', () => {
+    for (const plan of [null, 'custom'] as const) {
+      cartStore.update(() => cartOf({ need: 'website', plan }))
+      inquiryActions.setStep(plan === null ? 'plan' : 'extras')
+      if (plan === null) continue
+      const html = render(createElement(ConfiguratorPage), lang, 'dark', '/services/configure')
+      expect(inputs(html, { type: 'checkbox' })).toHaveLength(addonsFor('website').length)
+      expect(html).not.toContain(escape(fill(text.configurator.extras.notWithTitle, { package: 'Launch' })))
+    }
+  })
+
+  it('says beside the send button that sending is not a purchase, in both flows', () => {
+    cartStore.update(() => cartOf({ need: 'website', plan: 'launch', extras: ['pages'] }))
+    inquiryActions.setDetail('description', 'A small site for my bakery, with the menu and opening hours.')
+    inquiryActions.setStep('send')
+    expect(render(createElement(ConfiguratorPage), lang, 'dark', '/services/configure')).toContain(escape(text.configurator.review.notPurchase))
+    expect(text.experience.start.notPurchase).toBe(text.configurator.review.notPurchase)
   })
 })

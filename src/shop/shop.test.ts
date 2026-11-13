@@ -7,8 +7,10 @@ import { localize } from '../content/trilingual'
 import { LANGUAGES } from '../i18n/config'
 import {
   EMPTY_CART,
+  allowedExtras,
   clearCart,
   countExtras,
+  extrasLostBy,
   findLine,
   hasLine,
   isCartComplete,
@@ -71,6 +73,50 @@ describe('the cart', () => {
     expect(normalizeExtras('unsure', ['custom', 'pages', 'care'])).toEqual(['custom'])
     expect(normalizeExtras('website', ['cms', 42, null])).toEqual([])
     expect(upsertLine(EMPTY_CART, { need: 'ui', extras: ['api', 'motion'] }).lines[0].extras).toEqual(['motion'])
+  })
+
+  // PROMPT 20: an add-on sits on a line only if it applies to the service AND the line's package lists it. The backend applies the same rule.
+  it('offers on a line only the add-ons its package lists, and everything the service takes while there is no package', () => {
+    const sorted = (ids: readonly string[]) => [...ids].sort()
+    // Launch lists pages, motion, languages, custom and care. It does not list api or performance, though both apply to a website.
+    expect(sorted(allowedExtras('website', 'launch'))).toEqual(['care', 'custom', 'languages', 'motion', 'pages'])
+    expect(sorted(allowedExtras('website', 'grow'))).toEqual(['api', 'care', 'custom', 'languages', 'motion', 'pages', 'performance'])
+    // No package chosen yet, or a custom project: only the service decides.
+    expect(allowedExtras('website', null)).toEqual(addonsFor('website').map((addon) => addon.id))
+    expect(allowedExtras('website', 'custom')).toEqual(addonsFor('website').map((addon) => addon.id))
+    for (const pack of packages) {
+      for (const need of NEED_IDS) {
+        for (const id of allowedExtras(need, pack.id)) {
+          expect(pack.extras, `${pack.id}/${need}/${id}`).toContain(id)
+          expect(addonsFor(need).map((addon) => addon.id)).toContain(id)
+        }
+      }
+    }
+    expect(normalizeExtras('website', ['pages', 'api', 'performance', 'motion'], 'launch')).toEqual(['pages', 'motion'])
+    expect(normalizeExtras('website', ['pages', 'api'])).toEqual(['pages', 'api'])
+  })
+
+  it('refuses to put an add-on on a line whose package does not list it, and takes it off when the package changes', () => {
+    let cart = cartOf({ need: 'website', plan: 'launch', extras: ['pages'] })
+    expect(toggleExtra(cart, 'website', 'api')).toBe(cart)
+    expect(findLine(upsertLine(EMPTY_CART, { need: 'website', plan: 'launch', extras: ['pages', 'api', 'performance'] }), 'website')?.extras).toEqual(['pages'])
+
+    cart = setPlan(cartOf({ need: 'website', plan: 'grow', extras: ['pages', 'api', 'performance', 'languages'] }), 'website', 'launch')
+    expect(findLine(cart, 'website')).toEqual({ need: 'website', plan: 'launch', extras: ['pages', 'languages'] })
+    expect(extrasLostBy({ need: 'website', plan: 'grow', extras: ['pages', 'api', 'performance', 'languages'] }, 'launch')).toEqual(['api', 'performance'])
+    // Going back up does not bring them back: the visitor chooses them again.
+    expect(findLine(setPlan(cart, 'website', 'grow'), 'website')?.extras).toEqual(['pages', 'languages'])
+    // A line with no package yet, or a custom project, keeps whatever the service takes.
+    expect(findLine(setPlan(cartOf({ need: 'website', plan: 'grow', extras: ['api'] }), 'website', 'custom'), 'website')?.extras).toEqual(['api'])
+    expect(extrasLostBy({ need: 'website', plan: 'grow', extras: ['api'] }, null)).toEqual([])
+  })
+
+  it('drops from an old saved cart the add-ons its package does not list', () => {
+    const saved = { lines: [{ need: 'website', plan: 'launch', extras: ['pages', 'api'] }, { need: 'webapp', plan: 'custom', extras: ['api'] }] }
+    expect(parseCart(saved).lines).toEqual([
+      { need: 'website', plan: 'launch', extras: ['pages'] },
+      { need: 'webapp', plan: 'custom', extras: ['api'] },
+    ])
   })
 
   it('removes a line and puts it back where it was', () => {
@@ -198,6 +244,18 @@ describe('the cart store', () => {
     store.update((value) => value + 1)
     expect(seen).toEqual([2])
     expect(store.get()).toBe(3)
+  })
+
+  it('says which add-ons a package change took off, and nothing when it took none', () => {
+    cartStore.update(() => EMPTY_CART)
+    cartActions.add('website', { plan: 'grow', extras: ['pages', 'api', 'performance'] })
+    cartActions.setPlan('website', 'launch')
+    expect(noticeStore.get()).toMatchObject({ kind: 'extrasDropped', need: 'website', dropped: ['api', 'performance'] })
+    expect(findLine(cartStore.get(), 'website')?.extras).toEqual(['pages'])
+    const seq = noticeStore.get()?.seq
+    cartActions.setPlan('website', 'care')
+    expect(noticeStore.get()?.seq).toBe(seq)
+    cartStore.update(() => EMPTY_CART)
   })
 
   it('adds, removes and undoes through the actions, and says what happened', () => {

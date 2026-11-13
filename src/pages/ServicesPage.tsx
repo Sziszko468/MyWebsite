@@ -1,5 +1,6 @@
+import { track } from '../analytics/tracker'
 import { useCatalogGate } from '../content/liveCatalog'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
 import { isPackageId, packages, type PackageId } from '../content/packages'
 import { FinalCta } from '../components/home/FinalCta'
@@ -27,6 +28,7 @@ function packageFromSearch(search: string): PackageId | null {
  */
 export function ServicesPage() {
   useCatalogGate()
+  useEffect(() => track('shop_opened', {}), [])
   const { landing } = useShopText()
   const { search } = useLocation()
   // The visitor's own choice holds for the address it was made at; a different `?package=` in the address wins again.

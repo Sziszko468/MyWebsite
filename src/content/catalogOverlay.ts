@@ -123,6 +123,8 @@ export function overlayPackages(base: readonly ServicePackage[], catalog: unknow
       featured: typeof entry.featured === 'boolean' ? entry.featured : undefined,
       quoteRequired: typeof entry.quoteRequired === 'boolean' ? entry.quoteRequired : undefined,
       priceNote: note ?? (noteIsEmpty ? null : undefined),
+      // Which add-ons the package lists (PROMPT 20): the backend refuses the others, so the pages must follow its list. Ids the website has no add-on for are harmless (nothing matches them).
+      extras: Array.isArray(entry.extras) && entry.extras.every((id) => typeof id === 'string') ? (entry.extras as ServicePackage['extras'][number][]) : undefined,
       tagline: trilingual(entry.translations, 'tagline') ?? undefined,
       audience: trilingual(entry.translations, 'audience') ?? undefined,
       scope: trilingual(entry.translations, 'scope') ?? undefined,

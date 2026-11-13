@@ -96,6 +96,15 @@
   font-weight: var(--fw-semibold);
 }
 
+.notPurchase {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 0.25rem solid var(--color-accent);
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+}
+
 .memory {
   color: var(--color-text-secondary);
   font-size: var(--fs-sm);

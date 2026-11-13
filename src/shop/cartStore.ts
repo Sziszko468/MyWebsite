@@ -3,6 +3,7 @@ import type { NeedId, PlanId } from '../content/services/ids'
 import {
   EMPTY_CART,
   clearCart,
+  extrasLostBy,
   findLine,
   parseCart,
   removeLine,
@@ -47,14 +48,20 @@ function readStored(): Cart {
 export const cartStore = createStore<Cart>(readStored())
 
 let written = JSON.stringify(cartStore.get())
+let saved = storage() !== null
+/** Whether the cart is being kept in this browser (so the page may say "saved") or lives in memory only (a private window, blocked site data). */
+export const isCartSaved = (): boolean => saved
 cartStore.subscribe(() => {
   const next = JSON.stringify(cartStore.get())
   if (next === written) return
   written = next
   try {
-    storage()?.setItem(CART_STORAGE_KEY, next)
+    const where = storage()
+    where?.setItem(CART_STORAGE_KEY, next)
+    saved = where !== null
   } catch {
-    // The cart stays in memory; nothing else to do.
+    // The cart stays in memory; the page must not claim it was saved.
+    saved = false
   }
 })
 
@@ -74,16 +81,18 @@ if (typeof window !== 'undefined') {
 /** What just happened to the cart, for the announcement and the "undo". Not persisted. */
 export interface CartNotice {
   seq: number
-  kind: 'added' | 'updated' | 'removed' | 'cleared'
+  kind: 'added' | 'updated' | 'removed' | 'cleared' | 'extrasDropped'
   need: NeedId | null
   /** For `removed`: the line and where it was, so it can be put back. */
   undo: { line: CartLine; index: number } | null
+  /** For `extrasDropped`: the add-ons a package change took off because the new package does not list them. */
+  dropped: readonly ExtraId[]
 }
 
 export const noticeStore = createStore<CartNotice | null>(null)
 let sequence = 0
-const announce = (kind: CartNotice['kind'], need: NeedId | null, undo: CartNotice['undo'] = null) =>
-  noticeStore.update(() => ({ seq: ++sequence, kind, need, undo }))
+const announce = (kind: CartNotice['kind'], need: NeedId | null, undo: CartNotice['undo'] = null, dropped: readonly ExtraId[] = []) =>
+  noticeStore.update(() => ({ seq: ++sequence, kind, need, undo, dropped }))
 
 export const cartActions = {
   /** Puts a service in the cart with these choices; if it is already there, they replace the old ones. */
@@ -108,10 +117,18 @@ export const cartActions = {
     announce('updated', undo.line.need)
   },
   setPlan(need: NeedId, plan: PlanId | null) {
+    const before = findLine(cartStore.get(), need)
+    const lost = before ? extrasLostBy(before, plan) : []
     cartStore.update((cart) => setPlan(cart, need, plan))
+    // A package that does not list an add-on takes it off the line: say so, never silently.
+    if (lost.length > 0) announce('extrasDropped', need, null, lost)
     if (plan) track('package_selected', { need, plan })
   },
-  toggleExtra: (need: NeedId, extra: ExtraId, on?: boolean) => cartStore.update((cart) => toggleExtra(cart, need, extra, on)),
+  toggleExtra(need: NeedId, extra: ExtraId, on?: boolean) {
+    const had = findLine(cartStore.get(), need)?.extras.includes(extra) ?? false
+    cartStore.update((cart) => toggleExtra(cart, need, extra, on))
+    if (!had && findLine(cartStore.get(), need)?.extras.includes(extra)) track('addon_selected', { need, extra })
+  },
   setNeeds: (needs: readonly NeedId[], planFor?: (need: NeedId) => PlanId | null) =>
     cartStore.update((cart) => setNeeds(cart, needs, planFor)),
   clear() {

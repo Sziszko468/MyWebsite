@@ -71,7 +71,7 @@ None confirmed. **One could be Critical** depending on a dashboard fact: see D-1
 | T-1 | two stale e-mail assertions (`600px` vs the 620 px redesign) | **fixed** |
 | T-2 | security probe did not cover 17 admin routes | **fixed** |
 | T-3 | Drive backup had no tests | **fixed** (6 tests) |
-| T-4 | the browser journeys (`tools/e2e`) are not in CI and had drifted behind the shop copy (`shop-journey` 31/41, 3 steps of `journeys` A–E); the FULL EXPERIENCE configurator was not exercised in a browser | **partly fixed** (quote and consent selectors); refresh the rest with stable selectors, run before releases |
+| T-4 | the browser journeys (`tools/e2e`) are copy-sensitive, not in CI, and had drifted behind the shop copy | **fixed** (all 155 steps pass again); make them copy-independent and run them before releases |
 
 ### Informational
 

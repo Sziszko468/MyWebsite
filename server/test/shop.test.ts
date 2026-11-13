@@ -204,6 +204,37 @@ describe('a FULL EXPERIENCE request', () => {
     expect(minimal.status).toBe(201)
   })
 
+  it('stores the project size guide the SERVER worked out from the validated answers, and ignores one the browser sent (PROMPT 20)', async () => {
+    const answers = { type: ['web-app'], stage: ['idea'], components: ['backend', 'database', 'auth'], complexity: ['medium'], budget: ['unsure'] }
+    // web-app 2 + backend 1 + database 1 + auth 1 + medium 2 = 7 points: Advanced. The request claims it is Basic: that is never read.
+    const response = await server.api('/api/quote-requests', { body: fullExperience({ answers, estimate: { level: 'basic', points: 0 }, size: 'basic', projectSize: { level: 'basic', points: 0 } }) })
+    expect(response.status).toBe(201)
+    const row = getQuote(server.db, server.db.get<{ id: string }>("SELECT id FROM quote_requests WHERE kind = 'full_experience'")!.id)!
+    expect(readBrief(row.brief_json)!.estimate).toEqual({ level: 'advanced', points: 7 })
+    expect(row.brief_json).not.toContain('"basic"')
+    // The owner reads it, labelled as a planning guide and not as a quote; no price and no time anywhere near it.
+    const sizeRow = briefRows(row, 'en').find((entry) => entry.label.startsWith('Project size'))!
+    expect(sizeRow).toEqual({ label: 'Project size (a planning guide, not a quote)', value: 'Advanced' })
+    expect(briefRows(row, 'hu').find((entry) => entry.label.startsWith('A projekt mérete'))!.value).toBe('Összetett')
+    expect(briefRows(row, 'nl').find((entry) => entry.label.startsWith('Omvang'))!.value).toBe('Uitgebreid')
+    // The administration gets it with the brief.
+    const detail = await send('GET', `/api/admin/quote-requests/${row.id}`)
+    const brief = detail.json.data.brief ?? readBrief(detail.json.data.brief_json)
+    expect(brief.estimate).toEqual({ level: 'advanced', points: 7 })
+  })
+
+  it('has no size guide when nothing it is based on was answered, and keeps older briefs readable without one', async () => {
+    const response = await server.api('/api/quote-requests', { body: fullExperience({ answers: { type: ['unsure'], stage: ['idea'], complexity: ['unsure'], budget: ['unsure'] } }) })
+    expect(response.status).toBe(201)
+    const row = getQuote(server.db, server.db.get<{ id: string }>("SELECT id FROM quote_requests WHERE kind = 'full_experience'")!.id)!
+    expect(readBrief(row.brief_json)!.estimate).toBeUndefined()
+    expect(briefRows(row, 'en').some((entry) => entry.label.startsWith('Project size'))).toBe(false)
+    // A brief stored before the guide existed has no estimate and reads as before; a damaged estimate is dropped, not trusted.
+    const stored = JSON.parse(row.brief_json!) as Record<string, unknown>
+    expect(readBrief(JSON.stringify({ ...stored, estimate: { level: 'huge', points: 'many' } }))!.estimate).toBeUndefined()
+    expect(readBrief(JSON.stringify({ ...stored, estimate: { level: 'moderate', points: 4 } }))!.estimate).toEqual({ level: 'moderate', points: 4 })
+  })
+
   it('is answered with the first reference when it is sent twice, and refuses a bot\'s hidden field', async () => {
     const first = await server.api('/api/quote-requests', { body: fullExperience() })
     const again = await server.api('/api/quote-requests', { body: fullExperience() })

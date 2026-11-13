@@ -1121,6 +1121,8 @@ export const hu: AdminText = {
       skipped: 'kihagyva',
       noItems: 'A FULL EXPERIENCE kérésnek nincsenek kosártételei: az alábbi brief maga a kérés.',
       noBrief: 'A brief nem olvasható.',
+      size: 'A projekt mérete (tervezési segéd, nem ajánlat)',
+      sizes: { basic: 'Alap', moderate: 'Közepes', advanced: 'Összetett', custom: 'Egyedi' },
     },
   },
 

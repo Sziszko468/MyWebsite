@@ -1124,6 +1124,8 @@ export const en = {
       skipped: 'skipped',
       noItems: 'A FULL EXPERIENCE request has no cart lines: the brief below is the request.',
       noBrief: 'The brief could not be read.',
+      size: 'Project size (a planning guide, not a quote)',
+      sizes: { basic: 'Basic', moderate: 'Moderate', advanced: 'Advanced', custom: 'Custom' },
     },
   },
 

@@ -85,6 +85,22 @@ export const configurator = {
     none: tri('Ehhez nincs választható kiegészítő.', 'No add-ons are available for this one.', 'Hiervoor zijn geen extra’s beschikbaar.'),
     selected: tri('{count} kiválasztva', '{count} selected', '{count} gekozen'),
     skipHint: tri('Nem kell semmit választanod: léphetsz tovább.', 'You do not have to pick anything: just go on.', 'Je hoeft niets te kiezen: ga gewoon verder.'),
+    // PROMPT 20: what an add-on is and where it works.
+    optional: tri('Nem kötelező', 'Optional', 'Niet verplicht'),
+    worksWith: tri('Választható csomagok: {packages}', 'Works with: {packages}', 'Beschikbaar bij: {packages}'),
+    notWithTitle: tri('Nem választható ehhez a csomaghoz: {package}', 'Not available with {package}', 'Niet beschikbaar bij {package}'),
+    notWithText: tri('Ha ezeket is szeretnéd, válassz másik csomagot:', 'Choose another package if you want these:', 'Kies een ander pakket als je deze wilt:'),
+    availableWith: tri('Választható ennél: {packages}', 'Available with {packages}', 'Beschikbaar bij {packages}'),
+  },
+
+  live: {
+    title: tri('A kérésed eddig', 'Your request so far', 'Je aanvraag tot nu toe'),
+    package: tri('Csomag', 'Package', 'Pakket'),
+    addons: tri('Kiegészítők', 'Add-ons', 'Extra’s'),
+    none: tri('még nincs', 'none yet', 'nog geen'),
+    empty: tri('Még nem választottál szolgáltatást.', 'You have not chosen a service yet.', 'Je hebt nog geen dienst gekozen.'),
+    saved: tri('A választásaid el vannak mentve ezen az eszközön.', 'Your choices are saved on this device.', 'Je keuzes zijn op dit apparaat bewaard.'),
+    notSaved: tri('A választásaid csak ezen az oldalon maradnak meg: ez a böngésző nem engedi a mentést.', 'Your choices stay on this page only: this browser does not allow saving.', 'Je keuzes blijven alleen op deze pagina staan: deze browser staat opslaan niet toe.'),
   },
 
   details: {
@@ -158,6 +174,11 @@ export const configurator = {
       'Mindegyik tétel ára az ajánlatban szerepel.',
       'The price of every item comes with the quote.',
       'De prijs van elk onderdeel staat in de offerte.',
+    ),
+    notPurchase: tri(
+      'A kérés elküldése nem jelenti azt, hogy megvásároltál egy szolgáltatást. Átnézzük, mire van szükséged, és személyre szabott ajánlatot készítünk.',
+      'Sending this request does not mean you have bought a service. We will look at what you need and prepare a quote made for you.',
+      'Het versturen van deze aanvraag betekent niet dat je een dienst hebt gekocht. We bekijken wat je nodig hebt en maken een offerte op maat.',
     ),
   },
 

@@ -1,4 +1,5 @@
-import { useId, type CSSProperties } from 'react'
+import { useEffect, useId, type CSSProperties } from 'react'
+import { track } from '../analytics/tracker'
 import { FinalCta } from '../components/home/FinalCta'
 import { Button } from '../components/Button/Button'
 import { Container } from '../components/Container/Container'
@@ -37,6 +38,7 @@ import styles from './PackagePage.module.scss'
 export function PackagePage({ packageId }: { packageId: PackageId }) {
   useCatalogGate()
   useCatalogVersion()
+  useEffect(() => track('package_viewed', { plan: packageId }), [packageId])
   const { lang, t } = useI18n()
   const { tiers, landing, common } = useShopText()
   const c = tiers.page

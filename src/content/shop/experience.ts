@@ -78,9 +78,41 @@ export const experience = {
     privacy: tri('Adatkezelési tájékoztató', 'Privacy notice', 'Privacyverklaring'),
     memory: tri('A válaszaid csak ebben a lapban maradnak meg, amíg el nem küldöd őket.', 'Your answers stay on this page only, until you send them.', 'Je antwoorden blijven alleen op deze pagina staan, tot je ze verstuurt.'),
     reviewTitle: tri('A válaszaid', 'Your answers', 'Je antwoorden'),
+    // PROMPT 20: the project size guide, a planning aid (shop/fullExperience/estimate.ts).
+    size: {
+      title: tri('Mekkorának látszik a projekt?', 'How big the project looks', 'Hoe groot het project lijkt'),
+      levels: {
+        basic: {
+          name: tri('Alap', 'Basic', 'Basis'),
+          text: tri('Egy kicsi, áttekinthető projekt.', 'A small, clear project.', 'Een klein, overzichtelijk project.'),
+        },
+        moderate: {
+          name: tri('Közepes', 'Moderate', 'Gemiddeld'),
+          text: tri('Egy projekt néhány kiegészítő résszel.', 'A project with a few extra parts.', 'Een project met een paar extra onderdelen.'),
+        },
+        advanced: {
+          name: tri('Összetett', 'Advanced', 'Uitgebreid'),
+          text: tri('Nagyobb projekt, több egymással összefüggő résszel.', 'A larger project with several parts that work together.', 'Een groter project met meerdere onderdelen die samenwerken.'),
+        },
+        custom: {
+          name: tri('Egyedi', 'Custom', 'Maatwerk'),
+          text: tri('Nagy vagy szokatlan projekt. Közösen tervezzük meg veled.', 'A large or unusual project. We will plan it together with you.', 'Een groot of ongewoon project. We plannen het samen met je.'),
+        },
+      },
+      note: tri(
+        'Ez egy durva segédlet a tervezéshez a válaszaid alapján. Nem ajánlat. A végleges terjedelmet és az árat azután döntjük el, hogy átnéztük a projektedet.',
+        'This is a rough guide for our planning, based on your answers. It is not a quote. We decide the final scope and the price after we have looked at your project.',
+        'Dit is een grove richtlijn voor onze planning, op basis van je antwoorden. Het is geen offerte. De uiteindelijke omvang en de prijs bepalen we nadat we je project hebben bekeken.',
+      ),
+    },
     reviewSkipped: tri('kihagyva', 'skipped', 'overgeslagen'),
     change: tri('Módosítás', 'Change', 'Wijzigen'),
     changeAnswer: tri('{title}: módosítás', 'Change: {title}', 'Wijzigen: {title}'),
+    notPurchase: tri(
+      'A kérés elküldése nem jelenti azt, hogy megvásároltál egy szolgáltatást. Átnézzük, mire van szükséged, és személyre szabott ajánlatot készítünk.',
+      'Sending this request does not mean you have bought a service. We will look at what you need and prepare a quote made for you.',
+      'Het versturen van deze aanvraag betekent niet dat je een dienst hebt gekocht. We bekijken wat je nodig hebt en maken een offerte op maat.',
+    ),
     send: tri('Ajánlatkérés küldése', 'Send the request', 'Aanvraag versturen'),
     sending: tri('Küldés…', 'Sending…', 'Versturen…'),
     prepare: tri('Összefoglaló elkészítése', 'Prepare the summary', 'Samenvatting voorbereiden'),

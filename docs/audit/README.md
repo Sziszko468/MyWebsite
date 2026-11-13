@@ -37,6 +37,6 @@ The code is in good shape (typecheck, lint, 2 149 tests, build, SEO checks and `
 - **No live Anthropic call** (no key): Haiku 5.5 is verified against Anthropic's published model list and the installed SDK, **not** against the service.
 - **No real e-mail** was sent and no Drive upload was made; both are tested against stand-ins.
 - Lab numbers are desktop Chrome with an emulated phone, not real devices.
-- The browser journeys had drifted behind the shop copy: quote (20/20) and CMS (22/22) pass, `journeys` A–E 57/60, `shop-journey` 31/41; **the FULL EXPERIENCE configurator was not submitted in a browser** ([TEST_RESULTS.md](TEST_RESULTS.md)).
+- The browser journeys had drifted behind the shop copy and were refreshed here: cms 22/22, quote 20/20, `journeys` A–E 72/72, shop 41/41 (155 steps, all pass), but they are copy-sensitive and not in CI ([TEST_RESULTS.md](TEST_RESULTS.md)).
 
 No secret value appears in any of these files. Names of variables are listed; values never.
