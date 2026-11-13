@@ -583,7 +583,7 @@ describe('the e-mails in three languages', () => {
       expect(made.mail.html).not.toContain('<script>')
       expect(made.mail.html).toContain('&lt;script&gt;')
       expect(made.mail.html).toContain(`https://site.test/${language}/quote/`)
-      expect(made.mail.html).toContain('max-width:600px')
+      expect(made.mail.html).toContain('max-width:620px')
       // The plain text alone is enough to act: it carries the link.
       expect(linkIn(made.mail.text, 'quote')).toBe(made.token)
     }

@@ -394,7 +394,7 @@ describe('the confirmation to the person who wrote', () => {
       expect(tags.filter((tag) => /\bsrc=|\bon\w+=|\bhref=|<(link|iframe|script|img|object|embed|form)\b/i.test(tag))).toEqual([])
       expect(mail.html).toContain('&lt;script&gt;')
       expect(mail.html).toContain(`lang="${language}"`)
-      expect(mail.html).toContain('max-width:600px')
+      expect(mail.html).toContain('max-width:620px')
       expect(mail.html).toContain('width=device-width')
       expect(mail.text.length).toBeGreaterThan(100)
       expect(mail.subject).not.toMatch(/[\r\n]/)

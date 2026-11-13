@@ -51,6 +51,9 @@ async function main(): Promise<void> {
     if (shop.seeded) log.info('shop documents loaded into an empty table', { documents: shop.documents })
   }
   if (config.env === 'production' && config.retentionDays === null) log.warn('RETENTION_DAYS is not set: closed and archived requests are kept until an administrator deletes them')
+  // PROMPT 19 audit: behind a host's load balancer (and Cloudflare) the socket's address is the proxy's. With TRUST_PROXY=0 every visitor then
+  // counts as ONE address for the rate limits and the sign-in lock, so a handful of requests can lock everybody (the owner included) out.
+  if (config.env === 'production' && config.trustProxy === 0) log.warn('TRUST_PROXY is 0: if a reverse proxy (a hosting load balancer, Cloudflare) sits in front, every visitor shares one address for the rate limits and the sign-in lock. Set TRUST_PROXY to the number of proxies in front (see docs/backend/README.md)')
   if (config.email.provider !== 'none' && !config.email.notifyTo) log.warn('e-mail is configured but NOTIFY_TO is not set: the owner will not be notified of new messages')
   if (config.email.provider !== 'none' && !config.email.enabled) log.warn('e-mail sending is paused (EMAIL_ENABLED=false): nothing will be sent until it is switched on')
   if (config.email.provider === 'resend' && !config.email.webhookSecret) log.warn('EMAIL_WEBHOOK_SECRET is not set: messages can be sent but never shown as delivered or bounced')

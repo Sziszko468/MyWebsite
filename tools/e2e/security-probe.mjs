@@ -45,6 +45,12 @@ const ADMIN_ROUTES = [
   '/api/admin/projects', '/api/admin/projects/:id', '/api/admin/projects/:id/preview', '/api/admin/projects/:id/duplicate', '/api/admin/projects/:id/publish',
   '/api/admin/projects/:id/unpublish', '/api/admin/projects/:id/archive', '/api/admin/projects/:id/restore', '/api/admin/project-settings', '/api/admin/project-order',
   '/api/admin/project-preview', '/api/admin/media', '/api/admin/media/:id', '/api/admin/texts', '/api/admin/texts/:key',
+  // Quotation management, shop documents and the Control Room AI administration (PROMPT 17 / 09.1 / 16): added by the PROMPT 19 audit,
+  // which found these routes were not in the probe (compare with `grep -rho "'/api/admin/[^']*'" server/src`).
+  '/api/admin/ai', '/api/admin/ai/alerts/acknowledge', '/api/admin/ai/connection-test', '/api/admin/ai/knowledge/refresh', '/api/admin/ai/settings',
+  '/api/admin/ai/usage', '/api/admin/inquiries/:id/quote-request', '/api/admin/quote-requests/overview', '/api/admin/quote-requests/:id/quotes',
+  '/api/admin/quote-requests/:id/resend-confirmation', '/api/admin/quotes/:id', '/api/admin/quotes/:id/resend', '/api/admin/quotes/:id/send',
+  '/api/admin/quotes/:id/withdraw', '/api/admin/shop/documents/:code', '/api/admin/shop/documents/:code/publish', '/api/admin/shop/documents/:code/unpublish',
 ]
 const FILL = { ':id': '00000000-0000-0000-0000-000000000000', ':code': 'launch', ':slug': 'website', ':type': 'faq', ':group': 'services', ':key': 'website', ':lang': 'en', ':kind': 'services' }
 let exposed = []

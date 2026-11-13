@@ -279,7 +279,9 @@ async function requestQuote(page, { mobile, lang = 'en', note }) {
     await page.waitForTimeout(500)
     await page.locator('main').getByLabel('Your name', { exact: true }).fill('E2E Tester')
     await page.locator('main').getByLabel('Email address', { exact: true }).fill(`e2e+${stamp}@example.test`)
-    const consent = page.locator('main input[type=checkbox]').last()
+    // The REQUIRED consent is the first box; the second one (hearing about other news) is optional and separate by design
+    // (added with PROMPT 17). `.last()` used to be the required one and now ticks the optional box and leaves the request unsendable.
+    const consent = page.locator('main input[type=checkbox]').first()
     if (!(await consent.isChecked())) await consent.check({ force: true })
   })
   await step(page, 'send the quote request and see the confirmation (only after the server accepted it)', async () => {
