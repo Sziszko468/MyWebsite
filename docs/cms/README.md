@@ -4,13 +4,28 @@ Written for PROMPT 13.1 ("Dynamic Portfolio CMS & Premium Shop Content Managemen
 
 There is **one backend** (`server/`, the same process, SQLite database, administrator accounts, sessions, CSRF rule, audit log and permissions as before) and **one administration** (`/admin`). Nothing was added beside them.
 
+## PROMPT 22 — the CMS completed (read this first)
+
+PROMPT 22 finished the CMS inside the same backend and administration; nothing was rebuilt and no second CMS exists. The audit and the reasoning are in [PLAN_22.md](PLAN_22.md); the details are in:
+
+| Document | What it says |
+| --- | --- |
+| [CONTENT_MODEL.md](CONTENT_MODEL.md) | the tables, the project document (internal name, services, content blocks, search and sharing words), the profile document |
+| [PUBLISHING_WORKFLOW.md](PUBLISHING_WORKFLOW.md) | draft, preview, publish, unpublish; what visitors, search engines and preview-link holders see; the live sitemap and pages |
+| [MEDIA_MANAGEMENT.md](MEDIA_MANAGEMENT.md) | the picture library, replace, descriptions, limits, where files live in production (and what is unverified) |
+| [LOCALIZATION.md](LOCALIZATION.md) | a missing translation shows nothing, never another language; availability per language; no automatic translation |
+| [SECURITY.md](SECURITY.md) | authorization, CSRF, XSS, uploads, preview-link tokens, concurrency, audit; the canonical-host issue (documented, not changed) |
+| [TEST_RESULTS.md](TEST_RESULTS.md) | every check that was run, with the exact numbers, and what was not run |
+
+New since §1–§11 below were written: content blocks, services and an internal name per project; search and sharing words per project; revocable preview links; a picture library with descriptions and replace; an About-and-contact profile; list search and filters; a live sitemap and live project pages; per-language availability. Where §1–§11 below say otherwise (the picture chooser being the only picture screen, the prerendered sitemap being the only one), this section and the documents above are current.
+
 ## 1. What can be managed, and where
 
 | What | Where in the administration | Public result |
 | --- | --- | --- |
 | **Portfolio projects**: create, edit, translate, preview, publish, unpublish, archive, restore, duplicate, delete, feature, reorder | `Projects` (`/admin/projects`, `/admin/projects/:id`) | the Work page (`/<lang>/work/`), each project's own page (`/<lang>/work/<slug>/`), and **Selected work on the home page** (the same data) |
 | **Work-page categories** and the **publishing rule** (all three languages complete, or not) | `Projects` → "Categories and publishing" | the Work page's filter (a category with no published project is not offered) |
-| **Pictures**: upload, replace, remove, description (alt text), gallery order, thumbnail | inside the project editor, `Images` tab (the picture chooser) | project cards, project pages, the gallery |
+| **Pictures**: upload, replace, remove, description (alt text), gallery order, thumbnail | `Pictures` (`/admin/media`, the library: descriptions, replace, delete) and inside the project editor, `Images` tab (the picture chooser) | project cards, project pages, the gallery |
 | **The website's own wording**: the home page (hero, calls to action, services preview, about preview, final call to action), the shop's buttons and messages, the request builder's questions and answers | `Website texts` (`/admin/texts`) | the same strings, in the language edited |
 | **The shop's catalogue**: services (benefits, features, description), packages (Launch, Grow, Build, Care: name, subtitle, descriptions, included/optional features, price, currency, VAT mode, pricing note, availability, order), add-ons, the FAQ | `Services & packages` and `Website content` (already existed, PROMPT 13) | the shop's pages, the cart and the request builder — **now without a new build** (§6) |
 

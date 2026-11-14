@@ -45,6 +45,8 @@ const ADMIN_ROUTES = [
   '/api/admin/projects', '/api/admin/projects/:id', '/api/admin/projects/:id/preview', '/api/admin/projects/:id/duplicate', '/api/admin/projects/:id/publish',
   '/api/admin/projects/:id/unpublish', '/api/admin/projects/:id/archive', '/api/admin/projects/:id/restore', '/api/admin/project-settings', '/api/admin/project-order',
   '/api/admin/project-preview', '/api/admin/media', '/api/admin/media/:id', '/api/admin/texts', '/api/admin/texts/:key',
+  // The CMS completion (PROMPT 22): preview links, the picture library's replace and storage, the profile (About and contact).
+  '/api/admin/projects/:id/preview-links', '/api/admin/projects/:id/preview-links/:link', '/api/admin/media/:id/replace', '/api/admin/media-storage', '/api/admin/profile',
   // Quotation management, shop documents and the Control Room AI administration (PROMPT 17 / 09.1 / 16): added by the PROMPT 19 audit,
   // which found these routes were not in the probe (compare with `grep -rho "'/api/admin/[^']*'" server/src`).
   '/api/admin/ai', '/api/admin/ai/alerts/acknowledge', '/api/admin/ai/connection-test', '/api/admin/ai/knowledge/refresh', '/api/admin/ai/settings',
@@ -77,7 +79,7 @@ check('/admin.html is not a page of the website', (await call('/admin.html')).st
 // ---------------------------------------------------------------------------------------------------------------
 console.log('\n2. Public endpoints never expose private or administrative data')
 const FORBIDDEN = /("|\b)(password|passwd|secret|token|csrf|ip_hash|content_hash|session|smtp|api_?key|notify_?to|owner|private)("|\b)\s*:/i
-for (const path of ['/api/services', '/api/packages', '/api/shop/catalog', '/api/shop/categories', '/api/shop/extras', '/api/content/faq', '/api/projects', '/api/projects/spendly', '/api/texts', '/api/health', '/api/ready']) {
+for (const path of ['/api/services', '/api/packages', '/api/shop/catalog', '/api/shop/categories', '/api/shop/extras', '/api/content/faq', '/api/projects', '/api/projects/spendly', '/api/profile', '/api/texts', '/api/health', '/api/ready']) {
   const r = await call(path)
   check(`GET ${path} answers and carries no private field`, (r.status === 200 || r.status === 503) && !FORBIDDEN.test(r.text) && !/@/.test(r.text.replace(/[\w.-]+@example\.(test|com)/g, '')), `status ${r.status}, ${r.text.length} bytes`)
 }
