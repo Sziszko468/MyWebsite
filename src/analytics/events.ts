@@ -36,6 +36,20 @@ export interface AnalyticsEvents {
   project_opened: { project: string }
   /** A Lab experience was opened. */
   lab_experience_opened: { experiment: LabId }
+  /** A consultation type was chosen (PROMPT 24): its code, which the owner chose (lowercase letters, digits and hyphens). Nothing typed. */
+  consultation_type_viewed: { type: string }
+  /** The booking page was opened with booking available. */
+  booking_started: Record<string, never>
+  /** A free time was chosen. */
+  booking_slot_selected: { type: string }
+  /** The booking was sent (before the server answered). */
+  booking_submitted: { type: string }
+  /** The server made the booking: `confirmed` is false when it waits for the owner. No name, address, reference or text. */
+  booking_confirmed: { type: string; confirmed: boolean }
+  /** A customer asked to cancel (or cancelled, when no approval is needed) on their booking page. */
+  booking_cancel_requested: Record<string, never>
+  /** A customer asked to move (or moved) their booking on their booking page. */
+  booking_reschedule_requested: Record<string, never>
 }
 
 export type EventName = keyof AnalyticsEvents
@@ -70,4 +84,11 @@ export const EVENT_NAMES: readonly EventName[] = [
   'summary_viewed',
   'project_opened',
   'lab_experience_opened',
+  'consultation_type_viewed',
+  'booking_started',
+  'booking_slot_selected',
+  'booking_submitted',
+  'booking_confirmed',
+  'booking_cancel_requested',
+  'booking_reschedule_requested',
 ]

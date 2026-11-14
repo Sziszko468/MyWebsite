@@ -4,10 +4,12 @@
  * `{name}` is a value filled in by the screen (utils/format.ts `fill`).
  */
 import { cmsEn } from './cms'
+import { bookingEn } from './booking'
 import { quotationEn } from './quotation'
 
 export const en = {
   quotation: quotationEn,
+  booking: bookingEn,
   cms: cmsEn,
   app: {
     name: 'Administration',
@@ -37,6 +39,7 @@ export const en = {
     dashboard: 'Dashboard',
     inquiries: 'Inquiries',
     quotes: 'Quote requests',
+    bookings: 'Consultations',
     services: 'Services & packages',
     content: 'Website content',
     translations: 'Translations',
@@ -514,6 +517,8 @@ export const en = {
       unknown: 'Not recognised.',
       duplicate: 'Already used.',
       tooMany: 'Too many.',
+      nonexistentTime: 'This time does not exist on that day.',
+      ambiguousTime: 'This time happens twice on that day.',
     },
   },
 
@@ -620,6 +625,10 @@ export const en = {
       confirm_inquiryBody: 'A short e-mail to the address the sender typed, saying the message arrived. Off until you turn it on.',
       confirm_quote: 'Confirm a quote request to the sender',
       confirm_quoteBody: 'A short e-mail to the address the sender typed, saying the request arrived: what they chose, no price, no promise. Off until you turn it on.',
+      new_booking: 'A consultation is booked',
+      new_bookingBody: 'An e-mail to the owner’s address when a visitor books, asks to change or cancels a consultation.',
+      confirm_booking: 'Confirm a booking to the visitor',
+      confirm_bookingBody: 'E-mails to the address the visitor typed: the confirmation, a new time, a cancellation. They say nothing about price, place or how it takes place. On unless you turn it off.',
       status_update: 'A status changes',
       status_updateBody: 'An e-mail to the sender or customer, only when you tick the box on the status change. Never automatic.',
       automatic: 'Automatic',
@@ -646,7 +655,7 @@ export const en = {
       empty: 'Nothing has been sent yet.',
       emptyBody: 'Messages appear here once something is queued.',
       emptyFiltered: 'No message has this state.',
-      kinds: { inquiry_received: 'New inquiry', quote_received: 'New quote request', inquiry_status: 'Inquiry status', quote_status: 'Quote request status', inquiry_confirmation: 'Inquiry confirmation', quote_confirmation: 'Quote request confirmation', test: 'Test message', quote_sent: 'Quotation', quote_revised: 'Revised quotation', quote_accepted: 'Acceptance (to the customer)', quote_accepted_admin: 'Acceptance (to you)', quote_declined: 'Decline (to the customer)', quote_declined_admin: 'Decline (to you)', revision_requested_admin: 'Change request (to you)', revision_received: 'Receipt for a change request (to the customer)', delivery_failed_admin: 'Delivery alert (to you)' },
+      kinds: { inquiry_received: 'New inquiry', quote_received: 'New quote request', inquiry_status: 'Inquiry status', quote_status: 'Quote request status', inquiry_confirmation: 'Inquiry confirmation', quote_confirmation: 'Quote request confirmation', test: 'Test message', quote_sent: 'Quotation', quote_revised: 'Revised quotation', quote_accepted: 'Acceptance (to the customer)', quote_accepted_admin: 'Acceptance (to you)', quote_declined: 'Decline (to the customer)', quote_declined_admin: 'Decline (to you)', revision_requested_admin: 'Change request (to you)', revision_received: 'Receipt for a change request (to the customer)', delivery_failed_admin: 'Delivery alert (to you)', booking_received: 'Booking request received', booking_confirmed: 'Booking confirmation (to the customer)', booking_new_admin: 'New booking (to you)', booking_change_received: 'Receipt for a request about a booking', booking_change_requested_admin: 'Request about a booking (to you)', booking_rescheduled: 'Booking moved (to the customer)', booking_proposal: 'Proposal of a new time', booking_change_declined: 'Request about a booking declined', booking_cancelled: 'Booking cancelled (to the customer)', booking_cancelled_admin: 'Booking cancelled (to you)' },
       filter: 'Show',
       filters: { all: 'Every message', problem: 'Problems (failed, bounced, spam)', retrying: 'Waiting to retry', pending: 'Waiting', accepted: 'Sent', delivered: 'Delivered', bounced: 'Bounced', complained: 'Marked as spam', failed: 'Failed', cancelled: 'Cancelled' },
       retry: 'Send again',

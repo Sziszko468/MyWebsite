@@ -66,6 +66,8 @@ export const LIMITS = {
   customer: { windowMs: MINUTE, max: 90 },
   /** Answers to a link that does not exist or no longer works are counted separately, against whoever keeps asking: guessing a token costs the guesser. */
   tokenMiss: { windowMs: 15 * MINUTE, max: 20 },
+  /** A consultation booking: a person books once or twice; a script books until it is stopped. */
+  booking: { windowMs: 15 * MINUTE, max: 6 },
   /** The e-mail provider's webhook: a handful of events per message, far below this, and a flood of unsigned ones is refused cheaply. */
   webhook: { windowMs: MINUTE, max: 240 },
 } as const
@@ -79,7 +81,7 @@ export class Limiters {
   constructor(clock: Clock, enabled: boolean) {
     this.enabled = enabled
     const make = (name: LimitName) => new RateLimiter(clock, LIMITS[name].windowMs, LIMITS[name].max)
-    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), customer: make('customer'), tokenMiss: make('tokenMiss'), webhook: make('webhook') }
+    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), customer: make('customer'), booking: make('booking'), tokenMiss: make('tokenMiss'), webhook: make('webhook') }
   }
 
   /** Counts one request against a limit and throws the 429 when it is over. */

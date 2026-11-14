@@ -3,6 +3,7 @@ import { useCatalogGate } from '../content/liveCatalog'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
 import { isPackageId, packages, type PackageId } from '../content/packages'
+import { ConsultationCta } from '../components/consultation/ConsultationCta'
 import { FinalCta } from '../components/home/FinalCta'
 import { ConfigureBand, FaqBand, ProcessBand, SupportBand, WorkBand } from '../components/shop/Bands'
 import { Discovery } from '../components/shop/Discovery'
@@ -46,6 +47,7 @@ export function ServicesPage() {
       <SupportBand />
       <WorkBand />
       <FaqBand />
+      <ConsultationCta />
       <FinalCta id="start" tone={shopTone('start')} copy={landing.final} action={{ to: SHOP_PATHS.configure }} />
     </>
   )

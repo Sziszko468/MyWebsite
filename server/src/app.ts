@@ -16,6 +16,8 @@ import { adminRoutes } from './modules/admin/routes.ts'
 import { Assistant, type ModelProvider } from './modules/ai/gateway.ts'
 import { aiRoutes } from './modules/ai/routes.ts'
 import { originIsThisHost, resolveSession, sameOrigin, sessionCookieName, verifySessionCsrf } from './modules/auth/sessions.ts'
+import { publicConfig } from './modules/bookings/public.ts'
+import { bookingRoutes } from './modules/bookings/routes.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { contactRoutes } from './modules/contact/routes.ts'
 import { EmailChecks, type DnsResolver } from './modules/notifications/checks.ts'
@@ -82,7 +84,7 @@ export function createApp(deps: AppDeps): App {
   context.assistant = new Assistant(context, deps.aiModel ?? null)
 
   const router = new Router()
-  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
+  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...bookingRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
 
   const sweeper = setInterval(() => {
     limiters.sweep()
@@ -226,6 +228,16 @@ export function createApp(deps: AppDeps): App {
             const shell = serveStatic(config.staticDir, `/${previewLink[1]}/work/`)
             if (shell && shell.status === 200) served = { ...shell, headers: { ...shell.headers, 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'Referrer-Policy': 'no-referrer' } }
           }
+          // A customer's booking page (`/hu/consultation/booking/<secret>`) is the same kind of private page: the application's quiet shell, never cached or indexed,
+          // never carrying the address to another site.
+          const bookingPage = /^\/(hu|en|nl)\/consultation\/booking\/[A-Za-z0-9_-]{20,64}\/?$/.exec(url.pathname)
+          if (bookingPage && (!served || served.status === 404)) {
+            const shell = serveStatic(config.staticDir, `/${bookingPage[1]}/consultation/booking/`)
+            if (shell && shell.status === 200) served = { ...shell, headers: { ...shell.headers, 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'Referrer-Policy': 'no-referrer' } }
+          }
+          // The booking page itself says so, and is not listed, while booking is not open: the prerendered page cannot know, the backend does.
+          const consultationPage = /^\/(hu|en|nl)\/consultation\/?$/.exec(url.pathname)
+          if (consultationPage && served && served.status === 200 && !publicConfig(context, consultationPage[1] as 'hu' | 'en' | 'nl').open) served = { ...served, headers: { ...served.headers, 'X-Robots-Tag': 'noindex' } }
           if (!served) throw notFound('The address')
           label = 'static'
           reply = served

@@ -339,7 +339,7 @@ describe('housekeeping and the right to be forgotten', () => {
     expect(server.db.get('SELECT COUNT(*) AS n FROM inquiries')).toEqual({ n: 1 })
     expect(server.db.get('SELECT COUNT(*) AS n FROM quote_requests')).toEqual({ n: 1 })
     expect(server.db.get('SELECT COUNT(*) AS n FROM quote_request_items WHERE quote_request_id NOT IN (SELECT id FROM quote_requests)')).toEqual({ n: 0 })
-    expect(eraseByEmail(ctx(), 'forget.me@example.com')).toEqual({ inquiries: 0, quoteRequests: 0, deliveries: 0 })
+    expect(eraseByEmail(ctx(), 'forget.me@example.com')).toEqual({ inquiries: 0, quoteRequests: 0, bookings: 0, deliveries: 0 })
   })
 })
 

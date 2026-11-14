@@ -42,6 +42,9 @@ const loaders = import.meta.glob<Record<string, unknown>>([
 const emailLoaders = import.meta.glob<Record<string, unknown>>([
   '../../../server/src/modules/notifications/templates.ts',
   '../../../server/src/modules/notifications/quoteTemplates.ts',
+  // PROMPT 24: the consultation booking's e-mails and the suggested consultation types.
+  '../../../server/src/modules/notifications/bookingTemplates.ts',
+  '../../../server/src/modules/bookings/suggested.ts',
 ])
 
 /** A word list with every function replaced by the sentence it makes from `{a0}`, `{a1}`… */

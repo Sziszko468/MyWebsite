@@ -6,6 +6,7 @@ import { Database } from './db/database.ts'
 import { migrate, migrationStatus } from './db/migrate.ts'
 import { seedCatalog } from './db/seed.ts'
 import { seedProjects } from './modules/projects/service.ts'
+import { seedConsultationTypes } from './modules/bookings/suggested.ts'
 import { seedShopDocuments } from './modules/shop/documents.ts'
 import { createLogger } from './lib/logger.ts'
 import { systemClock } from './lib/time.ts'
@@ -133,6 +134,9 @@ async function run(): Promise<void> {
         const result = seedCatalog(app.context)
         const projectSeed = seedProjects(app.context)
         const shopSeed = seedShopDocuments(app.context)
+        const consultationSeed = seedConsultationTypes(app.context)
+        if (consultationSeed.seeded) process.stdout.write(`Loaded ${consultationSeed.types} suggested consultation types (all switched off).
+`)
         if (shopSeed.seeded) process.stdout.write('Loaded the tier comparison and the FULL EXPERIENCE offer.' + '\n')
         if (projectSeed.seeded) process.stdout.write(`Loaded ${projectSeed.projects} projects and ${projectSeed.media} images.
 `)
@@ -207,7 +211,7 @@ async function run(): Promise<void> {
       case 'erase': {
         const [email] = args
         if (!email) throw new Error('Give the e-mail address to erase.')
-        const confirm = await prompt(`Delete every message, request and delivery record held for ${normalizeEmail(email)}? Type yes: `, false)
+        const confirm = await prompt(`Delete every message, request, booking and delivery record held for ${normalizeEmail(email)}? Type yes: `, false)
         if (confirm.trim().toLowerCase() !== 'yes') throw new Error('Cancelled.')
         process.stdout.write(`${JSON.stringify(eraseByEmail(app.context, email), null, 2)}\n`)
         return

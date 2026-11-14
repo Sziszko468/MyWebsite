@@ -32,6 +32,9 @@ export interface GlossaryTerm {
 /** The files that write the quotation a customer reads and decides on: the customer pages and the e-mails about it. */
 export const QUOTATION_DOCUMENTS = /^(content\/quotes\/|server\/src\/modules\/notifications\/quoteTemplates\.ts$)/
 
+/** The files that write the consultation booking's words: the booking pages, the e-mails and the suggested types. */
+export const BOOKING_DOCUMENTS = /^(content\/consultation\/|server\/src\/modules\/notifications\/bookingTemplates\.ts$|server\/src\/modules\/bookings\/suggested\.ts$)/
+
 export const glossary: GlossaryTerm[] = [
   {
     concept: 'add-on (an optional extra on a package or service)',
@@ -94,6 +97,16 @@ export const glossary: GlossaryTerm[] = [
     forbidden: {},
     appears: { hu: /szolgáltatás/i, en: /\bservices?\b/i, nl: /\bdiensten?\b/i },
     note: 'Dutch “dienstverlener” and “dienstpagina” are compounds of the same word; Dutch “service” would be the English word.',
+  },
+  {
+    concept: 'consultation (a booked conversation) and its booking',
+    use: { hu: 'konzultáció, foglalás', en: 'consultation, booking', nl: 'adviesgesprek, afspraak' },
+    // The thing is a "consultation" and reserving a time for it is a "booking" (English), a "foglalás" (Hungarian) and an "afspraak" (Dutch): not an
+    // "appointment" or a "reservation" in one sentence and a "booking" in the next, and not the medical-sounding Dutch "consult" or a hotel's "boeking".
+    forbidden: { en: [/\bappointments?\b/i, /\breservations?\b/i], nl: [/\bboeking(?:en)?\b/i, /\breservering(?:en)?\b/i, /\bconsult(?:en)?\b/i], hu: [/\breszerv/i, /\bbookol/i] },
+    sources: BOOKING_DOCUMENTS,
+    appears: { hu: /konzultáció/i, en: /\bconsultation/i, nl: /adviesgesprek/i },
+    note: 'Only in the booking pages, the booking e-mails and the suggested consultation types: "appointment" is not banned elsewhere.',
   },
   {
     concept: 'custom project (work that is not one of the four packages)',

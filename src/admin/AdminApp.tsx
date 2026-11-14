@@ -6,6 +6,9 @@ import { AdminShell } from './components/AdminShell'
 import { ToastProvider } from './components/Toast'
 import { ErrorState, LoadingState } from './components/states'
 import { useText } from './i18n'
+import { BookingDetailPage } from './pages/BookingDetailPage'
+import { BookingSetupPage } from './pages/BookingSetupPage'
+import { BookingsPage } from './pages/BookingsPage'
 import { ContentPage } from './pages/ContentPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { FaqEditPage } from './pages/FaqEditPage'
@@ -90,6 +93,9 @@ function Gate() {
           <Route path="quotes/:id" element={<QuoteDetailPage />} />
           <Route path="quotes/:id/create" element={<QuotationStartPage />} />
           <Route path="quotes/:id/versions/:quoteId" element={<QuotationPage />} />
+          <Route path="bookings" element={<BookingsPage />} />
+          <Route path="bookings/setup" element={<BookingSetupPage />} />
+          <Route path="bookings/:id" element={<BookingDetailPage />} />
           <Route path="services" element={<ServicesPage />} />
           <Route path="services/new/service" element={<ServiceEditPage />} />
           <Route path="services/service/:slug" element={<ServiceEditPage />} />

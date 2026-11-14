@@ -28,6 +28,17 @@ export type EmailKind =
   // PROMPT 21: the customer's receipt for a change request, and the owner's alert when a message to a customer could not be delivered
   | 'revision_received'
   | 'delivery_failed_admin'
+  // PROMPT 24: the consultation booking (bookingTemplates.ts)
+  | 'booking_received'
+  | 'booking_confirmed'
+  | 'booking_new_admin'
+  | 'booking_change_received'
+  | 'booking_change_requested_admin'
+  | 'booking_rescheduled'
+  | 'booking_proposal'
+  | 'booking_change_declined'
+  | 'booking_cancelled'
+  | 'booking_cancelled_admin'
 
 export interface Rendered {
   subject: string
@@ -249,7 +260,7 @@ export interface Cta {
   fallback: string
 }
 
-export function layout(options: { lang: Language; brand: string; title: string; preview: string; intro: string; rows: Row[]; note?: { title: string; text: string }; cta?: Cta; footer: string }): string {
+export function layout(options: { lang: Language; brand: string; title: string; preview: string; intro: string; rows: Row[]; note?: { title: string; text: string }; cta?: Cta; footer: string; /** The small heading above the rows; the default says "request details", a booking says its own. */ detailsLabel?: string }): string {
   const { lang, brand, title, preview, intro, rows, note, cta, footer } = options
   const rowHtml = rows.map(
     (row) => html`<tr>
@@ -258,7 +269,7 @@ export function layout(options: { lang: Language; brand: string; title: string; 
     </tr>`,
   )
   const noteLabel = lang === 'hu' ? 'FONTOS INFORMÁCIÓ' : lang === 'nl' ? 'BELANGRIJKE INFORMATIE' : 'IMPORTANT INFORMATION'
-  const detailsLabel = lang === 'hu' ? 'A MEGKERESÉS RÉSZLETEI' : lang === 'nl' ? 'GEGEVENS VAN JE AANVRAAG' : 'REQUEST DETAILS'
+  const detailsLabel = options.detailsLabel ?? (lang === 'hu' ? 'A MEGKERESÉS RÉSZLETEI' : lang === 'nl' ? 'GEGEVENS VAN JE AANVRAAG' : 'REQUEST DETAILS')
   const noteHtml = note
     ? html`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;background:#fff8f0;border:1px solid #f0dfd0"><tr><td width="4" style="background:${RED};font-size:0;line-height:0">&nbsp;</td><td style="padding:17px 18px;color:${INK};font:14px/1.65 Arial,Helvetica,sans-serif;white-space:pre-wrap"><span style="display:block;margin:0 0 7px;color:${RED};font:700 10px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.1em;text-transform:uppercase">${note.title || noteLabel}</span>${note.text}</td></tr></table>`
     : ''

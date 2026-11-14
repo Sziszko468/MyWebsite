@@ -116,6 +116,9 @@ export function overview(app: AppContext, session: SessionInfo | null, query: UR
       // Sent to the person who wrote, only if an administrator switched confirmations on (they are off until then).
       { id: 'confirm_inquiry', automatic: true, enabled: prefs.confirmInquiry, active: prefs.confirmInquiry && summary.enabled },
       { id: 'confirm_quote', automatic: true, enabled: prefs.confirmQuote, active: prefs.confirmQuote && summary.enabled },
+      automatic('new_booking', prefs.newBooking),
+      // Sent to the person who booked a consultation: the confirmation and what happens to the booking afterwards.
+      { id: 'confirm_booking', automatic: true, enabled: prefs.confirmBooking, active: prefs.confirmBooking && summary.enabled },
       // Sent to the person who wrote, only when an administrator ticks the box on a status change; there is no switch to turn on.
       { id: 'status_update', automatic: false, enabled: true, active: summary.enabled },
     ],
@@ -156,11 +159,13 @@ export function savePreferences(app: AppContext, session: SessionInfo | null, bo
     newQuote: body.newQuote,
     confirmInquiry: flag(body.confirmInquiry, current.confirmInquiry, 'confirmInquiry'),
     confirmQuote: flag(body.confirmQuote, current.confirmQuote, 'confirmQuote'),
+    newBooking: flag(body.newBooking, current.newBooking, 'newBooking'),
+    confirmBooking: flag(body.confirmBooking, current.confirmBooking, 'confirmBooking'),
     responseNote,
   }
   saveNotificationPreferences(app.db, app.clock, actor.userId, next)
   // The log names what was switched, not what was written in the note.
-  audit(app, actor, 'settings.notifications', 'settings', null, { newInquiry: next.newInquiry, newQuote: next.newQuote, confirmInquiry: next.confirmInquiry, confirmQuote: next.confirmQuote, responseNoteSet: LANGUAGES.filter((language) => next.responseNote[language] !== '') })
+  audit(app, actor, 'settings.notifications', 'settings', null, { newInquiry: next.newInquiry, newQuote: next.newQuote, confirmInquiry: next.confirmInquiry, confirmQuote: next.confirmQuote, newBooking: next.newBooking, confirmBooking: next.confirmBooking, responseNoteSet: LANGUAGES.filter((language) => next.responseNote[language] !== '') })
   return next
 }
 

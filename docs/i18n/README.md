@@ -154,13 +154,15 @@ What these checks are not: a spell checker does not find a correctly spelled wro
 | custom project (not one of the four packages) | egyedi | custom | maatwerk |
 | portfolio / selected work | Munkáim (menu), Kiemelt munkák | Work (menu), Selected work | Werk (menu), Uitgelicht werk |
 | process | folyamat | process | proces, werkwijze |
+| consultation (a booked conversation) and its booking | konzultáció, foglalás | consultation, booking | adviesgesprek, afspraak |
 | project status | állapot | status | status |
 
 The Dutch said *toevoeging*, *optie* and *extra* for the same thing, English said *quote* and *quotation*, *e-mail* and *email*, Hungarian *ajánlat* and *árajánlat*; each is now one word and a rule keeps it so.
 PROMPT 23 added what it found next: English said **both** *inquiry* (5 texts) and *enquiry* (4) — the owner's own word is *inquiry*, now the only one; and the quotation a customer is asked to accept was *the quote* in one sentence and
 *the offer* (English) or *het voorstel* (Dutch) in the next, in the customer pages and the e-mails (18 texts), which reads as two documents: it is *the quote* / *de offerte* there now, and the rule is limited to those files because *offer*
 and *voorstel* are right words elsewhere.
-**Concepts of the brief that the site does not have:** a customer portal (a customer opens a private link to one quotation or to the status of one request; there is no account or sign-in) and a consultation booking (there is no booking). No word was invented for them.
+PROMPT 24 added the consultation booking, so the last concept in the table is new: *konzultáció* / *consultation* / *adviesgesprek* for the thing and *foglalás* / *booking* / *afspraak* for reserving a time. The rule is limited to the booking pages, the booking e-mails and the suggested types (`BOOKING_DOCUMENTS` in `glossary.ts`) and forbids *appointment* and *reservation* (English), *boeking*, *reservering* and the medical-sounding *consult* (Dutch) and *reszerváció* (Hungarian) there. The new texts are inventoried (`content/consultation/`, `bookingTemplates.ts`, `suggested.ts`), spell-checked and held to the register rule (the first Hungarian draft said *kérjük*, which the `register` rule caught).
+**Concepts of the brief that the site does not have:** a customer portal (a customer opens a private link to one quotation, to the status of one request or to one booking; there is no account or sign-in). No word was invented for it.
 
 ## 5. Writing for people with no technical background
 

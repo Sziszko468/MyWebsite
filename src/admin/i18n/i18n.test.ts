@@ -51,7 +51,7 @@ describe('the two interface languages', () => {
 
   it('say "delivered" only as a state the provider’s verified notification sets, or in a sentence that says it needs one', () => {
     // A state's own name (a label, a filter, a count) may say it; anything else must tie it to the provider's confirmation.
-    const NAMES = /^(status\.delivery\.|notifications\.(counts\.|log\.(filters\.|deliveredAt)))/
+    const NAMES = /^(status\.delivery\.|booking\.detail\.emailStates\.|notifications\.(counts\.|log\.(filters\.|deliveredAt)))/
     const TIED = /webhook|provider|szolgáltató|confirm|megerősít|only|csak/i
     const claims = [...english, ...hungarian].filter(([key, text]) => /\bdelivered\b|kézbesítve/i.test(text) && !NAMES.test(key) && !TIED.test(text)).map(([key]) => key)
     expect(claims).toEqual([])

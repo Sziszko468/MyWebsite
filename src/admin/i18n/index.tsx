@@ -56,6 +56,15 @@ export function formatDay(value: string | null | undefined, language: InterfaceL
   return new Intl.DateTimeFormat(LOCALE[language], { dateStyle: 'medium' }).format(date)
 }
 
+/** An instant in the zone the owner schedules in (the appointment's own zone), in the administrator's language: "4 Nov 2026, 14:00". */
+export function formatInZone(value: string | null | undefined, zone: string, language: InterfaceLanguage, style: 'moment' | 'day' | 'clock' = 'moment'): string {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  const options: Intl.DateTimeFormatOptions = style === 'day' ? { dateStyle: 'medium' } : style === 'clock' ? { timeStyle: 'short' } : { dateStyle: 'medium', timeStyle: 'short' }
+  return new Intl.DateTimeFormat(LOCALE[language], { ...options, timeZone: zone }).format(date)
+}
+
 export function formatNumber(value: number, language: InterfaceLanguage): string {
   return new Intl.NumberFormat(LOCALE[language]).format(value)
 }

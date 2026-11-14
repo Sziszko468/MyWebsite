@@ -6,6 +6,8 @@ import { redactText, type Logger } from '../../lib/logger.ts'
 import { addMs, iso, MINUTE, type Clock } from '../../lib/time.ts'
 import { loadCatalog } from '../catalog/repository.ts'
 import { getInquiry } from '../inquiries/repository.ts'
+import { bookingCustomerAddress, renderBookingDelivery } from '../bookings/mail.ts'
+import { recordBookingEvent } from '../bookings/repository.ts'
 import { recordEvent } from '../quotes/events.ts'
 import { getQuotation, linesOf, type QuotationRow } from '../quotes/quotations.ts'
 import { getQuote, quoteItems, type QuoteRow } from '../quotes/repository.ts'
@@ -17,6 +19,7 @@ import { MailError } from './smtp.ts'
 import type { Mailer } from './mailer.ts'
 import { MimeError, type MailMessage } from './mime.ts'
 import { quoteWords, renderDeliveryFailed, renderQuoteAccepted, renderQuoteAcceptedAdmin, renderQuoteDeclined, renderQuoteDeclinedAdmin, renderQuoteSent, renderRequestConfirmation, renderRequestNotification, renderRevisionReceived, renderRevisionRequested, type QuoteMail } from './quoteTemplates.ts'
+import type { BookingMailKind } from './bookingTemplates.ts'
 import { renderInquiryConfirmation, renderInquiryReceived, renderStatusChange, renderTestEmail, type EmailKind, type Rendered } from './templates.ts'
 
 /**
@@ -52,6 +55,8 @@ const STUCK_AFTER_MS = 10 * MINUTE
  */
 export const CONFIRMATIONS_PER_ADDRESS_PER_DAY = 3
 const DAY_MS = 24 * 60 * MINUTE
+/** How many booking messages one address may receive in a day: a booking is made by a stranger who typed an address, so the site cannot be used to write to someone else without end. */
+export const BOOKING_MAILS_PER_ADDRESS_PER_DAY = 12
 
 export interface NotifierDeps {
   db: Database
@@ -66,7 +71,7 @@ export type DeliveryStatus = 'pending' | 'sending' | 'accepted' | 'delivered' | 
 export interface DeliveryRow {
   id: string
   kind: EmailKind
-  related_type: 'inquiry' | 'quote_request' | 'system' | 'quote' | 'quote_revision' | 'email_delivery'
+  related_type: 'inquiry' | 'quote_request' | 'system' | 'quote' | 'quote_revision' | 'email_delivery' | 'booking_event'
   related_id: string
   recipient: string
   language: 'hu' | 'en' | 'nl'
@@ -172,6 +177,41 @@ export class Notifier {
     }
   }
 
+  // ---- the consultation booking's mails (PROMPT 24) ----
+
+  /**
+   * The messages about one event of a booking: one to the customer and/or one to the owner. A booking's message is about an EVENT of the booking (its
+   * creation, a move, a cancellation), so the outbox's once-only rule gives exactly one of each kind per event whatever is retried. The customer's is
+   * skipped when confirmations of bookings are switched off, when nothing is configured to send it or when the address has had its share today; the
+   * owner's when there is no `NOTIFY_TO` or the owner switched booking notifications off. Called inside the transaction of the change it announces,
+   * and never throws: a message that cannot be queued must not undo a booking. Returns whether the customer's message is queued.
+   */
+  queueBookingMails(input: { eventId: number; customerEmail: string; customerLanguage: DeliveryRow['language']; customer?: BookingMailKind; owner?: BookingMailKind; note?: string | null }): boolean {
+    const { config, db, log, clock } = this.deps
+    if (!this.enabled) return false
+    const wanted = notificationPreferences(db)
+    const attempt = (kind: BookingMailKind, recipient: string, language: DeliveryRow['language'], note: string | null): boolean => {
+      try {
+        this.enqueue({ kind, relatedType: 'booking_event', relatedId: String(input.eventId), recipient, language, note })
+        return true
+      } catch (error) {
+        // The same message for the same event is refused by the database: that is the point, not a failure.
+        if (error instanceof ConstraintError && error.kind === 'unique') return true
+        log.error('could not queue a booking e-mail', { kind, error })
+        return false
+      }
+    }
+    let customerQueued = false
+    if (input.customer && wanted.confirmBooking) {
+      const since = iso(addMs(clock.now(), -DAY_MS))
+      const recent = db.get<{ n: number }>("SELECT COUNT(*) AS n FROM email_deliveries WHERE recipient = ? COLLATE NOCASE AND kind LIKE 'booking!_%' ESCAPE '!' AND created_at >= ?", [input.customerEmail, since])?.n ?? 0
+      if (recent >= BOOKING_MAILS_PER_ADDRESS_PER_DAY) log.warn('booking e-mail skipped: this address has had its share today')
+      else customerQueued = attempt(input.customer, input.customerEmail, input.customerLanguage, input.note ?? null)
+    }
+    if (input.owner && config.email.notifyTo && wanted.newBooking) attempt(input.owner, config.email.notifyTo, config.email.notifyLanguage, null)
+    return customerQueued
+  }
+
   // ---- the quotation's mails (PROMPT 17) ----
 
   /** Where the customer's e-mail links point: the public site, in the customer's language. `null` when the operator has not said where the site is. */
@@ -238,6 +278,12 @@ export class Notifier {
     try {
       const row = db.get<DeliveryRow>('SELECT * FROM email_deliveries WHERE id = ?', [id])
       if (!row || (row.status !== 'failed' && row.status !== 'bounced' && row.status !== 'complained')) return
+      if (row.related_type === 'booking_event') {
+        // A message about a booking: the booking's history says so (the administration shows the message's state beside it); no second e-mail about an e-mail.
+        const event = db.get<{ booking_id: string; reference: string }>('SELECT booking_id, reference FROM booking_events WHERE id = ?', [Number(row.related_id)])
+        if (event) recordBookingEvent(db, clock, { booking: { id: event.booking_id, reference: event.reference }, type: 'email_failed', actor: { type: 'system' }, summary: `${row.kind}: ${row.status}` })
+        return
+      }
       const request = this.requestOf(row)
       if (!request) return
       recordEvent({ db, clock }, { requestId: request.id, reference: request.reference, type: 'email_failed', actor: { type: 'system' }, summary: `${row.kind}: ${row.status}` })
@@ -355,6 +401,7 @@ export class Notifier {
       if (row.kind === 'inquiry_confirmation') return renderInquiryConfirmation(inquiry, row.language, brand, note)
       return row.kind === 'inquiry_received' ? renderInquiryReceived(inquiry, row.language, brand) : renderStatusChange('inquiry', inquiry, row.note, row.language, brand)
     }
+    if (row.related_type === 'booking_event') return renderBookingDelivery(this.deps, row, brand)
     if (row.related_type === 'email_delivery') return this.renderDeliveryFailure(row)
     if (row.related_type === 'quote' || row.related_type === 'quote_revision') return this.renderQuotation(row)
 
@@ -455,6 +502,7 @@ export class Notifier {
   /** The address of the person a message to the owner is about, so the owner can answer them straight from the mail program. */
   private customerAddress(row: DeliveryRow): string | null {
     if (row.kind === 'inquiry_received') return getInquiry(this.deps.db, row.related_id)?.email ?? null
+    if (row.related_type === 'booking_event') return bookingCustomerAddress(this.deps, row.related_id)
     return this.requestOf(row)?.email ?? null
   }
 
@@ -495,7 +543,7 @@ export class Notifier {
       const domain = from.replace(/^.*@/, '').replace(/[^A-Za-z0-9.-]/g, '') || 'localhost'
       // The owner's notification can be answered directly (Reply-To is the visitor, never the sender: the sender is the verified
       // address). A customer's goes back to the PUBLIC contact address, never to the owner's private inbox (`NOTIFY_TO`).
-      const toOwner = row.kind === 'inquiry_received' || row.kind === 'quote_received' || row.kind === 'quote_accepted_admin' || row.kind === 'quote_declined_admin' || row.kind === 'revision_requested_admin'
+      const toOwner = row.kind === 'inquiry_received' || row.kind === 'quote_received' || row.kind === 'quote_accepted_admin' || row.kind === 'quote_declined_admin' || row.kind === 'revision_requested_admin' || row.kind === 'booking_new_admin' || row.kind === 'booking_change_requested_admin' || row.kind === 'booking_cancelled_admin'
       const customerReply = config.email.replyTo ?? from
       // The alert about a failed delivery is not something to answer to the customer whose message failed: it has no Reply-To.
       const replyTo = row.kind === 'test' || row.kind === 'delivery_failed_admin' ? null : toOwner ? this.customerAddress(row) : customerReply

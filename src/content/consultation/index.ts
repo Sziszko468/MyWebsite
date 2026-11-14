@@ -1,0 +1,276 @@
+import { tri } from '../trilingual'
+
+/**
+ * Everything the consultation booking says to a visitor (PROMPT 24), in Hungarian, English and Dutch: the booking page, the steps, the calendar, the
+ * form, the confirmation and the customer's own booking page. The words follow the glossary: a consultation is a "konzultáció" / "consultation" /
+ * "adviesgesprek", the reservation of a time is a "foglalás" / "booking" / "afspraak".
+ *
+ * Nothing here says what a consultation costs, whether it is free, how it takes place or how long an answer takes: none of that is configured anywhere,
+ * so none of it is promised. A sentence about an e-mail is shown only when the server says one was queued, and it never claims the e-mail arrived.
+ */
+export const consultationText = {
+  meta: {
+    title: tri('Konzultáció foglalása', 'Book a consultation', 'Een adviesgesprek inplannen'),
+    description: tri(
+      'Válassz konzultációtípust és szabad időpontot, add meg az elérhetőségedet, és foglalj időpontot egy beszélgetésre a projektedről.',
+      'Choose a type of consultation and a free time, leave your contact details and book a conversation about your project.',
+      'Kies een soort adviesgesprek en een vrij moment, laat je gegevens achter en plan een gesprek over je project.',
+    ),
+    manageTitle: tri('Foglalásod', 'Your booking', 'Je afspraak'),
+    manageDescription: tri('A konzultációd foglalása a személyes linkeden.', 'Your consultation booking, behind your personal link.', 'De afspraak voor je adviesgesprek, achter je persoonlijke link.'),
+  },
+
+  hero: {
+    eyebrow: tri('Konzultáció', 'Consultation', 'Adviesgesprek'),
+    line1: tri('Beszéljük meg', 'Let us talk', 'Laten we praten'),
+    line2: tri('a projektedet.', 'about your project.', 'over je project.'),
+    lead: tri(
+      'Válaszd ki a konzultáció típusát és egy szabad időpontot, majd add meg az elérhetőségedet.',
+      'Choose the kind of consultation and a free time, then leave your contact details.',
+      'Kies het soort adviesgesprek en een vrij moment en laat daarna je gegevens achter.',
+    ),
+  },
+
+  closed: {
+    title: tri('A foglalás jelenleg nem érhető el', 'Online booking is not available right now', 'Online inplannen is op dit moment niet mogelijk'),
+    body: tri(
+      'Időpontot most nem tudsz itt foglalni. A kapcsolat oldalon üzenetet küldhetsz.',
+      'You cannot book a time here right now. You can send a message from the contact page.',
+      'Je kunt hier op dit moment geen moment inplannen. Via de contactpagina kun je een bericht sturen.',
+    ),
+    action: tri('Kapcsolat', 'Contact', 'Contact'),
+    loading: tri('A foglalás betöltése…', 'Loading the booking…', 'De agenda wordt geladen…'),
+    failed: tri('A foglalás átmenetileg nem érhető el. Próbáld újra később.', 'Booking is temporarily unavailable. Please try again later.', 'Inplannen is tijdelijk niet beschikbaar. Probeer het later opnieuw.'),
+    retry: tri('Újra', 'Try again', 'Opnieuw proberen'),
+  },
+
+  steps: {
+    label: tri('A foglalás lépései', 'Booking steps', 'Stappen van het inplannen'),
+    type: tri('Típus', 'Type', 'Soort'),
+    time: tri('Időpont', 'Date and time', 'Datum en tijd'),
+    details: tri('Adataid', 'Your details', 'Je gegevens'),
+    review: tri('Áttekintés', 'Review', 'Controleren'),
+    of: tri('{n}. lépés / {total}', 'Step {n} of {total}', 'Stap {n} van {total}'),
+    next: tri('Tovább', 'Continue', 'Verder'),
+    back: tri('Vissza', 'Back', 'Terug'),
+  },
+
+  type: {
+    heading: tri('Milyen beszélgetésre van szükséged?', 'What kind of conversation do you need?', 'Welk soort gesprek heb je nodig?'),
+    hint: tri('Válassz egyet. A leírása és az időtartama a választás mellett látható.', 'Choose one. Its description and length are shown with it.', 'Kies er één. De beschrijving en de duur staan erbij.'),
+    duration: tri('{minutes} perc', '{minutes} minutes', '{minutes} minuten'),
+    required: tri('Válassz egy típust a folytatáshoz.', 'Choose a type to continue.', 'Kies een soort om verder te gaan.'),
+  },
+
+  time: {
+    heading: tri('Válassz napot és időpontot', 'Choose a day and a time', 'Kies een dag en een tijd'),
+    zone: tri('Az időpontok ebben az időzónában értendők: {zone}.', 'Times are shown in this time zone: {zone}.', 'Tijden worden getoond in deze tijdzone: {zone}.'),
+    zoneNote: tri('Ha máshol vagy, az időpont a saját órádon eltérhet.', 'If you are somewhere else, the time on your own clock may differ.', 'Ben je ergens anders, dan kan de tijd op je eigen klok afwijken.'),
+    calendar: tri('Naptár: {month}', 'Calendar: {month}', 'Agenda: {month}'),
+    previousMonth: tri('Előző hónap', 'Previous month', 'Vorige maand'),
+    nextMonth: tri('Következő hónap', 'Next month', 'Volgende maand'),
+    legend: tri('Jelmagyarázat', 'Key', 'Legenda'),
+    available: tri('Szabad nap', 'Free day', 'Vrije dag'),
+    selected: tri('Kiválasztva', 'Selected', 'Geselecteerd'),
+    full: tri('Betelt', 'Fully booked', 'Volgeboekt'),
+    closed: tri('Nem foglalható', 'Not available', 'Niet beschikbaar'),
+    dayAvailable: tri('vannak szabad időpontok', 'free times available', 'vrije tijden beschikbaar'),
+    dayFull: tri('minden időpont foglalt', 'fully booked', 'volgeboekt'),
+    dayClosed: tri('nem foglalható', 'not available', 'niet beschikbaar'),
+    daySelected: tri('kiválasztva', 'selected', 'geselecteerd'),
+    loadingDays: tri('Szabad napok betöltése…', 'Loading free days…', 'Vrije dagen laden…'),
+    daysFailed: tri('A naptár átmenetileg nem érhető el.', 'The calendar is temporarily unavailable.', 'De agenda is tijdelijk niet beschikbaar.'),
+    retry: tri('Újra', 'Try again', 'Opnieuw proberen'),
+    timesHeading: tri('Szabad időpontok: {date}', 'Free times on {date}', 'Vrije tijden op {date}'),
+    pickDay: tri('Válassz egy szabad napot a naptárban.', 'Choose a free day in the calendar.', 'Kies een vrije dag in de agenda.'),
+    noTimes: tri('Ezen a napon nincs szabad időpont.', 'There are no free times on this day.', 'Er zijn op deze dag geen vrije tijden.'),
+    ambiguous: tri(
+      'Ezen a napon az óraátállítás miatt ugyanaz az óra kétszer van; a gomb a pontos időzónát is mutatja.',
+      'On this day the clocks go back, so the same hour happens twice; the button also shows the exact time zone.',
+      'Op deze dag gaan de klokken terug, dus hetzelfde uur komt twee keer voor; de knop toont ook de exacte tijdzone.',
+    ),
+    taken: tri('Ezt az időpontot közben valaki lefoglalta. Válassz másikat.', 'Someone has just booked that time. Please choose another.', 'Iemand heeft dat moment zojuist geboekt. Kies een ander moment.'),
+    required: tri('Válassz napot és időpontot a folytatáshoz.', 'Choose a day and a time to continue.', 'Kies een dag en een tijd om verder te gaan.'),
+    timesLabel: tri('Szabad időpontok', 'Free times', 'Vrije tijden'),
+  },
+
+  details: {
+    heading: tri('Hogyan érhetünk el?', 'How can we reach you?', 'Hoe kunnen we je bereiken?'),
+    hint: tri('Csak azt kérjük, ami a foglaláshoz kell. Fiók nem szükséges.', 'We only ask for what the booking needs. No account is needed.', 'We vragen alleen wat voor de afspraak nodig is. Een account is niet nodig.'),
+    name: tri('Név', 'Name', 'Naam'),
+    email: tri('E-mail-cím', 'Email address', 'E-mailadres'),
+    company: tri('Cég', 'Company', 'Bedrijf'),
+    website: tri('Weboldal', 'Website', 'Website'),
+    description: tri('Mesélj a projektedről vagy a kérdéseidről', 'Tell us about your project or your questions', 'Vertel over je project of je vragen'),
+    descriptionHint: tri('Nem kötelező, de segít a felkészülésben.', 'Optional, but it helps us prepare.', 'Niet verplicht, maar het helpt ons ons voor te bereiden.'),
+    counter: tri('{n} / {max} karakter', '{n} of {max} characters', '{n} van {max} tekens'),
+    reference: tri('Kapcsolódó ajánlatkérés vagy megkeresés azonosítója', 'Reference of a related quote or inquiry', 'Referentie van een bijbehorende offerte of aanvraag'),
+    referenceHint: tri('Ha már küldtél ajánlatkérést vagy megkeresést, az azonosítóját ide írhatod.', 'If you already sent an inquiry or asked for a quote, you can add its reference here.', 'Heb je al een aanvraag of offerteverzoek gestuurd, dan kun je de referentie hier invullen.'),
+    optional: tri('nem kötelező', 'optional', 'optioneel'),
+    consent: tri(
+      'Tudomásul veszem, hogy a megadott adataimat a konzultáció egyeztetéséhez és lebonyolításához használják fel.',
+      'I understand that my details are used to arrange and carry out this consultation.',
+      'Ik begrijp dat mijn gegevens worden gebruikt om dit adviesgesprek te regelen en uit te voeren.',
+    ),
+    privacy: tri('Adatkezelési tájékoztató', 'Privacy notice', 'Privacyverklaring'),
+  },
+
+  errors: {
+    required: tri('Ezt kötelező kitölteni.', 'This is required.', 'Dit is verplicht.'),
+    tooShort: tri('Ez túl rövid.', 'This is too short.', 'Dit is te kort.'),
+    tooLong: tri('Ez túl hosszú.', 'This is too long.', 'Dit is te lang.'),
+    invalidEmail: tri('Érvényes e-mail-címet adj meg.', 'Enter a valid email address.', 'Vul een geldig e-mailadres in.'),
+    invalidUrl: tri('Érvényes weboldalcímet adj meg.', 'Enter a valid website address.', 'Vul een geldig websiteadres in.'),
+    invalid: tri('Ez az érték nem fogadható el.', 'This value is not accepted.', 'Deze waarde wordt niet geaccepteerd.'),
+    tooMany: tri('Ezzel az e-mail-címmel már több foglalás van folyamatban.', 'There are already several bookings in progress with this email address.', 'Er lopen al meerdere afspraken met dit e-mailadres.'),
+    consentRequired: tri('A foglaláshoz ezt el kell fogadnod.', 'Please tick this to book.', 'Vink dit aan om de afspraak te maken.'),
+    summary: tri('Néhány mező javításra szorul.', 'Some fields need your attention.', 'Een paar velden vragen je aandacht.'),
+  },
+
+  review: {
+    heading: tri('Ellenőrizd a foglalást', 'Check your booking', 'Controleer je afspraak'),
+    consultation: tri('Konzultáció', 'Consultation', 'Adviesgesprek'),
+    when: tri('Időpont', 'Date and time', 'Datum en tijd'),
+    zone: tri('Időzóna', 'Time zone', 'Tijdzone'),
+    duration: tri('Időtartam', 'Duration', 'Duur'),
+    you: tri('Az adataid', 'Your details', 'Je gegevens'),
+    message: tri('Üzeneted', 'Your message', 'Je bericht'),
+    change: tri('Módosítás', 'Change', 'Wijzigen'),
+    confirm: tri('Foglalás megerősítése', 'Confirm booking', 'Afspraak bevestigen'),
+    request: tri('Foglalási kérés küldése', 'Send booking request', 'Aanvraag voor afspraak versturen'),
+    sending: tri('Küldés…', 'Sending…', 'Versturen…'),
+    noteAutomatic: tri('A gomb megnyomása után a foglalás azonnal létrejön.', 'When you press the button, the booking is made straight away.', 'Zodra je op de knop drukt, is de afspraak gemaakt.'),
+    noteManual: tri(
+      'A foglalás addig nincs megerősítve, amíg át nem néztük. Az időpont addig le van foglalva neked.',
+      'The booking is not confirmed until it has been reviewed. The time is reserved for you meanwhile.',
+      'De afspraak is pas bevestigd als hij is bekeken. Het moment is intussen voor je gereserveerd.',
+    ),
+    summaryLabel: tri('A foglalás összegzése', 'Booking summary', 'Overzicht van de afspraak'),
+  },
+
+  failures: {
+    closed: tri('A foglalás jelenleg nem érhető el.', 'Booking is not available right now.', 'Inplannen is op dit moment niet mogelijk.'),
+    rate_limited: tri('Túl sok kérés érkezett. Próbáld újra később.', 'Too many requests. Please try again later.', 'Te veel verzoeken. Probeer het later opnieuw.'),
+    unavailable: tri('A szolgáltatás átmenetileg nem érhető el. Próbáld újra később.', 'The service is temporarily unavailable. Please try again later.', 'De dienst is tijdelijk niet beschikbaar. Probeer het later opnieuw.'),
+    network: tri('Nem sikerült kapcsolódni. Ellenőrizd a kapcsolatot, és próbáld újra.', 'Could not connect. Check your connection and try again.', 'Geen verbinding. Controleer je verbinding en probeer het opnieuw.'),
+    key_reused: tri('Ez a küldés már egy másik foglaláshoz tartozik. Töltsd újra az oldalt.', 'This submission already belongs to another booking. Please reload the page.', 'Deze verzending hoort al bij een andere afspraak. Laad de pagina opnieuw.'),
+    generic: tri('A foglalás nem sikerült. Próbáld újra.', 'The booking did not go through. Please try again.', 'De afspraak is niet gelukt. Probeer het opnieuw.'),
+  },
+
+  done: {
+    confirmedTitle: tri('A foglalás létrejött', 'Booking confirmed', 'Afspraak bevestigd'),
+    pendingTitle: tri('A foglalási kérést megkaptuk', 'Booking request received', 'Aanvraag ontvangen'),
+    confirmedBody: tri('A konzultációd le van foglalva. Az időpont lent olvasható.', 'Your consultation is booked. The time is below.', 'Je adviesgesprek is ingepland. Het moment staat hieronder.'),
+    pendingBody: tri('Az időpont le van foglalva neked, de a foglalás még nincs megerősítve.', 'The time is reserved for you, but the booking is not confirmed yet.', 'Het moment is voor je gereserveerd, maar de afspraak is nog niet bevestigd.'),
+    reference: tri('Azonosító', 'Reference', 'Referentie'),
+    emailSent: tri('Visszaigazoló e-mail van úton a megadott címre.', 'A confirmation email is on its way to the address you gave.', 'Er is een bevestigingsmail onderweg naar het opgegeven adres.'),
+    emailNotSent: tri('Erről az oldalról nem küldtünk e-mailt, ezért jegyezd fel az azonosítót.', 'No email was sent from this page, so please note the reference.', 'Vanaf deze pagina is geen e-mail verstuurd, noteer daarom de referentie.'),
+    another: tri('Újabb időpont foglalása', 'Book another time', 'Nog een moment inplannen'),
+    duplicate: tri('Ez a foglalás már létrejött, a részletei lent olvashatók.', 'This booking was already made; the details are below.', 'Deze afspraak was al gemaakt; de gegevens staan hieronder.'),
+  },
+
+  cta: {
+    label: tri('Konzultáció foglalása', 'Book a consultation', 'Een adviesgesprek inplannen'),
+    lead: tri('Inkább beszélgetnél róla? Foglalj egy szabad időpontot.', 'Prefer to talk it through? Book a free time.', 'Liever erover praten? Plan een vrij moment in.'),
+  },
+
+  /** The customer's own booking page, behind the secret link. */
+  manage: {
+    eyebrow: tri('Foglalás', 'Booking', 'Afspraak'),
+    loading: tri('A foglalás betöltése…', 'Loading your booking…', 'Je afspraak wordt geladen…'),
+    reference: tri('Azonosító', 'Reference', 'Referentie'),
+    status: tri('Állapot', 'Status', 'Status'),
+    when: tri('Időpont', 'Date and time', 'Datum en tijd'),
+    zone: tri('Időzóna', 'Time zone', 'Tijdzone'),
+    duration: tri('Időtartam', 'Duration', 'Duur'),
+    consultation: tri('Konzultáció', 'Consultation', 'Adviesgesprek'),
+    yourDetails: tri('Az adataid', 'Your details', 'Je gegevens'),
+    history: tri('Mi történt eddig', 'What has happened so far', 'Wat er tot nu toe is gebeurd'),
+    statuses: {
+      pending: tri('Megerősítésre vár', 'Waiting for confirmation', 'Wacht op bevestiging'),
+      confirmed: tri('Megerősítve', 'Confirmed', 'Bevestigd'),
+      reschedule_requested: tri('Módosítás folyamatban', 'Change pending', 'Wijziging in behandeling'),
+      rescheduled: tri('Áthelyezve', 'Rescheduled', 'Verplaatst'),
+      cancelled: tri('Lemondva', 'Cancelled', 'Geannuleerd'),
+      completed: tri('Lezajlott', 'Completed', 'Afgerond'),
+      no_show: tri('Nem jelent meg', 'No show', 'Niet verschenen'),
+    },
+    events: {
+      created: tri('A foglalás létrejött', 'Booking made', 'Afspraak gemaakt'),
+      confirmed: tri('Megerősítve', 'Confirmed', 'Bevestigd'),
+      rescheduled: tri('Új időpontra tettük: {time}', 'Moved to a new time: {time}', 'Verplaatst naar een nieuwe tijd: {time}'),
+      cancelled: tri('Lemondva', 'Cancelled', 'Geannuleerd'),
+      completed: tri('Lezajlott', 'Completed', 'Afgerond'),
+      no_show: tri('Nem jelent meg', 'No show', 'Niet verschenen'),
+      change_requested: tri('Módosítási kérés vagy javaslat', 'A request or a proposal for a change', 'Een verzoek of voorstel voor een wijziging'),
+      change_declined: tri('A kérést vagy javaslatot nem fogadták el', 'The request or proposal was declined', 'Het verzoek of voorstel is afgewezen'),
+      change_withdrawn: tri('A kérést visszavonták', 'The request was withdrawn', 'Het verzoek is ingetrokken'),
+      change_expired: tri('A javaslat lejárt', 'The proposal lapsed', 'Het voorstel is vervallen'),
+    },
+    cancelled: {
+      title: tri('Ez a foglalás le van mondva.', 'This booking is cancelled.', 'Deze afspraak is geannuleerd.'),
+      note: tri('Üzenet: {note}', 'Message: {note}', 'Bericht: {note}'),
+    },
+    pending: {
+      cancelTitle: tri('Lemondási kérésed megvan', 'Your cancellation request is in', 'Je verzoek om te annuleren is binnen'),
+      moveTitle: tri('Időpont-módosítási kérésed megvan', 'Your request to change the time is in', 'Je verzoek om de tijd te wijzigen is binnen'),
+      cancelBody: tri('A foglalás addig változatlan, amíg a kérést meg nem válaszolják.', 'The booking stays as it is until the request is answered.', 'De afspraak blijft zoals hij is totdat het verzoek is beantwoord.'),
+      moveBody: tri('Az új időpont ({time}) le van foglalva neked, a foglalás pedig a jelenlegi időponton marad, amíg a kérést meg nem válaszolják.', 'The new time ({time}) is held for you and the booking stays at its current time until the request is answered.', 'De nieuwe tijd ({time}) wordt voor je vastgehouden en de afspraak blijft op de huidige tijd staan totdat het verzoek is beantwoord.'),
+      withdraw: tri('Kérés visszavonása', 'Withdraw the request', 'Verzoek intrekken'),
+    },
+    proposal: {
+      title: tri('Új időpontot javasoltak', 'A new time is proposed', 'Er is een nieuwe tijd voorgesteld'),
+      body: tri('A javasolt új időpont: {time}. A foglalás addig a jelenlegi időponton marad, amíg el nem fogadod.', 'The proposed new time is {time}. The booking stays at its current time until you accept.', 'De voorgestelde nieuwe tijd is {time}. De afspraak blijft op de huidige tijd staan totdat je accepteert.'),
+      until: tri('Eddig válaszolhatsz: {time}.', 'You can answer until {time}.', 'Je kunt reageren tot {time}.'),
+      accept: tri('Elfogadom az új időpontot', 'Accept the new time', 'Nieuwe tijd accepteren'),
+      decline: tri('Nem fogadom el', 'Decline', 'Afwijzen'),
+      message: tri('Üzenet: {message}', 'Message: {message}', 'Bericht: {message}'),
+    },
+    actions: {
+      heading: tri('Módosítás', 'Changes', 'Wijzigingen'),
+      cancelAsk: tri('Lemondás kérése', 'Ask to cancel', 'Annulering aanvragen'),
+      cancelNow: tri('Foglalás lemondása', 'Cancel the booking', 'Afspraak annuleren'),
+      moveAsk: tri('Időpont-módosítás kérése', 'Ask to change the time', 'Tijdwijziging aanvragen'),
+      moveNow: tri('Időpont módosítása', 'Change the time', 'Tijd wijzigen'),
+      reason: tri('Miért? (nem kötelező)', 'Why? (optional)', 'Waarom? (optioneel)'),
+      sendCancelAsk: tri('Lemondási kérés küldése', 'Send the cancellation request', 'Verzoek om te annuleren versturen'),
+      sendCancelNow: tri('Lemondás megerősítése', 'Confirm the cancellation', 'Annulering bevestigen'),
+      sendMove: tri('Új időpont kiválasztása', 'Choose this time', 'Deze tijd kiezen'),
+      keep: tri('Mégsem', 'Never mind', 'Laat maar'),
+      chooseTime: tri('Válassz új időpontot', 'Choose a new time', 'Kies een nieuwe tijd'),
+      sending: tri('Küldés…', 'Sending…', 'Versturen…'),
+      requestedCancel: tri('A lemondási kérésedet elküldtük.', 'Your cancellation request has been sent.', 'Je verzoek om te annuleren is verstuurd.'),
+      requestedMove: tri('Az időpont-módosítási kérésedet elküldtük.', 'Your request to change the time has been sent.', 'Je verzoek om de tijd te wijzigen is verstuurd.'),
+      cancelled: tri('A foglalás le van mondva.', 'The booking is cancelled.', 'De afspraak is geannuleerd.'),
+      moved: tri('A foglalás új időpontra került.', 'The booking has a new time.', 'De afspraak heeft een nieuwe tijd.'),
+      withdrawn: tri('A kérést visszavontad.', 'You withdrew the request.', 'Je hebt het verzoek ingetrokken.'),
+      accepted: tri('Elfogadtad az új időpontot.', 'You accepted the new time.', 'Je hebt de nieuwe tijd geaccepteerd.'),
+      declined: tri('Elutasítottad a javaslatot, a foglalás a régi időponton marad.', 'You declined the proposal; the booking stays at its time.', 'Je hebt het voorstel afgewezen; de afspraak blijft op de huidige tijd staan.'),
+    },
+    unavailable: {
+      not_offered: tri('Ezt a módosítást ezen az oldalon nem lehet kérni.', 'This change cannot be requested on this page.', 'Deze wijziging kun je op deze pagina niet aanvragen.'),
+      too_late: tri('Az időpont túl közel van ahhoz, hogy ezen az oldalon módosítsd.', 'The consultation is too close to change on this page.', 'De afspraak is te dichtbij om op deze pagina te wijzigen.'),
+      change_open: tri('Már van egy nyitott kérés vagy javaslat ehhez a foglaláshoz.', 'There is already an open request or proposal for this booking.', 'Er staat al een openstaand verzoek of voorstel voor deze afspraak.'),
+      started: tri('Ez az időpont már elkezdődött.', 'This consultation has already started.', 'Deze afspraak is al begonnen.'),
+      ended: tri('Ez a foglalás már lezárult.', 'This booking is over.', 'Deze afspraak is afgesloten.'),
+      state: tri('Ezt a foglalást most nem lehet módosítani.', 'This booking cannot be changed right now.', 'Deze afspraak kan nu niet worden gewijzigd.'),
+      expired: tri('Ez a javaslat lejárt.', 'This proposal has lapsed.', 'Dit voorstel is vervallen.'),
+      slot_unavailable: tri('Ezt az időpontot közben valaki lefoglalta. Válassz másikat.', 'Someone has just booked that time. Please choose another.', 'Iemand heeft dat moment zojuist geboekt. Kies een ander moment.'),
+    },
+    link: {
+      not_found: tri('Ez a link nem érvényes.', 'This link is not valid.', 'Deze link is niet geldig.'),
+      expired: tri('Ez a link lejárt. Keress egy újabb e-mailt a foglalásról.', 'This link has expired. Look for a newer email about your booking.', 'Deze link is verlopen. Zoek een nieuwere e-mail over je afspraak.'),
+      replaced: tri('Ez a link már nem használható. Keress egy újabb e-mailt a foglalásról.', 'This link no longer works. Look for a newer email about your booking.', 'Deze link werkt niet meer. Zoek een nieuwere e-mail over je afspraak.'),
+      rate_limited: tri('Túl sok próbálkozás. Várj egy kicsit, és próbáld újra.', 'Too many attempts. Wait a little and try again.', 'Te veel pogingen. Wacht even en probeer het opnieuw.'),
+      unavailable: tri('Ez az oldal átmenetileg nem érhető el.', 'This page is temporarily unavailable.', 'Deze pagina is tijdelijk niet beschikbaar.'),
+      network: tri('Nem sikerült kapcsolódni. Próbáld újra.', 'Could not connect. Please try again.', 'Geen verbinding. Probeer het opnieuw.'),
+      retry: tri('Újra', 'Try again', 'Opnieuw proberen'),
+    },
+    incomplete: {
+      title: tri('Hiányos link', 'Incomplete link', 'Onvolledige link'),
+      body: tri('A foglalásodat az e-mailben kapott személyes linken éred el. Másold be a teljes címet a böngészőbe.', 'Your booking is behind the personal link in your email. Paste the whole address into your browser.', 'Je afspraak staat achter de persoonlijke link in je e-mail. Plak het volledige adres in je browser.'),
+    },
+  },
+}
+
+export type ConsultationText = typeof consultationText

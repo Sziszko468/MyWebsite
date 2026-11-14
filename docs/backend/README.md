@@ -143,6 +143,10 @@ Field codes (the same words the website's forms use): `required`, `tooShort`, `t
 
 `Cache-Control: public, max-age=60` on these; **no customer data exists in any of them** (a test submits a message and a quote request and searches every public answer for it).
 
+### Consultation booking (PROMPT 24)
+
+`GET /api/consultations/config?lang=`, `GET /api/consultations/types/:code/days?from=&to=`, `POST /api/consultations/bookings`, and the customer's own page behind a secret: `GET /api/consultations/manage/:token`, `…/days`, `POST …/actions`. Closed until the owner opens it (`409 closed`); the server recomputes the free slot inside the transaction that writes the booking; no route accepts a reference, an id or an address. The administration's side is `/api/admin/bookings*`, `/api/admin/booking-config|settings|hours` and `/api/admin/consultation-types*`. Everything about it is in [docs/booking](../booking/README.md) (architecture, availability and time zones, security, e-mails, test results). The booking form is limited to 6 per 15 minutes per address.
+
 ### E-mail provider webhook
 
 ### Portfolio, pictures and wording (read-only, public)

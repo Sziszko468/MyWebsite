@@ -7,6 +7,7 @@ import { runtimeProject } from '../projects/store'
 import { serviceAreas } from '../content/services/areas'
 import { packages } from '../content/packages'
 import { comparison } from '../content/shop/comparison'
+import { consultationText } from '../content/consultation'
 import { quoteText } from '../content/quotes'
 import { shopMeta } from '../content/shop/meta'
 import type { Language } from '../i18n/config'
@@ -117,6 +118,8 @@ export function buildDocumentMeta(
   if (page.id === 'control-room') return { ...site, title: `${aiMeta.title[lang]} — ${brandName}`, description: aiMeta.description[lang] }
   if (page.id === 'customer-quote') return { ...site, title: `${quoteText.meta.quote.title[lang]} — ${brandName}`, description: quoteText.meta.quote.description[lang] }
   if (page.id === 'customer-request') return { ...site, title: `${quoteText.meta.request.title[lang]} — ${brandName}`, description: quoteText.meta.request.description[lang] }
+  if (page.id === 'consultation') return { ...site, title: `${consultationText.meta.title[lang]} — ${brandName}`, description: consultationText.meta.description[lang] }
+  if (page.id === 'customer-booking') return { ...site, title: `${consultationText.meta.manageTitle[lang]} — ${brandName}`, description: consultationText.meta.manageDescription[lang] }
   if (page.id === 'privacy') return { ...site, title: `${privacyMeta.title[lang]} — ${brandName}`, description: privacyMeta.description[lang] }
 
   // These pages describe themselves: what they offer is worth more in a search result than a menu label.

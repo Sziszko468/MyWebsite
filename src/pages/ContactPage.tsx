@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
+import { ConsultationCta } from '../components/consultation/ConsultationCta'
 import { ContactHero } from '../components/contact/ContactHero'
 import { ContactSection } from '../components/contact/ContactSection'
 import {
@@ -77,6 +78,7 @@ export function ContactPage() {
   return (
     <>
       <ContactHero onChoose={(path) => chooseKind(PATH_KIND[path])} />
+      <ConsultationCta />
       <ContactSection draft={draft} onChange={change} onReset={onReset} />
     </>
   )

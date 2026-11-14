@@ -17,6 +17,10 @@ export interface NotificationPreferences {
   confirmInquiry: boolean
   /** The same for a quote request. */
   confirmQuote: boolean
+  /** E-mail the owner (NOTIFY_TO) about a consultation booking: a new one, a request to change it, a cancellation. */
+  newBooking: boolean
+  /** E-mail the visitor about their booking: the confirmation, a change, a cancellation. On: they asked for an appointment and expect to be told. */
+  confirmBooking: boolean
   /**
    * A sentence the administrator wrote for the confirmations, per language, for example how long an answer usually takes.
    * Empty means the confirmation says nothing about timing: the site never invents one.
@@ -32,6 +36,8 @@ const KEYS = {
   newQuote: 'notify.quote',
   confirmInquiry: 'confirm.inquiry',
   confirmQuote: 'confirm.quote',
+  newBooking: 'notify.booking',
+  confirmBooking: 'confirm.booking',
   note: (language: Language) => `confirm.note.${language}`,
 } as const
 
@@ -60,6 +66,9 @@ export function notificationPreferences(db: Database): NotificationPreferences {
     confirmInquiry: getSetting(db, KEYS.confirmInquiry) === '1',
     // A person who asked for a quotation expects to hear that the request arrived (PROMPT 17): on unless an administrator switched it off.
     confirmQuote: getSetting(db, KEYS.confirmQuote) !== '0',
+    // A person who booked a consultation expects to hear it was booked (PROMPT 24); the owner hears of bookings until they say otherwise.
+    newBooking: getSetting(db, KEYS.newBooking) !== '0',
+    confirmBooking: getSetting(db, KEYS.confirmBooking) !== '0',
     responseNote: { hu: getSetting(db, KEYS.note('hu')) ?? '', en: getSetting(db, KEYS.note('en')) ?? '', nl: getSetting(db, KEYS.note('nl')) ?? '' },
   }
 }
@@ -70,6 +79,8 @@ export function saveNotificationPreferences(db: Database, clock: Clock, userId: 
     setSetting(db, clock, KEYS.newQuote, preferences.newQuote ? '1' : '0', userId)
     setSetting(db, clock, KEYS.confirmInquiry, preferences.confirmInquiry ? '1' : '0', userId)
     setSetting(db, clock, KEYS.confirmQuote, preferences.confirmQuote ? '1' : '0', userId)
+    setSetting(db, clock, KEYS.newBooking, preferences.newBooking ? '1' : '0', userId)
+    setSetting(db, clock, KEYS.confirmBooking, preferences.confirmBooking ? '1' : '0', userId)
     for (const language of ['hu', 'en', 'nl'] as const) setSetting(db, clock, KEYS.note(language), preferences.responseNote[language], userId)
   })
 }

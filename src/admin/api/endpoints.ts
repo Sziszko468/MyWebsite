@@ -1,4 +1,5 @@
 import { del, get, post, put, patch, request, queryString, type Envelope } from './client'
+import type { BookingConfig, BookingDetail, BookingListItem, ConsultationType, FreeDay } from './bookingTypes'
 import type { AiSummary, AiTestResult, AiUsage } from '../lib/ai'
 import type {
   ContentRecord, DashboardData, ExtraRecord, Inquiry, InquiryDetail, ListQuery, LoginData, NotificationPreferences, NotificationsData, EmailCheck, Orderable, Page, PackageRecord, Preferences, Profile, Quote, QuoteDetail, QuoteOverview, QuotationDetail, QuotationForm,
@@ -52,6 +53,22 @@ export const quotes = {
   /** Plain links: the browser downloads these with its own session cookie. */
   csvUrl: (query: ListQuery) => `${base}/quote-requests/export.csv${queryString(listQuery({ ...query, page: undefined, pageSize: undefined }))}`,
   jsonUrl: (id: string) => `${base}/quote-requests/${encodeURIComponent(id)}/export.json`,
+}
+
+/** The consultation bookings (PROMPT 24): the list, one booking, what can be done with it, and the owner's set-up. */
+export const bookings = {
+  list: async (query: Record<string, string | number | undefined>, signal?: AbortSignal) => {
+    const { data, meta } = await get<BookingListItem[]>(`${base}/bookings`, { query, signal })
+    return { rows: data, page: pageOf(meta) }
+  },
+  get: (id: string, signal?: AbortSignal) => get<BookingDetail>(`${base}/bookings/${encodeURIComponent(id)}`, { signal }).then((answer) => answer.data),
+  days: (id: string, from: string, to: string, signal?: AbortSignal) => get<{ days: FreeDay[] }>(`${base}/bookings/${encodeURIComponent(id)}/days`, { query: { from, to }, signal }).then((answer) => answer.data.days),
+  act: (id: string, body: Record<string, unknown>) => post<BookingDetail>(`${base}/bookings/${encodeURIComponent(id)}/actions`, body).then((answer) => answer.data),
+  config: (signal?: AbortSignal) => get<BookingConfig>(`${base}/booking-config`, { signal }).then((answer) => answer.data),
+  saveSettings: (body: Record<string, unknown>) => put<BookingConfig>(`${base}/booking-settings`, body).then((answer) => answer.data),
+  saveHours: (body: Record<string, unknown>) => put<BookingConfig>(`${base}/booking-hours`, body).then((answer) => answer.data),
+  createType: (body: Record<string, unknown>) => post<ConsultationType>(`${base}/consultation-types`, body).then((answer) => answer.data),
+  saveType: (code: string, body: Record<string, unknown>) => put<ConsultationType>(`${base}/consultation-types/${encodeURIComponent(code)}`, body).then((answer) => answer.data),
 }
 
 export const quotations = {

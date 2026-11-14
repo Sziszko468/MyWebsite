@@ -36,6 +36,9 @@ export type FieldCode =
   | 'unknown'
   | 'duplicate'
   | 'tooMany'
+  /** A wall-clock time the zone skips (the clocks jump forward over it) or repeats (they go back over it). */
+  | 'nonexistentTime'
+  | 'ambiguousTime'
 
 export type FieldErrors = Record<string, FieldCode>
 

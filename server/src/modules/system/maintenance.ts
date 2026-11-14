@@ -5,6 +5,8 @@ import { purgeExpiredSessions } from '../auth/sessions.ts'
 import { sweepAbandoned } from '../ai/budget.ts'
 import { loadSettings } from '../ai/settings.ts'
 import { purge as purgeAssistant } from '../ai/store.ts'
+import { purgeBookingTokens } from '../bookings/repository.ts'
+import { deleteBookingsByEmail, purgeFinishedBookings } from '../bookings/retention.ts'
 import { deleteDeliveriesOfRequest } from '../quotes/deliveries.ts'
 import { purgeTokens } from '../quotes/tokens.ts'
 
@@ -19,6 +21,8 @@ export interface MaintenanceResult {
   expiredSessions: number
   inquiries: number
   quoteRequests: number
+  /** Consultation bookings that were over and older than the retention period. */
+  bookings: number
   deliveries: number
   /** Customer links that expired more than a month ago. */
   expiredLinks: number
@@ -29,7 +33,7 @@ export interface MaintenanceResult {
 
 export function runMaintenance(app: AppContext): MaintenanceResult {
   const { db, clock, config } = app
-  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, deliveries: 0, expiredLinks: purgeTokens(app), retentionDays: config.retentionDays, assistant: { conversations: 0, sessions: 0, approvals: 0, abandonedRequests: 0 } }
+  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, bookings: 0, deliveries: 0, expiredLinks: purgeTokens(app) + purgeBookingTokens(app), retentionDays: config.retentionDays, assistant: { conversations: 0, sessions: 0, approvals: 0, abandonedRequests: 0 } }
   result.assistant = { ...purgeAssistant(db, clock, loadSettings(app).retentionDays), abandonedRequests: sweepAbandoned(app) }
   if (config.retentionDays !== null) {
     const cutoff = iso(addMs(clock.now(), -config.retentionDays * DAY))
@@ -37,6 +41,7 @@ export function runMaintenance(app: AppContext): MaintenanceResult {
       // Only what is finished: archived, or completed (inquiries) / completed, cancelled or declined (quote requests). A request still open is never deleted by age.
       result.inquiries = db.run("DELETE FROM inquiries WHERE updated_at < ? AND (archived_at IS NOT NULL OR status = 'completed')", [cutoff]).changes
       result.quoteRequests = db.run("DELETE FROM quote_requests WHERE updated_at < ? AND (archived_at IS NOT NULL OR status IN ('completed', 'cancelled', 'declined'))", [cutoff]).changes
+      result.bookings = purgeFinishedBookings(app, cutoff)
       result.deliveries = db.run("DELETE FROM email_deliveries WHERE created_at < ? AND status IN ('accepted', 'delivered', 'bounced', 'complained', 'failed', 'cancelled')", [cutoff]).changes
     })
   }
@@ -46,6 +51,7 @@ export function runMaintenance(app: AppContext): MaintenanceResult {
 export interface ErasureResult {
   inquiries: number
   quoteRequests: number
+  bookings: number
   deliveries: number
 }
 
@@ -63,6 +69,8 @@ export function eraseByEmail(app: AppContext, email: string): ErasureResult {
     // The request takes its items, notes, quotations, lines, links, questions and status-page entries with it (cascades); the history keeps one line per
     // event, with a reference and a status and nothing a person wrote.
     const quoteRequests = db.run('DELETE FROM quote_requests WHERE email = ?', [address]).changes
-    return { inquiries, quoteRequests, deliveries }
+    // The consultation bookings made with this address, with their notes, links and e-mails.
+    const bookings = deleteBookingsByEmail(app, address)
+    return { inquiries, quoteRequests, bookings, deliveries }
   })
 }

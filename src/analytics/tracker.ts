@@ -41,14 +41,16 @@ export function sanitize(props: object): Record<string, string | number | boolea
   return clean
 }
 
+/** The page path an event may carry: the secret in a customer's private address (a quotation, a request, a booking) never leaves the page. */
+export const publicPage = (rest: string): string => rest.replace(/^\/(quote|request)\/[^/]+/, '/$1').replace(/^\/consultation\/booking\/[^/]+/, '/consultation/booking')
+
 export function track<N extends EventName>(name: N, props: AnalyticsEvents[N]): void {
   if (!EVENT_NAMES.includes(name) || providers.size === 0 || !mayMeasure()) return
   const { lang, rest } = typeof window === 'undefined' ? { lang: null, rest: '/' } : splitLanguage(window.location.pathname)
   const event: AnalyticsEvent = {
     name,
     props: sanitize(props),
-    // The secret in a customer's private address never leaves the page.
-    page: rest.replace(/^\/(quote|request)\/[^/]+/, '/$1'),
+    page: publicPage(rest),
     lang: lang ?? 'hu',
     time: Date.now(),
   }

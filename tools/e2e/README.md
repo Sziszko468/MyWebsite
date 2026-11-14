@@ -158,3 +158,15 @@ AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/localization-journey.cjs --b
 ```
 
 `quote-lifecycle-journey.cjs` has one more step (E): the same secure quotation link opened under `/en/` must say, with `lang` attributes, that the quotation's own words are Hungarian while the page around them is English.
+
+## Consultation booking (PROMPT 24)
+
+**`booking-journey.cjs`**: the consultation booking in a real Chrome against the built site served by the real backend (a throw-away database and the `file` e-mail provider; no real address). 40 checks in eight parts, run at 1440 and at 390 px: **A** closed until opened (every language says so, no calendar, `X-Robots-Tag: noindex`, not in the sitemap, the server refuses a booking); **B** the owner opens it **through the administration's own screens** (the four suggested types, a type refused without a length, weekly hours, the time zone and the switch); **C** a visitor books in Hungarian, English and Dutch (type, day, time, details, review, confirmation; the e-mail is in the same language, names the zone and carries a secure link; the owner is told once); **D** invalid data in each language with the first problem focused, a double click that makes one booking, and a time taken by somebody else before the visitor confirmed; **E** the customer's own page (not cached, not indexed, a made-up secret answers 404), asking to move the booking, taking the request back, asking to cancel; **F** the administration answers (the list, search, declining with a message the customer receives, a private note that is in no e-mail and no customer page, proposing a new time that the customer accepts, cancelling a Dutch booking with a message); **G** the contact page and the shop lead to booking in each language, the sitemap lists the page; **H** axe finds nothing (WCAG 2.2 AA and best practice) on the type, calendar, times, the form with errors and the review (three languages), the customer's page and the administration's list, detail and three set-up tabs.
+
+```bash
+npm run build                                        # with VITE_API_URL=/ (and MSYS_NO_PATHCONV=1 on Windows)
+# a FRESH scratch backend serving dist/ with the file provider, PUBLIC_URL, an administrator, and RATE_LIMITS=false
+# (the booking form allows six bookings per 15 minutes per address, which is the point of the limit; this journey makes more)
+AUDIT_PLAYWRIGHT=/path/to/playwright AUDIT_AXE=/path/to/axe-core/axe.min.js node tools/e2e/booking-journey.cjs \
+  --base=http://127.0.0.1:8860 --mail=<the mail folder> --email=admin@example.test --password=... [--width=390] [--only=ABCDEFGH] [--out=<dir>]
+```

@@ -5,6 +5,7 @@ import { loadConfig, type Config } from '../src/config.ts'
 import { Database } from '../src/db/database.ts'
 import { migrate } from '../src/db/migrate.ts'
 import { seedCatalog } from '../src/db/seed.ts'
+import { seedConsultationTypes } from '../src/modules/bookings/suggested.ts'
 import { seedShopDocuments } from '../src/modules/shop/documents.ts'
 import { createLogger, type Logger } from '../src/lib/logger.ts'
 import type { Clock } from '../src/lib/time.ts'
@@ -127,6 +128,7 @@ export async function startServer(options: { env?: Record<string, string>; seed?
   if (options.seed !== false) {
     seedCatalog(app.context)
     seedShopDocuments(app.context)
+    seedConsultationTypes(app.context)
   }
   if (options.aiActive ?? options.aiModel !== undefined) activateAssistant(app.context)
   await new Promise<void>((resolve) => app.server.listen(0, '127.0.0.1', () => resolve()))

@@ -24,7 +24,7 @@ export function resolveLanguageSwitch(
   const page = pages === PAGES ? resolvePage(rest) : findPage(rest, pages)
   if (page?.languages.includes(next)) {
     // A customer's private page keeps the secret in its address: the same page, the same link, another language.
-    const keepsAddress = page.id === 'customer-quote' || page.id === 'customer-request'
+    const keepsAddress = page.id === 'customer-quote' || page.id === 'customer-request' || page.id === 'customer-booking'
     return { path: localizedPath(next, keepsAddress ? rest : page.path), samePage: true }
   }
   return { path: localizedPath(next), samePage: false }

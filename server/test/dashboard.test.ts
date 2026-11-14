@@ -393,6 +393,8 @@ describe('notifications', () => {
       // The confirmation of a message is off until an administrator turns it on; the confirmation of a quote request is on until they turn it off.
       { id: 'confirm_inquiry', automatic: true, enabled: false, active: false },
       { id: 'confirm_quote', automatic: true, enabled: true, active: true },
+      { id: 'new_booking', automatic: true, enabled: true, active: true },
+      { id: 'confirm_booking', automatic: true, enabled: true, active: true },
       { id: 'status_update', automatic: false, enabled: true, active: true },
     ])
     await server.close()
@@ -400,7 +402,7 @@ describe('notifications', () => {
     admin = await server.signIn('admin', 'admin@site.test')
     const off = await overview()
     expect(off.integration).toMatchObject({ enabled: false, provider: 'none' })
-    expect(off.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, false, false, false])
+    expect(off.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, false, false, false, false, false])
     expect(off.deliveries).toEqual([])
   })
 
@@ -410,7 +412,7 @@ describe('notifications', () => {
     admin = await server.signIn('admin', 'admin@site.test')
     const data = await overview()
     expect(data.integration).toMatchObject({ enabled: true, ownerAddressConfigured: false })
-    expect(data.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, false, true, true]) // the confirmation of a quote request is on unless switched off
+    expect(data.types.map((type: { active: boolean }) => type.active)).toEqual([false, false, false, true, false, true, true]) // the confirmations of a quote request and of a booking are on unless switched off; the owner's booking notice needs the owner's address
   })
 
   it('lists the delivery log with each message\'s real state and the reference of its record', async () => {
@@ -429,7 +431,7 @@ describe('notifications', () => {
 
   it('switches the owner notification for messages or quote requests off and on, and records who did it', async () => {
     const off = await send('PUT', '/api/admin/notifications/preferences', { newInquiry: false, newQuote: true })
-    expect(off.json.data).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: true, responseNote: { hu: '', en: '', nl: '' } })
+    expect(off.json.data).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: true, newBooking: true, confirmBooking: true, responseNote: { hu: '', en: '', nl: '' } })
     server.db.run('DELETE FROM email_deliveries')
     await server.api('/api/contact', { body: contact() })
     await quotes(1)
@@ -438,7 +440,7 @@ describe('notifications', () => {
     expect(server.db.all<{ kind: string }>('SELECT kind FROM email_deliveries').map((row) => row.kind).sort()).toEqual(['quote_confirmation', 'quote_received'])
     const data = await overview()
     expect(data.types[0]).toMatchObject({ id: 'new_inquiry', enabled: false, active: false })
-    expect(data.preferences).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: true, responseNote: { hu: '', en: '', nl: '' } })
+    expect(data.preferences).toEqual({ newInquiry: false, newQuote: true, confirmInquiry: false, confirmQuote: true, newBooking: true, confirmBooking: true, responseNote: { hu: '', en: '', nl: '' } })
     expect((await send('PUT', '/api/admin/notifications/preferences', { newInquiry: true, newQuote: true })).status).toBe(200)
     expect(server.db.all("SELECT action FROM audit_log WHERE action = 'settings.notifications'")).toHaveLength(2)
     for (const body of [{}, { newInquiry: 'yes', newQuote: true }, { newInquiry: true }]) expect((await send('PUT', '/api/admin/notifications/preferences', body)).status).toBe(422)

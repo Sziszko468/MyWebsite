@@ -5,6 +5,7 @@ import { migrate, migrationStatus } from './db/migrate.ts'
 import { seedCatalog } from './db/seed.ts'
 import { mediaStorage } from './modules/media/storage.ts'
 import { seedProjects } from './modules/projects/service.ts'
+import { seedConsultationTypes } from './modules/bookings/suggested.ts'
 import { seedShopDocuments } from './modules/shop/documents.ts'
 import { createLogger } from './lib/logger.ts'
 import { DAY, systemClock } from './lib/time.ts'
@@ -50,6 +51,9 @@ async function main(): Promise<void> {
     // The tier comparison and the FULL EXPERIENCE offer, once, after the packages they are about exist.
     const shop = seedShopDocuments(app.context)
     if (shop.seeded) log.info('shop documents loaded into an empty table', { documents: shop.documents })
+    // The suggested consultation types, switched off and without a duration: the owner reads and opens them (docs/booking).
+    const consultations = seedConsultationTypes(app.context)
+    if (consultations.seeded) log.info('suggested consultation types loaded, all switched off', { types: consultations.types })
   }
   // PROMPT 22: uploaded pictures on the application's own (usually rebuilt) filesystem would be lost at the next deploy.
   const storage = mediaStorage(config)

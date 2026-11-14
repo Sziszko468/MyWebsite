@@ -4,6 +4,7 @@ import { useI18n } from '../../i18n/useI18n'
 import { useContact } from '../../profile/store'
 import { BrandMark } from '../BrandMark/BrandMark'
 import { Button } from '../Button/Button'
+import { ConsultationCta } from '../consultation/ConsultationCta'
 import { Container } from '../Container/Container'
 import { measurementIsOffered } from '../../analytics/offer'
 import { MeasurementSettingsButton } from '../Consent/ConsentBanner'
@@ -53,6 +54,7 @@ export function SiteFooter() {
           <Button to="/contact" variant="text" arrow>
             {t.footer.contactLink}
           </Button>
+          <ConsultationCta variant="link" />
           {email && (
             <a className={styles.link} href={`mailto:${email}`}>
               {email}

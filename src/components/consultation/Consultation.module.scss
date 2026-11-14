@@ -1,0 +1,794 @@
+@use '../../styles/mixins' as m;
+
+/* The consultation booking (PROMPT 24): the steps, the calendar, the times, the form, the summary and the customer's own booking page. Mobile first:
+   one column from 320 px, nothing wider than the screen, targets at least the touch size. The state of a day or a time is never colour alone: it is a
+   word (for a reader), a shape (a dot, a filled square, a diagonal line) and a colour. Nothing here animates beyond a colour change. */
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.muted {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-relaxed);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+.notice {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+
+  p {
+    margin: 0;
+  }
+}
+
+.linkButton {
+  justify-self: start;
+  min-height: var(--size-target);
+  padding: 0 var(--space-1);
+  border: 0;
+  background: none;
+  color: var(--color-accent-text);
+  font: inherit;
+  font-weight: var(--fw-semibold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.linkButton:focus-visible,
+.monthButton:focus-visible,
+.day:focus-visible,
+.stepButton:focus-visible,
+.typeOption input:focus-visible + .typeCard,
+.slot input:focus-visible + .slotLabel {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ── layout ─────────────────────────────────────────────────────────────────── */
+
+.layout {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+
+  @include m.up(lg) {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    align-items: start;
+    gap: var(--space-8);
+  }
+}
+
+.main {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+/* The summary beside the steps on a wide screen; on a narrow one it is shown in the review step instead (so it is never read twice). */
+.aside {
+  display: none;
+
+  @include m.up(lg) {
+    display: block;
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-5));
+    padding: var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+}
+
+.reviewSummary {
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+
+  @include m.up(lg) {
+    display: none;
+  }
+}
+
+/* ── the steps ──────────────────────────────────────────────────────────────── */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepItem {
+  min-width: 0;
+  border-top: 3px solid var(--color-border);
+  padding-top: var(--space-2);
+}
+
+.step_done {
+  border-top-color: var(--color-accent);
+}
+
+.step_current {
+  border-top-color: var(--color-accent);
+  font-weight: var(--fw-bold);
+}
+
+.stepButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--size-target);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.stepButton {
+  cursor: pointer;
+}
+
+.stepNumber {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-sm);
+}
+
+.step_current .stepNumber {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.step_todo {
+  color: var(--color-text-muted);
+}
+
+/* On a phone only the number shows, but the name stays for a reader (a step that can be gone back to is a button, and a button needs its name). */
+.stepLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  min-width: 0;
+  font-size: var(--fs-sm);
+
+  @include m.up(md) {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+.stepOf {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+
+  @include m.up(md) {
+    display: none;
+  }
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: var(--fs-xl);
+  line-height: var(--lh-tight);
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  /* The heading takes focus when the step changes: it must land below the sticky header, not under it. */
+  scroll-margin-top: calc(var(--header-height) + var(--space-4));
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+
+  > p {
+    flex: 1 1 100%;
+    text-align: right;
+  }
+}
+
+.softDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── the types ──────────────────────────────────────────────────────────────── */
+
+.types {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.typeOption {
+  position: relative;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+.typeCard {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: var(--transition-colors);
+}
+
+.typeOption input:checked + .typeCard {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+@include m.hover {
+  .typeOption:hover .typeCard {
+    border-color: var(--color-border-strong);
+  }
+}
+
+.typeName {
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-md);
+}
+
+.typeDuration {
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.typeText {
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+/* ── the calendar and the times ─────────────────────────────────────────────── */
+
+.dateTime {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+
+  @include m.up(md) {
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.calendar {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  max-width: 24rem;
+}
+
+.monthBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.monthTitle {
+  margin: 0;
+  font-size: var(--fs-md);
+}
+
+.monthButton {
+  display: inline-grid;
+  place-items: center;
+  width: var(--size-touch);
+  height: var(--size-touch);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--fs-lg);
+  cursor: pointer;
+
+  &:disabled {
+    border-color: var(--color-disabled-border);
+    background: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+  }
+}
+
+.grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 2px;
+  table-layout: fixed;
+}
+
+.weekday {
+  padding-block: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.cell,
+.cellEmpty {
+  padding: 0;
+  text-align: center;
+}
+
+.day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: var(--size-touch);
+  aspect-ratio: 1;
+  padding: 0;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: var(--transition-colors);
+}
+
+/* A free day: a filled dot under the number and a border. */
+.day_available {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+  font-weight: var(--fw-bold);
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    width: 5px;
+    height: 5px;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+  }
+}
+
+@include m.hover {
+  .day_available:hover {
+    border-color: var(--color-accent);
+    background: var(--color-surface-hover);
+  }
+}
+
+/* The chosen day: filled. */
+.day_selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: var(--fw-bold);
+}
+
+/* A day with hours but nothing left: a diagonal line through it. */
+.day_full {
+  color: var(--color-text-muted);
+  background: repeating-linear-gradient(135deg, transparent 0 5px, var(--color-border) 5px 6px);
+  cursor: not-allowed;
+}
+
+/* A day that cannot be booked: faint, nothing drawn. */
+.day_closed {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+}
+
+.swatch {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+}
+
+.swatchAvailable {
+  background: radial-gradient(circle at 50% 75%, var(--color-accent) 0 2px, transparent 2.5px), var(--color-surface);
+}
+
+.swatchSelected {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.swatchFull {
+  background: repeating-linear-gradient(135deg, transparent 0 3px, var(--color-border-strong) 3px 4px);
+}
+
+.swatchClosed {
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+.times {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.slotGroup {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.timesTitle {
+  padding: 0;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-md);
+}
+
+.slots {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fill, minmax(min(8rem, 100%), 1fr));
+}
+
+.slot {
+  position: relative;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+.slotLabel {
+  display: grid;
+  place-items: center;
+  min-height: var(--size-touch);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+  text-align: center;
+  transition: var(--transition-colors);
+}
+
+.slot input:checked + .slotLabel {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+@include m.hover {
+  .slot:hover .slotLabel {
+    border-color: var(--color-accent);
+  }
+}
+
+/* ── the form ───────────────────────────────────────────────────────────────── */
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.twoColumns {
+  display: grid;
+  gap: var(--space-4);
+
+  @include m.up(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* The field no person reaches: off the screen and out of the tab order. */
+.trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ── summary, review, done ──────────────────────────────────────────────────── */
+
+.summary {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+
+  div {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  dt {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-weight: var(--fw-semibold);
+  }
+}
+
+.pre {
+  white-space: pre-wrap;
+  font-weight: var(--fw-regular);
+}
+
+.review {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.reviewHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.reviewTitle {
+  margin: 0;
+  font-size: var(--fs-md);
+}
+
+.done {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 36rem;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-top: 4px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.doneBadge {
+  justify-self: start;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-accent);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.reference {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-wide);
+}
+
+.closed {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  max-width: 36rem;
+}
+
+/* ── the customer's own booking page ────────────────────────────────────────── */
+
+.manage {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.manageHeader {
+  display: grid;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.statusBadge {
+  justify-self: start;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+.statusBadge[data-tone='good'] {
+  border-color: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+.statusBadge[data-tone='ended'] {
+  color: var(--color-text-secondary);
+}
+
+.card {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+
+  h2,
+  h3 {
+    margin: 0;
+    font-size: var(--fs-md);
+  }
+
+  p {
+    margin: 0;
+    line-height: var(--lh-relaxed);
+  }
+}
+
+.history {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    gap: 2px;
+    padding-left: var(--space-3);
+    border-left: 3px solid var(--color-border);
+  }
+
+  time {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+  }
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* ── a call to action on another page ───────────────────────────────────────── */
+
+.ctaBand {
+  padding-block: var(--space-5);
+  border-block: var(--border-width) solid var(--color-divider);
+  background: var(--color-bg-subtle);
+}
+
+.ctaInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-5);
+}
+
+.ctaLead {
+  margin: 0;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-md);
+}

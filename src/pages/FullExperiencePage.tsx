@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { ConsultationCta } from '../components/consultation/ConsultationCta'
 import { FinalCta } from '../components/home/FinalCta'
 import { Button } from '../components/Button/Button'
 import { Container } from '../components/Container/Container'
@@ -147,6 +148,8 @@ export function FullExperiencePage() {
           </p>
         </Container>
       </Section>
+
+      <ConsultationCta />
 
       <FinalCta id="start" tone="dark" copy={{ title: c.finalTitle, text: c.finalText, cta: offer.hero.primaryCta[lang] }} action={{ to: SHOP_PATHS.fullExperienceStart }} />
     </div>

@@ -29,7 +29,9 @@ export type LegalPageId = 'privacy'
 export type AiPageId = 'control-room'
 /** The customer's private pages (PROMPT 17): a quotation and a request's status. Each is reached only through a secret in its address. */
 export type CustomerPageId = 'customer-quote' | 'customer-request'
-export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | 'designSystem'
+/** The consultation booking (PROMPT 24): the public page, and the customer's own booking page behind a secret link. */
+export type ConsultationPageId = 'consultation' | 'customer-booking'
+export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | 'designSystem'
 
 export interface PageDef<Id extends PageId = PageId> {
   id: Id
@@ -134,13 +136,23 @@ export const CUSTOMER_PAGES: readonly PageDef<CustomerPageId>[] = [
   page<CustomerPageId>('customer-request', '/request', LANGUAGES, false),
 ]
 
+/**
+ * The consultation page, and the customer's booking page. The booking page's registered path is the bare `/consultation/booking` (a quiet "this link is
+ * incomplete" page, prerendered as a noindex shell); the address with the secret after it is resolved to it. Neither is in a menu: the footer and the
+ * calls to action on the shop and contact pages lead to the first, and only while booking is open.
+ */
+export const CONSULTATION_PAGES: readonly PageDef<ConsultationPageId>[] = [
+  page<ConsultationPageId>('consultation', '/consultation'),
+  page<ConsultationPageId>('customer-booking', '/consultation/booking', LANGUAGES, false),
+]
+
 /** The secret part of a customer page's address: 256 random bits as base64url are 43 characters; a little room either way. */
-const CUSTOMER_PATH = /^\/(quote|request)\/[A-Za-z0-9_-]{20,64}$/
+const CUSTOMER_PATH = /^\/(quote|request|consultation\/booking)\/[A-Za-z0-9_-]{20,64}$/
 
 /** Dev-only reference page; absent from production builds. */
 const DEV_PAGES: readonly PageDef[] = import.meta.env.DEV ? [page('designSystem', '/design-system', LANGUAGES, false)] : []
 
-export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...CUSTOMER_PAGES, ...DEV_PAGES]
+export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...CUSTOMER_PAGES, ...CONSULTATION_PAGES, ...DEV_PAGES]
 
 function normalize(path: string): string {
   const trimmed = path.replace(/\/+$/, '')
