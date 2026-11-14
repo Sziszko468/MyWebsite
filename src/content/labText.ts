@@ -235,6 +235,46 @@ export const experimentText: Record<LabId, ExperimentText> = {
       'Een interactieve chromatische vervorming. De aanwijzer of de pijltjestoetsen bewegen de lens; Enter of spatie versterkt het effect.',
     ),
   },
+  'generative-objects': {
+    description: tri(
+      'Írj néhány szót, és procedurális alkatrészekből háromdimenziós tárgy épül belőle: test, hangulat, testtartás, kiegészítők, esetleg egy jármű. Egy rögzített szólista olvassa el, amit írtál, a részleteket pedig egy magfüggő véletlenszám-generátor dönti el, ezért ugyanazokból a szavakból mindig ugyanaz a tárgy lesz. Semmi nem megy ki az eszközödről, és mesterséges intelligencia nincs benne.',
+      'Write a few words and a three-dimensional object is built from procedural parts: a body, a mood, a pose, accessories, maybe a vehicle. A fixed word list reads what you wrote and a seeded random generator decides the details, so the same words always give the same object. Nothing leaves your device and no AI is involved.',
+      'Schrijf een paar woorden en er wordt een driedimensionaal voorwerp uit procedurele onderdelen gebouwd: een lichaam, een stemming, een houding, accessoires, misschien een voertuig. Een vaste woordenlijst leest wat je schreef en een generator voor willekeurige getallen met een vaste startwaarde bepaalt de details, dus dezelfde woorden geven altijd hetzelfde voorwerp. Er verlaat niets je apparaat en er komt geen AI aan te pas.',
+    ),
+    interactions: [
+      tri(
+        'Írd le, mit szeretnél látni, és nyomd meg a Készítés gombot',
+        'Write what you want to see and press Make',
+        'Schrijf wat je wilt zien en druk op Maken',
+      ),
+      tri(
+        'Próbálj ki egy példát, vagy lepjen meg a gép',
+        'Try an example or let it surprise you',
+        'Probeer een voorbeeld of laat je verrassen',
+      ),
+      tri(
+        'Húzással forgasd a tárgyat; az anyag, a fény és a méret élőben állítható',
+        'Drag to turn the object; material, light and size change live',
+        'Sleep om het voorwerp te draaien; materiaal, licht en grootte pas je live aan',
+      ),
+      tri('Mentsd el róla a képet', 'Save a picture of it', 'Bewaar er een afbeelding van'),
+    ],
+    hint: tri(
+      'Húzd, hogy elforgasd. Írj le másik tárgyat a panelben.',
+      'Drag to turn it. Describe another object in the panel.',
+      'Sleep om te draaien. Beschrijf een ander voorwerp in het paneel.',
+    ),
+    hintTouch: tri(
+      'Húzd az ujjaddal, hogy elforgasd.',
+      'Drag with a finger to turn it.',
+      'Sleep met je vinger om te draaien.',
+    ),
+    stageLabel: tri(
+      'Interaktív háromdimenziós tárgy, a leírásodból építve. A pointer vagy a nyílbillentyűk forgatják.',
+      'An interactive three-dimensional object built from your description. The pointer or the arrow keys turn it.',
+      'Een interactief driedimensionaal voorwerp, gebouwd uit je beschrijving. De aanwijzer of de pijltjestoetsen draaien het.',
+    ),
+  },
 }
 
 /** Words shared by every part of the Lab. */

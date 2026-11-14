@@ -481,9 +481,9 @@
    "label": "home › lab › intro",
    "placeholders": [],
    "default": {
-    "hu": "Kísérleti digitális játszótér: öt interaktív WebGL-élmény, a részecskéktől a kromatikus torzításig. Három ízelítő itt, mind az öt a Labban vár.",
-    "en": "An experimental digital playground: five interactive WebGL experiences, from particles to chromatic distortion. Three samples here, all five wait in the Lab.",
-    "nl": "Een experimentele digitale speeltuin: vijf interactieve WebGL-ervaringen, van deeltjes tot chromatische vervorming. Drie voorbeelden hier, alle vijf wachten in het Lab."
+    "hu": "Kísérleti digitális játszótér: hat interaktív WebGL-élmény, a részecskéktől a procedurális objektumokig. Három ízelítő itt, mind a hat a Labban vár.",
+    "en": "An experimental digital playground: six interactive WebGL experiences, from particles to procedural objects. Three samples here, all six wait in the Lab.",
+    "nl": "Een experimentele digitale speeltuin: zes interactieve WebGL-ervaringen, van deeltjes tot procedurele voorwerpen. Drie voorbeelden hier, alle zes wachten in het Lab."
    }
   },
   {

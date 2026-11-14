@@ -88,7 +88,12 @@ describe('every page is its own page', () => {
   it('does not describe the Lab as having an experience it does not have', () => {
     for (const lang of LANGUAGES) {
       const text = `${headOf('lab', lang).description} ${headOf('home', lang).description}`.toLowerCase()
-      expect(text).not.toMatch(/generat(or|ive object)|generátor|objektumgener|objectgenerator|\bsix\b|\bhat\b|\bzes\b/)
+      // The Lab has six experiences, one of them procedural objects. What a search result may not say is that anything in it is AI, or an experience
+      // that was removed (an image generator, a model studio, a racing game of its own).
+      expect(text).not.toMatch(/\bai\b|artificial|mesterséges|kunstmatige|text-to-3d|meshy|tripo|generátor|objektumgener|objectgenerator|model studio|racing/)
+    }
+    for (const lang of LANGUAGES) {
+      expect(headOf('lab', lang).description.toLowerCase(), lang).toMatch(/procedur/)
     }
   })
 })

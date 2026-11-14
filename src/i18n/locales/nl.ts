@@ -167,7 +167,7 @@ export const nl: Dictionary = {
     },
     lab: {
       title: 'Het lab',
-      intro: 'Een experimentele digitale speeltuin: vijf interactieve WebGL-ervaringen, van deeltjes tot chromatische vervorming. Drie voorbeelden hier, alle vijf wachten in het Lab.',
+      intro: 'Een experimentele digitale speeltuin: zes interactieve WebGL-ervaringen, van deeltjes tot procedurele voorwerpen. Drie voorbeelden hier, alle zes wachten in het Lab.',
       enter: 'Het Lab binnengaan',
       open: 'Openen',
     },

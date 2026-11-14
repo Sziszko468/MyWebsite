@@ -31,6 +31,7 @@ const loaders = import.meta.glob<Record<string, unknown>>([
   '../../components/**/*Text.ts',
   '../../components/lab/experiments/**/*Controls.ts',
   '../../components/lab/experiments/liquid/liquidMaterials.ts',
+  '../../components/lab/experiments/generative/generativeControls.ts',
 ])
 
 // The e-mails the server sends are written as word lists per language (some entries are functions that take a name or a

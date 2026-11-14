@@ -5,7 +5,7 @@ const { start } = require('../serve.cjs')
 const { launch, newPage } = require('../lib.cjs')
 const port = Number(process.argv[2] || 4831)
 const [w, h] = (process.argv[3] || '390x844').split('x').map(Number)
-const IDS = ['particle-universe', 'liquid-matter', 'type-in-motion', 'infinite-space', 'chromatic-distortion']
+const IDS = ['particle-universe', 'liquid-matter', 'type-in-motion', 'infinite-space', 'chromatic-distortion', 'generative-objects']
 
 ;(async () => {
   const server = start({ dir: path.resolve(REPO, 'dist'), port, headers: true, fallback: '404' })

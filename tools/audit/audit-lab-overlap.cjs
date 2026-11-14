@@ -13,7 +13,7 @@ const { start } = require('./serve.cjs')
 const { launch, newPage, LANGS } = require('./lib.cjs')
 
 const DIST = path.resolve(process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : path.join(__dirname, '..', '..', 'dist'))
-const IDS = ['particle-universe', 'liquid-matter', 'type-in-motion', 'infinite-space', 'chromatic-distortion']
+const IDS = ['particle-universe', 'liquid-matter', 'type-in-motion', 'infinite-space', 'chromatic-distortion', 'generative-objects']
 const SIZES = [[320, 568], [360, 800], [390, 844], [430, 932], [768, 1024], [1024, 768], [1440, 900]]
 // The pieces of the screen that carry words, by what they are (the CSS-module class names are hashed: match on the part that is not).
 const PIECES = { hint: '[class*="_hint_"]', notice: '[class*="_notice_"]', title: 'h1', crumb: '[class*="_crumb_"]', panel: '[data-lab-panel]', dock: '[class*="_dock_"]' }

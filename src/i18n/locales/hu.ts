@@ -167,7 +167,7 @@ export const hu = {
     },
     lab: {
       title: 'A Lab',
-      intro: 'Kísérleti digitális játszótér: öt interaktív WebGL-élmény, a részecskéktől a kromatikus torzításig. Három ízelítő itt, mind az öt a Labban vár.',
+      intro: 'Kísérleti digitális játszótér: hat interaktív WebGL-élmény, a részecskéktől a procedurális objektumokig. Három ízelítő itt, mind a hat a Labban vár.',
       enter: 'Belépés a Labba',
       open: 'Megnyitás',
     },

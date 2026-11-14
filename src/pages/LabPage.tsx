@@ -11,7 +11,7 @@ import { Philosophy } from '../components/lab/page/Philosophy'
 import { experimentPath } from '../content/lab'
 
 /**
- * The Lab: a first screen in Racing Red and carbon, the five experiences as a spread with live
+ * The Lab: a first screen in Racing Red and carbon, the six experiences as a spread with live
  * miniatures, why the Lab exists, what the visitor kept, and a closing line. The hidden racing experience hangs off the red full stop of the headline (or
  * N F S U 2 on the keyboard); it is not in the navigation and not in the list.
  */

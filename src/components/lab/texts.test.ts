@@ -60,9 +60,9 @@ describe('the Lab’s words, in every table', () => {
   it('speaks the brief’s words: the headline and its supporting line in Hungarian, English and Dutch', () => {
     expect(pageText.hero.headline.en).toBe('ENTER THE EXPERIMENTAL SIDE')
     expect(pageText.hero.headline.hu).toBe('LÉPJ BE A KÍSÉRLETI DIGITÁLIS VILÁGBA')
-    expect(pageText.hero.lead.en).toBe('Five interactive environments. Endless possibilities. One digital playground.')
-    expect(pageText.hero.lead.hu).toBe('Öt interaktív élmény. Végtelen lehetőség. Egy digitális játszótér.')
-    expect(pageText.hero.lead.nl).toBe('Vijf interactieve omgevingen. Eindeloze mogelijkheden. Één digitale speeltuin.')
+    expect(pageText.hero.lead.en).toBe('Six interactive environments. Endless possibilities. One digital playground.')
+    expect(pageText.hero.lead.hu).toBe('Hat interaktív élmény. Végtelen lehetőség. Egy digitális játszótér.')
+    expect(pageText.hero.lead.nl).toBe('Zes interactieve omgevingen. Eindeloze mogelijkheden. Één digitale speeltuin.')
     expect(pageText.closing.title.en).toBe('THE ONLY LIMIT IS WHAT YOU CAN IMAGINE.')
     expect(pageText.closing.cta.en.toUpperCase()).toBe('START EXPERIMENTING')
   })

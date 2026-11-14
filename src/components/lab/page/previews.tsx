@@ -145,11 +145,41 @@ function chromaticDraw(): DrawFrame {
   }
 }
 
+/** A small figure of spheres (body, head, ears, feet) turning in simple perspective: after the pointer when there is one, else by itself. */
+function generativeDraw(): DrawFrame {
+  const parts = [
+    { x: 0, y: 0.1, z: 0, r: 0.34, red: false },
+    { x: 0, y: -0.34, z: 0, r: 0.22, red: true },
+    { x: -0.17, y: -0.52, z: 0, r: 0.08, red: false },
+    { x: 0.17, y: -0.52, z: 0, r: 0.08, red: false },
+    { x: -0.16, y: 0.42, z: 0.06, r: 0.1, red: true },
+    { x: 0.16, y: 0.42, z: 0.06, r: 0.1, red: true },
+  ]
+  let angle = 0
+  return (ctx, w, h, t, dt, pointer) => {
+    ctx.fillStyle = '#0b0b0d'
+    ctx.fillRect(0, 0, w, h)
+    const target = pointer.inside ? (pointer.x / w - 0.5) * 5 : t * 0.6
+    angle += (target - angle) * Math.min(1, dt * (pointer.inside ? 6 : 1.5))
+    const size = Math.min(w, h) * 0.8
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+    const placed = parts.map((part) => ({ ...part, px: part.x * cos + part.z * sin, pz: -part.x * sin + part.z * cos })).sort((a, b) => a.pz - b.pz)
+    for (const part of placed) {
+      ctx.beginPath()
+      ctx.arc(w / 2 + part.px * size, h / 2 + part.y * size, part.r * size * (1 + part.pz * 0.35), 0, Math.PI * 2)
+      ctx.fillStyle = part.red ? RED : 'rgba(244, 240, 232, 0.9)'
+      ctx.fill()
+    }
+  }
+}
+
 const DRAWS: Partial<Record<LabId, () => DrawFrame>> = {
   'particle-universe': particleDraw,
   'liquid-matter': liquidDraw,
   'infinite-space': spaceDraw,
   'chromatic-distortion': chromaticDraw,
+  'generative-objects': generativeDraw,
 }
 
 function CanvasPreview({ id }: { id: LabId }) {

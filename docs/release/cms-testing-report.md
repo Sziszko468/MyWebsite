@@ -1,5 +1,7 @@
 # PROMPT 13.1 — testing report
 
+> **Superseded in part (PROMPT 22.1, 2026-11-14).** The Lab now has **six** standard experiences. *Generative Objects* is back as a procedural, local, interactive experience (a fixed word list and procedural geometry: no AI, no Meshy or similar service, no server, no voice input). Where this document says the Lab has five experiences, or that Generative Objects was deleted and not rebuilt, it describes the state on its own date, and its measurements were taken on the five experiences that existed then. The hidden NFSU2 racing screen is a separate Easter egg and is not one of the six. Current description: README, "The Lab".
+
 Dynamic Portfolio CMS & Premium Shop Content Management. This report says what was built against the brief, how it was tested, what the tests **found**, and what was **not** done or **not** tested. The feature itself is described in [`../cms/README.md`](../cms/README.md). Date of the runs: 2026-11-05/06.
 
 ## 1. Verdict

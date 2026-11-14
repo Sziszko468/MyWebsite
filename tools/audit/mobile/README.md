@@ -5,7 +5,7 @@ Small Playwright scripts that drive the **built** site (`npm run build` first) w
 | Script | What it checks |
 | --- | --- |
 | `intro-touch.cjs <port> [WxH]` | A finger dragging over the fullscreen intro reaches the field: pointer moves arrive, no `pointercancel`, the field variables change, the page does not scroll. |
-| `lab-touch.cjs <port> [WxH]` | The same drag on each of the five Lab experiences' stages. |
+| `lab-touch.cjs <port> [WxH]` | The same drag on each of the six Lab experiences' stages. |
 | `safe-area.cjs <port> <outdir>` | Notch insets through `Emulation.setSafeAreaInsetsOverride` (portrait 47/34, landscape 59/59): nothing interactive outside the safe rectangle, no sideways scroll, on the intro, home, Work, cart and the Lab. |
 | `egg.cjs <port> <outdir>` | The hidden NFSU2 screen at 320×568, 390×844, 844×390, 568×320: opened by touch, no overflow, 48 px controls, Back by touch. |
 | `restore.cjs <port> [experience] [throttle]` | The quality governor end to end: slows the CPU until the Lab lowers the canvas resolution, releases it, and prints the resolution coming back. |

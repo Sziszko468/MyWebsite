@@ -67,12 +67,17 @@
       grid-column: 8 / span 5;
     }
 
+    /* The last row holds three tiles of one width each. */
     & > [data-place='d'] {
-      grid-column: 1 / span 6;
+      grid-column: 1 / span 4;
     }
 
     & > [data-place='e'] {
-      grid-column: 7 / span 6;
+      grid-column: 5 / span 4;
+    }
+
+    & > [data-place='f'] {
+      grid-column: 9 / span 4;
     }
   }
 }

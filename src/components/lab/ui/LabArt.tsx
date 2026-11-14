@@ -236,12 +236,38 @@ function ChromaticArt() {
   )
 }
 
+/** Generative Objects: an object built from parts, drawn as a stack of isometric blocks (a body, a head, a hat) in the Lab's red. */
+function GenerativeArt() {
+  const block = (key: string, cx: number, cy: number, width: number, height: number) => {
+    const dx = width / 2
+    const dy = width / 4
+    return (
+      <g key={key}>
+        <path className={styles.faceLeft} d={`M${cx - dx} ${cy} L${cx} ${cy + dy} L${cx} ${cy + dy + height} L${cx - dx} ${cy + height} Z`} />
+        <path className={styles.faceRight} d={`M${cx + dx} ${cy} L${cx} ${cy + dy} L${cx} ${cy + dy + height} L${cx + dx} ${cy + height} Z`} />
+        <path className={styles.faceTop} d={`M${cx} ${cy - dy} L${cx + dx} ${cy} L${cx} ${cy + dy} L${cx - dx} ${cy} Z`} />
+      </g>
+    )
+  }
+  return (
+    <svg className={styles.svg} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" focusable="false">
+      <rect width={W} height={H} className={styles.bg} />
+      {block('foot-l', CX - 90, CY + 170, 80, 40)}
+      {block('foot-r', CX + 90, CY + 170, 80, 40)}
+      {block('body', CX, CY + 40, 300, 150)}
+      {block('head', CX, CY - 120, 190, 90)}
+      {block('hat', CX, CY - 215, 110, 34)}
+    </svg>
+  )
+}
+
 const ART: Record<LabId, () => ReactElement> = {
   'particle-universe': ParticleArt,
   'liquid-matter': LiquidArt,
   'type-in-motion': TypeArt,
   'infinite-space': SpaceArt,
   'chromatic-distortion': ChromaticArt,
+  'generative-objects': GenerativeArt,
 }
 
 export function LabArt({ id }: { id: LabId }) {

@@ -33,7 +33,7 @@ Legend: **V** implemented and verified (a test or a live check ran and passed) �
 | Transactional e-mail | IU | code and its tests pass; **no real send, DNS authentication absent** (see E-mail) |
 | HU / EN / NL localization | V | `i18n:check` 2 587 texts × 3 languages, Hunspell spelling 0 unknown words |
 | Racing Red design system | V | design audit (`audit-design.cjs`), token files present |
-| Three.js / WebGL experiences | V | five Lab experiences, no-WebGL and context-loss audit (see Performance) |
+| Three.js / WebGL experiences | V | six Lab experiences (five when audited; the sixth came with PROMPT 22.1), no-WebGL and context-loss audit (see Performance) |
 | Premium Shop (catalogue → request → quote) | V | `quote-journey` 20/20, phone path in `journeys` D; inquiry based, no payment |
 | FULL EXPERIENCE configurator | V | `shop-journey` 41/41 incl. the configurator end to end on a phone (201, confirmation, administrator sees every answer); backend tests |
 | Dynamic portfolio | V | CMS journey, security probe (drafts invisible to the public) |

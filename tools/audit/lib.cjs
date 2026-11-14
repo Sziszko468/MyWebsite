@@ -14,7 +14,7 @@ const PAGES = [
   '/services/full-experience', '/services/full-experience/start',
   '/services/configure', '/services/cart', '/about', '/lab', '/contact',
   '/work/spendly', '/work/bookinghub', '/work/logistics-platform',
-  '/privacy', '/control-room', '/lab/particle-universe', '/lab/liquid-matter', '/lab/type-in-motion', '/lab/infinite-space', '/lab/chromatic-distortion',
+  '/privacy', '/control-room', '/lab/particle-universe', '/lab/liquid-matter', '/lab/type-in-motion', '/lab/infinite-space', '/lab/chromatic-distortion', '/lab/generative-objects',
 ]
 
 async function launch(opts = {}) {

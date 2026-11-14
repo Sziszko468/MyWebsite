@@ -1,5 +1,7 @@
 # Mobile-first, performance and device report (PROMPT 13.2)
 
+> **Superseded in part (PROMPT 22.1, 2026-11-14).** The Lab now has **six** standard experiences. *Generative Objects* is back as a procedural, local, interactive experience (a fixed word list and procedural geometry: no AI, no Meshy or similar service, no server, no voice input). Where this document says the Lab has five experiences, or that Generative Objects was deleted and not rebuilt, it describes the state on its own date, and its measurements were taken on the five experiences that existed then. The hidden NFSU2 racing screen is a separate Easter egg and is not one of the six. Current description: README, "The Lab".
+
 Done on 2026-11-06 against production builds (`npm run build`). Every number below was produced by a script in `tools/audit/` or `tools/audit/mobile/` or by `npm test`; none is estimated. The method, the machine and **what could not be measured** are stated in each section. How the mobile system works is in `docs/mobile/README.md`.
 
 **Read this first.**

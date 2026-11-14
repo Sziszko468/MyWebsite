@@ -1,5 +1,7 @@
 # Performance and mobile audit
 
+> **Superseded in part (PROMPT 22.1, 2026-11-14).** The Lab now has **six** standard experiences. *Generative Objects* is back as a procedural, local, interactive experience (a fixed word list and procedural geometry: no AI, no Meshy or similar service, no server, no voice input). Where this document says the Lab has five experiences, or that Generative Objects was deleted and not rebuilt, it describes the state on its own date, and its measurements were taken on the five experiences that existed then. The hidden NFSU2 racing screen is a separate Easter egg and is not one of the six. Current description: README, "The Lab".
+
 Method: the project's own browser tools (`tools/audit/*`) against the **built** site in system Chrome (desktop GPU, so WebGL ran), 2026-11-13. These are **lab numbers on an emulated phone** (CDP: 4× CPU slowdown, 150 ms round trip, 1.6 Mbit/s), not real-user data. Real devices, a real mobile GPU, Lighthouse and field Core Web Vitals were **not** measured.
 
 ## Layout at the nine required widths

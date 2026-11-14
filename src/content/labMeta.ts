@@ -14,9 +14,9 @@ export const labMeta = {
     'Lab: een experimentele digitale speeltuin',
   ),
   description: tri(
-    'Öt interaktív WebGL-élmény egy helyen: részecskék, folyékony anyag, mozgó tipográfia, végtelen tér és kromatikus torzítás.',
-    'Five interactive WebGL experiences in one place: particles, liquid matter, kinetic type, endless space and chromatic distortion.',
-    'Vijf interactieve WebGL-ervaringen op één plek: deeltjes, vloeibare materie, bewegende typografie, eindeloze ruimte en chromatische vervorming.',
+    'Hat interaktív WebGL-élmény egy helyen: részecskék, folyékony anyag, mozgó tipográfia, végtelen tér, kromatikus torzítás és procedurális objektumok.',
+    'Six interactive WebGL experiences in one place: particles, liquid matter, kinetic type, endless space, chromatic distortion and procedural objects.',
+    'Zes interactieve WebGL-ervaringen op één plek: deeltjes, vloeibare materie, bewegende typografie, eindeloze ruimte, chromatische vervorming en procedurele voorwerpen.',
   ),
 }
 
@@ -45,5 +45,10 @@ export const experimentSummary: Record<LabId, Trilingual> = {
     'A vörös, zöld és kék csatorna külön rajzolódik és eltolódik ott, ahol mozogsz; a pointer körül lokális kromatikus aberráció lencséje alakul ki.',
     'Red, green and blue are drawn separately and drift apart where you move; the pointer carries a local lens of chromatic aberration.',
     'Rood, groen en blauw worden apart getekend en schuiven uiteen waar je beweegt; je aanwijzer draagt een lokale lens van chromatische aberratie.',
+  ),
+  'generative-objects': tri(
+    'Írj le egy tárgyat: rögzített szólista alapján, procedurális geometriából épül fel, mesterséges intelligencia nélkül; az anyagot és a fényt te választod.',
+    'Describe an object and a fixed word list builds it from procedural geometry, with no AI: you choose the material, the light and the size.',
+    'Beschrijf een voorwerp en een vaste woordenlijst bouwt het uit procedurele geometrie, zonder AI: jij kiest het materiaal, het licht en de grootte.',
   ),
 }

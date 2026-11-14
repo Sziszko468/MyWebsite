@@ -167,7 +167,7 @@ export const en: Dictionary = {
     },
     lab: {
       title: 'The Lab',
-      intro: 'An experimental digital playground: five interactive WebGL experiences, from particles to chromatic distortion. Three samples here, all five wait in the Lab.',
+      intro: 'An experimental digital playground: six interactive WebGL experiences, from particles to procedural objects. Three samples here, all six wait in the Lab.',
       enter: 'Enter the Lab',
       open: 'Open',
     },

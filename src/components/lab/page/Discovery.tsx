@@ -16,6 +16,7 @@ const PLACE: Record<LabId, string> = {
   'type-in-motion': 'c',
   'infinite-space': 'd',
   'chromatic-distortion': 'e',
+  'generative-objects': 'f',
 }
 
 function Tile({ experiment }: { experiment: LabExperiment }) {
@@ -55,7 +56,7 @@ function Tile({ experiment }: { experiment: LabExperiment }) {
 }
 
 /**
- * The five experiences as a spread, not five equal cards: the first is large, the rest each
+ * The six experiences as a spread, not six equal cards: the first is large, the rest each
  * have their own size, their own colour and a live miniature that answers the pointer (or a finger).
  */
 export function Discovery() {

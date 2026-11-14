@@ -124,7 +124,7 @@ function KineticHeadline({ id, text, onFind, dotLabel }: { id: string; text: str
 /**
  * The Lab's first screen: carbon black, a field of Racing Red lines that lean towards the pointer, the
  * headline in letters that stretch under it, one line of promise and the way into the experiments. It
- * is plain markup and a small 2D canvas: nothing here waits for WebGL, so the way into the five
+ * is plain markup and a small 2D canvas: nothing here waits for WebGL, so the way into the six
  * experiments is there at once.
  */
 export function LabHero({ onFind }: { onFind(): void }) {

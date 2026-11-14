@@ -101,7 +101,7 @@ Order numbers refer to the sequence at the end.
 - **Existing:** none. **Depends on** 10, 12, 13, 23. Every automated action needs a human-approval default, a budget and an audit trail.
 
 ### 15. LAB 2.0 (order 16)
-- **Existing:** five immersive experiences (Generative Objects was removed on 2026-11-01), a quality governor, lazy loading, a hidden NFSU2 screen (external link, no iframe: the target forbids framing).
+- **Existing:** six immersive experiences (Generative Objects was removed on 2026-11-01 with its AI code and came back on 2026-11-14 as a procedural, local experience: PROMPT 22.1), a quality governor, lazy loading, a hidden NFSU2 screen (external link, no iframe: the target forbids framing).
 - **Missing:** new experiments, shared authoring helpers.
 - **Reusable:** `components/lab/core`, `SceneLayer`, the governor.
 - **Risk:** performance budget (LCP is already over target on a phone, P-1); the brief's earlier demand for "six" experiences conflicts with the removal.

@@ -1,5 +1,7 @@
 # Final quality report: integration, end-to-end testing and production readiness (PROMPT 15)
 
+> **Superseded in part (PROMPT 22.1, 2026-11-14).** The Lab now has **six** standard experiences. *Generative Objects* is back as a procedural, local, interactive experience (a fixed word list and procedural geometry: no AI, no Meshy or similar service, no server, no voice input). Where this document says the Lab has five experiences, or that Generative Objects was deleted and not rebuilt, it describes the state on its own date, and its measurements were taken on the five experiences that existed then. The hidden NFSU2 racing screen is a separate Easter egg and is not one of the six. Current description: README, "The Lab".
+
 Done on 2026-11-05 against the code as committed at `d95aefe` plus the changes listed in §3 (nothing of this pass is committed). The method was **audit first, fix second, verify third**: the audit (§2) was made before anything was changed, the fixes (§3) are the ones the audit justified, and §5 says what was run afterwards. Every number below was produced by a command or a browser run named in §5 or in [`tools/e2e`](../../tools/e2e/README.md) / [`tools/audit`](../../tools/audit/README.md); none is estimated. What could **not** be tested is in §7 and is not hidden behind a summary.
 
 The release checklist (every item Verified / Requires manual configuration / Not implemented / Blocked) is [`docs/production/README.md`](../production/README.md).

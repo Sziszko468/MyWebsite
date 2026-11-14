@@ -1,5 +1,5 @@
 /**
- * The five experiments of the Lab: the one list the Lab is built from. The gallery, the routes
+ * The six experiments of the Lab: the one list the Lab is built from. The gallery, the routes
  * (`/lab/<id>`), the Lab's own navigation, the previous/next links and the home page's teaser are
  * all derived from it, so adding an experiment is: one entry here, its words in content/labText.ts
  * and its component in components/lab/registry.tsx.
@@ -17,6 +17,7 @@ export type LabId =
   | 'type-in-motion'
   | 'infinite-space'
   | 'chromatic-distortion'
+  | 'generative-objects'
 
 export type LabStatus = 'ready' | 'in-progress' | 'concept'
 
@@ -94,6 +95,20 @@ export const experiments: readonly LabExperiment[] = [
     status: 'ready',
     accent: 'red',
     tech: ['GLSL fragment shader', 'Signed distance fields', 'Per-channel sampling'],
+  },
+  {
+    id: 'generative-objects',
+    number: '06',
+    name: 'Generative Objects',
+    tagline: tri(
+      'Írj le egy tárgyat, és felépül belőle.',
+      'Describe an object and it gets built.',
+      'Beschrijf een voorwerp en het wordt gebouwd.',
+    ),
+    status: 'ready',
+    accent: 'blue',
+    // Procedural and local: no AI model, no external service, no server. The words are read by a fixed word list.
+    tech: ['Three.js', 'Procedural geometry', 'Seeded random', 'Rule-based word list'],
   },
 ]
 
