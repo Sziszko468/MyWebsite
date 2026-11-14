@@ -93,6 +93,22 @@ export interface StackEntry {
   items: readonly string[]
 }
 
+/** A content block the owner added in the administration (PROMPT 22): one band of the page with its own heading, plain text only. */
+export type DetailBlock =
+  | { type: 'text'; heading: Trilingual; body: Trilingual }
+  | { type: 'image'; heading: Trilingual; picture: BlockPicture; alt: Trilingual; caption: Trilingual }
+  | { type: 'gallery'; heading: Trilingual; images: readonly { picture: BlockPicture; alt: Trilingual; caption: Trilingual }[] }
+  | { type: 'features'; heading: Trilingual; items: readonly Trilingual[] }
+  | { type: 'technologies'; heading: Trilingual; items: readonly string[] }
+  | { type: 'highlight'; heading: Trilingual; text: Trilingual }
+  | { type: 'links'; heading: Trilingual; links: readonly { label: Trilingual; url: string }[] }
+
+export interface BlockPicture {
+  src: string
+  width: number
+  height: number
+}
+
 export interface ProjectDetail {
   /** The project's address (its slug). For the four static projects it is their id. */
   id: string
@@ -128,6 +144,10 @@ export interface ProjectDetail {
   architectureText?: Trilingual
   /** Only on a project managed in the administration: results, written by the owner from real evidence. Empty hides the section. */
   results?: readonly Trilingual[]
+  /** Only on a project managed in the administration: the services delivered for it, one short line each. */
+  services?: readonly Trilingual[]
+  /** Only on a project managed in the administration: the owner's own sections, after the standard ones. */
+  blocks?: readonly DetailBlock[]
   /** Only on a project managed in the administration: the addresses the owner marked as checked. */
   links?: { demo: string | null; source: string | null; extra: { url: string; label: Trilingual } | null; video: string | null }
 }

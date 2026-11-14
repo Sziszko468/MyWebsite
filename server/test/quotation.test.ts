@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -14,6 +14,11 @@ import { makeKit } from './quotationKit.ts'
  * PROMPT 17: the quotation and order management. These tests drive the real server (in memory) through its HTTP interface: the public
  * request, the administrator's work, the customer's secure pages, the e-mails, and what must be refused.
  */
+
+/** The migration versions that ship with the server, read from its folder, so a test that says "what a run applies" does not need to be edited when one is added. */
+const SHIPPED = readdirSync(MIGRATIONS_DIRECTORY)
+  .flatMap((name) => (/^(\d{4})_/.test(name) ? [Number(name.slice(0, 4))] : []))
+  .sort((a, b) => a - b)
 
 let server: TestServer
 let kit: ReturnType<typeof makeKit>
@@ -147,8 +152,8 @@ describe('migration 0007', () => {
       db.run("INSERT INTO quote_request_items (quote_request_id, position, need, plan) VALUES ('r1', 0, 'website', 'launch')")
       db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, created_at, updated_at) VALUES ('d1', 'quote_received', 'quote_request', 'r1', 'o@x.test', 'en', 'accepted', ?, ?)", [now, now])
 
-      // 0007 is the migration under test; 0008 (the assistant) and 0009 (PROMPT 21's two e-mail kinds, see "migration 0009") follow it.
-      expect(migrate(db, clock)).toEqual([7, 8, 9])
+      // 0007 is the migration under test; every migration after it (the assistant, PROMPT 21's two e-mail kinds, …) is applied by the same call.
+      expect(migrate(db, clock)).toEqual(SHIPPED.filter((version) => version >= 7))
       expect(db.all('PRAGMA foreign_key_check')).toEqual([])
       expect(db.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 })
       const rows = db.all<{ id: string; status: string; customer_status: string; source: string; request_type: string; priority: string }>('SELECT id, status, customer_status, source, request_type, priority FROM quote_requests ORDER BY id')
@@ -199,7 +204,7 @@ describe('migration 0009', () => {
       delivery('d2', 'quote_sent', 'quote', 'q1', 'failed')
       db.run("INSERT INTO email_events (id, provider, event_type, delivery_id, provider_message_id, occurred_at, received_at, outcome) VALUES ('e1', 'resend', 'email.delivered', 'd1', 'm1', ?, ?, 'applied')", [now, now])
 
-      expect(migrate(db, clock)).toEqual([9])
+      expect(migrate(db, clock)).toEqual(SHIPPED.filter((version) => version >= 9))
       expect(db.all('PRAGMA foreign_key_check')).toEqual([])
       expect(db.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 })
       // Nothing was lost on the way: the rows, what they say, and the provider's events that point at them.

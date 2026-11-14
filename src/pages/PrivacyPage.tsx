@@ -2,7 +2,7 @@ import { measurementIsOffered } from '../analytics/offer'
 import { Container } from '../components/Container/Container'
 import { LocalizedLink } from '../components/LocalizedLink/LocalizedLink'
 import { privacyText as text, storedItems } from '../content/privacy'
-import { siteConfig } from '../config/site'
+import { useContact } from '../profile/store'
 import { useI18n } from '../i18n/useI18n'
 import styles from './PrivacyPage.module.scss'
 
@@ -14,7 +14,7 @@ import styles from './PrivacyPage.module.scss'
 export function PrivacyPage() {
   const { lang } = useI18n()
   const measuring = measurementIsOffered()
-  const email = siteConfig.contact.email
+  const { email } = useContact()
 
   return (
     <div className={styles.page}>

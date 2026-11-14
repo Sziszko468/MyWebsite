@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { siteConfig } from '../../config/site'
 import { useI18n } from '../../i18n/useI18n'
+import { useContact } from '../../profile/store'
 import { BrandMark } from '../BrandMark/BrandMark'
 import { Button } from '../Button/Button'
 import { Container } from '../Container/Container'
@@ -27,7 +28,8 @@ function Pending({ children }: { children: ReactNode }) {
 
 export function SiteFooter() {
   const { t } = useI18n()
-  const { brandName, contact, social, legal } = siteConfig
+  const { brandName, legal } = siteConfig
+  const { email, social } = useContact()
 
   const socialItems = social.filter((profile) => profile.url || SHOW_PENDING)
   const legalItems = legal.filter((link) => link.path || SHOW_PENDING)
@@ -51,9 +53,9 @@ export function SiteFooter() {
           <Button to="/contact" variant="text" arrow>
             {t.footer.contactLink}
           </Button>
-          {contact.email && (
-            <a className={styles.link} href={`mailto:${contact.email}`}>
-              {contact.email}
+          {email && (
+            <a className={styles.link} href={`mailto:${email}`}>
+              {email}
             </a>
           )}
         </div>

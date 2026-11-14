@@ -29,6 +29,23 @@ export interface MediaRow {
   original_name: string | null
   created_by: string | null
   created_at: string
+  /** The picture's description in each language, as the library keeps it (JSON `{ hu, en, nl }`; `{}` until one is written). */
+  alt_json: string
+}
+
+export type Alt = Record<'hu' | 'en' | 'nl', string>
+
+/** The description kept with a picture, whole (a language nobody wrote is an empty text). */
+export function altOf(row: Pick<MediaRow, 'alt_json'>): Alt {
+  let parsed: unknown = {}
+  try {
+    parsed = JSON.parse(row.alt_json)
+  } catch {
+    parsed = {}
+  }
+  const record = (typeof parsed === 'object' && parsed !== null ? parsed : {}) as Record<string, unknown>
+  const text = (language: string) => (typeof record[language] === 'string' ? (record[language] as string) : '')
+  return { hu: text('hu'), en: text('en'), nl: text('nl') }
 }
 
 /** What the website and the administration use: where the picture is and how big. */
@@ -42,6 +59,7 @@ export interface MediaOut {
   name: string | null
   storage: 'upload' | 'public'
   createdAt: string
+  alt: Alt
 }
 
 export const MEDIA_FILE = /^[a-f0-9]{24}\.(png|jpg|webp|gif)$/
@@ -58,6 +76,7 @@ export const mediaOut = (row: MediaRow): MediaOut => ({
   name: row.original_name,
   storage: row.storage,
   createdAt: row.created_at,
+  alt: altOf(row),
 })
 
 export function mediaById(app: AppContext, ids: Iterable<number>): Map<number, MediaRow> {
@@ -93,9 +112,33 @@ export function saveUpload(app: AppContext, session: SessionInfo | null, buffer:
   return app.db.get<MediaRow>('SELECT * FROM media WHERE id = ?', [result.lastInsertRowid])!
 }
 
-export function listMedia(app: AppContext, session: SessionInfo | null, usage: Map<number, number>): Array<MediaOut & { uses: number }> {
+export function listMedia(app: AppContext, session: SessionInfo | null, usage: Map<number, number>, users: Map<number, Array<{ id: number; slug: string; title: Record<string, string> }>> = new Map()): Array<MediaOut & { uses: number; usedBy: Array<{ id: number; slug: string; title: Record<string, string> }> }> {
   requirePermission(session, 'content:write')
-  return app.db.all<MediaRow>('SELECT * FROM media ORDER BY id DESC').map((row) => ({ ...mediaOut(row), uses: usage.get(row.id) ?? 0 }))
+  return app.db.all<MediaRow>('SELECT * FROM media ORDER BY id DESC').map((row) => ({ ...mediaOut(row), uses: usage.get(row.id) ?? 0, usedBy: users.get(row.id) ?? [] }))
+}
+
+/** The description of a picture, in each language, as the library keeps it. A language left empty stays empty: nothing is copied between languages. */
+export function updateMediaAlt(app: AppContext, session: SessionInfo | null, id: number, body: unknown): MediaOut {
+  const who = requirePermission(session, 'content:write')
+  const row = app.db.get<MediaRow>('SELECT * FROM media WHERE id = ?', [id])
+  if (!row) throw notFound('The image')
+  const input = typeof body === 'object' && body !== null && typeof (body as { alt?: unknown }).alt === 'object' && (body as { alt?: unknown }).alt !== null ? ((body as { alt: Record<string, unknown> }).alt) : null
+  if (!input) throw validationFailed({ alt: 'invalid' })
+  const errors: Record<string, 'invalid' | 'tooLong'> = {}
+  const alt: Alt = { hu: '', en: '', nl: '' }
+  for (const language of ['hu', 'en', 'nl'] as const) {
+    const value = input[language]
+    if (value === undefined || value === null) continue
+    if (typeof value !== 'string') errors[`alt.${language}`] = 'invalid'
+    else {
+      alt[language] = cleanLine(value)
+      if (alt[language].length > 200) errors[`alt.${language}`] = 'tooLong'
+    }
+  }
+  if (Object.keys(errors).length > 0) throw validationFailed(errors)
+  app.db.run('UPDATE media SET alt_json = ? WHERE id = ?', [JSON.stringify(alt), id])
+  audit(app, who, 'media.alt', 'media', id)
+  return mediaOut(app.db.get<MediaRow>('SELECT * FROM media WHERE id = ?', [id])!)
 }
 
 /** Deletes an uploaded picture nothing uses. A picture that ships with the website (storage `public`) is never deleted here. */

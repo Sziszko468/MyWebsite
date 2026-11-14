@@ -16,6 +16,8 @@ import {
   publicProject,
   publishBlockers,
   requireValid,
+  upgradeContent,
+  availableLanguages,
   type PictureOut,
   type ProjectContent,
   type ProjectState,
@@ -53,7 +55,7 @@ export interface Category {
 
 const KEYS = { categories: 'projects.categories', allLanguages: 'projects.publish.all_languages' } as const
 
-const parseContent = (row: ProjectRow): ProjectContent => JSON.parse(row.content_json) as ProjectContent
+const parseContent = (row: ProjectRow): ProjectContent => upgradeContent(JSON.parse(row.content_json))
 const rows = (app: AppContext, where = '', params: Array<string | number> = []): ProjectRow[] =>
   app.db.all<ProjectRow>(`SELECT * FROM projects ${where} ORDER BY position, id`, params)
 
@@ -126,8 +128,14 @@ export function saveProjectSettings(app: AppContext, session: SessionInfo | null
 // pictures
 // ---------------------------------------------------------------------------------------------------------------
 
-function mediaIdsOf(content: ProjectContent): number[] {
-  return [...(content.thumbnail ? [content.thumbnail.mediaId] : []), ...content.gallery.map((image) => image.mediaId), ...content.features.flatMap((feature) => (feature.imageMediaId ? [feature.imageMediaId] : []))]
+export function mediaIdsOf(content: ProjectContent): number[] {
+  return [
+    ...(content.thumbnail ? [content.thumbnail.mediaId] : []),
+    ...content.gallery.map((image) => image.mediaId),
+    ...content.features.flatMap((feature) => (feature.imageMediaId ? [feature.imageMediaId] : [])),
+    ...(content.seo?.imageMediaId ? [content.seo.imageMediaId] : []),
+    ...(content.blocks ?? []).flatMap((item) => (item.type === 'image' ? [item.mediaId] : item.type === 'gallery' ? item.images.map((image) => image.mediaId) : [])),
+  ]
 }
 
 function picturesFor(app: AppContext, contents: ProjectContent[]): (id: number) => PictureOut | null {
@@ -136,6 +144,74 @@ function picturesFor(app: AppContext, contents: ProjectContent[]): (id: number) 
     const row = map.get(id)
     return row ? { id: row.id, src: mediaUrl(row), width: row.width, height: row.height } : null
   }
+}
+
+/** One project's row by its id (a number), or "not found". For the modules that work on a project without being the project service. */
+export const projectRow = (app: AppContext, id: number): ProjectRow => find(app, id)
+
+/** A project's row and its document (old documents given their empty new fields), or `null`. */
+export function parseProject(app: AppContext, id: number): { row: ProjectRow; content: ProjectContent } | null {
+  const row = app.db.get<ProjectRow>('SELECT * FROM projects WHERE id = ?', [id])
+  return row ? { row, content: parseContent(row) } : null
+}
+
+export const picturesOf = (app: AppContext, content: ProjectContent): ((id: number) => PictureOut | null) => picturesFor(app, [content])
+
+/**
+ * The project pages that exist right now: each published project that has a page of its own, with the languages it can be shown in. What the
+ * page server and the sitemap read, so that an unpublished project is gone from both at once and a language a project lacks has no page.
+ */
+export function livePages(app: AppContext): Map<string, Language[]> {
+  const pages = new Map<string, Language[]>()
+  for (const row of rows(app, "WHERE status = 'published'")) {
+    const content = parseContent(row)
+    if (content.detailPage) pages.set(row.slug, availableLanguages(content))
+  }
+  return pages
+}
+
+/** Which projects use each picture, for the picture library ("used by …"): a project's id, address and title. */
+export function mediaUsers(app: AppContext): Map<number, Array<{ id: number; slug: string; title: Tri }>> {
+  const users = new Map<number, Array<{ id: number; slug: string; title: Tri }>>()
+  for (const row of rows(app)) {
+    const content = parseContent(row)
+    for (const id of new Set(mediaIdsOf(content))) users.set(id, [...(users.get(id) ?? []), { id: row.id, slug: row.slug, title: content.title }])
+  }
+  return users
+}
+
+/**
+ * Points every use of picture `from` at picture `to`, in every project, and says how many projects changed. The caller runs it in the transaction
+ * that makes the new picture, so a project never points at a picture that is not there. A project's `updated_at` moves, so an editor that had it open
+ * is told (409) to reload instead of saving the old picture back.
+ */
+export function repointMedia(app: AppContext, from: number, to: number): number {
+  const now = iso(app.clock.now())
+  let changed = 0
+  for (const row of rows(app)) {
+    const content = parseContent(row)
+    let touched = false
+    const swap = (id: number): number => {
+      if (id === from) {
+        touched = true
+        return to
+      }
+      return id
+    }
+    if (content.thumbnail) content.thumbnail.mediaId = swap(content.thumbnail.mediaId)
+    for (const image of content.gallery) image.mediaId = swap(image.mediaId)
+    for (const feature of content.features) if (feature.imageMediaId) feature.imageMediaId = swap(feature.imageMediaId)
+    if (content.seo.imageMediaId) content.seo.imageMediaId = swap(content.seo.imageMediaId)
+    for (const item of content.blocks) {
+      if (item.type === 'image') item.mediaId = swap(item.mediaId)
+      if (item.type === 'gallery') for (const image of item.images) image.mediaId = swap(image.mediaId)
+    }
+    if (touched) {
+      app.db.run('UPDATE projects SET content_json = ?, updated_at = ? WHERE id = ?', [JSON.stringify(content), now, row.id])
+      changed += 1
+    }
+  }
+  return changed
 }
 
 /** How many project documents use each picture, for the picker ("used 2×") and for the refusal to delete one in use. */
@@ -211,9 +287,12 @@ function adminView(app: AppContext, row: ProjectRow, pictures: (id: number) => P
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     title: content.title,
+    internalTitle: content.internalTitle,
     thumbnail: thumb,
     detailPage: content.detailPage,
     languages: report,
+    /** The languages the website shows this project in (a language not listed shows nothing of it). */
+    available: availableLanguages(content),
     blockers: publishBlockers(content, requireAllLanguages(app)),
   }
 }

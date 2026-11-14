@@ -1,5 +1,5 @@
 import { LANGUAGES, type Language } from '../../i18n/config'
-import type { LanguageReport, ProjectContent, Tri } from '../api/projectTypes'
+import type { LanguageReport, ProjectBlock, ProjectContent, Tri } from '../api/projectTypes'
 
 /**
  * What the project editor knows besides what it draws: the empty document a new project starts from, the limits it counts
@@ -9,7 +9,7 @@ import type { LanguageReport, ProjectContent, Tri } from '../api/projectTypes'
 
 export const emptyTri = (): Tri => ({ hu: '', en: '', nl: '' })
 
-export const LIMITS = { title: 120, line: 200, card: 400, summary: 800, paragraph: 3000, item: 1500, source: 160, tag: 60, list: 24, gallery: 24, challenges: 12 } as const
+export const LIMITS = { title: 120, line: 200, card: 400, summary: 800, paragraph: 3000, item: 1500, source: 160, tag: 60, list: 24, gallery: 24, challenges: 12, blocks: 20, blockImages: 12, blockLinks: 6, seoTitle: 70, seoDescription: 200, ogTitle: 90, ogDescription: 200 } as const
 
 export const ACCENTS = ['red', 'blue', 'ink'] as const
 export const HEROES = ['split', 'stack', 'route'] as const
@@ -18,13 +18,15 @@ export const LAYOUTS = ['lead', 'offset', 'compact', 'wide'] as const
 export const PROJECT_STATUSES = ['live', 'demo', 'in-progress', 'concept'] as const
 export const STACK_GROUPS = ['frontend', 'backend', 'data', 'infrastructure', 'testing', 'services'] as const
 export const FEATURE_STATUSES = ['done', 'partial', 'planned'] as const
-export const SECTIONS = ['overview', 'challenge', 'approach', 'architecture', 'features', 'decisions', 'learned', 'results', 'gallery', 'links'] as const
+export const SECTIONS = ['overview', 'challenge', 'approach', 'architecture', 'features', 'decisions', 'learned', 'results', 'gallery', 'blocks', 'links'] as const
+export const BLOCK_TYPES = ['text', 'image', 'gallery', 'features', 'technologies', 'highlight', 'links'] as const
 /** The longest side a picture keeps before it is uploaded, and the size above which a picture is re-encoded. */
 export const IMAGE_MAX_SIDE = 1600
 export const IMAGE_COMFORTABLE_BYTES = 600 * 1024
 
 export function emptyContent(): ProjectContent {
   return {
+    internalTitle: '',
     title: emptyTri(),
     cardLabel: emptyTri(),
     cardDescription: emptyTri(),
@@ -43,6 +45,7 @@ export function emptyContent(): ProjectContent {
     gallery: [],
     galleryNote: emptyTri(),
     overview: { what: emptyTri(), audience: emptyTri(), problem: emptyTri(), goal: emptyTri() },
+    services: [],
     challenges: [],
     approach: [],
     architectureText: emptyTri(),
@@ -54,7 +57,30 @@ export function emptyContent(): ProjectContent {
     results: [],
     next: [],
     links: { demo: null, source: null, extra: null, video: null },
+    blocks: [],
+    seo: { title: emptyTri(), description: emptyTri(), ogTitle: emptyTri(), ogDescription: emptyTri(), imageMediaId: null, imageAlt: emptyTri() },
     hidden: [],
+  }
+}
+
+/** A new block of a type, empty (the editor adds it at the end of the list). */
+export function emptyBlock(type: (typeof BLOCK_TYPES)[number]): ProjectBlock {
+  const heading = emptyTri()
+  switch (type) {
+    case 'image':
+      return { type, heading, mediaId: 0, alt: emptyTri(), caption: emptyTri() }
+    case 'gallery':
+      return { type, heading, images: [] }
+    case 'features':
+      return { type, heading, items: [] }
+    case 'technologies':
+      return { type, heading, items: [] }
+    case 'highlight':
+      return { type, heading, text: emptyTri() }
+    case 'links':
+      return { type, heading, links: [] }
+    default:
+      return { type: 'text', heading, body: emptyTri() }
   }
 }
 
@@ -113,7 +139,7 @@ function walk(value: unknown, path: string, visit: (path: string, tri: Tri) => v
 
 const SECTION_OF: Record<string, string> = {
   overview: 'overview', challenges: 'challenge', approach: 'approach', architectureText: 'architecture', features: 'features', decisions: 'decisions', learned: 'learned', limits: 'learned', next: 'learned',
-  results: 'results', gallery: 'gallery', galleryNote: 'gallery', links: 'links',
+  results: 'results', gallery: 'gallery', galleryNote: 'gallery', links: 'links', services: 'overview', blocks: 'blocks',
 }
 
 /**
@@ -141,6 +167,12 @@ export function completenessOf(content: ProjectContent): Record<Language, Langua
       if (image.alt[l] === '') blocking.push(`gallery.${index}.alt`)
     })
     if (content.thumbnail && content.thumbnail.alt[l] === '') blocking.push('thumbnail.alt')
+    if (content.seo.imageMediaId && content.seo.imageAlt[l] === '') blocking.push('seo.imageAlt')
+    content.blocks.forEach((item, index) => {
+      if (item.heading[l] === '') blocking.push(`blocks.${index}.heading`)
+      if (item.type === 'image' && item.alt[l] === '') blocking.push(`blocks.${index}.alt`)
+      if (item.type === 'gallery') item.images.forEach((image, at) => image.alt[l] === '' && blocking.push(`blocks.${index}.images.${at}.alt`))
+    })
     out[l] = { state: filled[l] === 0 ? 'missing' : blocking.length === 0 && untranslated[l].length === 0 ? 'complete' : 'incomplete', blocking, untranslated: untranslated[l] }
   }
   return out

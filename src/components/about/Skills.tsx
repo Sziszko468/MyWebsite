@@ -1,6 +1,7 @@
 import { useId } from 'react'
-import { skillGroups, type SkillGroup } from '../../content/about'
+import type { SkillGroup } from '../../content/about'
 import { useI18n } from '../../i18n/useI18n'
+import { useAboutContent } from '../../profile/store'
 import { Container } from '../Container/Container'
 import { Reveal } from '../motion/Reveal'
 import { Section } from '../Section/Section'
@@ -39,7 +40,7 @@ export function Skills() {
   const { t } = useI18n()
   const titleId = useId()
   const copy = t.aboutPage.skills
-  const groups = skillGroups.filter((group) => group.skills.length > 0)
+  const groups = useAboutContent().skillGroups.filter((group) => group.skills.length > 0)
 
   if (groups.length === 0) return null
 

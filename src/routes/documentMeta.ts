@@ -21,6 +21,8 @@ export interface DocumentMeta {
   description: string
   /** Open Graph type: a project's page is an article, everything else a website. */
   ogType: 'website' | 'article'
+  /** What a shared link says, when the owner wrote words for sharing (PROMPT 22); absent: the title and description above, and the site's own picture. */
+  og?: { title: string; description: string; image: { src: string; width: number; height: number; alt: string } | null }
 }
 
 const OWN_META: Partial<Record<PageDef['id'], (t: Dictionary) => { title: string; description: string }>> = {
@@ -54,14 +56,24 @@ export function buildDocumentMeta(
 
   const projectId = projectIdOfPage(page.id)
   const own = projectId ? (projectMeta as Record<string, (typeof projectMeta)[keyof typeof projectMeta]>)[projectId] : undefined
-  if (own) {
-    return { title: `${own.title[lang]} — ${brandName}`, description: own.description[lang], ogType: 'article' }
-  }
-  // A project that exists only in the administration: its own name and card text (the data arrives after the page's code).
+  // A project's page: what the owner wrote for search and sharing first, then the website's own words for the four it ships with, then the project's
+  // name and card text from the administration (the data arrives after the page's code). Always in the page's own language: a text that is missing
+  // in this language is never replaced by another one (a project that lacks a language has no page in it at all).
   if (projectId && projectId !== 'preview') {
     const card = runtimeProject(projectId)
-    if (card) return { title: `${card.name[lang] || card.name.hu} — ${brandName}`, description: card.description[lang] || card.description.hu, ogType: 'article' }
-    return { ...site, title: `${t.nav.work} — ${brandName}`, description: t.workPage.meta.description }
+    const seo = card?.seo ?? null
+    const name = seo?.title[lang] || own?.title[lang] || card?.name[lang] || ''
+    if (name === '') return { ...site, title: `${t.nav.work} — ${brandName}`, description: t.workPage.meta.description }
+    const description = seo?.description[lang] || own?.description[lang] || card?.description[lang] || ''
+    const meta: DocumentMeta = { title: `${name} — ${brandName}`, description, ogType: 'article' }
+    if (seo) {
+      meta.og = {
+        title: seo.ogTitle[lang] || meta.title,
+        description: seo.ogDescription[lang] || description,
+        image: seo.image ? { src: seo.image.src, width: seo.image.width, height: seo.image.height, alt: seo.image.alt[lang] || name } : null,
+      }
+    }
+    return meta
   }
   if (projectId === 'preview') return { ...site, title: `${t.project.preview.title} — ${brandName}` }
 

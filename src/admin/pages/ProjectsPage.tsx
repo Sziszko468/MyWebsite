@@ -5,7 +5,7 @@ import { ApiError } from '../api/client'
 import type { ProjectListItem, ProjectState } from '../api/projectTypes'
 import { AdminButton } from '../components/AdminButton'
 import { useConfirm } from '../components/Confirm'
-import { FilterDropdown } from '../components/form'
+import { FilterDropdown, SearchInput } from '../components/form'
 import { Icon } from '../components/Icon'
 import { PageHeader, useLanguageName } from '../components/layout'
 import { EmptyState, ErrorState, LoadingState } from '../components/states'
@@ -35,13 +35,27 @@ export function ProjectsPage() {
   const confirm = useConfirm()
   const session = useSession()
   const [filter, setFilter] = useState<'all' | ProjectState>('all')
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState('all')
+  const [featuredFilter, setFeaturedFilter] = useState<'all' | 'yes' | 'no'>('all')
   const [busy, setBusy] = useState(false)
   const list = useResource((signal) => endpoints.projects.list(signal), [])
   const canWrite = session.can('content:write')
   const canDelete = session.can('content:delete')
 
   const all = useMemo(() => list.data?.projects ?? [], [list.data])
-  const visible = useMemo(() => (filter === 'all' ? all : all.filter((project) => project.status === filter)), [all, filter])
+  const filtered = filter !== 'all' || query.trim() !== '' || category !== 'all' || featuredFilter !== 'all'
+  const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    return all.filter((project) => {
+      if (filter !== 'all' && project.status !== filter) return false
+      if (category !== 'all' && project.category !== category) return false
+      if (featuredFilter === 'yes' && !project.featured) return false
+      if (featuredFilter === 'no' && project.featured) return false
+      if (!needle) return true
+      return [project.slug, project.internalTitle, project.title.hu, project.title.en, project.title.nl].some((text) => text.toLowerCase().includes(needle))
+    })
+  }, [all, filter, query, category, featuredFilter])
 
   const run = async (work: () => Promise<unknown>, done: string, conflict?: string) => {
     setBusy(true)
@@ -103,12 +117,22 @@ export function ProjectsPage() {
       />
       <div className={styles.stackLg}>
         {all.length > 0 && (
-          <FilterDropdown
-            label={t.projects.filter.label}
-            value={filter}
-            onChange={(value) => setFilter(value as typeof filter)}
-            options={[{ value: 'all', label: t.projects.filter.all }, ...(['draft', 'published', 'archived'] as const).map((state) => ({ value: state, label: t.projects.status[state] }))]}
-          />
+          <form className={styles.toolbar} role="search" aria-label={t.cms.list.search} onSubmit={(event) => event.preventDefault()}>
+            <SearchInput className={styles.toolbarSearch} label={t.cms.list.search} value={query} placeholder={t.cms.list.searchPlaceholder} onSearch={setQuery} />
+            <FilterDropdown
+              label={t.projects.filter.label}
+              value={filter}
+              onChange={(value) => setFilter(value as typeof filter)}
+              options={[{ value: 'all', label: t.projects.filter.all }, ...(['draft', 'published', 'archived'] as const).map((state) => ({ value: state, label: t.projects.status[state] }))]}
+            />
+            <FilterDropdown label={t.cms.list.category} value={category} onChange={setCategory} options={[{ value: 'all', label: t.cms.list.all }, ...(list.data?.categories ?? []).map((item) => ({ value: item.key, label: item.label[language] || item.label.hu }))]} />
+            <FilterDropdown
+              label={t.cms.list.featured}
+              value={featuredFilter}
+              onChange={(value) => setFeaturedFilter(value as typeof featuredFilter)}
+              options={[{ value: 'all', label: t.cms.list.all }, { value: 'yes', label: t.cms.list.featuredYes }, { value: 'no', label: t.cms.list.featuredNo }]}
+            />
+          </form>
         )}
         {list.loading ? (
           <LoadingState />
@@ -118,13 +142,30 @@ export function ProjectsPage() {
           <EmptyState icon="layers" title={t.projects.emptyTitle} action={canWrite ? <AdminButton to="/projects/new" variant="primary">{t.projects.new}</AdminButton> : undefined}>
             {t.projects.emptyBody}
           </EmptyState>
+        ) : visible.length === 0 ? (
+          <EmptyState
+            icon="search"
+            title={t.cms.list.noMatch}
+            action={
+              <AdminButton
+                onClick={() => {
+                  setFilter('all')
+                  setQuery('')
+                  setCategory('all')
+                  setFeaturedFilter('all')
+                }}
+              >
+                {t.cms.list.clear}
+              </AdminButton>
+            }
+          />
         ) : (
           <ul className={page.projectList} aria-busy={busy || list.refreshing}>
             {visible.map((project) => {
               const title = nameOf(project)
               const first = all[0]?.id === project.id
               const last = all[all.length - 1]?.id === project.id
-              const reorderable = filter === 'all' && canWrite
+              const reorderable = !filtered && canWrite
               return (
                 <li key={project.id} className={cx(styles.card, page.projectRow)}>
                   <div className={page.projectThumb} aria-hidden="true">
@@ -137,7 +178,11 @@ export function ProjectsPage() {
                       </Link>
                     </h2>
                     <p className={cx(styles.small, styles.muted)}>
-                      /work/{project.slug} · {fill(t.projects.updated, { date: new Date(project.updatedAt).toLocaleDateString(language) })}
+                      /work/{project.slug} · {fill(t.cms.list.changed, { date: new Date(project.updatedAt).toLocaleString(language) })}
+                    </p>
+                    {project.internalTitle && <p className={cx(styles.small, styles.muted)}>{fill(t.cms.list.internal, { name: project.internalTitle })}</p>}
+                    <p className={cx(styles.small, styles.muted)}>
+                      {project.available.length === 0 ? t.cms.list.shownNowhere : fill(t.cms.list.shownIn, { languages: project.available.map((code) => name(code)).join(', ') })}
                     </p>
                     <div className={styles.rowTight}>
                       <span className={cx(styles.badge, TONES[project.status])}>

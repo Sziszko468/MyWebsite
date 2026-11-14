@@ -1,5 +1,5 @@
 import { useId } from 'react'
-import { siteConfig } from '../../config/site'
+import { useContact } from '../../profile/store'
 import { useI18n } from '../../i18n/useI18n'
 import { Button } from '../Button/Button'
 import { Container } from '../Container/Container'
@@ -43,7 +43,7 @@ export function FinalCta({ copy: given, action = { to: '/contact' }, id = 'start
   const { t } = useI18n()
   const titleId = useId()
   const ref = usePointerField<HTMLDivElement>()
-  const { email } = siteConfig.contact
+  const { email } = useContact()
   const copy = given ?? t.home.final
 
   return (

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { LANGUAGES, type Language } from '../../i18n/config'
 import { cx } from '../../utils/cx'
-import type { LanguageReport, Tri } from '../api/projectTypes'
+import type { LanguageReport, MediaItem, Tri } from '../api/projectTypes'
 import { fill, useText } from '../i18n'
 import { moveItem } from '../lib/projects'
 import page from '../styles/pages.module.scss'
@@ -53,6 +53,26 @@ interface TriFieldProps {
   hint?: ReactNode
   required?: boolean
   optional?: boolean
+}
+
+/** A chosen picture (or none), with the buttons to choose, replace and take it off. */
+export function PictureBox({ item, t, onChoose, onRemove }: { item: MediaItem | undefined; t: ReturnType<typeof useText>; onChoose: () => void; onRemove?: () => void }) {
+  return (
+    <div className={page.thumbBox}>
+      {item ? <img src={item.src} width={item.width} height={item.height} alt="" className={page.thumbImage} /> : <p className={styles.muted}>{t.projects.edit.images.none}</p>}
+      <div className={styles.row}>
+        <AdminButton variant="secondary" onClick={onChoose}>
+          {item ? t.projects.edit.images.replace : t.projects.edit.images.choose}
+        </AdminButton>
+        {onRemove && (
+          <AdminButton variant="text" danger onClick={onRemove}>
+            <Icon name="trash" />
+            {t.projects.edit.images.remove}
+          </AdminButton>
+        )}
+      </div>
+    </div>
+  )
 }
 
 /** One text, in the language being edited; the other languages' texts are untouched. */

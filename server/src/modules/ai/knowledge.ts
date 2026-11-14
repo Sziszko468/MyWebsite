@@ -5,6 +5,7 @@ import type { AppContext } from '../../context.ts'
 import { sha256Hex } from '../../lib/crypto.ts'
 import { isRecord } from '../../lib/text.ts'
 import { loadCatalog, type PackageRecord } from '../catalog/repository.ts'
+import { publicProfile } from '../profile/service.ts'
 import { publicFull, categories as projectCategories } from '../projects/service.ts'
 import type { ComparisonDoc, FullExperienceDoc } from '../shop/documents.ts'
 
@@ -52,6 +53,7 @@ const FINGERPRINT_QUERIES: readonly (readonly [string, string])[] = [
   ['site_content', "SELECT MAX(updated_at) AS latest, COUNT(*) AS n, SUM(status = 'active') AS visible FROM site_content"],
   ['projects', "SELECT MAX(updated_at) AS latest, COUNT(*) AS n, SUM(status = 'published') AS visible FROM projects"],
   ['shop_documents', "SELECT MAX(updated_at) AS latest, COUNT(*) AS n, SUM(published_json IS NOT NULL) || MAX(COALESCE(published_at, '')) AS visible FROM shop_documents"],
+  ['profile', "SELECT MAX(updated_at) AS latest, COUNT(*) AS n, 1 AS visible FROM settings WHERE key = 'site.profile'"],
 ]
 
 /**
@@ -107,15 +109,27 @@ export class Knowledge {
   // ---- the developer -------------------------------------------------------------------------------------------------
 
   private profileData(): Record<string, unknown> | null {
+    let seed: Record<string, unknown> | null = null
     try {
       const mtimeMs = statSync(SEED_PROFILE_FILE).mtimeMs
       if (!this.profileCache || this.profileCache.mtimeMs !== mtimeMs) {
         const parsed: unknown = JSON.parse(readFileSync(SEED_PROFILE_FILE, 'utf8'))
         this.profileCache = { mtimeMs, data: isRecord(parsed) ? parsed : null }
       }
-      return this.profileCache.data
+      seed = this.profileCache.data
     } catch {
-      return null
+      seed = null
+    }
+    // What the owner saved in the administration replaces the website's own copy of these parts: the assistant says what the About page says.
+    const saved = publicProfile(this.app)
+    if (!saved) return seed
+    return {
+      ...(seed ?? { version: 1, name: null, approach: [], siteStack: [] }),
+      story: saved.story,
+      strengths: saved.strengths,
+      technologies: saved.skills.map((group) => ({ id: group.id, label: group.label, items: group.skills.map((skill) => skill.name) })),
+      focus: saved.focus.filter((topic) => topic.active),
+      contact: { email: saved.contact.email || null, social: saved.contact.social, contactPagePath: '/contact' },
     }
   }
 

@@ -2,7 +2,8 @@ import { useEffect, useSyncExternalStore } from 'react'
 import { API_BASE } from '../config/api'
 import { getJson, parseCard, parseCategories, parseRecord } from './api'
 import { staticCards, staticCategories, staticRecord } from './static'
-import type { ProjectCard, ProjectCategory, ProjectRecord } from './types'
+import type { Language } from '../i18n/config'
+import { isAvailable, type ProjectCard, type ProjectCategory, type ProjectRecord } from './types'
 
 /**
  * Where the website's projects come from at run time. With a backend the answer of `/api/projects` is the truth: a project the
@@ -26,6 +27,7 @@ export type DetailState =
   | { status: 'loading' }
   | { status: 'ready'; record: ProjectRecord; source: 'api' | 'static' }
   | { status: 'missing' }
+  | { status: 'gone' }
   | { status: 'unauthorized' }
 
 const STATIC_LIST: ListState = { status: 'ready', cards: staticCards, categories: staticCategories, source: 'static', preview: false }
@@ -82,9 +84,15 @@ export function useProjectList(preview = false): ListState {
   return useSyncExternalStore(subscribe, () => list, () => list)
 }
 
-/** One project in full. `previewId` reads the administrator's preview of that project (any state) instead of the public one. */
-export function ensureDetail(slug: string, previewId: string | null): void {
-  const key = previewId ?? slug
+/** The key a project's page is kept under: a preview link's secret is never mistaken for a slug. */
+const keyOf = (slug: string, previewId: string | null, token: string | null): string => (token !== null ? `link:${token}` : (previewId ?? slug))
+
+/**
+ * One project in full. `previewId` reads the administrator's preview of that project (any state) instead of the public one; `token` reads it through
+ * a preview link (PROMPT 22), which needs no sign-in and shows the project only until the link ends.
+ */
+export function ensureDetail(slug: string, previewId: string | null, token: string | null = null): void {
+  const key = keyOf(slug, previewId, token)
   if (details.has(key) || API_BASE === null) {
     if (API_BASE === null && !details.has(key)) {
       const record = staticRecord(slug)
@@ -97,22 +105,30 @@ export function ensureDetail(slug: string, previewId: string | null): void {
   loadingDetails.set(
     key,
     (async () => {
-      const outcome = previewId ? await getJson(`/api/admin/projects/${encodeURIComponent(previewId)}/preview`, { credentials: true }) : await getJson(`/api/projects/${encodeURIComponent(slug)}`)
+      const viaPreview = previewId !== null || token !== null
+      const outcome =
+        token !== null
+          ? await getJson(`/api/preview/projects/${encodeURIComponent(token)}`)
+          : previewId
+            ? await getJson(`/api/admin/projects/${encodeURIComponent(previewId)}/preview`, { credentials: true })
+            : await getJson(`/api/projects/${encodeURIComponent(slug)}`)
       if (outcome.kind === 'ok') {
         const data = outcome.data as { project?: unknown; neighbours?: unknown } | undefined
-        const source = previewId ? data?.project : outcome.data
-        const around = previewId ? undefined : outcome.meta && typeof outcome.meta === 'object' ? (outcome.meta as { neighbours?: unknown }).neighbours : undefined
-        const record = parseRecord(source, around, previewId !== null)
+        const source = viaPreview ? data?.project : outcome.data
+        const around = viaPreview ? undefined : outcome.meta && typeof outcome.meta === 'object' ? (outcome.meta as { neighbours?: unknown }).neighbours : undefined
+        const record = parseRecord(source, around, viaPreview)
         const state = (data as { status?: unknown } | undefined)?.status
-        if (record && previewId && (state === 'draft' || state === 'published' || state === 'archived')) record.state = state
+        if (record && viaPreview && (state === 'draft' || state === 'published' || state === 'archived')) record.state = state
         details.set(key, record ? { status: 'ready', record, source: 'api' } : { status: 'missing' })
       } else if (outcome.kind === 'missing') {
         details.set(key, { status: 'missing' })
+      } else if (outcome.kind === 'gone') {
+        details.set(key, { status: 'gone' })
       } else if (outcome.kind === 'unauthorized') {
         details.set(key, { status: 'unauthorized' })
       } else {
         // No answer at all: the website's own copy, for the projects it has.
-        const record = previewId ? null : staticRecord(slug)
+        const record = viaPreview ? null : staticRecord(slug)
         details.set(key, record ? { status: 'ready', record, source: 'static' } : { status: 'missing' })
       }
       emit()
@@ -132,12 +148,15 @@ function offlineState(slug: string): DetailState {
   return state
 }
 
-export function useProjectDetail(slug: string, previewId: string | null = null): DetailState {
-  useEffect(() => ensureDetail(slug, previewId), [slug, previewId])
-  const key = previewId ?? slug
+export function useProjectDetail(slug: string, previewId: string | null = null, token: string | null = null): DetailState {
+  useEffect(() => ensureDetail(slug, previewId, token), [slug, previewId, token])
+  const key = keyOf(slug, previewId, token)
   const state = useSyncExternalStore(subscribe, () => details.get(key) ?? LOADING_DETAIL, () => LOADING_DETAIL)
-  return API_BASE === null ? (previewId ? ({ status: 'unauthorized' } as DetailState) : offlineState(slug)) : state
+  if (API_BASE !== null) return state
+  // No backend: a link preview has nothing to ask, an administrator's preview needs the backend's session, a public page is the website's own copy.
+  return token !== null ? MISSING_DETAIL : previewId ? ({ status: 'unauthorized' } as DetailState) : offlineState(slug)
 }
+const MISSING_DETAIL: DetailState = { status: 'missing' }
 const LOADING_DETAIL: DetailState = { status: 'loading' }
 
 /** What the head knows about a project's title and description: the data's own once it has arrived. */
@@ -163,6 +182,17 @@ export const listSnapshot = (): ListState => list
 /** Whether the project is known not to exist (the API said 404): its address then says "not found", not a project. */
 export function isMissingProject(slug: string): boolean {
   return details.get(slug)?.status === 'missing'
+}
+
+/**
+ * Whether the project is known to have nothing to say in a language (its page is then "not found" in that language, and not indexed there).
+ * Only a public answer counts: an administrator's preview shows every project.
+ */
+export function isUnavailableIn(slug: string, lang: Language): boolean {
+  const state = details.get(slug)
+  if (state?.status === 'ready') return !state.record.preview && !isAvailable(state.record.card, lang)
+  const card = list.status === 'ready' && !list.preview ? list.cards.find((candidate) => candidate.slug === slug) : undefined
+  return card !== undefined && !isAvailable(card, lang)
 }
 
 export const useProjectsVersion = (): number => useSyncExternalStore(subscribe, () => version, () => version)

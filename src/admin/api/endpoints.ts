@@ -122,7 +122,7 @@ export const system = {
 
 // ---- the portfolio (PROMPT 13.1): projects, pictures and the website's own wording ----
 
-import type { Category, MediaItem, ProjectDetailData, ProjectList, TextKey } from './projectTypes'
+import type { Category, MediaItem, MediaStorage, PreviewLink, ProfileData, ProfileDocument, ProjectDetailData, ProjectList, TextKey } from './projectTypes'
 
 export const projects = {
   list: (signal?: AbortSignal) => get<ProjectList>(`${base}/projects`, { signal }).then((answer) => answer.data),
@@ -137,6 +137,9 @@ export const projects = {
   duplicate: (id: number) => post<ProjectDetailData>(`${base}/projects/${id}/duplicate`, {}).then((answer) => answer.data),
   remove: (id: number) => del(`${base}/projects/${id}`),
   reorder: (ids: number[]) => put<undefined>(`${base}/project-order`, { ids }),
+  previewLinks: (id: number, signal?: AbortSignal) => get<PreviewLink[]>(`${base}/projects/${id}/preview-links`, { signal }).then((answer) => answer.data),
+  createPreviewLink: (id: number, body: { days: number; label: string }) => post<{ id: string; token: string; expiresAt: string; label: string | null }>(`${base}/projects/${id}/preview-links`, body).then((answer) => answer.data),
+  revokePreviewLink: (id: number, linkId: string) => del(`${base}/projects/${id}/preview-links/${encodeURIComponent(linkId)}`),
   settings: (signal?: AbortSignal) => get<{ categories: Category[]; requireAllLanguages: boolean }>(`${base}/project-settings`, { signal }).then((answer) => answer.data),
   saveSettings: (body: { categories?: Category[]; requireAllLanguages?: boolean }) => put<{ categories: Category[]; requireAllLanguages: boolean }>(`${base}/project-settings`, body).then((answer) => answer.data),
 }
@@ -156,6 +159,17 @@ export const media = {
   list: (signal?: AbortSignal) => get<MediaItem[]>(`${base}/media`, { signal }).then((answer) => answer.data),
   upload: (blob: Blob, name: string) => request<MediaItem>('POST', `${base}/media`, { rawBody: blob, query: { name } }).then((answer) => answer.data),
   remove: (id: number) => del(`${base}/media/${id}`),
+  /** The description kept with a picture, in each language. */
+  updateAlt: (id: number, alt: Record<string, string>) => put<MediaItem>(`${base}/media/${id}`, { alt }).then((answer) => answer.data),
+  /** Replaces a picture: everything that used the old one is pointed at the new one, the old one stays until it is deleted. */
+  replace: (id: number, blob: Blob, name: string) => request<{ media: MediaItem; projects: number }>('POST', `${base}/media/${id}/replace`, { rawBody: blob, query: { name } }).then((answer) => answer.data),
+  storage: (signal?: AbortSignal) => get<MediaStorage>(`${base}/media-storage`, { signal }).then((answer) => answer.data),
+}
+
+export const profile = {
+  get: (signal?: AbortSignal) => get<ProfileData>(`${base}/profile`, { signal }).then((answer) => answer.data),
+  save: (profile: ProfileDocument, expectedUpdatedAt: string | null) => put<ProfileData>(`${base}/profile`, { profile, ...(expectedUpdatedAt ? { expectedUpdatedAt } : {}) }).then((answer) => answer.data),
+  reset: () => del(`${base}/profile`),
 }
 
 export const texts = {

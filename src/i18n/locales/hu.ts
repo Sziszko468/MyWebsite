@@ -354,6 +354,9 @@ export const hu = {
       banner: 'Előnézet: ez a projekt még nem nyilvános (állapot: {state}). Csak te látod, az adminisztrációba bejelentkezve.',
       signIn: 'Az előnézethez jelentkezz be az adminisztrációba.',
       states: { draft: 'piszkozat', published: 'közzétett', archived: 'archivált' },
+      linkBanner: 'Előnézeti link: ez a projekt még nem nyilvános (állapota: {state}). A linkkel bárki megnézheti, amíg a link le nem jár.',
+      languageGap: 'A látogatók ezen a nyelven még nem látják ezt a projektet: itt hiányzik szöveg vagy képleírás.',
+      gone: 'Ez az előnézeti link lejárt, vagy vissza lett vonva.',
     },
     videoLink: 'Videó',
     repoName: 'A tárolóban és a felületen: {name}',
@@ -388,6 +391,7 @@ export const hu = {
       problem: 'Milyen problémát old meg',
       goal: 'A fejlesztés célja',
       role: 'Saját szerepem',
+      services: 'Elvégzett szolgáltatások',
     },
     challenge: {
       problem: 'A probléma',

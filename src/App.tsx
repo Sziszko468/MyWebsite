@@ -103,6 +103,7 @@ export default function App() {
             <Route path="/" element={<Navigate to={localizedPath(startingLanguage())} replace />} />
             <Route path=":lang" element={<LanguageLayout />}>
               {/* A project's page is one route for every slug: the data decides which project (or "not found") it shows. */}
+              <Route path="work/preview/link/:token" element={<ProjectRoute linkPreview />} />
               <Route path="work/preview/:id" element={<ProjectRoute preview />} />
               <Route path="work/:slug" element={<ProjectRoute />} />
               <Route path="quote/:token" element={<QuotePage />} />

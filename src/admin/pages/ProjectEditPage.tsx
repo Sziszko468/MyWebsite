@@ -4,13 +4,15 @@ import { LANGUAGES, type Language } from '../../i18n/config'
 import { cx } from '../../utils/cx'
 import * as endpoints from '../api/endpoints'
 import { ApiError } from '../api/client'
-import type { Category, MediaItem, ProjectContent, ProjectDetailData } from '../api/projectTypes'
+import type { Category, MediaItem, ProjectBlock, ProjectContent, ProjectDetailData } from '../api/projectTypes'
 import { AdminButton } from '../components/AdminButton'
 import { useConfirm } from '../components/Confirm'
 import { CheckField, SelectField, SwitchField, TextAreaField, TextField } from '../components/form'
 import { Icon } from '../components/Icon'
 import { DetailPanel, PageHeader, TabPanel, Tabs } from '../components/layout'
-import { ItemList, LanguageBar, TriField } from '../components/ProjectFields'
+import { BlocksEditor } from '../components/ProjectBlocks'
+import { ItemList, LanguageBar, PictureBox, TriField } from '../components/ProjectFields'
+import { PreviewLinks } from '../components/PreviewLinks'
 import { MediaPicker } from '../components/MediaPicker'
 import { ErrorState, LoadingState } from '../components/states'
 import { useToast } from '../components/Toast'
@@ -23,8 +25,8 @@ import { useSession } from '../session/SessionProvider'
 import page from '../styles/pages.module.scss'
 import styles from '../styles/ui.module.scss'
 
-type TabId = 'general' | 'images' | 'descriptions' | 'technical' | 'sections' | 'links' | 'publication'
-const TABS: readonly TabId[] = ['general', 'images', 'descriptions', 'technical', 'sections', 'links', 'publication']
+type TabId = 'general' | 'images' | 'descriptions' | 'blocks' | 'technical' | 'sections' | 'links' | 'seo' | 'publication'
+const TABS: readonly TabId[] = ['general', 'images', 'descriptions', 'blocks', 'technical', 'sections', 'links', 'seo', 'publication']
 
 interface Draft {
   slug: string
@@ -33,12 +35,12 @@ interface Draft {
 }
 
 /** What the picker is choosing a picture for. */
-type Target = { kind: 'thumbnail' } | { kind: 'gallery'; index: number | 'new' } | null
+type Target = { kind: 'thumbnail' } | { kind: 'gallery'; index: number | 'new' } | { kind: 'seo' } | { kind: 'block'; block: number; at: number | 'new' | null } | null
 
 const opts = (values: readonly string[], labels: Record<string, string>) => values.map((value) => ({ value, label: labels[value] ?? value }))
 
 /**
- * The project editor. One document, seven tabs: general, images, descriptions, technical, sections, links and publication. Every
+ * The project editor. One document, nine tabs: general, images, descriptions, content blocks, technical, sections, links, search and sharing, and publication. Every
  * text is edited in the language chosen on the language bar, and the marks on the bar follow the typing. Saving writes the draft
  * (the server checks all of it and names every field that is wrong, next to the field); publishing is a separate, confirmed
  * step. Changes that are not saved are guarded against being lost. The preview opens the saved project's own page, with its real
@@ -77,6 +79,7 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
   const [picking, setPicking] = useState<Target>(null)
   const [known, setKnown] = useState<Map<number, MediaItem>>(new Map((initial?.media ?? []).map((item) => [item.id, item])))
   const [record, setRecord] = useState<ProjectDetailData | null>(initial)
+  const [newBlock, setNewBlock] = useState<ProjectBlock['type']>('text')
 
   const dirty = !sameDocument(draft, saved)
   useUnsavedChanges(dirty)
@@ -87,10 +90,16 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
 
   // The picture a choice refers to, for the thumbnails the editor shows (the ones it has been told about).
   useEffect(() => {
-    const missing = [content.thumbnail?.mediaId, ...content.gallery.map((image) => image.mediaId), ...content.features.map((feature) => feature.imageMediaId)].filter((value): value is number => typeof value === 'number' && !known.has(value))
+    const missing = [
+      content.thumbnail?.mediaId,
+      content.seo.imageMediaId,
+      ...content.gallery.map((image) => image.mediaId),
+      ...content.features.map((feature) => feature.imageMediaId),
+      ...content.blocks.flatMap((block) => (block.type === 'image' ? [block.mediaId] : block.type === 'gallery' ? block.images.map((image) => image.mediaId) : [])),
+    ].filter((value): value is number => typeof value === 'number' && value > 0 && !known.has(value))
     if (missing.length === 0) return
     void endpoints.media.list().then((list) => setKnown((current) => new Map([...current, ...list.map((item) => [item.id, item] as [number, MediaItem])])))
-  }, [content.thumbnail, content.gallery, content.features, known])
+  }, [content.thumbnail, content.gallery, content.features, content.seo, content.blocks, known])
 
   const set = (path: ReadonlyArray<string | number>, value: unknown) => setDraft((current) => ({ ...current, content: setIn(current.content, path, value) }))
   const err = (field: string) => errors[field] ?? null
@@ -198,8 +207,18 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
     setKnown((current) => new Map(current).set(item.id, item))
     if (picking?.kind === 'thumbnail') set(['thumbnail'], { mediaId: item.id, alt: content.thumbnail?.alt ?? emptyTri() })
     else if (picking?.kind === 'gallery') {
-      if (picking.index === 'new') set(['gallery'], [...content.gallery, { mediaId: item.id, device: item.width >= item.height ? 'desktop' : 'mobile', alt: emptyTri(), caption: emptyTri(), hero: content.gallery.length === 0 }])
+      if (picking.index === 'new') set(['gallery'], [...content.gallery, { mediaId: item.id, device: item.width >= item.height ? 'desktop' : 'mobile', alt: item.alt, caption: emptyTri(), hero: content.gallery.length === 0 }])
       else set(['gallery', picking.index, 'mediaId'], item.id)
+    } else if (picking?.kind === 'seo') {
+      // The library's description is offered where the project has none yet; the project keeps its own copy.
+      set(['seo'], { ...content.seo, imageMediaId: item.id, imageAlt: LANGUAGES.some((code) => content.seo.imageAlt[code] !== '') ? content.seo.imageAlt : item.alt })
+    } else if (picking?.kind === 'block') {
+      const target = content.blocks[picking.block]
+      if (target?.type === 'image') set(['blocks', picking.block], { ...target, mediaId: item.id, alt: LANGUAGES.some((code) => target.alt[code] !== '') ? target.alt : item.alt })
+      if (target?.type === 'gallery') {
+        if (picking.at === 'new') set(['blocks', picking.block, 'images'], [...target.images, { mediaId: item.id, alt: item.alt, caption: emptyTri() }])
+        else if (typeof picking.at === 'number') set(['blocks', picking.block, 'images', picking.at, 'mediaId'], item.id)
+      }
     }
     setPicking(null)
   }
@@ -254,6 +273,7 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
         <TabPanel id="general" idBase="project" active={tab === 'general'}>
           <div className={cx(styles.stackLg, page.tabPanelGap)}>
             <DetailPanel>
+              <TextField label={t.cms.project.internalTitle} hint={t.cms.project.internalTitleHelp} value={content.internalTitle} onChange={(event) => set(['internalTitle'], event.target.value)} maxLength={120} optional error={err('content.internalTitle')} />
               <div className={styles.formGrid}>
                 <TextField label={t.projects.edit.general.slug} value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: event.target.value.toLowerCase() })} hint={t.projects.edit.general.slugHint} error={err('slug')} disabled={Boolean(record?.publishedAt)} required maxLength={60} />
                 <SelectField label={t.projects.edit.general.category} value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })} options={categoryOptions} error={err('category')} required />
@@ -323,6 +343,10 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
               <TriField label={t.projects.edit.descriptions.goal} optional {...triProps('overview.goal', 3000, { multiline: true })} />
               <TriField label={t.projects.edit.descriptions.role} optional {...triProps('role', 400, { multiline: true, rows: 2 })} />
             </DetailPanel>
+            <DetailPanel title={t.cms.project.services}>
+              <p className={styles.hint}>{t.cms.project.servicesHelp}</p>
+              <TextList list={content.services} onChange={(list) => set(['services'], list)} path="services" label={t.cms.project.serviceItem} t={t} triProps={triProps} max={200} />
+            </DetailPanel>
             <DetailPanel title={t.projects.edit.descriptions.challenges}>
               <ItemList items={content.challenges} onChange={(items) => set(['challenges'], items)} max={LIMITS.challenges} create={() => ({ title: emptyTri(), problem: emptyTri(), solution: emptyTri(), source: '' })} addLabel={t.projects.edit.descriptions.challengeTitle} itemLabel={t.projects.edit.descriptions.challengeTitle}
                 render={(_, index, update) => (
@@ -386,6 +410,24 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
                 <span>{t.projects.edit.descriptions.resultsHelp}</span>
               </p>
               <TextList list={content.results} onChange={(list) => set(['results'], list)} path="results" label={t.projects.edit.descriptions.item} t={t} triProps={triProps} />
+            </DetailPanel>
+          </div>
+        </TabPanel>
+
+        <TabPanel id="blocks" idBase="project" active={tab === 'blocks'}>
+          <div className={page.tabPanelGap}>
+            <DetailPanel title={t.cms.project.blocks.title}>
+              <BlocksEditor
+                blocks={content.blocks}
+                hidden={content.hidden.includes('blocks')}
+                onChange={(blocks) => set(['blocks'], blocks)}
+                triProps={triProps}
+                picture={picture}
+                onPick={(block, at) => setPicking({ kind: 'block', block, at })}
+                newKind={newBlock}
+                onNewKind={setNewBlock}
+                error={err}
+              />
             </DetailPanel>
           </div>
         </TabPanel>
@@ -460,6 +502,32 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
           </div>
         </TabPanel>
 
+        <TabPanel id="seo" idBase="project" active={tab === 'seo'}>
+          <div className={cx(styles.stackLg, page.tabPanelGap)}>
+            <DetailPanel title={t.cms.project.seo.title}>
+              <p className={styles.hint}>{t.cms.project.seo.lead}</p>
+              <TriField label={t.cms.project.seo.seoTitle} hint={fill(t.cms.project.seo.seoTitleHelp, { max: LIMITS.seoTitle })} optional {...triProps('seo.title', LIMITS.seoTitle)} />
+              <Counter value={content.seo.title[editing]} max={LIMITS.seoTitle} />
+              <TriField label={t.cms.project.seo.description} hint={fill(t.cms.project.seo.descriptionHelp, { max: LIMITS.seoDescription })} optional {...triProps('seo.description', LIMITS.seoDescription, { multiline: true, rows: 3 })} />
+              <Counter value={content.seo.description[editing]} max={LIMITS.seoDescription} />
+              <TriField label={t.cms.project.seo.ogTitle} hint={fill(t.cms.project.seo.ogTitleHelp, { max: LIMITS.ogTitle })} optional {...triProps('seo.ogTitle', LIMITS.ogTitle)} />
+              <TriField label={t.cms.project.seo.ogDescription} hint={fill(t.cms.project.seo.ogDescriptionHelp, { max: LIMITS.ogDescription })} optional {...triProps('seo.ogDescription', LIMITS.ogDescription, { multiline: true, rows: 3 })} />
+            </DetailPanel>
+            <DetailPanel title={t.cms.project.seo.image}>
+              <p className={styles.hint}>{t.cms.project.seo.imageHelp}</p>
+              <PictureBox item={picture(content.seo.imageMediaId)} t={t} onChoose={() => setPicking({ kind: 'seo' })} onRemove={content.seo.imageMediaId ? () => set(['seo'], { ...content.seo, imageMediaId: null }) : undefined} />
+              {content.seo.imageMediaId && <TriField label={t.cms.project.seo.imageAlt} hint={t.cms.project.seo.imageAltHelp} required {...triProps('seo.imageAlt', 200)} />}
+            </DetailPanel>
+            <DetailPanel title={t.cms.project.seo.canonical}>
+              <p>
+                <code className={styles.mono}>/{editing}/work/{draft.slug || '…'}/</code>
+              </p>
+              <p className={styles.hint}>{fill(t.cms.project.seo.canonicalHelp, { language: editing, slug: draft.slug || '…' })}</p>
+              <p className={styles.hint}>{t.cms.project.seo.indexing}</p>
+            </DetailPanel>
+          </div>
+        </TabPanel>
+
         <TabPanel id="publication" idBase="project" active={tab === 'publication'}>
           <div className={cx(styles.stackLg, page.tabPanelGap)}>
             <DetailPanel title={t.projects.edit.publication.title}>
@@ -471,6 +539,14 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
               <p className={styles.hint}>{t.projects.edit.publication.stateHelp}</p>
               {record && state !== 'archived' && (
                 <SwitchField label={t.projects.edit.publication.featured} hint={t.projects.edit.publication.featuredHelp} checked={record.featured} onChange={(featured) => void act((projectId) => endpoints.projects.feature(projectId, featured), featured ? t.projects.toast.featured : t.projects.toast.unfeatured)} disabled={busy} />
+              )}
+              {record && (
+                <p className={styles.hint} data-testid="availability">
+                  <strong>{t.cms.project.availability.title}: </strong>
+                  {record.available.length === 0 ? t.cms.project.availability.none : record.available.length === LANGUAGES.length ? t.cms.project.availability.all : fill(t.cms.project.availability.some, { languages: record.available.map((code) => (t.languages as Record<string, string>)[code]).join(', ') })}
+                  <br />
+                  {t.cms.project.availability.help}
+                </p>
               )}
               <h3 className={styles.sectionTitle}>{t.projects.edit.publication.blockers}</h3>
               {record === null ? (
@@ -504,6 +580,9 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
                   </>
                 )}
               </div>
+            </DetailPanel>
+            <DetailPanel title={t.cms.project.previewLinks.title}>
+              {record ? <PreviewLinks projectId={record.id} dirty={dirty} /> : <p className={styles.muted}>{t.cms.project.previewLinks.saveFirst}</p>}
             </DetailPanel>
             {record && (
               <DetailPanel title={t.projects.edit.publication.danger}>
@@ -542,7 +621,9 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
 /** Which tab a server field belongs to, for the mark on the tab that has a problem. */
 function errorTab(field: string): TabId {
   const path = field.replace(/^content\./, '')
-  if (/^(slug|category|projectStatus|detailPage|title|cardLabel|cardDescription|summary|tags|accent|hero|mockup|layout)/.test(path)) return 'general'
+  if (/^(slug|category|projectStatus|detailPage|title|internalTitle|cardLabel|cardDescription|summary|tags|accent|hero|mockup|layout)/.test(path)) return 'general'
+  if (/^seo/.test(path)) return 'seo'
+  if (/^blocks/.test(path)) return 'blocks'
   if (/^(thumbnail|gallery|galleryNote)/.test(path)) return 'images'
   if (/^(stack|repoName|architecture\b)/.test(path)) return 'technical'
   if (/^hidden/.test(path)) return 'sections'
@@ -552,34 +633,26 @@ function errorTab(field: string): TabId {
 
 function blockerText(t: ReturnType<typeof useText>, language: Language, field: string): string {
   const names = t.projects.edit.publication.field as Record<string, string>
-  const key = field.startsWith('gallery.') ? 'gallery' : field
+  const key = field.startsWith('gallery.') ? 'gallery' : field.startsWith('blocks.') ? 'blocks' : field
   return `${(t.languages as Record<string, string>)[language]}: ${names[key] ?? field}`
 }
 
-function PictureBox({ item, t, onChoose, onRemove }: { item: MediaItem | undefined; t: ReturnType<typeof useText>; onChoose: () => void; onRemove?: () => void }) {
+/** A character counter for a field that has a recommended length (search and sharing text). */
+function Counter({ value, max }: { value: string; max: number }) {
+  const t = useText()
+  const count = [...value].length
   return (
-    <div className={page.thumbBox}>
-      {item ? <img src={item.src} width={item.width} height={item.height} alt="" className={page.thumbImage} /> : <p className={styles.muted}>{t.projects.edit.images.none}</p>}
-      <div className={styles.row}>
-        <AdminButton variant="secondary" onClick={onChoose}>
-          {item ? t.projects.edit.images.replace : t.projects.edit.images.choose}
-        </AdminButton>
-        {onRemove && (
-          <AdminButton variant="text" danger onClick={onRemove}>
-            <Icon name="trash" />
-            {t.projects.edit.images.remove}
-          </AdminButton>
-        )}
-      </div>
-    </div>
+    <p className={cx(styles.hint, count > max && styles.error)} aria-live="polite">
+      {fill(t.cms.project.seo.counter, { count, max })}
+    </p>
   )
 }
 
 /** A list of single texts (lessons, results, limits): one multi-line field per item. */
-function TextList({ list, onChange, path, label, t, triProps }: { list: ProjectContent['limits']; onChange: (list: ProjectContent['limits']) => void; path: string; label: string; t: ReturnType<typeof useText>; triProps: (path: string, max: number, extra?: { multiline?: boolean; rows?: number }) => Parameters<typeof TriField>[0] extends infer P ? Omit<P & object, 'label'> : never }) {
+function TextList({ list, onChange, path, label, t, triProps, max = 1500 }: { list: ProjectContent['limits']; onChange: (list: ProjectContent['limits']) => void; path: string; label: string; t: ReturnType<typeof useText>; max?: number; triProps: (path: string, max: number, extra?: { multiline?: boolean; rows?: number }) => Parameters<typeof TriField>[0] extends infer P ? Omit<P & object, 'label'> : never }) {
   void t
   return (
-    <ItemList items={list} onChange={onChange} max={LIMITS.list} create={emptyTri} addLabel={label} itemLabel={label} render={(_, index) => <TriField label={label} {...(triProps(`${path}.${index}`, 1500, { multiline: true, rows: 3 }) as Omit<Parameters<typeof TriField>[0], 'label'>)} />} />
+    <ItemList items={list} onChange={onChange} max={LIMITS.list} create={emptyTri} addLabel={label} itemLabel={label} render={(_, index) => <TriField label={label} {...(triProps(`${path}.${index}`, max, { multiline: true, rows: 3 }) as Omit<Parameters<typeof TriField>[0], 'label'>)} />} />
   )
 }
 

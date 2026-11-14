@@ -29,7 +29,10 @@ export const PROJECT_STATUSES = ['live', 'demo', 'in-progress', 'concept'] as co
 export const STACK_GROUPS = ['frontend', 'backend', 'data', 'infrastructure', 'testing', 'services'] as const
 export const FEATURE_STATUSES = ['done', 'partial', 'planned'] as const
 /** The sections of a project page an administrator may hide. The hero is always there. */
-export const SECTIONS = ['overview', 'challenge', 'approach', 'architecture', 'features', 'decisions', 'learned', 'results', 'gallery', 'links'] as const
+export const SECTIONS = ['overview', 'challenge', 'approach', 'architecture', 'features', 'decisions', 'learned', 'results', 'gallery', 'blocks', 'links'] as const
+/** The kinds of block an administrator may add to a project page (PROMPT 22): a small fixed vocabulary, plain text only, each drawn as a band of the existing page. */
+export const BLOCK_TYPES = ['text', 'image', 'gallery', 'features', 'technologies', 'highlight', 'links'] as const
+export type BlockType = (typeof BLOCK_TYPES)[number]
 export type SectionId = (typeof SECTIONS)[number]
 
 export interface LinkEntry {
@@ -38,7 +41,29 @@ export interface LinkEntry {
   verified: boolean
 }
 
+/** One reusable content block. Every block has a heading (it becomes the band's title); what else it carries depends on its type. */
+export type Block =
+  | { type: 'text'; heading: Tri; body: Tri }
+  | { type: 'image'; heading: Tri; mediaId: number; alt: Tri; caption: Tri }
+  | { type: 'gallery'; heading: Tri; images: Array<{ mediaId: number; alt: Tri; caption: Tri }> }
+  | { type: 'features'; heading: Tri; items: Tri[] }
+  | { type: 'technologies'; heading: Tri; items: string[] }
+  | { type: 'highlight'; heading: Tri; text: Tri }
+  | { type: 'links'; heading: Tri; links: Array<{ label: Tri; url: string; verified: boolean }> }
+
+/** What a search engine and a link preview read about the project's page. Every field is optional: what is empty falls back to the card's own text IN THE SAME LANGUAGE. */
+export interface ProjectSeo {
+  title: Tri
+  description: Tri
+  ogTitle: Tri
+  ogDescription: Tri
+  imageMediaId: number | null
+  imageAlt: Tri
+}
+
 export interface ProjectContent {
+  /** A name only the administration shows (to tell two projects apart in the list); never sent to a visitor. */
+  internalTitle: string
   title: Tri
   /** The small label above a card's title ("Finance app"); empty means the category's label is used. */
   cardLabel: Tri
@@ -61,6 +86,8 @@ export interface ProjectContent {
   gallery: Array<{ mediaId: number; device: 'desktop' | 'mobile'; alt: Tri; caption: Tri; hero: boolean }>
   galleryNote: Tri
   overview: { what: Tri; audience: Tri; problem: Tri; goal: Tri }
+  /** The services delivered for this project (shown with the overview). */
+  services: Tri[]
   challenges: Array<{ title: Tri; problem: Tri; solution: Tri; source: string }>
   approach: Array<{ title: Tri; text: Tri }>
   architectureText: Tri
@@ -74,6 +101,8 @@ export interface ProjectContent {
   results: Tri[]
   next: Tri[]
   links: { demo: LinkEntry | null; source: LinkEntry | null; extra: (LinkEntry & { label: Tri }) | null; video: LinkEntry | null }
+  blocks: Block[]
+  seo: ProjectSeo
   hidden: SectionId[]
 }
 
@@ -81,9 +110,9 @@ export interface ProjectContent {
 // Normalising what an administrator sends
 // ---------------------------------------------------------------------------------------------------------------
 
-export const LIMITS = { title: 120, line: 200, card: 400, paragraph: 3000, item: 1500, source: 160, tag: 60, url: 300, list: 24, stackItems: 40, gallery: 24, challenges: 12 }
+export const LIMITS = { title: 120, line: 200, card: 400, paragraph: 3000, item: 1500, source: 160, tag: 60, url: 300, list: 24, stackItems: 40, gallery: 24, challenges: 12, blocks: 20, blockImages: 12, blockLinks: 6, seoTitle: 70, seoDescription: 200, ogTitle: 90, ogDescription: 200 }
 
-class Errors {
+export class Errors {
   readonly map: FieldErrors = {}
   fail(path: string, code: FieldCode): void {
     if (!(path in this.map)) this.map[path] = code
@@ -95,7 +124,7 @@ class Errors {
 
 type Input = unknown
 
-function str(errors: Errors, path: string, value: Input, max: number, multiline: boolean): string {
+export function str(errors: Errors, path: string, value: Input, max: number, multiline: boolean): string {
   if (value === undefined || value === null) return ''
   if (typeof value !== 'string') {
     errors.fail(path, 'invalid')
@@ -106,7 +135,7 @@ function str(errors: Errors, path: string, value: Input, max: number, multiline:
   return out
 }
 
-function tri(errors: Errors, path: string, value: Input, max: number, multiline = false): Tri {
+export function tri(errors: Errors, path: string, value: Input, max: number, multiline = false): Tri {
   const out = emptyTri()
   if (value === undefined || value === null) return out
   if (!isRecord(value)) {
@@ -117,7 +146,7 @@ function tri(errors: Errors, path: string, value: Input, max: number, multiline 
   return out
 }
 
-function list<T>(errors: Errors, path: string, value: Input, max: number, each: (item: unknown, itemPath: string) => T): T[] {
+export function list<T>(errors: Errors, path: string, value: Input, max: number, each: (item: unknown, itemPath: string) => T): T[] {
   if (value === undefined || value === null) return []
   if (!Array.isArray(value)) {
     errors.fail(path, 'invalid')
@@ -127,7 +156,7 @@ function list<T>(errors: Errors, path: string, value: Input, max: number, each: 
   return value.slice(0, max).map((item, index) => each(item, `${path}.${index}`))
 }
 
-function pick<T extends string>(errors: Errors, path: string, value: Input, allowed: readonly T[], fallback: T): T {
+export function pick<T extends string>(errors: Errors, path: string, value: Input, allowed: readonly T[], fallback: T): T {
   if (value === undefined || value === null || value === '') return fallback
   if (typeof value !== 'string' || !allowed.includes(value as T)) {
     errors.fail(path, 'invalid')
@@ -180,9 +209,50 @@ function link(errors: Errors, path: string, value: Input): LinkEntry | null {
 const triList = (errors: Errors, path: string, value: Input, max = LIMITS.item): Tri[] =>
   list(errors, path, value, LIMITS.list, (item, at) => tri(errors, at, item, max, true)).filter((item) => LANGUAGES.some((l) => item[l] !== ''))
 
-const stringList = (errors: Errors, path: string, value: Input, max: number, each: number): string[] => {
+export const stringList = (errors: Errors, path: string, value: Input, max: number, each: number): string[] => {
   const out = list(errors, path, value, max, (item, at) => str(errors, at, item, each, false)).filter((item) => item !== '')
   return [...new Set(out)]
+}
+
+/** One block: its type decides what else it may carry; anything else it was sent is dropped, and a type that is not in the vocabulary is refused. */
+function block(errors: Errors, path: string, value: Input): Block {
+  const row = isRecord(value) ? value : {}
+  if (!isRecord(value)) errors.fail(path, 'invalid')
+  const type = pick(errors, `${path}.type`, row.type, BLOCK_TYPES, 'text')
+  const heading = tri(errors, `${path}.heading`, row.heading, LIMITS.title)
+  switch (type) {
+    case 'image':
+      return { type, heading, mediaId: mediaId(errors, `${path}.mediaId`, row.mediaId), alt: tri(errors, `${path}.alt`, row.alt, LIMITS.line), caption: tri(errors, `${path}.caption`, row.caption, LIMITS.line) }
+    case 'gallery':
+      return {
+        type,
+        heading,
+        images: list(errors, `${path}.images`, row.images, LIMITS.blockImages, (item, at) => {
+          const image = isRecord(item) ? item : {}
+          if (!isRecord(item)) errors.fail(at, 'invalid')
+          return { mediaId: mediaId(errors, `${at}.mediaId`, image.mediaId), alt: tri(errors, `${at}.alt`, image.alt, LIMITS.line), caption: tri(errors, `${at}.caption`, image.caption, LIMITS.line) }
+        }),
+      }
+    case 'features':
+      return { type, heading, items: triList(errors, `${path}.items`, row.items, LIMITS.line) }
+    case 'technologies':
+      return { type, heading, items: stringList(errors, `${path}.items`, row.items, LIMITS.stackItems, LIMITS.tag) }
+    case 'highlight':
+      return { type, heading, text: tri(errors, `${path}.text`, row.text, LIMITS.item, true) }
+    case 'links':
+      return {
+        type,
+        heading,
+        links: list(errors, `${path}.links`, row.links, LIMITS.blockLinks, (item, at) => {
+          const entry = isRecord(item) ? item : {}
+          if (!isRecord(item)) errors.fail(at, 'invalid')
+          const url = checkedUrl(errors, `${at}.url`, entry.url)
+          return { label: tri(errors, `${at}.label`, entry.label, LIMITS.title), url, verified: entry.verified === true }
+        }).filter((entry) => entry.url !== ''),
+      }
+    default:
+      return { type: 'text', heading, body: tri(errors, `${path}.body`, row.body, LIMITS.paragraph, true) }
+  }
 }
 
 /** Builds the canonical document from an administrator's input. Every problem is collected; the caller throws them together. */
@@ -196,7 +266,9 @@ export function normalizeContent(input: Input, referenceCheck?: (id: number) => 
   const thumbnailIn = isRecord(body.thumbnail) ? body.thumbnail : null
   const linksIn = isRecord(body.links) ? body.links : {}
 
+  const seoIn = isRecord(body.seo) ? body.seo : {}
   const content: ProjectContent = {
+    internalTitle: str(errors, `${p}.internalTitle`, body.internalTitle, LIMITS.title, false),
     title: tri(errors, `${p}.title`, body.title, LIMITS.title),
     cardLabel: tri(errors, `${p}.cardLabel`, body.cardLabel, LIMITS.line),
     cardDescription: tri(errors, `${p}.cardDescription`, body.cardDescription, LIMITS.card, true),
@@ -234,6 +306,7 @@ export function normalizeContent(input: Input, referenceCheck?: (id: number) => 
       problem: tri(errors, `${p}.overview.problem`, overviewIn.problem, LIMITS.paragraph, true),
       goal: tri(errors, `${p}.overview.goal`, overviewIn.goal, LIMITS.paragraph, true),
     },
+    services: triList(errors, `${p}.services`, body.services, LIMITS.line),
     challenges: list(errors, `${p}.challenges`, body.challenges, LIMITS.challenges, (item, at) => {
       const row = isRecord(item) ? item : {}
       if (!isRecord(item)) errors.fail(at, 'invalid')
@@ -284,6 +357,15 @@ export function normalizeContent(input: Input, referenceCheck?: (id: number) => 
       })(),
       video: link(errors, `${p}.links.video`, linksIn.video),
     },
+    blocks: list(errors, `${p}.blocks`, body.blocks, LIMITS.blocks, (item, at) => block(errors, at, item)),
+    seo: {
+      title: tri(errors, `${p}.seo.title`, seoIn.title, LIMITS.seoTitle),
+      description: tri(errors, `${p}.seo.description`, seoIn.description, LIMITS.seoDescription),
+      ogTitle: tri(errors, `${p}.seo.ogTitle`, seoIn.ogTitle, LIMITS.ogTitle),
+      ogDescription: tri(errors, `${p}.seo.ogDescription`, seoIn.ogDescription, LIMITS.ogDescription),
+      imageMediaId: typeof seoIn.imageMediaId === 'number' && Number.isInteger(seoIn.imageMediaId) && seoIn.imageMediaId > 0 ? seoIn.imageMediaId : seoIn.imageMediaId === undefined || seoIn.imageMediaId === null ? null : (errors.fail(`${p}.seo.imageMediaId`, 'invalid'), null),
+      imageAlt: tri(errors, `${p}.seo.imageAlt`, seoIn.imageAlt, LIMITS.line),
+    },
     hidden: [...new Set(list(errors, `${p}.hidden`, body.hidden, SECTIONS.length, (item, at) => pick(errors, at, item, SECTIONS, 'overview')))],
   }
 
@@ -295,10 +377,38 @@ export function normalizeContent(input: Input, referenceCheck?: (id: number) => 
     if (content.thumbnail) check(content.thumbnail.mediaId, `${p}.thumbnail.mediaId`)
     content.gallery.forEach((image, index) => check(image.mediaId, `${p}.gallery.${index}.mediaId`))
     content.features.forEach((feature, index) => feature.imageMediaId && check(feature.imageMediaId, `${p}.features.${index}.imageMediaId`))
+    if (content.seo.imageMediaId) check(content.seo.imageMediaId, `${p}.seo.imageMediaId`)
+    content.blocks.forEach((item, index) => {
+      if (item.type === 'image') check(item.mediaId, `${p}.blocks.${index}.mediaId`)
+      if (item.type === 'gallery') item.images.forEach((image, at) => check(image.mediaId, `${p}.blocks.${index}.images.${at}.mediaId`))
+    })
   }
   // At most one hero picture.
   if (content.gallery.filter((image) => image.hero).length > 1) errors.fail(`${p}.gallery`, 'duplicate')
   return { content, errors: errors.map }
+}
+
+/**
+ * A stored document read back: a project saved before PROMPT 22 has no internal title, services, blocks or SEO, so each is given its empty
+ * value. Nothing is validated here (a document was validated when it was written) and nothing is written back until the project is saved.
+ */
+export function upgradeContent(stored: unknown): ProjectContent {
+  const content = (isRecord(stored) ? stored : {}) as unknown as ProjectContent
+  const seo = (isRecord(content.seo) ? content.seo : {}) as Partial<ProjectSeo>
+  return {
+    ...content,
+    internalTitle: typeof content.internalTitle === 'string' ? content.internalTitle : '',
+    services: Array.isArray(content.services) ? content.services : [],
+    blocks: Array.isArray(content.blocks) ? content.blocks : [],
+    seo: {
+      title: seo.title ?? emptyTri(),
+      description: seo.description ?? emptyTri(),
+      ogTitle: seo.ogTitle ?? emptyTri(),
+      ogDescription: seo.ogDescription ?? emptyTri(),
+      imageMediaId: typeof seo.imageMediaId === 'number' ? seo.imageMediaId : null,
+      imageAlt: seo.imageAlt ?? emptyTri(),
+    },
+  }
 }
 
 export function requireValid(result: { content: ProjectContent; errors: FieldErrors }): ProjectContent {
@@ -354,6 +464,13 @@ export function completeness(content: ProjectContent): Record<Language, Language
       if (image.alt[l] === '') blocking.push(`gallery.${index}.alt`)
     })
     if (content.thumbnail && content.thumbnail.alt[l] === '') blocking.push('thumbnail.alt')
+    // The social picture and every picture in a block need their description, in every language that is required.
+    if (content.seo.imageMediaId && content.seo.imageAlt[l] === '') blocking.push('seo.imageAlt')
+    content.blocks.forEach((item, index) => {
+      if (item.heading[l] === '') blocking.push(`blocks.${index}.heading`)
+      if (item.type === 'image' && item.alt[l] === '') blocking.push(`blocks.${index}.alt`)
+      if (item.type === 'gallery') item.images.forEach((image, at) => image.alt[l] === '' && blocking.push(`blocks.${index}.images.${at}.alt`))
+    })
     out[l] = { state: filled[l] === 0 ? 'missing' : blocking.length === 0 && untranslated[l].length === 0 ? 'complete' : 'incomplete', blocking, untranslated: untranslated[l] }
   }
   return out
@@ -361,7 +478,7 @@ export function completeness(content: ProjectContent): Record<Language, Language
 
 const SECTION_OF: Record<string, SectionId> = {
   overview: 'overview', challenges: 'challenge', approach: 'approach', architectureText: 'architecture', features: 'features', decisions: 'decisions', learned: 'learned', limits: 'learned', next: 'learned',
-  results: 'results', gallery: 'gallery', galleryNote: 'gallery', links: 'links',
+  results: 'results', gallery: 'gallery', galleryNote: 'gallery', links: 'links', services: 'overview', blocks: 'blocks',
 }
 const hiddenPath = (content: ProjectContent, path: string): boolean => {
   const section = SECTION_OF[path.split('.')[0]]
@@ -408,8 +525,78 @@ export interface PublicProject {
     detailPage: boolean
     thumbnail: (PictureOut & { alt: Tri }) | null
     demoUrl: string | null
+    /** The languages the project can be shown in (see `availableLanguages`): a language not in it shows nothing of the project. */
+    languages: Language[]
+    seo: PublicSeo | null
   }
   detail?: Record<string, unknown>
+}
+
+/** What the head of the project's page says, per language; an empty text falls back to the card's, in the same language. */
+export interface PublicSeo {
+  title: Tri
+  description: Tri
+  ogTitle: Tri
+  ogDescription: Tri
+  image: (PictureOut & { alt: Tri }) | null
+}
+
+export type PublicBlock =
+  | { type: 'text'; heading: Tri; body: Tri }
+  | { type: 'image'; heading: Tri; picture: PictureOut; alt: Tri; caption: Tri }
+  | { type: 'gallery'; heading: Tri; images: Array<{ picture: PictureOut; alt: Tri; caption: Tri }> }
+  | { type: 'features'; heading: Tri; items: Tri[] }
+  | { type: 'technologies'; heading: Tri; items: string[] }
+  | { type: 'highlight'; heading: Tri; text: Tri }
+  | { type: 'links'; heading: Tri; links: Array<{ label: Tri; url: string }> }
+
+/**
+ * The languages a project can be shown in: the ones that have what publishing needs and some text of their own. The website never
+ * fills a gap with another language, so a language that is not in this list gets no card, no page and no sitemap entry for the project.
+ */
+export function availableLanguages(content: ProjectContent): Language[] {
+  const report = completeness(content)
+  return LANGUAGES.filter((language) => report[language].state !== 'missing' && report[language].blocking.length === 0)
+}
+
+function publicSeo(content: ProjectContent, pictures: Pictures): PublicSeo | null {
+  const { seo } = content
+  const picture = seo.imageMediaId ? pictures(seo.imageMediaId) : null
+  const written = LANGUAGES.some((language) => seo.title[language] || seo.description[language] || seo.ogTitle[language] || seo.ogDescription[language])
+  if (!written && !picture) return null
+  return { title: seo.title, description: seo.description, ogTitle: seo.ogTitle, ogDescription: seo.ogDescription, image: picture ? { ...picture, alt: seo.imageAlt } : null }
+}
+
+/** The blocks as a visitor may see them: pictures resolved, only links that were marked as checked, and nothing that ended up empty. */
+function publicBlocks(content: ProjectContent, pictures: Pictures): PublicBlock[] {
+  const some = (value: Tri) => LANGUAGES.some((language) => value[language] !== '')
+  return content.blocks.flatMap((item): PublicBlock[] => {
+    switch (item.type) {
+      case 'text':
+        return some(item.body) ? [{ type: 'text', heading: item.heading, body: item.body }] : []
+      case 'image': {
+        const picture = pictures(item.mediaId)
+        return picture ? [{ type: 'image', heading: item.heading, picture, alt: item.alt, caption: item.caption }] : []
+      }
+      case 'gallery': {
+        const images = item.images.flatMap((image) => {
+          const picture = pictures(image.mediaId)
+          return picture ? [{ picture, alt: image.alt, caption: image.caption }] : []
+        })
+        return images.length > 0 ? [{ type: 'gallery', heading: item.heading, images }] : []
+      }
+      case 'features':
+        return item.items.length > 0 ? [{ type: 'features', heading: item.heading, items: item.items }] : []
+      case 'technologies':
+        return item.items.length > 0 ? [{ type: 'technologies', heading: item.heading, items: item.items }] : []
+      case 'highlight':
+        return some(item.text) ? [{ type: 'highlight', heading: item.heading, text: item.text }] : []
+      case 'links': {
+        const links = item.links.filter((entry) => entry.verified).map((entry) => ({ label: entry.label, url: entry.url }))
+        return links.length > 0 ? [{ type: 'links', heading: item.heading, links }] : []
+      }
+    }
+  })
 }
 
 /** Resolves a picture id to its address and size. */
@@ -419,7 +606,11 @@ export type Pictures = (id: number) => PictureOut | null
 function stripHidden(content: ProjectContent): ProjectContent {
   const hide = (section: SectionId) => content.hidden.includes(section)
   const copy: ProjectContent = structuredClone(content)
-  if (hide('overview')) copy.overview = { what: emptyTri(), audience: emptyTri(), problem: emptyTri(), goal: emptyTri() }
+  if (hide('overview')) {
+    copy.overview = { what: emptyTri(), audience: emptyTri(), problem: emptyTri(), goal: emptyTri() }
+    copy.services = []
+  }
+  if (hide('blocks')) copy.blocks = []
   if (hide('challenge')) copy.challenges = []
   if (hide('approach')) copy.approach = []
   if (hide('architecture')) {
@@ -472,6 +663,8 @@ export function publicProject(
       thumbnail: thumb && content.thumbnail ? { ...thumb, alt: content.thumbnail.alt } : null,
       // The card's demo link is the project's own, never a draft's, and only when it was marked as checked.
       demoUrl: shownLink(content.links.demo),
+      languages: availableLanguages(stored),
+      seo: publicSeo(content, pictures),
     },
   }
   if (!full) return out
@@ -487,6 +680,7 @@ export function publicProject(
     repoName: content.repoName || null,
     stack: content.stack,
     overview: content.overview,
+    services: content.services,
     challenges: content.challenges,
     approach: content.approach,
     architectureText: content.architectureText,
@@ -498,6 +692,7 @@ export function publicProject(
     results: content.results,
     next: content.next,
     gallery,
+    blocks: publicBlocks(content, pictures),
     galleryNote: LANGUAGES.some((l) => content.galleryNote[l] !== '') ? content.galleryNote : null,
     links: {
       demo: shownLink(content.links.demo),

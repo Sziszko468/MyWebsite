@@ -48,6 +48,8 @@ export function Overview({ detail }: { detail: ProjectDetail }) {
     [t.project.overview.goal, overview.goal[lang]],
   ]
   if (role) rows.push([t.project.overview.role, role[lang]])
+  const services = (detail.services ?? []).map((item) => item[lang]).filter((text) => text !== '')
+  if (services.length > 0) rows.push([t.project.overview.services, services.join(' · ')])
   const facts = rows.filter(([, text]) => text !== '')
   // A group with nothing in it, and a stack with no group, are not drawn: no label over an empty space.
   const groups = stack.filter((entry) => entry.items.length > 0)
@@ -57,7 +59,7 @@ export function Overview({ detail }: { detail: ProjectDetail }) {
   return (
     <div className={styles.overview}>
       <Reveal className={styles.overviewLead}>
-        <p className={styles.lead}>{detail.summary[lang] || detail.summary.hu}</p>
+        {detail.summary[lang] !== '' && <p className={styles.lead}>{detail.summary[lang]}</p>}
         {fromRepository && <p className={styles.reviewed}>{t.project.reviewed.replace('{date}', formatDate(reviewed, lang))}</p>}
       </Reveal>
 
@@ -201,7 +203,7 @@ export function Lessons({ detail }: { detail: ProjectDetail }) {
 /** A plain description of the architecture, for a project that has no drawn diagram. Paragraphs are separated by a blank line. */
 export function ArchitectureText({ detail }: { detail: ProjectDetail }) {
   const { lang } = useI18n()
-  const text = detail.architectureText?.[lang] || detail.architectureText?.hu || ''
+  const text = detail.architectureText?.[lang] ?? ''
   return (
     <Reveal className={styles.lessons}>
       {text.split(/\n{2,}/).map((paragraph, position) => (
@@ -218,11 +220,13 @@ export function Results({ detail }: { detail: ProjectDetail }) {
   const { lang } = useI18n()
   return (
     <Reveal className={styles.learned}>
-      {(detail.results ?? []).map((result, position) => (
-        <p key={position} className={styles.quote}>
-          {result[lang] || result.hu}
-        </p>
-      ))}
+      {(detail.results ?? [])
+        .filter((result) => result[lang] !== '')
+        .map((result, position) => (
+          <p key={position} className={styles.quote}>
+            {result[lang]}
+          </p>
+        ))}
     </Reveal>
   )
 }

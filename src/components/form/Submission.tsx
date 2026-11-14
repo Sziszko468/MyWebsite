@@ -1,5 +1,5 @@
 import { useState, type ReactNode, type RefObject } from 'react'
-import { siteConfig } from '../../config/site'
+import { useContact } from '../../profile/store'
 import { mailtoHref } from '../../forms/mailto'
 import { Button } from '../Button/Button'
 import type { SubmissionPhase } from './useSubmission'
@@ -69,7 +69,7 @@ export function SubmissionResult({
   headingRef: RefObject<HTMLHeadingElement | null>
 }) {
   const [copy, setCopy] = useState<'idle' | 'copied' | 'failed'>('idle')
-  const email = siteConfig.contact.email
+  const { email } = useContact()
 
   if (phase.kind === 'failed') {
     return (

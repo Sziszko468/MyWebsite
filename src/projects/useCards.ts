@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import { useI18n } from '../i18n/useI18n'
 import { useProjectList } from './store'
-import { viewOf, type CardView, type ProjectCategory } from './types'
+import { isAvailable, viewOf, type CardView, type ProjectCategory } from './types'
 
 export interface Cards {
   loading: boolean
@@ -21,7 +21,7 @@ export function usePreviewFlag(): boolean {
   return params.get('preview') === '1'
 }
 
-const label = (category: ProjectCategory, lang: 'hu' | 'en' | 'nl'): string => category.label[lang] || category.label.hu
+const label = (category: ProjectCategory, lang: 'hu' | 'en' | 'nl'): string => category.label[lang]
 
 /** The projects the pages draw, in one language. Both the Work page and the home page read this, so there is one source. */
 export function useCards(): Cards {
@@ -30,7 +30,8 @@ export function useCards(): Cards {
   const state = useProjectList(wantsPreview)
   return useMemo(() => {
     const names = new Map(state.categories.map((category) => [category.key, label(category, lang)]))
-    const all = state.cards.map((card) => viewOf(card, lang, names.get(card.category)))
+    // A project is listed only in the languages it has something to say in (an administrator's preview shows every project, drafts included).
+    const all = state.cards.filter((card) => state.preview || isAvailable(card, lang)).map((card) => viewOf(card, lang, names.get(card.category)))
     const featured = all.filter((card) => card.featured)
     return {
       loading: state.status === 'loading',

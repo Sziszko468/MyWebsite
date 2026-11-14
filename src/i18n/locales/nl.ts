@@ -354,6 +354,9 @@ export const nl: Dictionary = {
       banner: 'Voorbeeld: dit project is nog niet openbaar (stand: {state}). Alleen jij ziet het, ingelogd in het beheer.',
       signIn: 'Log in op het beheer om het voorbeeld te zien.',
       states: { draft: 'concept', published: 'gepubliceerd', archived: 'gearchiveerd' },
+      linkBanner: 'Voorbeeldlink: dit project is nog niet openbaar (status: {state}). Iedereen met deze link kan het zien tot de link afloopt.',
+      languageGap: 'Bezoekers zien dit project nog niet in deze taal: hier ontbreekt tekst of een afbeeldingsbeschrijving.',
+      gone: 'Deze voorbeeldlink is verlopen of ingetrokken.',
     },
     videoLink: 'Video',
     repoName: 'In de repository en in de interface: {name}',
@@ -388,6 +391,7 @@ export const nl: Dictionary = {
       problem: 'Welk probleem het aanpakt',
       goal: 'Het doel van de ontwikkeling',
       role: 'Mijn rol',
+      services: 'Uitgevoerde diensten',
     },
     challenge: {
       problem: 'Het probleem',

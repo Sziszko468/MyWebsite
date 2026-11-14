@@ -1,6 +1,6 @@
 import { useId } from 'react'
-import { activeFocusTopics } from '../../content/about'
 import { useI18n } from '../../i18n/useI18n'
+import { useAboutContent } from '../../profile/store'
 import { pad } from '../../utils/format'
 import { Container } from '../Container/Container'
 import { Reveal } from '../motion/Reveal'
@@ -20,6 +20,7 @@ export function Focus() {
   const titleId = useId()
   const copy = t.aboutPage.focus
 
+  const activeFocusTopics = useAboutContent().focus
   if (activeFocusTopics.length === 0) return null
 
   return (

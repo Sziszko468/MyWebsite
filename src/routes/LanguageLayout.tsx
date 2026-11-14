@@ -13,7 +13,7 @@ import { buildHead } from '../seo/head'
 import { PageTransition } from '../motion/PageTransition'
 import { scopeOfPage } from '../motion/config'
 import { ScrollManager } from '../motion/ScrollManager'
-import { isMissingProject, useProjectsVersion } from '../projects/store'
+import { isMissingProject, isUnavailableIn, useProjectsVersion } from '../projects/store'
 import { labIdOfPage, projectIdOfPage, resolvePage, type PageDef } from './pages'
 
 /**
@@ -82,7 +82,8 @@ export function LanguageLayout() {
   // A project the backend says does not exist is "not found", like any other unknown address (and is not indexed).
   const found = resolvePage(rest)
   const slug = found ? projectIdOfPage(found.id) : null
-  const page = found && slug && slug !== 'preview' && isMissingProject(slug) ? undefined : found
+  // A project the backend says does not exist, or that has nothing to say in this language, is "not found" here (and is not indexed).
+  const page = found && slug && slug !== 'preview' && (isMissingProject(slug) || isUnavailableIn(slug, lang)) ? undefined : found
   const scope = scopeOfPage(page?.id)
 
   if (page && !page.languages.includes(lang)) {

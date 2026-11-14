@@ -51,7 +51,14 @@ export function pagesForBuild(pulled: unknown = pulledProjects): readonly PageDe
     const page = resolvePage(path)
     return page && !kept.includes(page) ? [page] : []
   })
-  return [...kept, ...added]
+  // A project's page exists only in the languages it has something to say in: no file and no sitemap entry for the others.
+  const languagesOf = new Map(found.cards.map((card) => [`/work/${card.slug}`, card.languages]))
+  return [...kept, ...added].flatMap((page): PageDef[] => {
+    const only = languagesOf.get(page.path)
+    if (!only) return [page]
+    const languages = page.languages.filter((code) => only.includes(code))
+    return languages.length > 0 ? [{ ...page, languages }] : []
+  })
 }
 
 export interface InlineHashes {

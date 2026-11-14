@@ -23,15 +23,18 @@ import { Notifier } from './modules/notifications/notifier.ts'
 import { emailRoutes } from './modules/notifications/routes.ts'
 import type { Mailer } from './modules/notifications/mailer.ts'
 import type { FetchLike } from './modules/notifications/resend.ts'
+import { profileRoutes } from './modules/profile/routes.ts'
 import { projectRoutes } from './modules/projects/routes.ts'
+import { livePages } from './modules/projects/service.ts'
 import { quoteRoutes } from './modules/quotes/routes.ts'
 import { healthRoutes } from './modules/system/health.ts'
 import { languageRedirect } from './modules/system/language.ts'
+import { liveSitemap } from './modules/system/sitemap.ts'
 import { serveAdminApp, serveStatic } from './modules/system/static.ts'
 
-/** Whether a project with this address is published (drafts are not acknowledged). */
-function projectIsPublished(app: AppContext, slug: string): boolean {
-  return app.db.get("SELECT 1 AS x FROM projects WHERE slug = ? AND status = 'published'", [slug]) !== undefined
+/** Whether the project page `/<lang>/work/<slug>/` exists right now: the project is published, has a page of its own, and has something to say in that language. */
+function projectPageExists(app: AppContext, slug: string, language: string): boolean {
+  return (livePages(app).get(slug) ?? []).includes(language as 'hu' | 'en' | 'nl')
 }
 
 /**
@@ -79,7 +82,7 @@ export function createApp(deps: AppDeps): App {
   context.assistant = new Assistant(context, deps.aiModel ?? null)
 
   const router = new Router()
-  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
+  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
 
   const sweeper = setInterval(() => {
     limiters.sweep()
@@ -192,19 +195,35 @@ export function createApp(deps: AppDeps): App {
           label = 'language'
           reply = redirect
         } else if (area === 'static' && config.staticDir && (method === 'GET' || method === 'HEAD')) {
-          let served = serveStatic(config.staticDir, url.pathname)
-          // A project published after the site was built has no prerendered page of its own: answer with the Work page's shell
-          // (200, not a 404) so the browser starts the application, which draws the project from the API.
+          // The sitemap is a live answer: the built one, with the project pages that exist now (an unpublished project is not in it).
+          let served = url.pathname === '/sitemap.xml' ? liveSitemap(context, config.staticDir) : null
+          served ??= serveStatic(config.staticDir, url.pathname)
+          // A project page exists only while the project is published, has a page of its own and has something to say in that language.
+          // The build's prerendered file is not the truth: after an unpublish it is a stale, indexable page, so it is not served.
+          // A project published after the site was built has no prerendered page: answer with the Work page's shell (200) so the browser
+          // starts the application, which draws the project from the API.
           const projectPage = /^\/(hu|en|nl)\/work\/([a-z0-9][a-z0-9-]{1,59})\/?$/.exec(url.pathname)
-          if (projectPage && (!served || served.status === 404) && projectIsPublished(context, projectPage[2])) {
-            const shell = serveStatic(config.staticDir, `/${projectPage[1]}/work/`)
-            if (shell && shell.status === 200) served = shell
+          if (projectPage && !['preview', 'new'].includes(projectPage[2])) {
+            if (!projectPageExists(context, projectPage[2], projectPage[1])) {
+              const missing = serveStatic(config.staticDir, '/404.html')
+              if (missing) served = { ...missing, status: 404, headers: { ...missing.headers, 'X-Robots-Tag': 'noindex' } }
+            } else if (!served || served.status === 404) {
+              const shell = serveStatic(config.staticDir, `/${projectPage[1]}/work/`)
+              if (shell && shell.status === 200) served = shell
+            }
           }
           // A customer's private page (`/hu/quote/<secret>`, `/hu/request/<secret>`) is never prerendered, whatever the secret is: the same quiet
           // shell answers for every address, is never cached or indexed, and the application then asks the API with the secret.
           const customerPage = /^\/(hu|en|nl)\/(quote|request)\/[A-Za-z0-9_-]{20,64}\/?$/.exec(url.pathname)
           if (customerPage && (!served || served.status === 404)) {
             const shell = serveStatic(config.staticDir, `/${customerPage[1]}/${customerPage[2]}/`)
+            if (shell && shell.status === 200) served = { ...shell, headers: { ...shell.headers, 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'Referrer-Policy': 'no-referrer' } }
+          }
+          // A preview link (`/hu/work/preview/link/<secret>`, PROMPT 22) is the same kind of page: never prerendered, answered with the Work page's shell,
+          // never cached or indexed, and without a referrer, so the secret in the address does not travel further. The application asks the API with it.
+          const previewLink = /^\/(hu|en|nl)\/work\/preview\/link\/[A-Za-z0-9_-]{20,64}\/?$/.exec(url.pathname)
+          if (previewLink && (!served || served.status === 404)) {
+            const shell = serveStatic(config.staticDir, `/${previewLink[1]}/work/`)
             if (shell && shell.status === 200) served = { ...shell, headers: { ...shell.headers, 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'Referrer-Policy': 'no-referrer' } }
           }
           if (!served) throw notFound('The address')

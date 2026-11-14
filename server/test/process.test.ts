@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process'
-import { existsSync, mkdtempSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -226,7 +226,10 @@ describe('the operator\'s commands', () => {
 
   it('migrate and seed are safe to run again', async () => {
     const e = env(folder())
-    expect((await cli(['migrate'], e)).stdout).toMatch(/Applied migrations: 1, 2, 3, 4, 5, 6, 7, 8, 9\.\s+Schema version 9\./)
+    const shipped = readdirSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'db', 'migrations'))
+      .flatMap((name) => (/^(\d{4})_/.test(name) ? [Number(name.slice(0, 4))] : []))
+      .sort((a, b) => a - b)
+    expect((await cli(['migrate'], e)).stdout).toContain(`Applied migrations: ${shipped.join(', ')}.`)
     expect((await cli(['migrate'], e)).stdout).toMatch(/The schema is up to date\./)
     expect((await cli(['seed'], e)).stdout).toContain('Loaded 4 services, 4 packages, 8 add-ons and 6 FAQ entries.')
     expect((await cli(['seed'], e)).stdout).toContain('The catalogue is not empty: nothing was changed.')

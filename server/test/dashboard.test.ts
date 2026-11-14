@@ -1,10 +1,15 @@
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Database } from '../src/db/database.ts'
 import { MIGRATIONS_DIRECTORY, migrate, migrationStatus } from '../src/db/migrate.ts'
 import { contact, quote, startServer, TestClock, type TestServer } from './helpers.ts'
+
+/** The migration versions that ship with the server, read from its folder, so a test that says "what a run applies" does not need to be edited when one is added. */
+const SHIPPED = readdirSync(MIGRATIONS_DIRECTORY)
+  .flatMap((name) => (/^(\d{4})_/.test(name) ? [Number(name.slice(0, 4))] : []))
+  .sort((a, b) => a - b)
 
 let server: TestServer
 let admin: { cookie: string; csrf: string; email: string }
@@ -59,7 +64,7 @@ describe('migration 0002', () => {
       db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, created_at, updated_at) VALUES ('d1', 'inquiry_status', 'inquiry', 'i3', 'n@x.test', 'en', 'accepted', ?, ?)", [now, now])
       expect(migrationStatus(db, directory)).toMatchObject({ current: 1, pending: 0 })
 
-      expect(migrate(db, clock)).toEqual([2, 3, 4, 5, 6, 7, 8, 9]) // every migration after 0002 is applied by this call, the newest included
+      expect(migrate(db, clock)).toEqual(SHIPPED.filter((version) => version >= 2)) // every migration after 0002 is applied by this call, the newest included
 
       expect(db.all('SELECT id, status FROM inquiries ORDER BY id')).toEqual([
         { id: 'i1', status: 'new' }, { id: 'i2', status: 'in_progress' }, { id: 'i3', status: 'waiting_client' }, { id: 'i4', status: 'completed' },

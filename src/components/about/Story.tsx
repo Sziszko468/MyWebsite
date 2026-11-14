@@ -1,6 +1,6 @@
 import { useId, type CSSProperties } from 'react'
-import { storyParagraphs, storyThought, storyTitle, transferableSkills } from '../../content/about'
 import { useI18n } from '../../i18n/useI18n'
+import { useAboutContent } from '../../profile/store'
 import { pad } from '../../utils/format'
 import { Container } from '../Container/Container'
 import { Reveal } from '../motion/Reveal'
@@ -19,26 +19,32 @@ export function Story() {
   const { lang, t } = useI18n()
   const titleId = useId()
   const copy = t.aboutPage.story
+  // The owner's own words once they saved a profile in the administration (every text in all three languages), else the website's own.
+  const about = useAboutContent()
+  if (about.title[lang] === '' && about.paragraphs.length === 0) return null
 
   return (
     <Section id="story" tone={aboutTone('story')} slant labelledBy={titleId}>
       <Container size="wide">
         <Reveal>
-          <SectionHeading id={titleId} index="01" size="large" title={storyTitle[lang]} />
+          <SectionHeading id={titleId} index="01" size="large" title={about.title[lang]} />
         </Reveal>
 
         <div className={styles.layout}>
           <Reveal className={styles.paragraphs}>
-            {storyParagraphs.map((paragraph) => (
-              <p key={paragraph.hu}>{paragraph[lang]}</p>
+            {about.paragraphs.map((paragraph, position) => (
+              <p key={position}>{paragraph[lang]}</p>
             ))}
           </Reveal>
 
-          <Reveal className={styles.thoughtSlot} delay={100}>
-            <p className={styles.thought}>{storyThought[lang]}</p>
-          </Reveal>
+          {about.thought[lang] !== '' && (
+            <Reveal className={styles.thoughtSlot} delay={100}>
+              <p className={styles.thought}>{about.thought[lang]}</p>
+            </Reveal>
+          )}
         </div>
 
+        {about.strengths.length > 0 && (
         <div className={styles.bridge}>
           <Reveal>
             <h3 className={styles.bridgeTitle}>{copy.skillsTitle}</h3>
@@ -51,7 +57,7 @@ export function Story() {
           </Reveal>
 
           <ul className={styles.skills}>
-            {transferableSkills.map((skill, position) => (
+            {about.strengths.map((skill, position) => (
               <li key={skill.id} className={styles.skill} style={{ '--i': position } as CSSProperties}>
                 <Reveal delay={(position % 2) * 80}>
                   <span className={styles.number} aria-hidden="true">
@@ -64,6 +70,7 @@ export function Story() {
             ))}
           </ul>
         </div>
+        )}
       </Container>
     </Section>
   )

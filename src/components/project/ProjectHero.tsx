@@ -136,7 +136,7 @@ export function ProjectHero({ entry, detail, image, onOpenImage }: ProjectHeroPr
           </h1>
           {detail.repoName && <p className={styles.repoName}>{fill(t.project.repoName, { name: detail.repoName })}</p>}
 
-          <p className={styles.lead}>{detail.summary[lang] || detail.summary.hu}</p>
+          {detail.summary[lang] !== '' && <p className={styles.lead}>{detail.summary[lang]}</p>}
 
           {entry.tags.length > 0 && (
             <ul className={styles.tags} aria-label={t.project.stackLabel}>

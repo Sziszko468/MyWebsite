@@ -18,6 +18,8 @@ import { QuoteDetailPage } from './pages/QuoteDetailPage'
 import { QuotationPage, QuotationStartPage } from './pages/QuotationPage'
 import { ProjectEditPage } from './pages/ProjectEditPage'
 import { ProjectSettingsPage } from './pages/ProjectSettingsPage'
+import { MediaPage } from './pages/MediaPage'
+import { ProfilePage } from './pages/ProfilePage'
 import { ProjectsPage } from './pages/ProjectsPage'
 import { QuotesPage } from './pages/QuotesPage'
 import { TextsPage } from './pages/TextsPage'
@@ -102,6 +104,8 @@ function Gate() {
           <Route path="projects/new" element={<ProjectEditPage />} />
           <Route path="projects/settings" element={<ProjectSettingsPage />} />
           <Route path="projects/:id" element={<ProjectEditPage />} />
+          <Route path="media" element={<MediaPage />} />
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="texts" element={<TextsPage />} />
           <Route path="content" element={<ContentPage />} />
           <Route path="content/new" element={<FaqEditPage />} />

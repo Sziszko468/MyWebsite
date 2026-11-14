@@ -1,9 +1,9 @@
 import type { ProjectStatus } from '../components/Badge/Badge'
-import type { Accent, Architecture, Challenge, Feature, GalleryImage, HeroVariant, ProjectDetail, StackEntry, StackGroup, Step } from '../content/projectDetails/types'
+import type { Accent, Architecture, Challenge, DetailBlock, Feature, GalleryImage, HeroVariant, ProjectDetail, StackEntry, StackGroup, Step } from '../content/projectDetails/types'
 import type { MockupKind, ProjectLayout } from '../content/projects'
 import type { Trilingual } from '../content/trilingual'
 import { API_BASE } from '../config/api'
-import { LANGUAGES } from '../i18n/config'
+import { LANGUAGES, type Language } from '../i18n/config'
 import type { ProjectCard, ProjectCategory, ProjectRecord } from './types'
 
 /**
@@ -43,6 +43,66 @@ const ACCENTS = ['red', 'blue', 'ink'] as const satisfies readonly Accent[]
 const HEROES = ['split', 'stack', 'route'] as const satisfies readonly HeroVariant[]
 const GROUPS = ['frontend', 'backend', 'data', 'infrastructure', 'testing', 'services'] as const satisfies readonly StackGroup[]
 
+/** The languages an answer says a project can be shown in; an answer that says nothing (an older server) means every language. */
+function languagesOf(value: unknown): Language[] {
+  if (!Array.isArray(value)) return [...LANGUAGES]
+  return LANGUAGES.filter((lang) => value.includes(lang))
+}
+
+function parseSeo(value: unknown): ProjectCard['seo'] {
+  if (!isRaw(value)) return null
+  const image = isRaw(value.image) ? value.image : null
+  const src = image ? picturePath(image.src) : null
+  return {
+    title: tri(value.title),
+    description: tri(value.description),
+    ogTitle: tri(value.ogTitle),
+    ogDescription: tri(value.ogDescription),
+    image: image && src && size(image.width) && size(image.height) ? { src, width: size(image.width), height: size(image.height), alt: tri(image.alt) } : null,
+  }
+}
+
+function parsePicture(value: unknown): { src: string; width: number; height: number } | null {
+  if (!isRaw(value)) return null
+  const src = picturePath(value.src)
+  return src && size(value.width) && size(value.height) ? { src, width: size(value.width), height: size(value.height) } : null
+}
+
+/** The blocks of a project's page: a type the website does not know, or a block that lost its picture or its address, is left out. */
+function parseBlocks(value: unknown): DetailBlock[] {
+  return list(value).flatMap((item): DetailBlock[] => {
+    if (!isRaw(item)) return []
+    const heading = tri(item.heading)
+    switch (item.type) {
+      case 'text':
+        return [{ type: 'text', heading, body: tri(item.body) }]
+      case 'image': {
+        const picture = parsePicture(item.picture)
+        return picture ? [{ type: 'image', heading, picture, alt: tri(item.alt), caption: tri(item.caption) }] : []
+      }
+      case 'gallery': {
+        const images = list(item.images).flatMap((entry) => {
+          const picture = isRaw(entry) ? parsePicture(entry.picture) : null
+          return picture && isRaw(entry) ? [{ picture, alt: tri(entry.alt), caption: tri(entry.caption) }] : []
+        })
+        return images.length > 0 ? [{ type: 'gallery', heading, images }] : []
+      }
+      case 'features':
+        return [{ type: 'features', heading, items: triList(item.items) }]
+      case 'technologies':
+        return [{ type: 'technologies', heading, items: list(item.items).filter((entry): entry is string => typeof entry === 'string') }]
+      case 'highlight':
+        return [{ type: 'highlight', heading, text: tri(item.text) }]
+      case 'links': {
+        const links = list(item.links).flatMap((entry) => (isRaw(entry) && httpsUrl(entry.url) ? [{ label: tri(entry.label), url: httpsUrl(entry.url) as string }] : []))
+        return links.length > 0 ? [{ type: 'links', heading, links }] : []
+      }
+      default:
+        return []
+    }
+  })
+}
+
 export function parseCard(raw: unknown): ProjectCard | null {
   if (!isRaw(raw) || !isRaw(raw.card) || typeof raw.slug !== 'string' || !/^[a-z0-9][a-z0-9-]{1,59}$/.test(raw.slug)) return null
   const card = raw.card
@@ -63,6 +123,8 @@ export function parseCard(raw: unknown): ProjectCard | null {
     image: thumb && src && size(thumb.width) && size(thumb.height) ? { src, width: size(thumb.width), height: size(thumb.height), alt: tri(thumb.alt) } : null,
     detailPath: card.detailPage === true ? `/work/${raw.slug}` : null,
     demoUrl: httpsUrl(card.demoUrl),
+    languages: languagesOf(card.languages),
+    seo: parseSeo(card.seo),
     featured: raw.featured === true,
     ...(raw.draft === true ? { draft: true } : {}),
   }
@@ -97,6 +159,8 @@ function parseDetail(slug: string, raw: unknown): ProjectDetail | null {
     reviewed: str(raw.reviewed, '1970-01-01'),
     stack: list(raw.stack).flatMap((item): StackEntry[] => (isRaw(item) ? [{ group: oneOf(item.group, GROUPS, 'frontend'), items: list(item.items).filter((entry): entry is string => typeof entry === 'string') }] : [])),
     overview: { what: tri(overview.what), audience: tri(overview.audience), problem: tri(overview.problem), goal: tri(overview.goal) },
+    services: triList(raw.services),
+    blocks: parseBlocks(raw.blocks),
     challenges: list(raw.challenges).flatMap((item): Challenge[] => (isRaw(item) ? [{ title: tri(item.title), problem: tri(item.problem), solution: tri(item.solution), source: str(item.source) }] : [])),
     approach: list(raw.approach).map(step).filter(present),
     architecture,
@@ -122,7 +186,7 @@ export function parseRecord(raw: unknown, neighbours: unknown, preview: boolean)
   return { card, detail, neighbours: around && around.previous && around.next ? { previous: around.previous, next: around.next } : null, preview }
 }
 
-export type FetchOutcome = { kind: 'ok'; data: unknown; meta: unknown } | { kind: 'missing' } | { kind: 'unauthorized' } | { kind: 'error' }
+export type FetchOutcome = { kind: 'ok'; data: unknown; meta: unknown } | { kind: 'missing' } | { kind: 'gone' } | { kind: 'unauthorized' } | { kind: 'error' }
 
 /** One GET to the backend. `null` base (no backend configured) is an error the caller answers with the static content. */
 export async function getJson(path: string, options: { credentials?: boolean; timeoutMs?: number } = {}): Promise<FetchOutcome> {
@@ -134,6 +198,8 @@ export async function getJson(path: string, options: { credentials?: boolean; ti
       signal: AbortSignal.timeout(options.timeoutMs ?? 6000),
     })
     if (response.status === 404) return { kind: 'missing' }
+    // A preview link that has ended: the answer is not "no such project" but "this link is over".
+    if (response.status === 410) return { kind: 'gone' }
     if (response.status === 401 || response.status === 403) return { kind: 'unauthorized' }
     if (!response.ok) return { kind: 'error' }
     const body: unknown = await response.json()

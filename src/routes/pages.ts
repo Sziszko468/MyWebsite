@@ -156,6 +156,9 @@ export function findPage(path: string, pages: readonly PageDef[] = PAGES): PageD
 const dynamic = new Map<string, PageDef>()
 const SLUG_PATH = /^\/work\/([a-z0-9][a-z0-9-]{1,59})$/
 const PREVIEW_PATH = /^\/work\/preview\/(\d{1,9})$/
+/** A preview link (PROMPT 22): 256 random bits as base64url are 43 characters; a little room either way. The secret is not part of the page's identity. */
+const PREVIEW_LINK_PATH = /^\/work\/preview\/link\/[A-Za-z0-9_-]{20,64}$/
+const LINK_PREVIEW_PAGE = page<ProjectPageId>('project-preview', '/work/preview/link', LANGUAGES, false)
 
 /**
  * The page behind an address: the registered one, or, for `/work/<slug>`, the page of a project that exists only in the
@@ -170,6 +173,7 @@ export function resolvePage(path: string): PageDef | undefined {
   // A customer's private page: the page is the registered one, whatever the secret in the address is.
   const customer = CUSTOMER_PATH.exec(wanted)
   if (customer) return findPage(`/${customer[1]}`)
+  if (PREVIEW_LINK_PATH.test(wanted)) return LINK_PREVIEW_PAGE
   const preview = PREVIEW_PATH.exec(wanted)
   if (preview) {
     if (!dynamic.has(wanted)) dynamic.set(wanted, page<ProjectPageId>('project-preview', wanted, LANGUAGES, false))

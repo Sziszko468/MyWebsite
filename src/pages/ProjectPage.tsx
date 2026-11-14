@@ -9,11 +9,13 @@ import { pad, fill } from '../utils/format'
 import { Gallery, Lightbox } from '../components/project/Gallery'
 import { ProjectHero, type HeroEntry } from '../components/project/ProjectHero'
 import { ProjectNav } from '../components/project/ProjectNav'
+import { visibleBlocks } from '../components/project/blocks'
+import { BlockBody } from '../components/project/ProjectBlocks'
 import { Approach, ArchitectureText, Band, Challenges, Decisions, Lessons, Overview, Results } from '../components/project/ProjectSections'
 import type { SectionTone } from '../components/Section/tone'
 import { useI18n } from '../i18n/useI18n'
-import { useProjectDetail } from '../projects/store'
-import { viewOf, type ProjectRecord } from '../projects/types'
+import { useProjectDetail, useProjectList } from '../projects/store'
+import { isAvailable, neighboursIn, viewOf, type ProjectRecord } from '../projects/types'
 import { NotFoundPage } from './NotFoundPage'
 import styles from './ProjectPage.module.scss'
 
@@ -32,7 +34,7 @@ function ExternalLinks({ record }: { record: ProjectRecord }) {
   const entries: Array<{ href: string; label: string; primary?: boolean }> = []
   if (links.demo) entries.push({ href: links.demo, label: t.project.demoLink, primary: true })
   if (links.source) entries.push({ href: links.source, label: t.project.sourceLink })
-  if (links.extra) entries.push({ href: links.extra.url, label: links.extra.label[lang] || links.extra.label.hu || links.extra.url })
+  if (links.extra) entries.push({ href: links.extra.url, label: links.extra.label[lang] || links.extra.url })
   if (links.video) entries.push({ href: links.video, label: t.project.videoLink })
   return (
     <div className={styles.links}>
@@ -53,9 +55,15 @@ function ExternalLinks({ record }: { record: ProjectRecord }) {
  * documentation and code) supports. An administrator hides a band by hiding its section: the server then sends it empty. The bands
  * alternate between the page's theme and its opposite.
  */
-export function ProjectPage({ record }: { record: ProjectRecord }) {
+export function ProjectPage({ record, viaLink = false }: { record: ProjectRecord; viaLink?: boolean }) {
   const { lang, t } = useI18n()
   const { card, detail } = record
+  const projectList = useProjectList()
+  // The projects before and after: only ones that can be shown in this language (the list says; before it arrives, the page's own answer).
+  const around = record.preview
+    ? null
+    : (neighboursIn(projectList.cards, card.slug, lang) ??
+      (record.neighbours && isAvailable(record.neighbours.previous, lang) && isAvailable(record.neighbours.next, lang) ? record.neighbours : null))
   const [activeImage, setActiveImage] = useState<string | null>(null)
   useEffect(() => {
     if (!record.preview) track('project_opened', { project: card.slug })
@@ -64,8 +72,9 @@ export function ProjectPage({ record }: { record: ProjectRecord }) {
   const view = viewOf(card, lang)
   const heroImage = detail.gallery.find((image) => image.hero) ?? detail.gallery[0]
   const sections = t.project.sections
-  const hasText = (text: { hu: string; en: string; nl: string } | undefined | null) => Boolean(text && (text[lang] || text.hu))
-  const hasOverview = [detail.overview.what, detail.overview.audience, detail.overview.problem, detail.overview.goal].some(hasText) || detail.stack.length > 0 || hasText(detail.role)
+  const hasText = (text: { hu: string; en: string; nl: string } | undefined | null) => Boolean(text && text[lang])
+  const hasOverview =
+    [detail.overview.what, detail.overview.audience, detail.overview.problem, detail.overview.goal].some(hasText) || detail.stack.length > 0 || hasText(detail.role) || (detail.services ?? []).some(hasText)
   const hasLinks = Boolean(detail.links && (detail.links.demo || detail.links.source || detail.links.extra || detail.links.video))
   const entry: HeroEntry = { name: view.name, label: view.label, status: card.status, tags: card.tags, demoUrl: card.demoUrl, mockup: card.mockup }
 
@@ -83,8 +92,10 @@ export function ProjectPage({ record }: { record: ProjectRecord }) {
     detail.gallery.length > 0 && {
       id: 'gallery',
       title: sections.gallery,
-      body: <Gallery images={detail.gallery} note={detail.galleryNote ? detail.galleryNote[lang] || detail.galleryNote.hu : null} onOpenImage={setActiveImage} />,
+      body: <Gallery images={detail.gallery} note={detail.galleryNote?.[lang] || null} onOpenImage={setActiveImage} />,
     },
+    // The owner's own sections: each has its own heading, and one that has nothing to say in this language is not drawn.
+    ...visibleBlocks(detail.blocks, lang).map(({ block, index }): BandSpec => ({ id: `block-${index + 1}`, title: block.heading[lang], body: <BlockBody block={block} /> })),
     hasLinks && { id: 'links', title: sections.links, body: <ExternalLinks record={record} /> },
   ]
   const bands = candidates.filter((band): band is BandSpec => Boolean(band))
@@ -95,7 +106,10 @@ export function ProjectPage({ record }: { record: ProjectRecord }) {
     <div className={styles.page} data-accent={detail.accent} data-project={card.slug}>
       {record.preview && (
         <div className={styles.preview} role="status">
-          <Container size="wide">{fill(t.project.preview.banner, { state: t.project.preview.states[record.state ?? 'draft'] })}</Container>
+          <Container size="wide">
+            {fill(viaLink ? t.project.preview.linkBanner : t.project.preview.banner, { state: t.project.preview.states[record.state ?? 'draft'] })}
+            {!isAvailable(card, lang) && <> {t.project.preview.languageGap}</>}
+          </Container>
         </div>
       )}
       <ProjectHero entry={entry} detail={detail} image={heroImage} onOpenImage={setActiveImage} />
@@ -106,7 +120,7 @@ export function ProjectPage({ record }: { record: ProjectRecord }) {
         </Band>
       ))}
 
-      <ProjectNav name={view.name} neighbours={record.neighbours} tone={toneOf(bands.length)} />
+      <ProjectNav name={view.name} neighbours={around} tone={toneOf(bands.length)} />
 
       <Lightbox images={detail.gallery} activeId={activeImage} onChange={setActiveImage} />
     </div>
@@ -118,13 +132,23 @@ export function ProjectPage({ record }: { record: ProjectRecord }) {
  * project, keeps a screen's height while it waits (so the footer does not jump), says "not found" for a project that is not
  * published, and draws the page when the data is there.
  */
-export function ProjectRoute({ preview = false }: { preview?: boolean }) {
+export function ProjectRoute({ preview = false, linkPreview = false }: { preview?: boolean; linkPreview?: boolean }) {
   const params = useParams()
-  const { t } = useI18n()
-  const state = useProjectDetail(preview ? '' : (params.slug ?? ''), preview ? (params.id ?? null) : null)
+  const { lang, t } = useI18n()
+  const state = useProjectDetail(preview || linkPreview ? '' : (params.slug ?? ''), preview ? (params.id ?? null) : null, linkPreview ? (params.token ?? '') : null)
+  useNoReferrer(linkPreview)
 
   if (state.status === 'loading') return <div style={{ minHeight: '100svh' }} aria-hidden="true" />
   if (state.status === 'missing') return <NotFoundPage />
+  if (state.status === 'gone') {
+    return (
+      <Container size="wide">
+        <p role="status" className={styles.signIn}>
+          {t.project.preview.gone}
+        </p>
+      </Container>
+    )
+  }
   if (state.status === 'unauthorized') {
     return (
       <Container size="wide">
@@ -134,5 +158,19 @@ export function ProjectRoute({ preview = false }: { preview?: boolean }) {
       </Container>
     )
   }
-  return <ProjectPage record={state.record} />
+  // A project that has nothing to say in this language does not exist in it (the website never shows another language's words instead).
+  if (!state.record.preview && !isAvailable(state.record.card, lang)) return <NotFoundPage />
+  return <ProjectPage record={state.record} viaLink={linkPreview} />
+}
+
+/** A preview link's address holds its secret: the page asks the browser to send no referrer, so the secret does not travel to anything it links to. */
+function useNoReferrer(active: boolean): void {
+  useEffect(() => {
+    if (!active) return
+    const tag = document.createElement('meta')
+    tag.name = 'referrer'
+    tag.content = 'no-referrer'
+    document.head.append(tag)
+    return () => tag.remove()
+  }, [active])
 }

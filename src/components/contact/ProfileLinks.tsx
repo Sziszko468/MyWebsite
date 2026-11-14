@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import { contactLinks } from '../../config/links'
-import { siteConfig } from '../../config/site'
 import { useI18n } from '../../i18n/useI18n'
+import { useContact } from '../../profile/store'
 import styles from './ProfileLinks.module.scss'
 
 // Where a link is still missing, development shows a muted note; production shows nothing.
@@ -16,7 +16,8 @@ const SHOW_PENDING = import.meta.env.DEV
 export function ProfileLinks() {
   const { t } = useI18n()
   const titleId = useId()
-  const links = contactLinks(siteConfig)
+  const { email, social } = useContact()
+  const links = contactLinks({ contact: { email }, social })
 
   if (links.length === 0) {
     return SHOW_PENDING ? <p className={styles.pending}>{t.contactPage.links.title}: src/config/site.ts</p> : null

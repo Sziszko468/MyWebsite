@@ -109,7 +109,7 @@ describe("the project editor's rules are the server's rules", () => {
   it('has the same limits, the same choices, and the same verdict per language on the same documents', async () => {
     const editor = await load('src/admin/lib/projects.ts')
     const server = await import('../src/modules/projects/content.ts')
-    expect(editor.LIMITS).toEqual({ title: server.LIMITS.title, line: server.LIMITS.line, card: server.LIMITS.card, summary: server.LIMITS.card * 2, paragraph: server.LIMITS.paragraph, item: server.LIMITS.item, source: server.LIMITS.source, tag: server.LIMITS.tag, list: server.LIMITS.list, gallery: server.LIMITS.gallery, challenges: server.LIMITS.challenges })
+    expect(editor.LIMITS).toEqual({ title: server.LIMITS.title, line: server.LIMITS.line, card: server.LIMITS.card, summary: server.LIMITS.card * 2, paragraph: server.LIMITS.paragraph, item: server.LIMITS.item, source: server.LIMITS.source, tag: server.LIMITS.tag, list: server.LIMITS.list, gallery: server.LIMITS.gallery, challenges: server.LIMITS.challenges, blocks: server.LIMITS.blocks, blockImages: server.LIMITS.blockImages, blockLinks: server.LIMITS.blockLinks, seoTitle: server.LIMITS.seoTitle, seoDescription: server.LIMITS.seoDescription, ogTitle: server.LIMITS.ogTitle, ogDescription: server.LIMITS.ogDescription })
     expect([...editor.ACCENTS]).toEqual([...server.ACCENTS])
     expect([...editor.HEROES]).toEqual([...server.HEROES])
     expect([...editor.MOCKUPS]).toEqual([...server.MOCKUPS])

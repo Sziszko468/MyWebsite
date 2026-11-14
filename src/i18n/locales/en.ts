@@ -354,6 +354,9 @@ export const en: Dictionary = {
       banner: 'Preview: this project is not public yet (state: {state}). Only you can see it, signed in to the administration.',
       signIn: 'Sign in to the administration to see the preview.',
       states: { draft: 'draft', published: 'published', archived: 'archived' },
+      linkBanner: 'Preview link: this project is not public yet (state: {state}). Anyone with this link can see it until the link ends.',
+      languageGap: 'Visitors do not see this project in this language yet: text or a picture description is missing here.',
+      gone: 'This preview link has ended or was withdrawn.',
     },
     videoLink: 'Video',
     repoName: 'In the repository and in the interface: {name}',
@@ -388,6 +391,7 @@ export const en: Dictionary = {
       problem: 'The problem it addresses',
       goal: 'The goal of building it',
       role: 'My role',
+      services: 'Services delivered',
     },
     challenge: {
       problem: 'The problem',

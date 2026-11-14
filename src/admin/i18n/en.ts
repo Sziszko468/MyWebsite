@@ -3,10 +3,12 @@
  * (it is typed against this one, and i18n.test.ts checks the placeholders and that nothing is left empty).
  * `{name}` is a value filled in by the screen (utils/format.ts `fill`).
  */
+import { cmsEn } from './cms'
 import { quotationEn } from './quotation'
 
 export const en = {
   quotation: quotationEn,
+  cms: cmsEn,
   app: {
     name: 'Administration',
     skip: 'Skip to the content',
@@ -40,6 +42,8 @@ export const en = {
     translations: 'Translations',
     notifications: 'Notifications',
     projects: 'Projects',
+    media: 'Pictures',
+    profile: 'About page',
     comparison: 'Tier comparison',
     fullExperience: 'FULL EXPERIENCE',
     ai: 'AI assistant',
@@ -839,7 +843,7 @@ export const en = {
       previewDisabled: 'Save the project first, then preview it.',
       languageBar: 'Editing language',
       languageBarHelp: 'Every text field below shows this language. A mark says whether the language is complete.',
-      tabs: { general: 'General', images: 'Images', descriptions: 'Descriptions', technical: 'Technical', sections: 'Sections', links: 'Links', publication: 'Publication' },
+      tabs: { general: 'General', images: 'Images', descriptions: 'Descriptions', blocks: 'Blocks', technical: 'Technical', sections: 'Sections', links: 'Links', seo: 'Search and sharing', publication: 'Publication' },
       general: {
         slug: 'Address (slug)',
         slugHint: 'The project’s page is /work/ and this word. It cannot be changed once the project has been public.',
@@ -948,6 +952,7 @@ export const en = {
           learned: 'What I learned and next steps',
           results: 'Results',
           gallery: 'Gallery',
+          blocks: 'Content blocks',
           links: 'External links',
         },
         fixed: 'The hero and the link to the next project are always shown.',
@@ -972,7 +977,7 @@ export const en = {
         featuredHelp: 'Featured projects make up Selected work on the home page, in the order of the list.',
         blockers: 'What is missing before it can be published',
         ready: 'Everything required is there: it can be published.',
-        field: { title: 'Title', cardDescription: 'Card description', summary: 'Short description', 'overview.what': 'Full description', thumbnail: 'Thumbnail description', gallery: 'Picture description' },
+        field: { title: 'Title', cardDescription: 'Card description', summary: 'Short description', 'overview.what': 'Full description', thumbnail: 'Thumbnail description', gallery: 'Picture description', 'seo.imageAlt': 'Description of the sharing picture', blocks: 'Content block (heading or picture description)' },
         publishedAt: 'First published {date}',
         neverPublished: 'Never published',
         open: 'Open the public page',

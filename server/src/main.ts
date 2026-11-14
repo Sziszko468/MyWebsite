@@ -3,6 +3,7 @@ import { ConfigError, loadConfig } from './config.ts'
 import { Database } from './db/database.ts'
 import { migrate, migrationStatus } from './db/migrate.ts'
 import { seedCatalog } from './db/seed.ts'
+import { mediaStorage } from './modules/media/storage.ts'
 import { seedProjects } from './modules/projects/service.ts'
 import { seedShopDocuments } from './modules/shop/documents.ts'
 import { createLogger } from './lib/logger.ts'
@@ -50,6 +51,10 @@ async function main(): Promise<void> {
     const shop = seedShopDocuments(app.context)
     if (shop.seeded) log.info('shop documents loaded into an empty table', { documents: shop.documents })
   }
+  // PROMPT 22: uploaded pictures on the application's own (usually rebuilt) filesystem would be lost at the next deploy.
+  const storage = mediaStorage(config)
+  if (storage.warning === 'not_writable') log.warn('the media folder cannot be written to: picture uploads will fail', { directory: storage.directory })
+  if (storage.warning === 'application_filesystem') log.warn('the media folder is on the same filesystem as the application: on most hosts that is erased at every deploy. Put MEDIA_DIR (and DATABASE_PATH) on a persistent disk', { directory: storage.directory })
   if (config.env === 'production' && config.retentionDays === null) log.warn('RETENTION_DAYS is not set: closed and archived requests are kept until an administrator deletes them')
   // PROMPT 19 audit: behind a host's load balancer (and Cloudflare) the socket's address is the proxy's. With TRUST_PROXY=0 every visitor then
   // counts as ONE address for the rate limits and the sign-in lock, so a handful of requests can lock everybody (the owner included) out.

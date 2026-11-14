@@ -1,9 +1,11 @@
 import type { AdminText } from './en'
+import { cmsHu } from './cms'
 import { quotationHu } from './quotation'
 
 /** A kezelőfelület szövegei magyarul. Pontosan ugyanazok a kulcsok, mint az `en.ts`-ben; a `{név}` a képernyő által beillesztett érték. */
 export const hu: AdminText = {
   quotation: quotationHu,
+  cms: cmsHu,
   app: {
     name: 'Kezelőfelület',
     skip: 'Ugrás a tartalomra',
@@ -37,6 +39,8 @@ export const hu: AdminText = {
     translations: 'Fordítások',
     notifications: 'Értesítések',
     projects: 'Projektek',
+    media: 'Képek',
+    profile: 'Rólam oldal',
     comparison: 'Csomag-összehasonlítás',
     fullExperience: 'FULL EXPERIENCE',
     ai: 'AI asszisztens',
@@ -836,7 +840,7 @@ export const hu: AdminText = {
       previewDisabled: 'Előbb mentsd el a projektet, utána nézheted meg előre.',
       languageBar: 'Szerkesztett nyelv',
       languageBarHelp: 'Az alábbi szövegmezők mind ezt a nyelvet mutatják. A jelzés megmondja, kész-e a nyelv.',
-      tabs: { general: 'Általános', images: 'Képek', descriptions: 'Leírások', technical: 'Technikai', sections: 'Szakaszok', links: 'Hivatkozások', publication: 'Közzététel' },
+      tabs: { general: 'Általános', images: 'Képek', descriptions: 'Leírások', blocks: 'Blokkok', technical: 'Technikai', sections: 'Szakaszok', links: 'Hivatkozások', seo: 'Keresés és megosztás', publication: 'Közzététel' },
       general: {
         slug: 'Cím (slug)',
         slugHint: 'A projekt oldala /work/ és ez a szó. Nem módosítható, ha a projekt már nyilvános volt.',
@@ -945,6 +949,7 @@ export const hu: AdminText = {
           learned: 'Amit tanultam és következő lépések',
           results: 'Eredmények',
           gallery: 'Galéria',
+          blocks: 'Tartalmi blokkok',
           links: 'Külső hivatkozások',
         },
         fixed: 'A fejléc és a következő projektre mutató hivatkozás mindig látszik.',
@@ -969,7 +974,7 @@ export const hu: AdminText = {
         featuredHelp: 'A kiemelt projektek adják a főoldal Kiemelt munkák szakaszát, a lista sorrendjében.',
         blockers: 'Ami a közzétételhez még hiányzik',
         ready: 'Minden szükséges megvan: közzétehető.',
-        field: { title: 'Cím', cardDescription: 'Kártyaleírás', summary: 'Rövid leírás', 'overview.what': 'Teljes leírás', thumbnail: 'A bélyegkép leírása', gallery: 'A kép leírása' },
+        field: { title: 'Cím', cardDescription: 'Kártyaleírás', summary: 'Rövid leírás', 'overview.what': 'Teljes leírás', thumbnail: 'A bélyegkép leírása', gallery: 'A kép leírása', 'seo.imageAlt': 'A megosztási kép leírása', blocks: 'Tartalmi blokk (címsor vagy képleírás)' },
         publishedAt: 'Először közzétéve: {date}',
         neverPublished: 'Még nem volt közzétéve',
         open: 'A nyilvános oldal megnyitása',

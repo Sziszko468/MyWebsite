@@ -1,0 +1,139 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The owner's own sections of a project page (PROMPT 22). They take the page's accent (--pa, --pa-text) like every other band and use
+ * only the site's tokens, so a block looks like it belongs to the page it is on.
+ */
+
+.text {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  max-inline-size: 46rem;
+
+  p {
+    margin: 0;
+    font-size: var(--fs-lg);
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+  }
+}
+
+.figure {
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.image {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+.caption {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.gallery {
+  display: grid;
+  gap: var(--space-5);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include m.up('lg') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.features {
+  display: grid;
+  gap: 0;
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding-block: var(--space-4);
+    padding-inline-start: var(--space-5);
+    border-top: var(--border-width) solid var(--color-border-strong);
+    position: relative;
+    line-height: var(--lh-relaxed);
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-inline-start: 0;
+      inset-block-start: calc(var(--space-4) + 0.55em);
+      inline-size: 0.5rem;
+      block-size: 0.5rem;
+      background: var(--pa, var(--color-accent));
+    }
+  }
+}
+
+.technologies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: var(--space-1) var(--space-3);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-pill, 999px);
+    font-size: var(--fs-sm);
+    overflow-wrap: anywhere;
+  }
+}
+
+.highlight {
+  margin: var(--space-6) 0 0;
+  max-inline-size: 46rem;
+  padding-inline-start: var(--space-5);
+  border-inline-start: 0.25rem solid var(--pa, var(--color-accent));
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-medium);
+  letter-spacing: -0.02em;
+  line-height: var(--lh-snug);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+    padding-inline: var(--space-4);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    color: var(--pa-text, var(--color-accent-text));
+    font-weight: var(--fw-bold);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+}
