@@ -23,14 +23,17 @@ export class ApiError extends Error {
   /** Field name → why it was refused (`required`, `tooLong`, `invalid`, …), for a form to show next to the field. */
   readonly fields: Record<string, string>
   readonly requestId: string | null
+  /** The backend's structured details (a reason code, the reference of the record in the way), for the few screens that act on them. Never shown as text. */
+  readonly details: Record<string, unknown>
 
-  constructor(status: number, code: string, message: string, fields: Record<string, string> = {}, requestId: string | null = null) {
+  constructor(status: number, code: string, message: string, fields: Record<string, string> = {}, requestId: string | null = null, details: Record<string, unknown> = {}) {
     super(message)
     this.name = 'ApiError'
     this.status = status
     this.code = code
     this.fields = fields
     this.requestId = requestId
+    this.details = details
   }
 }
 
@@ -120,6 +123,7 @@ export async function request<T>(method: string, path: string, options: RequestO
       typeof failure?.message === 'string' ? failure.message : `The server answered ${response.status}.`,
       fields,
       typeof failure?.requestId === 'string' ? failure.requestId : null,
+      details ?? {},
     )
     if (response.status === 401 && !options.anonymous) {
       csrfToken = null

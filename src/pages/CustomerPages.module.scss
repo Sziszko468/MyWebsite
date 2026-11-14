@@ -258,7 +258,8 @@
   bottom: 0;
   z-index: var(--z-sticky);
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Side by side only where both labels fit on their own lines ("ELFOGADOM AZ AJÁNLATOT" is the longest, in Hungarian): on a narrower phone they stack, instead of a word breaking in the middle. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.75rem), 1fr));
   gap: var(--space-3);
   padding: var(--space-3) 0 calc(var(--space-3) + var(--safe-bottom));
   border-top: var(--border-width) solid var(--color-divider);

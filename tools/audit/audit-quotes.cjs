@@ -103,7 +103,8 @@ async function prepare() {
       ],
     })
     await admin('POST', `/api/admin/quotes/${quoteId}/send`, { note: 'See you soon.' })
-    const mail = await until((m) => m.to.includes(email) && /quotation|offerte|árajánlat/i.test(m.subject) && link(m.text, 'quote'), `the quotation to ${email}`)
+    // The quotation e-mail is the one to this address that carries a link to a quotation page (its subject is worded differently in each language, and was reworded in PROMPT 18).
+    const mail = await until((m) => m.to.includes(email) && link(m.text, 'quote'), `the quotation to ${email}`)
     const confirmation = await until((m) => m.to.includes(email) && link(m.text, 'request'), `the confirmation to ${email}`)
     prepared[language] = { reference: created.reference, quote: link(mail.text, 'quote'), request: link(confirmation.text, 'request') }
   }

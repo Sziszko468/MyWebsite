@@ -124,7 +124,12 @@ describe('Scenario D: the e-mail provider fails', () => {
     await kit.settle()
     await kit.settle()
     expect(server.db.get('SELECT COUNT(*) AS n FROM quote_requests')).toEqual({ n: 1 })
-    expect(server.mailer.sent).toHaveLength(0)
+    // Nothing reached the customer. The one message that went out is the owner's alert that the customer's confirmation did not get through (PROMPT 21).
+    expect(kit.toCustomer()).toHaveLength(0)
+    expect(server.mailer.sent).toHaveLength(1)
+    expect(server.mailer.sent[0].to).toBe('owner@site.test')
+    expect(server.mailer.sent[0].subject).toContain(made.reference)
+    expect(server.mailer.sent[0].text).toContain('Confirmation of the request')
     const detail = (await kit.get(`/api/admin/quote-requests/${made.id}`)).json.data
     expect(detail.deliveries.map((row: { kind: string; status: string }) => [row.kind, row.status]).sort()).toEqual([['quote_confirmation', 'failed'], ['quote_received', 'failed']])
     expect(detail.deliveries[0].lastError).toBeTruthy()
@@ -140,7 +145,14 @@ describe('Scenario D: the e-mail provider fails', () => {
     expect((await kit.send('POST', `/api/admin/quote-requests/${made.id}/resend-confirmation`)).status).toBe(202)
     await kit.settle()
     expect(server.db.get("SELECT COUNT(*) AS n FROM email_deliveries WHERE kind = 'quote_confirmation'")).toEqual({ n: 1 })
-    expect(events(made.id).map((event) => event.event_type)).toEqual(['request_created', 'email_retried', 'email_retried'])
+    // The two failures are in the history (what failed and how, in fixed words), written by the system, before the administrator's two repeats.
+    expect(events(made.id).map((event) => [event.event_type, event.actor_type, event.summary])).toEqual([
+      ['request_created', 'system', 'shop/package_quote'],
+      ['email_failed', 'system', 'quote_received: failed'],
+      ['email_failed', 'system', 'quote_confirmation: failed'],
+      ['email_retried', 'admin', 'confirmation'],
+      ['email_retried', 'admin', 'confirmation'],
+    ])
   })
 })
 

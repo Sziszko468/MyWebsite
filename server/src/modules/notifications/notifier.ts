@@ -6,6 +6,7 @@ import { redactText, type Logger } from '../../lib/logger.ts'
 import { addMs, iso, MINUTE, type Clock } from '../../lib/time.ts'
 import { loadCatalog } from '../catalog/repository.ts'
 import { getInquiry } from '../inquiries/repository.ts'
+import { recordEvent } from '../quotes/events.ts'
 import { getQuotation, linesOf, type QuotationRow } from '../quotes/quotations.ts'
 import { getQuote, quoteItems, type QuoteRow } from '../quotes/repository.ts'
 import { mintViewToken } from '../quotes/tokens.ts'
@@ -15,7 +16,7 @@ import { totalsOf } from '../shop/pricing.ts'
 import { MailError } from './smtp.ts'
 import type { Mailer } from './mailer.ts'
 import { MimeError, type MailMessage } from './mime.ts'
-import { quoteWords, renderQuoteAccepted, renderQuoteAcceptedAdmin, renderQuoteDeclined, renderQuoteDeclinedAdmin, renderQuoteSent, renderRequestConfirmation, renderRequestNotification, renderRevisionRequested, type QuoteMail } from './quoteTemplates.ts'
+import { quoteWords, renderDeliveryFailed, renderQuoteAccepted, renderQuoteAcceptedAdmin, renderQuoteDeclined, renderQuoteDeclinedAdmin, renderQuoteSent, renderRequestConfirmation, renderRequestNotification, renderRevisionReceived, renderRevisionRequested, type QuoteMail } from './quoteTemplates.ts'
 import { renderInquiryConfirmation, renderInquiryReceived, renderStatusChange, renderTestEmail, type EmailKind, type Rendered } from './templates.ts'
 
 /**
@@ -33,6 +34,13 @@ import { renderInquiryConfirmation, renderInquiryReceived, renderStatusChange, r
  * the confirmation to the person who wrote (only when an administrator switched it on, once per submission, at most
  * a few per address a day), and what an administrator starts (a status e-mail, a test).
  */
+
+/**
+ * The messages that go to a customer and that matter: if one of these cannot be delivered the owner is told (PROMPT 21), once per message. The
+ * owner's own messages are not here (a failed alert about a failed alert would only repeat itself, and the administration lists every message and
+ * its state anyway).
+ */
+const CUSTOMER_MAILS: ReadonlySet<string> = new Set(['quote_confirmation', 'quote_status', 'quote_sent', 'quote_revised', 'quote_accepted', 'quote_declined', 'revision_received'])
 
 /** Pauses before the 2nd, 3rd, 4th… attempt. */
 const BACKOFF_MINUTES = [1, 5, 30, 120, 720]
@@ -58,7 +66,7 @@ export type DeliveryStatus = 'pending' | 'sending' | 'accepted' | 'delivered' | 
 export interface DeliveryRow {
   id: string
   kind: EmailKind
-  related_type: 'inquiry' | 'quote_request' | 'system' | 'quote' | 'quote_revision'
+  related_type: 'inquiry' | 'quote_request' | 'system' | 'quote' | 'quote_revision' | 'email_delivery'
   related_id: string
   recipient: string
   language: 'hu' | 'en' | 'nl'
@@ -202,14 +210,46 @@ export class Notifier {
     if (this.enabled && config.email.notifyTo) attempt({ kind: decision === 'accepted' ? 'quote_accepted_admin' : 'quote_declined_admin', relatedType: 'quote', relatedId: quote.id, recipient: config.email.notifyTo, language: config.email.notifyLanguage })
   }
 
-  /** The customer's request for clarification or a change, to the owner. */
-  queueRevisionNotice(revisionId: string): void {
+  /**
+   * The customer's request for clarification or a change: the owner is told, and the customer gets a receipt (in the offer's language), once
+   * each. Both are queued in the transaction that stores the request, so neither can exist without the other and a replayed click makes neither.
+   */
+  queueRevisionNotice(revisionId: string, quote: QuotationRow, request: QuoteRow): void {
     const { config, log } = this.deps
-    if (!this.enabled || !config.email.notifyTo) return
+    if (!this.enabled) return
+    const attempt = (input: Parameters<Notifier['enqueue']>[0]) => {
+      try {
+        this.enqueue(input)
+      } catch (error) {
+        if (!(error instanceof ConstraintError && error.kind === 'unique')) log.error('could not queue a revision e-mail', { kind: input.kind, error })
+      }
+    }
+    if (config.email.notifyTo) attempt({ kind: 'revision_requested_admin', relatedType: 'quote_revision', relatedId: revisionId, recipient: config.email.notifyTo, language: config.email.notifyLanguage })
+    attempt({ kind: 'revision_received', relatedType: 'quote_revision', relatedId: revisionId, recipient: request.email, language: quote.language })
+  }
+
+  /**
+   * A message has ended in a bad state (the provider refused it for good, it bounced, it was reported as spam). The request's history says so, and
+   * if it was a message to a customer the owner is told by e-mail, once per message. Called from the sender and from the verified webhook; it
+   * never throws, because what it reports on has already happened and nobody's request may fail because the report could not be written.
+   */
+  reportDeliveryProblem(id: string): void {
+    const { db, config, log, clock } = this.deps
     try {
-      this.enqueue({ kind: 'revision_requested_admin', relatedType: 'quote_revision', relatedId: revisionId, recipient: config.email.notifyTo, language: config.email.notifyLanguage })
+      const row = db.get<DeliveryRow>('SELECT * FROM email_deliveries WHERE id = ?', [id])
+      if (!row || (row.status !== 'failed' && row.status !== 'bounced' && row.status !== 'complained')) return
+      const request = this.requestOf(row)
+      if (!request) return
+      recordEvent({ db, clock }, { requestId: request.id, reference: request.reference, type: 'email_failed', actor: { type: 'system' }, summary: `${row.kind}: ${row.status}` })
+      if (!CUSTOMER_MAILS.has(row.kind) || !this.enabled || !config.email.notifyTo) return
+      try {
+        this.enqueue({ kind: 'delivery_failed_admin', relatedType: 'email_delivery', relatedId: row.id, recipient: config.email.notifyTo, language: config.email.notifyLanguage })
+      } catch (error) {
+        // The database allows one alert per message: a message that fails again after being sent again does not raise a second one.
+        if (!(error instanceof ConstraintError && error.kind === 'unique')) throw error
+      }
     } catch (error) {
-      if (!(error instanceof ConstraintError && error.kind === 'unique')) log.error('could not queue the revision notice', { error })
+      log.error('could not report a delivery problem', { delivery: id, error })
     }
   }
 
@@ -315,6 +355,7 @@ export class Notifier {
       if (row.kind === 'inquiry_confirmation') return renderInquiryConfirmation(inquiry, row.language, brand, note)
       return row.kind === 'inquiry_received' ? renderInquiryReceived(inquiry, row.language, brand) : renderStatusChange('inquiry', inquiry, row.note, row.language, brand)
     }
+    if (row.related_type === 'email_delivery') return this.renderDeliveryFailure(row)
     if (row.related_type === 'quote' || row.related_type === 'quote_revision') return this.renderQuotation(row)
 
     const request = getQuote(db, row.related_id)
@@ -387,19 +428,43 @@ export class Notifier {
         return renderQuoteDeclinedAdmin(mail, quote.declined_at ?? iso(clock.now()), quote.decline_reason, row.language, brand, adminUrl)
       case 'revision_requested_admin':
         return revision ? renderRevisionRequested(mail, revision.message, revision.created_at, row.language, brand, adminUrl) : null
+      case 'revision_received':
+        return revision ? renderRevisionReceived(mail, revision.message, revision.created_at, row.language, brand, quoteUrl()) : null
       default:
         return null
     }
   }
 
+  /** The quote request a message is about (directly, through its quotation or revision request, or through the failed message an alert reports), or `null` when it is about none. */
+  private requestOf(row: DeliveryRow, depth = 0): QuoteRow | null {
+    const { db } = this.deps
+    if (row.related_type === 'quote_request') return getQuote(db, row.related_id) ?? null
+    if (row.related_type === 'quote' || row.related_type === 'quote_revision') {
+      const quoteId = row.related_type === 'quote_revision' ? db.get<{ quote_id: string }>('SELECT quote_id FROM quote_revision_requests WHERE id = ?', [row.related_id])?.quote_id : row.related_id
+      const quote = quoteId ? getQuotation(db, quoteId) : undefined
+      return quote ? (getQuote(db, quote.quote_request_id) ?? null) : null
+    }
+    if (row.related_type === 'email_delivery' && depth === 0) {
+      const failed = db.get<DeliveryRow>('SELECT * FROM email_deliveries WHERE id = ?', [row.related_id])
+      return failed ? this.requestOf(failed, depth + 1) : null
+    }
+    return null
+  }
+
   /** The address of the person a message to the owner is about, so the owner can answer them straight from the mail program. */
   private customerAddress(row: DeliveryRow): string | null {
-    const { db } = this.deps
-    if (row.kind === 'inquiry_received') return getInquiry(db, row.related_id)?.email ?? null
-    if (row.related_type === 'quote_request') return getQuote(db, row.related_id)?.email ?? null
-    const quoteId = row.related_type === 'quote_revision' ? db.get<{ quote_id: string }>('SELECT quote_id FROM quote_revision_requests WHERE id = ?', [row.related_id])?.quote_id : row.related_id
-    const quote = quoteId ? getQuotation(db, quoteId) : undefined
-    return quote ? (getQuote(db, quote.quote_request_id)?.email ?? null) : null
+    if (row.kind === 'inquiry_received') return getInquiry(this.deps.db, row.related_id)?.email ?? null
+    return this.requestOf(row)?.email ?? null
+  }
+
+  /** The owner's alert about a message to a customer that did not get through: what it was, to whom, what the provider said, and the request to open. */
+  private renderDeliveryFailure(row: DeliveryRow): Rendered | null {
+    const { db, config } = this.deps
+    const failed = db.get<DeliveryRow>('SELECT * FROM email_deliveries WHERE id = ?', [row.related_id])
+    if (!failed) return null
+    const request = this.requestOf(failed)
+    if (!request) return null
+    return renderDeliveryFailed({ kind: failed.kind, requestReference: request.reference, recipient: failed.recipient, status: failed.status, reason: failed.last_error, attempts: failed.attempts }, row.language, config.email.brandName, this.adminLink(request.id))
   }
 
   private async deliver(row: DeliveryRow): Promise<'accepted' | 'failed' | 'retried'> {
@@ -431,7 +496,8 @@ export class Notifier {
       // address). A customer's goes back to the PUBLIC contact address, never to the owner's private inbox (`NOTIFY_TO`).
       const toOwner = row.kind === 'inquiry_received' || row.kind === 'quote_received' || row.kind === 'quote_accepted_admin' || row.kind === 'quote_declined_admin' || row.kind === 'revision_requested_admin'
       const customerReply = config.email.replyTo ?? from
-      const replyTo = row.kind === 'test' ? null : toOwner ? this.customerAddress(row) : customerReply
+      // The alert about a failed delivery is not something to answer to the customer whose message failed: it has no Reply-To.
+      const replyTo = row.kind === 'test' || row.kind === 'delivery_failed_admin' ? null : toOwner ? this.customerAddress(row) : customerReply
       const message: MailMessage = {
         from,
         to: row.recipient,
@@ -455,6 +521,7 @@ export class Notifier {
       const code = error instanceof MailError ? error.reason : error instanceof MimeError ? 'rejected' : 'unavailable'
       if (!transient || row.attempts >= config.email.maxAttempts) {
         finish('failed', { error: text, code })
+        this.reportDeliveryProblem(row.id)
         return 'failed'
       }
       const pause = BACKOFF_MINUTES[Math.min(row.attempts - 1, BACKOFF_MINUTES.length - 1)]

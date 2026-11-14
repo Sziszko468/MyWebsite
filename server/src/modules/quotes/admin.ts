@@ -14,6 +14,7 @@ import { briefRows, readBrief } from '../shop/brief.ts'
 import { totalsOf } from '../shop/pricing.ts'
 import { audit } from '../system/audit.ts'
 import { createQuoteRequest } from './create.ts'
+import { deleteDeliveriesOfRequest } from './deliveries.ts'
 import { eventsOf, recordEvent } from './events.ts'
 import { linesOf, problemsBeforeSending, quotationsOf, requireQuotation, type QuotationRow } from './quotations.ts'
 import { toDecimal } from './money.ts'
@@ -32,7 +33,7 @@ import {
   type QuoteRow,
 } from './repository.ts'
 import { checkManualMove, isPriority, isRequestType, isStatus, nextStatuses, PRIORITIES, REQUEST_STATUSES, REQUEST_TYPES, SOURCES, type RequestStatus, type RequestType } from './status.ts'
-import { revokeQuoteTokens } from './tokens.ts'
+import { revokeQuoteTokens, revokeRequestTokens } from './tokens.ts'
 import { buildQuoteView, percentText } from './view.ts'
 
 /** What an administrator can do with the quote requests: look, filter, change the status and priority, write notes, tell the customer, archive, delete, create. The quotation itself is in quotations.ts and lifecycle.ts. */
@@ -50,6 +51,7 @@ export function parseQuoteQuery(query: URLSearchParams): QuoteFilters & Listing 
     type: pick('type', REQUEST_TYPES),
     priority: pick('priority', PRIORITIES),
     source: pick('source', SOURCES),
+    language: pick('language', LANGUAGES),
     extraSort: (EXTRA_SORTS as readonly string[]).includes(sort) ? (sort as ExtraSort) : undefined,
   }
 }
@@ -336,14 +338,30 @@ export function remove(app: AppContext, session: SessionInfo | null, id: string)
   const request = getQuote(app.db, id)
   if (!request) throw notFound('The quote request')
   app.db.transaction(() => {
-    const quoteIds = quotationsOf(app.db, id).map((row) => row.id)
-    const revisionIds = app.db.all<{ id: string }>('SELECT id FROM quote_revision_requests WHERE quote_request_id = ?', [id]).map((row) => row.id)
-    app.db.run("DELETE FROM email_deliveries WHERE related_type = 'quote_request' AND related_id = ?", [id])
-    for (const quoteId of quoteIds) app.db.run("DELETE FROM email_deliveries WHERE related_type = 'quote' AND related_id = ?", [quoteId])
-    for (const revisionId of revisionIds) app.db.run("DELETE FROM email_deliveries WHERE related_type = 'quote_revision' AND related_id = ?", [revisionId])
+    deleteDeliveriesOfRequest(app.db, id)
     recordEvent(app, { requestId: id, reference: request.reference, type: 'request_deleted', actor: { type: 'admin', session: actor } })
     if (!deleteQuote(app.db, id)) throw notFound('The quote request')
     audit(app, actor, 'quote.delete', 'quote_request', id, { reference: request.reference })
+  })
+}
+
+/**
+ * Ends every link the customer holds for this request: the status page and each quotation's page, with the accept, decline and change buttons it
+ * handed out. The quotation itself and the request do not change (nothing is withdrawn); the customer is not told, and a link that is opened
+ * afterwards says it has been replaced. To give them access again, send the quotation or the confirmation again: each carries a new link. Doing it
+ * twice does nothing the second time, and says so.
+ */
+export function revokeLinks(app: AppContext, session: SessionInfo | null, id: string): { revoked: number } {
+  const actor = requirePermission(session, 'requests:write')
+  const request = getQuote(app.db, id)
+  if (!request) throw notFound('The quote request')
+  return app.db.transaction(() => {
+    const revoked = revokeRequestTokens(app, id)
+    if (revoked > 0) {
+      recordEvent(app, { requestId: id, reference: request.reference, type: 'link_revoked', actor: { type: 'admin', session: actor }, summary: `${revoked} link(s) ended by an administrator` })
+      audit(app, actor, 'quote.revoke_links', 'quote_request', id, { revoked })
+    }
+    return { revoked }
   })
 }
 
@@ -373,9 +391,16 @@ const MANUAL_TYPES: readonly RequestType[] = ['standard_inquiry', 'general_busin
 /** A request typed in by hand (a phone call, a business card) or made from a message that arrived through the contact form. */
 export function createByAdmin(app: AppContext, session: SessionInfo | null, body: Record<string, unknown>, fromInquiryId: string | null): QuoteRow {
   const actor = requirePermission(session, 'requests:write')
-  const fields = new Fields(body)
   const inquiry = fromInquiryId ? getInquiry(app.db, fromInquiryId) : undefined
   if (fromInquiryId && !inquiry) throw notFound('The message')
+  if (inquiry) {
+    // One message becomes one request: a second click (or a second administrator) is told which request already exists instead of making another.
+    const existing = app.db.get<{ id: string; reference: string }>("SELECT id, reference FROM quote_requests WHERE inquiry_id = ? AND status <> 'cancelled' ORDER BY created_at LIMIT 1", [inquiry.id])
+    if (existing) throw new HttpError(409, 'conflict', 'This message has already been turned into a quote request.', { details: { reason: 'already_converted', reference: existing.reference, id: existing.id } })
+    // What the person wrote is the default; the administrator can still change any of it (a field sent in the body wins).
+    body = { name: inquiry.name, email: inquiry.email, language: inquiry.language, description: cleanBlock(`${inquiry.subject}\n\n${inquiry.message}`).slice(0, 4000), ...Object.fromEntries(Object.entries(body).filter(([, value]) => value !== undefined && value !== '')) }
+  }
+  const fields = new Fields(body)
   const name = fields.text('name', { min: 2, max: 100, required: true })
   const email = fields.text('email', { max: 254, required: true }, (value) => (isEmail(value) ? undefined : 'invalidEmail'))
   const phone = fields.text('phone', { max: 30 }, (value) => (isPhone(value) ? undefined : 'invalidPhone'))

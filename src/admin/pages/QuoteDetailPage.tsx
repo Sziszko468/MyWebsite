@@ -22,6 +22,10 @@ import { useSession } from '../session/SessionProvider'
 import page from '../styles/pages.module.scss'
 import styles from '../styles/ui.module.scss'
 
+/** The messages that go to the customer, and the states a message ends in when it did not get there: what the banner on a request is about. */
+const CUSTOMER_MAILS: ReadonlySet<string> = new Set(['quote_confirmation', 'quote_status', 'quote_sent', 'quote_revised', 'quote_accepted', 'quote_declined', 'revision_received'])
+const PROBLEM_STATES: ReadonlySet<string> = new Set(['failed', 'bounced', 'complained'])
+
 /** The price a part had when the request was made: the approved figure stored with the item, or "on request". */
 function priceText(t: AdminText, part: QuoteItem['snapshot']['plan'], language: 'hu' | 'en'): string {
   if (!part) return t.common.noValue
@@ -142,6 +146,14 @@ export function QuoteDetailPage() {
       resource.reload()
     })
 
+  const revokeLinks = () =>
+    run(async () => {
+      if (!(await confirm({ title: q.detail.revokeTitle, body: q.detail.revokeBody, danger: true, confirmLabel: q.detail.revokeLinks }))) return
+      const answer = await endpoints.quotes.revokeLinks(id)
+      toast.success(answer.data.revoked > 0 ? fill(q.detail.linksRevoked, { n: answer.data.revoked }) : q.detail.noLinksToRevoke)
+      resource.reload()
+    })
+
   const retryDelivery = (deliveryId: string) =>
     run(async () => {
       await endpoints.notifications.retry(deliveryId)
@@ -197,6 +209,11 @@ export function QuoteDetailPage() {
       {quote.archived_at && (
         <p className={styles.notice} role="status">
           {d.archivedNotice}
+        </p>
+      )}
+      {quote.deliveries.some((delivery) => CUSTOMER_MAILS.has(delivery.kind) && PROBLEM_STATES.has(delivery.status)) && (
+        <p className={`${styles.notice} ${styles.noticeWarning}`} role="status">
+          {q.detail.deliveries.problem}
         </p>
       )}
       <div className={page.detail}>
@@ -480,7 +497,9 @@ export function QuoteDetailPage() {
             {quote.inquiry ? (
               <div className={styles.stack}>
                 <p>
-                  <Link to={`/inquiries/${quote.inquiry.id}`}>{quote.inquiry.subject}</Link>
+                  <Link className={styles.linkTarget} to={`/inquiries/${quote.inquiry.id}`}>
+                    {quote.inquiry.subject}
+                  </Link>
                   <br />
                   <span className={`${styles.muted} ${styles.small} ${styles.mono}`}>{quote.inquiry.reference}</span>
                 </p>
@@ -554,6 +573,12 @@ export function QuoteDetailPage() {
                 <Icon name="download" />
                 {d.exportJson}
               </AdminButton>
+              {canWrite && (
+                <AdminButton onClick={() => void revokeLinks()} className={page.wide}>
+                  <Icon name="link" />
+                  {q.detail.revokeLinks}
+                </AdminButton>
+              )}
               {canWrite && (
                 <AdminButton onClick={() => void archive(quote.archived_at === null)} className={page.wide}>
                   <Icon name="archive" />

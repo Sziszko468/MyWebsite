@@ -1,0 +1,96 @@
+name: Quote journeys (manual)
+
+# The browser journey for the whole life of a quotation (PROMPT 21), run on demand. It is deliberately NOT part of CI:
+#   - it drives a real Chrome through copy-sensitive screens (a reworded button changes it), so on every pull request it would fail for
+#     reasons that are not defects;
+#   - it takes minutes, and CI is the quick gate before a merge.
+# It deploys nothing and touches no deployment setting. It builds the site, starts a throw-away backend on the runner (a new SQLite file,
+# the `file` e-mail provider that writes messages to a folder, no network, no real address) and runs the journey against it. Run it from the
+# Actions tab before a release, or after a change to the quotation screens or e-mails. The unit and integration tests that CI runs
+# (`npm test`) cover the same rules without a browser.
+
+on:
+  workflow_dispatch:
+    inputs:
+      customer_width:
+        description: Width of the customer's screen in pixels (320, 360, 390, 768, 1440)
+        default: '390'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  quote-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18
+          cache: npm
+
+      - run: npm ci
+
+      # Playwright is not a dependency of the project (a browser download for a tool most contributors never run); it is installed for this
+      # run only and drives the Google Chrome that GitHub's Ubuntu runners already have.
+      - name: Install Playwright for this run
+        run: npm install --no-save playwright
+
+      - name: Build the site for a same-origin backend
+        run: |
+          VITE_API_URL=/ VITE_SITE_URL=https://example.test npm run build
+
+      - name: Start a throw-away backend
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/e2e/mail"
+          {
+            echo "DATABASE_PATH=$RUNNER_TEMP/e2e/app.sqlite"
+            echo "APP_SECRET=$(openssl rand -hex 24)"
+            echo "APP_ENV=development"
+            echo "PORT=8830"
+            echo "EMAIL_PROVIDER=file"
+            echo "EMAIL_FILE_DIR=$RUNNER_TEMP/e2e/mail"
+            echo "EMAIL_FROM=Controlled Chaos <notifications@example.test>"
+            echo "NOTIFY_TO=owner@example.test"
+            echo "NOTIFY_LANGUAGE=hu"
+            echo "EMAIL_REPLY_TO=hello@example.test"
+            echo "STATIC_DIR=$GITHUB_WORKSPACE/dist"
+            echo "PUBLIC_URL=http://127.0.0.1:8830"
+          } > "$RUNNER_TEMP/e2e/env"
+          echo "ADMIN_PASSWORD=$(openssl rand -hex 12)-Aa1" >> "$RUNNER_TEMP/e2e/env"
+          set -a
+          . "$RUNNER_TEMP/e2e/env"
+          set +a
+          npm run server:cli -- admin create admin@example.test admin
+          nohup node --disable-warning=ExperimentalWarning server/src/main.ts > "$RUNNER_TEMP/e2e/server.log" 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fs http://127.0.0.1:8830/api/health > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/e2e/server.log"
+          exit 1
+
+      - name: Run the journey
+        env:
+          AUDIT_PLAYWRIGHT: ${{ github.workspace }}/node_modules/playwright
+          CUSTOMER_WIDTH: ${{ inputs.customer_width }}
+        run: |
+          set -a
+          . "$RUNNER_TEMP/e2e/env"
+          set +a
+          node tools/e2e/quote-lifecycle-journey.cjs --base=http://127.0.0.1:8830 --mail="$RUNNER_TEMP/e2e/mail" \
+            --email=admin@example.test --password="$ADMIN_PASSWORD" --customer-width="$CUSTOMER_WIDTH" --owner-language=hu --out="$RUNNER_TEMP/e2e/shots"
+
+      - name: Keep the screenshots and the server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quote-journey-${{ inputs.customer_width }}
+          path: |
+            ${{ runner.temp }}/e2e/shots
+            ${{ runner.temp }}/e2e/server.log
+          if-no-files-found: ignore

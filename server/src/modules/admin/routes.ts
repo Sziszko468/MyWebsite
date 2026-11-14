@@ -184,6 +184,10 @@ export function adminRoutes(_app: AppContext): RouteDef[] {
       await ctx.json()
       return json(quotes.resendConfirmation(ctx.app, ctx.session, ctx.params.id), { status: 202 })
     }),
+    api('POST', '/api/admin/quote-requests/:id/revoke-links', async (ctx) => {
+      await ctx.json()
+      return json(quotes.revokeLinks(ctx.app, ctx.session, ctx.params.id))
+    }),
     api('POST', '/api/admin/quote-requests/:id/quotes', async (ctx) => {
       const body = await ctx.json()
       const draft = quotations.createDraft(ctx.app, ctx.session, ctx.params.id, { from: typeof body.from === 'string' ? body.from : null, reason: body.reason })

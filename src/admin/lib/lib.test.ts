@@ -12,7 +12,7 @@ import { DEFAULT_ORDER, hasFilters, readListState, toListQuery, writeListState }
 
 describe('list state in the address', () => {
   it('reads defaults from an empty address', () => {
-    expect(readListState(new URLSearchParams())).toEqual({ q: '', status: '', kind: '', type: '', priority: '', source: '', from: '', to: '', order: DEFAULT_ORDER, page: 1 })
+    expect(readListState(new URLSearchParams())).toEqual({ q: '', status: '', kind: '', type: '', priority: '', source: '', language: '', from: '', to: '', order: DEFAULT_ORDER, page: 1 })
   })
 
   it('refuses what is not a page or a day, and caps the search text', () => {
@@ -47,6 +47,17 @@ describe('list state in the address', () => {
     const now = new URLSearchParams({ status: 'new', order: 'name_asc' })
     expect(writeListState(now, { status: '' }).toString()).toBe('order=name_asc')
     expect(writeListState(now, { order: DEFAULT_ORDER }).toString()).toBe('status=new')
+  })
+
+  it('carries the language of the customer through the address and into the backend query, and leaves no trace when it is empty', () => {
+    const state = readListState(new URLSearchParams({ language: 'nl', status: 'new' }))
+    expect(state.language).toBe('nl')
+    expect(toListQuery(state)).toMatchObject({ language: 'nl', status: 'new' })
+    expect(toListQuery(readListState(new URLSearchParams()))).toMatchObject({ language: undefined })
+    expect(writeListState(new URLSearchParams({ status: 'new', page: '2' }), { language: 'hu' }).toString()).toBe('status=new&language=hu') // a change of filter goes back to the first page
+    expect(writeListState(new URLSearchParams({ language: 'hu' }), { language: '' }).toString()).toBe('')
+    expect(hasFilters(state)).toBe(true)
+    expect(hasFilters(readListState(new URLSearchParams({ language: 'nl' })))).toBe(true)
   })
 
   it('knows whether anything filters the list', () => {

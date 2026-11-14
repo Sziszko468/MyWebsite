@@ -5,6 +5,7 @@ import { purgeExpiredSessions } from '../auth/sessions.ts'
 import { sweepAbandoned } from '../ai/budget.ts'
 import { loadSettings } from '../ai/settings.ts'
 import { purge as purgeAssistant } from '../ai/store.ts'
+import { deleteDeliveriesOfRequest } from '../quotes/deliveries.ts'
 import { purgeTokens } from '../quotes/tokens.ts'
 
 /**
@@ -56,13 +57,7 @@ export function eraseByEmail(app: AppContext, email: string): ErasureResult {
     // The messages about this person's requests and quotations that were addressed to someone else (the owner's notifications) go too:
     // they hold no text of their own, but they point at records that are about to disappear.
     let deliveries = 0
-    for (const request of db.all<{ id: string }>('SELECT id FROM quote_requests WHERE email = ?', [address])) {
-      const quoteIds = db.all<{ id: string }>('SELECT id FROM quotes WHERE quote_request_id = ?', [request.id]).map((row) => row.id)
-      const revisionIds = db.all<{ id: string }>('SELECT id FROM quote_revision_requests WHERE quote_request_id = ?', [request.id]).map((row) => row.id)
-      deliveries += db.run("DELETE FROM email_deliveries WHERE related_type = 'quote_request' AND related_id = ?", [request.id]).changes
-      for (const id of quoteIds) deliveries += db.run("DELETE FROM email_deliveries WHERE related_type = 'quote' AND related_id = ?", [id]).changes
-      for (const id of revisionIds) deliveries += db.run("DELETE FROM email_deliveries WHERE related_type = 'quote_revision' AND related_id = ?", [id]).changes
-    }
+    for (const request of db.all<{ id: string }>('SELECT id FROM quote_requests WHERE email = ?', [address])) deliveries += deleteDeliveriesOfRequest(db, request.id)
     deliveries += db.run('DELETE FROM email_deliveries WHERE recipient = ? COLLATE NOCASE', [address]).changes
     const inquiries = db.run('DELETE FROM inquiries WHERE email = ?', [address]).changes
     // The request takes its items, notes, quotations, lines, links, questions and status-page entries with it (cascades); the history keeps one line per

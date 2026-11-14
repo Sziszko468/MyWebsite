@@ -130,9 +130,17 @@
   color: var(--color-text);
 }
 
+/* A link on a line of its own (in a list, under a heading) is a target of at least 24 px (WCAG 2.5.8). */
+.linkTarget {
+  display: inline-block;
+  min-height: 1.5rem;
+  line-height: 1.5rem;
+}
+
 .definitions {
   display: grid;
-  grid-template-columns: minmax(7rem, max-content) minmax(0, 1fr);
+  /* The labels may take up to 45 % of the width and wrap: on a 320 px phone the longest label ("Agreed to hear about other things") would otherwise leave the value a column 14 px wide, an e-mail address one letter per line. */
+  grid-template-columns: minmax(7rem, min(max-content, 45%)) minmax(0, 1fr);
   gap: var(--space-2) var(--space-5);
   margin: 0;
   font-size: var(--fs-sm);

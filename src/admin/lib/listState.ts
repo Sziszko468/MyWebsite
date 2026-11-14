@@ -15,6 +15,8 @@ export interface ListState {
   type: string
   priority: string
   source: string
+  /** The language the customer wrote in (hu, en, nl). */
+  language: string
   from: string
   to: string
   /** `created_desc`, `name_asc`, …: the column and the direction in one word. */
@@ -39,6 +41,7 @@ export function readListState(params: URLSearchParams): ListState {
     type: params.get('type') ?? '',
     priority: params.get('priority') ?? '',
     source: params.get('source') ?? '',
+    language: params.get('language') ?? '',
     from: day('from'),
     to: day('to'),
     order: params.get('order') ?? DEFAULT_ORDER,
@@ -59,6 +62,7 @@ export function toListQuery(state: ListState): ListQuery {
     type: state.type || undefined,
     priority: state.priority || undefined,
     source: state.source || undefined,
+    language: state.language || undefined,
     from: state.from || undefined,
     to: state.to || undefined,
     sort: sort && state.order !== DEFAULT_ORDER ? sort : undefined,
@@ -78,4 +82,4 @@ export function writeListState(current: URLSearchParams, patch: Partial<ListStat
   return next
 }
 
-export const hasFilters = (state: ListState): boolean => Boolean(state.q || state.status || state.kind || state.type || state.priority || state.source || state.from || state.to)
+export const hasFilters = (state: ListState): boolean => Boolean(state.q || state.status || state.kind || state.type || state.priority || state.source || state.language || state.from || state.to)

@@ -229,6 +229,38 @@
   background-color: var(--color-bg-subtle);
 }
 
+/* The preview of a quotation in the editor: the document as the customer reads it, in a quiet box. */
+.previewDoc {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.previewTitle {
+  margin: 0;
+  font-size: var(--fs-lg);
+}
+
+.previewSection {
+  display: grid;
+  gap: var(--space-2);
+
+  h3 {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+  }
+}
+
+.previewSub {
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+
+.previewRow {
+  display: contents;
+}
+
 .items {
   display: grid;
   gap: var(--space-3);

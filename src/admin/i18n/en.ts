@@ -642,7 +642,7 @@ export const en = {
       empty: 'Nothing has been sent yet.',
       emptyBody: 'Messages appear here once something is queued.',
       emptyFiltered: 'No message has this state.',
-      kinds: { inquiry_received: 'New inquiry', quote_received: 'New quote request', inquiry_status: 'Inquiry status', quote_status: 'Quote request status', inquiry_confirmation: 'Inquiry confirmation', quote_confirmation: 'Quote request confirmation', test: 'Test message' },
+      kinds: { inquiry_received: 'New inquiry', quote_received: 'New quote request', inquiry_status: 'Inquiry status', quote_status: 'Quote request status', inquiry_confirmation: 'Inquiry confirmation', quote_confirmation: 'Quote request confirmation', test: 'Test message', quote_sent: 'Quotation', quote_revised: 'Revised quotation', quote_accepted: 'Acceptance (to the customer)', quote_accepted_admin: 'Acceptance (to you)', quote_declined: 'Decline (to the customer)', quote_declined_admin: 'Decline (to you)', revision_requested_admin: 'Change request (to you)', revision_received: 'Receipt for a change request (to the customer)', delivery_failed_admin: 'Delivery alert (to you)' },
       filter: 'Show',
       filters: { all: 'Every message', problem: 'Problems (failed, bounced, spam)', retrying: 'Waiting to retry', pending: 'Waiting', accepted: 'Sent', delivered: 'Delivered', bounced: 'Bounced', complained: 'Marked as spam', failed: 'Failed', cancelled: 'Cancelled' },
       retry: 'Send again',

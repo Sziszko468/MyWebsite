@@ -127,6 +127,8 @@ export interface QuoteFilters {
   type?: string
   priority?: string
   source?: string
+  /** The language the customer wrote in (hu, en, nl). */
+  language?: string
   extraSort?: ExtraSort
   archived?: 'exclude' | 'only' | 'all'
   q?: string
@@ -156,6 +158,10 @@ function where(filters: QuoteFilters): { sql: string; params: (string | number)[
   if (filters.source) {
     clauses.push('source = ?')
     params.push(filters.source)
+  }
+  if (filters.language) {
+    clauses.push('language = ?')
+    params.push(filters.language)
   }
   if (filters.archived === 'only') clauses.push('archived_at IS NOT NULL')
   else if (filters.archived !== 'all') clauses.push('archived_at IS NULL')

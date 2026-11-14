@@ -163,7 +163,7 @@ export function act(app: AppContext, input: { token: string } & DecisionInput, i
         recordEvent(app, { requestId: request.id, reference: request.reference, type: 'status_changed', actor: { type: 'customer' }, from: 'quote_sent', to: 'under_review', summary: 'revision requested' })
       }
       recordEvent(app, { requestId: request.id, reference: request.reference, quoteId: quote.id, type: 'revision_requested', actor: { type: 'customer' }, summary: `v${quote.version}` })
-      app.notifier.queueRevisionNotice(id)
+      app.notifier.queueRevisionNotice(id, quote, request)
     })
     return { outcome: 'revision_requested', at: nowIso, reference: quote.reference }
   }

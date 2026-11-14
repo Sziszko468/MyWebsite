@@ -1,6 +1,8 @@
 # Live verification — quotation and order management
 
-## Status: **NOT PERFORMED**
+## Status: **NOT PERFORMED** (still so on 2026-11-14, after PROMPT 21)
+
+PROMPT 21 re-read the public DNS (read only): the domain still has no DKIM for the provider, no return-path domain and a DMARC policy without reports. The step-by-step test for the owner to run (including the bounce and the complaint, and the delivery-failure alert PROMPT 21 added) is in [`EMAILS.md`](EMAILS.md) §7; record its date and result here when it has been done.
 
 The brief (§21) asks for a real test on the production system, with designated test customers and test addresses, **after an authorised deployment**. None of that was possible from here and none of it was done:
 

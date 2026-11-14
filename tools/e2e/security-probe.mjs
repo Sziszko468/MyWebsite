@@ -49,7 +49,7 @@ const ADMIN_ROUTES = [
   // which found these routes were not in the probe (compare with `grep -rho "'/api/admin/[^']*'" server/src`).
   '/api/admin/ai', '/api/admin/ai/alerts/acknowledge', '/api/admin/ai/connection-test', '/api/admin/ai/knowledge/refresh', '/api/admin/ai/settings',
   '/api/admin/ai/usage', '/api/admin/inquiries/:id/quote-request', '/api/admin/quote-requests/overview', '/api/admin/quote-requests/:id/quotes',
-  '/api/admin/quote-requests/:id/resend-confirmation', '/api/admin/quotes/:id', '/api/admin/quotes/:id/resend', '/api/admin/quotes/:id/send',
+  '/api/admin/quote-requests/:id/resend-confirmation', '/api/admin/quote-requests/:id/revoke-links', '/api/admin/quotes/:id', '/api/admin/quotes/:id/resend', '/api/admin/quotes/:id/send',
   '/api/admin/quotes/:id/withdraw', '/api/admin/shop/documents/:code', '/api/admin/shop/documents/:code/publish', '/api/admin/shop/documents/:code/unpublish',
 ]
 const FILL = { ':id': '00000000-0000-0000-0000-000000000000', ':code': 'launch', ':slug': 'website', ':type': 'faq', ':group': 'services', ':key': 'website', ':lang': 'en', ':kind': 'services' }

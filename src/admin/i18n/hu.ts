@@ -639,7 +639,7 @@ export const hu: AdminText = {
       empty: 'Még nem ment ki semmi.',
       emptyBody: 'A levelek itt jelennek meg, amint valami sorba kerül.',
       emptyFiltered: 'Egy levél sincs ebben az állapotban.',
-      kinds: { inquiry_received: 'Új üzenet', quote_received: 'Új ajánlatkérés', inquiry_status: 'Üzenet állapota', quote_status: 'Ajánlatkérés állapota', inquiry_confirmation: 'Üzenet visszaigazolása', quote_confirmation: 'Ajánlatkérés visszaigazolása', test: 'Teszt levél' },
+      kinds: { inquiry_received: 'Új üzenet', quote_received: 'Új ajánlatkérés', inquiry_status: 'Üzenet állapota', quote_status: 'Ajánlatkérés állapota', inquiry_confirmation: 'Üzenet visszaigazolása', quote_confirmation: 'Ajánlatkérés visszaigazolása', test: 'Teszt levél', quote_sent: 'Árajánlat', quote_revised: 'Módosított árajánlat', quote_accepted: 'Elfogadás (az ügyfélnek)', quote_accepted_admin: 'Elfogadás (neked)', quote_declined: 'Elutasítás (az ügyfélnek)', quote_declined_admin: 'Elutasítás (neked)', revision_requested_admin: 'Módosítási kérés (neked)', revision_received: 'A módosítási kérés visszaigazolása (az ügyfélnek)', delivery_failed_admin: 'Kézbesítési riasztás (neked)' },
       filter: 'Mutat',
       filters: { all: 'Minden levél', problem: 'Gondok (sikertelen, visszapattant, spam)', retrying: 'Újrapróbálásra vár', pending: 'Várakozik', accepted: 'Elküldve', delivered: 'Kézbesítve', bounced: 'Visszapattant', complained: 'Spamnek jelölve', failed: 'Sikertelen', cancelled: 'Visszavonva' },
       retry: 'Küldés újra',

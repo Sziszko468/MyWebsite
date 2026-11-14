@@ -197,6 +197,16 @@ export interface QuotationView {
   status: string
   expired: boolean
   title: string
+  introduction: string
+  understanding: string
+  scope: string
+  deliverables: string
+  exclusions: string
+  paymentTerms: string
+  terms: string
+  notes: string
+  estimatedTimeline: string
+  customer: { name: string; company: string | null }
   validUntil: string | null
   pricing: {
     mode: string
@@ -299,6 +309,8 @@ export interface ListQuery {
   type?: string
   priority?: string
   source?: string
+  /** The language the customer wrote in. */
+  language?: string
   archived?: 'only' | 'all'
   from?: string
   to?: string

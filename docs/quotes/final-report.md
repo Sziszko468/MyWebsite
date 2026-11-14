@@ -1,6 +1,6 @@
 # Quotation and order management — final implementation report (PROMPT 17)
 
-Written from what was run, not from what was intended. Manual: [`README.md`](README.md). What was reused and why: [`integration-report.md`](integration-report.md). The checklist for going live: [`production-checklist.md`](production-checklist.md). Nothing was committed, deployed, sent to a real provider, or changed in DNS.
+Written from what was run, not from what was intended. Manual: [`README.md`](README.md). What was reused and why: [`integration-report.md`](integration-report.md). The checklist for going live: [`PRODUCTION_CHECKLIST.md`](PRODUCTION_CHECKLIST.md). Nothing was committed, deployed, sent to a real provider, or changed in DNS.
 
 ## Production readiness
 
@@ -29,7 +29,7 @@ No new provider integration: the existing transactional outbox is used, with eig
 
 ## 6. DNS verification status
 
-**None.** No DNS record was read or changed; SPF, DKIM, DMARC and the Cloudflare Email Routing set-up are on the owner's checklist (`production-checklist.md` §4), and Administration → Notifications → *Run checks* does the reading once they exist.
+**None.** No DNS record was read or changed; SPF, DKIM, DMARC and the Cloudflare Email Routing set-up are on the owner's checklist (`PRODUCTION_CHECKLIST.md` §4), and Administration → Notifications → *Run checks* does the reading once they exist.
 
 ## 7. Actual e-mail delivery test results
 

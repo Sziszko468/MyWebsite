@@ -25,6 +25,9 @@ export type EmailKind =
   | 'quote_declined'
   | 'quote_declined_admin'
   | 'revision_requested_admin'
+  // PROMPT 21: the customer's receipt for a change request, and the owner's alert when a message to a customer could not be delivered
+  | 'revision_received'
+  | 'delivery_failed_admin'
 
 export interface Rendered {
   subject: string

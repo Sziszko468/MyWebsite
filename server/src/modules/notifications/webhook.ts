@@ -151,6 +151,7 @@ export function handleWebhook(app: AppContext, headers: Record<string, string | 
         [target, type, messageId, target, occurred, target, occurred, reason ? reason.text : null, reason ? reason.code : null, now, delivery.id],
       )
       outcome = 'applied'
+      if (NEGATIVE.has(target)) app.notifier.reportDeliveryProblem(delivery.id)
     } else if (delivery && type === 'email.delivery_delayed') {
       // A temporary problem at the recipient's side: nothing changes except that the administrator can see it.
       app.db.run('UPDATE email_deliveries SET provider_event = ?, updated_at = ? WHERE id = ? AND status IN (\'accepted\', \'pending\', \'sending\')', [type, now, delivery.id])

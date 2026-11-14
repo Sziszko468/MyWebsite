@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import * as endpoints from '../api/endpoints'
-import type { QuotationDetail, QuotationForm, QuotationLine } from '../api/types'
+import type { QuotationDetail, QuotationForm, QuotationLine, QuotationView } from '../api/types'
 import { AdminButton } from '../components/AdminButton'
 import { useConfirm } from '../components/Confirm'
 import { CheckField, Fieldset, SelectField, TextAreaField, TextField } from '../components/form'
@@ -12,6 +12,7 @@ import { StatusBadge } from '../components/StatusBadge'
 import { useToast } from '../components/Toast'
 import { useResource } from '../hooks/useResource'
 import { fill, formatDateTime, useInterfaceLanguage, useText } from '../i18n'
+import type { AdminText } from '../i18n/en'
 import { describeError, fieldErrors } from '../lib/errors'
 import { useSession } from '../session/SessionProvider'
 import page from '../styles/pages.module.scss'
@@ -296,6 +297,16 @@ function Editor({ detail, requestId, apply }: { detail: QuotationDetail; request
               </div>
             )}
           </form>
+
+          <DetailPanel title={e.sections.preview}>
+            <p className={styles.hint}>{fill(e.preview.help, { language: (t.languages as Record<string, string>)[view.language] ?? view.language })}</p>
+            {dirty && (
+              <p className={`${styles.notice} ${styles.noticeWarning}`} role="status">
+                {e.preview.stale}
+              </p>
+            )}
+            <QuotationPreview view={view} e={e} noValue={t.common.noValue} />
+          </DetailPanel>
         </div>
 
         <div className={page.detailSide}>
@@ -384,7 +395,7 @@ function Editor({ detail, requestId, apply }: { detail: QuotationDetail; request
             <ul className={styles.stack}>
               {detail.siblings.map((row) => (
                 <li key={row.id}>
-                  {row.id === quotation.id ? <strong>{fill(q.detail.quotations.version, { n: row.version })}</strong> : <Link to={`/quotes/${requestId}/versions/${row.id}`}>{fill(q.detail.quotations.version, { n: row.version })}</Link>}{' '}
+                  {row.id === quotation.id ? <strong>{fill(q.detail.quotations.version, { n: row.version })}</strong> : <Link className={styles.linkTarget} to={`/quotes/${requestId}/versions/${row.id}`}>{fill(q.detail.quotations.version, { n: row.version })}</Link>}{' '}
                   <StatusBadge kind="quotation" status={row.status} />
                 </li>
               ))}
@@ -394,5 +405,112 @@ function Editor({ detail, requestId, apply }: { detail: QuotationDetail; request
         </div>
       </div>
     </>
+  )
+}
+
+type EditorWords = AdminText['quotation']['editor']
+
+/**
+ * The saved quotation as the customer will read it: the same document the server builds for the customer's page and the e-mails (modules/quotes/view.ts),
+ * with every amount already written out by the server. The headings are the administrator's words for the fields; the text, the amounts and the language
+ * are the offer's own, and the block says which language that is so a screen reader pronounces it correctly.
+ */
+export function QuotationPreview({ view, e, noValue }: { view: QuotationView; e: EditorWords; noValue: string }) {
+  const p = view.pricing
+  const items = p.lines.filter((line) => line.kind === 'item')
+  const optional = p.lines.filter((line) => line.kind === 'optional')
+  const discounts = p.lines.filter((line) => line.kind === 'discount')
+  const prose = (label: string, body: string) =>
+    body.trim() ? (
+      <section className={page.previewSection}>
+        <h3>{label}</h3>
+        <p className={styles.prose}>{body}</p>
+      </section>
+    ) : null
+  const lineList = (lines: typeof items) => (
+    <ul className={page.items}>
+      {lines.map((line, index) => (
+        <li key={`${line.description}-${index}`} className={page.item}>
+          <span className={styles.spread}>
+            <span className={page.itemTitle}>{line.description}</span>
+            <span>{line.total.text}</span>
+          </span>
+          {line.quantity > 1 && <span className={`${styles.muted} ${styles.small}`}>{fill(e.preview.quantity, { quantity: line.quantity, unit: line.unit.text })}</span>}
+          {line.detail && <span className={`${styles.muted} ${styles.small}`}>{line.detail}</span>}
+        </li>
+      ))}
+    </ul>
+  )
+  return (
+    <article className={`${page.previewDoc} ${page.messageText}`} lang={view.language}>
+      <header>
+        <h3 className={page.previewTitle}>{view.title || noValue}</h3>
+        <p className={`${styles.muted} ${styles.small}`}>
+          {fill(e.preview.for, { name: view.customer.company ? `${view.customer.name} (${view.customer.company})` : view.customer.name })}
+          {view.validUntil ? ` · ${fill(e.preview.validUntil, { date: view.validUntil })}` : ''}
+        </p>
+      </header>
+      {prose(e.introduction, view.introduction)}
+      {prose(e.understanding, view.understanding)}
+      {prose(e.scope, view.scope)}
+      {prose(e.deliverables, view.deliverables)}
+      {prose(e.exclusions, view.exclusions)}
+      {prose(e.timeline, view.estimatedTimeline)}
+      <section className={page.previewSection}>
+        <h3>{e.sections.price}</h3>
+        {p.mode === 'custom' && <p className={styles.prose}>{p.note || e.preview.notStated}</p>}
+        {p.mode === 'fixed' && <p className={styles.prose}>{p.fixed?.text ?? e.preview.notStated}</p>}
+        {p.mode === 'itemized' && (
+          <>
+            {items.length === 0 ? <p className={styles.muted}>{e.noLines}</p> : lineList(items)}
+            <dl className={styles.definitions}>
+              {p.subtotal && (p.discount || p.tax.amount) && (
+                <>
+                  <dt>{e.subtotal}</dt>
+                  <dd>{p.subtotal.text}</dd>
+                </>
+              )}
+              {discounts.map((line, index) => (
+                <div key={`${line.description}-${index}`} className={page.previewRow}>
+                  <dt>
+                    {e.discount}: {line.description}
+                    {line.justification ? ` (${fill(e.preview.discountReason, { reason: line.justification })})` : ''}
+                  </dt>
+                  <dd>− {line.total.text}</dd>
+                </div>
+              ))}
+              {p.tax.amount && p.tax.ratePercent && (
+                <>
+                  <dt>
+                    {e.tax} ({p.tax.ratePercent} %)
+                  </dt>
+                  <dd>{p.tax.amount.text}</dd>
+                </>
+              )}
+              {p.total && (
+                <>
+                  <dt>
+                    <strong>{e.total}</strong>
+                  </dt>
+                  <dd>
+                    <strong>{p.total.text}</strong>
+                  </dd>
+                </>
+              )}
+            </dl>
+            {optional.length > 0 && (
+              <>
+                <h4 className={page.previewSub}>{e.kinds.optional}</h4>
+                {lineList(optional)}
+              </>
+            )}
+          </>
+        )}
+        {p.tax.note && <p className={styles.prose}>{p.tax.note}</p>}
+      </section>
+      {prose(e.paymentTerms, view.paymentTerms)}
+      {prose(e.terms, view.terms)}
+      {prose(e.notes, view.notes)}
+    </article>
   )
 }

@@ -45,6 +45,8 @@ export const quotes = {
   create: (body: unknown) => post<Quote>(`${base}/quote-requests`, body),
   fromInquiry: (inquiryId: string, body: unknown) => post<Quote>(`${base}/inquiries/${encodeURIComponent(inquiryId)}/quote-request`, body),
   resendConfirmation: (id: string) => post<{ queued: boolean }>(`${base}/quote-requests/${encodeURIComponent(id)}/resend-confirmation`, {}),
+  /** Ends every link the customer holds for the request (the status page, the quotation page and the buttons on them). */
+  revokeLinks: (id: string) => post<{ revoked: number }>(`${base}/quote-requests/${encodeURIComponent(id)}/revoke-links`, {}),
   /** Starts a quotation for the request, or (with `from`) the next version of one that was sent. */
   startQuotation: (id: string, body: { from?: string; reason?: string } = {}) => post<QuotationDetail>(`${base}/quote-requests/${encodeURIComponent(id)}/quotes`, body),
   /** Plain links: the browser downloads these with its own session cookie. */

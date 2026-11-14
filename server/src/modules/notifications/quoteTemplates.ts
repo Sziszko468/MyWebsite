@@ -84,6 +84,24 @@ interface Words {
   revisionTitle: string
   revisionIntro: string
 
+  revisionReceivedSubject: (reference: string) => string
+  revisionReceivedTitle: string
+  revisionReceivedIntro: (name: string) => string
+  revisionReceivedNext: string
+  revisionReceivedFooter: string
+
+  failedSubject: (reference: string) => string
+  failedTitle: string
+  failedIntro: string
+  failedNext: string
+  failedMessage: string
+  failedRecipient: string
+  failedState: string
+  failedReport: string
+  failedAttempts: string
+  failedKinds: Record<string, string>
+  failedStatuses: Record<string, string>
+
   statusFooter: string
 }
 
@@ -159,6 +177,24 @@ const W: Record<Language, Words> = {
     revisionTitle: 'Az ügyfél pontosítást vagy módosítást kért',
     revisionIntro: 'Az ügyfél az ajánlat oldalán üzenetet küldött. Az ajánlat nem változott magától; új verziót te készíthetsz.',
 
+    revisionReceivedSubject: (reference) => `Megkaptuk a módosítási kérésedet — ${reference}`,
+    revisionReceivedTitle: 'Megkaptuk az üzenetedet',
+    revisionReceivedIntro: (name) => `Szia ${name}! Megkaptuk az üzenetedet az alábbi ajánlattal kapcsolatban. Átnézzük, és válaszolunk, vagy új verziót küldünk.`,
+    revisionReceivedNext: 'Az üzeneted nem változtatta meg az ajánlatot, és nem jelent sem elfogadást, sem elutasítást. Ha új verziót készítünk, azt új, biztonságos linkkel küldjük, és a korábbi verzió linkje ekkor megszűnik.',
+    revisionReceivedFooter: 'Ha ki szeretnél egészíteni valamit, válaszolj erre az e-mailre. Ha nem te küldted az üzenetet, nyugodtan figyelmen kívül hagyhatod.',
+
+    failedSubject: (reference) => `Kézbesítési probléma egy ügyfélnek küldött e-maillel — ${reference}`,
+    failedTitle: 'Kézbesítési probléma egy ügyfélnek küldött üzenettel',
+    failedIntro: 'Egy ügyfélnek szánt üzenet kézbesítése problémába ütközött. Az alábbi állapot az e-mail-szolgáltató jelentése.',
+    failedNext: 'Nyisd meg a kérést az adminisztrációban, ellenőrizd a címzett címét, és küldd el újra az üzenetet. A kérés, az ajánlat és a naplója változatlan, semmi nem veszett el.',
+    failedMessage: 'Üzenet',
+    failedRecipient: 'Címzett',
+    failedState: 'Állapot',
+    failedReport: 'A szolgáltató jelentése',
+    failedAttempts: 'Kísérletek',
+    failedKinds: { quote_confirmation: 'A megkeresés visszaigazolása', quote_status: 'Állapotváltozás értesítése', quote_sent: 'Az ajánlat', quote_revised: 'A módosított ajánlat', quote_accepted: 'Az elfogadás visszaigazolása', quote_declined: 'Az elutasítás visszaigazolása', revision_received: 'A módosítási kérés visszaigazolása' },
+    failedStatuses: { failed: 'Sikertelen', bounced: 'Visszapattant', complained: 'Kéretlen levélnek jelölve' },
+
     statusFooter: 'Ha kérdésed van, válaszolj erre az e-mailre.',
   },
   en: {
@@ -232,6 +268,24 @@ const W: Record<Language, Words> = {
     revisionTitle: 'The customer asked for clarification or a change',
     revisionIntro: 'The customer sent a message from the quote page. The offer did not change by itself; you can prepare a new version.',
 
+    revisionReceivedSubject: (reference) => `We received your request for a change — ${reference}`,
+    revisionReceivedTitle: 'We received your message',
+    revisionReceivedIntro: (name) => `Hello ${name}, we received your message about the quote below. We will look at it and either reply or send a new version.`,
+    revisionReceivedNext: 'Your message did not change the quote, and it is neither an acceptance nor a decline. If we prepare a new version we will send it with a new secure link, and the link of the earlier version will stop working.',
+    revisionReceivedFooter: 'If you want to add something, reply to this email. If you did not send this message, you can safely ignore it.',
+
+    failedSubject: (reference) => `Delivery problem with an email to a customer — ${reference}`,
+    failedTitle: 'A message to a customer has a delivery problem',
+    failedIntro: 'Delivery of a message addressed to a customer ran into a problem. The state below is what the email provider reported.',
+    failedNext: 'Open the request in the administration, check the recipient’s address and send the message again. The request, the quote and its history are unchanged; nothing was lost.',
+    failedMessage: 'Message',
+    failedRecipient: 'Recipient',
+    failedState: 'Status',
+    failedReport: 'Provider report',
+    failedAttempts: 'Attempts',
+    failedKinds: { quote_confirmation: 'Confirmation of the request', quote_status: 'Status update', quote_sent: 'The quote', quote_revised: 'The revised quote', quote_accepted: 'Confirmation of the acceptance', quote_declined: 'Confirmation of the decline', revision_received: 'Receipt for the change request' },
+    failedStatuses: { failed: 'Failed', bounced: 'Bounced', complained: 'Marked as spam' },
+
     statusFooter: 'If you have any questions, reply to this email.',
   },
   nl: {
@@ -304,6 +358,24 @@ const W: Record<Language, Words> = {
     revisionSubject: (reference) => `De klant vraagt om toelichting of een wijziging: ${reference}`,
     revisionTitle: 'De klant vraagt om toelichting of een wijziging',
     revisionIntro: 'De klant heeft een bericht gestuurd vanaf de offertepagina. Het voorstel is niet vanzelf veranderd; je kunt een nieuwe versie maken.',
+
+    revisionReceivedSubject: (reference) => `We hebben je verzoek om een wijziging ontvangen — ${reference}`,
+    revisionReceivedTitle: 'We hebben je bericht ontvangen',
+    revisionReceivedIntro: (name) => `Hallo ${name}, we hebben je bericht over de onderstaande offerte ontvangen. We bekijken het en antwoorden, of we sturen een nieuwe versie.`,
+    revisionReceivedNext: 'Je bericht heeft de offerte niet veranderd en is geen acceptatie of afwijzing. Maken we een nieuwe versie, dan sturen we die met een nieuwe beveiligde link; de link van de eerdere versie werkt dan niet meer.',
+    revisionReceivedFooter: 'Wil je iets toevoegen, antwoord dan op deze e-mail. Heb je dit bericht niet zelf verstuurd, dan kun je het gerust negeren.',
+
+    failedSubject: (reference) => `Probleem met de bezorging van een e-mail aan een klant — ${reference}`,
+    failedTitle: 'Probleem met de bezorging van een bericht aan een klant',
+    failedIntro: 'Bij het bezorgen van een bericht aan een klant is een probleem opgetreden. De onderstaande status is wat de e-mailprovider meldde.',
+    failedNext: 'Open de aanvraag in het beheer, controleer het adres van de ontvanger en verstuur het bericht opnieuw. De aanvraag, de offerte en de geschiedenis zijn ongewijzigd; er is niets verloren gegaan.',
+    failedMessage: 'Bericht',
+    failedRecipient: 'Ontvanger',
+    failedState: 'Status',
+    failedReport: 'Melding van de provider',
+    failedAttempts: 'Pogingen',
+    failedKinds: { quote_confirmation: 'Bevestiging van de aanvraag', quote_status: 'Statusbericht', quote_sent: 'De offerte', quote_revised: 'De herziene offerte', quote_accepted: 'Bevestiging van de acceptatie', quote_declined: 'Bevestiging van de afwijzing', revision_received: 'Ontvangstbevestiging van het wijzigingsverzoek' },
+    failedStatuses: { failed: 'Mislukt', bounced: 'Niet bezorgd', complained: 'Als spam gemarkeerd' },
 
     statusFooter: 'Heb je vragen, antwoord dan op deze e-mail.',
   },
@@ -469,4 +541,38 @@ export function renderRevisionRequested(quote: QuoteMail, message: string, at: s
   const rows: Row[] = [...quoteRows(quote, lang), { label: q.customer, value: quote.customerName }, { label: q.submitted, value: dateText(at, lang) }, { label: q.message, value: message }]
   const parts = { brand, title: q.revisionTitle, intro: q.revisionIntro, rows, cta: adminUrl ? { label: q.openAdmin, url: adminUrl, fallback: q.fallback } : undefined, footer: q.ownerFooter }
   return { subject: q.revisionSubject(quote.requestReference), preview: oneLine(message, 100), text: plain(parts), html: layout({ lang, preview: oneLine(message, 100), ...parts }) }
+}
+
+/** The customer's receipt for a request for a change or a clarification: what they wrote, that nothing was accepted or declined, and what happens next. */
+export function renderRevisionReceived(quote: QuoteMail, message: string, at: string, lang: Language, brand: string, url: string | null): Rendered {
+  const q = W[lang]
+  const rows: Row[] = [...quoteRows(quote, lang), { label: q.submitted, value: dateText(at, lang) }, { label: q.message, value: message }]
+  const parts = { brand, title: q.revisionReceivedTitle, intro: q.revisionReceivedIntro(oneLine(quote.customerName, 60)), rows, note: { title: q.nextStep, text: q.revisionReceivedNext }, cta: url ? { label: q.openQuote, url, fallback: q.fallback } : undefined, footer: q.revisionReceivedFooter }
+  return { subject: q.revisionReceivedSubject(quote.requestReference), preview: q.revisionReceivedTitle, text: plain(parts), html: layout({ lang, preview: q.revisionReceivedTitle, ...parts }) }
+}
+
+/** What the owner is told when a message to a customer could not be delivered: which message, to whom, what the provider said, and what to do. */
+export interface DeliveryFailureMail {
+  kind: string
+  requestReference: string
+  recipient: string
+  status: string
+  /** The provider's report as stored (addresses and long tokens are already masked). */
+  reason: string | null
+  attempts: number
+}
+
+export function renderDeliveryFailed(mail: DeliveryFailureMail, lang: Language, brand: string, adminUrl: string | null): Rendered {
+  const q = W[lang]
+  const w = emailWords(lang)
+  const rows: Row[] = [
+    { label: w.reference, value: mail.requestReference },
+    { label: q.failedMessage, value: q.failedKinds[mail.kind] ?? mail.kind },
+    { label: q.failedRecipient, value: mail.recipient },
+    { label: q.failedState, value: q.failedStatuses[mail.status] ?? mail.status },
+    ...(mail.reason ? [{ label: q.failedReport, value: cut(mail.reason, 300) }] : []),
+    { label: q.failedAttempts, value: String(mail.attempts) },
+  ]
+  const parts = { brand, title: q.failedTitle, intro: q.failedIntro, rows, note: { title: q.nextStep, text: q.failedNext }, cta: adminUrl ? { label: q.openAdmin, url: adminUrl, fallback: q.fallback } : undefined, footer: q.ownerFooter }
+  return { subject: q.failedSubject(mail.requestReference), preview: q.failedTitle, text: plain(parts), html: layout({ lang, preview: q.failedTitle, ...parts }) }
 }

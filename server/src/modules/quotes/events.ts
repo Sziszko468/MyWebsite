@@ -48,7 +48,7 @@ export interface EventInput {
   summary?: string | null
 }
 
-export function recordEvent(app: AppContext, event: EventInput): void {
+export function recordEvent(app: Pick<AppContext, 'db' | 'clock'>, event: EventInput): void {
   app.db.run(
     `INSERT INTO quote_events (quote_request_id, quote_id, reference, event_type, actor_type, actor_id, from_status, to_status, summary, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,

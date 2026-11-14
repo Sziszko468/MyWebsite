@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router'
+import { ApiError } from '../api/client'
 import * as endpoints from '../api/endpoints'
 import type { InquiryDetail } from '../api/types'
 import { ActivityTimeline } from '../components/ActivityTimeline'
@@ -12,7 +13,7 @@ import { StatusBadge } from '../components/StatusBadge'
 import { StatusForm } from '../components/StatusForm'
 import { useToast } from '../components/Toast'
 import { useResource } from '../hooks/useResource'
-import { formatDateTime, useInterfaceLanguage, useText } from '../i18n'
+import { fill, formatDateTime, useInterfaceLanguage, useText } from '../i18n'
 import { describeError } from '../lib/errors'
 import { mailtoLink } from '../lib/links'
 import { useSession } from '../session/SessionProvider'
@@ -52,6 +53,24 @@ export function InquiryDetailPage() {
       apply((await endpoints.inquiries.update(id, { archived })).data)
       toast.success(archived ? d.archived : d.restored)
     } catch (error) {
+      failed(error)
+    }
+  }
+
+  /** One message becomes one quote request: the server prefills it from the message and refuses a second, naming the one that exists. */
+  const makeRequest = async () => {
+    const c = t.quotation.create
+    if (!(await confirm({ title: c.fromInquiryTitle, body: c.fromInquiryHelp, confirmLabel: c.fromInquiryConfirm }))) return
+    try {
+      const made = await endpoints.quotes.fromInquiry(id, {})
+      toast.success(fill(c.fromInquiryDone, { reference: made.data.reference }))
+      void navigate(`/quotes/${made.data.id}`)
+    } catch (error) {
+      if (error instanceof ApiError && error.details.reason === 'already_converted') {
+        toast.error(fill(c.fromInquiryAlready, { reference: String(error.details.reference ?? '') }))
+        resource.reload()
+        return
+      }
       failed(error)
     }
   }
@@ -122,7 +141,7 @@ export function InquiryDetailPage() {
                 {inquiry.quotes.map((quote) => (
                   <li key={quote.id} className={page.item}>
                     <span className={styles.spread}>
-                      <Link className={page.itemTitle} to={`/quotes/${quote.id}`}>
+                      <Link className={`${page.itemTitle} ${styles.linkTarget}`} to={`/quotes/${quote.id}`}>
                         {quote.reference}
                       </Link>
                       <StatusBadge kind="quote" status={quote.status} />
@@ -160,6 +179,12 @@ export function InquiryDetailPage() {
                 <Icon name="mail" />
                 {d.openMail}
               </AdminButton>
+              {canWrite && inquiry.quotes.every((row) => row.status === 'cancelled') && (
+                <AdminButton onClick={() => void makeRequest()} className={page.wide}>
+                  <Icon name="plus" />
+                  {t.quotation.create.fromInquiry}
+                </AdminButton>
+              )}
               {canWrite && (
                 <AdminButton onClick={() => void archive(inquiry.archived_at === null)} className={page.wide}>
                   <Icon name="archive" />

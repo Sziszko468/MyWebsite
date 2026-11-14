@@ -147,7 +147,8 @@ describe('migration 0007', () => {
       db.run("INSERT INTO quote_request_items (quote_request_id, position, need, plan) VALUES ('r1', 0, 'website', 'launch')")
       db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, created_at, updated_at) VALUES ('d1', 'quote_received', 'quote_request', 'r1', 'o@x.test', 'en', 'accepted', ?, ?)", [now, now])
 
-      expect(migrate(db, clock)).toEqual([7, 8])
+      // 0007 is the migration under test; 0008 (the assistant) and 0009 (PROMPT 21's two e-mail kinds, see "migration 0009") follow it.
+      expect(migrate(db, clock)).toEqual([7, 8, 9])
       expect(db.all('PRAGMA foreign_key_check')).toEqual([])
       expect(db.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 })
       const rows = db.all<{ id: string; status: string; customer_status: string; source: string; request_type: string; priority: string }>('SELECT id, status, customer_status, source, request_type, priority FROM quote_requests ORDER BY id')
@@ -173,6 +174,56 @@ describe('migration 0007', () => {
       db.run("DELETE FROM quote_requests WHERE id = 'r1'")
       expect(db.get("SELECT COUNT(*) AS n FROM quote_request_items WHERE quote_request_id = 'r1'")).toEqual({ n: 0 })
       expect(db.get('SELECT COUNT(*) AS n FROM quote_events')).toEqual({ n: 1 })
+    } finally {
+      db.close()
+    }
+  })
+})
+
+describe('migration 0009', () => {
+  const cleanup: string[] = []
+  afterEach(() => cleanup.splice(0).forEach((directory) => rmSync(directory, { recursive: true, force: true })))
+
+  it('keeps every e-mail and its provider events, takes the two new kinds, and keeps the once-only rules', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'cc-mig9-'))
+    cleanup.push(directory)
+    for (const file of ['0001_init.sql', '0002_admin_dashboard.sql', '0003_email_system.sql', '0004_projects_media_texts.sql', '0005_shop_experience.sql', '0006_control_room_ai.sql', '0007_quotation_management.sql', '0008_ai_model_lock.sql']) copyFileSync(join(MIGRATIONS_DIRECTORY, file), join(directory, file))
+    const clock = new TestClock()
+    const db = new Database(':memory:')
+    try {
+      expect(migrate(db, clock, directory)).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+      const now = clock.now().toISOString()
+      const delivery = (id: string, kind: string, relatedType: string, relatedId: string, status = 'accepted') =>
+        db.run('INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, attempts, last_error, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 2, ?, ?, ?)', [id, kind, relatedType, relatedId, 'a@x.test', 'en', status, status === 'failed' ? 'refused' : null, now, now])
+      delivery('d1', 'quote_confirmation', 'quote_request', 'r1')
+      delivery('d2', 'quote_sent', 'quote', 'q1', 'failed')
+      db.run("INSERT INTO email_events (id, provider, event_type, delivery_id, provider_message_id, occurred_at, received_at, outcome) VALUES ('e1', 'resend', 'email.delivered', 'd1', 'm1', ?, ?, 'applied')", [now, now])
+
+      expect(migrate(db, clock)).toEqual([9])
+      expect(db.all('PRAGMA foreign_key_check')).toEqual([])
+      expect(db.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 })
+      // Nothing was lost on the way: the rows, what they say, and the provider's events that point at them.
+      expect(db.all('SELECT id, kind, related_type, related_id, status, attempts, last_error FROM email_deliveries ORDER BY id')).toEqual([
+        { id: 'd1', kind: 'quote_confirmation', related_type: 'quote_request', related_id: 'r1', status: 'accepted', attempts: 2, last_error: null },
+        { id: 'd2', kind: 'quote_sent', related_type: 'quote', related_id: 'q1', status: 'failed', attempts: 2, last_error: 'refused' },
+      ])
+      expect(db.all('SELECT id, delivery_id FROM email_events')).toEqual([{ id: 'e1', delivery_id: 'd1' }])
+      expect(db.all("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'email_deliveries' AND name LIKE 'idx_%' ORDER BY name").map((row) => (row as { name: string }).name)).toEqual([
+        'idx_email_deliveries_created', 'idx_email_deliveries_due', 'idx_email_deliveries_provider', 'idx_email_deliveries_recipient', 'idx_email_deliveries_related', 'idx_email_once_per_submission',
+      ])
+
+      // The two new kinds, and a message that is about another message.
+      expect(() => delivery('d3', 'revision_received', 'quote_revision', 'rv1')).not.toThrow()
+      expect(() => delivery('d4', 'delivery_failed_admin', 'email_delivery', 'd2')).not.toThrow()
+      // Once per revision request and once per failed message, as the database insists.
+      expect(() => delivery('d5', 'revision_received', 'quote_revision', 'rv1')).toThrow(/UNIQUE/)
+      expect(() => delivery('d6', 'delivery_failed_admin', 'email_delivery', 'd2')).toThrow(/UNIQUE/)
+      // The earlier once-only rule still holds, and a quotation may still be sent again on purpose.
+      expect(() => delivery('d7', 'quote_confirmation', 'quote_request', 'r1')).toThrow(/UNIQUE/)
+      expect(() => delivery('d8', 'quote_sent', 'quote', 'q1')).not.toThrow()
+      // And the vocabularies are still closed.
+      expect(() => delivery('d9', 'quote_whatever', 'quote', 'q1')).toThrow()
+      expect(() => delivery('d10', 'quote_sent', 'somewhere_else', 'q1')).toThrow()
     } finally {
       db.close()
     }
