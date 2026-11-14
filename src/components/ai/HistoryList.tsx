@@ -3,7 +3,7 @@ import { controlRoom, useControlRoom } from '../../ai/controlRoom'
 import { useAiText } from '../../ai/useAiText'
 import { useI18n } from '../../i18n/useI18n'
 import { cx } from '../../utils/cx'
-import { fill } from '../../utils/format'
+import { fill, formatStamp } from '../../utils/format'
 import styles from './History.module.scss'
 
 /**
@@ -16,7 +16,6 @@ export function HistoryList({ onChosen }: { onChosen?: () => void }) {
   const { lang } = useI18n()
   const [asking, setAsking] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-  const format = new Intl.DateTimeFormat(lang, { dateStyle: 'short', timeStyle: 'short' })
 
   return (
     <div className={styles.history}>
@@ -72,7 +71,7 @@ export function HistoryList({ onChosen }: { onChosen?: () => void }) {
                       }}
                     >
                       <span className={styles.name}>{title}</span>
-                      <span className={styles.when}>{format.format(new Date(conversation.updatedAt))}</span>
+                      <span className={styles.when}>{formatStamp(lang, conversation.updatedAt)}</span>
                     </button>
                     <button type="button" className={styles.remove} aria-label={fill(text.history.delete, { title })} onClick={() => setAsking(conversation.id)}>
                       <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">

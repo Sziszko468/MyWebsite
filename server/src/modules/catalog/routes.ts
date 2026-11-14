@@ -25,33 +25,38 @@ export function catalogRoutes(_app: AppContext): RouteDef[] {
   const catalog = (ctx: RequestCtx) => loadCatalog(ctx.app.db)
   const lang = (ctx: RequestCtx) => parseLang(ctx.query.get('lang'))
 
+  /** What is left of a list once the records with nothing to say in the asked language are out (they are never shown in another one). */
+  const present = (list: Array<Record<string, unknown> | null>): Array<Record<string, unknown>> => list.filter((item): item is Record<string, unknown> => item !== null)
+
   const services: RouteDef['handler'] = (ctx) => {
     const l = lang(ctx)
-    return cached(ctx, catalog(ctx).services.map((item) => serviceOut(item, l)))
+    return cached(ctx, present(catalog(ctx).services.map((item) => serviceOut(item, l))))
   }
   const packages: RouteDef['handler'] = (ctx) => {
     const l = lang(ctx)
-    return cached(ctx, catalog(ctx).packages.map((item) => packageOut(item, l)))
+    return cached(ctx, present(catalog(ctx).packages.map((item) => packageOut(item, l))))
   }
 
   return [
     get('/api/services', services),
     get('/api/services/:slug', (ctx) => {
       const item = catalog(ctx).services.find((service) => service.slug === ctx.params.slug)
-      if (!item) throw notFound('The service')
-      return cached(ctx, serviceOut(item, lang(ctx)))
+      const out = item ? serviceOut(item, lang(ctx)) : null
+      if (!out) throw notFound(item ? 'The service in that language' : 'The service')
+      return cached(ctx, out)
     }),
     get('/api/packages', packages),
     get('/api/packages/:code', (ctx) => {
       const item = catalog(ctx).packages.find((pack) => pack.code === ctx.params.code)
-      if (!item) throw notFound('The package')
-      return cached(ctx, packageOut(item, lang(ctx)))
+      const out = item ? packageOut(item, lang(ctx)) : null
+      if (!out) throw notFound(item ? 'The package in that language' : 'The package')
+      return cached(ctx, out)
     }),
     get('/api/shop/services', services),
     get('/api/shop/packages', packages),
     get('/api/shop/extras', (ctx) => {
       const l = lang(ctx)
-      return cached(ctx, catalog(ctx).extras.map((item) => extraOut(item, l)))
+      return cached(ctx, present(catalog(ctx).extras.map((item) => extraOut(item, l))))
     }),
     get('/api/shop/categories', (ctx) => cached(ctx, categoriesOut(catalog(ctx)))),
     get('/api/shop/catalog', (ctx) => cached(ctx, catalogOut(catalog(ctx)).body)),
@@ -59,7 +64,7 @@ export function catalogRoutes(_app: AppContext): RouteDef[] {
       const l = lang(ctx)
       return cached(
         ctx,
-        catalog(ctx).content.filter((item) => item.type === 'faq').map((item) => faqOut(item, l)),
+        present(catalog(ctx).content.filter((item) => item.type === 'faq').map((item) => faqOut(item, l))),
       )
     }),
   ]

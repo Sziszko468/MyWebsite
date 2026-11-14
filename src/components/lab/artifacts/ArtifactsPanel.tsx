@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { experimentPath } from '../../../content/lab'
 import { localizedPath } from '../../../i18n/paths'
 import { useI18n } from '../../../i18n/useI18n'
+import { formatMediumDate } from '../../../utils/format'
 import { Container } from '../../Container/Container'
 import { Section } from '../../Section/Section'
 import { fill, useLocalized } from '../core/useLabText'
@@ -69,7 +70,7 @@ export function ArtifactsPanel() {
     downloadBlob(blob, safeFilename(artifact.name, 'png'))
   }
 
-  const date = (time: number) => new Intl.DateTimeFormat(lang, { dateStyle: 'medium' }).format(new Date(time))
+  const date = (time: number) => formatMediumDate(lang, time)
   const mb = (bytes: number) => (bytes / 1_048_576).toFixed(bytes > 1_073_741_824 ? 0 : 1)
 
   return (

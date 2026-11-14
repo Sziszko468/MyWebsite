@@ -158,7 +158,7 @@ export const en = {
   kinds: { job: 'Job offer', collaboration: 'Collaboration', project: 'Project', other: 'Other' },
   needs: { website: 'Website', webapp: 'Web application', improve: 'Improve an existing site', ui: 'UI implementation', integrations: 'API & integrations', unsure: 'Not sure yet' },
   plans: { launch: 'Launch', grow: 'Grow', build: 'Build', care: 'Care', custom: 'Custom project' },
-  objectives: { present: 'Present myself or my business', leads: 'Get enquiries', sell: 'Sell online', process: 'Support a process', improve: 'Improve what exists', other: 'Something else' },
+  objectives: { present: 'Present myself or my business', leads: 'Get inquiries', sell: 'Sell online', process: 'Support a process', improve: 'Improve what exists', other: 'Something else' },
   timings: { unsure: 'Not sure', asap: 'As soon as possible', weeks: 'Within weeks', months: 'Within months', flexible: 'Flexible' },
   languages: { hu: 'Hungarian', en: 'English', nl: 'Dutch' },
 

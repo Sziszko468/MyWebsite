@@ -155,7 +155,7 @@ async function main() {
       expect(owner.text.includes(`${BASE}/admin/quotes/`), 'the dashboard link is in the owner notification')
       expect(owner.text.includes('Visser Bakery') && owner.text.includes('around three thousand euro'), 'company and budget are in it')
       const confirmation = await waitForMail((mail) => mail.to.includes(VISITOR) && mail.subject.includes(reference), 'the confirmation')
-      expect(confirmation.subject === `We will review your enquiry soon — ${reference}`, `subject: ${confirmation.subject}`)
+      expect(confirmation.subject === `We will review your inquiry soon — ${reference}`, `subject: ${confirmation.subject}`)
       statusLink = linkOf(confirmation.text, 'request')
       expect(statusLink, 'the status link is in the confirmation')
       expect(!/within \d|guarantee/i.test(confirmation.text), 'no promise of an answer time')

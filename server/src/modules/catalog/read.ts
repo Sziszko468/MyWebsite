@@ -7,8 +7,9 @@ import type { Catalog, ContentRecord, ExtraRecord, PackageRecord, Price, Service
  * The catalogue as the public API shows it. Only active rows get here (repository.ts is asked for them), no
  * customer data exists in these models, and a price is always the shape the website already understands:
  * `{ kind: 'quote' }`, `{ kind: 'tbd' }` or `{ kind: 'from', amount, currency }` in whole currency units.
- * `lang` is one language (a missing translation falls back to Hungarian, the site's default) or `all`, which
- * gives every translation that exists, for a client that builds a page in all three languages (the website's build).
+ * `lang` is one language or `all`, which gives every translation that exists, for a client that builds a page in all
+ * three languages (the website's build). A record that has nothing in the asked language is left out of a list and is
+ * "not found" as a single record: a missing translation is never filled with another language (PROMPT 23).
  */
 
 export type LangParam = Language | 'all'
@@ -20,24 +21,31 @@ export function parseLang(value: string | null): LangParam {
 }
 
 function pick<T>(translations: Translations<T>, lang: Language): T | undefined {
-  return translations[lang] ?? translations.hu ?? Object.values(translations)[0]
+  return translations[lang]
 }
 
 function priceOut(price: Price): Record<string, unknown> {
   return price.kind === 'from' ? { kind: 'from', amount: price.amount, currency: price.currency } : { kind: price.kind }
 }
 
-function localized<T extends object>(translations: Translations<T>, lang: LangParam): Record<string, unknown> {
+function localized<T extends object>(translations: Translations<T>, lang: LangParam): Record<string, unknown> | null {
   if (lang === 'all') return { translations }
-  return { ...(pick(translations, lang) ?? {}) }
+  const text = pick(translations, lang)
+  return text === undefined ? null : ({ ...text } as Record<string, unknown>)
 }
 
-export function serviceOut(service: ServiceRecord, lang: LangParam): Record<string, unknown> {
-  return { slug: service.slug, category: service.category, position: service.position, packages: service.packages, ...localized(service.translations, lang) }
+export function serviceOut(service: ServiceRecord, lang: 'all'): Record<string, unknown>
+export function serviceOut(service: ServiceRecord, lang: LangParam): Record<string, unknown> | null
+export function serviceOut(service: ServiceRecord, lang: LangParam): Record<string, unknown> | null {
+  const text = localized(service.translations, lang)
+  return text && { slug: service.slug, category: service.category, position: service.position, packages: service.packages, ...text }
 }
 
-export function packageOut(pack: PackageRecord, lang: LangParam): Record<string, unknown> {
-  return {
+export function packageOut(pack: PackageRecord, lang: 'all'): Record<string, unknown>
+export function packageOut(pack: PackageRecord, lang: LangParam): Record<string, unknown> | null
+export function packageOut(pack: PackageRecord, lang: LangParam): Record<string, unknown> | null {
+  const text = localized(pack.translations, lang)
+  return text && {
     code: pack.code,
     featured: pack.featured,
     position: pack.position,
@@ -46,22 +54,27 @@ export function packageOut(pack: PackageRecord, lang: LangParam): Record<string,
     quoteRequired: pack.quoteRequired,
     needs: pack.needs,
     extras: pack.extras,
-    ...localized(pack.translations, lang),
+    ...text,
   }
 }
 
-export function extraOut(extra: ExtraRecord, lang: LangParam): Record<string, unknown> {
-  return { code: extra.code, position: extra.position, price: priceOut(extra.price), vat: extra.vat, appliesTo: extra.appliesTo, ...localized(extra.translations, lang) }
+export function extraOut(extra: ExtraRecord, lang: 'all'): Record<string, unknown>
+export function extraOut(extra: ExtraRecord, lang: LangParam): Record<string, unknown> | null
+export function extraOut(extra: ExtraRecord, lang: LangParam): Record<string, unknown> | null {
+  const text = localized(extra.translations, lang)
+  return text && { code: extra.code, position: extra.position, price: priceOut(extra.price), vat: extra.vat, appliesTo: extra.appliesTo, ...text }
 }
 
-export function faqOut(item: ContentRecord, lang: LangParam): Record<string, unknown> {
+export function faqOut(item: ContentRecord, lang: 'all'): Record<string, unknown>
+export function faqOut(item: ContentRecord, lang: LangParam): Record<string, unknown> | null
+export function faqOut(item: ContentRecord, lang: LangParam): Record<string, unknown> | null {
   if (lang === 'all') {
     const translations: Record<string, unknown> = {}
     for (const [code, text] of Object.entries(item.translations)) translations[code] = { question: text.title, answer: text.description }
     return { slug: item.slug, position: item.position, translations }
   }
   const text = pick(item.translations, lang)
-  return { slug: item.slug, position: item.position, question: text?.title ?? '', answer: text?.description ?? '' }
+  return text ? { slug: item.slug, position: item.position, question: text.title, answer: text.description } : null
 }
 
 /** The service categories: what the services are grouped by, with the services in each. */

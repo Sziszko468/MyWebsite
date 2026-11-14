@@ -92,6 +92,6 @@ describe('buildDocumentMeta', () => {
   })
 
   it('maps each language to an Open Graph locale', () => {
-    expect(LANGUAGES.map(ogLocale)).toEqual(['hu_HU', 'en_US', 'nl_NL'])
+    expect(LANGUAGES.map(ogLocale)).toEqual(['hu_HU', 'en_GB', 'nl_NL'])
   })
 })

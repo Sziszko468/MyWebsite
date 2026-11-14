@@ -1,4 +1,5 @@
 import { lazy, useEffect, useRef, useState, type RefObject } from 'react'
+import { formatStamp } from '../../../../utils/format'
 import { KeepWork } from '../../artifacts/KeepWork'
 import type { StageCapture } from '../../core/useStageCapture'
 import { fill, useLabText, useLocalized } from '../../core/useLabText'
@@ -22,7 +23,6 @@ import { MAX_LETTERS, PHRASES, sanitizeText } from './typeLayout'
 const TypeScene = lazy(() => import('./TypeScene'))
 
 /** The time, short, to tell one kept work from another. */
-const stamp = () => new Date().toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
 
 const CAMERA = { fov: 36, position: [0, 0, 17] as [number, number, number] }
 
@@ -30,7 +30,7 @@ const random = <T,>(list: readonly T[]): T => list[Math.floor(Math.random() * li
 
 function TypePanel({ controls, stage }: { controls: RefObject<TypeControls>; stage: RefObject<StageCapture | null> }) {
   const t = useLocalized(typeText)
-  const { text } = useLabText()
+  const { text, lang } = useLabText()
   const [state, setState] = useState<TypeControls>(() => ({ ...controls.current }))
   // What is in the box, which may be half-typed: the scene gets the cleaned words as they are typed.
   const [typed, setTyped] = useState(state.text)
@@ -166,7 +166,7 @@ function TypePanel({ controls, stage }: { controls: RefObject<TypeControls>; sta
       <KeepWork
         type="typography"
         stage={stage}
-        name={() => `${controls.current.text.slice(0, 24)} ${stamp()}`}
+        name={() => `${controls.current.text.slice(0, 24)} ${formatStamp(lang)}`}
         payload={() => typeWork(controls.current) as unknown as Record<string, unknown>}
       />
     </>

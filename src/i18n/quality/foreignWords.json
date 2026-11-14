@@ -1,0 +1,12 @@
+{
+  "_comment": "Words that belong to exactly one of the site's three languages and to neither of the others (PROMPT 23). A word that means something in two of them (most, over, van, is) is NOT here. Read by foreign.ts (the i18n check) and by tools/e2e/localization-journey.cjs (the rendered pages), so both look for the same words.",
+  "en": [
+    "the", "and", "with", "your", "you", "our", "will", "this", "that", "from", "have", "are", "not", "but", "which", "their", "these", "those", "been", "would", "could", "should", "about", "into", "than", "then", "them", "they", "what", "when", "where", "while", "also", "only", "more", "other", "such", "some", "any", "can", "does", "did", "its"
+  ],
+  "hu": [
+    "és", "hogy", "nem", "vagy", "csak", "ezt", "mint", "már", "még", "kell", "nélkül", "között", "után", "előtt", "szerint", "mert", "pedig", "aztán", "egy", "lesz", "volt", "vannak", "nekem", "neked"
+  ],
+  "nl": [
+    "het", "niet", "voor", "naar", "dat", "ook", "wij", "jouw", "jij", "zijn", "worden", "wordt", "kunnen", "wel", "nog", "maar", "deze", "dit", "door", "bij", "uit", "tot", "geen", "alle", "een"
+  ]
+}

@@ -4,6 +4,8 @@ import { LANGUAGES, type Language } from '../config'
 import { allowances } from './allowances'
 import { scanHardcoded } from './hardcoded'
 import { buildInventory } from './inventory'
+import { scanLiterals } from './literals'
+import { scanLocaleReferences } from './locales'
 import { checkEntries } from './rules'
 import { checkSpelling, loadSpellCheckers, type SpellingResult } from './spelling'
 import type { Finding, Inventory } from './types'
@@ -21,7 +23,7 @@ import type { Finding, Inventory } from './types'
 
 export type Mode = 'check' | 'validate' | 'report'
 
-const CHECK_RULES = new Set(['load', 'missing', 'empty', 'placeholders', 'numbers', 'junk', 'glossary', 'register', 'untranslated', 'length', 'hardcoded'])
+const CHECK_RULES = new Set(['load', 'missing', 'empty', 'placeholders', 'numbers', 'junk', 'glossary', 'register', 'untranslated', 'length', 'hardcoded', 'foreign', 'locale', 'literal'])
 const VALIDATE_RULES = new Set(['encoding', 'diacritics', 'whitespace', 'quotes', 'brackets', 'spelling'])
 
 export interface RunResult {
@@ -77,7 +79,17 @@ export async function run(options: { root: string; mode: Mode; all?: boolean }):
   const src = join(root, 'src')
   const inventory = await buildInventory()
   const everything: Finding[] = [...inventory.findings, ...checkEntries(inventory.entries, allowances)]
-  if (mode !== 'validate') everything.push(...scanHardcoded(src))
+  if (mode !== 'validate') {
+    everything.push(...scanHardcoded(src), ...scanLiterals(src))
+    // Every reference to a language in the code: the website, the administration, the edge Worker and the backend (paths relative to `src/` or to the repository).
+    everything.push(
+      ...scanLocaleReferences([
+        { directory: src, base: src },
+        { directory: join(root, 'server', 'src'), base: root },
+        { directory: join(root, 'worker'), base: root },
+      ]),
+    )
+  }
 
   let spelling: SpellingResult | null = null
   let skipped: Partial<Record<Language, string>> = {}

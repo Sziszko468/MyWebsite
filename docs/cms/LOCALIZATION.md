@@ -37,3 +37,16 @@ By default publishing requires **all three** languages to be complete, so a publ
 ## Checks
 
 `server/test/cms22.test.ts` (availability per language, blocks needing all languages to publish, profile refusing a half-translated text), `src/projects/cms22.test.ts` (no fallback in `viewOf`, Dutch page without Hungarian words, per-language blocks, head and sitemap per language), the localization checks above, and the browser journey, which marks every text with its language (`HUMARK`, `ENMARK`, `NLMARK`) and fails if a mark of another language appears on a page.
+
+## PROMPT 23: the same rule in the places that had not been checked
+
+The rule above was applied to the portfolio. PROMPT 23 looked for it in every other place that serves or writes a translation, and found four that still filled a gap with Hungarian or English. Full list: [docs/i18n/localization-audit-23.md](../i18n/localization-audit-23.md).
+
+| Place | What it did | Now |
+| --- | --- | --- |
+| Public catalogue API, `GET /api/services`, `/api/packages`, `/api/shop/extras`, `/api/content/faq` with `?lang=nl` (or `en`, `hu`) | a record with no Dutch text was answered with its Hungarian text, labelled as Dutch (the website itself does not use this form: it asks for `lang=all` and picks per language) | a record with nothing in the asked language is **left out of a list** and is `404` as a single record; `lang=all` still gives exactly the languages that exist. A test in `server/test/catalog.test.ts` removes a Dutch translation and checks all of it |
+| The live sitemap, project pages | `x-default` pointed at the Hungarian page, while the page's own head (and the built sitemap) say English | the same `x-default` everywhere: English when the project has it, else its first language; `DEFAULT_LANGUAGE` is one constant on the server too, and `server/test/localization23.test.ts` fails if it differs from the website's |
+| A quotation draft saved without a `language` | the draft's language became `en`, so a Hungarian customer's quotation, its e-mails and its page would have been English | the quotation keeps its own language when the body names none; an explicit value still wins and an unknown one is refused (`server/test/localization23.test.ts`) |
+| The "what was chosen" line of a customer's confirmation e-mail, for a request saved before names were stored with it | a package without a name in the e-mail's language was shown by its **Hungarian** name | it is shown by its code (what the request itself stores), never by another language's name |
+
+Not changed, on purpose: the AI assistant's knowledge (`server/src/modules/ai/knowledge.ts`) still hands the model the Hungarian text of a record that has no text in the visitor's language: it is input for a model that writes its own answer in the visitor's language, not text a visitor reads; and the administration's lists show the first available language of a title (`titleOf`) when the administrator's own language has none, because a list row with no name at all would be unusable (the editor's language bar and the chips say which language is missing).

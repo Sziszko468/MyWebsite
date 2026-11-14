@@ -14,6 +14,11 @@ import { AI_MODEL_ID } from './modules/ai/model.ts'
 export type AppEnv = 'development' | 'test' | 'production'
 export type Language = 'hu' | 'en' | 'nl'
 export const LANGUAGES: readonly Language[] = ['hu', 'en', 'nl']
+/**
+ * The language of every visitor the site cannot place, and of the `x-default` alternate. The same value as `DEFAULT_LANGUAGE` in
+ * src/i18n/config.ts: `test/contract.test.ts` fails when the two differ, so a page's own head and the live sitemap never disagree.
+ */
+export const DEFAULT_LANGUAGE: Language = 'en'
 
 export interface SmtpConfig {
   host: string

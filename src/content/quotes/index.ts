@@ -100,7 +100,7 @@ export const quoteText = {
       accepted: tri('Ezt az ajánlatot elfogadtad ekkor: {date}. Köszönjük!', 'You accepted this quote on {date}. Thank you!', 'Je hebt deze offerte geaccepteerd op {date}. Bedankt!'),
       acceptedNote: tri('Hamarosan jelentkezünk a projekt indításáról. Az elfogadás nem számla, és ezen az oldalon nem történt fizetés.', 'We will be in touch soon about starting the project. Accepting is not an invoice, and no payment was made on this page.', 'We nemen binnenkort contact op over de start van het project. Acceptatie is geen factuur en op deze pagina is niet betaald.'),
       declined: tri('Ezt az ajánlatot elutasítottad ekkor: {date}. Köszönjük, hogy átnézted.', 'You declined this quote on {date}. Thank you for looking at it.', 'Je hebt deze offerte afgewezen op {date}. Bedankt voor het bekijken.'),
-      expired: tri('Ez az ajánlat lejárt ({date}), már nem fogadható el. Kérhetsz újat.', 'This offer expired on {date} and can no longer be accepted. You can ask for a new one.', 'Dit voorstel is verlopen op {date} en kan niet meer worden geaccepteerd. Je kunt om een nieuw voorstel vragen.'),
+      expired: tri('Ez az ajánlat lejárt ({date}), már nem fogadható el. Kérhetsz újat.', 'This quote expired on {date} and can no longer be accepted. You can ask for a new one.', 'Deze offerte is verlopen op {date} en kan niet meer worden geaccepteerd. Je kunt om een nieuwe offerte vragen.'),
     },
     actions: {
       heading: tri('Mit szeretnél tenni?', 'What would you like to do?', 'Wat wil je doen?'),
@@ -142,7 +142,7 @@ export const quoteText = {
       tooLong: tri('Ez túl hosszú.', 'This is too long.', 'Dit is te lang.'),
       alreadyUsed: tri('Ezt a műveletet már végrehajtottuk.', 'This action has already been carried out.', 'Deze actie is al uitgevoerd.'),
       alreadyDecided: tri('Erről az ajánlatról már döntés született.', 'This quote has already been decided.', 'Over deze offerte is al beslist.'),
-      quoteExpired: tri('Ez az ajánlat lejárt, már nem fogadható el.', 'This offer has expired and can no longer be accepted.', 'Dit voorstel is verlopen en kan niet meer worden geaccepteerd.'),
+      quoteExpired: tri('Ez az ajánlat lejárt, már nem fogadható el.', 'This quote has expired and can no longer be accepted.', 'Deze offerte is verlopen en kan niet meer worden geaccepteerd.'),
       generic: tri('Nem sikerült. Nem történt változás: töltsd újra az oldalt, és próbáld újra.', 'That did not work. Nothing has changed: reload the page and try again.', 'Dat is niet gelukt. Er is niets veranderd: laad de pagina opnieuw en probeer het nog eens.'),
       needsReload: tri('Töltsd újra az oldalt, és próbáld újra.', 'Reload the page and try again.', 'Laad de pagina opnieuw en probeer het nog eens.'),
     },

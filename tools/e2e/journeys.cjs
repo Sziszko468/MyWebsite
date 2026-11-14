@@ -386,6 +386,9 @@ async function journeyC(browser) {
       await page.getByText(marker).first().waitFor({ timeout: 15000 })
       await page.getByText(marker).first().click()
       await page.waitForURL(/\/admin\/inquiries\/[^/]+/)
+      // The list is still on screen until the detail page has arrived (React Router navigates in a transition) and the sender's name is in both:
+      // wait for something only the detail page has, or the next step finds one status selector per list row (a race, seen once in three runs).
+      await page.getByLabel('Add a note').waitFor()
       await page.getByText('Journey Visitor').first().waitFor()
     })
     await step(page, 'change the status of the message and add an internal note', async () => {

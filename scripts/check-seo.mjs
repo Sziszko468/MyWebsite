@@ -27,6 +27,14 @@ const decode = (value) => value.replace(/&quot;/g, '"').replace(/&lt;/g, '<').re
 const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/([a-zA-Z:-]+)="([^"]*)"/g)].map((m) => [m[1], decode(m[2])]))
 const tagsOf = (html, name) => [...html.matchAll(new RegExp(`<${name}\\s[^>]*>`, 'g'))].map((m) => attrsOf(m[0]))
 
+const OG_LOCALE = { hu: 'hu_HU', en: 'en_GB', nl: 'nl_NL' }
+// Pages whose TITLE is the same in two languages on purpose, with the reason (a description must always differ). Add one here, with its reason,
+// rather than loosening the check.
+const SAME_TITLE_ON_PURPOSE = new Map([
+  ['/contact/', '"Contact" is the Dutch word as well as the English one'],
+  ...['particle-universe', 'liquid-matter', 'type-in-motion', 'infinite-space', 'chromatic-distortion', 'generative-objects'].map((id) => [`/lab/${id}/`, 'the name of a Lab experience is a proper name, written in English in every language']),
+])
+
 const pages = new Map() // url path -> parsed head
 for await (const file of walk(dist)) {
   const rel = relative(dist, file).split(sep).join('/')
@@ -98,6 +106,44 @@ if (configured) {
   }
   check(indexablePages.every(([path]) => path === '/' || sitemapPaths.has(path)), 'sitemap.xml', 'misses an indexable page')
 
+  // The same page in every language: the languages it has, what each says about the others, and where x-default points. A page that says it
+  // exists in a language that has no indexable page (or the other way round) sends a crawler to a page that is not there or hides one that is.
+  const groups = new Map()
+  for (const [path, page] of indexablePages) {
+    if (path === '/') continue
+    const key = path.replace(/^\/(hu|en|nl)\//, '/')
+    groups.set(key, [...(groups.get(key) ?? []), { path, page }])
+  }
+  for (const [key, members] of groups) {
+    const have = members.map((m) => m.page.lang).sort()
+    for (const { page } of members) {
+      const said = page.alternates.filter((a) => a.hreflang !== 'x-default').map((a) => a.hreflang).sort()
+      check(JSON.stringify(said) === JSON.stringify(have), page.rel, `says it exists in [${said.join(', ')}] but the indexable pages of ${key} are in [${have.join(', ')}]`)
+      const expected = members.find((m) => m.page.lang === 'en') ?? members.slice().sort((a, b) => ['hu', 'en', 'nl'].indexOf(a.page.lang) - ['hu', 'en', 'nl'].indexOf(b.page.lang))[0]
+      const xDefault = page.alternates.find((a) => a.hreflang === 'x-default')
+      check(xDefault && new URL(xDefault.href).pathname === expected.path, page.rel, `x-default should point to ${expected.path} (English when the page has it), points to ${xDefault ? new URL(xDefault.href).pathname : 'nothing'}`)
+    }
+    // A translation that kept another language's title or description is a page that was never translated (a brand-only title is the one exception).
+    for (const field of ['titles', 'description']) {
+      const seen = new Map()
+      for (const { page } of members) {
+        const value = page[field][0]
+        if (seen.has(value) && !(field === 'titles' && SAME_TITLE_ON_PURPOSE.has(key))) fail(page.rel, `has the same ${field === 'titles' ? 'title' : 'description'} as the ${seen.get(value)} page of ${key}: it looks untranslated`)
+        seen.set(value, page.lang)
+      }
+    }
+  }
+
+  // The sitemap says the same as the pages: every entry carries the alternates its page's head carries.
+  for (const block of sitemap.match(/<url>[\s\S]*?<\/url>/g) ?? []) {
+    const loc = decode(block.match(/<loc>([^<]+)<\/loc>/)?.[1] ?? '')
+    const page = pages.get(new URL(loc).pathname)
+    if (!page || !page.alternates.length) continue
+    const fromSitemap = [...block.matchAll(/<xhtml:link\s[^>]*>/g)].map((m) => attrsOf(m[0])).map((a) => `${a.hreflang} ${a.href}`).sort()
+    const fromHead = page.alternates.map((a) => `${a.hreflang} ${a.href}`).sort()
+    check(JSON.stringify(fromSitemap) === JSON.stringify(fromHead), 'sitemap.xml', `the alternates of ${loc} differ from the ones in the page's head`)
+  }
+
   const titlesByLang = new Map()
   const descriptionsByLang = new Map()
   for (const [path, page] of indexablePages) {
@@ -109,6 +155,11 @@ if (configured) {
     }
     check(page.canonical.length === 1 && page.canonical[0] === self, where, `canonical should be ${self}, is ${page.canonical.join(', ') || 'missing'}`)
     check(page.og('og:url')[0] === self, where, 'og:url should equal the canonical address')
+    // The Open Graph locale follows the page's language (English is British, like its spelling), and every OTHER language of the page is an alternate.
+    check(page.og('og:locale').length === 1 && page.og('og:locale')[0] === OG_LOCALE[page.lang], where, `og:locale should be ${OG_LOCALE[page.lang]}, is ${page.og('og:locale').join(', ') || 'missing'}`)
+    const ogAlternates = page.og('og:locale:alternate').slice().sort()
+    const otherLocales = page.alternates.filter((a) => a.hreflang !== 'x-default' && a.hreflang !== page.lang).map((a) => OG_LOCALE[a.hreflang]).sort()
+    check(JSON.stringify(ogAlternates) === JSON.stringify(otherLocales), where, `og:locale:alternate [${ogAlternates.join(', ')}] should match the page's other languages [${otherLocales.join(', ')}]`)
     const codes = page.alternates.map((a) => a.hreflang)
     check(new Set(codes).size === codes.length, where, 'repeats a hreflang')
     check(codes.includes('x-default'), where, 'has no x-default alternate')

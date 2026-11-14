@@ -165,7 +165,7 @@ describe('canonical addresses and language alternates', () => {
     for (const { page, lang } of indexable) {
       const head = headOf(page.id, lang)
       expect(head.lang).toBe(lang)
-      expect(field(head, 'property', 'og:locale')).toBe({ hu: 'hu_HU', en: 'en_US', nl: 'nl_NL' }[lang])
+      expect(field(head, 'property', 'og:locale')).toBe({ hu: 'hu_HU', en: 'en_GB', nl: 'nl_NL' }[lang])
     }
   })
 })

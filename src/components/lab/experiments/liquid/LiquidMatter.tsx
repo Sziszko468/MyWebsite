@@ -2,6 +2,7 @@ import { lazy, useEffect, useRef, useState, type RefObject } from 'react'
 import { KeepWork } from '../../artifacts/KeepWork'
 import type { StageCapture } from '../../core/useStageCapture'
 import { useLabText, useLocalized } from '../../core/useLabText'
+import { formatStamp } from '../../../../utils/format'
 import { ExperimentFrame } from '../../ui/ExperimentFrame'
 import { LabAction, LabActions, LabChoice, LabColour, LabGroup, LabSlider } from '../../ui/LabControls'
 import { LIQUID_DEFAULTS, liquidHandoff, liquidText, materialWork, type LiquidControls } from './liquidControls'
@@ -9,9 +10,6 @@ import { MATTER_NAMES, MATTERS, type MatterId } from './liquidMaterials'
 
 // The scene (Three.js, the shaders) loads after the page's words and controls.
 const LiquidScene = lazy(() => import('./LiquidScene'))
-
-/** The time, short, to tell one kept work from another. */
-const stamp = () => new Date().toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
 
 const CAMERA = { fov: 40, position: [0, 0, 6.2] as [number, number, number] }
 
@@ -24,7 +22,7 @@ function LiquidPanel({
 }) {
   const t = useLocalized(liquidText)
   const names = useLocalized(MATTER_NAMES)
-  const { text } = useLabText()
+  const { text, lang } = useLabText()
   const [state, setState] = useState<LiquidControls>(() => ({ ...controls.current }))
 
   const update = (patch: Partial<LiquidControls>) => {
@@ -106,7 +104,7 @@ function LiquidPanel({
       <KeepWork
         type="material"
         stage={stage}
-        name={() => `${names[controls.current.matter]} ${stamp()}`}
+        name={() => `${names[controls.current.matter]} ${formatStamp(lang)}`}
         payload={() => materialWork(controls.current) as unknown as Record<string, unknown>}
       />
     </>

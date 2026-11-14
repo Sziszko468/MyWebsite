@@ -31,7 +31,8 @@ const OWN_META: Partial<Record<PageDef['id'], (t: Dictionary) => { title: string
   contact: (t) => t.contactPage.meta,
 }
 
-const OG_LOCALE: Record<Language, string> = { hu: 'hu_HU', en: 'en_US', nl: 'nl_NL' }
+// English is British (the site's spelling, dates and `LOCALE_TAGS`), so its Open Graph locale is en_GB.
+const OG_LOCALE: Record<Language, string> = { hu: 'hu_HU', en: 'en_GB', nl: 'nl_NL' }
 
 export function ogLocale(lang: Language): string {
   return OG_LOCALE[lang]

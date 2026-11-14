@@ -312,7 +312,7 @@ describe('the confirmation to the person who wrote', () => {
     await settle()
     await settle()
     const [mail] = toVisitor()
-    expect(mail.subject).toMatch(/^We will review your enquiry soon — CC-\d{4}-\d{6}$/)
+    expect(mail.subject).toMatch(/^We will review your inquiry soon — CC-\d{4}-\d{6}$/)
     expect(mail.text).toContain('Your request has been received and we will review it soon')
     expect(mail.text).toMatch(/Website/)
     expect(mail.text).not.toMatch(/€|EUR|HUF|\bFt\b|price|prijs|ár\b|estimate|\$/i)

@@ -1,4 +1,5 @@
 import { LANGUAGES, type Language } from '../config'
+import { foreignIn } from './foreign'
 import { glossary } from './glossary'
 import type { Finding, Severity, TextEntry } from './types'
 
@@ -16,9 +17,11 @@ export interface Allowances {
   sameOnPurpose: (entry: TextEntry, text: string) => boolean
   /** Texts where a number may be written differently in the languages. */
   numbersMayDiffer: (entry: TextEntry) => boolean
+  /** Names and fixed terms that are written in another language inside a sentence on purpose; removed before the foreign-word scan. */
+  foreignPhrases?: readonly RegExp[]
 }
 
-export const noAllowances: Allowances = { sameOnPurpose: () => false, numbersMayDiffer: () => false }
+export const noAllowances: Allowances = { sameOnPurpose: () => false, numbersMayDiffer: () => false, foreignPhrases: [] }
 
 const finding = (rule: string, severity: Severity, entry: TextEntry, message: string, lang?: Language, sample?: string): Finding => ({
   rule,
@@ -117,7 +120,13 @@ export function checkEntry(entry: TextEntry, allowances: Allowances = noAllowanc
     const formal = FORMAL[lang]
     if (formal && formal.test(text)) out.push(finding('register', 'error', entry, lang === 'hu' ? 'formal address (Ön…) in a site that says "te"' : 'formal address (u/uw) in a site that says "je"', lang, text))
 
+    // Words of another language inside this one (rule `foreign`, foreign.ts): an untranslated phrase, or a sentence that changes language half way.
+    for (const hit of foreignIn(text, lang, allowances.foreignPhrases ?? [])) {
+      out.push(finding('foreign', 'error', entry, `${lang.toUpperCase()} text has ${hit.from.toUpperCase()} words: ${hit.words.join(', ')}`, lang, text))
+    }
+
     for (const term of glossary) {
+      if (term.sources && !term.sources.test(entry.source)) continue
       for (const bad of term.forbidden[lang] ?? []) {
         if (bad.test(text)) out.push(finding('glossary', 'error', entry, `${lang.toUpperCase()}: "${term.concept}" must be written as ${term.use[lang]}`, lang, text))
       }

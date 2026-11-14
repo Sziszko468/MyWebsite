@@ -1,6 +1,7 @@
 import type { ServicePrice, VatMode } from '../../content/pricing'
 import { useI18n } from '../../i18n/useI18n'
 import { cx } from '../../utils/cx'
+import { formatPrice } from '../../utils/format'
 import styles from './PriceTag.module.scss'
 
 interface PriceTagProps {
@@ -28,7 +29,7 @@ export function PriceTag({ price, vat = 'unspecified', quoteRequired = false, no
         <>
           <span className={styles.label}>{t.services.priceFrom}</span>
           <span className={styles.value}>
-            {new Intl.NumberFormat(lang, { style: 'currency', currency: price.currency, maximumFractionDigits: 0 }).format(price.amount)}
+            {formatPrice(price.amount, price.currency, lang)}
             {vat !== 'unspecified' && <span className={styles.vat}> {t.services.vat[vat]}</span>}
           </span>
           {quoteRequired && <span className={styles.hint}>{t.services.priceExact}</span>}

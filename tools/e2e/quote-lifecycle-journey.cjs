@@ -185,7 +185,7 @@ async function main() {
     })
     await step('the customer gets a confirmation in English with the status link and no promise of a time; the owner is told', async () => {
       const confirmation = await waitForMail((m) => m.to.includes(ANNA) && m.subject.includes(state.refA), 'the confirmation')
-      expect(confirmation.subject === `We will review your enquiry soon — ${state.refA}`, `subject: ${confirmation.subject}`)
+      expect(confirmation.subject === `We will review your inquiry soon — ${state.refA}`, `subject: ${confirmation.subject}`)
       state.statusA = linkOf(confirmation.text, 'request')
       expect(state.statusA, 'the status link is in the confirmation')
       expect(!/within \d|guarantee/i.test(confirmation.text), 'no promise of an answer time')
@@ -376,6 +376,21 @@ async function main() {
       const broken = await brokenWords(page)
       expect(broken.length === 0, `a word is broken in the middle on a button at ${CW} px: ${broken.join(', ')}`)
       await shot(page, `E1-customer-offer-${CW}`)
+    })
+    await step('the words the administrator wrote keep their own language when the page around them is in another one (PROMPT 23)', async () => {
+      // The same secure link opened under /en/: the page's chrome is English, the quotation is Hungarian, and a screen reader is told so.
+      await page.goto(state.quoteLink.replace('/hu/quote/', '/en/quote/'), { waitUntil: 'networkidle' })
+      await page.getByRole('heading', { name: TITLE }).waitFor({ timeout: 10000 })
+      const marks = await page.evaluate(() => ({
+        page: document.documentElement.lang,
+        title: document.querySelector('h1')?.getAttribute('lang') ?? null,
+        terms: [...document.querySelectorAll('p')].filter((p) => p.textContent?.includes('Ennek az ajánlatnak a feltételei.')).map((p) => p.getAttribute('lang')),
+      }))
+      expect(marks.page === 'en', `the page is English around it: ${marks.page}`)
+      expect(marks.title === 'hu', `the title says it is Hungarian: ${marks.title}`)
+      expect(marks.terms.length > 0 && marks.terms.every((value) => value === 'hu'), `the terms say they are Hungarian: ${marks.terms.join(',')}`)
+      await page.goto(state.quoteLink, { waitUntil: 'networkidle' })
+      await page.getByRole('heading', { name: TITLE }).waitFor({ timeout: 10000 })
     })
   }
 

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { AppContext } from '../../context.ts'
-import { LANGUAGES, type Language } from '../../config.ts'
+import { DEFAULT_LANGUAGE, LANGUAGES, type Language } from '../../config.ts'
 import type { Reply } from '../../http/reply.ts'
 import { livePages } from '../projects/service.ts'
 
@@ -34,7 +34,8 @@ export function liveSitemap(app: AppContext, directory: string): Reply | null {
   const location = (language: Language, slug: string) => `${origin}/${language}/work/${slug}/`
   const added = [...pages].flatMap(([slug, languages]) => {
     if (languages.length === 0) return []
-    const fallback = languages.includes('hu') ? 'hu' : languages[0]
+    // The same `x-default` as the page's own head (src/seo/head.ts): English when the project has it, else its first language.
+    const fallback = languages.includes(DEFAULT_LANGUAGE) ? DEFAULT_LANGUAGE : languages[0]
     const alternates = [...languages.map((language) => ({ hreflang: language as string, href: location(language, slug) })), { hreflang: 'x-default', href: location(fallback, slug) }]
       .map((link) => `    <xhtml:link rel="alternate" hreflang="${link.hreflang}" href="${escape(link.href)}"/>`)
       .join('\n')

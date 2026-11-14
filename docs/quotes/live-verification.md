@@ -24,7 +24,7 @@ Use a test customer address and the owner's address, and write the observed resu
 2. **Database persistence** — Administration → Quote requests shows it with the right type (*Package-based*), source (*Shop*), contact data and budget.
 3. **Unique reference** — send a second one; the number is the next one. Send the same one again within ten minutes; the same reference comes back and nothing is sent twice.
 4. **Administrator notification** — the owner's inbox has *New quote request (CC-…)* with a working link to the request.
-5. **Customer confirmation** — the test mailbox has *We will review your enquiry soon — CC-…* (or the Hungarian / Dutch subject), with the status link. Open the status link: only what was shared is shown.
+5. **Customer confirmation** — the test mailbox has *We will review your inquiry soon — CC-…* (or the Hungarian / Dutch subject), with the status link. Open the status link: only what was shared is shown.
 6. **Quotation creation** — create a quotation, save it, read the totals.
 7. **Quotation e-mail** — send it; the test mailbox has the quotation mail with the total, validity and the secure link. In the administration the message becomes *Sent*, then *Delivered* after the webhook. Look at it in a desktop client and on a phone client.
 8. **Secure quote access** — open the link on a phone: the whole offer; no sideways scroll; the choices stay on the screen.

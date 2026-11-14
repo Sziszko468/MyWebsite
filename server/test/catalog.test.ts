@@ -20,12 +20,33 @@ describe('the public catalogue', () => {
     expect(nl.json.data[0].features.length).toBeGreaterThan(2)
   })
 
-  it('gives every translation with lang=all, and falls back to Hungarian for a missing one', async () => {
+  it('gives every translation with lang=all, and never fills a missing one with another language (PROMPT 23)', async () => {
     const all = await server.api('/api/services/website?lang=all')
     expect(Object.keys(all.json.data.translations).sort()).toEqual(['en', 'hu', 'nl'])
     server.db.run("DELETE FROM service_translations WHERE service_id = (SELECT id FROM services WHERE slug = 'ui') AND language = 'nl'")
+    // In Dutch the service has nothing to say now: it is not listed and not found, and no Hungarian title is passed off as Dutch.
     const nl = await server.api('/api/services/ui?lang=nl')
-    expect(nl.json.data.title).toBe((await server.api('/api/services/ui?lang=hu')).json.data.title)
+    expect(nl.status).toBe(404)
+    expect(nl.json.error.code).toBe('not_found')
+    const list = await server.api('/api/services?lang=nl')
+    expect(list.json.data.map((s: { slug: string }) => s.slug)).toEqual(['website', 'webapp', 'integrations'])
+    // The other languages, and the all-languages form, still have it, with exactly the languages that exist.
+    expect((await server.api('/api/services/ui?lang=hu')).status).toBe(200)
+    expect((await server.api('/api/services/ui?lang=en')).status).toBe(200)
+    const rest = await server.api('/api/services/ui?lang=all')
+    expect(Object.keys(rest.json.data.translations).sort()).toEqual(['en', 'hu'])
+  })
+
+  it('leaves a package, an add-on and a question out of a language that has none of its words, instead of showing another language', async () => {
+    server.db.run("DELETE FROM package_translations WHERE package_id = (SELECT id FROM packages WHERE code = 'grow') AND language = 'nl'")
+    server.db.run("DELETE FROM extra_translations WHERE extra_id = (SELECT id FROM extras WHERE code = 'pages') AND language = 'nl'")
+    server.db.run("DELETE FROM site_content_translations WHERE content_id = (SELECT id FROM site_content WHERE slug = 'start') AND language = 'nl'")
+    expect((await server.api('/api/packages?lang=nl')).json.data.map((p: { code: string }) => p.code)).toEqual(['launch', 'build', 'care'])
+    expect((await server.api('/api/packages/grow?lang=nl')).status).toBe(404)
+    expect((await server.api('/api/shop/extras?lang=nl')).json.data.map((e: { code: string }) => e.code)).not.toContain('pages')
+    expect((await server.api('/api/content/faq?lang=nl')).json.data.map((f: { slug: string }) => f.slug)).not.toContain('start')
+    expect((await server.api('/api/packages?lang=en')).json.data).toHaveLength(4)
+    expect((await server.api('/api/content/faq?lang=en')).json.data).toHaveLength(6)
   })
 
   it('refuses an unknown language and says a missing service is missing', async () => {

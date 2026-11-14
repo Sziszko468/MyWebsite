@@ -54,7 +54,11 @@ const Loading = ({ label }: { label: string }) => (
 )
 
 /** Text the administrator wrote, with its line breaks, never as markup. */
-const Prose = ({ children }: { children: string }) => <p className={styles.prose}>{children}</p>
+const Prose = ({ children, lang }: { children: string; lang?: string }) => (
+  <p className={styles.prose} lang={lang}>
+    {children}
+  </p>
+)
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
@@ -83,7 +87,7 @@ function Price({ quote, words }: { quote: QuoteView; words: QuoteWords }) {
       {pricing.mode === 'custom' && (
         <>
           <h3 className={styles.sub}>{p.custom}</h3>
-          <Prose>{pricing.note}</Prose>
+          <Prose lang={quote.language}>{pricing.note}</Prose>
         </>
       )}
       {pricing.mode === 'fixed' && pricing.fixed && (
@@ -100,7 +104,7 @@ function Price({ quote, words }: { quote: QuoteView; words: QuoteWords }) {
             {items.map((line, index) => (
               <li key={`${line.description}-${index}`}>
                 <div className={styles.lineHead}>
-                  <span className={styles.lineName}>{line.description}</span>
+                  <span className={styles.lineName} lang={quote.language}>{line.description}</span>
                   <span className={styles.lineAmount}>{line.total.text}</span>
                 </div>
                 {line.quantity > 1 && (
@@ -108,7 +112,7 @@ function Price({ quote, words }: { quote: QuoteView; words: QuoteWords }) {
                     {line.quantity} × {line.unit.text}
                   </p>
                 )}
-                {line.detail && <p className={styles.lineMeta}>{line.detail}</p>}
+                {line.detail && <p className={styles.lineMeta} lang={quote.language}>{line.detail}</p>}
               </li>
             ))}
           </ul>
@@ -122,7 +126,7 @@ function Price({ quote, words }: { quote: QuoteView; words: QuoteWords }) {
             {discounts.map((line, index) => (
               <div key={`${line.description}-${index}`}>
                 <dt>
-                  {p.discount}: {line.description}
+                  {p.discount}: <span lang={quote.language}>{line.description}</span>
                   {line.justification && <span className={styles.lineMeta}>{fill(p.discountReason, { reason: line.justification })}</span>}
                 </dt>
                 <dd>− {line.total.text}</dd>
@@ -149,10 +153,10 @@ function Price({ quote, words }: { quote: QuoteView; words: QuoteWords }) {
                 {optional.map((line, index) => (
                   <li key={`${line.description}-${index}`}>
                     <div className={styles.lineHead}>
-                      <span className={styles.lineName}>{line.description}</span>
+                      <span className={styles.lineName} lang={quote.language}>{line.description}</span>
                       <span className={styles.lineAmount}>{line.total.text}</span>
                     </div>
-                    {line.detail && <p className={styles.lineMeta}>{line.detail}</p>}
+                    {line.detail && <p className={styles.lineMeta} lang={quote.language}>{line.detail}</p>}
                   </li>
                 ))}
               </ul>
@@ -309,7 +313,7 @@ export function QuotePage() {
       <article className={styles.document} aria-labelledby="q-title">
         <header className={styles.header}>
           <p className={styles.eyebrow}>{q.eyebrow}</p>
-          <h1 id="q-title" className={styles.title}>
+          <h1 id="q-title" className={styles.title} lang={quote.language}>
             {quote.title}
           </h1>
           <dl className={styles.facts}>
@@ -336,7 +340,7 @@ export function QuotePage() {
             {quote.estimatedTimeline && (
               <div>
                 <dt>{q.timeline}</dt>
-                <dd>{quote.estimatedTimeline}</dd>
+                <dd lang={quote.language}>{quote.estimatedTimeline}</dd>
               </div>
             )}
           </dl>
@@ -356,41 +360,41 @@ export function QuotePage() {
           </div>
         )}
 
-        {quote.introduction && <Prose>{quote.introduction}</Prose>}
+        {quote.introduction && <Prose lang={quote.language}>{quote.introduction}</Prose>}
         {quote.understanding && (
           <Section id="q-understanding" title={q.sections.understanding}>
-            <Prose>{quote.understanding}</Prose>
+            <Prose lang={quote.language}>{quote.understanding}</Prose>
           </Section>
         )}
         {quote.scope && (
           <Section id="q-scope" title={q.sections.scope}>
-            <Prose>{quote.scope}</Prose>
+            <Prose lang={quote.language}>{quote.scope}</Prose>
           </Section>
         )}
         {quote.deliverables && (
           <Section id="q-deliverables" title={q.sections.deliverables}>
-            <Prose>{quote.deliverables}</Prose>
+            <Prose lang={quote.language}>{quote.deliverables}</Prose>
           </Section>
         )}
         {quote.exclusions && (
           <Section id="q-exclusions" title={q.sections.exclusions}>
-            <Prose>{quote.exclusions}</Prose>
+            <Prose lang={quote.language}>{quote.exclusions}</Prose>
           </Section>
         )}
         <Price quote={quote} words={words} />
         {quote.paymentTerms && (
           <Section id="q-payment" title={q.sections.payment}>
-            <Prose>{quote.paymentTerms}</Prose>
+            <Prose lang={quote.language}>{quote.paymentTerms}</Prose>
           </Section>
         )}
         {quote.notes && (
           <Section id="q-notes" title={q.sections.notes}>
-            <Prose>{quote.notes}</Prose>
+            <Prose lang={quote.language}>{quote.notes}</Prose>
           </Section>
         )}
         {quote.terms && (
           <Section id="q-terms" title={q.sections.terms}>
-            <Prose>{quote.terms}</Prose>
+            <Prose lang={quote.language}>{quote.terms}</Prose>
           </Section>
         )}
 
@@ -487,7 +491,7 @@ function RequestView({ data, words }: { data: RequestPageData; words: QuoteWords
                   {formatMoment(update.at, lang)}
                 </time>
                 <p className={styles.lineName}>{update.kind === 'quote' ? r.statuses.quote_sent : update.status ? r.statuses[update.status] : ''}</p>
-                {update.body && <Prose>{update.body}</Prose>}
+                {update.body && <Prose lang={data.language}>{update.body}</Prose>}
               </li>
             ))}
           </ol>

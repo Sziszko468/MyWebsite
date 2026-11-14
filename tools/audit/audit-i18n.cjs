@@ -26,6 +26,7 @@ const SAME_ON_PURPOSE = [
   /nfsu2/i, /^(react|typescript|three\.js|glsl|next\.js|django|fastapi|postgresql|docker|node\.js|react native)\b/i,
   /^(create without limits|break the pattern|make it different|move\. distort\. explore\.?)/i,
   /^(your name|spendly|bookinghub|logistics platform|hollandia kezd)/i,
+  /^(sk )?szilárd kiss$/i, // the owner's name, in the header's and the footer's logo: a name is the same in every language (PROMPT 23: the placeholder "Your name" was replaced by the real one)
   /^[\W\d]+$/,
   /^(HU|EN|NL) ?: /, // the language switch names each language in that language
   /→/, // an architecture diagram's technical labels (service names and protocols)

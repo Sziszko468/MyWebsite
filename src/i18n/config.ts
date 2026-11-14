@@ -8,6 +8,13 @@ export type Language = (typeof LANGUAGES)[number]
  */
 export const DEFAULT_LANGUAGE: Language = 'en'
 
+/**
+ * The full locale of each language, for every date, number and amount the site writes (`Intl`, and the same tags in the server's e-mails and
+ * quotations: `server/test/localization23.test.ts` keeps them equal). English is British, like its spelling: a bare `en` would write
+ * "11/14/26" and "November 14, 2026", which a reader in Europe takes for another date.
+ */
+export const LOCALE_TAGS: Record<Language, string> = { hu: 'hu-HU', en: 'en-GB', nl: 'nl-NL' }
+
 /** Language names are shown in their own language everywhere, so they are not translated. */
 export const LANGUAGE_META: Record<Language, { code: string; name: string }> = {
   hu: { code: 'HU', name: 'Magyar' },

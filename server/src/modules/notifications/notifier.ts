@@ -374,7 +374,8 @@ export class Notifier {
     const catalog = loadCatalog(db, { includeDisabled: true })
     const packageName = (code: string) => {
       const pack = catalog.packages.find((candidate) => candidate.code === code)
-      return pack?.translations[row.language]?.name ?? pack?.translations.hu?.name ?? code
+      // Never another language's name: a package that has no name in the e-mail's language shows its code (what the request itself saved).
+      return pack?.translations[row.language]?.name ?? code
     }
     const data = { request, items, totals: totalsOf(items.map((item) => item.snapshot)), packageName }
     if (row.kind === 'quote_confirmation') return renderRequestConfirmation(data, row.language, brand, statusUrl(), note)

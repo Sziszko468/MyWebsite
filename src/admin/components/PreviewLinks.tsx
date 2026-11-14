@@ -3,7 +3,7 @@ import * as endpoints from '../api/endpoints'
 import { ApiError } from '../api/client'
 import type { PreviewLink } from '../api/projectTypes'
 import { useResource } from '../hooks/useResource'
-import { fill, useInterfaceLanguage, useText } from '../i18n'
+import { fill, formatDateTime, useInterfaceLanguage, useText } from '../i18n'
 import { describeError } from '../lib/errors'
 import page from '../styles/pages.module.scss'
 import styles from '../styles/ui.module.scss'
@@ -68,7 +68,7 @@ export function PreviewLinks({ projectId, dirty }: { projectId: number; dirty: b
     }
   }
 
-  const date = (value: string) => new Date(value).toLocaleString(language)
+  const date = (value: string) => formatDateTime(value, language)
   return (
     <div className={styles.stack}>
       <p className={styles.hint}>{c.lead}</p>

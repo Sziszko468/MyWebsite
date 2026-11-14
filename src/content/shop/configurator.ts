@@ -117,7 +117,7 @@ export const configurator = {
       label: tri('Mi a fő cél?', 'What is the main goal?', 'Wat is het hoofddoel?'),
       options: {
         present: tri('Bemutatkozás', 'Presenting a business or myself', 'Een bedrijf of mezelf presenteren'),
-        leads: tri('Megkeresések szerzése', 'Getting enquiries', 'Aanvragen krijgen'),
+        leads: tri('Megkeresések szerzése', 'Getting inquiries', 'Aanvragen krijgen'),
         sell: tri('Foglalás vagy rendelés', 'Taking bookings or orders', 'Boekingen of bestellingen aannemen'),
         process: tri('Egy folyamat digitalizálása', 'Taking a process online', 'Een proces digitaliseren'),
         improve: tri('A meglévő javítása', 'Improving what exists', 'Verbeteren wat er al is'),

@@ -18,7 +18,7 @@ import { ErrorState, LoadingState } from '../components/states'
 import { useToast } from '../components/Toast'
 import { useResource } from '../hooks/useResource'
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges'
-import { fill, useInterfaceLanguage, useText } from '../i18n'
+import { fill, formatDay, useInterfaceLanguage, useText } from '../i18n'
 import { describeError, fieldErrors } from '../lib/errors'
 import { ACCENTS, FEATURE_STATUSES, HEROES, LAYOUTS, LIMITS, MOCKUPS, PROJECT_STATUSES, SECTIONS, STACK_GROUPS, completenessOf, emptyContent, emptyTri, linesToList, sameDocument, setIn, titleOf } from '../lib/projects'
 import { useSession } from '../session/SessionProvider'
@@ -534,7 +534,7 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
               <p>
                 <strong>{t.projects.edit.publication.state}: </strong>
                 {t.projects.status[state]}
-                {record && ` · ${record.publishedAt ? fill(t.projects.edit.publication.publishedAt, { date: new Date(record.publishedAt).toLocaleDateString(language) }) : t.projects.edit.publication.neverPublished}`}
+                {record && ` · ${record.publishedAt ? fill(t.projects.edit.publication.publishedAt, { date: formatDay(record.publishedAt, language) }) : t.projects.edit.publication.neverPublished}`}
               </p>
               <p className={styles.hint}>{t.projects.edit.publication.stateHelp}</p>
               {record && state !== 'archived' && (

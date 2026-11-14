@@ -11,7 +11,7 @@ import { PageHeader, useLanguageName } from '../components/layout'
 import { EmptyState, ErrorState, LoadingState } from '../components/states'
 import { useToast } from '../components/Toast'
 import { useResource } from '../hooks/useResource'
-import { fill, useInterfaceLanguage, useText } from '../i18n'
+import { fill, formatDateTime, useInterfaceLanguage, useText } from '../i18n'
 import { describeError } from '../lib/errors'
 import { titleOf } from '../lib/projects'
 import { useSession } from '../session/SessionProvider'
@@ -178,7 +178,7 @@ export function ProjectsPage() {
                       </Link>
                     </h2>
                     <p className={cx(styles.small, styles.muted)}>
-                      /work/{project.slug} · {fill(t.cms.list.changed, { date: new Date(project.updatedAt).toLocaleString(language) })}
+                      /work/{project.slug} · {fill(t.cms.list.changed, { date: formatDateTime(project.updatedAt, language) })}
                     </p>
                     {project.internalTitle && <p className={cx(styles.small, styles.muted)}>{fill(t.cms.list.internal, { name: project.internalTitle })}</p>}
                     <p className={cx(styles.small, styles.muted)}>

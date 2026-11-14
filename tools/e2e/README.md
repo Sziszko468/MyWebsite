@@ -147,3 +147,14 @@ AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/quote-languages-journey.cjs 
 ```
 
 The older `journeys.cjs` journey A now accepts `/hu/`, `/en/` or `/nl/` after `/` (without the edge Worker the starting language is the saved choice, else English).
+
+## The three languages, end to end (PROMPT 23)
+
+**`localization-journey.cjs`**: the whole website in Hungarian, English and Dutch in a real Chrome, against the built site served by the real backend. 37 checks in four groups: **A** every public page (29 routes × 3 languages, on a 1440 desktop and a 390 touch phone, 174 loads): status, `<html lang>`, a title that is not a key, no raw key or unfilled placeholder on screen, no words of another language (the `foreign` rule of `src/i18n/quality`, run on the rendered text; word lists shared in `foreignWords.json`), no sideways scroll, canonical / `hreflang` / `og:locale` that say the page's own language, and no request that leaves the site; **B** the switcher and the saved preference (the switch keeps the page, saves exactly one cookie only when chosen, a saved choice beats the default at `/`, an explicit `/hu/` address beats a saved choice, Back and Forward restore each page's language, the browser's own language is not a signal, a crawler is not redirected); **C** the 404 page in the language of the address, with status 404; **D** the country step on a second scratch server started with `COUNTRY_HEADER=CF-IPCountry` (the production path: Render behind Cloudflare): HU → `/hu/`, NL → `/nl/`, anything else or nothing → `/en/`, a saved choice beats the country, an address that names a language and a crawler are never redirected, the answer is `private, no-store`. The country header is one the script sends itself: **it proves the server's rule, not that Cloudflare's real header reaches Render.**
+
+```bash
+# two scratch backends serving dist/ (set up as above; the second with COUNTRY_HEADER=CF-IPCountry)
+AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/localization-journey.cjs --base=http://127.0.0.1:8801 --country-base=http://127.0.0.1:8802 [--out=<result.json>]
+```
+
+`quote-lifecycle-journey.cjs` has one more step (E): the same secure quotation link opened under `/en/` must say, with `lang` attributes, that the quotation's own words are Hungarian while the page around them is English.

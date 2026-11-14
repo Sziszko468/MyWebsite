@@ -1,5 +1,11 @@
 # Language audit and implementation report (PROMPT 18)
 
+> **Superseded in part (PROMPT 23, 2026-11-14).** This is the record of PROMPT 18 and is kept as written. A second audit, [localization-audit-23.md](localization-audit-23.md), re-read everything below and
+> corrected what it found: the numbers are now 2,738 texts × 3 languages from 65 sources; "Localized SEO: already in place" was true of the build but not of the live sitemap (its `x-default` pointed at Hungarian)
+> and `og:locale` for English was `en_US` on a British-English site; the Cloudflare Worker described under item 5 is **not** in the path that serves the live site (Render behind Cloudflare is), so the country step
+> is not active in production; English still wrote both "inquiry" and "enquiry"; and the quotation was "the quote" and "the offer" (or "het voorstel") in the same e-mail. Findings 5, 14 and the terminology section
+> below describe the state on 2026-11-11; the state now is in the newer report.
+
 Date: 2026-11-11. Scope: the Shop simplification, the country-based starting language, the Hungarian / English / Dutch quality control, the
 administration, SEO, and the checks that keep it so. How it works is in [README.md](README.md); this file says what was done, what was found and
 what is **not** done or not proven.

@@ -173,7 +173,7 @@ const WORDS: Record<Language, Words> = {
     kinds: { job: 'A job opportunity', collaboration: 'Collaboration', project: 'A web development project', other: 'Something else' },
     inquiryStatus: { new: 'Received', in_progress: 'Being handled', waiting_client: 'Waiting for your reply', completed: 'Completed' },
     quoteStatus: { new: 'Received', under_review: 'Being reviewed', waiting_customer: 'Waiting for your reply', quote_preparation: 'Quote being prepared', quote_sent: 'Quote sent', accepted: 'Accepted', declined: 'Declined', in_progress: 'In progress', completed: 'Completed', cancelled: 'Cancelled' },
-    objectives: { present: 'Present myself or my business', leads: 'Get enquiries', sell: 'Sell', process: 'Support a process', improve: 'Improve what exists', other: 'Something else' },
+    objectives: { present: 'Present myself or my business', leads: 'Get inquiries', sell: 'Sell', process: 'Support a process', improve: 'Improve what exists', other: 'Something else' },
     timings: { unsure: 'Not sure yet', asap: 'As soon as possible', weeks: 'Within a few weeks', months: 'Within a few months', flexible: 'Flexible' },
     needs: { website: 'Website', webapp: 'Web application', improve: 'Improve an existing website', ui: 'UI implementation', integrations: 'API and integrations', unsure: 'Not sure yet' },
     languages: { hu: 'Hungarian', en: 'English', nl: 'Dutch' },
@@ -394,7 +394,7 @@ export const CONFIRM: Record<Language, ConfirmWords> = {
   en: {
     inquirySubject: (reference) => `We received your message (${reference})`,
     inquiryTitle: 'Your message has arrived',
-    inquiryBody: 'Thank you for getting in touch! Your message has been received. We will review your enquiry soon.',
+    inquiryBody: 'Thank you for getting in touch! Your message has been received. We will review your inquiry soon.',
     noteTitle: 'Information',
     ignore: 'If you did not send this message, you can safely ignore this email.',
     footer: 'This is an automatic confirmation. If you want to add something, reply to this email.',

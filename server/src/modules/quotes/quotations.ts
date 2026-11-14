@@ -134,7 +134,7 @@ export function parsePercent(value: string): number | null {
   return basis <= 10_000 ? basis : null
 }
 
-export function parseDraft(body: Record<string, unknown>): DraftInput {
+export function parseDraft(body: Record<string, unknown>, currentLanguage: Language): DraftInput {
   const errors: FieldErrors = {}
   const text = (field: string, max: number, multiline = true): string => {
     const raw = body[field]
@@ -157,7 +157,8 @@ export function parseDraft(body: Record<string, unknown>): DraftInput {
     return raw as T
   }
 
-  const language = choice('language', LANGUAGES, 'en')
+  // A body that does not name a language keeps the quotation's own: the customer wrote in it, and the e-mails and the page follow it.
+  const language = choice('language', LANGUAGES, currentLanguage)
   const pricingMode = choice<PricingMode>('pricingMode', ['fixed', 'itemized', 'custom'], 'itemized')
   const taxMode = choice<TaxMode>('taxMode', ['unspecified', 'excluded', 'included', 'exempt'], 'unspecified')
   const currencyRaw = body.currency
@@ -398,7 +399,7 @@ export function saveDraft(app: AppContext, session: SessionInfo | null, id: stri
   const actor = requirePermission(session, 'requests:write')
   const quote = requireQuotation(app, id)
   if (quote.status !== 'draft') throw new HttpError(409, 'conflict', 'A quotation that was sent is never edited. Make a new version.', { details: { reason: 'not_draft' } })
-  const draft = parseDraft(body)
+  const draft = parseDraft(body, quote.language)
   const totals = totalsOfDraft(draft)
   const request = requireRequest(app, quote.quote_request_id)
   app.db.transaction(() => {

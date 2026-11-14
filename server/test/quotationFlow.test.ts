@@ -58,7 +58,7 @@ describe('Scenario A: a request from the shop', () => {
     expect(kit.owner()[0].text).toContain('https://site.test/admin/quotes/')
     expect(kit.owner()[0].subject).toBe(`New quote request (${response.json.data.reference}): Anna Kovács`)
     const [mail] = kit.toCustomer()
-    expect(mail.subject).toBe(`We will review your enquiry soon — ${response.json.data.reference}`)
+    expect(mail.subject).toBe(`We will review your inquiry soon — ${response.json.data.reference}`)
     // What the brief asks the confirmation to hold: thanks, the reference, what was asked for, the date, the contact details, the next step.
     for (const part of [response.json.data.reference, 'Launch', 'Additional pages', 'A small website for a bakery', 'anna@example.com', '+36 30 123 4567', 'Kovács Bakery', 'What happens next', 'No payment is requested', 'Submitted']) expect(mail.text, part).toContain(part)
     expect(mail.text).not.toMatch(/within \d|in \d+ (hours|days)|guarantee|by (monday|tomorrow)/i) // no promise of an answer time

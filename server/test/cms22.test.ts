@@ -349,6 +349,9 @@ describe('the live sitemap and the project pages', () => {
     expect(xml).not.toContain('stale-one')
     expect(xml).not.toContain('draft-one')
     expect(xml).toContain('hreflang="x-default"')
+    // The same x-default as the page's own head (English, the site's default language), not Hungarian (PROMPT 23).
+    expect(xml).toContain('hreflang="x-default" href="https://site.test/en/work/live-one/"')
+    expect(xml).not.toContain('hreflang="x-default" href="https://site.test/hu/work/live-one/"')
     await site.api(`/api/admin/projects/${a}/unpublish`, { body: {}, headers: as(who) })
     expect(await (await site.fetch('/sitemap.xml')).text()).not.toContain('live-one')
   })

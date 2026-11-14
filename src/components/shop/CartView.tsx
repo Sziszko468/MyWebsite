@@ -12,7 +12,7 @@ import { SHOP_PATHS, pathOfNeed } from '../../shop/paths'
 import type { LinePricing } from '../../shop/pricing'
 import { useShopText } from '../../shop/useShopText'
 import { cx } from '../../utils/cx'
-import { fill } from '../../utils/format'
+import { fill, formatPrice } from '../../utils/format'
 import { Button } from '../Button/Button'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
 import { ChoiceCard, ChoiceFieldset } from './Choice'
@@ -124,7 +124,7 @@ function Summary({ showActions }: { showActions: boolean }) {
           <div key={total.currency}>
             <dt>{c.summary.startingTotal}</dt>
             <dd>
-              {new Intl.NumberFormat(lang, { style: 'currency', currency: total.currency, maximumFractionDigits: 0 }).format(total.amount)}
+              {formatPrice(total.amount, total.currency, lang)}
               {total.vat !== 'unspecified' && total.vat !== 'mixed' && <span className={styles.vat}> {common.price.vat[total.vat]}</span>}
             </dd>
           </div>

@@ -2,6 +2,7 @@ import type { ServicePrice, VatMode } from '../../content/pricing'
 import { useI18n } from '../../i18n/useI18n'
 import { useCommonText } from '../../shop/hooks'
 import { cx } from '../../utils/cx'
+import { formatPrice } from '../../utils/format'
 import styles from './PriceStatus.module.scss'
 
 interface PriceStatusProps {
@@ -28,7 +29,7 @@ export function PriceStatus({ price, vat = 'unspecified', hint = false, classNam
         <>
           <span className={styles.label}>{text.from}</span>
           <strong className={styles.value}>
-            {new Intl.NumberFormat(lang, { style: 'currency', currency: price.currency, maximumFractionDigits: 0 }).format(price.amount)}
+            {formatPrice(price.amount, price.currency, lang)}
             {vat !== 'unspecified' && <span className={styles.vat}> {text.vat[vat]}</span>}
           </strong>
           {hint && <span className={styles.hint}>{text.exact}</span>}
