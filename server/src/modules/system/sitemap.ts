@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path'
 import type { AppContext } from '../../context.ts'
 import { DEFAULT_LANGUAGE, LANGUAGES, type Language } from '../../config.ts'
 import type { Reply } from '../../http/reply.ts'
-import { publicConfig } from '../bookings/public.ts'
+import { consultationIndexable } from '../bookings/public.ts'
 import { livePages } from '../projects/service.ts'
 
 /**
@@ -33,7 +33,8 @@ export function liveSitemap(app: AppContext, directory: string): Reply | null {
     return null
   }
   // The consultation page is listed only while booking is open in every language: a page that says "not available" is not worth a search result.
-  const bookingOpen = LANGUAGES.every((language) => publicConfig(app, language).open)
+  // The page's own `X-Robots-Tag` (app.ts) asks the same question.
+  const bookingOpen = consultationIndexable(app)
   const kept = (built.match(URL_BLOCK) ?? []).filter((block) => !PROJECT_LOC.test(block) && (bookingOpen || !CONSULTATION_LOC.test(block)))
   const pages = livePages(app)
   const location = (language: Language, slug: string) => `${origin}/${language}/work/${slug}/`

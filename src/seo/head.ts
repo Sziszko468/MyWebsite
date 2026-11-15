@@ -3,7 +3,7 @@ import { DEFAULT_LANGUAGE, LANGUAGES, type Language } from '../i18n/config'
 import { dictionaries } from '../i18n/dictionaries'
 import { buildDocumentMeta, ogLocale } from '../routes/documentMeta'
 import { runtimeProject } from '../projects/store'
-import { PAGES, projectIdOfPage, type PageDef } from '../routes/pages'
+import { PAGES, isPrivatePage, projectIdOfPage, type PageDef } from '../routes/pages'
 import { buildJsonLd } from './jsonLd'
 import { DEFAULT_IMAGE_PATH, IMAGE_SIZE, seoPath } from './paths'
 import { seoText } from './text'
@@ -77,6 +77,8 @@ const IMAGE_TYPES: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg
 
 function robotsFor(page: PageDef | undefined, ctx: SeoContext): string {
   if (!ctx.siteUrl) return 'noindex, nofollow'
+  // A customer's private page (reached through a secret in its address) is not for a crawler to read or to follow; the server says the same in its header.
+  if (isPrivatePage(page)) return 'noindex, nofollow'
   if (!page || !page.indexable) return 'noindex, follow'
   return 'index, follow, max-image-preview:large'
 }

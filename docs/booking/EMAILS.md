@@ -48,6 +48,23 @@ Not sent: a message to the owner for the owner's own actions, and none when a pr
 
 The owner's address is `NOTIFY_TO` (never defaulted: no address, no owner message) and the sender and provider are the usual `EMAIL_*` settings. With no provider, or with sending paused (`EMAIL_ENABLED=false`), nothing is queued and bookings still work.
 
+## What the delivery log records, and what "accepted" means (PROMPT 24.1)
+
+A booking e-mail is a row in `email_deliveries` first and a message second. The row holds the **recipient, kind, language, state, attempts, the provider's error and message id, and times**: not the subject and not the body (the message is written again from the stored records when it is sent). One thing is text a person wrote: the owner's **optional note to the customer** with a cancellation, a decision or a proposal is kept on that message's row (`note`) so a retry says the same thing. No other booking message has a note.
+
+| State | Meaning | Who sets it |
+| --- | --- | --- |
+| `pending` / `sending` | queued, or being handed to the provider | the booking code; the outbox worker |
+| `accepted` | **the provider took the message.** It is not a statement that it reached a mailbox | the outbox worker, after a successful call to the provider |
+| `delivered`, `bounced`, `complained` | what the provider reported later | **only** the signed provider webhook (needs `EMAIL_WEBHOOK_SECRET`); nothing in the booking code can set `delivered` |
+| `failed`, `cancelled` | gave up (a reason is kept), or the booking was erased meanwhile | the outbox worker |
+
+So: a booking's confirmation page says an e-mail "is on its way" only when one was **queued**, and never that it arrived; the privacy notice says the log records acceptance, not arrival; and the administration shows each message's state beside the booking. Without a webhook secret nothing is ever shown as delivered, however well it was sent. Tested: `server/test/bookingPrivacy.test.ts` (rows end `accepted`, never `delivered`), `src/content/privacy.test.ts`.
+
+**The outgoing sender is the configured provider (`EMAIL_PROVIDER`: Resend, SMTP or, in development, `file`). Cloudflare Email Routing is inbound only** (it forwards mail sent *to* the domain); it sends none of the booking e-mails, and the privacy notice does not say it does. Which provider is live on production, and whether the domain's SPF, DKIM and DMARC are published, are **not verified** here: the platform audit of 2026-11-13 found them missing (E-1), and [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) section C lists what to do and test.
+
+The **owner's notification** (`booking_new_admin`, `booking_change_requested_admin`, `booking_cancelled_admin`) goes to `NOTIFY_TO` and contains the customer's name, e-mail address, company, website and description: that mailbox is part of the data's security.
+
 ## Testing without sending
 
 Every test uses the `RecordingMailer` (an in-memory fake) or the `file` provider (writes `.eml` files to a temporary folder); no test sends real e-mail and no real address is used (`example.test`, `example.com`). The tests that read messages: `server/test/booking*.test.ts` (subjects and bodies in all three languages, the zone, links, the optional notes, escaping, the switches, one message per event) and `tools/e2e/booking-journey.cjs` (the file provider, in a real browser).

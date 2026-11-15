@@ -24,6 +24,7 @@ async function* walk(dir) {
 }
 
 const decode = (value) => value.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+const locsOf = (sitemap) => [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => decode(m[1]))
 const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/([a-zA-Z:-]+)="([^"]*)"/g)].map((m) => [m[1], decode(m[2])]))
 const tagsOf = (html, name) => [...html.matchAll(new RegExp(`<${name}\\s[^>]*>`, 'g'))].map((m) => attrsOf(m[0]))
 
@@ -207,6 +208,39 @@ if (configured) {
 // The headers file allows exactly the inline script and style blocks the shell has.
 const shell = pages.get('/')?.html ?? ''
 const headers = await readFile(join(dist, '_headers'), 'utf8').catch(() => '')
+const redirects = await readFile(join(dist, '_redirects'), 'utf8').catch(() => '')
+
+// The consultation booking (PROMPT 24, 24.1). The public page is written as indexable (the build cannot know whether the owner has opened booking: the
+// backend answers it with `X-Robots-Tag: noindex` and leaves it out of its live sitemap while booking is closed, server/test/bookingSeo.test.ts). The
+// customer's own page is never indexable, whatever the owner configures: a quiet noindex shell with no canonical address, no alternates, no structured
+// data, not in the sitemap, and the headers that keep its secret out of caches and referrers.
+const builtSitemap = configured ? await readFile(sitemapFile, 'utf8') : ''
+const siteOrigin = configured ? new URL(locsOf(builtSitemap)[0]).origin : null
+for (const lang of ['hu', 'en', 'nl']) {
+  const publicPath = `/${lang}/consultation/`
+  const privatePath = `/${lang}/consultation/booking/`
+  const open = pages.get(publicPath)
+  const secret = pages.get(privatePath)
+  check(Boolean(open), 'consultation', `${publicPath} has no file in dist`)
+  check(Boolean(secret), 'consultation', `${privatePath} has no file in dist`)
+  if (open && configured) {
+    check(open.robots[0]?.startsWith('index'), open.rel, `should be indexable by design (the backend withdraws it while booking is closed), says "${open.robots[0]}"`)
+    check(open.canonical[0] === `${siteOrigin}${publicPath}`, open.rel, 'should name itself as the canonical address')
+    check(open.alternates.length === 4, open.rel, `should carry the three language alternates and x-default, has ${open.alternates.length}`)
+  }
+  if (secret) {
+    check(secret.robots[0] === 'noindex, nofollow', secret.rel, `a customer's private page must say "noindex, nofollow", says "${secret.robots[0]}"`)
+    check(secret.canonical.length === 0 && secret.alternates.length === 0 && secret.jsonLd.length === 0, secret.rel, 'a customer\'s private page must carry no canonical address, language alternate or structured data')  }
+  const block = headers.split('\n\n').find((part) => part.startsWith(`${privatePath}*`)) ?? ''
+  check(block.includes('Cache-Control: no-store'), '_headers', `${privatePath}* must be sent with Cache-Control: no-store`)
+  check(block.includes('Referrer-Policy: no-referrer'), '_headers', `${privatePath}* must be sent with Referrer-Policy: no-referrer`)
+  check(block.includes('X-Robots-Tag: noindex, nofollow'), '_headers', `${privatePath}* must be sent with X-Robots-Tag: noindex, nofollow`)
+  check(redirects.includes(`${privatePath}*  ${privatePath}  200`), '_redirects', `${privatePath}* must answer with the page's quiet shell`)
+}
+if (configured) {
+  check(!/<loc>[^<]*\/consultation\/booking\/[^<]*<\/loc>/.test(builtSitemap), 'sitemap.xml', "must never list a customer's private booking page")
+  for (const lang of ['hu', 'en', 'nl']) check(builtSitemap.includes(`<loc>${siteOrigin}/${lang}/consultation/</loc>`), 'sitemap.xml', `should list /${lang}/consultation/ as built (the backend's live sitemap leaves it out while booking is closed)`)
+}
 check(headers.includes('Content-Security-Policy'), '_headers', 'has no Content-Security-Policy')
 for (const tag of ['script', 'style']) {
   const bodies = [...shell.matchAll(new RegExp(`<${tag}(?![^>]*\\bsrc=)(?![^>]*ld\\+json)[^>]*>([\\s\\S]*?)</${tag}>`, 'g'))].map((m) => m[1]).filter((b) => b.trim())

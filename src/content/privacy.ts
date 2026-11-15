@@ -5,6 +5,11 @@ import { tri, type Trilingual } from './trilingual'
  * (src/content/privacy.test.ts reads the sources to keep the list of stored items in step with them), and
  * nothing it says is a promise about what the owner does with a message after it has arrived: that, and the
  * owner's own details, are theirs to add (README, "Before launch"). It is not legal advice.
+ *
+ * The booking section (PROMPT 24.1) says what the booking code stores, shows and deletes, and says nothing the code does not do: it gives no retention
+ * period (the owner sets `RETENTION_DAYS`, and unset means nothing is deleted by age), names no legal basis, no processor agreement and no guarantee, and
+ * does not say a message arrived because it was queued or accepted. `privacy.test.ts` reads the booking code to keep each of those sentences true;
+ * `docs/booking/LAUNCH_CHECKLIST.md` lists what only the owner or a lawyer can supply.
  */
 
 export interface StoredItem {
@@ -168,6 +173,11 @@ export const privacyText = {
         'Het contactformulier en de aanvraagbouwer versturen alleen gegevens als je op verzenden drukt, en alleen naar het adres dat de eigenaar van de site heeft ingesteld. Wat je typt blijft tot dat moment in het geheugen en wordt nooit in de opslag van je browser geschreven.',
       ),
       tri(
+        'A foglalási űrlap csak akkor küld adatot az oldal saját szerverének, amikor megerősíted a foglalást; addig amit beírsz, csak a memóriában van, a böngésző tárolójába nem kerül. A naptár böngészése közben az oldal csak a konzultáció típusát és egy dátumtartományt kéri le a szabad időpontokhoz, rólad semmit nem küld.',
+        'The booking form sends data to this site’s own server only when you confirm the booking; until then what you type stays in memory and is never written to your browser’s storage. While you browse the calendar, the page asks only for the consultation type and a range of dates to find the free times, and sends nothing about you.',
+        'Het formulier om in te plannen verstuurt alleen gegevens naar de eigen server van deze site als je de afspraak bevestigt; tot dat moment blijft wat je typt in het geheugen en wordt het nooit in de opslag van je browser geschreven. Terwijl je door de agenda bladert, vraagt de pagina alleen om het soort adviesgesprek en een datumbereik om de vrije tijden te vinden en stuurt ze niets over jou.',
+      ),
+      tri(
         'Ha még nincs fogadó cím beállítva, az űrlap ezt kimondja, és semmit nem küld el.',
         'If no receiving address has been set up yet, the form says so and sends nothing.',
         'Is er nog geen ontvangstadres ingesteld, dan zegt het formulier dat en verstuurt het niets.',
@@ -209,6 +219,56 @@ export const privacyText = {
       ),
     ],
   },
+  booking: {
+    title: tri('Konzultáció foglalása', 'Booking a consultation', 'Een adviesgesprek inplannen'),
+    items: [
+      tri(
+        'Amikor konzultációt foglalsz, az oldal eltárolja, amit megadtál: a neved és az e-mail-címed (kötelező), valamint ha megadtad, a cég nevét, a weboldalad címét, a projektleírásodat és egy kapcsolódó ajánlatkérés vagy megkeresés azonosítóját. Ha az azonosító egy ugyanezzel az e-mail-címmel küldött ajánlatkéréshez tartozik, az oldal összekapcsolja a kettőt a tulajdonos számára. Ne írj be érzékeny személyes adatot a leírásba.',
+        'When you book a consultation, the site stores what you entered: your name and email address (required) and, if you gave them, your company, your website address, a description of your project and the reference of a related quote request or inquiry. If the reference belongs to a quote request sent with the same email address, the site links the two for the owner. Do not put sensitive personal data in the description.',
+        'Als je een adviesgesprek inplant, bewaart de site wat je hebt ingevuld: je naam en e-mailadres (verplicht) en, als je ze opgaf, je bedrijf, het adres van je website, een omschrijving van je project en de referentie van een bijbehorende offerteaanvraag of aanvraag. Hoort de referentie bij een offerteaanvraag die met hetzelfde e-mailadres is verstuurd, dan koppelt de site de twee voor de eigenaar. Voer geen gevoelige persoonsgegevens in bij de omschrijving.',
+      ),
+      tri(
+        'A foglalásról ezt is tárolja: a konzultáció típusát, a dátumot, a kezdő és a befejező időpontot, azt az időzónát, amelyben a tulajdonos az időpontokat kínálja, a foglalás nyelvét és állapotát (például megerősített vagy lemondott), valamint az előzményeit: mikor jött létre, és mikor változott. Ha lemondást vagy időpont-módosítást kérsz, az indoklásod is eltárolódik.',
+        'It also stores the booking itself: the type of consultation, the date, the start and end time, the time zone the owner offers the times in, the booking’s language and status (for example confirmed or cancelled) and its history: when it was made and when it changed. If you ask to cancel or to change the time, the reason you write is stored too.',
+        'Ook de afspraak zelf wordt bewaard: het soort adviesgesprek, de datum, de begin- en eindtijd, de tijdzone waarin de eigenaar de tijden aanbiedt, de taal en de status van de afspraak (bijvoorbeeld bevestigd of geannuleerd) en de geschiedenis: wanneer hij is gemaakt en wanneer hij is gewijzigd. Vraag je om te annuleren of de tijd te wijzigen, dan wordt ook de reden die je schrijft bewaard.',
+      ),
+      tri(
+        'Eltárolja azt is, hogy mikor jelölted be a hozzájáruló mondatot, és a hálózati címed egyirányú ujjlenyomatát, amelyet a szerver titkos kulcsával képez (magát a címet nem). Ez arra való, hogy a visszaélést, például sok foglalást egy helyről, utólag fel lehessen ismerni. A hálózati címedet az oldal csak a memóriájában használja arra, hogy egy helyről ne jöhessen túl sok kérés; az adatbázisba és a naplóba nem írja. Technikai adat az is, hogy a böngésződ minden elküldéshez készít egy kulcsot, és az oldal eltárol egy ujjlenyomatot a típusról, az időpontról és az e-mail-címről, hogy egy dupla kattintás ne hozzon létre két foglalást.',
+        'It also stores when you ticked the sentence saying you understand how your details are used, and a one-way fingerprint of your network address, made with the server’s secret key (not the address itself). It exists so that abuse, such as many bookings from one place, can be recognised afterwards. The site uses your network address only in memory, to stop too many requests coming from one place; it does not write it to the database or the logs. Two technical items are stored as well so that a double click cannot make two bookings: a key your browser makes for each submission, and a fingerprint of the type, the time and the email address.',
+        'Ook wordt bewaard wanneer je de zin hebt aangevinkt waarmee je begrijpt hoe je gegevens worden gebruikt, en een eenrichtingsvingerafdruk van je netwerkadres, gemaakt met de geheime sleutel van de server (niet het adres zelf). Die is er om misbruik, bijvoorbeeld veel afspraken vanaf één plek, achteraf te kunnen herkennen. De site gebruikt je netwerkadres alleen in het geheugen, om te voorkomen dat er te veel verzoeken vanaf één plek komen; hij schrijft het niet naar de database of de logs. Om te voorkomen dat een dubbele klik twee afspraken maakt, worden ook twee technische gegevens bewaard: een sleutel die je browser voor elke verzending maakt en een vingerafdruk van het soort, de tijd en het e-mailadres.',
+      ),
+      tri(
+        'Ezekre azért van szükség, hogy a konzultációt egyeztetni és lebonyolítani lehessen, kapcsolatba lehessen lépni veled róla, ugyanazt az időpontot ne lehessen kétszer lefoglalni, és hogy az űrlap védve legyen a visszaéléstől. A foglalás nem kér marketing-hozzájárulást, és nem is függ attól.',
+        'All of this is needed to arrange and carry out the consultation, to contact you about it, to make sure one time cannot be booked twice, and to protect the form from abuse. Booking asks for no marketing consent and does not depend on one.',
+        'Dit alles is nodig om het adviesgesprek te regelen en uit te voeren, om contact met je op te nemen, om te zorgen dat dezelfde tijd niet twee keer wordt ingepland en om het formulier tegen misbruik te beschermen. Voor het inplannen wordt geen toestemming voor marketing gevraagd en het hangt er ook niet van af.',
+      ),
+      tri(
+        'A visszaigazolásban és a későbbi e-mailekben személyes link van a foglalásod oldalára. Ott láthatod az adataidat és az előzményeket, és lemondást vagy időpont-módosítást kérhetsz. A linkből csak egyirányú ujjlenyomat van eltárolva, maga a titkos rész nincs; a link korlátozott ideig működik, és a tulajdonos bármikor visszavonhatja. Aki ismeri a linket, megnyithatja az oldalt, ezért ne oszd meg másokkal. Mint minden webcím, a link is megjelenhet a tárhely- és a hálózati szolgáltató technikai naplóiban.',
+        'The confirmation and the later emails contain a personal link to your booking page. There you can see your details and the history and ask to cancel or to change the time. Only a one-way fingerprint of the link’s secret part is stored, never the secret itself; the link works for a limited time and the owner can withdraw it at any time. Anyone who has the link can open the page, so please do not share it. Like any web address, the link can appear in the technical logs of the hosting and network providers.',
+        'De bevestiging en de latere e-mails bevatten een persoonlijke link naar de pagina van je afspraak. Daar zie je je gegevens en de geschiedenis en kun je vragen om te annuleren of de tijd te wijzigen. Van het geheime deel van de link wordt alleen een eenrichtingsvingerafdruk bewaard, nooit het geheim zelf; de link werkt beperkte tijd en de eigenaar kan hem altijd intrekken. Wie de link heeft, kan de pagina openen, deel hem dus niet met anderen. Zoals elk webadres kan de link voorkomen in de technische logs van de hosting- en netwerkaanbieders.',
+      ),
+      tri(
+        'A tulajdonos privát jegyzeteket fűzhet a foglaláshoz. Ezeket csak az oldalt kezelők látják az adminisztrációs felületen; nem jelennek meg a foglalásod oldalán, és nem kerülnek bele az e-mailekbe. A foglalással együtt törlődnek.',
+        'The owner can add private notes to a booking. Only the people who manage the site see them, in its administration; they are not shown on your booking page and are not put in the emails. They are deleted together with the booking.',
+        'De eigenaar kan privénotities bij een afspraak zetten. Alleen de beheerders van de site zien ze, in het beheergedeelte; ze staan niet op de pagina van je afspraak en komen niet in de e-mails. Ze worden samen met de afspraak verwijderd.',
+      ),
+      tri(
+        'A visszaigazolást és a későbbi értesítéseket (megerősítés, lemondás, időpont-módosítás) tranzakciós e-mail-szolgáltatáson keresztül kapod. A tulajdonos is kap egy értesítő e-mailt a foglalásod adataival. Az üzenetekről napló készül: kinek, mikor, milyen nyelven és milyen típusú üzenet ment, és hogy a szolgáltató elfogadta-e. A napló nem tartalmazza az üzenet szövegét, kivéve azt a rövid megjegyzést, amelyet a tulajdonos egy lemondáshoz, döntéshez vagy időpont-javaslathoz esetleg hozzáír. A napló azt rögzíti, hogy a szolgáltató elfogadta az üzenetet, nem azt, hogy a postaládádba meg is érkezett; ha nem kapsz levelet, nézd meg a levélszemetet, vagy írj a Kapcsolat oldalon.',
+        'You receive the confirmation and the later notices (confirmed, cancelled, time changed) through a transactional email service. The owner also gets a notification email with the details of your booking. The messages are logged: to whom, when, in which language, of which kind, and whether the provider accepted them. The log does not hold the message text, except the short note the owner may add to a cancellation, a decision or a proposed time. It records that the provider accepted a message, not that it reached your mailbox; if you get no email, check your spam folder or write on the Contact page.',
+        'Je ontvangt de bevestiging en de latere berichten (bevestigd, geannuleerd, tijd gewijzigd) via een transactionele e-maildienst. Ook de eigenaar krijgt een e-mail met de gegevens van je afspraak. De berichten worden gelogd: aan wie, wanneer, in welke taal, van welk soort en of de aanbieder ze accepteerde. In het logboek staat de tekst van het bericht niet, behalve de korte opmerking die de eigenaar bij een annulering, een beslissing of een voorgestelde tijd kan toevoegen. Er staat vastgelegd dat de aanbieder een bericht accepteerde, niet dat het in je mailbox is aangekomen; krijg je geen e-mail, kijk dan in je spammap of schrijf via de contactpagina.',
+      ),
+      tri(
+        'Hogy meddig őrizzük a foglalásokat, az oldal tulajdonosának beállítása, ezért itt nem írunk időtartamot. Ha a tulajdonos megőrzési időt állított be, az oldal rendszeres karbantartása törli azokat a foglalásokat, amelyek már lezárultak (lezajlottak, lemondták őket, vagy nem jelentek meg), ha az utolsó változásuk óta eltelt ennyi idő; ugyanígy törli az e-mail-napló régi sorait. Egy még élő foglalást az idő önmagában nem töröl. Ha nincs megőrzési idő beállítva, az oldal semmit nem töröl az életkora alapján: a foglalás addig marad meg, amíg a tulajdonos nem törli, vagy te nem kéred a törlését. A lejárt linkek nyoma a lejárat után körülbelül egy hónappal törlődik.',
+        'How long bookings are kept is the site owner’s setting, so this notice gives no number. If the owner has set a retention period, the site’s regular housekeeping deletes bookings that are over (completed, cancelled or missed) once that much time has passed since their last change, and in the same way the old lines of the email log. A booking that is still active is never deleted just because time has passed. If no retention period is set, nothing is deleted because of its age: a booking stays until the owner deletes it or you ask for it to be deleted. The records of expired links are removed about a month after they expire.',
+        'Hoe lang afspraken worden bewaard is de instelling van de eigenaar van de site, daarom noemt deze tekst geen aantal. Heeft de eigenaar een bewaartermijn ingesteld, dan verwijdert het regelmatige onderhoud van de site afspraken die voorbij zijn (gehouden, geannuleerd of niet verschenen) zodra die tijd sinds hun laatste wijziging is verstreken, en op dezelfde manier de oude regels in het logboek van de e-mails. Een afspraak die nog loopt wordt nooit verwijderd alleen omdat er tijd is verstreken. Is er geen bewaartermijn ingesteld, dan wordt niets verwijderd vanwege de leeftijd: een afspraak blijft staan tot de eigenaar hem verwijdert of jij om verwijdering vraagt. De gegevens van verlopen links worden ongeveer een maand na het verlopen verwijderd.',
+      ),
+      tri(
+        'Ha tudni szeretnéd, mit tárolunk a foglalásodról, vagy törölni szeretnéd, kérd ezt a tulajdonostól a Kapcsolat oldalon, és add meg a foglaláskor használt e-mail-címet. A törlést a tulajdonos kézzel, egy erre szolgáló eszközzel végzi, tehát nem azonnal és nem automatikusan. Ez az adott e-mail-címmel tett foglalásokat törli a jegyzeteikkel, linkjeikkel és e-mail-naplójukkal együtt, és ugyanehhez a címhez tartozó ajánlatkéréseket és megkereséseket is. Megmarad egy rövid esemény-nyilvántartás, amelyben csak a foglalás azonosítója, állapota és időpontja áll, név, e-mail-cím és szöveg nélkül. Ha az oldal automatikus adatbázis-mentést használ, a már elkészült mentések a saját lejáratukig még tartalmazhatják a törölt adatokat.',
+        'If you want to know what is stored about your booking, or want it deleted, ask the owner on the Contact page and give the email address you used. The owner deletes by hand, with a tool made for it, so it is not immediate and not automatic. It deletes the bookings made with that email address together with their notes, links and email log, and also the quote requests and inquiries from the same address. A short event record stays, holding only the booking’s reference, status and time, with no name, email address or text. If the site uses automatic database backups, copies that were already made can still hold the deleted data until they expire.',
+        'Wil je weten wat er over je afspraak is opgeslagen, of wil je dat het wordt verwijderd, vraag het dan aan de eigenaar via de contactpagina en geef het e-mailadres op dat je hebt gebruikt. De eigenaar verwijdert dit met de hand, met een daarvoor bedoeld hulpmiddel; het gaat dus niet meteen en niet automatisch. Daarbij worden de afspraken met dat e-mailadres verwijderd, samen met de notities, de links en het logboek van de e-mails ervan, en ook de offerteaanvragen en aanvragen van hetzelfde adres. Er blijft een korte gebeurtenisregistratie over met alleen de referentie, de status en het tijdstip van de afspraak, zonder naam, e-mailadres of tekst. Gebruikt de site automatische back-ups van de database, dan kunnen reeds gemaakte kopieën de verwijderde gegevens tot hun verval nog bevatten.',
+      ),
+    ],
+  },
   assistant: {
     title: tri('A Control Room AI', 'Control Room AI', 'Control Room AI'),
     items: [
@@ -239,6 +299,31 @@ export const privacyText = {
       ),
     ],
   },
+  recipients: {
+    title: tri('Kik kezelik az adataidat', 'Who handles your data', 'Wie je gegevens verwerkt'),
+    items: [
+      tri(
+        'Az oldal a Render tárhelyén fut, és a forgalma a Cloudflare hálózatán megy át. Az adatbázis, benne a foglalásaiddal, azon a szerveren van, ahol az oldal fut. A tárhely és a hálózat szolgáltatója, mint minden ilyen szolgáltató, látja a kéréseidet, és a saját feltételei szerint saját technikai naplót vezethet.',
+        'The site runs on Render’s hosting, and its traffic passes through the Cloudflare network. The database, with your bookings in it, is on the server where the site runs. The hosting and network providers, like any such provider, can see your requests and may keep their own technical logs under their own terms.',
+        'De site draait bij de hosting van Render en het verkeer loopt via het netwerk van Cloudflare. De database, met je afspraken erin, staat op de server waar de site draait. De hosting- en netwerkaanbieders kunnen, zoals elke aanbieder, je verzoeken zien en kunnen volgens hun eigen voorwaarden eigen technische logs bijhouden.',
+      ),
+      tri(
+        'A tranzakciós e-maileket az oldal tulajdonosa által beállított e-mail-szolgáltatás küldi ki az oldal nevében. Megkapja a címzett e-mail-címét és az üzenet tartalmát, hogy továbbíthassa.',
+        'The transactional emails are sent in the site’s name by the email service the site’s owner has set up. It receives the recipient’s email address and the content of the message so that it can send it on.',
+        'De transactionele e-mails worden namens de site verstuurd door de e-maildienst die de eigenaar van de site heeft ingesteld. Die ontvangt het e-mailadres van de ontvanger en de inhoud van het bericht om het te kunnen versturen.',
+      ),
+      tri(
+        'Ha az oldal tulajdonosa bekapcsolta az automatikus mentést, az adatbázisról naponta másolat készül, amely a tulajdonos Google Drive tárhelyére kerül; ebben a foglalások is benne vannak. A mentéseket az oldal korlátozott ideig őrzi, utána törli.',
+        'If the site’s owner has switched on automatic backups, a copy of the database is made every day and stored in the owner’s Google Drive account; the bookings are in it too. The site keeps the backups for a limited time and then deletes them.',
+        'Heeft de eigenaar van de site automatische back-ups ingeschakeld, dan wordt elke dag een kopie van de database gemaakt en opgeslagen in het Google Drive-account van de eigenaar; de afspraken staan daar ook in. De site bewaart de back-ups beperkte tijd en verwijdert ze daarna.',
+      ),
+      tri(
+        'A Control Room AI nem fér hozzá a foglalásokhoz.',
+        'Control Room AI has no access to bookings.',
+        'Control Room AI heeft geen toegang tot afspraken.',
+      ),
+    ],
+  },
   measurement: {
     title: tri('Mérés', 'Measurement', 'Meten'),
     off: tri(
@@ -248,14 +333,14 @@ export const privacyText = {
     ),
     on: [
       tri(
-        'Ez az oldal névtelen eseményeket küldhet arról, hogy mit nyitottak meg (egy szolgáltatás, egy csomag, egy projekt, egy Lab-élmény), és hogy egy ajánlatkérés vagy üzenet elment-e. Csak azonosítót és számot tartalmaznak.',
-        'This site can send anonymous events about what was opened (a service, a package, a project, a Lab experience) and whether a request or message was sent. They contain only ids and numbers.',
-        'Deze site kan anonieme gebeurtenissen sturen over wat is geopend (een dienst, een pakket, een project, een Lab-ervaring) en of een aanvraag of bericht is verzonden. Ze bevatten alleen id’s en getallen.',
+        'Ez az oldal névtelen eseményeket küldhet arról, hogy mit nyitottak meg (egy szolgáltatás, egy csomag, egy projekt, egy Lab-élmény), hogy egy ajánlatkérés vagy üzenet elment-e, és hogy egy konzultációtípust kiválasztottak-e, elkészült-e egy foglalás, kértek-e lemondást vagy időpont-módosítást. Csak azonosítót és számot tartalmaznak.',
+        'This site can send anonymous events about what was opened (a service, a package, a project, a Lab experience), whether a request or message was sent, and whether a consultation type was chosen, a booking was made, or a cancellation or a change of time was asked for. They contain only ids and numbers.',
+        'Deze site kan anonieme gebeurtenissen sturen over wat is geopend (een dienst, een pakket, een project, een Lab-ervaring), of een aanvraag of bericht is verzonden en of een soort adviesgesprek is gekozen, een afspraak is gemaakt of om annulering of een tijdwijziging is gevraagd. Ze bevatten alleen id’s en getallen.',
       ),
       tri(
-        'Soha nem kerül bele az, amit beírsz egy űrlapba, egy projektleírás, hangfelvétel vagy bármilyen azonosító. A fogadó szerver, mint minden kérésnél, látja a kérés IP-címét; az oldal ezt nem teszi az eseménybe.',
-        'What you type into a form, a project description, a recording or any identifier is never included. The receiving server sees the request’s IP address, as with any request; the site does not put it in the event.',
-        'Wat je in een formulier typt, een projectomschrijving, een opname of een identificatie wordt nooit meegestuurd. De ontvangende server ziet, zoals bij elk verzoek, het IP-adres; de site zet dat niet in de gebeurtenis.',
+        'Soha nem kerül bele az, amit beírsz egy űrlapba, egy projektleírás, hangfelvétel, a foglalásod linkjének titkos része vagy bármilyen azonosító. A fogadó szerver, mint minden kérésnél, látja a kérés IP-címét; az oldal ezt nem teszi az eseménybe.',
+        'What you type into a form, a project description, a recording, the secret part of your booking link or any identifier is never included. The receiving server sees the request’s IP address, as with any request; the site does not put it in the event.',
+        'Wat je in een formulier typt, een projectomschrijving, een opname, het geheime deel van de link naar je afspraak of een identificatie wordt nooit meegestuurd. De ontvangende server ziet, zoals bij elk verzoek, het IP-adres; de site zet dat niet in de gebeurtenis.',
       ),
       tri(
         'Csak a hozzájárulásoddal mér. Ha a böngésződ Global Privacy Control vagy Do Not Track jelzést küld, az oldal nem is kérdez, és nem mér. A választásodat a lap alján, a „Mérési beállítások” gombbal bármikor megváltoztathatod.',

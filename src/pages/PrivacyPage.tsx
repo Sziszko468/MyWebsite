@@ -8,8 +8,8 @@ import styles from './PrivacyPage.module.scss'
 
 /**
  * The privacy and cookie notice (content/privacy.ts). One h1, then plain sections: cookies, what the site
- * keeps in the browser, what leaves the device, measurement (which says whether this site measures at all),
- * what the visitor controls. Loaded as its own chunk.
+ * keeps in the browser, what leaves the device, quotes, consultation booking, the assistant, who handles the data,
+ * measurement (which says whether this site measures at all), what the visitor controls. Loaded as its own chunk.
  */
 export function PrivacyPage() {
   const { lang } = useI18n()
@@ -74,10 +74,28 @@ export function PrivacyPage() {
           </ul>
         </section>
 
+        <section className={styles.section} aria-labelledby="privacy-booking">
+          <h2 id="privacy-booking">{text.booking.title[lang]}</h2>
+          <ul>
+            {text.booking.items.map((item) => (
+              <li key={item.en}>{item[lang]}</li>
+            ))}
+          </ul>
+        </section>
+
         <section className={styles.section} aria-labelledby="privacy-assistant">
           <h2 id="privacy-assistant">{text.assistant.title[lang]}</h2>
           <ul>
             {text.assistant.items.map((item) => (
+              <li key={item.en}>{item[lang]}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className={styles.section} aria-labelledby="privacy-recipients">
+          <h2 id="privacy-recipients">{text.recipients.title[lang]}</h2>
+          <ul>
+            {text.recipients.items.map((item) => (
               <li key={item.en}>{item[lang]}</li>
             ))}
           </ul>

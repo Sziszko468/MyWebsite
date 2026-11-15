@@ -146,6 +146,12 @@ export const CONSULTATION_PAGES: readonly PageDef<ConsultationPageId>[] = [
   page<ConsultationPageId>('customer-booking', '/consultation/booking', LANGUAGES, false),
 ]
 
+/**
+ * Whether a page is a customer's private page: it is reached only through a secret in its address (a quotation, a request's status, a consultation booking).
+ * Such a page is told to crawlers as `noindex, nofollow` (not just "do not list it"): nothing on it is for a search engine to read or follow.
+ */
+export const isPrivatePage = (page: PageDef | undefined): boolean => page !== undefined && (page.id === 'customer-quote' || page.id === 'customer-request' || page.id === 'customer-booking')
+
 /** The secret part of a customer page's address: 256 random bits as base64url are 43 characters; a little room either way. */
 const CUSTOMER_PATH = /^\/(quote|request|consultation\/booking)\/[A-Za-z0-9_-]{20,64}$/
 

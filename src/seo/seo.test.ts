@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import { LANGUAGES } from '../i18n/config'
-import { PAGES, findPage } from '../routes/pages'
+import { PAGES, findPage, isPrivatePage } from '../routes/pages'
 import { allPageVersions, buildHead, serializeJsonLd, seoContextFrom, type Head, type SeoContext } from './head'
 import { renderNoscript, renderPage, renderTag, HEAD_MARKER, BODY_MARKER } from './html'
 import { seoPath } from './paths'
@@ -103,7 +103,8 @@ describe('indexing rules', () => {
     for (const { page, lang } of versions) {
       const head = headOf(page.id, lang)
       expect(head.indexable, `${lang}:${page.id}`).toBe(page.indexable)
-      expect(head.robots, `${lang}:${page.id}`).toMatch(page.indexable ? /^index, follow/ : /^noindex, follow$/)
+      // A customer's private page (a secret in its address) is `noindex, nofollow`, like the header the server sends with it.
+      expect(head.robots, `${lang}:${page.id}`).toMatch(page.indexable ? /^index, follow/ : isPrivatePage(page) ? /^noindex, nofollow$/ : /^noindex, follow$/)
     }
     expect(findPage('/services/cart')?.indexable).toBe(false)
     expect(findPage('/services/configure')?.indexable).toBe(false)

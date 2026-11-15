@@ -14,6 +14,8 @@ import type { Language } from '../config'
 const names = [
   'launch', 'grow', 'build', 'care', 'full', 'experience', 'controlled', 'chaos', 'racing', 'control', 'room', 'lab', 'glitch', 'liquid', 'matter',
   'serif', 'type', 'motion', 'warpsprong', 'spendly', 'bookinghub', 'logistics', 'hollandia', 'kezdőknek', 'nfsu2', 'cloudflare', 'resend',
+  // The hosting provider and the backup storage the privacy notice names.
+  'render', 'drive',
   'anthropic', 'claude', 'haiku', 'gemini', 'github', 'figma', 'stripe', 'wordpress', 'shopify', 'woocommerce', 'webflow', 'wix', 'squarespace',
   'django', 'djangóval', 'fastapi', 'postgresql', 'sqlite', 'redis', 'docker', 'nginx', 'swagger', 'celery', 'react', 'typescript', 'javascript', 'vite',
   'node', 'nodejs', 'next', 'expo', 'native', 'tailwind', 'playwright', 'webgl', 'glsl', 'three', 'openapi', 'yaml', 'apns', 'fcm',

@@ -2,14 +2,15 @@
 
 A visitor chooses a consultation type, a free day and time, leaves their contact details and books. The owner opens booking, writes the hours, and works with the bookings in the existing administration. It is part of the existing website and backend: one Node process, the existing SQLite database, the existing e-mail outbox and the existing administration. There is no second backend, database, e-mail provider, calendar service or account system.
 
-> **Status:** implemented and tested on the branch `feature/consultation-booking`; **not deployed**, not merged, and booking is **closed to the public** until the owner has opened it (see "Opening booking" below). What was and was not verified is in [TEST_RESULTS.md](TEST_RESULTS.md). Only what is marked *implemented* exists; *planned* things are not built.
+> **Status:** implemented and tested on the branch `feature/consultation-booking` (PROMPT 24) and completed for launch readiness on `feature/booking-launch-readiness` (PROMPT 24.1: the privacy notice, the indexing rules, the launch checklist); **not deployed**, not merged, and booking is **closed to the public** until the owner has opened it (see "Opening booking" below). What was and was not verified is in [TEST_RESULTS.md](TEST_RESULTS.md). Only what is marked *implemented* exists; *planned* things are not built. **Nothing here is legal advice or an approval**: what only the owner or a lawyer can decide is in [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md).
 
 | Document | What it says |
 | --- | --- |
+| [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) | **start here before opening booking**: owner configuration, privacy and legal review, e-mail readiness, production infrastructure, final manual testing, each item with a status |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | the plan, the modules, the data model, the endpoints, the state machine, concurrency |
 | [AVAILABILITY.md](AVAILABILITY.md) | how free times are calculated; time zones and daylight saving time |
-| [SECURITY.md](SECURITY.md) | the secure links, abuse protection, privacy, what needs the owner's or a lawyer's review |
-| [EMAILS.md](EMAILS.md) | the ten messages, their languages, idempotency and the switches |
+| [SECURITY.md](SECURITY.md) | the secure links, abuse protection, privacy, the review of 2026-11-15, what needs the owner's or a lawyer's review |
+| [EMAILS.md](EMAILS.md) | the ten messages, their languages, idempotency, the switches, what "accepted" means |
 | [TEST_RESULTS.md](TEST_RESULTS.md) | what was run, with exact results, and what was not |
 
 ## What a visitor sees (implemented)
@@ -56,17 +57,24 @@ If you do not want to confirm each booking, leave "New bookings: are confirmed a
 | `EMAIL_PROVIDER`, `EMAIL_FROM`, `EMAIL_API_KEY` / SMTP, `EMAIL_REPLY_TO` | sending (the existing outbox) |
 | `NOTIFY_TO`, `NOTIFY_LANGUAGE` | where the owner's booking messages go and in which language |
 | `CUSTOMER_LINK_DAYS` | how long a customer link works after the appointment (default 90) |
-| `RETENTION_DAYS` | when set, bookings that are over (cancelled, completed, no show) are deleted this many days after their last change; unset keeps everything |
+| `RETENTION_DAYS` | **the owner's decision; the code chooses no period.** Unset: no booking, e-mail log line, inquiry or quote request is deleted because of its age. Set: the daily housekeeping deletes bookings that are *over* (cancelled, completed, no show) this many days after their last change, together with the old handled lines of the e-mail log; a booking still `pending` or `confirmed` is **never** deleted by age, so close finished consultations. The housekeeping is a timer that fires 24 hours after the server starts |
 | `RATE_LIMITS` | on by default; the booking form allows six bookings per 15 minutes per address |
 
 No environment variable was added. Migration `0011_consultation_booking.sql` creates the tables and rebuilds `email_deliveries` (as migrations 0007 and 0009 did); it applies on the next start with `MIGRATE_ON_START` (the default). It creates **no** hours, **no** durations and **no** enabled type.
 
 ## Operations
 
-* **Backup/restore:** the bookings are in the same SQLite file as everything else.
-* **Erasure request:** `npm run server:cli -- erase <e-mail>` also removes the address's bookings, notes, links and e-mails (the history keeps one line per event with a reference, a status and a time, and no person).
+* **Backup/restore:** the bookings are in the same SQLite file as everything else, and in every backup copy of it (the optional Google Drive backup keeps dated copies for `BACKUP_RETENTION_DAYS`). An erasure does not reach copies already made.
+* **Erasure request:** done **by hand**, by whoever runs the server: `npm run server:cli -- erase <e-mail>` removes the address's bookings, notes, change requests, link fingerprints and booking e-mails, and the same address's inquiries and quote requests. The history keeps one line per event with a reference, a status and a time, and no person. No page or endpoint lets a visitor do it; the privacy notice says so. A test reads every table afterwards and finds nothing of the person (`server/test/bookingPrivacy.test.ts`).
+* **Housekeeping:** `npm run server:maintenance` runs the retention task by hand; the server also runs it on a timer that starts counting at each start (a host that restarts more often than daily may never reach it).
 * **Outbox:** a booking's e-mails appear in the usual delivery log (*Notifications*) and on the booking's detail page.
 * **Several processes:** two server processes on one database file cannot double-book a time (tested with real processes); the rate limits are per process.
+
+## The privacy notice and indexing (implemented in PROMPT 24.1)
+
+* **The privacy notice** (`src/content/privacy.ts`, `/<lang>/privacy`) has two new sections in Hungarian, English and Dutch: *Booking a consultation* (what is stored, why, the secure link, private notes, e-mails, retention, erasure) and *Who handles your data* (hosting, network, e-mail service, optional backups, the assistant). It states no retention period, no legal basis and no agreement, and names no e-mail provider. `src/content/privacy.test.ts` reads the booking code to keep each sentence true. The page's description no longer says "no cookies" (there is one language cookie).
+* **Indexing.** The public page `/<lang>/consultation/` is indexable **only while booking is open in every language** (a zone, hours, the switch, a type with its words and a length): otherwise the backend answers it with `X-Robots-Tag: noindex`, leaves it out of its live `/sitemap.xml`, and the page itself switches its own head to `noindex` with no canonical address or alternates. The customer's own page `/<lang>/consultation/booking/<secret>` is **always** `noindex, nofollow`, `Cache-Control: no-store`, `Referrer-Policy: no-referrer`, never in a sitemap, and its secret reaches no title, head tag, analytics event, log line or storage. See [SECURITY.md](SECURITY.md) and `server/test/bookingSeo.test.ts`.
+* A static host that serves `dist/` **without** the backend cannot know booking is closed: see D10 in [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md).
 
 ## Deliberately not built
 

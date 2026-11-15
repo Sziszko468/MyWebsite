@@ -4,8 +4,8 @@ import { tri } from './trilingual'
 export const privacyMeta = {
   title: tri('Adatvédelem és sütik', 'Privacy and cookies', 'Privacy en cookies'),
   description: tri(
-    'Mit tárol és mit küld el ez az oldal: sütik nincsenek, a böngészőben tárolt beállítások listája, az űrlapok működése és a mérés szabályai.',
-    'What this site stores and sends: no cookies, the list of settings kept in your browser, how the forms work and the rules for measurement.',
-    'Wat deze site bewaart en verstuurt: geen cookies, de lijst met instellingen in je browser, hoe de formulieren werken en de regels voor meten.',
+    'Mit tárol és mit küld el ez az oldal: egyetlen nyelvi süti, a böngészőben tárolt beállítások listája, az űrlapok és a konzultációfoglalás működése, és a mérés szabályai.',
+    'What this site stores and sends: one language cookie, the list of settings kept in your browser, how the forms and the consultation booking work, and the rules for measurement.',
+    'Wat deze site bewaart en verstuurt: één cookie voor je taalkeuze, de lijst met instellingen in je browser, hoe de formulieren en het inplannen van een adviesgesprek werken en de regels voor meten.',
   ),
 }

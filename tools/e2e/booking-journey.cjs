@@ -9,9 +9,11 @@
 //   F  the owner answers in the administration: approves, proposes a new time, cancels with a message
 //   G  the places that offer booking appear once it is open, and the sitemap lists the page
 //   H  axe finds nothing on any screen of the booking, on the page and in the administration (needs AUDIT_AXE=<path to axe.min.js>)
+//   I  PROMPT 24.1: what a search engine and a third party are told (the public page indexable only while booking is open, the customer's page never, the secret
+//      only ever sent to this site), and the privacy notice's booking sections in three languages (needs AUDIT_AXE for the accessibility step)
 //
 //   AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/booking-journey.cjs --base=http://127.0.0.1:8860 --mail=<mail folder> \
-//        --email=admin@example.test --password=... [--width=1440] [--only=ABCDEFGH] [--out=<dir>]
+//        --email=admin@example.test --password=... [--width=1440] [--only=ABCDEFGHI] [--out=<dir>]
 //
 // Needs a FRESH server (every run makes bookings) built with VITE_API_URL=/ and started with RATE_LIMITS=false (a visitor may book only six times in
 // fifteen minutes from one address, which is the point of the limit, and this journey books more often than that). See README.md in this folder.
@@ -30,7 +32,7 @@ const PASSWORD = arg('password', '')
 const OUT = arg('out', '')
 const WIDTH = Number(arg('width', '1440'))
 const HEIGHT = Number(arg('height', WIDTH >= 768 ? '1000' : '844'))
-const ONLY = arg('only', 'ABCDEFGH')
+const ONLY = arg('only', 'ABCDEFGHI')
 const wants = (letter) => ONLY.includes(letter)
 const MOBILE = WIDTH < 768
 if (OUT) fs.mkdirSync(OUT, { recursive: true })
@@ -169,6 +171,10 @@ async function main() {
         expect(await page.evaluate(() => document.documentElement.lang) === lang, 'lang attribute')
         expect(await NO_SCROLL(page), 'sideways scroll')
         expect((response.headers()['x-robots-tag'] ?? '').includes('noindex'), 'not told to stay out of search results')
+        // The page's own head says the same once it knows booking is closed (for a crawler that reads the rendered page): noindex, and no canonical address.
+        await page.waitForFunction(() => /noindex/.test(document.querySelector('meta[name=robots]')?.getAttribute('content') ?? ''), null, { timeout: 8000 })
+        expect((await page.locator('link[rel=canonical]').count()) === 0, 'the closed page still names a canonical address')
+        expect((await page.locator('link[rel=alternate][hreflang]').count()) === 0, 'the closed page still lists language alternates')
         await shot(page, `A-${lang}-${WIDTH}`)
       })
     }
@@ -372,7 +378,6 @@ async function main() {
       await page.getByText(state.refs[lang]).first().waitFor({ timeout: 10000 })
       const text = await page.locator('main').innerText()
       expect(/Europe\/Budapest/.test(text) && /Confirmed/.test(text), 'zone or status missing')
-      expect(!/note/i.test(text.replace(/Notes?:/g, '')) || true, 'ok')
       expect(await NO_SCROLL(page), 'sideways scroll')
       await shot(page, `E-1-booking-${WIDTH}`)
     })
@@ -491,6 +496,19 @@ async function main() {
       const sitemap = await (await page.request.get(`${BASE}/sitemap.xml`)).text()
       for (const lang of LANGS) expect(sitemap.includes(`/${lang}/consultation/`), `${lang} missing`)
     })
+    await step('the public page is indexable now that booking is open: no header against it, its own canonical address and language alternates', async () => {
+      for (const lang of LANGS) {
+        const response = await page.goto(`${BASE}/${lang}/consultation/`, { waitUntil: 'networkidle' })
+        expect(response.status() === 200, `${lang}: status ${response.status()}`)
+        expect(!(response.headers()['x-robots-tag'] ?? ''), `${lang}: still told to stay out: ${response.headers()['x-robots-tag']}`)
+        await page.getByRole('radio', { name: new RegExp(W[lang].type) }).waitFor({ timeout: 15000 })
+        const robots = await page.locator('meta[name=robots]').getAttribute('content')
+        expect(/^index, follow/.test(robots ?? ''), `${lang}: robots says ${robots}`)
+        const canonical = await page.locator('link[rel=canonical]').getAttribute('href')
+        expect(canonical !== null && canonical.endsWith(`/${lang}/consultation/`), `${lang}: canonical ${canonical}`)
+        expect((await page.locator('link[rel=alternate][hreflang]').count()) === 4, `${lang}: language alternates`)
+      }
+    })
     await step('the language switcher keeps the booking page and the customer link', async () => {
       await page.goto(`${BASE}/en/consultation/`, { waitUntil: 'networkidle' })
       await page.goto(state.links.en, { waitUntil: 'networkidle' })
@@ -558,6 +576,80 @@ async function main() {
       }
       await context.close()
     })
+  }
+
+  // ---- I. what a search engine and a third party are told; the privacy notice ----------------------------------------------------------
+  if (wants('I')) {
+    console.log('I  indexing, the secret in the address, and the privacy notice (PROMPT 24.1)')
+    const { axeRun } = require('../audit/lib.cjs')
+    const host = new URL(BASE).host
+    const link = state.links.en
+    if (link) {
+      const { context, page } = await newPage(browser, { width: WIDTH, height: HEIGHT, mobile: MOBILE, locale: 'en-GB', scheme: 'light' })
+      current = page
+      const token = link.slice(-43)
+      await step("the customer's page: noindex, nofollow in the header and in the head, never cached, no referrer, no canonical address, a title without the secret", async () => {
+        const response = await page.goto(link, { waitUntil: 'networkidle' })
+        expect(response.status() === 200, `status ${response.status()}`)
+        const headers = response.headers()
+        expect(headers['x-robots-tag'] === 'noindex, nofollow', `x-robots-tag: ${headers['x-robots-tag']}`)
+        expect(headers['cache-control'] === 'no-store', `cache-control: ${headers['cache-control']}`)
+        expect(headers['referrer-policy'] === 'no-referrer', `referrer-policy: ${headers['referrer-policy']}`)
+        await page.getByText(state.refs.en).first().waitFor({ timeout: 10000 })
+        expect((await page.locator('meta[name=robots]').getAttribute('content')) === 'noindex, nofollow', 'meta robots')
+        expect((await page.locator('link[rel=canonical]').count()) === 0, 'canonical address')
+        expect((await page.locator('link[rel=alternate][hreflang]').count()) === 0, 'language alternates')
+        const head = await page.evaluate(() => document.head.outerHTML + document.title)
+        expect(!head.includes(token), 'the secret is in the head or the title')
+      })
+      await step('the secret goes only to this site: changing the language and reloading send it nowhere else, and it is in no storage or cookie', async () => {
+        const seen = []
+        page.on('request', (request) => seen.push(request.url()))
+        await page.goto(link, { waitUntil: 'networkidle' })
+        for (const lang of ['hu', 'nl', 'en']) {
+          await page.goto(link.replace('/en/', `/${lang}/`), { waitUntil: 'networkidle' })
+          expect(page.url().endsWith(token), `${lang}: the secret did not survive the language change`)
+          await page.getByText(state.refs.en).first().waitFor({ timeout: 10000 })
+        }
+        const local = (url) => url.startsWith('data:') || url.startsWith('blob:') || new URL(url).host === host
+        const withSecret = seen.filter((url) => url.includes(token))
+        expect(withSecret.length > 0, 'the page never asked for the booking')
+        expect(withSecret.every(local), `the secret was sent to another host: ${withSecret.find((url) => !local(url))}`)
+        expect(seen.every(local), `a request went to another host: ${seen.find((url) => !local(url))}`)
+        const stored = await page.evaluate(() => JSON.stringify([Object.entries(localStorage), Object.entries(sessionStorage), document.cookie]))
+        expect(!stored.includes(token), 'the secret is in browser storage or a cookie')
+      })
+      await context.close()
+    }
+    for (const lang of LANGS) {
+      const { context, page } = await newPage(browser, { width: WIDTH, height: HEIGHT, mobile: MOBILE, locale: lang === 'hu' ? 'hu-HU' : lang === 'nl' ? 'nl-NL' : 'en-GB', scheme: 'light' })
+      current = page
+      const notice = {
+        hu: { booking: 'Konzultáció foglalása', recipients: 'Kik kezelik az adataidat', a: /egyirányú ujjlenyomat/, b: /Ha nincs megőrzési idő beállítva/, c: /nem jelennek meg a foglalásod oldalán/ },
+        en: { booking: 'Booking a consultation', recipients: 'Who handles your data', a: /one-way fingerprint/, b: /If no retention period is set/, c: /not shown on your booking page/ },
+        nl: { booking: 'Een adviesgesprek inplannen', recipients: 'Wie je gegevens verwerkt', a: /eenrichtingsvingerafdruk/, b: /Is er geen bewaartermijn ingesteld/, c: /staan niet op de pagina van je afspraak/ },
+      }[lang]
+      await step(`${lang}: the privacy notice has the booking and the recipients sections, says the same things, fits the screen and has no accessibility violation`, async () => {
+        const errors = []
+        page.on('pageerror', (error) => errors.push(String(error)))
+        await page.goto(`${BASE}/${lang}/privacy`, { waitUntil: 'networkidle' })
+        await page.getByRole('heading', { name: notice.booking, level: 2 }).waitFor({ timeout: 10000 })
+        await page.getByRole('heading', { name: notice.recipients, level: 2 }).waitFor({ timeout: 10000 })
+        const text = await page.locator('main').innerText()
+        for (const pattern of [notice.a, notice.b, notice.c]) expect(pattern.test(text), `missing ${pattern}`)
+        const bookingSection = await page.locator('section[aria-labelledby=privacy-booking]').innerText()
+        expect(!/\d/.test(bookingSection), 'a number appears in the booking section')
+        expect(await NO_SCROLL(page), 'sideways scroll')
+        expect(errors.length === 0, errors.join('; '))
+        if (process.env.AUDIT_AXE) {
+          await sleep(600)
+          const found = await axeRun(page)
+          expect(found.length === 0, found.map((v) => `${v.id} (${v.count})`).join('; '))
+        }
+        await shot(page, `I-privacy-${lang}-${WIDTH}`)
+      })
+      await context.close()
+    }
   }
 
   await browser.close()
