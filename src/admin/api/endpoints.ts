@@ -1,7 +1,7 @@
 import { del, get, post, put, patch, request, queryString, type Envelope } from './client'
 import type { AiSummary, AiTestResult, AiUsage } from '../lib/ai'
 import type {
-  ContentRecord, DashboardData, ExtraRecord, Inquiry, InquiryDetail, ListQuery, LoginData, NotificationPreferences, NotificationsData, EmailCheck, Orderable, Page, PackageRecord, Preferences, Profile, Quote, QuoteDetail, QuoteOverview, QuotationDetail, QuotationForm,
+  ContentRecord, DashboardData, ExtraRecord, GmailStatus, Inquiry, InquiryDetail, ListQuery, LoginData, NotificationPreferences, NotificationsData, EmailCheck, Orderable, Page, PackageRecord, Preferences, Profile, Quote, QuoteDetail, QuoteOverview, QuotationDetail, QuotationForm,
   ServiceRecord, SessionData, SessionView, SystemData, TranslationGroup, TranslationItem, TranslationOverview,
 } from './types'
 
@@ -116,6 +116,13 @@ export const system = {
   get: (signal?: AbortSignal) => get<SystemData>(`${base}/system`, { signal }),
   maintenance: () => post<{ expiredSessions: number; inquiries: number; quoteRequests: number; deliveries: number }>(`${base}/system/maintenance`, {}),
   publish: () => post<{ published: boolean }>(`${base}/system/publish`, {}),
+}
+
+export const gmail = {
+  /** What is known: asks the backend, not Google. */
+  status: (signal?: AbortSignal) => get<GmailStatus>(`${base}/gmail/status`, { signal }),
+  /** A real check: the backend asks Google for a new access token and answers with the result (a failed connection is a result, HTTP 200). */
+  check: () => post<GmailStatus>(`${base}/gmail/check`, {}),
 }
 
 // ---- the portfolio (PROMPT 13.1): projects, pictures and the website's own wording ----

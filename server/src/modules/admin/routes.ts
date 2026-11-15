@@ -10,6 +10,7 @@ import { authenticate, clearedCookie, destroySession, sessionCookie } from '../a
 import * as catalog from '../catalog/admin.ts'
 import type { ContentType } from '../catalog/repository.ts'
 import * as translations from '../catalog/translations.ts'
+import * as gmail from '../gmail/admin.ts'
 import * as shopDocuments from '../shop/documents.ts'
 import * as inquiries from '../inquiries/admin.ts'
 import { INQUIRY_KINDS, INQUIRY_STATUSES, LIST_SORTS, type InquiryRow } from '../inquiries/repository.ts'
@@ -316,6 +317,12 @@ export function adminRoutes(_app: AppContext): RouteDef[] {
 
     // ---- system (administrators only) ----
     api('GET', '/api/admin/system', (ctx) => json(systemData(ctx.app, session(ctx)))),
+    // The Gmail connection: what is known (no request to Google), and a real check (one request to Google). Status only.
+    api('GET', '/api/admin/gmail/status', (ctx) => json(gmail.gmailStatus(ctx.app, ctx.session))),
+    api('POST', '/api/admin/gmail/check', async (ctx) => {
+      await ctx.json()
+      return json(await gmail.gmailCheck(ctx.app, ctx.session))
+    }),
     api('POST', '/api/admin/system/maintenance', async (ctx) => {
       await ctx.json()
       const who = requirePermission(ctx.session, 'system:write')

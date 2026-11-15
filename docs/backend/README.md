@@ -334,7 +334,18 @@ The first scheduled run happens at the next configured UTC hour after the proces
 
 All four are optional and **never stop the server**. Unlike the Drive settings, an incomplete or unusable set only leaves Gmail disabled; the start-up log then names the variables that are wrong (never their values). `server/src/modules/gmail/tokenService.ts` exchanges the refresh token at `https://oauth2.googleapis.com/token`, keeps the access token in memory (renewed a minute before it expires, one request for concurrent callers) and reports a status of exactly four fields: `configured`, `connected`, `accountEmail`, `lastError` (a category such as `invalid_grant` or `provider_unavailable`; never a response text). Credentials and tokens are never logged or returned.
 
-This step reads and sends no mail, adds no route and no administration screen. `connected` means "Google issued an access token"; it does not yet prove the token belongs to `GMAIL_ACCOUNT_EMAIL`. If the Google Cloud OAuth consent screen is in *Testing*, Google expires the refresh token after seven days (`invalid_grant`).
+Nothing reads or sends mail. `connected` means "Google issued an access token"; it does not yet prove the token belongs to `GMAIL_ACCOUNT_EMAIL`. If the Google Cloud OAuth consent screen is in *Testing*, Google expires the refresh token after seven days (`invalid_grant`).
+
+#### Administration: connection status (step 2)
+
+The service is built once in `createApp` (`AppContext.gmail`) and shown in **Settings → System → Gmail integration**. Two routes, both signed-in administrator only (same-origin, CSRF token on the POST):
+
+| Route | Needs | What it does |
+|---|---|---|
+| `GET /api/admin/gmail/status` | `system:read` | What is known now. Makes **no** request to Google; "not checked" until a check has been made since the server started. |
+| `POST /api/admin/gmail/check` | `system:write` | A real check: asks Google for a new access token (a cached one does not stand in for it) and answers with the result. A failed connection is a result (HTTP 200 with `lastError`), not an error. At most 6 per minute per administrator; written to the administrator log (`gmail.check`, `gmail.check_failed`). |
+
+Both answer with exactly five fields: `configured`, `connected`, `accountEmail`, `lastError` (a category, worded by the administration in its own language) and `checkedAt`. No token, secret, Google response or network error text is ever in an answer or a log line. The mailbox address is shown only to an administrator who may read the system page; the configuration list on that page says whether Gmail is set up (`gmail.enabled`, `credentials`, `problems`) but not the address. There is no polling and no background worker: nothing asks Google until an administrator presses the button.
 
 ### What was **not** verified — read this before relying on it
 

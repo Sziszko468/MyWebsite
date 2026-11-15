@@ -4,7 +4,7 @@ import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { HttpError } from '../src/http/errors.ts'
-import { Limiters } from '../src/http/rateLimit.ts'
+import { LIMITS, Limiters } from '../src/http/rateLimit.ts'
 import { contact, GOOD_PASSWORD, quote, startServer, type TestServer } from './helpers.ts'
 
 let server: TestServer
@@ -290,7 +290,8 @@ describe('abuse of the public forms', () => {
     // Only the windows still running are remembered, so the table does not grow with every address ever seen.
     server.clock.advance(16 * 60_000)
     limiters.sweep()
-    expect(Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    // Every limiter is empty (one per kind of request in LIMITS, however many there are).
+    expect(Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)).toEqual(Object.keys(LIMITS).map(() => 0))
     expect(() => new Limiters(server.clock, false).check('contact', 'x')).not.toThrow()
   })
 

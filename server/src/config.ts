@@ -603,6 +603,8 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     mediaMaxBytes: config.mediaMaxBytes,
     quoteReferenceFormat: config.quoteReferenceFormat,
     customerLinkDays: config.customerLinkDays,
+    // Whether Gmail is set up, never the values and never the mailbox address (the connection panel shows that, to those who may see it). `problems` names variables only.
+    gmail: { enabled: config.gmail.enabled, credentials: config.gmail.enabled ? 'set' : 'missing', accountEmailSet: config.gmail.accountEmail !== '', problems: config.gmail.problems },
     googleDriveBackup: { enabled: config.backup.enabled, credentials: config.backup.enabled ? 'set' : 'missing', folderIdSet: config.backup.folderId !== null, retentionDays: config.backup.retentionDays, hourUtc: config.backup.hourUtc },
     assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : 'missing', model: config.ai.model, modelOverrideRejected: config.ai.modelOverride !== null, customBaseUrl: config.ai.baseUrl !== null },
   }

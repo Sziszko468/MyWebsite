@@ -329,6 +329,57 @@ describe('the Gmail token service', () => {
   })
 })
 
+// ---- what the administration reads: the last result, and a real check -------------------------------------------------------
+
+describe('the Gmail token service, for the administration', () => {
+  it('knows nothing it has not asked: "not checked" until the first request, and then no request for a snapshot', async () => {
+    const { service, calls } = setup(() => reply(200, tokenAnswer()))
+    expect(service.snapshot()).toEqual({ configured: true, connected: false, accountEmail: ACCOUNT, lastError: null, checkedAt: null })
+    expect(calls).toHaveLength(0)
+  })
+
+  it('remembers the outcome of the last request with its time, successes and failures alike', async () => {
+    const { service, calls, clock } = setup(() => reply(200, tokenAnswer()), () => reply(400, { error: 'invalid_grant' }))
+    clock.advance(1000)
+    await service.getAccessToken()
+    expect(service.snapshot()).toEqual({ configured: true, connected: true, accountEmail: ACCOUNT, lastError: null, checkedAt: clock.now().toISOString() })
+    clock.advance(3600_000) // the access token has run out: the next use asks Google, which now refuses
+    await categoryOf(service.getAccessToken())
+    expect(service.snapshot()).toEqual({ configured: true, connected: false, accountEmail: ACCOUNT, lastError: 'invalid_grant', checkedAt: clock.now().toISOString() })
+    expect(calls).toHaveLength(2)
+  })
+
+  it('checks for real: asks Google even when an access token is cached, and never throws', async () => {
+    const { service, calls, clock } = setup(() => reply(200, tokenAnswer()), () => reply(500, {}))
+    expect((await service.check()).connected).toBe(true)
+    clock.advance(10_000)
+    expect(await service.check()).toMatchObject({ connected: false, lastError: 'provider_unavailable', checkedAt: clock.now().toISOString() })
+    expect(calls, 'the cached token did not stand in for the check').toHaveLength(2)
+  })
+
+  it('shares one request between a check and a use that start together', async () => {
+    let release!: () => void
+    const gate = new Promise<void>((resolve) => (release = resolve))
+    const { service, calls } = setup(async () => {
+      await gate
+      return reply(200, tokenAnswer())
+    })
+    const pending = Promise.all([service.check(), service.getAccessToken(), service.check()])
+    release()
+    await pending
+    expect(calls).toHaveLength(1)
+  })
+
+  it('answers "not configured" without a request, for a snapshot and for a check', async () => {
+    const google = fakeGoogle(() => reply(200, tokenAnswer()))
+    const service = createGmailTokenService(loadConfig({ GMAIL_CLIENT_ID: CLIENT_ID }).gmail, { fetch: google.fetch })
+    const expected = { configured: false, connected: false, accountEmail: null, lastError: 'not_configured', checkedAt: null }
+    expect(service.snapshot()).toEqual(expected)
+    expect(await service.check()).toEqual(expected)
+    expect(google.calls).toHaveLength(0)
+  })
+})
+
 // ---- no secret in an error, a log or an answer ------------------------------------------------------------------------------
 
 describe('secrets', () => {

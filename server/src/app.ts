@@ -18,6 +18,7 @@ import { aiRoutes } from './modules/ai/routes.ts'
 import { originIsThisHost, resolveSession, sameOrigin, sessionCookieName, verifySessionCsrf } from './modules/auth/sessions.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { contactRoutes } from './modules/contact/routes.ts'
+import { createGmailTokenService } from './modules/gmail/tokenService.ts'
 import { EmailChecks, type DnsResolver } from './modules/notifications/checks.ts'
 import { Notifier } from './modules/notifications/notifier.ts'
 import { emailRoutes } from './modules/notifications/routes.ts'
@@ -74,7 +75,9 @@ export function createApp(deps: AppDeps): App {
   const limiters = new Limiters(clock, config.rateLimitsEnabled)
   const notifier = new Notifier({ db, config, clock, log, mailer: deps.mailer })
   const emailChecks = new EmailChecks({ config, db, clock, log, fetch: deps.fetch, dns: deps.dns })
-  const context = { config, db, clock, log, limiters, notifier, emailChecks, stats } as AppContext
+  // The Gmail connection is built once, here, from the one configuration: its token cache and its last check belong to the process.
+  const gmail = createGmailTokenService(config.gmail, { fetch: deps.fetch, clock, log })
+  const context = { config, db, clock, log, limiters, notifier, emailChecks, gmail, stats } as AppContext
   context.assistant = new Assistant(context, deps.aiModel ?? null)
 
   const router = new Router()

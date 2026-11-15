@@ -1,6 +1,6 @@
 import type { GmailConfig } from '../../config.ts'
 import type { Logger } from '../../lib/logger.ts'
-import { systemClock, type Clock } from '../../lib/time.ts'
+import { iso, systemClock, type Clock } from '../../lib/time.ts'
 
 /**
  * Gmail OAuth 2.0, step 1: turns the mailbox's refresh token into short-lived access tokens, and says whether that works.
@@ -66,9 +66,18 @@ export interface GmailConnectionStatus {
   lastError: GmailErrorCategory | null
 }
 
+/** What is known about the connection, and when it was last tried. */
+export interface GmailCheckedStatus extends GmailConnectionStatus {
+  /** When the last token request to Google finished (ISO 8601, UTC); null when none has been made since the server started. */
+  checkedAt: string | null
+}
+
+/** The shape of `fetch` the server hands around (app.ts), narrower than the global one: a string address, and options. */
+export type GmailFetch = (input: string, init?: RequestInit) => Promise<Response>
+
 export interface GmailTokenServiceOptions {
-  /** Defaults to the global `fetch`; tests hand in a stand-in for Google. */
-  fetch?: typeof fetch
+  /** Defaults to the global `fetch`; the application passes the one it was given, and tests hand in a stand-in for Google. */
+  fetch?: GmailFetch
   clock?: Clock
   /** Gets the category and HTTP status of a failure, and a note when it recovers; never a credential, a token or a response. */
   log?: Pick<Logger, 'info' | 'warn'>
@@ -84,6 +93,17 @@ export interface GmailTokenService {
   getAccessToken(): Promise<string>
   /** Whether the mailbox can be reached. Never throws, never returns more than the four fields of `GmailConnectionStatus`. */
   status(): Promise<GmailConnectionStatus>
+  /**
+   * What is known right now, without asking Google: the outcome of the last token request (or "not checked" when there has been
+   * none since the server started). Never throws, never makes a request, never returns more than `GmailCheckedStatus`.
+   */
+  snapshot(): GmailCheckedStatus
+  /**
+   * A real check: always asks Google for a new access token with the refresh token (a cached access token proves nothing about
+   * the refresh token), whatever the cache holds, then returns the outcome. Never throws. Without a complete configuration it
+   * makes no request and returns the snapshot.
+   */
+  check(): Promise<GmailCheckedStatus>
 }
 
 /** A token is renewed this long before it expires, so one that is used straight away is still good when Google receives it. */
@@ -127,9 +147,11 @@ export function createGmailTokenService(config: GmailConfig, options: GmailToken
   let cached: { token: string; expiresAt: number } | null = null
   let inFlight: Promise<string> | null = null
   let lastFailure: GmailErrorCategory | null = null
+  /** The outcome of the last request to Google: what the administration shows as "the last check". Memory only, gone on restart. */
+  let last: { at: string; error: GmailErrorCategory | null } | null = null
 
   async function exchange(): Promise<string> {
-    const fetchImpl = options.fetch ?? fetch
+    const fetchImpl: GmailFetch = options.fetch ?? fetch
     const requestedAt = clock.now().getTime()
     let response: Response
     try {
@@ -164,23 +186,50 @@ export function createGmailTokenService(config: GmailConfig, options: GmailToken
       const token = await exchange()
       if (lastFailure !== null) options.log?.info('Gmail token refresh recovered')
       lastFailure = null
+      last = { at: iso(clock.now()), error: null }
       return token
     } catch (error) {
       const failure = error instanceof GmailAuthError ? error : new GmailAuthError('invalid_response')
       cached = null
       if (lastFailure !== failure.category) options.log?.warn('Gmail token refresh failed', { category: failure.category, httpStatus: failure.httpStatus })
       lastFailure = failure.category
+      last = { at: iso(clock.now()), error: failure.category }
       throw failure
     }
+  }
+
+  /** Starts a refresh, or joins the one already under way: callers that ask at the same time share one request to Google. */
+  function startRefresh(): Promise<string> {
+    inFlight ??= refresh().finally(() => {
+      inFlight = null
+    })
+    return inFlight
   }
 
   async function getAccessToken(): Promise<string> {
     if (!config.enabled) throw new GmailAuthError('not_configured')
     if (cached && clock.now().getTime() < cached.expiresAt - REFRESH_MARGIN_MS) return cached.token
-    inFlight ??= refresh().finally(() => {
-      inFlight = null
-    })
-    return inFlight
+    return startRefresh()
+  }
+
+  function snapshot(): GmailCheckedStatus {
+    const accountEmail = config.accountEmail === '' ? null : config.accountEmail
+    if (!config.enabled) return { configured: false, connected: false, accountEmail, lastError: 'not_configured', checkedAt: null }
+    // Configured but never tried: neither connected nor failed. (A failure always has a category, so `lastError: null` with
+    // `connected: false` can mean only "not checked".)
+    if (last === null) return { configured: true, connected: false, accountEmail, lastError: null, checkedAt: null }
+    return { configured: true, connected: last.error === null, accountEmail, lastError: last.error, checkedAt: last.at }
+  }
+
+  async function check(): Promise<GmailCheckedStatus> {
+    if (config.enabled) {
+      try {
+        await startRefresh()
+      } catch {
+        // The outcome is recorded by `refresh`, and shown by the snapshot below; nothing of the failure travels further.
+      }
+    }
+    return snapshot()
   }
 
   async function status(): Promise<GmailConnectionStatus> {
@@ -194,5 +243,5 @@ export function createGmailTokenService(config: GmailConfig, options: GmailToken
     }
   }
 
-  return { getAccessToken, status }
+  return { getAccessToken, status, snapshot, check }
 }

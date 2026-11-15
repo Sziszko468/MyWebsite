@@ -6,6 +6,7 @@ import type { InterfaceLanguage, ThemePreference } from '../api/types'
 import { AdminButton } from '../components/AdminButton'
 import { useConfirm } from '../components/Confirm'
 import { SelectField, TextField } from '../components/form'
+import { GmailPanel } from '../components/GmailPanel'
 import { Icon } from '../components/Icon'
 import { DetailPanel, PageHeader, TabPanel, Tabs } from '../components/layout'
 import { ErrorState, LoadingState } from '../components/states'
@@ -270,6 +271,8 @@ function System() {
           <dd>{formatNumber(data.stats.rateLimited, language)}</dd>
         </dl>
       </DetailPanel>
+
+      <GmailPanel />
 
       <DetailPanel title={s.configuration}>
         <dl className={page.configList}>

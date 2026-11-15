@@ -541,3 +541,17 @@ export interface SystemData {
   audit: { id: number; actor: string | null; action: string; entity_type: string; entity_id: string | null; detail: string | null; created_at: string }[]
   hasDeployHook: boolean
 }
+
+/**
+ * The Gmail connection as the backend shows it (server/src/modules/gmail/admin.ts): these five fields and nothing else. The
+ * error is a category from a fixed list, never text from Google; the screen words it in the administrator's language.
+ */
+export interface GmailStatus {
+  configured: boolean
+  connected: boolean
+  accountEmail: string | null
+  /** A category (see `GMAIL_ERROR_CATEGORIES` in lib/gmail.ts); a value this screen does not know is shown as an unknown error. */
+  lastError: string | null
+  /** When the last request to Google finished (ISO 8601); null when none has been made since the server started. */
+  checkedAt: string | null
+}
