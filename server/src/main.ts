@@ -55,6 +55,8 @@ async function main(): Promise<void> {
   if (config.email.provider !== 'none' && !config.email.enabled) log.warn('e-mail sending is paused (EMAIL_ENABLED=false): nothing will be sent until it is switched on')
   if (config.email.provider === 'resend' && !config.email.webhookSecret) log.warn('EMAIL_WEBHOOK_SECRET is not set: messages can be sent but never shown as delivered or bounced')
   if (config.email.provider !== 'none' && !config.email.replyTo) log.warn('EMAIL_REPLY_TO is not set: a customer who replies will reach the sender address')
+  // Gmail is optional and never stops the server: an incomplete setup only keeps it off. The reasons name variables, never values.
+  if (config.gmail.problems.length > 0) log.warn('Gmail is not set up completely and stays disabled', { problems: config.gmail.problems })
 
   await new Promise<void>((resolve, reject) => {
     app.server.once('error', reject)

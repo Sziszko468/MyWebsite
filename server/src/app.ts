@@ -69,7 +69,7 @@ const REQUEST_ID = /^[A-Za-z0-9_-]{8,64}$/
 export function createApp(deps: AppDeps): App {
   const { config, db, clock, log } = deps
   // Whatever a provider's error text or a library's exception quotes of these is masked in every log line and every stored reason.
-  for (const secret of [config.email.apiKey, config.email.webhookSecret, config.email.smtp?.password, config.email.cloudflare?.apiToken, config.ai.apiKey]) registerSecret(secret)
+  for (const secret of [config.email.apiKey, config.email.webhookSecret, config.email.smtp?.password, config.email.cloudflare?.apiToken, config.ai.apiKey, config.gmail.clientSecret, config.gmail.refreshToken]) registerSecret(secret)
   const stats: Stats = { startedAt: Date.now(), requests: 0, clientErrors: 0, serverErrors: 0, rateLimited: 0 }
   const limiters = new Limiters(clock, config.rateLimitsEnabled)
   const notifier = new Notifier({ db, config, clock, log, mailer: deps.mailer })

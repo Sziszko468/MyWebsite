@@ -328,6 +328,14 @@ When `GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET` and `GOOGLE_DRIVE_RE
 
 The first scheduled run happens at the next configured UTC hour after the process starts; no immediate backup is run on deploy. The upload uses the Google Drive `drive.file` scope. A successful provider response confirms upload acceptance, not an independent restore test. Restore procedures should be tested separately.
 
+### Gmail OAuth foundation (step 1: connection only)
+
+`GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN` and `GMAIL_ACCOUNT_EMAIL` prepare a connection to one Gmail mailbox. They are separate from the Google Drive backup values: a different OAuth client and a different refresh token, never shared, never read from `GOOGLE_DRIVE_*`. The refresh token must be authorized for `gmail.readonly` and `gmail.send`; a token that Google reports without both is refused (`insufficient_scope`).
+
+All four are optional and **never stop the server**. Unlike the Drive settings, an incomplete or unusable set only leaves Gmail disabled; the start-up log then names the variables that are wrong (never their values). `server/src/modules/gmail/tokenService.ts` exchanges the refresh token at `https://oauth2.googleapis.com/token`, keeps the access token in memory (renewed a minute before it expires, one request for concurrent callers) and reports a status of exactly four fields: `configured`, `connected`, `accountEmail`, `lastError` (a category such as `invalid_grant` or `provider_unavailable`; never a response text). Credentials and tokens are never logged or returned.
+
+This step reads and sends no mail, adds no route and no administration screen. `connected` means "Google issued an access token"; it does not yet prove the token belongs to `GMAIL_ACCOUNT_EMAIL`. If the Google Cloud OAuth consent screen is in *Testing*, Google expires the refresh token after seven days (`invalid_grant`).
+
 ### What was **not** verified — read this before relying on it
 
 - **No real mail provider.** E-mail was proven against a protocol-speaking mock and a self-signed certificate, not against a real SMTP service (no provider, sender or recipient address exists to test with). Deliverability, SPF/DKIM/DMARC and spam-folder behaviour are the owner's to check; the system only claims *accepted by the provider*.

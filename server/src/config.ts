@@ -136,6 +136,26 @@ export interface AiConfig {
   defaults: AiSettings
 }
 
+/**
+ * The Gmail mailbox the website will read and send through (OAuth 2.0, its own client and refresh token). It is optional and
+ * NEVER stops the server: unlike the other settings, an incomplete or unusable Gmail setup does not raise a `ConfigError`, it
+ * only leaves the integration switched off and says why in `problems`. It shares nothing with `backup` (Google Drive).
+ */
+export interface GmailConfig {
+  /** True only when all four values are present and usable. Every Gmail feature must check this first. */
+  enabled: boolean
+  /** The OAuth client. Empty unless `enabled`: a half-set configuration can never reach Google. */
+  clientId: string
+  /** A secret: server only, never logged, never in an answer, never in the browser. Empty unless `enabled`. */
+  clientSecret: string
+  /** A secret, like `clientSecret`. Empty unless `enabled`. */
+  refreshToken: string
+  /** The mailbox the refresh token belongs to (not a secret). Empty when it is missing or not an address. */
+  accountEmail: string
+  /** Why the integration is off although something was set: variable names and a short reason, never a value. Empty when nothing is set or all is well. */
+  problems: readonly string[]
+}
+
 export interface Config {
   env: AppEnv
   host: string
@@ -175,6 +195,8 @@ export interface Config {
   customerLinkDays: number
   ai: AiConfig
   backup: { enabled: boolean; clientId: string; clientSecret: string; refreshToken: string; folderId: string | null; retentionDays: number; hourUtc: number }
+  /** Gmail, step 1 (OAuth foundation). Separate from `backup`: its own client, its own refresh token. */
+  gmail: GmailConfig
 }
 
 export class ConfigError extends Error {
@@ -399,6 +421,23 @@ export function loadConfig(env: Env = process.env): Config {
   const backupRetentionDays = integer('BACKUP_RETENTION_DAYS', 30, 1, 365)
   const backupHourUtc = integer('BACKUP_HOUR_UTC', 3, 0, 23)
 
+  // ---- Gmail (optional) ----
+  // Deliberately not `bad(...)`: the website and the existing e-mail system must start whatever is (or is not) set here. A wrong or
+  // incomplete Gmail setup only keeps the integration off. The reasons name variables, never their values.
+  const gmailClientId = text('GMAIL_CLIENT_ID')
+  const gmailClientSecret = text('GMAIL_CLIENT_SECRET')
+  const gmailRefreshToken = text('GMAIL_REFRESH_TOKEN')
+  const gmailAccountEmail = text('GMAIL_ACCOUNT_EMAIL')
+  const gmailProblems: string[] = []
+  const gmailInput: [string, string | null][] = [['GMAIL_CLIENT_ID', gmailClientId], ['GMAIL_CLIENT_SECRET', gmailClientSecret], ['GMAIL_REFRESH_TOKEN', gmailRefreshToken], ['GMAIL_ACCOUNT_EMAIL', gmailAccountEmail]]
+  if (gmailInput.some(([, value]) => value !== null)) {
+    for (const [name, value] of gmailInput) {
+      if (value === null) gmailProblems.push(`${name} is missing`)
+      else if (name === 'GMAIL_ACCOUNT_EMAIL' ? !isEmailAddress(value) : /\s/.test(value)) gmailProblems.push(name === 'GMAIL_ACCOUNT_EMAIL' ? `${name} is not a valid e-mail address` : `${name} contains whitespace`)
+    }
+  }
+  const gmailEnabled = gmailInput.some(([, value]) => value !== null) && gmailProblems.length === 0
+
   // ---- the assistant (PROMPT 16) ----
   const decimal = (name: string, fallback: number, min: number, max: number): number => {
     const raw = text(name)
@@ -522,6 +561,15 @@ export function loadConfig(env: Env = process.env): Config {
     customerLinkDays,
     ai,
     backup: { enabled: backupParts.every(Boolean), clientId: driveClientId ?? '', clientSecret: driveClientSecret ?? '', refreshToken: driveRefreshToken ?? '', folderId: driveFolderId, retentionDays: backupRetentionDays, hourUtc: backupHourUtc },
+    gmail: {
+      enabled: gmailEnabled,
+      // Credentials are kept only for a complete, usable setup; a half-set one can never be used by accident.
+      clientId: gmailEnabled ? (gmailClientId ?? '') : '',
+      clientSecret: gmailEnabled ? (gmailClientSecret ?? '') : '',
+      refreshToken: gmailEnabled ? (gmailRefreshToken ?? '') : '',
+      accountEmail: gmailAccountEmail !== null && isEmailAddress(gmailAccountEmail) ? gmailAccountEmail : '',
+      problems: gmailProblems,
+    },
   }
 }
 
