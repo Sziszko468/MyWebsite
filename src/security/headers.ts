@@ -12,11 +12,16 @@ export interface HeaderInput {
   styleHashes: readonly string[]
   /** Origins the page may send requests to besides itself: the form handlers and the analytics collector. */
   connectOrigins: readonly string[]
+  /**
+   * The exact https origins a client's deliverable preview may be shown from inside the client portal (PROMPT 27; `VITE_PREVIEW_ORIGINS`). Only the portal's own pages get them
+   * (`frame-src` and `img-src`); every other page keeps `frame-src 'none'`. Empty: nothing is embedded anywhere.
+   */
+  previewOrigins?: readonly string[]
 }
 
 const quote = (hash: string) => `'sha256-${hash}'`
 
-export function buildCsp({ scriptHashes, styleHashes, connectOrigins }: HeaderInput): string {
+export function buildCsp({ scriptHashes, styleHashes, connectOrigins }: HeaderInput, previewOrigins: readonly string[] = []): string {
   const directives: [string, readonly string[]][] = [
     ['default-src', ["'self'"]],
     // Scripts: the site's own bundles and the one inline script that sets the theme before first paint.
@@ -25,12 +30,12 @@ export function buildCsp({ scriptHashes, styleHashes, connectOrigins }: HeaderIn
     ['style-src', ["'self'", ...styleHashes.map(quote)]],
     ['style-src-attr', ["'unsafe-inline'"]],
     // data: and blob: are the Lab's saved images and thumbnails.
-    ['img-src', ["'self'", 'data:', 'blob:']],
+    ['img-src', ["'self'", 'data:', 'blob:', ...previewOrigins]],
     ['font-src', ["'self'"]],
     ['connect-src', ["'self'", ...connectOrigins]],
     ['worker-src', ["'self'", 'blob:']],
     ['object-src', ["'none'"]],
-    ['frame-src', ["'none'"]],
+    ['frame-src', previewOrigins.length > 0 ? [...previewOrigins] : ["'none'"]],
     ['base-uri', ["'self'"]],
     ['form-action', ["'self'"]],
     ['frame-ancestors', ["'none'"]],
@@ -81,7 +86,17 @@ export function buildHeadersFile(input: HeaderInput): string {
       ['hu', 'en', 'nl'].map((lang) => block(`/${lang}/${page}/*`, { 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })),
     ),
     // The client portal (`/hu/client-portal/…`, PROMPT 25) holds a signed-in customer's own pages: never cached, never indexed, never carried to another site.
-    ...['hu', 'en', 'nl'].map((lang) => block(`/${lang}/client-portal/*`, { 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })),
+    // When the owner allowed preview origins, the portal's pages (and only they) may show them: a sandboxed frame and a picture. A host that applies the LAST matching rule (the
+    // backend's static server) serves this policy for the portal; a host that joins the values of several rules (Cloudflare Pages) applies both, so the stricter `frame-src 'none'`
+    // wins there and nothing is embedded: it fails closed, and the preview stays a link.
+    ...['hu', 'en', 'nl'].map((lang) =>
+      block(`/${lang}/client-portal/*`, {
+        ...((input.previewOrigins?.length ?? 0) > 0 ? { 'Content-Security-Policy': buildCsp(input, input.previewOrigins) } : {}),
+        'Referrer-Policy': 'no-referrer',
+        'Cache-Control': 'no-store',
+        'X-Robots-Tag': 'noindex, nofollow',
+      }),
+    ),
     // A customer's booking page (`/hu/consultation/booking/<secret>`, PROMPT 24) is private in exactly the same way.
     ...['hu', 'en', 'nl'].map((lang) => block(`/${lang}/consultation/booking/*`, { 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })),
     // Built files carry a hash of their content in their name, so they never change under that name.

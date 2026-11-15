@@ -27,6 +27,7 @@ import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
 import styles from './Portal.module.scss'
 import { Load, PageHeader, Progress, StatusBadge } from './ui'
 import work from './Work.module.scss'
+import { ProjectDeliverables } from './DeliverableViews'
 import { eventText } from './eventText'
 import { ProjectWork } from './WorkViews'
 
@@ -170,6 +171,27 @@ export function OverviewView() {
                             {entry.dueOn ? fill(words.work.tasks.due, { date: formatDay(entry.dueOn, lang) }) : words.work.action.status[entry.status]}
                             {entry.overdue ? <strong className={work.late}> · {words.work.overview.overdue}</strong> : null}
                           </span>
+                        </LocalizedLink>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {data.awaitingApproval.length > 0 && (
+                <section className={styles.section} aria-labelledby="approval-title">
+                  <h2 id="approval-title" className={styles.sectionTitle}>
+                    {words.deliverables.overview.title}
+                  </h2>
+                  <p className={styles.muted}>{words.deliverables.overview.body}</p>
+                  <ul className={styles.list}>
+                    {data.awaitingApproval.map((entry) => (
+                      <li key={`${entry.project.reference}-${entry.deliverable.reference}`}>
+                        <LocalizedLink to={`/client-portal/projects/${entry.project.reference}/deliverables/${entry.deliverable.reference}`} className={styles.rowLink}>
+                          <span>
+                            {entry.deliverable.title} <span className={styles.timelineMeta}>· {entry.project.name}</span>
+                          </span>
+                          <span className={styles.timelineMeta}>{fill(words.deliverables.overview.version, { number: entry.version })}</span>
                         </LocalizedLink>
                       </li>
                     ))}
@@ -346,6 +368,8 @@ export function ProjectView() {
                 </div>
               )}
             </dl>
+
+            <ProjectDeliverables reference={reference} />
 
             <ProjectWork reference={reference} milestones={project.milestoneList} />
 

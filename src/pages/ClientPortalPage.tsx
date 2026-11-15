@@ -5,6 +5,7 @@ import { PortalShell } from '../components/portal/PortalShell'
 import { BookingsView, BookingView, DocumentsView, OverviewView, ProjectsView, ProjectView, RequestsView, RequestView } from '../components/portal/PortalViews'
 import styles from '../components/portal/Portal.module.scss'
 import { PageHeader } from '../components/portal/ui'
+import { DeliverableView } from '../components/portal/DeliverableViews'
 import { TaskView } from '../components/portal/WorkViews'
 import { Button } from '../components/Button/Button'
 import { Container } from '../components/Container/Container'
@@ -40,6 +41,7 @@ function SignedInRoutes() {
         <Route path="projects" element={<ProjectsView />} />
         <Route path="projects/:reference" element={<ProjectView />} />
         <Route path="projects/:reference/tasks/:task" element={<TaskView />} />
+        <Route path="projects/:reference/deliverables/:deliverable" element={<DeliverableView />} />
         <Route path="requests" element={<RequestsView />} />
         <Route path="requests/:reference" element={<RequestView />} />
         <Route path="bookings" element={<BookingsView />} />

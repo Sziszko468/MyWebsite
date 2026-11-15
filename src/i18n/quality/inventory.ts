@@ -48,6 +48,8 @@ const emailLoaders = import.meta.glob<Record<string, unknown>>([
   '../../../server/src/modules/notifications/clientTemplates.ts',
   // PROMPT 26: the project work's e-mails.
   '../../../server/src/modules/notifications/workTemplates.ts',
+  // PROMPT 27: the feedback and approval e-mails.
+  '../../../server/src/modules/notifications/deliverableTemplates.ts',
   '../../../server/src/modules/bookings/suggested.ts',
 ])
 

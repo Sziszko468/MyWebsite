@@ -1,4 +1,5 @@
 import { analyticsEndpoint } from '../analytics/endpointProvider'
+import { previewConfig } from '../config/preview'
 import { API_BASE } from '../config/api'
 import { contactConfig } from '../config/contact'
 import { quoteConfig } from '../config/quote'
@@ -109,6 +110,8 @@ export function buildSiteFiles(template: string, hashes: InlineHashes, ctx: SeoC
     ...hashes,
     // The backend's own origin too: the assistant and the catalogue talk to it even when a form handler of another kind is configured.
     connectOrigins: [...new Set([originOf(API_BASE), originOf(contactConfig.endpoint), originOf(quoteConfig.endpoint), originOf(analyticsEndpoint)].filter((o): o is string => o !== null))],
+    previewOrigins: previewConfig.origins,
   })
+  if (previewConfig.rejected.length > 0) warnings.push(`VITE_PREVIEW_ORIGINS has entries that are not exact https origins and were ignored: ${previewConfig.rejected.join(', ')}.`)
   return { files, warnings }
 }

@@ -55,7 +55,7 @@ describe('the upgrade from the client portal’s schema (migration 0013)', () =>
     const directory = mkdtempSync(join(tmpdir(), 'cc-mig-'))
     temporary.push(directory)
     mkdirSync(directory, { recursive: true })
-    for (const name of readdirSync(MIGRATIONS_DIRECTORY).filter((file) => !file.startsWith('0013'))) copyFileSync(join(MIGRATIONS_DIRECTORY, name), join(directory, name))
+    for (const name of readdirSync(MIGRATIONS_DIRECTORY).filter((file) => file < '0013')) copyFileSync(join(MIGRATIONS_DIRECTORY, name), join(directory, name))
     const clock = new TestClock()
     const db = new Database(':memory:')
     migrate(db, clock, directory)
@@ -67,7 +67,7 @@ describe('the upgrade from the client portal’s schema (migration 0013)', () =>
     db.run("INSERT INTO client_project_notes (id, project_id, body, created_at) VALUES ('n1', 'p1', 'Private', ?)", [now])
     db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, attempts, created_at, updated_at) VALUES ('d1', 'client_project_status', 'client_project_event', '2', 'old@example.test', 'en', 'delivered', 1, ?, ?)", [now, now])
 
-    expect(migrate(db, clock)).toEqual([13])
+    expect(migrate(db, clock).filter((version) => version <= 13)).toEqual([13])
 
     expect(db.all("SELECT id, title, status, customer_visible, description FROM client_milestones ORDER BY position")).toEqual([
       { id: 'm1', title: 'Done one', status: 'completed', customer_visible: 1, description: null },

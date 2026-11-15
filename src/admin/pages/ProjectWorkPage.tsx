@@ -225,6 +225,9 @@ export function ProjectWorkPage() {
             <AdminButton variant="primary" onClick={() => setCreating((open) => !open)} aria-expanded={creating}>
               {creating ? wt.new.cancel : wt.new.open}
             </AdminButton>
+            <AdminButton variant="secondary" to={`/client-projects/${data.project.id}/deliverables`}>
+              {t.deliverables.open}
+            </AdminButton>
             <AdminButton variant="secondary" to="/work/settings">
               {wt.settings.title}
             </AdminButton>

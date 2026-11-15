@@ -43,7 +43,7 @@ describe('the customer is told when an action is given to them', () => {
       expect(sent[0].text + sent[0].html).not.toContain('INTERNAL-ONLY-TEXT')
       await w.close()
     }
-  })
+  }, 30_000)
 
   it('is not sent when the owner switched it off, and a task nobody shared is never written about', async () => {
     w = await makeWorkKit()

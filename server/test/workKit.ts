@@ -26,8 +26,8 @@ export interface WorkKit {
   close(): Promise<void>
 }
 
-export async function makeWorkKit(options: { email?: string; language?: 'hu' | 'en' | 'nl' } = {}): Promise<WorkKit> {
-  const kit = await makePortalKit({ env: { NOTIFY_TO: 'owner@site.test' } })
+export async function makeWorkKit(options: { email?: string; language?: 'hu' | 'en' | 'nl'; env?: Record<string, string> } = {}): Promise<WorkKit> {
+  const kit = await makePortalKit({ env: { NOTIFY_TO: 'owner@site.test', ...options.env } })
   const anna = await kit.customer(options.email ?? 'anna@example.com', options.language ? { language: options.language } : {})
   const project = await kit.project(anna.id)
   const heads = { admin: kit.admin, editor: kit.editor, none: {} as Record<string, string> }

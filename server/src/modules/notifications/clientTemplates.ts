@@ -1,6 +1,7 @@
 import type { Language } from '../../config.ts'
 import type { ProjectStatus } from '../customers/model.ts'
 import { dateText, layout, oneLine, plain, type Cta, type Rendered, type Row } from './templates.ts'
+import type { DeliverableMailKind } from './deliverableTemplates.ts'
 import type { WorkMailKind } from './workTemplates.ts'
 
 /**
@@ -25,8 +26,9 @@ export type ClientMailKind =
   | 'client_document_published'
   | 'client_deletion_requested_admin'
   | WorkMailKind
+  | DeliverableMailKind
 
-export const CLIENT_MAIL_KINDS: readonly ClientMailKind[] = ['client_sign_in', 'client_activate', 'client_register', 'client_email_change', 'client_security_notice', 'client_project_created', 'client_project_status', 'client_document_published', 'client_deletion_requested_admin', 'client_action_assigned', 'client_action_due_soon', 'client_action_overdue', 'client_action_submitted_admin', 'client_action_reviewed', 'client_action_changes_requested', 'client_milestone_completed']
+export const CLIENT_MAIL_KINDS: readonly ClientMailKind[] = ['client_sign_in', 'client_activate', 'client_register', 'client_email_change', 'client_security_notice', 'client_project_created', 'client_project_status', 'client_document_published', 'client_deletion_requested_admin', 'client_action_assigned', 'client_action_due_soon', 'client_action_overdue', 'client_action_submitted_admin', 'client_action_reviewed', 'client_action_changes_requested', 'client_milestone_completed', 'client_deliverable_ready', 'client_deliverable_new_version', 'client_deliverable_approval_requested', 'client_deliverable_reply', 'deliverable_feedback_admin', 'deliverable_changes_requested_admin', 'deliverable_approved_admin']
 
 /** The security notice's four reasons: the types of an account's history that tell the customer something. */
 export type NoticeKind = 'email_change_requested' | 'email_changed' | 'deletion_requested' | 'sessions_revoked'

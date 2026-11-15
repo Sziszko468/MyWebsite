@@ -57,6 +57,14 @@ export type EmailKind =
   | 'client_action_reviewed'
   | 'client_action_changes_requested'
   | 'client_milestone_completed'
+  // PROMPT 27: feedback and approval (deliverableTemplates.ts)
+  | 'client_deliverable_ready'
+  | 'client_deliverable_new_version'
+  | 'client_deliverable_approval_requested'
+  | 'client_deliverable_reply'
+  | 'deliverable_feedback_admin'
+  | 'deliverable_changes_requested_admin'
+  | 'deliverable_approved_admin'
 
 export interface Rendered {
   subject: string

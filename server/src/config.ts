@@ -150,6 +150,8 @@ export interface Config {
   /** The origin this server is reached at; decides whether cookies are `Secure`. */
   apiPublicUrl: string | null
   corsOrigins: readonly string[]
+  /** The https origins a deliverable's preview may be shown from INSIDE the portal (an embedded page, a picture to comment on). Empty: nothing is embedded; a preview is a link the customer opens. */
+  previewOrigins: readonly string[]
   databasePath: string
   migrateOnStart: boolean
   /** Load the website's catalogue into an empty database at start-up (never overwrites). */
@@ -210,6 +212,11 @@ export function isSender(value: string): boolean {
   const match = /^(?:[^<>@]*<([^<>\s]+)>|([^<>\s]+))$/.exec(value.trim())
   const address = match?.[1] ?? match?.[2]
   return address !== undefined && isEmailAddress(address)
+}
+
+/** An ordinary public host name: dotted labels of letters, digits and hyphens, not a number, not a name that only exists inside a network. */
+function publicHostName(host: string): boolean {
+  return /^(?=.{4,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]{2,63}$/.test(host) && !/^[0-9.]+$/.test(host) && !/\.(local|localhost|internal|intranet|lan|home|corp|onion)$/i.test(host)
 }
 
 function origin(value: string): string | null {
@@ -281,6 +288,16 @@ export function loadConfig(env: Env = process.env): Config {
     else corsOrigins.push(value)
   }
   if (production && corsOrigins.length === 0 && publicUrl) corsOrigins.push(publicUrl)
+
+  // PROMPT 27: exact https origins, no wildcard, no path: what may be embedded or drawn in the client portal. The build's Content-Security-Policy must list the same (VITE_PREVIEW_ORIGINS).
+  // The host must be an ordinary public name (the same rule as a preview address, modules/deliverables/preview.ts and src/config/preview.ts): `new URL` would accept `*.example.com` or `10.0.0.1`.
+  const previewOrigins: string[] = []
+  for (const raw of (text('PREVIEW_ORIGINS') ?? '').split(',').map((item) => item.trim()).filter(Boolean)) {
+    const value = raw.includes('*') ? null : origin(raw)
+    if (!value || !value.startsWith('https://') || !publicHostName(new URL(value).hostname)) bad('PREVIEW_ORIGINS', `"${raw}" is not an https origin (list exact origins such as https://previews.example.com; no wildcard, no path)`)
+    else if (value === publicUrl || value === apiPublicUrl) bad('PREVIEW_ORIGINS', `"${raw}" is this site's own origin: a preview is somebody else's page, and the portal never frames itself`)
+    else if (!previewOrigins.includes(value)) previewOrigins.push(value)
+  }
 
   const databasePath = text('DATABASE_PATH') ?? (appEnv === 'test' ? ':memory:' : './data/app.sqlite')
   if (production && databasePath === ':memory:') bad('DATABASE_PATH', 'an in-memory database loses everything on restart; give a file path in production')
@@ -500,6 +517,7 @@ export function loadConfig(env: Env = process.env): Config {
     publicUrl,
     apiPublicUrl,
     corsOrigins,
+    previewOrigins,
     databasePath,
     migrateOnStart,
     seedOnStart,
@@ -550,6 +568,7 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     publicUrl: config.publicUrl,
     apiPublicUrl: config.apiPublicUrl,
     corsOrigins: config.corsOrigins,
+    previewOrigins: config.previewOrigins,
     database: config.databasePath === ':memory:' ? 'memory' : 'file',
     appSecret: config.appSecret ? 'set' : 'missing',
     trustProxy: config.trustProxy,

@@ -53,6 +53,7 @@ An overview (counts that come from real projects, what waits for them, recent ac
 | `CLIENT_IDLE_MINUTES` | `2880` (48 hours) | How long a sign-in may sit unused before it ends (5 to 43200). |
 | `CLIENT_LINK_MINUTES` | `30` | How long a sign-in, registration or new-address link works (5 to 1440). |
 | `CLIENT_INVITE_HOURS` | `72` | How long an invitation link works (1 to 720). |
+| `PREVIEW_ORIGINS` | empty | PROMPT 27: exact https origins (comma-separated) a deliverable's preview or picture may be shown from **inside** the portal. Empty: a preview is a link. The build needs the same list as `VITE_PREVIEW_ORIGINS` ([../client-feedback/PREVIEW_SECURITY.md](../client-feedback/PREVIEW_SECURITY.md)). |
 
 The defaults are starting values chosen here, **not legal or security advice**: they are the owner's to confirm ([LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) A).
 
@@ -68,4 +69,4 @@ node tools/e2e/portal-journey.cjs --base=http://127.0.0.1:8801 --mail=<mail fold
 
 ## What this does **not** do (PROMPT 26 and the owner's decisions)
 
-No file delivery, no messages between customer and owner, no invoices or payments, no time tracking. **PROMPT 26 added** tasks, milestones with dependencies, requests the customer answers (with the owner's review), a schedule and progress: see [../project-management/](../project-management/README.md). A project's status list is still the documented model in [ARCHITECTURE.md](ARCHITECTURE.md). No blog.
+No file delivery, no messages between customer and owner, no invoices or payments, no time tracking. **PROMPT 26 added** tasks, milestones with dependencies, requests the customer answers (with the owner's review), a schedule and progress: see [../project-management/](../project-management/README.md). A project's status list is still the documented model in [ARCHITECTURE.md](ARCHITECTURE.md). **PROMPT 27 added** deliverables shared for review: a private preview, versions, feedback (with positions on a picture) and the approval of one exact version; see [../client-feedback/](../client-feedback/README.md). No blog.

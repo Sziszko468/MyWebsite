@@ -11,6 +11,8 @@ import { BookingSetupPage } from './pages/BookingSetupPage'
 import { BookingsPage } from './pages/BookingsPage'
 import { ClientDetailPage } from './pages/ClientDetailPage'
 import { ClientProjectPage } from './pages/ClientProjectPage'
+import { DeliverablePage } from './pages/DeliverablePage'
+import { DeliverablesPage } from './pages/DeliverablesPage'
 import { ProjectWorkPage } from './pages/ProjectWorkPage'
 import { TaskDetailPage } from './pages/TaskDetailPage'
 import { WorkSettingsPage } from './pages/WorkSettingsPage'
@@ -106,6 +108,8 @@ function Gate() {
           <Route path="clients/:id" element={<ClientDetailPage />} />
           <Route path="client-projects/:id" element={<ClientProjectPage />} />
           <Route path="client-projects/:id/work" element={<ProjectWorkPage />} />
+          <Route path="client-projects/:id/deliverables" element={<DeliverablesPage />} />
+          <Route path="client-projects/:id/deliverables/:deliverableId" element={<DeliverablePage />} />
           <Route path="client-projects/:id/tasks/:taskId" element={<TaskDetailPage />} />
           <Route path="work/settings" element={<WorkSettingsPage />} />
           <Route path="services" element={<ServicesPage />} />

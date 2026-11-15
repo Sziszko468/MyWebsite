@@ -52,6 +52,8 @@ const hungarianForms = [
   'buildet', 'commitját', 'commit-előzmények', 'celery-feladatok', 'full-stack', 'boxutcába', 'reszponzív', 'reszponzívan', 'reszponzívvá',
   'labba', 'labban', 'labhoz', 'lab-élmény', 'matterben', 'motionben', 'admin', 'push', 'push-értesítések', 'push-ellenőrzések',
   'backend', 'frontend', 'backend-kép', 'ecb-referenciaárfolyammal', 'fetch-burkoló', 'szerializálók', 'zsályazöld',
+  // "anyag" (a thing shared for review, PROMPT 27): the dictionary has the stem, not these regular forms.
+  'anyagok', 'anyagoknál', 'anyagodból',
 ]
 
 const dutchWords = [
@@ -69,7 +71,7 @@ const dutchWords = [
 
 export const allowedWords: Record<Language, Set<string>> = {
   hu: new Set([...names, ...abbreviations, ...technical, ...hungarianForms]),
-  en: new Set([...names, ...abbreviations, ...technical, 'refuellings', 'else’s', 'else\'s', 'frontend', 'backend', 'webshop', 'webshops', 'onboarding', 'workflow', 'workflows']),
+  en: new Set([...names, ...abbreviations, ...technical, 'crosshair', 'refuellings', 'else’s', 'else\'s', 'frontend', 'backend', 'webshop', 'webshops', 'onboarding', 'workflow', 'workflows']),
   nl: new Set([...names, ...abbreviations, ...technical, ...dutchWords, 'webshop', 'webshops', 'frontend', 'backend', 'onboarding', 'workflow', 'workflows', 'zzp’ers', 'zzp\'ers']),
 }
 

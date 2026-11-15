@@ -1,7 +1,9 @@
 import type { Language } from '../../config.ts'
 import type { AppContext } from '../../context.ts'
 import { ConstraintError } from '../../http/errors.ts'
+import { DELIVERABLE_MAIL_TO_OWNER, renderDeliverableMail, type DeliverableMailKind } from '../notifications/deliverableTemplates.ts'
 import { renderWorkMail, type WorkMailKind } from '../notifications/workTemplates.ts'
+import type { DeliverableRow, EventRow } from '../deliverables/model.ts'
 import { AWAITING_RESPONSE, FINISHED_TASK, type ActionRow, type TaskRow } from '../projectwork/model.ts'
 import { renderClientLink, renderDeletionRequested, renderDocumentPublished, renderProjectCreated, renderProjectUpdate, renderSecurityNotice, maskEmail, type ClientMailKind, type NoticeKind } from '../notifications/clientTemplates.ts'
 import { MailError } from '../notifications/smtp.ts'
@@ -19,7 +21,7 @@ import type { AuthRequestRow, DocumentRow, ProjectEventRow, ProjectRow, ProjectS
 
 type Deps = Pick<AppContext, 'db' | 'config' | 'clock'>
 
-export type ClientRelated = 'client_auth' | 'client_audit' | 'client_project_event' | 'client_document' | 'client_action_reminder'
+export type ClientRelated = 'client_auth' | 'client_audit' | 'client_project_event' | 'client_document' | 'client_action_reminder' | 'deliverable_event'
 
 /** Queues one message. The database allows one of each kind per thing it is about, so a retried request or a handler that runs twice makes no second message. Never throws: a message that cannot be queued must not undo what it announces. */
 export function queueClientMail(app: Pick<AppContext, 'notifier' | 'log'>, input: { kind: ClientMailKind; relatedType: ClientRelated; relatedId: string; recipient: string; language: Language }): boolean {
@@ -95,6 +97,29 @@ export function renderClientDelivery(deps: Deps, row: { kind: string; related_ty
       }
       return null
     }
+    case 'deliverable_event': {
+      // The message is about ONE line of a deliverable's history, and says what that line says. A deliverable no customer has seen is never written about.
+      const event = db.get<EventRow>('SELECT * FROM deliverable_events WHERE id = ?', [Number(row.related_id)])
+      if (!event) return null
+      const deliverable = db.get<DeliverableRow>('SELECT * FROM deliverables WHERE id = ?', [event.deliverable_id])
+      const project = deliverable ? db.get<ProjectRow>('SELECT * FROM client_projects WHERE id = ?', [deliverable.project_id]) : undefined
+      const customer = project ? getCustomer(deps, project.customer_id) : undefined
+      if (!deliverable || !deliverable.published_at || !project || !customer) return null
+      const toOwner = DELIVERABLE_MAIL_TO_OWNER.includes(row.kind as DeliverableMailKind)
+      if (!toOwner && customer.status === 'disabled') return null
+      const input = {
+        project: { name: project.name, reference: project.reference },
+        customerName: customer.name,
+        customerEmail: toOwner ? customer.email : null,
+        deliverable: { reference: deliverable.reference, title: deliverable.title },
+        version: event.version_number,
+        // Only words written for the person the message goes to, or by the customer to the owner; never a private note.
+        note: row.kind === 'client_deliverable_approval_requested' || row.kind === 'client_deliverable_reply' || row.kind === 'deliverable_changes_requested_admin' ? event.note : null,
+        comments: row.kind === 'deliverable_feedback_admin' ? (event.event_type === 'feedback_submitted' ? Number(event.subject) || null : 1) : null,
+      }
+      const url = toOwner ? (config.publicUrl ? `${config.publicUrl}/admin/client-projects/${project.id}/deliverables/${deliverable.id}` : null) : portalUrl(deps, lang, `projects/${project.reference}/deliverables/${deliverable.reference}`)
+      return renderDeliverableMail(row.kind as DeliverableMailKind, input, lang, brand, url)
+    }
     case 'client_action_reminder': {
       // `related_id` is `<action id>:<due date>`: a reminder is about one action on ONE date, so a date that moved is a different reminder and an old one is not sent.
       const [actionId, dueOn] = row.related_id.split(':')
@@ -128,6 +153,10 @@ const isWorkKind = (kind: string): kind is 'client_action_assigned' | 'client_ac
 
 /** The address of the customer a message to the owner is about (through the line of their history it is about), so the owner can answer them straight from the mail program. */
 export function clientCustomerAddress(deps: Pick<AppContext, 'db'>, relatedType: string, relatedId: string): string | null {
+  if (relatedType === 'deliverable_event') {
+    const owner = deps.db.get<{ customer_id: string }>('SELECT p.customer_id FROM deliverable_events e JOIN deliverables d ON d.id = e.deliverable_id JOIN client_projects p ON p.id = d.project_id WHERE e.id = ?', [Number(relatedId)])
+    return owner ? (getCustomer(deps, owner.customer_id)?.email ?? null) : null
+  }
   if (relatedType === 'client_project_event') {
     const owner = deps.db.get<{ customer_id: string }>('SELECT p.customer_id FROM client_project_events e JOIN client_projects p ON p.id = e.project_id WHERE e.id = ?', [Number(relatedId)])
     return owner ? (getCustomer(deps, owner.customer_id)?.email ?? null) : null

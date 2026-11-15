@@ -7,6 +7,7 @@ import { cmsEn } from './cms'
 import { bookingEn } from './booking'
 import { clientsEn } from './clients'
 import { quotationEn } from './quotation'
+import { deliverablesEn } from './deliverables'
 import { workEn } from './work'
 
 export const en = {
@@ -14,6 +15,7 @@ export const en = {
   booking: bookingEn,
   clients: clientsEn,
   work: workEn,
+  deliverables: deliverablesEn,
   cms: cmsEn,
   app: {
     name: 'Administration',

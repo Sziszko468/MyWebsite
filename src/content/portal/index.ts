@@ -1,4 +1,5 @@
 import { tri } from '../trilingual'
+import { deliverablesText } from './deliverables'
 import { workText } from './work'
 
 /**
@@ -331,6 +332,8 @@ export const portalText = {
   },
 
   work: workText,
+
+  deliverables: deliverablesText,
 
   languages: {
     hu: tri('Magyar', 'Hungarian', 'Hongaars'),

@@ -16,6 +16,7 @@ import { canSendLinks, createLinkRequest } from './auth.ts'
 import { claimable, ownedBooking, ownedBookings, ownedRequest, ownedRequests, type Candidate } from './linking.ts'
 import { queueClientMail } from './mail.ts'
 import { ACTIVE_STATUSES, AWAITING_CUSTOMER, TERMINAL_STATUSES, type CustomerRow, type ProjectEventType, type ProjectStatus } from './model.ts'
+import { portalAwaitingApproval } from '../deliverables/views.ts'
 import { openRequests, upcomingTasks } from '../projectwork/portal.ts'
 import { portalProjects, type PortalProject } from './projects.ts'
 import { clientSessionsOf, endClientSession, revokeClientSessions, type ClientSession, type ClientSessionView } from './sessions.ts'
@@ -157,6 +158,8 @@ export interface Overview {
   activity: Array<{ id: number; type: ProjectEventType; at: string; toStatus: string | null; note: string | null; milestone: string | null; subject: string | null; project: { reference: string; name: string } }>
   /** The requests the customer has to answer now (customer actions that wait for them), most urgent first. */
   needsYou: ReturnType<typeof openRequests>
+  /** Deliverables whose approval the owner asked for and the customer has not decided (PROMPT 27). */
+  awaitingApproval: ReturnType<typeof portalAwaitingApproval>
   upcoming: Array<{ kind: 'milestone' | 'task'; project: { reference: string; name: string }; title: string; dueOn: string | null; overdue: boolean }>
   bookings: Array<{ reference: string; startAt: string; endAt: string; timeZone: string; typeName: string; status: string; language: Language }>
 }
@@ -188,7 +191,7 @@ export function overview(app: AppContext, session: ClientSession): Overview {
     name: customer.name,
     counts: {
       active: projects.filter((project) => ACTIVE_STATUSES.includes(project.status)).length,
-      awaitingYou: new Set([...projects.filter((project) => AWAITING_CUSTOMER.includes(project.status)).map((project) => project.reference), ...needsYou.map((entry) => entry.project.reference)]).size,
+      awaitingYou: new Set([...projects.filter((project) => AWAITING_CUSTOMER.includes(project.status)).map((project) => project.reference), ...needsYou.map((entry) => entry.project.reference), ...portalAwaitingApproval(app, customer.id).map((entry) => entry.project.reference)]).size,
       completed: projects.filter((project) => project.status === 'completed').length,
       requests: requests.length,
       bookings: bookings.length,
@@ -196,6 +199,7 @@ export function overview(app: AppContext, session: ClientSession): Overview {
     awaitingYou: projects.filter((project) => AWAITING_CUSTOMER.includes(project.status)).map((project) => ({ reference: project.reference, name: project.name, status: project.status })),
     activity: activity.map((row) => ({ id: row.id, type: row.event_type, at: row.created_at, toStatus: row.to_status, note: row.note, milestone: row.milestone_title, subject: row.subject, project: { reference: row.reference, name: row.name } })),
     needsYou,
+    awaitingApproval: portalAwaitingApproval(app, customer.id),
     upcoming: [
       ...upcoming.map((row) => ({ kind: 'milestone' as const, project: { reference: row.reference, name: row.name }, title: row.title, dueOn: row.due_on, overdue: row.due_on !== null && row.due_on < today })),
       ...upcomingTasks(app, customer.id).map((row) => ({ kind: 'task' as const, ...row })),

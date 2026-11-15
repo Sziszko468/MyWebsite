@@ -131,6 +131,8 @@ export interface Overview {
   activity: Array<{ id: number; type: ProjectEventType; at: string; toStatus: string | null; note: string | null; milestone: string | null; subject: string | null; project: { reference: string; name: string } }>
   /** The requests the customer has to answer now, most urgent first. */
   needsYou: Array<{ project: { reference: string; name: string }; task: { reference: string; title: string }; status: ActionStatus; dueOn: string | null; overdue: boolean }>
+  /** Deliverables whose approval is asked for and not decided (PROMPT 27). */
+  awaitingApproval: Array<{ project: { reference: string; name: string }; deliverable: { reference: string; title: string }; version: number; requestedAt: string }>
   upcoming: Array<{ kind: 'milestone' | 'task'; project: { reference: string; name: string }; title: string; dueOn: string | null; overdue: boolean }>
   bookings: Array<{ reference: string; startAt: string; endAt: string; timeZone: string; typeName: string; status: BookingStatus; language: Language }>
 }
@@ -170,6 +172,85 @@ export interface PortalWork {
 export interface PortalTaskDetail extends PortalTask {
   submissions: Array<{ revision: number; response: string; submittedAt: string }>
   history: Array<{ at: string; to: ActionStatus; by: 'you' | 'us'; note: string | null }>
+}
+
+// ---- deliverables (PROMPT 27) -----------------------------------------------------------------------------------------------------------
+
+export type DeliverableType = 'website_preview' | 'design' | 'image' | 'document' | 'prototype' | 'other'
+export type ReviewState = 'not_submitted' | 'awaiting_customer' | 'changes_requested' | 'approved' | 'superseded'
+
+export interface DeliverableSummary {
+  reference: string
+  title: string
+  type: DeliverableType
+  archived: boolean
+  reviewState: ReviewState
+  currentVersion: number
+  versionTitle: string
+  publishedAt: string
+  updatedAt: string
+  awaitingApproval: boolean
+  openThreads: number
+  approvedAt: string | null
+}
+
+export interface DeliverableVersion {
+  number: number
+  title: string
+  description: string
+  publishedAt: string
+  current: boolean
+  checksum: string
+  previewUrl: string | null
+  previewHost: string | null
+  /** The address is on the owner's list: it may be shown in a sandboxed frame. Otherwise it is a link. */
+  embeddable: boolean
+  imageUrl: string | null
+  outcome: 'approved' | 'changes_requested' | null
+  awaiting: boolean
+}
+
+export interface DeliverableComment {
+  id: string
+  parentId: string | null
+  author: 'you' | 'studio'
+  body: string
+  position: { x: number; y: number } | null
+  marker: number | null
+  status: 'draft' | 'submitted' | 'resolved'
+  createdAt: string
+  editable: boolean
+}
+
+export interface DeliverableApproval {
+  id: string
+  versionNumber: number
+  checksum: string
+  note: string | null
+  requestedAt: string
+  revision: number
+}
+
+export interface DeliverableHistoryLine {
+  id: number
+  type: string
+  at: string
+  version: number | null
+  by: 'you' | 'studio' | 'system'
+  note: string | null
+  subject: string | null
+}
+
+export interface DeliverableDetail extends DeliverableSummary {
+  description: string
+  task: { reference: string; title: string } | null
+  versions: DeliverableVersion[]
+  viewing: number
+  comments: DeliverableComment[]
+  approval: DeliverableApproval | null
+  history: DeliverableHistoryLine[]
+  can: { comment: boolean; decide: boolean; follow: boolean }
+  drafts: { current: number; earlier: number }
 }
 
 export interface RequestRow {
@@ -312,6 +393,20 @@ export const fetchProject = (reference: string) => call<ProjectDetail>('GET', `/
 export const fetchWork = (reference: string) => call<PortalWork>('GET', `/api/portal/projects/${enc(reference)}/tasks`)
 export const fetchTask = (reference: string, task: string) => call<PortalTaskDetail>('GET', `/api/portal/projects/${enc(reference)}/tasks/${enc(task)}`)
 export const respondToTask = (reference: string, task: string, response: string) => call<{ revision: number; task: PortalTaskDetail }>('POST', `/api/portal/projects/${enc(reference)}/tasks/${enc(task)}/respond`, { response })
+const deliverablePath = (reference: string, deliverable: string) => `/api/portal/projects/${enc(reference)}/deliverables/${enc(deliverable)}`
+export const fetchDeliverables = (reference: string) => call<DeliverableSummary[]>('GET', `/api/portal/projects/${enc(reference)}/deliverables`)
+export const fetchDeliverable = (reference: string, deliverable: string, version: number | null) => call<DeliverableDetail>('GET', `${deliverablePath(reference, deliverable)}${version ? `?version=${version}` : ''}`)
+export const addComment = (reference: string, deliverable: string, body: { body: string; position?: { x: number; y: number } | null }) => call<DeliverableDetail>('POST', `${deliverablePath(reference, deliverable)}/comments`, body)
+export const editComment = (reference: string, deliverable: string, comment: string, body: { body?: string; position?: { x: number; y: number } | null }) => call<DeliverableDetail>('PATCH', `${deliverablePath(reference, deliverable)}/comments/${enc(comment)}`, body)
+export const deleteComment = (reference: string, deliverable: string, comment: string) => call<undefined>('DELETE', `${deliverablePath(reference, deliverable)}/comments/${enc(comment)}`)
+export const sendFeedback = (reference: string, deliverable: string) => call<{ sent: number; deliverable: DeliverableDetail }>('POST', `${deliverablePath(reference, deliverable)}/feedback`, {})
+export const followUp = (reference: string, deliverable: string, comment: string, body: string) => call<DeliverableDetail>('POST', `${deliverablePath(reference, deliverable)}/comments/${enc(comment)}/follow-up`, { body })
+export const reopenComment = (reference: string, deliverable: string, comment: string) => call<DeliverableDetail>('POST', `${deliverablePath(reference, deliverable)}/comments/${enc(comment)}/reopen`, {})
+export const approveVersion = (reference: string, deliverable: string, approval: DeliverableApproval) =>
+  call<DeliverableDetail>('POST', `${deliverablePath(reference, deliverable)}/approvals/${enc(approval.id)}/approve`, { confirm: true, versionNumber: approval.versionNumber, checksum: approval.checksum, revision: approval.revision })
+export const askForChanges = (reference: string, deliverable: string, approval: DeliverableApproval, explanation: string) =>
+  call<DeliverableDetail>('POST', `${deliverablePath(reference, deliverable)}/approvals/${enc(approval.id)}/changes`, { explanation, revision: approval.revision })
+export const withdrawApproval = (reference: string, deliverable: string, approval: DeliverableApproval) => call<DeliverableDetail>('POST', `${deliverablePath(reference, deliverable)}/approvals/${enc(approval.id)}/withdraw`, { revision: approval.revision })
 export const fetchRequests = () => call<RequestRow[]>('GET', '/api/portal/requests')
 export const fetchRequest = (reference: string) => call<RequestDetail>('GET', `/api/portal/requests/${enc(reference)}`)
 export const openRequest = (reference: string, quote: string | null) => call<{ path: string }>('POST', `/api/portal/requests/${enc(reference)}/open`, { quote })

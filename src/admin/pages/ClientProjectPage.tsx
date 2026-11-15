@@ -62,7 +62,16 @@ export function ClientProjectPage() {
 
   return (
     <>
-      <PageHeader title={project.name} lead={<span className={styles.mono}>{project.reference}</span>} back={{ to: `/clients/${project.customer_id}`, label: `${p.back}: ${data.customer.name || data.customer.email}` }} actions={<AdminButton variant="primary" to={`/client-projects/${project.id}/work`}>{t.work.open}</AdminButton>} />
+      <PageHeader title={project.name} lead={<span className={styles.mono}>{project.reference}</span>} back={{ to: `/clients/${project.customer_id}`, label: `${p.back}: ${data.customer.name || data.customer.email}` }} actions={
+        <>
+          <AdminButton variant="primary" to={`/client-projects/${project.id}/work`}>
+            {t.work.open}
+          </AdminButton>
+          <AdminButton variant="secondary" to={`/client-projects/${project.id}/deliverables`}>
+            {t.deliverables.open}
+          </AdminButton>
+        </>
+      } />
       <div className={styles.stackLg}>
         <DetailPanel title={p.statusTitle}>
           <p>
