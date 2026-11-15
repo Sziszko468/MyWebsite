@@ -130,10 +130,21 @@ export interface MilestoneRow {
   completed_at: string | null
   position: number
   created_at: string
+  description: string | null
+  status: 'upcoming' | 'in_progress' | 'completed' | 'delayed' | 'cancelled'
+  customer_visible: 0 | 1
 }
 
-export type ProjectEventType = 'created' | 'status_changed' | 'dates_changed' | 'milestone_added' | 'milestone_completed' | 'document_published' | 'feedback_requested' | 'update_posted'
-export const PROJECT_EVENT_TYPES: readonly ProjectEventType[] = ['created', 'status_changed', 'dates_changed', 'milestone_added', 'milestone_completed', 'document_published', 'feedback_requested', 'update_posted']
+export type ProjectEventType =
+  | 'created' | 'status_changed' | 'dates_changed' | 'milestone_added' | 'milestone_completed' | 'document_published' | 'feedback_requested' | 'update_posted'
+  // PROMPT 26 (migration 0013): the project work
+  | 'task_created' | 'task_edited' | 'task_status_changed' | 'task_completed' | 'task_cancelled' | 'task_assigned' | 'dependency_added' | 'dependency_removed'
+  | 'milestone_status_changed' | 'action_assigned' | 'action_submitted' | 'action_under_review' | 'action_changes_requested' | 'action_accepted' | 'action_cancelled' | 'note_added'
+export const PROJECT_EVENT_TYPES: readonly ProjectEventType[] = [
+  'created', 'status_changed', 'dates_changed', 'milestone_added', 'milestone_completed', 'document_published', 'feedback_requested', 'update_posted',
+  'task_created', 'task_edited', 'task_status_changed', 'task_completed', 'task_cancelled', 'task_assigned', 'dependency_added', 'dependency_removed',
+  'milestone_status_changed', 'action_assigned', 'action_submitted', 'action_under_review', 'action_changes_requested', 'action_accepted', 'action_cancelled', 'note_added',
+]
 
 export interface ProjectEventRow {
   id: number
@@ -141,10 +152,17 @@ export interface ProjectEventRow {
   event_type: ProjectEventType
   actor_type: 'admin' | 'customer' | 'system'
   actor_id: string | null
-  from_status: ProjectStatus | null
-  to_status: ProjectStatus | null
+  /** A project status on a project line; a task or action status on a task or action line (the event type says which). */
+  from_status: string | null
+  to_status: string | null
   milestone_id: string | null
   document_id: string | null
+  task_id: string | null
+  action_id: string | null
+  /** The title of the thing the event is about, as it was at the time. */
+  subject: string | null
+  /** `customer`: the customer's timeline shows it. `internal`: only the administration. */
+  visibility: 'customer' | 'internal'
   note: string | null
   created_at: string
 }

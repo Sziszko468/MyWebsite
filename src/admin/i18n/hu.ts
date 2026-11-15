@@ -3,12 +3,14 @@ import { cmsHu } from './cms'
 import { bookingHu } from './booking'
 import { clientsHu } from './clients'
 import { quotationHu } from './quotation'
+import { workHu } from './work'
 
 /** A kezelőfelület szövegei magyarul. Pontosan ugyanazok a kulcsok, mint az `en.ts`-ben; a `{név}` a képernyő által beillesztett érték. */
 export const hu: AdminText = {
   quotation: quotationHu,
   booking: bookingHu,
   clients: clientsHu,
+  work: workHu,
   cms: cmsHu,
   app: {
     name: 'Kezelőfelület',

@@ -49,6 +49,14 @@ export type EmailKind =
   | 'client_project_status'
   | 'client_document_published'
   | 'client_deletion_requested_admin'
+  // PROMPT 26: the project work (workTemplates.ts)
+  | 'client_action_assigned'
+  | 'client_action_due_soon'
+  | 'client_action_overdue'
+  | 'client_action_submitted_admin'
+  | 'client_action_reviewed'
+  | 'client_action_changes_requested'
+  | 'client_milestone_completed'
 
 export interface Rendered {
   subject: string

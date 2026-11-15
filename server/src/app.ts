@@ -20,6 +20,7 @@ import { consultationIndexable } from './modules/bookings/public.ts'
 import { bookingRoutes } from './modules/bookings/routes.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { customerRoutes } from './modules/customers/routes.ts'
+import { workRoutes } from './modules/projectwork/routes.ts'
 import { clientCookieName, resolveClientSession, verifyClientCsrf } from './modules/customers/sessions.ts'
 import { contactRoutes } from './modules/contact/routes.ts'
 import { EmailChecks, type DnsResolver } from './modules/notifications/checks.ts'
@@ -86,7 +87,7 @@ export function createApp(deps: AppDeps): App {
   context.assistant = new Assistant(context, deps.aiModel ?? null)
 
   const router = new Router()
-  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...bookingRoutes(context), ...customerRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
+  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...bookingRoutes(context), ...customerRoutes(context), ...workRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
 
   const sweeper = setInterval(() => {
     limiters.sweep()

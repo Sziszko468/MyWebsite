@@ -36,7 +36,7 @@ export const QUOTATION_DOCUMENTS = /^(content\/quotes\/|server\/src\/modules\/no
 export const BOOKING_DOCUMENTS = /^(content\/consultation\/|content\/privacy\.ts$|server\/src\/modules\/notifications\/bookingTemplates\.ts$|server\/src\/modules\/bookings\/suggested\.ts$)/
 
 /** The files that write the client portal's words: its pages and its e-mails. */
-export const PORTAL_DOCUMENTS = /^(content\/portal\/|server\/src\/modules\/notifications\/clientTemplates\.ts$)/
+export const PORTAL_DOCUMENTS = /^(content\/portal\/|server\/src\/modules\/notifications\/(clientTemplates|workTemplates)\.ts$)/
 
 export const glossary: GlossaryTerm[] = [
   {

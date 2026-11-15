@@ -39,7 +39,11 @@ describe('the lists in the code are the lists in the database', () => {
   it('statuses, categories, events, documents and the account’s history', () => {
     expect(listIn(/status TEXT NOT NULL DEFAULT 'awaiting_start' CHECK \(status IN \(([^)]*)\)\)/)).toEqual([...PROJECT_STATUSES])
     expect(listIn(/category TEXT NOT NULL CHECK \(category IN \(([^)]*)\)\)/)).toEqual([...PROJECT_CATEGORIES])
-    expect(listIn(/event_type TEXT NOT NULL CHECK \(event_type IN \(('created'[^)]*)\)\)/)).toEqual([...PROJECT_EVENT_TYPES])
+    // The history was widened by migration 0013 (the project work): the list in the code is the rebuilt table's, and the first eight are 0012's.
+    const rebuilt = readFileSync(join(MIGRATIONS_DIRECTORY, '0013_project_management.sql'), 'utf8')
+    const kinds = [...(/CREATE TABLE client_project_events_rebuilt \([\s\S]*?event_type TEXT NOT NULL CHECK \(event_type IN \(\s*('created'[^)]*)\)\)/.exec(rebuilt)?.[1] ?? '').matchAll(/'([a-z_]+)'/g)].map((entry) => entry[1])
+    expect(kinds).toEqual([...PROJECT_EVENT_TYPES])
+    expect(listIn(/event_type TEXT NOT NULL CHECK \(event_type IN \(('created'[^)]*)\)\)/)).toEqual(kinds.slice(0, 8))
     expect(listIn(/kind TEXT NOT NULL CHECK \(kind IN \(('brief'[^)]*)\)\)/)).toEqual([...DOCUMENT_KINDS])
     expect(listIn(/event_type TEXT NOT NULL CHECK \(event_type IN \(\s*('invited'[^)]*)\)\)/)).toEqual([...AUDIT_TYPES])
   })
@@ -163,11 +167,13 @@ describe('moving a project through its statuses', () => {
 })
 
 describe('milestones and the timeline', () => {
-  it('show a count only when there are milestones, and never a percentage', async () => {
+  it('show a count only when there are milestones, and a percentage only when it is counted from records', async () => {
     const anna = await state()
     const { id, reference } = await oneProject(anna)
     const before = (await anna.get(`/api/portal/projects/${reference}`)).json.data
     expect(before.milestones).toBeNull()
+    // PROMPT 26: nothing recorded means nothing to count, never "0 %".
+    expect(before.progress).toMatchObject({ percent: null, basis: null })
     const first = (await admin('POST', `/api/admin/client-projects/${id}/milestones`, { title: 'Design approved', dueOn: '2026-11-20' })).json.data
     await admin('POST', `/api/admin/client-projects/${id}/milestones`, { title: 'First version online', dueOn: '2026-12-15' })
     await admin('POST', `/api/admin/client-projects/${id}/milestones`, { title: 'Hand-over' })
@@ -177,7 +183,10 @@ describe('milestones and the timeline', () => {
     expect(after.nextMilestone).toEqual({ title: 'First version online', dueOn: '2026-12-15' })
     expect(after.milestoneList.map((entry: { title: string; completedAt: string | null }) => [entry.title, entry.completedAt !== null])).toEqual([['Design approved', true], ['First version online', false], ['Hand-over', false]])
     expect(after.timeline.map((entry: { type: string; milestone: string | null }) => [entry.type, entry.milestone])).toEqual([['milestone_completed', 'Design approved'], ['milestone_added', 'Hand-over'], ['milestone_added', 'First version online'], ['milestone_added', 'Design approved'], ['created', null]])
-    expect(JSON.stringify(after)).not.toMatch(/percent|progress|%/i)
+    // The percentage is the milestones' own count (1 of 3), computed by the server; it is not a number anybody can set.
+    expect(after.progress).toMatchObject({ percent: 33, basis: 'milestones' })
+    expect((await admin('PATCH', `/api/admin/client-projects/${id}`, { percent: 90 })).status).toBeLessThan(500)
+    expect((await anna.get(`/api/portal/projects/${reference}`)).json.data.progress.percent).toBe(33)
   })
 
   it('a completed milestone stays completed and cannot be removed; an open one can', async () => {

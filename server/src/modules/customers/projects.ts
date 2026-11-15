@@ -3,7 +3,11 @@ import { HttpError, notFound } from '../../http/errors.ts'
 import { newId, newReference } from '../../lib/crypto.ts'
 import { iso } from '../../lib/time.ts'
 import { getCustomer, recordAudit } from './accounts.ts'
+import { progressOf, type Progress } from '../projectwork/progress.ts'
+import { workSettings } from '../projectwork/settings.ts'
+import type { ClientMailKind } from '../notifications/clientTemplates.ts'
 import { queueClientMail } from './mail.ts'
+import type { MilestoneStatus } from '../projectwork/model.ts'
 import {
   canMoveProject,
   IMPORTANT_STATUSES,
@@ -36,14 +40,18 @@ export function newProjectReference(app: Pick<AppContext, 'db'>): string {
 
 export const getProject = (app: Pick<AppContext, 'db'>, id: string): ProjectRow | undefined => app.db.get<ProjectRow>('SELECT * FROM client_projects WHERE id = ?', [id])
 
-export function recordProjectEvent(app: Pick<AppContext, 'db' | 'clock'>, input: { projectId: string; type: ProjectEventType; adminId: string | null; from?: ProjectStatus | null; to?: ProjectStatus | null; milestoneId?: string | null; documentId?: string | null; note?: string | null }): number {
-  return app.db.run('INSERT INTO client_project_events (project_id, event_type, actor_type, actor_id, from_status, to_status, milestone_id, document_id, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-    input.projectId, input.type, input.adminId ? 'admin' : 'system', input.adminId, input.from ?? null, input.to ?? null, input.milestoneId ?? null, input.documentId ?? null, input.note ?? null, iso(app.clock.now()),
+export function recordProjectEvent(
+  app: Pick<AppContext, 'db' | 'clock'>,
+  input: { projectId: string; type: ProjectEventType; adminId: string | null; actor?: 'admin' | 'customer' | 'system'; actorId?: string | null; from?: string | null; to?: string | null; milestoneId?: string | null; documentId?: string | null; taskId?: string | null; actionId?: string | null; subject?: string | null; visibility?: 'customer' | 'internal'; note?: string | null },
+): number {
+  const actor = input.actor ?? (input.adminId ? 'admin' : 'system')
+  return app.db.run('INSERT INTO client_project_events (project_id, event_type, actor_type, actor_id, from_status, to_status, milestone_id, document_id, task_id, action_id, subject, visibility, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+    input.projectId, input.type, actor, input.actorId ?? input.adminId, input.from ?? null, input.to ?? null, input.milestoneId ?? null, input.documentId ?? null, input.taskId ?? null, input.actionId ?? null, input.subject ?? null, input.visibility ?? 'customer', input.note ?? null, iso(app.clock.now()),
   ]).lastInsertRowid
 }
 
 /** Tells the project's customer about an event, in their language, unless they are switched off. Never throws. */
-function tell(app: AppContext, project: ProjectRow, kind: 'client_project_created' | 'client_project_status', eventId: number): void {
+export function tell(app: AppContext, project: ProjectRow, kind: ClientMailKind, eventId: number): void {
   const customer = getCustomer(app, project.customer_id)
   if (!customer || customer.status === 'disabled') return
   queueClientMail(app, { kind, relatedType: 'client_project_event', relatedId: String(eventId), recipient: customer.email, language: customer.language })
@@ -130,34 +138,69 @@ export function changeStatus(app: AppContext, adminId: string, projectId: string
     const startedOn = project.started_on ?? (project.status === 'awaiting_start' && ['discovery', 'planning', 'design', 'development'].includes(to) ? now.slice(0, 10) : null)
     app.db.run('UPDATE client_projects SET status = ?, started_on = ?, completed_at = ?, updated_at = ? WHERE id = ?', [to, startedOn, to === 'completed' ? now : null, now, projectId])
     const eventId = recordProjectEvent(app, { projectId, type: 'status_changed', adminId, from: project.status, to, note })
-    if (notify ?? IMPORTANT_STATUSES.includes(to)) tell(app, project, 'client_project_status', eventId)
+    if (notify ?? (IMPORTANT_STATUSES.includes(to) && workSettings(app).statusChanged)) tell(app, project, 'client_project_status', eventId)
     return getProject(app, projectId)!
   })
 }
 
-export function addMilestone(app: AppContext, adminId: string, projectId: string, input: { title: string; dueOn: string | null }): MilestoneRow {
+export function addMilestone(app: AppContext, adminId: string, projectId: string, input: { title: string; dueOn: string | null; description?: string | null; customerVisible?: boolean }): MilestoneRow {
   return app.db.transaction(() => {
     if (!getProject(app, projectId)) throw notFound('The project')
     const position = (app.db.get<{ n: number }>('SELECT COALESCE(MAX(position), 0) + 1 AS n FROM client_milestones WHERE project_id = ?', [projectId])?.n ?? 1)
-    const row: MilestoneRow = { id: newId(), project_id: projectId, title: input.title, due_on: input.dueOn, completed_at: null, position, created_at: iso(app.clock.now()) }
-    app.db.run('INSERT INTO client_milestones (id, project_id, title, due_on, completed_at, position, created_at) VALUES (?, ?, ?, ?, NULL, ?, ?)', [row.id, projectId, row.title, row.due_on, position, row.created_at])
+    const visible = input.customerVisible !== false
+    const row: MilestoneRow = { id: newId(), project_id: projectId, title: input.title, due_on: input.dueOn, completed_at: null, position, created_at: iso(app.clock.now()), description: input.description ?? null, status: 'upcoming', customer_visible: visible ? 1 : 0 }
+    app.db.run('INSERT INTO client_milestones (id, project_id, title, due_on, completed_at, position, created_at, description, status, customer_visible) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?)', [row.id, projectId, row.title, row.due_on, position, row.created_at, row.description, row.status, row.customer_visible])
     app.db.run('UPDATE client_projects SET updated_at = ? WHERE id = ?', [row.created_at, projectId])
-    recordProjectEvent(app, { projectId, type: 'milestone_added', adminId, milestoneId: row.id })
+    recordProjectEvent(app, { projectId, type: 'milestone_added', adminId, milestoneId: row.id, subject: row.title, visibility: visible ? 'customer' : 'internal' })
     return row
   })
 }
 
-/** Renames a milestone, moves its date, or marks it done. A completed milestone stays completed (the history already says so). */
-export function updateMilestone(app: AppContext, adminId: string, projectId: string, milestoneId: string, changes: { title?: string; dueOn?: string | null; done?: boolean }): MilestoneRow {
+export interface MilestoneChanges {
+  title?: string
+  description?: string | null
+  dueOn?: string | null
+  /** Any status but `completed` moves the milestone there; `completed` is the same as `done: true`. */
+  status?: MilestoneStatus
+  customerVisible?: boolean
+  /** Kept from the first version of the portal: `true` completes the milestone. */
+  done?: boolean
+}
+
+/**
+ * Changes a milestone: its words, its date, whether the customer sees it, its status. A completed milestone stays completed and cannot be cancelled (the history already
+ * says so); a cancelled one can be reinstated. Completing is the one change a customer is told about (when the milestone is one they can see and the owner has not
+ * switched the message off). Completing a milestone never completes a task: the work and the date are two records.
+ */
+export function updateMilestone(app: AppContext, adminId: string, projectId: string, milestoneId: string, changes: MilestoneChanges): MilestoneRow {
   return app.db.transaction(() => {
     const milestone = app.db.get<MilestoneRow>('SELECT * FROM client_milestones WHERE id = ? AND project_id = ?', [milestoneId, projectId])
     if (!milestone) throw notFound('The milestone')
+    const project = getProject(app, projectId)
+    if (!project) throw notFound('The project')
     const now = iso(app.clock.now())
-    if (changes.done === false && milestone.completed_at) throw refuse('A completed milestone cannot be reopened.', 'milestone_completed')
-    const completing = changes.done === true && !milestone.completed_at
-    app.db.run('UPDATE client_milestones SET title = ?, due_on = ?, completed_at = ? WHERE id = ?', [changes.title ?? milestone.title, changes.dueOn === undefined ? milestone.due_on : changes.dueOn, completing ? now : milestone.completed_at, milestoneId])
+    const wantsStatus: MilestoneStatus | undefined = changes.done === true ? 'completed' : changes.status
+    if (milestone.completed_at && (changes.done === false || (wantsStatus !== undefined && wantsStatus !== 'completed'))) throw refuse('A completed milestone cannot be reopened.', 'milestone_completed')
+    const status: MilestoneStatus = wantsStatus ?? milestone.status
+    const completing = status === 'completed' && !milestone.completed_at
+    const visible = changes.customerVisible === undefined ? milestone.customer_visible === 1 : changes.customerVisible
+    app.db.run('UPDATE client_milestones SET title = ?, description = ?, due_on = ?, status = ?, customer_visible = ?, completed_at = ? WHERE id = ?', [
+      changes.title ?? milestone.title,
+      changes.description === undefined ? milestone.description : changes.description,
+      changes.dueOn === undefined ? milestone.due_on : changes.dueOn,
+      status,
+      visible ? 1 : 0,
+      completing ? now : milestone.completed_at,
+      milestoneId,
+    ])
     app.db.run('UPDATE client_projects SET updated_at = ? WHERE id = ?', [now, projectId])
-    if (completing) recordProjectEvent(app, { projectId, type: 'milestone_completed', adminId, milestoneId })
+    const title = changes.title ?? milestone.title
+    if (completing) {
+      const eventId = recordProjectEvent(app, { projectId, type: 'milestone_completed', adminId, milestoneId, subject: title, visibility: visible ? 'customer' : 'internal' })
+      if (visible && workSettings(app).milestoneCompleted) tell(app, project, 'client_milestone_completed', eventId)
+    } else if (status !== milestone.status) {
+      recordProjectEvent(app, { projectId, type: 'milestone_status_changed', adminId, milestoneId, subject: title, from: milestone.status, to: status, visibility: visible ? 'customer' : 'internal' })
+    }
     return app.db.get<MilestoneRow>('SELECT * FROM client_milestones WHERE id = ?', [milestoneId])!
   })
 }
@@ -203,6 +246,8 @@ export interface PortalProject {
   /** Counted from real milestones; `null` when the owner has set none (no percentage is ever made up). */
   milestones: { done: number; total: number } | null
   nextMilestone: { title: string; dueOn: string | null } | null
+  /** Counted from the customer's own view of the tasks and milestones (progress.ts): `percent` is `null` when there is nothing to count. */
+  progress: Progress
 }
 
 interface MilestoneCount {
@@ -211,7 +256,7 @@ interface MilestoneCount {
   done: number
 }
 
-function toPortal(row: ProjectRow, counts: MilestoneCount | undefined, next: MilestoneRow | undefined): PortalProject {
+function toPortal(row: ProjectRow, counts: MilestoneCount | undefined, next: MilestoneRow | undefined, progress: Progress): PortalProject {
   return {
     reference: row.reference,
     name: row.name,
@@ -224,33 +269,37 @@ function toPortal(row: ProjectRow, counts: MilestoneCount | undefined, next: Mil
     updatedAt: row.updated_at,
     milestones: counts && counts.total > 0 ? { done: counts.done, total: counts.total } : null,
     nextMilestone: next ? { title: next.title, dueOn: next.due_on } : null,
+    progress,
   }
 }
 
 const nextOf = (app: Pick<AppContext, 'db'>, projectId: string): MilestoneRow | undefined =>
-  app.db.get<MilestoneRow>('SELECT * FROM client_milestones WHERE project_id = ? AND completed_at IS NULL ORDER BY (due_on IS NULL), due_on, position LIMIT 1', [projectId])
+  app.db.get<MilestoneRow>("SELECT * FROM client_milestones WHERE project_id = ? AND completed_at IS NULL AND status <> 'cancelled' AND customer_visible = 1 ORDER BY (due_on IS NULL), due_on, position LIMIT 1", [projectId])
 
 /** All of ONE customer's projects: their id comes from the session, and every row is selected by it. */
-export function portalProjects(app: Pick<AppContext, 'db'>, customerId: string): PortalProject[] {
+export function portalProjects(app: Pick<AppContext, 'db' | 'clock'>, customerId: string): PortalProject[] {
   const rows = app.db.all<ProjectRow>("SELECT * FROM client_projects WHERE customer_id = ? ORDER BY (status IN ('completed', 'cancelled')), updated_at DESC, id", [customerId])
   const counts = new Map(
     app.db
-      .all<MilestoneCount>('SELECT m.project_id, COUNT(*) AS total, SUM(m.completed_at IS NOT NULL) AS done FROM client_milestones m JOIN client_projects p ON p.id = m.project_id WHERE p.customer_id = ? GROUP BY m.project_id', [customerId])
+      .all<MilestoneCount>('SELECT m.project_id, COUNT(*) AS total, SUM(m.completed_at IS NOT NULL) AS done FROM client_milestones m JOIN client_projects p ON p.id = m.project_id WHERE p.customer_id = ? AND m.customer_visible = 1 AND m.status <> \'cancelled\' GROUP BY m.project_id', [customerId])
       .map((row) => [row.project_id, row]),
   )
-  return rows.map((row) => toPortal(row, counts.get(row.id), nextOf(app, row.id)))
+  return rows.map((row) => toPortal(row, counts.get(row.id), nextOf(app, row.id), progressOf(app, row.id, 'customer')))
 }
 
 export interface TimelineEntry {
   id: number
   type: ProjectEventType
   at: string
-  fromStatus: ProjectStatus | null
-  toStatus: ProjectStatus | null
+  /** A project status on a project line; a task or action status on a task or action line (`type` says which). */
+  fromStatus: string | null
+  toStatus: string | null
   /** The words the owner wrote for the customer with this event, if any. */
   note: string | null
   /** The title of the milestone the event is about, if it still exists. */
   milestone: string | null
+  /** The title of the task, milestone or action the event is about, as it was at the time. */
+  subject: string | null
 }
 
 export interface PortalDocument {
@@ -264,7 +313,7 @@ export interface PortalDocument {
 }
 
 export interface PortalProjectDetail extends PortalProject {
-  milestoneList: Array<{ title: string; dueOn: string | null; completedAt: string | null }>
+  milestoneList: Array<{ id: string; title: string; description: string | null; status: MilestoneRow['status']; dueOn: string | null; completedAt: string | null }>
   /** Newest first. */
   timeline: TimelineEntry[]
   documents: PortalDocument[]
@@ -273,21 +322,22 @@ export interface PortalProjectDetail extends PortalProject {
 }
 
 /** One of THIS customer's projects, by its reference: `null` for one that does not exist and for one that belongs to anybody else (the same answer). */
-export function portalProject(app: Pick<AppContext, 'db'>, customerId: string, reference: string): PortalProjectDetail | null {
+export function portalProject(app: Pick<AppContext, 'db' | 'clock'>, customerId: string, reference: string): PortalProjectDetail | null {
   const row = app.db.get<ProjectRow>('SELECT * FROM client_projects WHERE customer_id = ? AND reference = ?', [customerId, reference])
   if (!row) return null
-  const milestones = app.db.all<MilestoneRow>('SELECT * FROM client_milestones WHERE project_id = ? ORDER BY position', [row.id])
-  const done = milestones.filter((milestone) => milestone.completed_at).length
+  const milestones = app.db.all<MilestoneRow>('SELECT * FROM client_milestones WHERE project_id = ? AND customer_visible = 1 ORDER BY position', [row.id])
+  const counted = milestones.filter((milestone) => milestone.status !== 'cancelled')
+  const done = counted.filter((milestone) => milestone.completed_at).length
   const events = app.db.all<ProjectEventRow & { milestone_title: string | null }>(
-    'SELECT e.*, m.title AS milestone_title FROM client_project_events e LEFT JOIN client_milestones m ON m.id = e.milestone_id WHERE e.project_id = ? ORDER BY e.id DESC',
+    'SELECT e.*, m.title AS milestone_title FROM client_project_events e LEFT JOIN client_milestones m ON m.id = e.milestone_id LEFT JOIN project_tasks t ON t.id = e.task_id WHERE e.project_id = ? AND e.visibility = \'customer\' AND (m.id IS NULL OR m.customer_visible = 1) AND (e.task_id IS NULL OR t.customer_visible = 1) ORDER BY e.id DESC',
     [row.id],
   )
   const documents = app.db.all<DocumentRow>('SELECT * FROM client_documents WHERE project_id = ? AND published_at IS NOT NULL ORDER BY published_at DESC', [row.id])
   const request = row.quote_request_id ? app.db.get<{ reference: string }>('SELECT q.reference FROM quote_requests q JOIN customer_links l ON l.quote_request_id = q.id WHERE q.id = ? AND l.customer_id = ?', [row.quote_request_id, customerId]) : undefined
   return {
-    ...toPortal(row, { project_id: row.id, total: milestones.length, done }, nextOf(app, row.id)),
-    milestoneList: milestones.map((milestone) => ({ title: milestone.title, dueOn: milestone.due_on, completedAt: milestone.completed_at })),
-    timeline: events.map((event) => ({ id: event.id, type: event.event_type, at: event.created_at, fromStatus: event.from_status, toStatus: event.to_status, note: event.note, milestone: event.milestone_title })),
+    ...toPortal(row, { project_id: row.id, total: counted.length, done }, nextOf(app, row.id), progressOf(app, row.id, 'customer')),
+    milestoneList: milestones.map((milestone) => ({ id: milestone.id, title: milestone.title, description: milestone.description, status: milestone.status, dueOn: milestone.due_on, completedAt: milestone.completed_at })),
+    timeline: events.map((event) => ({ id: event.id, type: event.event_type, at: event.created_at, fromStatus: event.from_status, toStatus: event.to_status, note: event.note, milestone: event.milestone_title, subject: event.subject })),
     documents: documents.map((doc) => ({ id: doc.id, title: doc.title, kind: doc.kind, fileName: doc.file_name, mimeType: doc.mime_type, sizeBytes: doc.size_bytes, publishedAt: doc.published_at! })),
     request: request ?? null,
   }

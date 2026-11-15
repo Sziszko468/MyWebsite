@@ -1,6 +1,7 @@
 import type { Language } from '../../config.ts'
 import type { ProjectStatus } from '../customers/model.ts'
 import { dateText, layout, oneLine, plain, type Cta, type Rendered, type Row } from './templates.ts'
+import type { WorkMailKind } from './workTemplates.ts'
 
 /**
  * The e-mails of the client portal (PROMPT 25), in Hungarian, English and Dutch, each as a branded HTML part and a plain-text part. The layout and the
@@ -23,8 +24,9 @@ export type ClientMailKind =
   | 'client_project_status'
   | 'client_document_published'
   | 'client_deletion_requested_admin'
+  | WorkMailKind
 
-export const CLIENT_MAIL_KINDS: readonly ClientMailKind[] = ['client_sign_in', 'client_activate', 'client_register', 'client_email_change', 'client_security_notice', 'client_project_created', 'client_project_status', 'client_document_published', 'client_deletion_requested_admin']
+export const CLIENT_MAIL_KINDS: readonly ClientMailKind[] = ['client_sign_in', 'client_activate', 'client_register', 'client_email_change', 'client_security_notice', 'client_project_created', 'client_project_status', 'client_document_published', 'client_deletion_requested_admin', 'client_action_assigned', 'client_action_due_soon', 'client_action_overdue', 'client_action_submitted_admin', 'client_action_reviewed', 'client_action_changes_requested', 'client_milestone_completed']
 
 /** The security notice's four reasons: the types of an account's history that tell the customer something. */
 export type NoticeKind = 'email_change_requested' | 'email_changed' | 'deletion_requested' | 'sessions_revoked'
@@ -164,12 +166,12 @@ export function maskEmail(address: string): string {
   return `${address.slice(0, 1)}${'*'.repeat(Math.min(5, Math.max(1, at - 1)))}${address.slice(at)}`
 }
 
-function compose(lang: Language, brand: string, parts: { title: string; intro: string; rows: Row[]; note?: { title: string; text: string }; cta?: Cta; footer: string; detailsLabel: string }): { text: string; html: string } {
+export function compose(lang: Language, brand: string, parts: { title: string; intro: string; rows: Row[]; note?: { title: string; text: string }; cta?: Cta; footer: string; detailsLabel: string }): { text: string; html: string } {
   const { detailsLabel, ...rest } = parts
   return { text: plain({ brand, ...rest }), html: layout({ lang, brand, preview: parts.title, detailsLabel, ...rest }) }
 }
 
-const ctaOf = (lang: Language, label: string, url: string | null): Cta | undefined => (url ? { label, url, fallback: W[lang].fallback } : undefined)
+export const ctaOf = (lang: Language, label: string, url: string | null): Cta | undefined => (url ? { label, url, fallback: W[lang].fallback } : undefined)
 
 /** The four messages that carry a link which signs someone in or confirms an address. `url` is the link with its secret: it is printed in this message and kept nowhere else. */
 export function renderClientLink(kind: 'client_sign_in' | 'client_activate' | 'client_register' | 'client_email_change', input: { name: string | null; url: string; validFor: { unit: 'minutes' | 'hours'; count: number } }, lang: Language, brand: string): Rendered {

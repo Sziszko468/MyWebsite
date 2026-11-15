@@ -16,6 +16,7 @@ import { canSendLinks, createLinkRequest } from './auth.ts'
 import { claimable, ownedBooking, ownedBookings, ownedRequest, ownedRequests, type Candidate } from './linking.ts'
 import { queueClientMail } from './mail.ts'
 import { ACTIVE_STATUSES, AWAITING_CUSTOMER, TERMINAL_STATUSES, type CustomerRow, type ProjectEventType, type ProjectStatus } from './model.ts'
+import { openRequests, upcomingTasks } from '../projectwork/portal.ts'
 import { portalProjects, type PortalProject } from './projects.ts'
 import { clientSessionsOf, endClientSession, revokeClientSessions, type ClientSession, type ClientSessionView } from './sessions.ts'
 
@@ -153,8 +154,10 @@ export interface Overview {
   name: string | null
   counts: { active: number; awaitingYou: number; completed: number; requests: number; bookings: number }
   awaitingYou: Array<Pick<PortalProject, 'reference' | 'name' | 'status'>>
-  activity: Array<{ id: number; type: ProjectEventType; at: string; toStatus: ProjectStatus | null; note: string | null; milestone: string | null; project: { reference: string; name: string } }>
-  upcoming: Array<{ project: { reference: string; name: string }; title: string; dueOn: string | null; overdue: boolean }>
+  activity: Array<{ id: number; type: ProjectEventType; at: string; toStatus: string | null; note: string | null; milestone: string | null; subject: string | null; project: { reference: string; name: string } }>
+  /** The requests the customer has to answer now (customer actions that wait for them), most urgent first. */
+  needsYou: ReturnType<typeof openRequests>
+  upcoming: Array<{ kind: 'milestone' | 'task'; project: { reference: string; name: string }; title: string; dueOn: string | null; overdue: boolean }>
   bookings: Array<{ reference: string; startAt: string; endAt: string; timeZone: string; typeName: string; status: string; language: Language }>
 }
 
@@ -164,33 +167,41 @@ export function overview(app: AppContext, session: ClientSession): Overview {
   const now = app.clock.now()
   const today = iso(now).slice(0, 10)
   const projects = portalProjects(app, customer.id)
-  const activity = app.db.all<{ id: number; event_type: ProjectEventType; created_at: string; to_status: ProjectStatus | null; note: string | null; milestone_title: string | null; reference: string; name: string }>(
-    `SELECT e.id, e.event_type, e.created_at, e.to_status, e.note, m.title AS milestone_title, p.reference, p.name
-     FROM client_project_events e JOIN client_projects p ON p.id = e.project_id LEFT JOIN client_milestones m ON m.id = e.milestone_id
-     WHERE p.customer_id = ? ORDER BY e.id DESC LIMIT 8`,
+  // Only the lines written FOR the customer, and none about a milestone or a task the owner has not shared.
+  const activity = app.db.all<{ id: number; event_type: ProjectEventType; created_at: string; to_status: string | null; note: string | null; milestone_title: string | null; subject: string | null; reference: string; name: string }>(
+    `SELECT e.id, e.event_type, e.created_at, e.to_status, e.note, m.title AS milestone_title, e.subject, p.reference, p.name
+     FROM client_project_events e JOIN client_projects p ON p.id = e.project_id LEFT JOIN client_milestones m ON m.id = e.milestone_id LEFT JOIN project_tasks t ON t.id = e.task_id
+     WHERE p.customer_id = ? AND e.visibility = 'customer' AND (m.id IS NULL OR m.customer_visible = 1) AND (e.task_id IS NULL OR t.customer_visible = 1) ORDER BY e.id DESC LIMIT 8`,
     [customer.id],
   )
   const upcoming = app.db.all<{ title: string; due_on: string | null; reference: string; name: string }>(
     `SELECT m.title, m.due_on, p.reference, p.name FROM client_milestones m JOIN client_projects p ON p.id = m.project_id
-     WHERE p.customer_id = ? AND m.completed_at IS NULL AND p.status NOT IN (${TERMINAL_STATUSES.map(() => '?').join(', ')})
+     WHERE p.customer_id = ? AND m.completed_at IS NULL AND m.customer_visible = 1 AND m.status <> 'cancelled' AND p.status NOT IN (${TERMINAL_STATUSES.map(() => '?').join(', ')})
      ORDER BY (m.due_on IS NULL), m.due_on, m.position LIMIT 6`,
     [customer.id, ...TERMINAL_STATUSES],
   )
   const requests = ownedRequests(app, customer.id)
   const bookings = ownedBookings(app, customer.id)
+  const needsYou = openRequests(app, customer.id)
   const nowIso = iso(now)
   return {
     name: customer.name,
     counts: {
       active: projects.filter((project) => ACTIVE_STATUSES.includes(project.status)).length,
-      awaitingYou: projects.filter((project) => AWAITING_CUSTOMER.includes(project.status)).length,
+      awaitingYou: new Set([...projects.filter((project) => AWAITING_CUSTOMER.includes(project.status)).map((project) => project.reference), ...needsYou.map((entry) => entry.project.reference)]).size,
       completed: projects.filter((project) => project.status === 'completed').length,
       requests: requests.length,
       bookings: bookings.length,
     },
     awaitingYou: projects.filter((project) => AWAITING_CUSTOMER.includes(project.status)).map((project) => ({ reference: project.reference, name: project.name, status: project.status })),
-    activity: activity.map((row) => ({ id: row.id, type: row.event_type, at: row.created_at, toStatus: row.to_status, note: row.note, milestone: row.milestone_title, project: { reference: row.reference, name: row.name } })),
-    upcoming: upcoming.map((row) => ({ project: { reference: row.reference, name: row.name }, title: row.title, dueOn: row.due_on, overdue: row.due_on !== null && row.due_on < today })),
+    activity: activity.map((row) => ({ id: row.id, type: row.event_type, at: row.created_at, toStatus: row.to_status, note: row.note, milestone: row.milestone_title, subject: row.subject, project: { reference: row.reference, name: row.name } })),
+    needsYou,
+    upcoming: [
+      ...upcoming.map((row) => ({ kind: 'milestone' as const, project: { reference: row.reference, name: row.name }, title: row.title, dueOn: row.due_on, overdue: row.due_on !== null && row.due_on < today })),
+      ...upcomingTasks(app, customer.id).map((row) => ({ kind: 'task' as const, ...row })),
+    ]
+      .sort((a, b) => (a.dueOn === null ? 1 : b.dueOn === null ? -1 : a.dueOn.localeCompare(b.dueOn)))
+      .slice(0, 8),
     bookings: bookings
       .filter((booking) => isActive(booking.status) && booking.end_at >= nowIso)
       .sort((a, b) => a.start_at.localeCompare(b.start_at))

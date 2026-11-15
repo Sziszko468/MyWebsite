@@ -9,6 +9,7 @@ import { purgeBookingTokens } from '../bookings/repository.ts'
 import { purgeAuth } from '../customers/auth.ts'
 import { deleteCustomersByEmail } from '../customers/retention.ts'
 import { purgeClientSessions } from '../customers/sessions.ts'
+import { runWorkReminders, type ReminderResult } from '../projectwork/reminders.ts'
 import { deleteBookingsByEmail, purgeFinishedBookings } from '../bookings/retention.ts'
 import { deleteDeliveriesOfRequest } from '../quotes/deliveries.ts'
 import { purgeTokens } from '../quotes/tokens.ts'
@@ -32,6 +33,8 @@ export interface MaintenanceResult {
   /** The client portal: sign-ins that ended, and sign-in links (with their requests) that expired more than a month ago. Accounts are never deleted by age: that is the owner's decision. */
   clientSessions: number
   clientLinks: number
+  /** The project work: reminders queued for customer actions that are due soon or overdue (each once per action and date). */
+  workReminders: ReminderResult
   retentionDays: number | null
   /** The assistant: conversations whose words were removed, idle sessions removed, expired approvals cleared, reservations that never reconciled. */
   assistant: { conversations: number; sessions: number; approvals: number; abandonedRequests: number }
@@ -39,7 +42,7 @@ export interface MaintenanceResult {
 
 export function runMaintenance(app: AppContext): MaintenanceResult {
   const { db, clock, config } = app
-  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, bookings: 0, deliveries: 0, expiredLinks: purgeTokens(app) + purgeBookingTokens(app), clientSessions: purgeClientSessions(app), clientLinks: purgeAuth(app), retentionDays: config.retentionDays, assistant: { conversations: 0, sessions: 0, approvals: 0, abandonedRequests: 0 } }
+  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, bookings: 0, deliveries: 0, expiredLinks: purgeTokens(app) + purgeBookingTokens(app), clientSessions: purgeClientSessions(app), clientLinks: purgeAuth(app), workReminders: runWorkReminders(app), retentionDays: config.retentionDays, assistant: { conversations: 0, sessions: 0, approvals: 0, abandonedRequests: 0 } }
   result.assistant = { ...purgeAssistant(db, clock, loadSettings(app).retentionDays), abandonedRequests: sweepAbandoned(app) }
   if (config.retentionDays !== null) {
     const cutoff = iso(addMs(clock.now(), -config.retentionDays * DAY))

@@ -16,6 +16,7 @@ function deleteOne(app: AppContext, customerId: string): number {
   db.run("DELETE FROM email_deliveries WHERE related_type = 'client_audit' AND related_id IN (SELECT CAST(id AS TEXT) FROM customer_audit_events WHERE customer_id = ?)", [customerId])
   db.run("DELETE FROM email_deliveries WHERE related_type = 'client_project_event' AND related_id IN (SELECT CAST(e.id AS TEXT) FROM client_project_events e JOIN client_projects p ON p.id = e.project_id WHERE p.customer_id = ?)", [customerId])
   db.run("DELETE FROM email_deliveries WHERE related_type = 'client_document' AND related_id IN (SELECT d.id FROM client_documents d JOIN client_projects p ON p.id = d.project_id WHERE p.customer_id = ?)", [customerId])
+  db.run("DELETE FROM email_deliveries WHERE related_type = 'client_action_reminder' AND EXISTS (SELECT 1 FROM project_customer_actions a JOIN client_projects p ON p.id = a.project_id WHERE p.customer_id = ? AND email_deliveries.related_id LIKE a.id || ':%')", [customerId])
   return db.run('DELETE FROM customers WHERE id = ?', [customerId]).changes
 }
 

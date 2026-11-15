@@ -10,7 +10,31 @@ import type { Language } from '../i18n/config'
 
 export type ProjectStatus = 'awaiting_start' | 'discovery' | 'planning' | 'design' | 'development' | 'review' | 'waiting_customer' | 'finalization' | 'completed' | 'on_hold' | 'cancelled'
 export type ProjectCategory = 'website' | 'webapp' | 'ui' | 'integrations' | 'ai' | 'other'
-export type ProjectEventType = 'created' | 'status_changed' | 'dates_changed' | 'milestone_added' | 'milestone_completed' | 'document_published' | 'feedback_requested' | 'update_posted'
+export type ProjectEventType =
+  | 'created'
+  | 'status_changed'
+  | 'dates_changed'
+  | 'milestone_added'
+  | 'milestone_completed'
+  | 'document_published'
+  | 'feedback_requested'
+  | 'update_posted'
+  // PROMPT 26: the lines the project work writes for the customer (the owner's own lines never reach this page)
+  | 'task_created'
+  | 'task_status_changed'
+  | 'task_completed'
+  | 'task_cancelled'
+  | 'milestone_status_changed'
+  | 'action_assigned'
+  | 'action_submitted'
+  | 'action_under_review'
+  | 'action_changes_requested'
+  | 'action_accepted'
+  | 'action_cancelled'
+export type TaskStatus = 'backlog' | 'planned' | 'in_progress' | 'in_review' | 'waiting_customer' | 'blocked' | 'completed' | 'cancelled'
+export type MilestoneStatus = 'upcoming' | 'in_progress' | 'completed' | 'delayed' | 'cancelled'
+export type ActionType = 'provide_content' | 'answer_question' | 'confirm_direction' | 'review_deliverable' | 'approve_stage' | 'other'
+export type ActionStatus = 'not_started' | 'submitted' | 'under_review' | 'changes_requested' | 'accepted' | 'cancelled'
 export type RequestStatus = 'new' | 'under_review' | 'waiting_customer' | 'quote_preparation' | 'quote_sent' | 'accepted' | 'declined' | 'in_progress' | 'completed' | 'cancelled'
 export type QuoteState = 'open' | 'expired' | 'accepted' | 'declined' | 'superseded' | 'withdrawn'
 export type BookingStatus = 'pending' | 'confirmed' | 'reschedule_requested' | 'rescheduled' | 'cancelled' | 'completed' | 'no_show'
@@ -57,16 +81,30 @@ export interface ProjectSummary {
   updatedAt: string
   milestones: { done: number; total: number } | null
   nextMilestone: { title: string; dueOn: string | null } | null
+  progress: WorkProgress
+}
+
+/** Counted by the server from the tasks and milestones the customer can see; `percent` is `null` when there is nothing to count (never "0 %"). */
+export interface WorkProgress {
+  percent: number | null
+  basis: 'tasks' | 'milestones' | null
+  tasks: { total: number; completed: number; open: number; overdue: number }
+  milestones: { total: number; completed: number; overdue: number }
+  /** The day "overdue" was decided against (the server's, in the owner's zone). */
+  today: string
 }
 
 export interface TimelineEntry {
   id: number
   type: ProjectEventType
   at: string
-  fromStatus: ProjectStatus | null
-  toStatus: ProjectStatus | null
+  /** A project status on a project line; a task or action status on a task or action line. */
+  fromStatus: string | null
+  toStatus: string | null
   note: string | null
   milestone: string | null
+  /** The title of the task, milestone or request the line is about, as it was then. */
+  subject: string | null
 }
 
 export interface DocumentSummary {
@@ -80,7 +118,7 @@ export interface DocumentSummary {
 }
 
 export interface ProjectDetail extends ProjectSummary {
-  milestoneList: Array<{ title: string; dueOn: string | null; completedAt: string | null }>
+  milestoneList: Array<{ id: string; title: string; description: string | null; status: MilestoneStatus; dueOn: string | null; completedAt: string | null }>
   timeline: TimelineEntry[]
   documents: DocumentSummary[]
   request: { reference: string } | null
@@ -90,9 +128,48 @@ export interface Overview {
   name: string | null
   counts: { active: number; awaitingYou: number; completed: number; requests: number; bookings: number }
   awaitingYou: Array<{ reference: string; name: string; status: ProjectStatus }>
-  activity: Array<{ id: number; type: ProjectEventType; at: string; toStatus: ProjectStatus | null; note: string | null; milestone: string | null; project: { reference: string; name: string } }>
-  upcoming: Array<{ project: { reference: string; name: string }; title: string; dueOn: string | null; overdue: boolean }>
+  activity: Array<{ id: number; type: ProjectEventType; at: string; toStatus: string | null; note: string | null; milestone: string | null; subject: string | null; project: { reference: string; name: string } }>
+  /** The requests the customer has to answer now, most urgent first. */
+  needsYou: Array<{ project: { reference: string; name: string }; task: { reference: string; title: string }; status: ActionStatus; dueOn: string | null; overdue: boolean }>
+  upcoming: Array<{ kind: 'milestone' | 'task'; project: { reference: string; name: string }; title: string; dueOn: string | null; overdue: boolean }>
   bookings: Array<{ reference: string; startAt: string; endAt: string; timeZone: string; typeName: string; status: BookingStatus; language: Language }>
+}
+
+export interface PortalAction {
+  type: ActionType
+  instruction: string
+  status: ActionStatus
+  /** Who has to move it: `you`, `us`, or nobody (finished). */
+  awaiting: 'you' | 'us' | null
+  canRespond: boolean
+  revision: number
+  /** The latest request for changes, in the words the owner wrote for the customer. */
+  changesRequested: string | null
+}
+
+export interface PortalTask {
+  reference: string
+  title: string
+  description: string
+  status: TaskStatus
+  startOn: string | null
+  dueOn: string | null
+  completedAt: string | null
+  overdue: boolean
+  category: { hu: string; en: string; nl: string } | null
+  milestone: { title: string } | null
+  waitingFor: Array<{ reference: string; title: string }>
+  action: PortalAction | null
+}
+
+export interface PortalWork {
+  progress: WorkProgress
+  tasks: PortalTask[]
+}
+
+export interface PortalTaskDetail extends PortalTask {
+  submissions: Array<{ revision: number; response: string; submittedAt: string }>
+  history: Array<{ at: string; to: ActionStatus; by: 'you' | 'us'; note: string | null }>
 }
 
 export interface RequestRow {
@@ -232,6 +309,9 @@ export const signOutRequest = () => call<{ ok: true }>('POST', '/api/portal/sess
 export const fetchOverview = () => call<Overview>('GET', '/api/portal/overview')
 export const fetchProjects = () => call<ProjectSummary[]>('GET', '/api/portal/projects')
 export const fetchProject = (reference: string) => call<ProjectDetail>('GET', `/api/portal/projects/${enc(reference)}`)
+export const fetchWork = (reference: string) => call<PortalWork>('GET', `/api/portal/projects/${enc(reference)}/tasks`)
+export const fetchTask = (reference: string, task: string) => call<PortalTaskDetail>('GET', `/api/portal/projects/${enc(reference)}/tasks/${enc(task)}`)
+export const respondToTask = (reference: string, task: string, response: string) => call<{ revision: number; task: PortalTaskDetail }>('POST', `/api/portal/projects/${enc(reference)}/tasks/${enc(task)}/respond`, { response })
 export const fetchRequests = () => call<RequestRow[]>('GET', '/api/portal/requests')
 export const fetchRequest = (reference: string) => call<RequestDetail>('GET', `/api/portal/requests/${enc(reference)}`)
 export const openRequest = (reference: string, quote: string | null) => call<{ path: string }>('POST', `/api/portal/requests/${enc(reference)}/open`, { quote })

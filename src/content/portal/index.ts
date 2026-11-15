@@ -1,4 +1,5 @@
 import { tri } from '../trilingual'
+import { workText } from './work'
 
 /**
  * Everything the client portal says to a customer (PROMPT 25), in Hungarian, English and Dutch: signing in, the pages behind it and every message. The
@@ -139,9 +140,9 @@ export const portalText = {
     bookingsTitle: tri('Közelgő konzultációk', 'Upcoming consultations', 'Aankomende adviesgesprekken'),
     emptyTitle: tri('Még nincs projekted a portálban', 'You have no projects in the portal yet', 'Je hebt nog geen projecten in het portaal'),
     emptyBody: tri(
-      'Amint elindítunk veled egy projektet, itt követheted. Addig itt találod az ajánlatkéréseidet és a foglalásaidat, ha már összekapcsoltuk őket a fiókoddal.',
-      'As soon as we start a project with you, you can follow it here. Until then you find your quote requests and bookings here, once they are linked to your account.',
-      'Zodra we een project met je starten, volg je het hier. Tot die tijd vind je hier je offerteaanvragen en afspraken, zodra ze aan je account zijn gekoppeld.',
+      'Egy projekt akkor jelenik meg itt, ha elfogadtál egy ajánlatot, és mi létrehoztuk hozzá a projektet. Addig itt találod az ajánlatkéréseidet és a foglalásaidat, ha már összekapcsoltuk őket a fiókoddal.',
+      'A project appears here once you have accepted a quote and we have set up the project for it. Until then you find your quote requests and bookings here, once they are linked to your account.',
+      'Een project verschijnt hier zodra je een offerte hebt geaccepteerd en wij het project ervoor hebben aangemaakt. Tot die tijd vind je hier je offerteaanvragen en afspraken, zodra ze aan je account zijn gekoppeld.',
     ),
     emptyHelp: tri('Kérdésed van? Írj nekünk.', 'Do you have a question? Write to us.', 'Heb je een vraag? Schrijf ons.'),
     linkHint: tri('Beküldtél már ajánlatkérést ezzel a címmel? Nézd meg a Fiók oldalon, összekapcsolhatod-e.', 'Have you already sent a quote request with this address? Look on the Account page to see whether you can link it.', 'Heb je al een offerteaanvraag met dit adres verstuurd? Kijk op de accountpagina of je die kunt koppelen.'),
@@ -328,6 +329,8 @@ export const portalText = {
     deletionCancel: tri('A kérés visszavonása', 'Withdraw the request', 'Verzoek intrekken'),
     errors: { tooLong: tri('Ez túl hosszú.', 'This is too long.', 'Dit is te lang.'), invalid: tri('Ez nem megfelelő.', 'This is not acceptable.', 'Dit is niet geschikt.'), invalidEmail: tri('Ez nem tűnik e-mail-címnek.', 'That does not look like an email address.', 'Dit lijkt geen e-mailadres.'), required: tri('Ezt kötelező kitölteni.', 'This is required.', 'Dit is verplicht.') },
   },
+
+  work: workText,
 
   languages: {
     hu: tri('Magyar', 'Hungarian', 'Hongaars'),

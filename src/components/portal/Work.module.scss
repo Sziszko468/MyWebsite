@@ -1,0 +1,366 @@
+@use '../../styles/mixins' as m;
+
+/* The work on a project, as the customer sees it (PROMPT 26): progress, tasks, the requests that wait for an answer, the schedule. Mobile first (320 px up): one
+   column, nothing wider than the screen, long titles wrap, every control is a comfortable touch target. A status is a word with a mark, never colour alone; the
+   schedule's bars are a picture of text that is always there, so nothing depends on seeing them; nothing here moves. */
+
+.progressPanel {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  min-width: 0;
+}
+
+.progressHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+
+.progressNumber {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-snug);
+}
+
+.bar {
+  width: 100%;
+  height: 10px;
+  accent-color: var(--color-accent);
+  border-radius: var(--radius-pill);
+}
+
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.late {
+  color: var(--color-accent-text);
+  font-weight: var(--fw-semibold);
+}
+
+.fineprint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+/* ---- tasks -------------------------------------------------------------------------------------------------------------------------- */
+
+.groups {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.group {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: var(--fs-md);
+  line-height: var(--lh-snug);
+}
+
+.tasks {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+  overflow-wrap: anywhere;
+
+  &[data-attention='true'] {
+    border-color: var(--color-accent);
+  }
+
+  &[data-done='true'] {
+    color: var(--color-text-secondary);
+  }
+}
+
+.taskHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+}
+
+.taskTitle {
+  margin: 0;
+  font-size: var(--fs-md);
+  line-height: var(--lh-snug);
+}
+
+.taskLink {
+  display: inline-block;
+  min-height: var(--size-touch);
+  padding-block: var(--space-2);
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.taskMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.taskNote {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+/* ---- the schedule -------------------------------------------------------------------------------------------------------------------- */
+
+.schedule {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.scheduleRows {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.scheduleRow {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+
+  /* The bars come beside the words only where there is room; below that the words come first and the bar under them, so a phone reads it from top to bottom. */
+  @include m.up(md) {
+    grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-4);
+  }
+}
+
+.scheduleText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.scheduleKind {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.scheduleDates {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.track {
+  position: relative;
+  height: 1.25rem;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-divider);
+}
+
+.todayLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-secondary);
+}
+
+.fill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  min-width: 6px;
+  background: var(--color-accent);
+  border-radius: var(--radius-sm);
+
+  &[data-kind='milestone'] {
+    transform: skewX(-20deg);
+  }
+
+  &[data-done='true'] {
+    background: var(--color-text-muted);
+  }
+
+  &[data-overdue='true'] {
+    background: repeating-linear-gradient(135deg, var(--color-accent) 0 4px, var(--color-accent-active) 4px 8px);
+  }
+}
+
+.scheduleLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.undated {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* ---- one task, and the answer ------------------------------------------------------------------------------------------------------- */
+
+.requestCard {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  min-width: 0;
+
+  &[data-attention='true'] {
+    border-color: var(--color-accent);
+  }
+}
+
+.instruction {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.changes {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--color-bg-subtle);
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+}
+
+.answerForm {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.field {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.label {
+  font-weight: var(--fw-semibold);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 9rem;
+  padding: var(--space-3);
+  color: var(--color-text);
+  font: inherit;
+  line-height: var(--lh-normal);
+  background: var(--color-bg);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  resize: vertical;
+
+  &[aria-invalid='true'] {
+    border-color: var(--color-accent);
+  }
+}
+
+.counter {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+.fieldError {
+  margin: 0;
+  color: var(--color-accent-text);
+  font-weight: var(--fw-semibold);
+}
+
+.answers {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.answer {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+  min-width: 0;
+
+  p {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+
+.answerHead {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+.sent {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-secondary);
+  border-radius: var(--radius-md);
+}

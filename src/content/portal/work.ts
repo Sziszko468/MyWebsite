@@ -1,0 +1,160 @@
+import { tri } from '../trilingual'
+
+/**
+ * What the client portal says about the work on a project (PROMPT 26), in Hungarian, English and Dutch: the progress, the tasks, the requests that wait for the
+ * customer's answer, the schedule. The words follow the portal's: plain, never a promise (no time for an answer, no outcome of a review), and nothing here says a file
+ * can be attached, because the site has no private place for one.
+ */
+export const workText = {
+  progress: {
+    title: tri('A projekt haladása', 'Project progress', 'Voortgang van het project'),
+    emptyTitle: tri('Még nincs mit mérni', 'Nothing to measure yet', 'Er valt nog niets te meten'),
+    empty: tri(
+      'Amint feladatot vagy mérföldkövet rögzítünk a projekthez, itt látod a haladást. Addig nem mutatunk számot, mert nem lenne mire építeni.',
+      'As soon as we record tasks or milestones for the project, you will see the progress here. Until then we show no number, because there would be nothing to base it on.',
+      'Zodra we taken of mijlpalen voor het project vastleggen, zie je hier de voortgang. Tot die tijd tonen we geen getal, omdat er niets is om het op te baseren.',
+    ),
+    percent: tri('{percent}% kész', '{percent}% done', '{percent}% klaar'),
+    aria: tri('A projekt haladása: {percent}%', 'Project progress: {percent}%', 'Voortgang van het project: {percent}%'),
+    basisTasks: tri('{done} / {total} feladat kész', '{done} of {total} tasks done', '{done} van {total} taken klaar'),
+    basisMilestones: tri('{done} / {total} mérföldkő kész', '{done} of {total} milestones done', '{done} van {total} mijlpalen klaar'),
+    overdue: tri('{count} elmúlt a határidejét', '{count} past their date', '{count} voorbij de datum'),
+    note: tri('A szám a rögzített feladatok és mérföldkövek tényleges állapotából jön, nem becslés.', 'The number comes from the real state of the recorded tasks and milestones; it is not an estimate.', 'Het getal komt uit de werkelijke stand van de vastgelegde taken en mijlpalen; het is geen schatting.'),
+  },
+
+  tasks: {
+    title: tri('Feladatok', 'Tasks', 'Taken'),
+    lead: tri('Amit a projekten csinálunk, és amit megosztottunk veled.', 'What we are doing on the project, as far as we have shared it with you.', 'Wat we aan het project doen, voor zover we het met je hebben gedeeld.'),
+    empty: tri('Még nem osztottunk meg veled feladatot.', 'We have not shared any tasks with you yet.', 'We hebben nog geen taken met je gedeeld.'),
+    groups: {
+      needsYou: tri('Rád vár', 'Needs you', 'Wacht op jou'),
+      inProgress: tri('Folyamatban', 'In progress', 'Bezig'),
+      planned: tri('Tervezett', 'Planned', 'Gepland'),
+      done: tri('Kész', 'Done', 'Klaar'),
+      stopped: tri('Elmarad', 'Not going ahead', 'Gaat niet door'),
+    },
+    reference: tri('Azonosító', 'Reference', 'Referentie'),
+    category: tri('Terület', 'Category', 'Categorie'),
+    milestone: tri('Mérföldkő', 'Milestone', 'Mijlpaal'),
+    due: tri('Határidő: {date}', 'Due {date}', 'Uiterlijk {date}'),
+    start: tri('Kezdés: {date}', 'Starts {date}', 'Start {date}'),
+    doneOn: tri('Kész: {date}', 'Done on {date}', 'Klaar op {date}'),
+    startLabel: tri('Kezdés', 'Starts', 'Start'),
+    dueLabel: tri('Határidő', 'Due date', 'Uiterlijk'),
+    doneLabel: tri('Kész', 'Completed', 'Afgerond'),
+    noDates: tri('Még nincs dátuma', 'No date yet', 'Nog geen datum'),
+    overdue: tri('A határidő elmúlt', 'Past its date', 'Datum verstreken'),
+    waitingFor: tri('Ezekre vár: {titles}', 'Waiting for: {titles}', 'Wacht op: {titles}'),
+    open: tri('Megnyitás', 'Open', 'Openen'),
+    needsYouBadge: tri('Válaszra vár', 'Needs your answer', 'Wacht op je antwoord'),
+    back: tri('Vissza a projekthez', 'Back to the project', 'Terug naar het project'),
+    list: tri('A projekt feladatai', 'The tasks of the project', 'De taken van het project'),
+    description: tri('Mit jelent', 'What it is', 'Wat het inhoudt'),
+    noDescription: tri('Nincs további leírás.', 'There is no further description.', 'Er is geen verdere beschrijving.'),
+    status: {
+      backlog: tri('Sorban áll', 'Queued', 'In de wachtrij'),
+      planned: tri('Tervezett', 'Planned', 'Gepland'),
+      in_progress: tri('Folyamatban', 'In progress', 'Bezig'),
+      in_review: tri('Átnézés alatt', 'Being reviewed', 'Wordt beoordeeld'),
+      waiting_customer: tri('Rád vár', 'Waiting for you', 'Wacht op jou'),
+      blocked: tri('Szünetel', 'On hold', 'Gepauzeerd'),
+      completed: tri('Kész', 'Done', 'Klaar'),
+      cancelled: tri('Elmarad', 'Not going ahead', 'Gaat niet door'),
+    },
+  },
+
+  milestones: {
+    status: {
+      upcoming: tri('Közelgő', 'Upcoming', 'Aankomend'),
+      in_progress: tri('Folyamatban', 'In progress', 'Bezig'),
+      completed: tri('Kész', 'Done', 'Klaar'),
+      delayed: tri('Csúszik', 'Delayed', 'Vertraagd'),
+      cancelled: tri('Elmarad', 'Not going ahead', 'Gaat niet door'),
+    },
+  },
+
+  action: {
+    title: tri('Amit kérünk tőled', 'What we ask of you', 'Wat we van je vragen'),
+    awaitingYou: tri('A te válaszodra várunk.', 'We are waiting for your answer.', 'We wachten op je antwoord.'),
+    awaitingUs: tri('Megkaptuk, átnézzük.', 'We have it and are looking at it.', 'We hebben het ontvangen en bekijken het.'),
+    finished: tri('Ezzel nincs több dolgod.', 'There is nothing more for you to do here.', 'Hier hoef je verder niets meer te doen.'),
+    cancelled: tri('Erre már nincs szükség.', 'This is no longer needed.', 'Dit is niet meer nodig.'),
+    types: {
+      provide_content: tri('Tartalom megadása', 'Provide content', 'Inhoud aanleveren'),
+      answer_question: tri('Kérdés megválaszolása', 'Answer a question', 'Vraag beantwoorden'),
+      confirm_direction: tri('Irány jóváhagyása', 'Confirm a direction', 'Richting bevestigen'),
+      review_deliverable: tri('Elkészült munka átnézése', 'Review finished work', 'Opgeleverd werk beoordelen'),
+      approve_stage: tri('Szakasz jóváhagyása', 'Approve a stage', 'Fase goedkeuren'),
+      other: tri('Egyéb kérés', 'Other request', 'Ander verzoek'),
+    },
+    status: {
+      not_started: tri('Válaszra vár', 'Waiting for your answer', 'Wacht op je antwoord'),
+      submitted: tri('Elküldve', 'Sent', 'Verstuurd'),
+      under_review: tri('Átnézés alatt', 'Being reviewed', 'Wordt beoordeeld'),
+      changes_requested: tri('Módosítást kértünk', 'Changes requested', 'Aanpassing gevraagd'),
+      accepted: tri('Elfogadva', 'Accepted', 'Geaccepteerd'),
+      cancelled: tri('Már nem kell', 'No longer needed', 'Niet meer nodig'),
+    },
+    changesTitle: tri('Ezt kérjük módosítani', 'What we ask you to change', 'Wat we je vragen aan te passen'),
+    form: {
+      title: tri('A válaszod', 'Your answer', 'Je antwoord'),
+      label: tri('Írd le a válaszodat', 'Write your answer', 'Schrijf je antwoord'),
+      hint: tri(
+        'Szövegben tudsz válaszolni. Fájlt itt nem tudsz csatolni: ha fájlra van szükség, azt a válaszodban írd le, és megbeszéljük, hogyan juttasd el hozzánk.',
+        'You answer in writing. You cannot attach a file here: if a file is needed, say so in your answer and we will agree how you send it to us.',
+        'Je antwoordt schriftelijk. Je kunt hier geen bestand bijvoegen: is er een bestand nodig, zeg dat dan in je antwoord en we spreken af hoe je het naar ons stuurt.',
+      ),
+      count: tri('{count} / {max} karakter', '{count} of {max} characters', '{count} van {max} tekens'),
+      send: tri('Válasz elküldése', 'Send the answer', 'Antwoord versturen'),
+      sendAgain: tri('Új válasz elküldése', 'Send a new answer', 'Nieuw antwoord versturen'),
+      sending: tri('Küldés…', 'Sending…', 'Versturen…'),
+      sent: tri('Megkaptuk a válaszodat. Átnézzük, és ha kell, jelentkezünk.', 'We have received your answer. We will review it and write to you if we need anything.', 'We hebben je antwoord ontvangen. We bekijken het en schrijven je als we iets nodig hebben.'),
+      errors: {
+        required: tri('Írj valamit a válaszba.', 'Write something in your answer.', 'Schrijf iets in je antwoord.'),
+        tooShort: tri('Ez túl rövid. Írj egy kicsit többet.', 'That is too short. Write a little more.', 'Dit is te kort. Schrijf iets meer.'),
+        tooLong: tri('Ez túl hosszú. Rövidítsd le.', 'That is too long. Please shorten it.', 'Dit is te lang. Kort het in.'),
+        closed: tri('Erre már nem lehet válaszolni. Frissítsd az oldalt.', 'This can no longer be answered. Reload the page.', 'Hierop kan niet meer worden gereageerd. Ververs de pagina.'),
+        failed: tri('A választ nem sikerült elküldeni. Próbáld újra.', 'We could not send your answer. Please try again.', 'We konden je antwoord niet versturen. Probeer het opnieuw.'),
+      },
+    },
+    answers: tri('Eddigi válaszaid', 'Your answers so far', 'Je antwoorden tot nu toe'),
+    answerNumber: tri('{number}. válasz', 'Answer {number}', 'Antwoord {number}'),
+    history: tri('Mi történt a kéréssel', 'What happened to this request', 'Wat er met dit verzoek is gebeurd'),
+    by: { you: tri('Te', 'You', 'Jij'), us: tri('Mi', 'Us', 'Wij') },
+  },
+
+  schedule: {
+    title: tri('Ütemezés', 'Schedule', 'Planning'),
+    lead: tri('A feladatok és a mérföldkövek dátumai időrendben. Alatta a pontos dátumok szövegesen is megvannak.', 'The dates of the tasks and the milestones in time order. The exact dates are also written out underneath.', 'De data van de taken en mijlpalen op volgorde van tijd. De exacte data staan ook uitgeschreven.'),
+    empty: tri('Még egyik elemnek sincs dátuma.', 'None of the items has a date yet.', 'Nog geen enkel onderdeel heeft een datum.'),
+    unscheduled: tri('Dátum nélkül', 'Without a date', 'Zonder datum'),
+    today: tri('Ma', 'Today', 'Vandaag'),
+    kind: { task: tri('Feladat', 'Task', 'Taak'), milestone: tri('Mérföldkő', 'Milestone', 'Mijlpaal') },
+    span: tri('{from} – {to}', '{from} to {to}', '{from} tot {to}'),
+    range: tri('Időszak: {from} – {to}', 'Period: {from} to {to}', 'Periode: {from} tot {to}'),
+    chart: tri('Időrendi nézet', 'Timeline view', 'Weergave op een tijdlijn'),
+  },
+
+  overview: {
+    needsYouTitle: tri('Ezekre várunk választ', 'We are waiting for your answer on', 'We wachten op je antwoord op'),
+    needsYouBody: tri('Egy rövid, szöveges válasszal tudsz segíteni.', 'A short written answer from you is all we need.', 'Een kort schriftelijk antwoord van jou is genoeg.'),
+    overdue: tri('A határidő elmúlt', 'Past its date', 'Datum verstreken'),
+    taskKind: tri('Feladat', 'Task', 'Taak'),
+    milestoneKind: tri('Mérföldkő', 'Milestone', 'Mijlpaal'),
+  },
+
+  events: {
+    task_created: tri('Új feladat: {title}', 'New task: {title}', 'Nieuwe taak: {title}'),
+    task_status_changed: tri('A feladat állapota ({title}): {status}', 'Task status ({title}): {status}', 'Status van taak ({title}): {status}'),
+    task_completed: tri('Feladat kész: {title}', 'Task done: {title}', 'Taak klaar: {title}'),
+    task_cancelled: tri('Feladat elmarad: {title}', 'Task not going ahead: {title}', 'Taak gaat niet door: {title}'),
+    milestone_status_changed: tri('A mérföldkő állapota ({title}): {status}', 'Milestone status ({title}): {status}', 'Status van mijlpaal ({title}): {status}'),
+    action_assigned: tri('Kérésünk van hozzád: {title}', 'We have a request for you: {title}', 'We hebben een verzoek voor je: {title}'),
+    action_submitted: tri('Megkaptuk a válaszodat: {title}', 'We received your answer: {title}', 'We hebben je antwoord ontvangen: {title}'),
+    action_under_review: tri('Átnézzük a válaszodat: {title}', 'We are reviewing your answer: {title}', 'We beoordelen je antwoord: {title}'),
+    action_changes_requested: tri('Módosítást kérünk: {title}', 'We ask for changes: {title}', 'We vragen om aanpassingen: {title}'),
+    action_accepted: tri('Elfogadtuk a válaszodat: {title}', 'We accepted your answer: {title}', 'We hebben je antwoord geaccepteerd: {title}'),
+    action_cancelled: tri('Erre már nincs szükség: {title}', 'This is no longer needed: {title}', 'Dit is niet meer nodig: {title}'),
+    taskUnknown: tri('egy feladat', 'a task', 'een taak'),
+  },
+}

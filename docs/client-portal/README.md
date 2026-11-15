@@ -30,7 +30,7 @@ A private workspace where an invited customer signs in (with a link sent to thei
 
 ## What a customer sees
 
-An overview (counts that come from real projects, what waits for them, recent activity, upcoming milestones and bookings), **Projects** (status, dates, the next milestone, "2 of 5 milestones done": a count of real milestones, **never an invented percentage**), one project (status in words, milestones, the timeline of what happened, documents), **Quote requests** (status, the quotes sent, the accepted one; a button opens the existing secure quote page), **Bookings** (the existing booking page behind a button), **Documents** (an honest empty state: files cannot be shared yet, [DOCUMENTS.md](DOCUMENTS.md)) and **Account** (details, change of address, devices, sign-out everywhere else, a request to delete the account).
+An overview (counts that come from real projects, what waits for them, recent activity, upcoming milestones and bookings), **Projects** (status, dates, the next milestone, "2 of 5 milestones done" and, since PROMPT 26, a percentage that is **counted from the real tasks or milestones** (and an honest "nothing to measure yet" when there are none), never an invented one: [../project-management/](../project-management/README.md)), one project (status in words, milestones, the timeline of what happened, documents), **Quote requests** (status, the quotes sent, the accepted one; a button opens the existing secure quote page), **Bookings** (the existing booking page behind a button), **Documents** (an honest empty state: files cannot be shared yet, [DOCUMENTS.md](DOCUMENTS.md)) and **Account** (details, change of address, devices, sign-out everywhere else, a request to delete the account).
 
 ## The documents
 
@@ -68,4 +68,4 @@ node tools/e2e/portal-journey.cjs --base=http://127.0.0.1:8801 --mail=<mail fold
 
 ## What this does **not** do (PROMPT 26 and the owner's decisions)
 
-No file delivery, no messages between customer and owner, no invoices or payments, no approval workflow for deliverables, no tasks, no time tracking, no workflow engine behind the status list. A project's status list is the documented model in [ARCHITECTURE.md](ARCHITECTURE.md); PROMPT 26 (project management and timeline) extends it. No blog.
+No file delivery, no messages between customer and owner, no invoices or payments, no time tracking. **PROMPT 26 added** tasks, milestones with dependencies, requests the customer answers (with the owner's review), a schedule and progress: see [../project-management/](../project-management/README.md). A project's status list is still the documented model in [ARCHITECTURE.md](ARCHITECTURE.md). No blog.

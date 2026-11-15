@@ -52,6 +52,17 @@ export function Load<T>({ state, onRetry, heading = false, children }: { state: 
 
 type Tone = 'attention' | 'active' | 'done' | 'muted'
 const TONES: Record<string, Tone> = {
+  // A task's statuses and a request's (PROMPT 26); the project's own are below. `waiting_customer` and `completed` mean the same in all of them.
+  backlog: 'muted',
+  planned: 'muted',
+  in_progress: 'active',
+  in_review: 'active',
+  blocked: 'muted',
+  not_started: 'attention',
+  changes_requested: 'attention',
+  submitted: 'active',
+  under_review: 'active',
+  accepted: 'done',
   waiting_customer: 'attention',
   awaiting_start: 'muted',
   discovery: 'active',
@@ -66,8 +77,8 @@ const TONES: Record<string, Tone> = {
 }
 
 /** A status as a word with a mark: never colour alone. */
-export function StatusBadge({ status, label }: { status: string; label: string }) {
-  const tone = TONES[status] ?? 'muted'
+export function StatusBadge({ status, label, tone: given }: { status: string; label: string; /** Said by the caller when the same word means something else here. */ tone?: Tone }) {
+  const tone = given ?? TONES[status] ?? 'muted'
   return (
     <span className={styles.badge} data-tone={tone}>
       <span className={styles.badgeMark} aria-hidden="true">

@@ -108,6 +108,8 @@ It does **not**, by itself. Accepting a quote (the existing, unchanged workflow)
 
 The migration cannot be "un-applied" by the runner (the project's migrations are forward-only, and a database newer than the code refuses to start). To take the portal out: restore a backup taken before migration 0012, or (the owner's decision, after a backup) run, in a SQLite shell, `DROP TABLE client_documents; DROP TABLE client_project_notes; DROP TABLE client_project_events; DROP TABLE client_milestones; DROP TABLE client_projects; DROP TABLE customer_links; DROP TABLE customer_sessions; DROP TABLE customer_auth_tokens; DROP TABLE customer_auth_requests; DROP TABLE customer_audit_events; DROP TABLE customers;` and delete the row for version 12 from `schema_migrations`; the e-mail log keeps its rows (the widened CHECK is harmless). Nothing else depends on these tables.
 
-## 9. What PROMPT 26 can extend without a rewrite
+## 9. What PROMPT 26 extended (done) and what it can still extend
+
+> PROMPT 26 used exactly these seams: migration 0013 rebuilt `client_project_events` (new types, visibility) and `email_deliveries`, extended `client_milestones`, added the task / request tables, and the portal's timeline now filters by visibility. See [../project-management/ARCHITECTURE.md](../project-management/ARCHITECTURE.md).
 
 The status list and transitions (`model.ts`), the event types (a rebuild of `client_project_events`, as the project already does elsewhere), the `client_milestones` table (add owners, dependencies, weights), `client_documents` (the storage interface exists), the customer's timeline (it reads one table), the e-mail kinds (the once-only index lists them), and the permissions (`clients:projects`).

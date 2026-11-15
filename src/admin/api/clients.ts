@@ -5,7 +5,10 @@ import { del, get, patch, post, put, type Envelope, type RequestOptions } from '
 export type ClientStatus = 'invited' | 'active' | 'disabled'
 export type ProjectStatus = 'awaiting_start' | 'discovery' | 'planning' | 'design' | 'development' | 'review' | 'waiting_customer' | 'finalization' | 'completed' | 'on_hold' | 'cancelled'
 export type ProjectCategory = 'website' | 'webapp' | 'ui' | 'integrations' | 'ai' | 'other'
-export type ProjectEventType = 'created' | 'status_changed' | 'dates_changed' | 'milestone_added' | 'milestone_completed' | 'document_published' | 'feedback_requested' | 'update_posted'
+export type ProjectEventType =
+  | 'created' | 'status_changed' | 'dates_changed' | 'milestone_added' | 'milestone_completed' | 'document_published' | 'feedback_requested' | 'update_posted'
+  | 'task_created' | 'task_edited' | 'task_status_changed' | 'task_completed' | 'task_cancelled' | 'task_assigned' | 'dependency_added' | 'dependency_removed'
+  | 'milestone_status_changed' | 'action_assigned' | 'action_submitted' | 'action_under_review' | 'action_changes_requested' | 'action_accepted' | 'action_cancelled' | 'note_added'
 
 export const PROJECT_STATUSES: readonly ProjectStatus[] = ['awaiting_start', 'discovery', 'planning', 'design', 'development', 'review', 'waiting_customer', 'finalization', 'completed', 'on_hold', 'cancelled']
 export const PROJECT_CATEGORIES: readonly ProjectCategory[] = ['website', 'webapp', 'ui', 'integrations', 'ai', 'other']
@@ -77,8 +80,8 @@ export interface ProjectView {
   customer: { id: string; email: string; name: string | null; language: 'hu' | 'en' | 'nl'; status: ClientStatus }
   quoteRequestReference: string | null
   allowedStatuses: ProjectStatus[]
-  milestones: Array<{ id: string; title: string; due_on: string | null; completed_at: string | null }>
-  events: Array<{ id: number; event_type: ProjectEventType; from_status: ProjectStatus | null; to_status: ProjectStatus | null; note: string | null; created_at: string; adminEmail: string | null }>
+  milestones: Array<{ id: string; title: string; description: string | null; status: string; customer_visible: 0 | 1; due_on: string | null; completed_at: string | null }>
+  events: Array<{ id: number; event_type: ProjectEventType; from_status: string | null; to_status: string | null; note: string | null; subject: string | null; visibility: 'customer' | 'internal'; created_at: string; adminEmail: string | null }>
   notes: Array<{ id: string; body: string; createdAt: string; authorEmail: string | null }>
   documents: Array<{ id: string; title: string; kind: string; published_at: string | null }>
   documentsCanBePublished: false

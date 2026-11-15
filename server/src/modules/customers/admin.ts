@@ -5,6 +5,7 @@ import { Fields, isEmail } from '../../lib/validate.ts'
 import { cleanLine } from '../../lib/text.ts'
 import { iso } from '../../lib/time.ts'
 import { requirePermission } from '../auth/permissions.ts'
+import { MILESTONE_STATUSES } from '../projectwork/model.ts'
 import { normalizeEmail } from '../auth/users.ts'
 import { audit } from '../system/audit.ts'
 import { auditOf, findCustomerByEmail, getCustomer, insertCustomer, isDuplicate, portalSettings, recordAudit, savePortalSettings, type AuditView } from './accounts.ts'
@@ -40,7 +41,7 @@ import { clientSessionsOf, revokeClientSessions, type ClientSessionView } from '
  */
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/
-function validDay(value: string): boolean {
+export function validDay(value: string): boolean {
   if (!DAY.test(value)) return false
   const date = new Date(`${value}T00:00:00.000Z`)
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
@@ -352,19 +353,28 @@ export function addProjectMilestone(app: AppContext, session: SessionInfo | null
   const who = requirePermission(session, 'clients:projects')
   const fields = new Fields(body)
   const title = fields.text('title', { max: 120, required: true })
+  const description = fields.text('description', { max: 1000, multiline: true })
   const dueOn = day(fields, 'dueOn')
+  const customerVisible = 'customerVisible' in body ? body.customerVisible : undefined
+  if (customerVisible !== undefined && typeof customerVisible !== 'boolean') fields.fail('customerVisible', 'invalid')
   fields.done()
-  return addMilestone(app, who.userId, id, { title: title!, dueOn })
+  return addMilestone(app, who.userId, id, { title: title!, dueOn, description, customerVisible: customerVisible as boolean | undefined })
 }
 
 export function editProjectMilestone(app: AppContext, session: SessionInfo | null, id: string, milestoneId: string, body: Record<string, unknown>): MilestoneRow {
   const who = requirePermission(session, 'clients:projects')
-  const known = ['title', 'dueOn', 'done']
+  const known = ['title', 'description', 'dueOn', 'status', 'customerVisible', 'done']
   if (Object.keys(body).length === 0 || !Object.keys(body).every((key) => known.includes(key))) throw validationFailed({ body: 'invalid' })
   const fields = new Fields(body)
   const changes: Parameters<typeof updateMilestone>[4] = {}
   if ('title' in body) changes.title = fields.text('title', { max: 120, required: true }) ?? undefined
+  if ('description' in body) changes.description = fields.text('description', { max: 1000, multiline: true })
   if ('dueOn' in body) changes.dueOn = day(fields, 'dueOn')
+  if ('status' in body) changes.status = fields.oneOf('status', MILESTONE_STATUSES, { required: true }) ?? undefined
+  if ('customerVisible' in body) {
+    if (typeof body.customerVisible !== 'boolean') fields.fail('customerVisible', 'invalid')
+    else changes.customerVisible = body.customerVisible
+  }
   if ('done' in body) {
     if (typeof body.done !== 'boolean') fields.fail('done', 'invalid')
     else changes.done = body.done

@@ -62,7 +62,7 @@ export function ClientProjectPage() {
 
   return (
     <>
-      <PageHeader title={project.name} lead={<span className={styles.mono}>{project.reference}</span>} back={{ to: `/clients/${project.customer_id}`, label: `${p.back}: ${data.customer.name || data.customer.email}` }} />
+      <PageHeader title={project.name} lead={<span className={styles.mono}>{project.reference}</span>} back={{ to: `/clients/${project.customer_id}`, label: `${p.back}: ${data.customer.name || data.customer.email}` }} actions={<AdminButton variant="primary" to={`/client-projects/${project.id}/work`}>{t.work.open}</AdminButton>} />
       <div className={styles.stackLg}>
         <DetailPanel title={p.statusTitle}>
           <p>
@@ -114,6 +114,7 @@ export function ClientProjectPage() {
                   <span>
                     {entry.completed_at ? '✓ ' : '○ '}
                     {entry.title}
+                    {entry.customer_visible === 0 && <span className={styles.muted}> · {t.work.milestones.hidden}</span>}
                     {entry.due_on && <span className={styles.muted}> · {entry.due_on}</span>}
                   </span>
                   <span className={styles.row}>
@@ -215,8 +216,10 @@ export function ClientProjectPage() {
               <li key={event.id} className={styles.timelineItem}>
                 <span className={styles.timelineWhen}>{formatDateTime(event.created_at, language)}</span>
                 <span>
-                  {p.eventTypes[event.event_type]}
-                  {event.to_status ? ` · ${p.statuses[event.to_status]}` : ''}
+                  {t.work.events[event.event_type]}
+                  {event.subject ? ` · ${event.subject}` : ''}
+                  {event.to_status && event.event_type === 'status_changed' ? ` · ${p.statuses[event.to_status as keyof typeof p.statuses]}` : ''}
+                  {event.visibility === 'internal' ? <span className={cx(styles.muted, styles.small)}> · {t.work.task.internal}</span> : null}
                   {event.adminEmail ? <span className={cx(styles.muted, styles.small)}> · {event.adminEmail}</span> : null}
                   {event.note ? <span className={page.messageText}>{event.note}</span> : null}
                 </span>

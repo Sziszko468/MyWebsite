@@ -272,7 +272,8 @@ async function main() {
       await page.getByRole('heading', { name: 'Bakery website', level: 2 }).waitFor({ timeout: 10000 })
       const text = await page.locator('body').innerText()
       for (const needle of [state.alex.reference, 'Waiting for you', 'First version online', '1 of 4 milestones done']) expect(text.includes(needle), `missing "${needle}"`)
-      expect(!/\d+\s?%/.test(text), 'a percentage is shown')
+      // PROMPT 26: a percentage is allowed, but only the one counted from the real records (1 of 4 milestones is 25%); no other number is ever shown.
+      expect((text.match(/\d+\s?%/g) ?? []).every((percent) => percent.replace(/\s/g, '') === '25%'), 'a percentage that is not the count is shown')
       await shot(page, 'c-projects')
       await scan(page, 'projects')
     })

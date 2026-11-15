@@ -17,16 +17,18 @@ import {
   fetchRequests,
   openBooking,
   openRequest,
-  type ProjectEventType,
   type ProjectSummary,
 } from '../../portal/api'
-import { failureText, usePortalText, type PortalWords } from '../../portal/text'
+import { failureText, usePortalText } from '../../portal/text'
 import { useLoad, useSessionData } from '../../portal/usePortal'
 import { fill, formatDay, formatMoment } from '../../utils/format'
 import { Button } from '../Button/Button'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
 import styles from './Portal.module.scss'
 import { Load, PageHeader, Progress, StatusBadge } from './ui'
+import work from './Work.module.scss'
+import { eventText } from './eventText'
+import { ProjectWork } from './WorkViews'
 
 /** What the customer reads: overview, projects, quote requests, bookings, documents. Every number and every line is a record the server returned for THIS customer. */
 
@@ -36,20 +38,6 @@ function useWords() {
   const quotes = localize(quoteText, lang)
   const booking = localize(consultationText, lang)
   return { lang, words, quotes, booking }
-}
-
-const eventLine = (type: ProjectEventType, words: PortalWords, values: { status?: string; milestone: string | null }): string => {
-  const title = values.milestone ?? words.events.milestoneUnknown
-  switch (type) {
-    case 'status_changed':
-      return fill(words.events.status_changed, { status: values.status ?? '' })
-    case 'milestone_added':
-      return fill(words.events.milestone_added, { title })
-    case 'milestone_completed':
-      return fill(words.events.milestone_completed, { title })
-    default:
-      return words.events[type]
-  }
 }
 
 function Notice() {
@@ -103,6 +91,7 @@ function ProjectCard({ project }: { project: ProjectSummary }) {
         </div>
       </dl>
       {project.milestones && <Progress done={project.milestones.done} total={project.milestones.total} label={fill(words.projects.milestonesDone, project.milestones)} />}
+      {project.progress.percent !== null && <p className={styles.progressText}>{fill(words.work.progress.percent, { percent: project.progress.percent })}</p>}
     </li>
   )
 }
@@ -164,6 +153,30 @@ export function OverviewView() {
                 </section>
               )}
 
+              {data.needsYou.length > 0 && (
+                <section className={styles.section} aria-labelledby="needs-title">
+                  <h2 id="needs-title" className={styles.sectionTitle}>
+                    {words.work.overview.needsYouTitle}
+                  </h2>
+                  <p className={styles.muted}>{words.work.overview.needsYouBody}</p>
+                  <ul className={styles.list}>
+                    {data.needsYou.map((entry) => (
+                      <li key={`${entry.project.reference}-${entry.task.reference}`}>
+                        <LocalizedLink to={`/client-portal/projects/${entry.project.reference}/tasks/${entry.task.reference}`} className={styles.rowLink}>
+                          <span>
+                            {entry.task.title} <span className={styles.timelineMeta}>· {entry.project.name}</span>
+                          </span>
+                          <span className={work.taskMeta}>
+                            {entry.dueOn ? fill(words.work.tasks.due, { date: formatDay(entry.dueOn, lang) }) : words.work.action.status[entry.status]}
+                            {entry.overdue ? <strong className={work.late}> · {words.work.overview.overdue}</strong> : null}
+                          </span>
+                        </LocalizedLink>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
               {data.awaitingYou.length > 0 && (
                 <section className={styles.section} aria-labelledby="awaiting-title">
                   <h2 id="awaiting-title" className={styles.sectionTitle}>
@@ -195,7 +208,7 @@ export function OverviewView() {
                       <ol className={styles.timeline}>
                         {data.activity.map((entry) => (
                           <li key={entry.id}>
-                            <p className={styles.timelineLine}>{eventLine(entry.type, words, { status: entry.toStatus ? words.status[entry.toStatus] : undefined, milestone: entry.milestone })}</p>
+                            <p className={styles.timelineLine}>{eventText(entry, words)}</p>
                             <p className={styles.timelineMeta}>
                               <LocalizedLink to={`/client-portal/projects/${entry.project.reference}`}>{entry.project.name}</LocalizedLink> · {formatMoment(entry.at, lang)}
                             </p>
@@ -215,8 +228,10 @@ export function OverviewView() {
                     ) : (
                       <ul className={styles.list}>
                         {data.upcoming.map((milestone) => (
-                          <li key={`${milestone.project.reference}-${milestone.title}`} className={styles.milestoneRow}>
-                            <span>{milestone.title}</span>
+                          <li key={`${milestone.kind}-${milestone.project.reference}-${milestone.title}`} className={styles.milestoneRow}>
+                            <span>
+                              <span className={work.scheduleKind}>{milestone.kind === 'task' ? words.work.overview.taskKind : words.work.overview.milestoneKind}</span> {milestone.title}
+                            </span>
                             <span className={styles.timelineMeta}>
                               {milestone.project.name}
                               {milestone.dueOn ? ` · ${formatDay(milestone.dueOn, lang)}` : ''}
@@ -332,6 +347,8 @@ export function ProjectView() {
               )}
             </dl>
 
+            <ProjectWork reference={reference} milestones={project.milestoneList} />
+
             <section className={styles.section} aria-labelledby="milestones-title">
               <h2 id="milestones-title" className={styles.sectionTitle}>
                 {words.project.milestones}
@@ -341,16 +358,18 @@ export function ProjectView() {
                 <p className={styles.muted}>{words.project.noMilestones}</p>
               ) : (
                 <ol className={styles.milestones}>
-                  {project.milestoneList.map((milestone, index) => (
-                    <li key={index} data-done={milestone.completedAt !== null}>
+                  {project.milestoneList.map((milestone) => (
+                    <li key={milestone.id} data-done={milestone.completedAt !== null}>
                       <span className={styles.milestoneMark} aria-hidden="true">
                         {milestone.completedAt ? '✓' : '○'}
                       </span>
                       <span>
                         {milestone.title}
                         <span className={styles.timelineMeta}>
-                          {milestone.completedAt ? fill(words.project.doneOn, { date: formatMoment(milestone.completedAt, lang) }) : milestone.dueOn ? fill(words.project.due, { date: formatDay(milestone.dueOn, lang) }) : ''}
+                          {words.work.milestones.status[milestone.status]}
+                          {milestone.completedAt ? ` · ${fill(words.project.doneOn, { date: formatMoment(milestone.completedAt, lang) })}` : milestone.dueOn ? ` · ${fill(words.project.due, { date: formatDay(milestone.dueOn, lang) })}` : ''}
                         </span>
+                        {milestone.description && <span className={styles.timelineNote}>{milestone.description}</span>}
                       </span>
                     </li>
                   ))}
@@ -365,7 +384,7 @@ export function ProjectView() {
               <ol className={styles.timeline}>
                 {project.timeline.map((entry) => (
                   <li key={entry.id}>
-                    <p className={styles.timelineLine}>{eventLine(entry.type, words, { status: entry.toStatus ? words.status[entry.toStatus] : undefined, milestone: entry.milestone })}</p>
+                    <p className={styles.timelineLine}>{eventText(entry, words)}</p>
                     <p className={styles.timelineMeta}>{formatMoment(entry.at, lang)}</p>
                     {entry.note && <p className={styles.timelineNote}>{entry.note}</p>}
                   </li>

@@ -72,7 +72,7 @@ export type DeliveryStatus = 'pending' | 'sending' | 'accepted' | 'delivered' | 
 export interface DeliveryRow {
   id: string
   kind: EmailKind
-  related_type: 'inquiry' | 'quote_request' | 'system' | 'quote' | 'quote_revision' | 'email_delivery' | 'booking_event' | 'client_auth' | 'client_audit' | 'client_project_event' | 'client_document'
+  related_type: 'inquiry' | 'quote_request' | 'system' | 'quote' | 'quote_revision' | 'email_delivery' | 'booking_event' | 'client_auth' | 'client_audit' | 'client_project_event' | 'client_document' | 'client_action_reminder'
   related_id: string
   recipient: string
   language: 'hu' | 'en' | 'nl'
@@ -505,7 +505,7 @@ export class Notifier {
   private customerAddress(row: DeliveryRow): string | null {
     if (row.kind === 'inquiry_received') return getInquiry(this.deps.db, row.related_id)?.email ?? null
     if (row.related_type === 'booking_event') return bookingCustomerAddress(this.deps, row.related_id)
-    if (row.related_type === 'client_audit') return clientCustomerAddress(this.deps, row.related_id)
+    if (row.related_type === 'client_audit' || row.related_type === 'client_project_event') return clientCustomerAddress(this.deps, row.related_type, row.related_id)
     return this.requestOf(row)?.email ?? null
   }
 
@@ -546,7 +546,7 @@ export class Notifier {
       const domain = from.replace(/^.*@/, '').replace(/[^A-Za-z0-9.-]/g, '') || 'localhost'
       // The owner's notification can be answered directly (Reply-To is the visitor, never the sender: the sender is the verified
       // address). A customer's goes back to the PUBLIC contact address, never to the owner's private inbox (`NOTIFY_TO`).
-      const toOwner = row.kind === 'inquiry_received' || row.kind === 'quote_received' || row.kind === 'quote_accepted_admin' || row.kind === 'quote_declined_admin' || row.kind === 'revision_requested_admin' || row.kind === 'booking_new_admin' || row.kind === 'booking_change_requested_admin' || row.kind === 'booking_cancelled_admin' || row.kind === 'client_deletion_requested_admin'
+      const toOwner = row.kind === 'inquiry_received' || row.kind === 'quote_received' || row.kind === 'quote_accepted_admin' || row.kind === 'quote_declined_admin' || row.kind === 'revision_requested_admin' || row.kind === 'booking_new_admin' || row.kind === 'booking_change_requested_admin' || row.kind === 'booking_cancelled_admin' || row.kind === 'client_deletion_requested_admin' || row.kind === 'client_action_submitted_admin'
       const customerReply = config.email.replyTo ?? from
       // The alert about a failed delivery is not something to answer to the customer whose message failed: it has no Reply-To.
       const replyTo = row.kind === 'test' || row.kind === 'delivery_failed_admin' ? null : toOwner ? this.customerAddress(row) : customerReply
