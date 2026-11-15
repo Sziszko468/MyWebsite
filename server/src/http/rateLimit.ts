@@ -68,6 +68,10 @@ export const LIMITS = {
   tokenMiss: { windowMs: 15 * MINUTE, max: 20 },
   /** A consultation booking: a person books once or twice; a script books until it is stopped. */
   booking: { windowMs: 15 * MINUTE, max: 6 },
+  /** Asking for a sign-in link and opening one: a person asks once or twice; a script asks for every address it knows. */
+  portalAuth: { windowMs: 15 * MINUTE, max: 12 },
+  /** What a signed-in customer does in the portal. */
+  portal: { windowMs: MINUTE, max: 180 },
   /** The e-mail provider's webhook: a handful of events per message, far below this, and a flood of unsigned ones is refused cheaply. */
   webhook: { windowMs: MINUTE, max: 240 },
 } as const
@@ -81,7 +85,7 @@ export class Limiters {
   constructor(clock: Clock, enabled: boolean) {
     this.enabled = enabled
     const make = (name: LimitName) => new RateLimiter(clock, LIMITS[name].windowMs, LIMITS[name].max)
-    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), customer: make('customer'), booking: make('booking'), tokenMiss: make('tokenMiss'), webhook: make('webhook') }
+    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), customer: make('customer'), booking: make('booking'), portalAuth: make('portalAuth'), portal: make('portal'), tokenMiss: make('tokenMiss'), webhook: make('webhook') }
   }
 
   /** Counts one request against a limit and throws the 429 when it is over. */

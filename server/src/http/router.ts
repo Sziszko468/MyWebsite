@@ -4,9 +4,9 @@ import type { LimitName } from './rateLimit.ts'
 /**
  * A router small enough to read in one go: a route is a method and a path pattern with `:name` segments.
  * `area` says which family the route belongs to, which decides its headers and its CORS rules (app.ts): the
- * public JSON API is open to the website's origin, the admin is same-origin only.
+ * public JSON API is open to the website's origin, the admin and the client portal's API (`/api/portal/*`) are same-origin only.
  */
-export type Area = 'api' | 'admin' | 'static'
+export type Area = 'api' | 'admin' | 'portal' | 'static'
 
 export interface RouteDef {
   method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
@@ -17,6 +17,8 @@ export interface RouteDef {
   limit?: LimitName
   /** A signed-in administrator is required; the permission (modules/auth/permissions.ts) is checked by the handler's module. */
   auth?: boolean
+  /** A signed-in customer is required (client portal): the identity comes from the customer cookie, never from the request. */
+  customerAuth?: boolean
 }
 
 interface Compiled {

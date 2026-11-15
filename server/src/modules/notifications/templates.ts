@@ -39,6 +39,16 @@ export type EmailKind =
   | 'booking_change_declined'
   | 'booking_cancelled'
   | 'booking_cancelled_admin'
+  // PROMPT 25: the client portal (clientTemplates.ts)
+  | 'client_sign_in'
+  | 'client_activate'
+  | 'client_register'
+  | 'client_email_change'
+  | 'client_security_notice'
+  | 'client_project_created'
+  | 'client_project_status'
+  | 'client_document_published'
+  | 'client_deletion_requested_admin'
 
 export interface Rendered {
   subject: string

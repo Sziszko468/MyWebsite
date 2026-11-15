@@ -7,11 +7,12 @@ import { forbidden, unauthorized } from '../../http/errors.ts'
  * business functions (modules/*\/admin.ts), not in the HTML, so no route can forget it.
  */
 export type Role = 'admin' | 'editor'
-export type Permission = 'requests:read' | 'requests:write' | 'requests:delete' | 'catalog:write' | 'catalog:delete' | 'content:write' | 'content:delete' | 'system:read' | 'system:write'
+export type Permission = 'requests:read' | 'requests:write' | 'requests:delete' | 'catalog:write' | 'catalog:delete' | 'content:write' | 'content:delete' | 'system:read' | 'system:write' | 'clients:read' | 'clients:projects' | 'clients:write'
 
 const GRANTS: Record<Role, readonly Permission[]> = {
-  admin: ['requests:read', 'requests:write', 'requests:delete', 'catalog:write', 'catalog:delete', 'content:write', 'content:delete', 'system:read', 'system:write'],
-  editor: ['requests:read', 'requests:write', 'catalog:write', 'content:write'],
+  admin: ['requests:read', 'requests:write', 'requests:delete', 'catalog:write', 'catalog:delete', 'content:write', 'content:delete', 'system:read', 'system:write', 'clients:read', 'clients:projects', 'clients:write'],
+  // An editor reads customers and works on their projects (a status, a milestone, an update); inviting, switching off, signing out and linking records are the administrator's.
+  editor: ['requests:read', 'requests:write', 'catalog:write', 'content:write', 'clients:read', 'clients:projects'],
 }
 
 export const can = (role: Role, permission: Permission): boolean => GRANTS[role].includes(permission)

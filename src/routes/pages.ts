@@ -31,7 +31,9 @@ export type AiPageId = 'control-room'
 export type CustomerPageId = 'customer-quote' | 'customer-request'
 /** The consultation booking (PROMPT 24): the public page, and the customer's own booking page behind a secret link. */
 export type ConsultationPageId = 'consultation' | 'customer-booking'
-export type PageId = NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | 'designSystem'
+/** The client portal (PROMPT 25): one private page for every address below `/client-portal`. */
+export type PortalPageId = 'client-portal'
+export type PageId = PortalPageId | NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | 'designSystem'
 
 export interface PageDef<Id extends PageId = PageId> {
   id: Id
@@ -147,18 +149,27 @@ export const CONSULTATION_PAGES: readonly PageDef<ConsultationPageId>[] = [
 ]
 
 /**
- * Whether a page is a customer's private page: it is reached only through a secret in its address (a quotation, a request's status, a consultation booking).
- * Such a page is told to crawlers as `noindex, nofollow` (not just "do not list it"): nothing on it is for a search engine to read or follow.
+ * The client portal: a signed-in customer's own workspace. The build ships ONE quiet shell for it (registered at `/client-portal`, prerendered like the customer's
+ * other private pages) and every address below it, a project or the page a sign-in link opens, is that same shell; the application asks the server who is signed in.
+ * It exists in every language, is never indexed and is in no menu.
  */
-export const isPrivatePage = (page: PageDef | undefined): boolean => page !== undefined && (page.id === 'customer-quote' || page.id === 'customer-request' || page.id === 'customer-booking')
+export const PORTAL_PAGES: readonly PageDef<PortalPageId>[] = [page<PortalPageId>('client-portal', '/client-portal', LANGUAGES, false)]
+
+/**
+ * Whether a page is a customer's private page: it is reached only through a secret in its address (a quotation, a request's status, a consultation booking) or behind
+ * a sign-in (the client portal). Such a page is told to crawlers as `noindex, nofollow` (not just "do not list it"): nothing on it is for a search engine to read or follow.
+ */
+export const isPrivatePage = (page: PageDef | undefined): boolean => page !== undefined && (page.id === 'customer-quote' || page.id === 'customer-request' || page.id === 'customer-booking' || page.id === 'client-portal')
 
 /** The secret part of a customer page's address: 256 random bits as base64url are 43 characters; a little room either way. */
 const CUSTOMER_PATH = /^\/(quote|request|consultation\/booking)\/[A-Za-z0-9_-]{20,64}$/
+/** Every address below the client portal is the portal's one page (a project, an account page, the page a sign-in link opens). */
+const PORTAL_PATH = /^\/client-portal\/[A-Za-z0-9_\-/]+$/
 
 /** Dev-only reference page; absent from production builds. */
 const DEV_PAGES: readonly PageDef[] = import.meta.env.DEV ? [page('designSystem', '/design-system', LANGUAGES, false)] : []
 
-export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...CUSTOMER_PAGES, ...CONSULTATION_PAGES, ...DEV_PAGES]
+export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...CUSTOMER_PAGES, ...CONSULTATION_PAGES, ...PORTAL_PAGES, ...DEV_PAGES]
 
 function normalize(path: string): string {
   const trimmed = path.replace(/\/+$/, '')
@@ -191,6 +202,7 @@ export function resolvePage(path: string): PageDef | undefined {
   // A customer's private page: the page is the registered one, whatever the secret in the address is.
   const customer = CUSTOMER_PATH.exec(wanted)
   if (customer) return findPage(`/${customer[1]}`)
+  if (PORTAL_PATH.test(wanted)) return findPage('/client-portal')
   if (PREVIEW_LINK_PATH.test(wanted)) return LINK_PREVIEW_PAGE
   const preview = PREVIEW_PATH.exec(wanted)
   if (preview) {

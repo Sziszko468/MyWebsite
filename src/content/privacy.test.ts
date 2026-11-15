@@ -335,3 +335,55 @@ describe('the privacy notice and the consultation booking', () => {
     expect(privacyMeta.description.nl).toMatch(/adviesgesprek/)
   })
 })
+
+describe('the privacy notice and the client portal (PROMPT 25)', () => {
+  const read = (file: string) => readFileSync(join(process.cwd(), file), 'utf8')
+  const portalText = (lang: Language) => privacyText.portal.items.map((item) => item[lang]).join(' ')
+
+  it('names the portal’s sign-in cookie exactly as the server sets it, and says it is used for nothing else', () => {
+    const server = read('server/src/modules/customers/sessions.ts')
+    expect(server).toContain("'__Host-cc_client' : 'cc_client'")
+    for (const lang of LANGUAGES) {
+      expect(privacyText.cookiesPortal[lang], lang).toContain('cc_client')
+      expect(privacyText.cookiesPortal[lang].length).toBeGreaterThan(150)
+    }
+    // The website's own code still sets exactly one cookie; the notice says the second one is the server's.
+    expect(storedItems.filter((item) => item.where === 'cookie').map((item) => item.name)).toEqual(['cc_lang'])
+  })
+
+  it('says only what the code does: no password, no network address in the history, no file shared, no deletion by age', () => {
+    const migration = read('server/src/db/migrations/0012_client_portal.sql')
+    const customers = /CREATE TABLE customers \([\s\S]*?\n\);/.exec(migration)?.[0] ?? ''
+    expect(customers).not.toMatch(/password/i)
+    const audit = /CREATE TABLE customer_audit_events \([\s\S]*?\n\);/.exec(migration)?.[0] ?? ''
+    // No column of the history is an address, a name, a token or a network address (the event kinds are words, and may name an e-mail change).
+    expect(audit).not.toMatch(/^\s+(ip|ip_hash|email|name|address|token)\w*\s+TEXT/im)
+    expect(migration).toContain('CHECK (published_at IS NULL OR storage_key IS NOT NULL)')
+    const retention = read('server/src/modules/system/maintenance.ts')
+    expect(retention).not.toMatch(/DELETE FROM customers/)
+    expect(portalText('en')).toMatch(/no password/)
+    expect(portalText('en')).toMatch(/stores no file shared with you/)
+    expect(portalText('en')).toMatch(/Time does not delete an account/)
+  })
+
+  it('gives no retention period, legal basis, processor, guarantee or encryption claim, in any language', () => {
+    for (const lang of LANGUAGES) {
+      const text = `${portalText(lang)} ${privacyText.cookiesPortal[lang]}`
+      expect(text, lang).not.toMatch(/\d+\s*(days?|weeks?|months?|years?|nap|hét|hónap|év|dagen|weken|maanden|jaar)/i)
+      expect(text, lang).not.toMatch(/GDPR|AVG|legal basis|jogalap|rechtsgrond|guarantee|garantál|garandeer|encrypt|titkosít|versleutel|certif|SLA/i)
+      expect(text, lang).not.toMatch(/Resend|Google|Brevo|Mailgun|SendGrid|Postmark/)
+    }
+  })
+
+  it('never says a message arrived because the provider accepted it', () => {
+    expect(portalText('en')).toMatch(/does not mean the email reached your mailbox/)
+    expect(portalText('hu')).toMatch(/nem azt jelenti, hogy a levél megérkezett/)
+    expect(portalText('nl')).toMatch(/betekent niet dat de e-mail in je mailbox is aangekomen/)
+  })
+
+  it('is on the privacy page in every language', () => {
+    const page = read('src/pages/PrivacyPage.tsx')
+    expect(page).toContain('text.portal.items.map')
+    expect(page).toContain('text.cookiesPortal[lang]')
+  })
+})

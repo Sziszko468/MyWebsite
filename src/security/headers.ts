@@ -80,6 +80,8 @@ export function buildHeadersFile(input: HeaderInput): string {
     ...['quote', 'request'].flatMap((page) =>
       ['hu', 'en', 'nl'].map((lang) => block(`/${lang}/${page}/*`, { 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })),
     ),
+    // The client portal (`/hu/client-portal/…`, PROMPT 25) holds a signed-in customer's own pages: never cached, never indexed, never carried to another site.
+    ...['hu', 'en', 'nl'].map((lang) => block(`/${lang}/client-portal/*`, { 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })),
     // A customer's booking page (`/hu/consultation/booking/<secret>`, PROMPT 24) is private in exactly the same way.
     ...['hu', 'en', 'nl'].map((lang) => block(`/${lang}/consultation/booking/*`, { 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })),
     // Built files carry a hash of their content in their name, so they never change under that name.

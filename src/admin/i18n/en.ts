@@ -5,11 +5,13 @@
  */
 import { cmsEn } from './cms'
 import { bookingEn } from './booking'
+import { clientsEn } from './clients'
 import { quotationEn } from './quotation'
 
 export const en = {
   quotation: quotationEn,
   booking: bookingEn,
+  clients: clientsEn,
   cms: cmsEn,
   app: {
     name: 'Administration',
@@ -40,6 +42,7 @@ export const en = {
     inquiries: 'Inquiries',
     quotes: 'Quote requests',
     bookings: 'Consultations',
+    clients: 'Customers',
     services: 'Services & packages',
     content: 'Website content',
     translations: 'Translations',
@@ -655,7 +658,7 @@ export const en = {
       empty: 'Nothing has been sent yet.',
       emptyBody: 'Messages appear here once something is queued.',
       emptyFiltered: 'No message has this state.',
-      kinds: { inquiry_received: 'New inquiry', quote_received: 'New quote request', inquiry_status: 'Inquiry status', quote_status: 'Quote request status', inquiry_confirmation: 'Inquiry confirmation', quote_confirmation: 'Quote request confirmation', test: 'Test message', quote_sent: 'Quotation', quote_revised: 'Revised quotation', quote_accepted: 'Acceptance (to the customer)', quote_accepted_admin: 'Acceptance (to you)', quote_declined: 'Decline (to the customer)', quote_declined_admin: 'Decline (to you)', revision_requested_admin: 'Change request (to you)', revision_received: 'Receipt for a change request (to the customer)', delivery_failed_admin: 'Delivery alert (to you)', booking_received: 'Booking request received', booking_confirmed: 'Booking confirmation (to the customer)', booking_new_admin: 'New booking (to you)', booking_change_received: 'Receipt for a request about a booking', booking_change_requested_admin: 'Request about a booking (to you)', booking_rescheduled: 'Booking moved (to the customer)', booking_proposal: 'Proposal of a new time', booking_change_declined: 'Request about a booking declined', booking_cancelled: 'Booking cancelled (to the customer)', booking_cancelled_admin: 'Booking cancelled (to you)' },
+      kinds: { inquiry_received: 'New inquiry', quote_received: 'New quote request', inquiry_status: 'Inquiry status', quote_status: 'Quote request status', inquiry_confirmation: 'Inquiry confirmation', quote_confirmation: 'Quote request confirmation', test: 'Test message', quote_sent: 'Quotation', quote_revised: 'Revised quotation', quote_accepted: 'Acceptance (to the customer)', quote_accepted_admin: 'Acceptance (to you)', quote_declined: 'Decline (to the customer)', quote_declined_admin: 'Decline (to you)', revision_requested_admin: 'Change request (to you)', revision_received: 'Receipt for a change request (to the customer)', delivery_failed_admin: 'Delivery alert (to you)', booking_received: 'Booking request received', booking_confirmed: 'Booking confirmation (to the customer)', booking_new_admin: 'New booking (to you)', booking_change_received: 'Receipt for a request about a booking', booking_change_requested_admin: 'Request about a booking (to you)', booking_rescheduled: 'Booking moved (to the customer)', booking_proposal: 'Proposal of a new time', booking_change_declined: 'Request about a booking declined', booking_cancelled: 'Booking cancelled (to the customer)', booking_cancelled_admin: 'Booking cancelled (to you)', client_sign_in: 'Sign-in link (to the customer)', client_activate: 'Invitation to the client portal', client_register: 'Confirm a registration', client_email_change: 'Confirm a new email address', client_security_notice: 'Security notice (to the customer)', client_project_created: 'New project (to the customer)', client_project_status: 'News about a project (to the customer)', client_document_published: 'New document (to the customer)', client_deletion_requested_admin: 'Account deletion request (to you)' },
       filter: 'Show',
       filters: { all: 'Every message', problem: 'Problems (failed, bounced, spam)', retrying: 'Waiting to retry', pending: 'Waiting', accepted: 'Sent', delivered: 'Delivered', bounced: 'Bounced', complained: 'Marked as spam', failed: 'Failed', cancelled: 'Cancelled' },
       retry: 'Send again',

@@ -42,11 +42,15 @@ export function sanitize(props: object): Record<string, string | number | boolea
 }
 
 /** The page path an event may carry: the secret in a customer's private address (a quotation, a request, a booking) never leaves the page. */
-export const publicPage = (rest: string): string => rest.replace(/^\/(quote|request)\/[^/]+/, '/$1').replace(/^\/consultation\/booking\/[^/]+/, '/consultation/booking')
+export const publicPage = (rest: string): string => rest.replace(/^\/(quote|request)\/[^/]+/, '/$1').replace(/^\/consultation\/booking\/[^/]+/, '/consultation/booking').replace(/^\/client-portal(\/.*)?$/, '/client-portal')
+
+/** The client portal is a customer's own, signed-in workspace: nothing that happens on it is measured, whatever a call site passes. */
+export const isPortalPath = (rest: string): boolean => /^\/client-portal(\/|$)/.test(rest)
 
 export function track<N extends EventName>(name: N, props: AnalyticsEvents[N]): void {
   if (!EVENT_NAMES.includes(name) || providers.size === 0 || !mayMeasure()) return
   const { lang, rest } = typeof window === 'undefined' ? { lang: null, rest: '/' } : splitLanguage(window.location.pathname)
+  if (isPortalPath(rest)) return
   const event: AnalyticsEvent = {
     name,
     props: sanitize(props),

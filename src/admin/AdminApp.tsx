@@ -9,6 +9,9 @@ import { useText } from './i18n'
 import { BookingDetailPage } from './pages/BookingDetailPage'
 import { BookingSetupPage } from './pages/BookingSetupPage'
 import { BookingsPage } from './pages/BookingsPage'
+import { ClientDetailPage } from './pages/ClientDetailPage'
+import { ClientProjectPage } from './pages/ClientProjectPage'
+import { ClientsPage } from './pages/ClientsPage'
 import { ContentPage } from './pages/ContentPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { FaqEditPage } from './pages/FaqEditPage'
@@ -96,6 +99,9 @@ function Gate() {
           <Route path="bookings" element={<BookingsPage />} />
           <Route path="bookings/setup" element={<BookingSetupPage />} />
           <Route path="bookings/:id" element={<BookingDetailPage />} />
+          <Route path="clients" element={<ClientsPage />} />
+          <Route path="clients/:id" element={<ClientDetailPage />} />
+          <Route path="client-projects/:id" element={<ClientProjectPage />} />
           <Route path="services" element={<ServicesPage />} />
           <Route path="services/new/service" element={<ServiceEditPage />} />
           <Route path="services/service/:slug" element={<ServiceEditPage />} />

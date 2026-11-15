@@ -8,6 +8,7 @@ import type { Clock } from './lib/time.ts'
 import type { EmailChecks } from './modules/notifications/checks.ts'
 import type { Notifier } from './modules/notifications/notifier.ts'
 import type { Assistant } from './modules/ai/gateway.ts'
+import type { ClientSession } from './modules/customers/sessions.ts'
 
 /** The few counters the System page shows, kept since the process started. */
 export interface Stats {
@@ -58,6 +59,8 @@ export interface RequestCtx {
   /** The `Origin` header, when the browser sent one. */
   origin: string | null
   session: SessionInfo | null
+  /** The signed-in customer of a client portal route (modules/customers/sessions.ts), resolved from the cookie and nothing else; `null` everywhere else. */
+  customer: ClientSession | null
   json(): Promise<Record<string, unknown>>
   form(): Promise<URLSearchParams>
   /** The body exactly as it arrived (for a signature, which is over the bytes, not over what they parse to). */

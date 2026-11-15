@@ -23,6 +23,10 @@ export function securityHeaders(area: Area, config: Config): Record<string, stri
       'X-Robots-Tag': 'noindex, nofollow',
     }
   }
+  if (area === 'portal') {
+    // A customer's own data: never cached, never indexed, never carried to another site, and no cross-origin reader (no CORS headers are added).
+    return { ...base, 'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'", 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' }
+  }
   if (area === 'api') {
     return { ...base, 'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'", 'Cache-Control': 'no-store' }
   }

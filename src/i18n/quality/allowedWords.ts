@@ -46,7 +46,7 @@ const technical = [
  */
 const hungarianForms = [
   'általunk', 'álnéven', 'ből', 'csomagok', 'csomagokat', 'csomagokból', 'csomagon', 'háttéren', 'határon', 'igazságok', 'jogosultságok',
-  'jogosultságokat', 'kérdőívet', 'költséget', 'lehetőséget', 'minőséget', 'nekem', 'neked', 'néven', 'nyelven', 'nyelvet', 'őket', 'összeget',
+  'jogosultságokat', 'kérdőívet', 'költséget', 'lehetőséget', 'minőséget', 'nekem', 'neked', 'nekünk', 'véget', 'biztonságod', 'néven', 'nyelven', 'nyelvet', 'őket', 'összeget',
   'összegzés', 'papírokról', 'sávokat', 'sávokkal', 'sebességet', 'sorok', 'sorokat', 'sorokra', 'soronként', 'szállítólevelen', 'szerveren',
   'szöveget', 'szövegen', 'tableten', 'tanulságok', 'tervet', 'től', 'tulajdonságok', 'újdonságokról', 'fuvarokat', 'adminisztrátorok', 'demócéget',
   'buildet', 'commitját', 'commit-előzmények', 'celery-feladatok', 'full-stack', 'boxutcába', 'reszponzív', 'reszponzívan', 'reszponzívvá',

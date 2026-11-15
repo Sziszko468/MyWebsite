@@ -241,6 +241,23 @@ if (configured) {
   check(!/<loc>[^<]*\/consultation\/booking\/[^<]*<\/loc>/.test(builtSitemap), 'sitemap.xml', "must never list a customer's private booking page")
   for (const lang of ['hu', 'en', 'nl']) check(builtSitemap.includes(`<loc>${siteOrigin}/${lang}/consultation/</loc>`), 'sitemap.xml', `should list /${lang}/consultation/ as built (the backend's live sitemap leaves it out while booking is closed)`)
 }
+// The client portal (PROMPT 25): one quiet shell per language for `/<lang>/client-portal/` and everything below it. Never indexable, never in a sitemap, no
+// canonical address, no alternates, no structured data, and the headers that keep it out of caches and referrers; every address below it is the same shell.
+for (const lang of ['hu', 'en', 'nl']) {
+  const path = `/${lang}/client-portal/`
+  const portal = pages.get(path)
+  check(Boolean(portal), 'client-portal', `${path} has no file in dist`)
+  if (portal) {
+    check(portal.robots[0] === 'noindex, nofollow', portal.rel, `the client portal must say "noindex, nofollow", says "${portal.robots[0]}"`)
+    check(portal.canonical.length === 0 && portal.alternates.length === 0 && portal.jsonLd.length === 0, portal.rel, 'the client portal must carry no canonical address, language alternate or structured data')
+  }
+  const block = headers.split('\n\n').find((part) => part.startsWith(`${path}*`)) ?? ''
+  check(block.includes('Cache-Control: no-store'), '_headers', `${path}* must be sent with Cache-Control: no-store`)
+  check(block.includes('Referrer-Policy: no-referrer'), '_headers', `${path}* must be sent with Referrer-Policy: no-referrer`)
+  check(block.includes('X-Robots-Tag: noindex, nofollow'), '_headers', `${path}* must be sent with X-Robots-Tag: noindex, nofollow`)
+  check(redirects.includes(`${path}*  ${path}  200`), '_redirects', `${path}* must answer with the portal's quiet shell`)
+}
+if (configured) check(!/<loc>[^<]*client-portal[^<]*<\/loc>/.test(builtSitemap), 'sitemap.xml', 'must never list the client portal')
 check(headers.includes('Content-Security-Policy'), '_headers', 'has no Content-Security-Policy')
 for (const tag of ['script', 'style']) {
   const bodies = [...shell.matchAll(new RegExp(`<${tag}(?![^>]*\\bsrc=)(?![^>]*ld\\+json)[^>]*>([\\s\\S]*?)</${tag}>`, 'g'))].map((m) => m[1]).filter((b) => b.trim())

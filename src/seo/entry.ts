@@ -104,7 +104,7 @@ export function buildSiteFiles(template: string, hashes: InlineHashes, ctx: SeoC
 
   // A static host serves a customer's private page (a secret after /quote/ or /request/) with the quiet shell the build wrote for that path;
   // the application then asks the API with the secret. (The backend does the same itself when it serves the site.)
-  files._redirects = ['hu', 'en', 'nl'].flatMap((lang) => ['quote', 'request', 'consultation/booking'].map((page) => `/${lang}/${page}/*  /${lang}/${page}/  200`)).join('\n') + '\n'
+  files._redirects = ['hu', 'en', 'nl'].flatMap((lang) => ['quote', 'request', 'consultation/booking', 'client-portal'].map((page) => `/${lang}/${page}/*  /${lang}/${page}/  200`)).join('\n') + '\n'
   files._headers = buildHeadersFile({
     ...hashes,
     // The backend's own origin too: the assistant and the catalogue talk to it even when a form handler of another kind is configured.

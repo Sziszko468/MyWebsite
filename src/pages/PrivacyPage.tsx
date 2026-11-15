@@ -25,6 +25,7 @@ export function PrivacyPage() {
         <section className={styles.section} aria-labelledby="privacy-cookies">
           <h2 id="privacy-cookies">{text.cookies.title[lang]}</h2>
           <p>{text.cookies.text[lang]}</p>
+          <p>{text.cookiesPortal[lang]}</p>
         </section>
 
         <section className={styles.section} aria-labelledby="privacy-language">
@@ -78,6 +79,15 @@ export function PrivacyPage() {
           <h2 id="privacy-booking">{text.booking.title[lang]}</h2>
           <ul>
             {text.booking.items.map((item) => (
+              <li key={item.en}>{item[lang]}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className={styles.section} aria-labelledby="privacy-portal">
+          <h2 id="privacy-portal">{text.portal.title[lang]}</h2>
+          <ul>
+            {text.portal.items.map((item) => (
               <li key={item.en}>{item[lang]}</li>
             ))}
           </ul>

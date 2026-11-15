@@ -19,6 +19,8 @@ import { originIsThisHost, resolveSession, sameOrigin, sessionCookieName, verify
 import { consultationIndexable } from './modules/bookings/public.ts'
 import { bookingRoutes } from './modules/bookings/routes.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
+import { customerRoutes } from './modules/customers/routes.ts'
+import { clientCookieName, resolveClientSession, verifyClientCsrf } from './modules/customers/sessions.ts'
 import { contactRoutes } from './modules/contact/routes.ts'
 import { EmailChecks, type DnsResolver } from './modules/notifications/checks.ts'
 import { Notifier } from './modules/notifications/notifier.ts'
@@ -84,7 +86,7 @@ export function createApp(deps: AppDeps): App {
   context.assistant = new Assistant(context, deps.aiModel ?? null)
 
   const router = new Router()
-  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...bookingRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
+  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...bookingRoutes(context), ...customerRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
 
   const sweeper = setInterval(() => {
     limiters.sweep()
@@ -113,6 +115,19 @@ export function createApp(deps: AppDeps): App {
       if (unsafe && ctx.origin && !app.config.corsOrigins.includes(ctx.origin) && !originIsThisHost(ctx, ctx.origin) && !def.auth) throw new HttpError(403, 'origin_not_allowed', 'This origin is not allowed to use the API.')
     }
     if (def.area === 'admin' && !SAFE.has(ctx.method) && !sameOrigin(ctx)) throw new HttpError(403, 'origin_not_allowed', 'Requests must come from the admin pages.')
+    if (def.area === 'portal') {
+      // The client portal's API carries a cookie, so it is same-origin only, like the administration's: a page of another site cannot make the browser change anything.
+      if (!SAFE.has(ctx.method) && !sameOrigin(ctx)) throw new HttpError(403, 'origin_not_allowed', 'Requests must come from the portal pages.')
+      if (def.customerAuth) {
+        // The customer is whoever the cookie says, and nothing in the request can say otherwise.
+        ctx.customer = resolveClientSession(app, ctx.cookies[clientCookieName(app)])
+        if (!ctx.customer) throw unauthorized()
+        if (!SAFE.has(ctx.method)) {
+          const header = ctx.req.headers['x-csrf-token']
+          if (!verifyClientCsrf(ctx.customer, typeof header === 'string' ? header : null)) throw csrfFailed()
+        }
+      }
+    }
 
     if (def.auth) {
       app.limiters.check('admin', ctx.ip)
@@ -144,7 +159,7 @@ export function createApp(deps: AppDeps): App {
     try {
       if ((req.url ?? '').length > 2048) throw new HttpError(414, 'not_found', 'The address is too long.')
       const url = new URL(req.url ?? '/', 'http://localhost')
-      area = url.pathname === '/admin' || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/api/admin/') ? 'admin' : url.pathname.startsWith('/api/') ? 'api' : 'static'
+      area = url.pathname === '/admin' || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/api/admin/') ? 'admin' : url.pathname.startsWith('/api/portal/') ? 'portal' : url.pathname.startsWith('/api/') ? 'api' : 'static'
       limiters.check('global', ip)
       const redirect = area === 'static' && config.staticDir ? languageRedirect({ countryHeader: config.countryHeader, method, pathname: url.pathname, search: url.search, headers: req.headers }) : null
 
@@ -168,6 +183,7 @@ export function createApp(deps: AppDeps): App {
         cookies: parseCookies(req.headers.cookie),
         origin,
         session: null,
+        customer: null,
         json: () => readJson(req, config.bodyLimitBytes),
         form: () => (formCache ??= readForm(req, config.bodyLimitBytes)),
         raw: () => readBody(req, config.bodyLimitBytes),
@@ -233,6 +249,13 @@ export function createApp(deps: AppDeps): App {
           const bookingPage = /^\/(hu|en|nl)\/consultation\/booking\/[A-Za-z0-9_-]{20,64}\/?$/.exec(url.pathname)
           if (bookingPage && (!served || served.status === 404)) {
             const shell = serveStatic(config.staticDir, `/${bookingPage[1]}/consultation/booking/`)
+            if (shell && shell.status === 200) served = { ...shell, headers: { ...shell.headers, 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'Referrer-Policy': 'no-referrer' } }
+          }
+          // The client portal (`/hu/client-portal/`, and every address below it: a project, the account, the page that opens a sign-in link) is one application
+          // shell. It is never prerendered with anyone's data, never cached or indexed, and never carries its address to another site.
+          const portalPage = /^\/(hu|en|nl)\/client-portal(?:\/[A-Za-z0-9_\-/]*)?$/.exec(url.pathname)
+          if (portalPage) {
+            const shell = serveStatic(config.staticDir, `/${portalPage[1]}/client-portal/`)
             if (shell && shell.status === 200) served = { ...shell, headers: { ...shell.headers, 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'Referrer-Policy': 'no-referrer' } }
           }
           // The booking page itself says so, and is not listed, while booking is not open: the prerendered page cannot know, the backend does. The sitemap asks

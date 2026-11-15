@@ -211,7 +211,7 @@ async function run(): Promise<void> {
       case 'erase': {
         const [email] = args
         if (!email) throw new Error('Give the e-mail address to erase.')
-        const confirm = await prompt(`Delete every message, request, booking and delivery record held for ${normalizeEmail(email)}? Type yes: `, false)
+        const confirm = await prompt(`Delete every message, request, booking, client account and delivery record held for ${normalizeEmail(email)}? Type yes: `, false)
         if (confirm.trim().toLowerCase() !== 'yes') throw new Error('Cancelled.')
         process.stdout.write(`${JSON.stringify(eraseByEmail(app.context, email), null, 2)}\n`)
         return

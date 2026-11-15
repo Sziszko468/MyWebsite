@@ -7,7 +7,7 @@ import type { IconName } from './Icon'
  * support. The pictures are chosen inside the project editor and also have a library screen of their own (PROMPT 22).
  */
 export interface NavItem {
-  id: 'dashboard' | 'inquiries' | 'quotes' | 'bookings' | 'services' | 'comparison' | 'fullExperience' | 'ai' | 'projects' | 'media' | 'profile' | 'content' | 'texts' | 'translations' | 'notifications' | 'settings'
+  id: 'dashboard' | 'inquiries' | 'quotes' | 'bookings' | 'clients' | 'services' | 'comparison' | 'fullExperience' | 'ai' | 'projects' | 'media' | 'profile' | 'content' | 'texts' | 'translations' | 'notifications' | 'settings'
   path: string
   icon: IconName
   /** On the phone's bottom bar (the four used most); the rest are in "More". */
@@ -20,6 +20,7 @@ export const NAVIGATION: readonly NavItem[] = [
   { id: 'quotes', path: '/quotes', icon: 'quote', primary: true },
   { id: 'services', path: '/services', icon: 'layers', primary: true },
   { id: 'bookings', path: '/bookings', icon: 'bell', primary: false },
+  { id: 'clients', path: '/clients', icon: 'user', primary: false },
   { id: 'comparison', path: '/comparison', icon: 'layers', primary: false },
   { id: 'fullExperience', path: '/full-experience', icon: 'edit', primary: false },
   { id: 'ai', path: '/ai', icon: 'info', primary: false },

@@ -35,6 +35,9 @@ export const QUOTATION_DOCUMENTS = /^(content\/quotes\/|server\/src\/modules\/no
 /** The files that write the consultation booking's words: the booking pages, the privacy notice, the e-mails and the suggested types. */
 export const BOOKING_DOCUMENTS = /^(content\/consultation\/|content\/privacy\.ts$|server\/src\/modules\/notifications\/bookingTemplates\.ts$|server\/src\/modules\/bookings\/suggested\.ts$)/
 
+/** The files that write the client portal's words: its pages and its e-mails. */
+export const PORTAL_DOCUMENTS = /^(content\/portal\/|server\/src\/modules\/notifications\/clientTemplates\.ts$)/
+
 export const glossary: GlossaryTerm[] = [
   {
     concept: 'add-on (an optional extra on a package or service)',
@@ -107,6 +110,15 @@ export const glossary: GlossaryTerm[] = [
     sources: BOOKING_DOCUMENTS,
     appears: { hu: /konzultáció/i, en: /\bconsultation/i, nl: /adviesgesprek/i },
     note: 'Only in the booking pages, the privacy notice, the booking e-mails and the suggested consultation types: "appointment" is not banned elsewhere.',
+  },
+  {
+    concept: 'client portal (the customer’s private workspace)',
+    use: { hu: 'ügyfélportál', en: 'client portal', nl: 'klantportaal' },
+    // One name for it: not a "customer area" in one sentence and a "dashboard" in the next.
+    forbidden: { en: [/\bcustomer portal\b/i, /\bcustomer area\b/i, /\bclient area\b/i, /\bdashboard\b/i], hu: [/ügyfélfelület/i, /ügyféloldal/i, /\bdashboard\b/i], nl: [/\bklantenportaal\b/i, /\bklantomgeving\b/i, /\bdashboard\b/i] },
+    sources: PORTAL_DOCUMENTS,
+    appears: { hu: /ügyfélportál/i, en: /client portal/i, nl: /klantportaal/i },
+    note: 'Only in the portal’s own pages and e-mails: the rest of the site never mentions it.',
   },
   {
     concept: 'custom project (work that is not one of the four packages)',

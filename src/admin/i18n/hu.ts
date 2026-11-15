@@ -1,12 +1,14 @@
 import type { AdminText } from './en'
 import { cmsHu } from './cms'
 import { bookingHu } from './booking'
+import { clientsHu } from './clients'
 import { quotationHu } from './quotation'
 
 /** A kezelőfelület szövegei magyarul. Pontosan ugyanazok a kulcsok, mint az `en.ts`-ben; a `{név}` a képernyő által beillesztett érték. */
 export const hu: AdminText = {
   quotation: quotationHu,
   booking: bookingHu,
+  clients: clientsHu,
   cms: cmsHu,
   app: {
     name: 'Kezelőfelület',
@@ -37,6 +39,7 @@ export const hu: AdminText = {
     inquiries: 'Üzenetek',
     quotes: 'Ajánlatkérések',
     bookings: 'Konzultációk',
+    clients: 'Ügyfelek',
     services: 'Szolgáltatások és csomagok',
     content: 'Weboldal-tartalom',
     translations: 'Fordítások',
@@ -652,7 +655,7 @@ export const hu: AdminText = {
       empty: 'Még nem ment ki semmi.',
       emptyBody: 'A levelek itt jelennek meg, amint valami sorba kerül.',
       emptyFiltered: 'Egy levél sincs ebben az állapotban.',
-      kinds: { inquiry_received: 'Új üzenet', quote_received: 'Új ajánlatkérés', inquiry_status: 'Üzenet állapota', quote_status: 'Ajánlatkérés állapota', inquiry_confirmation: 'Üzenet visszaigazolása', quote_confirmation: 'Ajánlatkérés visszaigazolása', test: 'Teszt levél', quote_sent: 'Árajánlat', quote_revised: 'Módosított árajánlat', quote_accepted: 'Elfogadás (az ügyfélnek)', quote_accepted_admin: 'Elfogadás (neked)', quote_declined: 'Elutasítás (az ügyfélnek)', quote_declined_admin: 'Elutasítás (neked)', revision_requested_admin: 'Módosítási kérés (neked)', revision_received: 'A módosítási kérés visszaigazolása (az ügyfélnek)', delivery_failed_admin: 'Kézbesítési riasztás (neked)', booking_received: 'Foglalási kérés beérkezett', booking_confirmed: 'Foglalás visszaigazolása (az ügyfélnek)', booking_new_admin: 'Új foglalás (neked)', booking_change_received: 'Átvételi értesítés egy foglalási kérésről', booking_change_requested_admin: 'Kérés egy foglalásról (neked)', booking_rescheduled: 'Foglalás áthelyezve (az ügyfélnek)', booking_proposal: 'Új időpont javaslata', booking_change_declined: 'Foglalási kérés elutasítva', booking_cancelled: 'Foglalás lemondva (az ügyfélnek)', booking_cancelled_admin: 'Foglalás lemondva (neked)' },
+      kinds: { inquiry_received: 'Új üzenet', quote_received: 'Új ajánlatkérés', inquiry_status: 'Üzenet állapota', quote_status: 'Ajánlatkérés állapota', inquiry_confirmation: 'Üzenet visszaigazolása', quote_confirmation: 'Ajánlatkérés visszaigazolása', test: 'Teszt levél', quote_sent: 'Árajánlat', quote_revised: 'Módosított árajánlat', quote_accepted: 'Elfogadás (az ügyfélnek)', quote_accepted_admin: 'Elfogadás (neked)', quote_declined: 'Elutasítás (az ügyfélnek)', quote_declined_admin: 'Elutasítás (neked)', revision_requested_admin: 'Módosítási kérés (neked)', revision_received: 'A módosítási kérés visszaigazolása (az ügyfélnek)', delivery_failed_admin: 'Kézbesítési riasztás (neked)', booking_received: 'Foglalási kérés beérkezett', booking_confirmed: 'Foglalás visszaigazolása (az ügyfélnek)', booking_new_admin: 'Új foglalás (neked)', booking_change_received: 'Átvételi értesítés egy foglalási kérésről', booking_change_requested_admin: 'Kérés egy foglalásról (neked)', booking_rescheduled: 'Foglalás áthelyezve (az ügyfélnek)', booking_proposal: 'Új időpont javaslata', booking_change_declined: 'Foglalási kérés elutasítva', booking_cancelled: 'Foglalás lemondva (az ügyfélnek)', booking_cancelled_admin: 'Foglalás lemondva (neked)', client_sign_in: 'Belépési link (az ügyfélnek)', client_activate: 'Meghívó az ügyfélportálba', client_register: 'Regisztráció megerősítése', client_email_change: 'Új e-mail-cím megerősítése', client_security_notice: 'Biztonsági értesítés (az ügyfélnek)', client_project_created: 'Új projekt (az ügyfélnek)', client_project_status: 'Hír egy projektről (az ügyfélnek)', client_document_published: 'Új dokumentum (az ügyfélnek)', client_deletion_requested_admin: 'Fióktörlési kérés (neked)' },
       filter: 'Mutat',
       filters: { all: 'Minden levél', problem: 'Gondok (sikertelen, visszapattant, spam)', retrying: 'Újrapróbálásra vár', pending: 'Várakozik', accepted: 'Elküldve', delivered: 'Kézbesítve', bounced: 'Visszapattant', complained: 'Spamnek jelölve', failed: 'Sikertelen', cancelled: 'Visszavonva' },
       retry: 'Küldés újra',

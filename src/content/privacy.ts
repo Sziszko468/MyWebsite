@@ -31,9 +31,9 @@ export const storedItems: readonly StoredItem[] = [
     name: 'cc_lang',
     where: 'cookie',
     purpose: tri(
-      'A nyelv kódja (hu, en vagy nl), ha a nyelvválasztóval magad választottál nyelvet. Ez az oldal egyetlen sütije.',
-      'The language code (hu, en or nl), when you chose a language yourself with the language switcher. It is the only cookie this site sets.',
-      'De taalcode (hu, en of nl), als je zelf een taal hebt gekozen met de taalkeuze. Het is het enige cookie dat deze site plaatst.',
+      'A nyelv kódja (hu, en vagy nl), ha a nyelvválasztóval magad választottál nyelvet. Ez az oldalak egyetlen sütije; az ügyfélportál belépési sütijét a szerver állítja be, lásd a Sütik részt.',
+      'The language code (hu, en or nl), when you chose a language yourself with the language switcher. It is the only cookie the site’s pages set; the client portal’s sign-in cookie is set by the server, see Cookies.',
+      'De taalcode (hu, en of nl), als je zelf een taal hebt gekozen met de taalkeuze. Het is het enige cookie dat de pagina’s van de site plaatsen; het cookie waarmee je in het klantportaal ingelogd blijft, wordt door de server geplaatst, zie Cookies.',
     ),
   },
   {
@@ -135,6 +135,11 @@ export const privacyText = {
       'Deze site gebruikt één klein cookie, en alleen als je zelf een taal kiest met de taalkeuze. Het cookie heet cc_lang, bevat alleen de taalcode (hu, en of nl), blijft een jaar bewaard en zorgt ervoor dat de site de volgende keer in de gekozen taal opent. Er staan geen persoonsgegevens in. De site gebruikt geen cookies voor iets anders.',
     ),
   },
+  cookiesPortal: tri(
+    'Ha belépsz az ügyfélportálba, a szerver egy második sütit állít be, cc_client néven. Egy véletlen értéket tartalmaz, amely a belépésedet azonosítja; csak a portál működéséhez kell, a belépés lejártával vagy kijelentkezéskor megszűnik, és semmi másra nem szolgál. Az érték nem olvasható a weboldal programkódjából.',
+    'If you sign in to the client portal, the server sets a second cookie, called cc_client. It holds a random value that identifies your sign-in; it is needed only for the portal to work, it ends when the sign-in ends or when you sign out, and it is used for nothing else. The website’s own code cannot read the value.',
+    'Als je inlogt op het klantportaal, plaatst de server een tweede cookie, cc_client genaamd. Het bevat een willekeurige waarde die je sessie aanduidt; het is alleen nodig om het portaal te laten werken, het verdwijnt als de sessie eindigt of als je uitlogt, en het wordt voor niets anders gebruikt. De code van de website zelf kan de waarde niet lezen.',
+  ),
   language: {
     title: tri('Nyelv és ország', 'Language and country', 'Taal en land'),
     items: [
@@ -266,6 +271,46 @@ export const privacyText = {
         'Ha tudni szeretnéd, mit tárolunk a foglalásodról, vagy törölni szeretnéd, kérd ezt a tulajdonostól a Kapcsolat oldalon, és add meg a foglaláskor használt e-mail-címet. A törlést a tulajdonos kézzel, egy erre szolgáló eszközzel végzi, tehát nem azonnal és nem automatikusan. Ez az adott e-mail-címmel tett foglalásokat törli a jegyzeteikkel, linkjeikkel és e-mail-naplójukkal együtt, és ugyanehhez a címhez tartozó ajánlatkéréseket és megkereséseket is. Megmarad egy rövid esemény-nyilvántartás, amelyben csak a foglalás azonosítója, állapota és időpontja áll, név, e-mail-cím és szöveg nélkül. Ha az oldal automatikus adatbázis-mentést használ, a már elkészült mentések a saját lejáratukig még tartalmazhatják a törölt adatokat.',
         'If you want to know what is stored about your booking, or want it deleted, ask the owner on the Contact page and give the email address you used. The owner deletes by hand, with a tool made for it, so it is not immediate and not automatic. It deletes the bookings made with that email address together with their notes, links and email log, and also the quote requests and inquiries from the same address. A short event record stays, holding only the booking’s reference, status and time, with no name, email address or text. If the site uses automatic database backups, copies that were already made can still hold the deleted data until they expire.',
         'Wil je weten wat er over je afspraak is opgeslagen, of wil je dat het wordt verwijderd, vraag het dan aan de eigenaar via de contactpagina en geef het e-mailadres op dat je hebt gebruikt. De eigenaar verwijdert dit met de hand, met een daarvoor bedoeld hulpmiddel; het gaat dus niet meteen en niet automatisch. Daarbij worden de afspraken met dat e-mailadres verwijderd, samen met de notities, de links en het logboek van de e-mails ervan, en ook de offerteaanvragen en aanvragen van hetzelfde adres. Er blijft een korte gebeurtenisregistratie over met alleen de referentie, de status en het tijdstip van de afspraak, zonder naam, e-mailadres of tekst. Gebruikt de site automatische back-ups van de database, dan kunnen reeds gemaakte kopieën de verwijderde gegevens tot hun verval nog bevatten.',
+      ),
+    ],
+  },
+  portal: {
+    title: tri('Az ügyfélportál', 'The client portal', 'Het klantportaal'),
+    items: [
+      tri(
+        'Az ügyfélportál azoknak szól, akiket a tulajdonos meghívott (vagy, ha a tulajdonos bekapcsolta, akik igazolják az e-mail-címüket). A fiókhoz az e-mail-címedet, a nevedet és a cégedet (a kettő nem kötelező), az e-mailek nyelvét, valamint a fiók létrehozásának, a cím megerősítésének és az utolsó belépésnek az idejét tárolja az oldal. A portál nem használ jelszót, és nem is tárol.',
+        'The client portal is for people the owner has invited (or, if the owner has switched it on, people who prove their email address). For the account the site stores your email address, your name and company (both optional), the language of the emails, and when the account was made, when the address was verified and when you last signed in. The portal uses no password and stores none.',
+        'Het klantportaal is voor mensen die de eigenaar heeft uitgenodigd (of, als de eigenaar dat heeft aangezet, die hun e-mailadres bevestigen). Voor het account bewaart de site je e-mailadres, je naam en bedrijf (beide optioneel), de taal van de e-mails en wanneer het account is gemaakt, het adres is bevestigd en je voor het laatst bent ingelogd. Het portaal gebruikt geen wachtwoord en bewaart er geen.',
+      ),
+      tri(
+        'Belépni egy linkkel lehet, amelyet a megadott e-mail-címre küldünk. A link titka csak az e-mailben szerepel, az adatbázisban csak egy egyirányú ujjlenyomata van. A link egyszer használható, és rövid ideig érvényes. A belépés egy sütit állít be (lásd a Sütik részt). Minden belépésről az oldal eltárolja, mikor kezdődött és mikor használtad utoljára, a böngésződ saját leírásának első részét és a hálózati címed egyirányú ujjlenyomatát.',
+        'You sign in with a link sent to your email address. The link’s secret appears only in the email; the database keeps only a one-way fingerprint of it. A link works once and only for a short time. Signing in sets a cookie (see Cookies). For each sign-in the site stores when it began and when you last used it, the first part of your browser’s own description and a one-way fingerprint of your network address.',
+        'Je logt in met een link die naar je e-mailadres wordt gestuurd. Het geheim van de link staat alleen in de e-mail; in de database staat alleen een eenrichtingsvingerafdruk ervan. Een link werkt één keer en maar kort. Inloggen plaatst een cookie (zie Cookies). Van elke sessie bewaart de site wanneer die begon en wanneer je hem voor het laatst gebruikte, het eerste deel van de eigen beschrijving van je browser en een eenrichtingsvingerafdruk van je netwerkadres.',
+      ),
+      tri(
+        'A portálban csak az látszik, amit a tulajdonos (vagy, ha be van kapcsolva, te magad a megerősített e-mail-címeddel) a fiókodhoz kapcsolt: ajánlatkéréseket, foglalásokat és projekteket. A projektről a tulajdonos rögzíti a nevét, a területét, az állapotát, a dátumokat, a mérföldköveket és a neked szánt üzeneteket, és minden változásról egy sort ír a projekt történetébe. A tulajdonos privát jegyzeteit te nem látod.',
+        'The portal shows only what the owner (or, if it is switched on, you yourself with your verified email address) has linked to your account: quote requests, bookings and projects. For a project the owner records its name, its category, its status, the dates, the milestones and the messages meant for you, and writes one line to the project’s history for every change. You do not see the owner’s private notes.',
+        'Het portaal toont alleen wat de eigenaar (of, als dat aan staat, jij zelf met je bevestigde e-mailadres) aan je account heeft gekoppeld: offerteaanvragen, afspraken en projecten. Van een project legt de eigenaar de naam, de categorie, de status, de data, de mijlpalen en de berichten voor jou vast, en schrijft bij elke wijziging een regel in de geschiedenis van het project. De privénotities van de eigenaar zie je niet.',
+      ),
+      tri(
+        'A portál levelei (belépési link, meghívó, a címed módosítása, biztonsági értesítés, új projekt, egy projekt állapotának fontos változása) ugyanazon a tranzakciós e-mail-szolgáltatáson mennek át, mint az oldal többi levele, és ugyanúgy naplózódnak: kinek, mikor, milyen nyelven, milyen fajta, és hogy a szolgáltató elfogadta-e. A napló nem tartalmazza az üzenet szövegét. Az elfogadás nem azt jelenti, hogy a levél megérkezett a postafiókodba.',
+        'The portal’s emails (a sign-in link, an invitation, a change of your address, a security notice, a new project, an important change in a project’s status) go through the same transactional email service as the site’s other emails and are logged in the same way: to whom, when, in which language, of which kind, and whether the provider accepted them. The log does not hold the message text. Acceptance does not mean the email reached your mailbox.',
+        'De e-mails van het portaal (een link om in te loggen, een uitnodiging, een wijziging van je adres, een beveiligingsmelding, een nieuw project, een belangrijke wijziging in de status van een project) gaan via dezelfde transactionele e-maildienst als de andere e-mails van de site en worden op dezelfde manier vastgelegd: aan wie, wanneer, in welke taal, van welke soort en of de aanbieder ze heeft geaccepteerd. In het logboek staat de tekst van het bericht niet. Geaccepteerd betekent niet dat de e-mail in je mailbox is aangekomen.',
+      ),
+      tri(
+        'A fiók történetét (létrehozás, belépés, kilépés, címváltás, összekapcsolás, törlési kérés) egy külön napló őrzi, amely csak az esemény fajtáját, azt, hogy ki tette (te, a tulajdonos vagy a rendszer), és egy rövid kódot tartalmaz, nevet, címet és hálózati címet nem. Ezt a naplót a törlés sem távolítja el, de utána már nem köthető személyhez.',
+        'The history of the account (made, signed in, signed out, address changed, a record linked, a deletion requested) is kept in a separate log that holds only the kind of event, who did it (you, the owner or the system) and a short code, no name, no address and no network address. A deletion does not remove this log, but afterwards it can no longer be tied to a person.',
+        'De geschiedenis van het account (aangemaakt, ingelogd, uitgelogd, adres gewijzigd, een gegeven gekoppeld, een verwijdering aangevraagd) staat in een apart logboek met alleen de soort gebeurtenis, wie het deed (jij, de eigenaar of het systeem) en een korte code, geen naam, geen adres en geen netwerkadres. Een verwijdering haalt dit logboek niet weg, maar daarna is het niet meer aan een persoon te koppelen.',
+      ),
+      tri(
+        'Fájlok megosztása a portálban még nem érhető el, ezért az oldal jelenleg nem tárol számodra megosztott fájlt. A portálon semmit nem mérünk: a portál oldalairól a mérés nem küld eseményt.',
+        'Sharing files through the portal is not available yet, so the site currently stores no file shared with you. Nothing on the portal is measured: the measurement sends no event from the portal’s pages.',
+        'Bestanden delen via het portaal kan nog niet, dus de site bewaart nu geen bestand dat met je is gedeeld. Op het portaal wordt niets gemeten: de meting stuurt geen gebeurtenis vanaf de pagina’s van het portaal.',
+      ),
+      tri(
+        'A fiókot és a hozzá tartozó projekteket nem az idő múlása törli: a megőrzési időszak (ha a tulajdonos beállított egyet) a fiókokat nem érinti. A portálban kérheted a fiókod és a rólad tárolt adatok törlését; a kérést rögzítjük, és szólunk a tulajdonosnak, de a törlést ő végzi el kézzel, ezért az nem azonnali. Egy e-mail-cím törlésekor a fiók, a belépései, a hozzá tartozó projektek és az ezzel a címmel beküldött ajánlatkérések és foglalások is törlődnek. A lejárt linkek és munkamenetek nyilvántartását a lejárat után nagyjából egy hónappal töröljük.',
+        'Time does not delete an account or its projects: a retention period (if the owner has set one) does not touch accounts. In the portal you can ask for your account and the data held about you to be deleted; the request is recorded and the owner is told, but the owner does the deleting by hand, so it is not immediate. When an email address is erased, the account, its sign-ins, its projects and the quote requests and bookings sent with that address are deleted too. The records of expired links and sessions are removed about a month after they expire.',
+        'De tijd verwijdert een account of de projecten daarin niet: een bewaartermijn (als de eigenaar er een heeft ingesteld) raakt accounts niet. In het portaal kun je vragen om je account en de gegevens die over je bewaard worden te verwijderen; het verzoek wordt vastgelegd en de eigenaar wordt op de hoogte gebracht, maar de eigenaar verwijdert met de hand, dus het gebeurt niet meteen. Bij het wissen van een e-mailadres worden het account, de sessies, de projecten en de met dat adres verstuurde offerteaanvragen en afspraken ook verwijderd. De gegevens van verlopen links en sessies worden ongeveer een maand na het verlopen verwijderd.',
       ),
     ],
   },

@@ -5,7 +5,7 @@ import { startingLanguage } from './i18n/preference'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { lazyRoute } from './motion/loading'
-import { PAGES, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type AiPageId, type ConsultationPageId, type CustomerPageId, type LegalPageId, type NavPageId, type PageDef, type ShopPageId } from './routes/pages'
+import { PAGES, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type AiPageId, type ConsultationPageId, type CustomerPageId, type LegalPageId, type NavPageId, type PageDef, type PortalPageId, type ShopPageId } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
 import { IntroProvider } from './components/intro/IntroProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
@@ -50,6 +50,9 @@ const ConsultationPage = lazyRoute(() => import('./pages/ConsultationPage').then
 const BookingPage = lazyRoute(() => import('./pages/BookingPage').then((module) => ({ default: module.BookingPage })))
 const IncompleteBookingLinkPage = lazyRoute(() => import('./pages/BookingPage').then((module) => ({ default: module.IncompleteBookingLinkPage })))
 
+// The client portal (PROMPT 25): a signed-in customer's own pages, a chunk of its own, loaded only when /client-portal is opened.
+const ClientPortalPage = lazyRoute(() => import('./pages/ClientPortalPage').then((module) => ({ default: module.ClientPortalPage })))
+
 // The privacy and cookie notice carries its text in three languages: its own chunk too.
 const PrivacyPage = lazyRoute(() => import('./pages/PrivacyPage').then((module) => ({ default: module.PrivacyPage })))
 
@@ -66,7 +69,7 @@ const LabExperimentPage = lazyRoute(() =>
 // The pages that are chunks carry no Suspense of their own: the one boundary above the page frame
 // (routes/LanguageLayout.tsx) stays mounted from page to page, so a navigation keeps the page on
 // screen until the next one's code has arrived instead of swapping it for a blank placeholder.
-const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | 'designSystem', ReactElement | null> = {
+const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | PortalPageId | 'designSystem', ReactElement | null> = {
   home: <HomePage />,
   work: <WorkPage />,
   services: <ServicesPage />,
@@ -84,6 +87,8 @@ const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | AiPageId | Cu
   'customer-request': <IncompleteLinkPage />,
   consultation: <ConsultationPage />,
   'customer-booking': <IncompleteBookingLinkPage />,
+  // The portal is one route with a splat (below): this entry only says the page exists.
+  'client-portal': null,
   designSystem: DesignSystemPage && <DesignSystemPage />,
 }
 
@@ -94,7 +99,7 @@ function elementFor(page: PageDef): ReactElement | null {
   if (pack) return <PackagePage packageId={pack} />
   const experiment = labIdOfPage(page.id)
   if (experiment) return <LabExperimentPage id={experiment} />
-  return PAGE_ELEMENTS[page.id as NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | 'designSystem']
+  return PAGE_ELEMENTS[page.id as NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | PortalPageId | 'designSystem']
 }
 
 export default function App() {
@@ -116,7 +121,9 @@ export default function App() {
               <Route path="quote/:token" element={<QuotePage />} />
               <Route path="request/:token" element={<RequestStatusPage />} />
               <Route path="consultation/booking/:token" element={<BookingPage />} />
-              {PAGES.filter((page) => projectIdOfPage(page.id) === null).map((page) =>
+              {/* The client portal and everything below it: one page, so the signed-in state stays mounted while a customer moves around. */}
+              <Route path="client-portal/*" element={<ClientPortalPage />} />
+              {PAGES.filter((page) => projectIdOfPage(page.id) === null && page.id !== 'client-portal').map((page) =>
                 page.path === '/' ? (
                   <Route key={page.id} index element={elementFor(page)} />
                 ) : (

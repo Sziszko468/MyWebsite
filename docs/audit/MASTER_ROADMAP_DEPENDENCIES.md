@@ -55,6 +55,7 @@ Order numbers refer to the sequence at the end.
 - **Risk:** deliverability (E-1) for confirmations; calendar API quotas; double booking needs a unique-slot constraint.
 
 ### 6. Client Portal (order 10)
+> **PROMPT 25 (2026-11-15) built the foundation** on `feature/client-portal`: passwordless customer accounts, a separate customer session on the same primitives, explicit record linking, customer projects with a status model and a timeline, admin screens, three-language e-mails. Not merged, not deployed. File delivery is **not** built (no private store: `docs/client-portal/DOCUMENTS.md`), nor messages, invoices or approvals; PROMPT 26 (project management and timeline) extends the status model. Owner decisions and legal review: `docs/client-portal/LAUNCH_CHECKLIST.md`. The paragraph below is the audit's **earlier** view.
 - **Existing:** private pages for **one** quotation or **one** request through a link; no customer accounts.
 - **Missing:** a customer identity, a dashboard of all requests, files, messages, invoices.
 - **Security:** **no second authentication system**: build on the existing session machinery (a `customer` role with magic-link sign-in) or keep link-only access; never expose other customers' data by e-mail address guessing; sign-in rate limits.

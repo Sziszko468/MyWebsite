@@ -183,6 +183,8 @@ export interface Config {
   quoteReferenceFormat: string
   /** `CUSTOMER_LINK_DAYS`: how long the link in a customer's e-mail (the quotation, the status page) works. */
   customerLinkDays: number
+  /** The client portal (PROMPT 25): how long a sign-in lasts (`CLIENT_SESSION_HOURS`), how long it may sit unused (`CLIENT_IDLE_MINUTES`), how long a link in an e-mail works (`CLIENT_LINK_MINUTES`; an invitation: `CLIENT_INVITE_HOURS`). */
+  client: { sessionHours: number; idleMinutes: number; linkMinutes: number; inviteHours: number }
   ai: AiConfig
   backup: { enabled: boolean; clientId: string; clientSecret: string; refreshToken: string; folderId: string | null; retentionDays: number; hourUtc: number }
 }
@@ -400,6 +402,7 @@ export function loadConfig(env: Env = process.env): Config {
   const quoteReferenceFormat = text('QUOTE_REFERENCE_FORMAT') ?? 'CC-{YYYY}-{NNNNNN}'
   if (!/^[A-Za-z0-9-]{0,16}(\{YYYY\}|\{YY\})?[A-Za-z0-9-]{0,16}\{N{3,10}\}[A-Za-z0-9-]{0,16}$/.test(quoteReferenceFormat)) bad('QUOTE_REFERENCE_FORMAT', `must be letters, digits and hyphens around one sequence placeholder such as {NNNNNN}, optionally with {YYYY} or {YY} before it (got "${quoteReferenceFormat}")`)
   const customerLinkDays = integer('CUSTOMER_LINK_DAYS', 90, 1, 365)
+  const client = { sessionHours: integer('CLIENT_SESSION_HOURS', 168, 1, 720), idleMinutes: integer('CLIENT_IDLE_MINUTES', 2880, 5, 43200), linkMinutes: integer('CLIENT_LINK_MINUTES', 30, 5, 1440), inviteHours: integer('CLIENT_INVITE_HOURS', 72, 1, 720) }
 
   // ---- Google Drive backups ----
   const driveClientId = text('GOOGLE_DRIVE_CLIENT_ID')
@@ -533,6 +536,7 @@ export function loadConfig(env: Env = process.env): Config {
     mediaMaxBytes,
     quoteReferenceFormat,
     customerLinkDays,
+    client,
     ai,
     backup: { enabled: backupParts.every(Boolean), clientId: driveClientId ?? '', clientSecret: driveClientSecret ?? '', refreshToken: driveRefreshToken ?? '', folderId: driveFolderId, retentionDays: backupRetentionDays, hourUtc: backupHourUtc },
   }
@@ -568,6 +572,7 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     mediaMaxBytes: config.mediaMaxBytes,
     quoteReferenceFormat: config.quoteReferenceFormat,
     customerLinkDays: config.customerLinkDays,
+    clientPortal: config.client,
     googleDriveBackup: { enabled: config.backup.enabled, credentials: config.backup.enabled ? 'set' : 'missing', folderIdSet: config.backup.folderId !== null, retentionDays: config.backup.retentionDays, hourUtc: config.backup.hourUtc },
     assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : 'missing', model: config.ai.model, modelOverrideRejected: config.ai.modelOverride !== null, customBaseUrl: config.ai.baseUrl !== null },
   }
