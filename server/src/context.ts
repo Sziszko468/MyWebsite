@@ -5,6 +5,7 @@ import type { Limiters } from './http/rateLimit.ts'
 import type { Reply } from './http/reply.ts'
 import type { Logger } from './lib/logger.ts'
 import type { Clock } from './lib/time.ts'
+import type { GmailSync } from './modules/gmail/sync.ts'
 import type { GmailTokenService } from './modules/gmail/tokenService.ts'
 import type { EmailChecks } from './modules/notifications/checks.ts'
 import type { Notifier } from './modules/notifications/notifier.ts'
@@ -33,6 +34,8 @@ export interface AppContext {
   assistant: Assistant
   /** The Gmail OAuth connection (modules/gmail): one per process, so its token cache and its last check are shared by every request. */
   gmail: GmailTokenService
+  /** The mailbox's synchronisation into `gmail_messages` (modules/gmail/sync.ts): one per process, which is what allows one run at a time. */
+  gmailSync: GmailSync
   stats: Stats
 }
 

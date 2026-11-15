@@ -18,6 +18,8 @@ import { aiRoutes } from './modules/ai/routes.ts'
 import { originIsThisHost, resolveSession, sameOrigin, sessionCookieName, verifySessionCsrf } from './modules/auth/sessions.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { contactRoutes } from './modules/contact/routes.ts'
+import { createGmailApiClient } from './modules/gmail/api.ts'
+import { GmailSync } from './modules/gmail/sync.ts'
 import { createGmailTokenService } from './modules/gmail/tokenService.ts'
 import { EmailChecks, type DnsResolver } from './modules/notifications/checks.ts'
 import { Notifier } from './modules/notifications/notifier.ts'
@@ -79,6 +81,8 @@ export function createApp(deps: AppDeps): App {
   const gmail = createGmailTokenService(config.gmail, { fetch: deps.fetch, clock, log })
   const context = { config, db, clock, log, limiters, notifier, emailChecks, gmail, stats } as AppContext
   context.assistant = new Assistant(context, deps.aiModel ?? null)
+  // The Gmail API and the synchronisation that uses it: built once, over the token service above and the same injected fetch.
+  context.gmailSync = new GmailSync({ config: config.gmail, db, clock, log, api: createGmailApiClient(gmail, { fetch: deps.fetch }) })
 
   const router = new Router()
   router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))

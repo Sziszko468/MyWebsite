@@ -46,9 +46,11 @@ export interface ErasureResult {
   inquiries: number
   quoteRequests: number
   deliveries: number
+  /** Messages imported from the Gmail mailbox (modules/gmail): the local copy only; what is in the mailbox itself is the owner's to delete. */
+  gmailMessages: number
 }
 
-/** Everything the site holds about one e-mail address: the messages, the requests (and their notes and items) and the delivery log. */
+/** Everything the site holds about one e-mail address: the messages, the requests (and their notes and items), the delivery log and the imported mail. */
 export function eraseByEmail(app: AppContext, email: string): ErasureResult {
   const { db } = app
   const address = normalizeEmail(email)
@@ -64,10 +66,16 @@ export function eraseByEmail(app: AppContext, email: string): ErasureResult {
       for (const id of revisionIds) deliveries += db.run("DELETE FROM email_deliveries WHERE related_type = 'quote_revision' AND related_id = ?", [id]).changes
     }
     deliveries += db.run('DELETE FROM email_deliveries WHERE recipient = ? COLLATE NOCASE', [address]).changes
+    // The imported copy of the mailbox: what this person wrote, what was written to them (the address is looked for as a whole, never as a
+    // pattern), and everything tied to the requests that are about to go. A message that belongs to no one else's request is not touched.
+    let gmailMessages = db.run('DELETE FROM gmail_messages WHERE sender_address = ?', [address]).changes
+    gmailMessages += db.run('DELETE FROM gmail_messages WHERE instr(lower(recipients_json), ?) > 0', [`"address":"${address}"`]).changes
+    for (const row of db.all<{ id: string }>('SELECT id FROM inquiries WHERE email = ?', [address])) gmailMessages += db.run('DELETE FROM gmail_messages WHERE inquiry_id = ?', [row.id]).changes
+    for (const row of db.all<{ id: string }>('SELECT id FROM quote_requests WHERE email = ?', [address])) gmailMessages += db.run('DELETE FROM gmail_messages WHERE quote_request_id = ?', [row.id]).changes
     const inquiries = db.run('DELETE FROM inquiries WHERE email = ?', [address]).changes
     // The request takes its items, notes, quotations, lines, links, questions and status-page entries with it (cascades); the history keeps one line per
     // event, with a reference and a status and nothing a person wrote.
     const quoteRequests = db.run('DELETE FROM quote_requests WHERE email = ?', [address]).changes
-    return { inquiries, quoteRequests, deliveries }
+    return { inquiries, quoteRequests, deliveries, gmailMessages }
   })
 }

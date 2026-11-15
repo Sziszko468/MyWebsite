@@ -347,6 +347,31 @@ The service is built once in `createApp` (`AppContext.gmail`) and shown in **Set
 
 Both answer with exactly five fields: `configured`, `connected`, `accountEmail`, `lastError` (a category, worded by the administration in its own language) and `checkedAt`. No token, secret, Google response or network error text is ever in an answer or a log line. The mailbox address is shown only to an administrator who may read the system page; the configuration list on that page says whether Gmail is set up (`gmail.enabled`, `credentials`, `problems`) but not the address. There is no polling and no background worker: nothing asks Google until an administrator presses the button.
 
+#### Incoming mail: synchronisation and conversation storage (step 3)
+
+An administrator can import the mailbox's inbox by hand into SQLite (`gmail_messages`, migration `0030_gmail_messages.sql`) so that a request's e-mail conversation can be shown next to it later. There is **no** background polling and **no** user interface for it yet. It uses only the Gmail API (`users.messages.list` and `users.messages.get`, over HTTPS, with the token service of step 1): no IMAP, no mail library, no sending, no modifying, no attachment download.
+
+**Why migration 0030 and not 0009.** The feature branches already use 0009 to 0013 for other tables, the runner refuses two files with one version, and an applied migration cannot be renamed. Versions need not be consecutive.
+
+**A run** looks at the inbox messages of a recent window (`windowDays`, default 14, 1 to 90), newest first, up to 500 listed; skips what is already stored (Gmail's id is unique); fetches at most `maxImport` new messages (default 50, 1 to 100), oldest first, each stored in a transaction of its own; and reports the rest as `remaining`, which the next run takes. One message that cannot be read (malformed, too large, deleted meanwhile) is counted in `failed` and skipped. An error that would hit every message (revoked credentials, a rate limit, Google being down, a missing permission) ends the run, and what was imported is kept. One run at a time (a second gets 409). No cursor is kept: repeating, interrupting and restarting are safe because of the unique Gmail id. The last attempt, the last run that was not cut short and its error category are in `gmail_sync_state`.
+
+**What is stored:** the decoded plain-text body (HTML-only mail is converted to text, never kept or rendered as HTML; at most 100,000 characters, flagged if cut), addresses, subject, Gmail's receive time (the sender's `Date` header is kept only as a claim), thread and `Message-ID` / `In-Reply-To` / `References`, and attachment *metadata* (name without a path, type, size). Never stored: the raw MIME payload, HTML, attachments, Gmail's attachment ids, tokens. Limits: 2 MiB per Gmail answer, 1 MiB of decoded text per message, 300 parts, depth 12, 100 attachments, 50 addresses.
+
+**Which request a message belongs to** (conservative; nothing is guessed and nothing is created): (1) the conversation, if it points at exactly one request: another message of the same Gmail thread already tied to a request, a message it replies to (`In-Reply-To` / `References`) that is stored with a request, or a message this system sent (its `Message-ID` is the e-mail delivery's id); if that points at two requests the message stays unassigned. (2) Otherwise the sender's address, if exactly one inquiry or quote request in the whole database has it (two, or an inquiry and a quote request from the same person, is ambiguous). Anything else stays unassigned. An administrator can place a message on a request, move it or take it off; that decision is final (`association_locked`).
+
+**Foreign keys.** A message points at its request with two nullable foreign keys (`inquiry_id`, `quote_request_id`, at most one set) with `ON DELETE SET NULL`: the database refuses an association to something that does not exist, deleting a request never deletes mail or touches an unrelated row, and the message goes back to waiting for a request. Erasing a person (`erase <email>`) also removes the local copy of their mail (sent by them, written to them, or tied to their requests); the mailbox itself is the owner's to clean.
+
+| Route | Needs |
+|---|---|
+| `GET /api/admin/gmail/sync-status` | `system:read` |
+| `POST /api/admin/gmail/sync` (`{windowDays?, maxImport?}`; 6 a minute per administrator) | `system:write` |
+| `GET /api/admin/gmail/unassigned` | `system:read` |
+| `GET /api/admin/inquiries/:id/emails`, `GET /api/admin/quote-requests/:id/emails` | `requests:read` |
+| `GET /api/admin/gmail/messages/:id` | `requests:read`; a message tied to no request needs `system:read` (for an editor it does not exist: 404) |
+| `PUT /api/admin/gmail/messages/:id/association` (`{entityType: "inquiry" \| "quote_request", entityId}`), `DELETE …/association` | `requests:write`; same rule for a message tied to no request |
+
+Every change needs the session's CSRF token and the administration's own origin. Answers carry summaries and the text of one message, never the raw payload; message text, subjects and addresses are never written to a log or to the administrator log (which records only counts and categories).
+
 ### What was **not** verified — read this before relying on it
 
 - **No real mail provider.** E-mail was proven against a protocol-speaking mock and a self-signed certificate, not against a real SMTP service (no provider, sender or recipient address exists to test with). Deliverability, SPF/DKIM/DMARC and spam-folder behaviour are the owner's to check; the system only claims *accepted by the provider*.

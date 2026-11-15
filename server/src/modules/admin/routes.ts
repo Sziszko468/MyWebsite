@@ -323,6 +323,24 @@ export function adminRoutes(_app: AppContext): RouteDef[] {
       await ctx.json()
       return json(await gmail.gmailCheck(ctx.app, ctx.session))
     }),
+    // The mailbox's messages (step 3): a manual synchronisation, and what it stored. Placing a message on a request is by hand.
+    api('GET', '/api/admin/gmail/sync-status', (ctx) => json(gmail.syncStatus(ctx.app, ctx.session))),
+    api('POST', '/api/admin/gmail/sync', async (ctx) => json(await gmail.runSync(ctx.app, ctx.session, await ctx.json()))),
+    api('GET', '/api/admin/gmail/unassigned', (ctx) => {
+      const page = gmail.unassignedMessages(ctx.app, ctx.session, ctx.query)
+      return json(page.messages, { meta: { total: page.total, limit: page.limit, offset: page.offset } })
+    }),
+    api('GET', '/api/admin/gmail/messages/:id', (ctx) => json(gmail.readMessage(ctx.app, ctx.session, ctx.params.id))),
+    api('PUT', '/api/admin/gmail/messages/:id/association', async (ctx) => json(gmail.associateMessage(ctx.app, ctx.session, ctx.params.id, await ctx.json()))),
+    api('DELETE', '/api/admin/gmail/messages/:id/association', (ctx) => json(gmail.unassociateMessage(ctx.app, ctx.session, ctx.params.id))),
+    api('GET', '/api/admin/inquiries/:id/emails', (ctx) => {
+      const page = gmail.messagesOf(ctx.app, ctx.session, 'inquiry', ctx.params.id, ctx.query)
+      return json(page.messages, { meta: { total: page.total, limit: page.limit, offset: page.offset } })
+    }),
+    api('GET', '/api/admin/quote-requests/:id/emails', (ctx) => {
+      const page = gmail.messagesOf(ctx.app, ctx.session, 'quote_request', ctx.params.id, ctx.query)
+      return json(page.messages, { meta: { total: page.total, limit: page.limit, offset: page.offset } })
+    }),
     api('POST', '/api/admin/system/maintenance', async (ctx) => {
       await ctx.json()
       const who = requirePermission(ctx.session, 'system:write')

@@ -370,6 +370,20 @@ describe('the Gmail token service, for the administration', () => {
     expect(calls).toHaveLength(1)
   })
 
+  it('forgets the cached access token when told it was refused, and asks for a new one at the next use', async () => {
+    let n = 0
+    const { service, calls } = setup(() => reply(200, tokenAnswer({ access_token: `ya29.token-number-${++n}` })))
+    expect(await service.getAccessToken()).toBe('ya29.token-number-1')
+    expect(await service.getAccessToken()).toBe('ya29.token-number-1')
+    service.invalidate()
+    expect(await service.getAccessToken()).toBe('ya29.token-number-2')
+    expect(calls).toHaveLength(2)
+    // Telling it twice, or before there is anything, is harmless.
+    service.invalidate()
+    service.invalidate()
+    expect(await service.getAccessToken()).toBe('ya29.token-number-3')
+  })
+
   it('answers "not configured" without a request, for a snapshot and for a check', async () => {
     const google = fakeGoogle(() => reply(200, tokenAnswer()))
     const service = createGmailTokenService(loadConfig({ GMAIL_CLIENT_ID: CLIENT_ID }).gmail, { fetch: google.fetch })

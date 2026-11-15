@@ -91,6 +91,8 @@ export interface GmailTokenService {
    * same time share one refresh. Throws `GmailAuthError` (and nothing else).
    */
   getAccessToken(): Promise<string>
+  /** Forgets the cached access token, so the next use asks Google for a new one (an API that answered 401 has said this one is no good). */
+  invalidate(): void
   /** Whether the mailbox can be reached. Never throws, never returns more than the four fields of `GmailConnectionStatus`. */
   status(): Promise<GmailConnectionStatus>
   /**
@@ -243,5 +245,9 @@ export function createGmailTokenService(config: GmailConfig, options: GmailToken
     }
   }
 
-  return { getAccessToken, status, snapshot, check }
+  function invalidate(): void {
+    cached = null
+  }
+
+  return { getAccessToken, invalidate, status, snapshot, check }
 }
