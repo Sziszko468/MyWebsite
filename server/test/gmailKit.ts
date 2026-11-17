@@ -94,6 +94,8 @@ export function gmailMessage(options: MessageOptions): Record<string, unknown> {
 
 export interface GoogleRequest {
   kind: 'token' | 'list' | 'get'
+  /** The HTTP method, upper case. */
+  method: string
   url: string
   /** The `Authorization` header, as sent. */
   authorization: string | null
@@ -127,7 +129,7 @@ export class FakeGoogle {
     const url = new URL(input)
     const headers = new Headers(init?.headers)
     const kind: GoogleRequest["kind"] = url.hostname === 'oauth2.googleapis.com' ? 'token' : /\/messages$/.test(url.pathname) ? 'list' : 'get'
-    const request: GoogleRequest = { kind, url: input, authorization: headers.get('authorization'), query: url.searchParams }
+    const request: GoogleRequest = { kind, method: (init?.method ?? 'GET').toUpperCase(), url: input, authorization: headers.get('authorization'), query: url.searchParams }
     this.requests.push(request)
     const forced = await this.override?.(request)
     if (forced instanceof Error) throw forced

@@ -16,8 +16,12 @@ import { iso, systemClock, type Clock } from '../../lib/time.ts'
 
 export const GMAIL_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 
-/** What the mailbox must have granted: read it, send from it. Nothing broader is asked for. */
-export const GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.send'] as const
+/**
+ * What the mailbox must have granted: the right to READ it, and nothing else. The integration lists and fetches messages (api.ts: two `GET`
+ * calls); it does not send, modify, delete or draft anything, so it requires no permission that would allow it. A token that was granted more
+ * (for example `gmail.send` as well, from an earlier authorization) is accepted; one that lacks `gmail.readonly` is not.
+ */
+export const GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'] as const
 
 /** Why a connection does not work, in words that are safe to show: it says what to check, never what Google (or the network) said. */
 export type GmailErrorCategory =
@@ -34,7 +38,7 @@ const MESSAGES: Record<GmailErrorCategory, string> = {
   not_configured: 'Gmail is not configured.',
   invalid_credentials: 'Google rejected the Gmail client ID, client secret or refresh token.',
   invalid_grant: 'Google no longer accepts the Gmail refresh token (it expired or was revoked); authorize the account again.',
-  insufficient_scope: 'The Gmail refresh token was not granted the permissions the integration needs.',
+  insufficient_scope: 'The Gmail refresh token was not granted permission to read Gmail (gmail.readonly).',
   rate_limited: 'Google is limiting token requests; try again later.',
   provider_unavailable: 'Google could not answer the token request; try again later.',
   network: 'Google could not be reached.',

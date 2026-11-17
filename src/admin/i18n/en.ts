@@ -780,7 +780,7 @@ export const en = {
         not_configured: 'Gmail is not configured.',
         invalid_credentials: 'Google rejected the client ID, the client secret or the refresh token. Check the three values on the server.',
         invalid_grant: 'Google no longer accepts the refresh token: it has expired or been revoked. Authorize the mailbox again and replace the token on the server.',
-        insufficient_scope: 'The refresh token was not granted the permissions the integration needs (reading and sending Gmail). Authorize the mailbox again with both.',
+        insufficient_scope: 'The refresh token was not granted the permission the integration needs (reading Gmail). Authorize the mailbox again with that permission.',
         rate_limited: 'Google is limiting requests right now. Try again in a few minutes.',
         provider_unavailable: 'Google could not answer. Try again in a few minutes.',
         network: 'The server could not reach Google. Try again in a few minutes.',

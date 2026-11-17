@@ -330,11 +330,19 @@ The first scheduled run happens at the next configured UTC hour after the proces
 
 ### Gmail OAuth foundation (step 1: connection only)
 
-`GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN` and `GMAIL_ACCOUNT_EMAIL` prepare a connection to one Gmail mailbox. They are separate from the Google Drive backup values: a different OAuth client and a different refresh token, never shared, never read from `GOOGLE_DRIVE_*`. The refresh token must be authorized for `gmail.readonly` and `gmail.send`; a token that Google reports without both is refused (`insufficient_scope`).
+`GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN` and `GMAIL_ACCOUNT_EMAIL` prepare a connection to one Gmail mailbox. They are separate from the Google Drive backup values: a different OAuth client and a different refresh token, never shared, never read from `GOOGLE_DRIVE_*`. The refresh token must be authorized for `gmail.readonly`, the **only** scope the integration requires; a token that Google reports without it is refused (`insufficient_scope`), and one that was also granted more (for example `gmail.send`, from an earlier authorization) is accepted.
 
 All four are optional and **never stop the server**. Unlike the Drive settings, an incomplete or unusable set only leaves Gmail disabled; the start-up log then names the variables that are wrong (never their values). `server/src/modules/gmail/tokenService.ts` exchanges the refresh token at `https://oauth2.googleapis.com/token`, keeps the access token in memory (renewed a minute before it expires, one request for concurrent callers) and reports a status of exactly four fields: `configured`, `connected`, `accountEmail`, `lastError` (a category such as `invalid_grant` or `provider_unavailable`; never a response text). Credentials and tokens are never logged or returned.
 
-Nothing reads or sends mail. `connected` means "Google issued an access token"; it does not yet prove the token belongs to `GMAIL_ACCOUNT_EMAIL`. If the Google Cloud OAuth consent screen is in *Testing*, Google expires the refresh token after seven days (`invalid_grant`).
+The token service itself reads and sends no mail. `connected` means "Google issued an access token"; it does not yet prove the token belongs to `GMAIL_ACCOUNT_EMAIL`. If the Google Cloud OAuth consent screen is in *Testing*, Google expires the refresh token after seven days (`invalid_grant`).
+
+#### Scope and permissions
+
+- **Gmail requires only the `https://www.googleapis.com/auth/gmail.readonly` scope.** The integration lists the inbox and fetches messages (`users.messages.list`, `users.messages.get`, both `GET`); it requires no other scope.
+- **It reads and imports messages. It does not send, modify or delete them**, in the mailbox or anywhere else, and it has no draft, label or attachment-download call. A test reads the module's source and its recorded requests to keep it so (`server/test/gmailReadOnly.test.ts`).
+- **The Gmail credentials are independent of the Google Drive backup credentials**: `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET` and `GMAIL_REFRESH_TOKEN` are never read from, and never fall back to, `GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET` and `GOOGLE_DRIVE_REFRESH_TOKEN`. The Drive backup keeps its own `drive.file` scope.
+- **Google's OAuth verification may still be required** for the restricted Gmail read scope. Whether and when depends on the consent screen's publishing status and on Google's current rules, which are not checked here; the Google Cloud console is where to look.
+- **An existing refresh token may need to be re-authorized.** A refresh token cannot be narrowed: one that was granted `gmail.readonly` and `gmail.send` keeps working, but to stop granting `gmail.send` the mailbox has to be authorized again with `gmail.readonly` only (and the old token revoked in the Google account). A token that lacks `gmail.readonly` is refused and must be authorized again.
 
 #### Administration: connection status (step 2)
 

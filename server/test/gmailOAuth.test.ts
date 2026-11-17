@@ -286,16 +286,28 @@ describe('the Gmail token service', () => {
     }
   })
 
-  it('refuses a token that was not granted the permissions the integration needs', async () => {
-    for (const scope of [GMAIL_SCOPES[0], GMAIL_SCOPES[1], 'https://www.googleapis.com/auth/drive.file', '']) {
+  it('requires gmail.readonly and nothing else: accepts a token that has it (with or without more) and refuses one that lacks it', async () => {
+    const READ = 'https://www.googleapis.com/auth/gmail.readonly'
+    const SEND = 'https://www.googleapis.com/auth/gmail.send'
+    // The one required scope. Adding another here would be a decision, not a side effect.
+    expect([...GMAIL_SCOPES]).toEqual([READ])
+
+    // Accepted: read-only alone (the minimum); read-only with more (an earlier authorization may also have granted gmail.send), in either order;
+    // a scope of another service beside it; and an answer that lists no scopes at all.
+    for (const scope of [READ, `${READ} ${SEND}`, `${SEND} ${READ}`, `${READ} openid`, `${READ} https://www.googleapis.com/auth/drive.file`, undefined]) {
       const { service } = setup(() => reply(200, tokenAnswer({ scope })))
-      expect((await categoryOf(service.getAccessToken())).category, scope).toBe('insufficient_scope')
-      expect(await service.status()).toMatchObject({ configured: true, connected: false, lastError: 'insufficient_scope' })
+      expect(await service.getAccessToken(), String(scope)).toBe(ACCESS_TOKEN)
+      expect(await service.status(), String(scope)).toEqual({ configured: true, connected: true, accountEmail: ACCOUNT, lastError: null })
     }
-    // Both scopes, in either order, and more are fine; so is an answer that does not list scopes at all.
-    for (const scope of [[...GMAIL_SCOPES].reverse().join(' '), `${GMAIL_SCOPES.join(' ')} openid`, undefined]) {
+
+    // Refused: no permission to read. gmail.send alone is not enough, and neither is a broader scope that does not name gmail.readonly,
+    // another service's scope, or an empty list.
+    for (const scope of [SEND, 'https://www.googleapis.com/auth/gmail.modify', 'https://mail.google.com/', 'https://www.googleapis.com/auth/drive.file', '']) {
       const { service } = setup(() => reply(200, tokenAnswer({ scope })))
-      expect(await service.getAccessToken()).toBe(ACCESS_TOKEN)
+      const failure = await categoryOf(service.getAccessToken())
+      expect(failure.category, scope).toBe('insufficient_scope')
+      expect(failure.error.message, 'a fixed text; it does not repeat what Google listed').toBe('The Gmail refresh token was not granted permission to read Gmail (gmail.readonly).')
+      expect(await service.status(), scope).toMatchObject({ configured: true, connected: false, lastError: 'insufficient_scope' })
     }
   })
 

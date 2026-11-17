@@ -777,7 +777,7 @@ export const hu: AdminText = {
         not_configured: 'A Gmail nincs beállítva.',
         invalid_credentials: 'A Google elutasította a kliensazonosítót, a kliens titkát vagy a frissítő tokent. Ellenőrizd a három értéket a szerveren.',
         invalid_grant: 'A Google már nem fogadja el a frissítő tokent: lejárt vagy visszavonták. Engedélyezd újra a postafiókot, és cseréld ki a tokent a szerveren.',
-        insufficient_scope: 'A frissítő token nem kapta meg az integrációhoz szükséges jogokat (a Gmail olvasását és a levélküldést). Engedélyezd újra a postafiókot mindkettővel.',
+        insufficient_scope: 'A frissítő token nem kapta meg az integrációhoz szükséges jogot (a Gmail olvasását). Engedélyezd újra a postafiókot ezzel a joggal.',
         rate_limited: 'A Google most korlátozza a kéréseket. Próbáld újra néhány perc múlva.',
         provider_unavailable: 'A Google nem tudott válaszolni. Próbáld újra néhány perc múlva.',
         network: 'A szerver nem érte el a Google-t. Próbáld újra néhány perc múlva.',
