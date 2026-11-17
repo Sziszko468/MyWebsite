@@ -552,4 +552,37 @@ export interface SystemData {
   failedDeliveries: { id: string; kind: string; status: string; attempts: number; lastError: string | null; updatedAt: string }[]
   audit: { id: number; actor: string | null; action: string; entity_type: string; entity_id: string | null; detail: string | null; created_at: string }[]
   hasDeployHook: boolean
+  /** The command center's first screen (server/src/modules/system/operations.ts): facts, never a secret, a path or a customer's address. */
+  operations: OperationsData
+}
+
+export type BackupState = 'disabled' | 'never' | 'ok' | 'stale' | 'running'
+export type BackupTriggerName = 'scheduled' | 'startup' | 'manual'
+
+export interface OperationsData {
+  backup: {
+    enabled: boolean
+    encrypted: boolean
+    state: BackupState
+    staleAfterHours: number
+    lastSuccess: { finishedAt: string; ageHours: number; folder: string | null; fileCount: number; totalBytes: number; databaseSha256: string | null; manifestSha256: string | null; encrypted: boolean; trigger: BackupTriggerName } | null
+    lastAttempt: { status: 'running' | 'success' | 'failed'; startedAt: string; finishedAt: string | null; errorCategory: string | null; httpStatus: number | null; trigger: BackupTriggerName } | null
+  }
+  migrations: { current: number; latest: number; pending: number; snapshots: { enabled: boolean; retentionDays: number; count: number; newestAt: string | null; newestBytes: number | null } }
+  disk: { available: boolean; freeBytes: number | null; totalBytes: number | null; freePercent: number | null; databaseBytes: number | null; low: boolean }
+  email: {
+    provider: string
+    enabled: boolean
+    paused: boolean
+    fromSet: boolean
+    replyToSet: boolean
+    notifyToSet: boolean
+    webhookSecretSet: boolean
+    deliveries: { pending: number; failed: number; accepted: number; delivered: number; bounced: number }
+    lastFailureAt: string | null
+    checks: { checkedAt: string; states: Record<string, number>; items: { id: string; state: string }[] } | null
+  }
+  assistant: { operatorEnabled: boolean; apiKeySet: boolean; model: string; verification: 'unverified' | 'verified' | 'failed' | 'stale'; verifiedAt: string | null; checkedAt: string | null; failureReason: string | null; available: boolean; unavailableReason: string | null }
+  network: { clientIp: string; socketAddress: string; forwardedFor: string[]; cloudflareConnectingIp: string | null; trustProxy: number; verdict: 'direct' | 'matches_cloudflare_header' | 'differs_from_cloudflare_header' | 'proxy_without_cloudflare_header'; measuredTrustProxy: number | null }
+  deployment: { commit: string | null; shortCommit: string | null; source: string | null; service: string | null; environment: string; startedAt: string }
 }

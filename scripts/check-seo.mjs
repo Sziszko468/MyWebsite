@@ -88,6 +88,10 @@ if (configured) {
   const sitemap = await readFile(sitemapFile, 'utf8')
   const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => decode(m[1]))
   const origin = new URL(locs[0]).origin
+  // PROMPT 25: the host the site declares must be the canonical one. `EXPECTED_SITE_ORIGIN` (for example https://szilardkiss.com, the host
+  // the backend's CANONICAL_REDIRECT sends to) makes this a check against a decision, not only against the build's own first address.
+  const expected = (process.env.EXPECTED_SITE_ORIGIN ?? '').trim().replace(/\/+$/, '')
+  if (expected) check(origin === expected, 'sitemap.xml', `the site declares ${origin}, but the canonical host is ${expected} (set VITE_SITE_URL to it for the build)`)
   const robots = await readFile(join(dist, 'robots.txt'), 'utf8')
   check(robots.includes(`Sitemap: ${origin}/sitemap.xml`), 'robots.txt', `should name ${origin}/sitemap.xml`)
   check(/^User-agent: \*$/m.test(robots) && !/^Disallow: \/\s*$/m.test(robots), 'robots.txt', 'should allow crawling')

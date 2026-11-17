@@ -2,6 +2,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import type { Level } from './lib/logger.ts'
 import { AI_MODEL_ID } from './modules/ai/model.ts'
+import { parseBackupKey } from './modules/backups/crypto.ts'
 
 /**
  * The server's whole configuration, read from the environment once and checked at start-up. A bad value
@@ -184,7 +185,26 @@ export interface Config {
   /** `CUSTOMER_LINK_DAYS`: how long the link in a customer's e-mail (the quotation, the status page) works. */
   customerLinkDays: number
   ai: AiConfig
-  backup: { enabled: boolean; clientId: string; clientSecret: string; refreshToken: string; folderId: string | null; retentionDays: number; hourUtc: number }
+  backup: {
+    enabled: boolean
+    clientId: string
+    clientSecret: string
+    refreshToken: string
+    folderId: string | null
+    retentionDays: number
+    hourUtc: number
+    /** `BACKUP_ENCRYPTION_KEY`: 32 bytes. A secret, server only. When set, every backed-up file is encrypted (AES-256-GCM) before it is uploaded. */
+    encryptionKey: Buffer | null
+  }
+  /**
+   * `MIGRATION_SNAPSHOT_DAYS` (0 switches it off) and `MIGRATION_SNAPSHOT_DIR`: before pending migrations are applied to an existing database,
+   * a consistent copy of it is written here, and kept for this many days (the newest one is always kept).
+   */
+  migrationSnapshots: { days: number; directory: string }
+  /** `CANONICAL_REDIRECT`: a request for the website on any host but `PUBLIC_URL`'s is sent there with a 301. Off unless asked for: see docs/operations. */
+  canonicalRedirect: boolean
+  /** Which commit this process runs, where the host says so (Render sets `RENDER_GIT_COMMIT`): shown to administrators, never used for anything. */
+  deployment: { commit: string | null; source: 'RENDER_GIT_COMMIT' | 'GIT_COMMIT' | null; service: string | null }
 }
 
 export class ConfigError extends Error {
@@ -410,6 +430,26 @@ export function loadConfig(env: Env = process.env): Config {
   if (backupParts.some(Boolean) && backupParts.some((part) => !part)) bad('GOOGLE_DRIVE_CLIENT_ID', 'GOOGLE_DRIVE_CLIENT_ID, GOOGLE_DRIVE_CLIENT_SECRET and GOOGLE_DRIVE_REFRESH_TOKEN must be set together')
   const backupRetentionDays = integer('BACKUP_RETENTION_DAYS', 30, 1, 365)
   const backupHourUtc = integer('BACKUP_HOUR_UTC', 3, 0, 23)
+  // A key that is set but wrong stops the server: a backup that was meant to be encrypted must never be sent in the clear by mistake.
+  const backupKeyRaw = text('BACKUP_ENCRYPTION_KEY')
+  let backupEncryptionKey: Buffer | null = null
+  if (backupKeyRaw !== null) {
+    backupEncryptionKey = parseBackupKey(backupKeyRaw)
+    if (!backupEncryptionKey) bad('BACKUP_ENCRYPTION_KEY', 'must be 32 random bytes written as base64 or as 64 hexadecimal characters (for example: openssl rand -base64 32)')
+  }
+
+  // ---- operations (PROMPT 25) ----
+  const migrationSnapshotDays = integer('MIGRATION_SNAPSHOT_DAYS', 14, 0, 365)
+  const migrationSnapshotDir = text('MIGRATION_SNAPSHOT_DIR') ?? join(dirname(databasePath), 'migration-snapshots')
+  const canonicalRedirect = flag('CANONICAL_REDIRECT', false)
+  if (canonicalRedirect && publicUrl === null) bad('CANONICAL_REDIRECT', 'needs PUBLIC_URL: the address every other host is sent to')
+  // What the host says about the running commit. Anything that is not a commit id is ignored (never an error: it is only displayed).
+  const commitFrom = (name: 'RENDER_GIT_COMMIT' | 'GIT_COMMIT') => {
+    const value = text(name)
+    return value !== null && /^[0-9a-f]{7,64}$/i.test(value) ? { commit: value.toLowerCase(), source: name } : null
+  }
+  const found = commitFrom('RENDER_GIT_COMMIT') ?? commitFrom('GIT_COMMIT')
+  const serviceName = text('RENDER_SERVICE_NAME')
 
   // ---- the assistant (PROMPT 16) ----
   const decimal = (name: string, fallback: number, min: number, max: number): number => {
@@ -534,7 +574,10 @@ export function loadConfig(env: Env = process.env): Config {
     quoteReferenceFormat,
     customerLinkDays,
     ai,
-    backup: { enabled: backupParts.every(Boolean), clientId: driveClientId ?? '', clientSecret: driveClientSecret ?? '', refreshToken: driveRefreshToken ?? '', folderId: driveFolderId, retentionDays: backupRetentionDays, hourUtc: backupHourUtc },
+    backup: { enabled: backupParts.every(Boolean), clientId: driveClientId ?? '', clientSecret: driveClientSecret ?? '', refreshToken: driveRefreshToken ?? '', folderId: driveFolderId, retentionDays: backupRetentionDays, hourUtc: backupHourUtc, encryptionKey: backupEncryptionKey },
+    migrationSnapshots: { days: migrationSnapshotDays, directory: migrationSnapshotDir },
+    canonicalRedirect,
+    deployment: { commit: found?.commit ?? null, source: found?.source ?? null, service: serviceName !== null && /^[A-Za-z0-9._ -]{1,64}$/.test(serviceName) ? serviceName : null },
   }
 }
 
@@ -568,7 +611,9 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     mediaMaxBytes: config.mediaMaxBytes,
     quoteReferenceFormat: config.quoteReferenceFormat,
     customerLinkDays: config.customerLinkDays,
-    googleDriveBackup: { enabled: config.backup.enabled, credentials: config.backup.enabled ? 'set' : 'missing', folderIdSet: config.backup.folderId !== null, retentionDays: config.backup.retentionDays, hourUtc: config.backup.hourUtc },
+    googleDriveBackup: { enabled: config.backup.enabled, credentials: config.backup.enabled ? 'set' : 'missing', folderIdSet: config.backup.folderId !== null, retentionDays: config.backup.retentionDays, hourUtc: config.backup.hourUtc, encrypted: config.backup.encryptionKey !== null },
+    migrationSnapshots: { days: config.migrationSnapshots.days },
+    canonicalRedirect: config.canonicalRedirect,
     assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : 'missing', model: config.ai.model, modelOverrideRejected: config.ai.modelOverride !== null, customBaseUrl: config.ai.baseUrl !== null },
   }
 }

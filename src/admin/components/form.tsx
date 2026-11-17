@@ -34,7 +34,7 @@ function Frame({ id, label, hint, error, required, optional, className, children
         </p>
       )}
       {error && (
-        <p className={styles.error} id={`${id}-error`} role="alert">
+        <p className={styles.error} id={`${id}-error`} role="alert" data-testid="field-error">
           {error}
         </p>
       )}

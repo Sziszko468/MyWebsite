@@ -62,7 +62,7 @@ export function StatusBadge({ kind, status, archived = false }: { kind: Kind; st
           : statusLabel(t, kind, status)
   return (
     <span className={styles.rowTight}>
-      <span className={cx(styles.badge, (kind === 'delivery' ? DELIVERY_TONES : TONES)[status] ?? styles.toneNeutral)}>
+      <span className={cx(styles.badge, (kind === 'delivery' ? DELIVERY_TONES : TONES)[status] ?? styles.toneNeutral)} data-testid="status-badge" data-kind={kind} data-status={status}>
         <span className={styles.badgeDot} aria-hidden="true" />
         {label}
       </span>

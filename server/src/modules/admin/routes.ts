@@ -1,5 +1,7 @@
+import type { IncomingMessage } from 'node:http'
 import type { AppContext, RequestCtx } from '../../context.ts'
 import { LANGUAGES, redactedConfig } from '../../config.ts'
+import { operationsData } from '../system/operations.ts'
 import { migrationStatus } from '../../db/migrate.ts'
 import { HttpError, notFound, validationFailed } from '../../http/errors.ts'
 import { empty, json, textReply } from '../../http/reply.ts'
@@ -49,9 +51,11 @@ const requestOut = (data: ReturnType<typeof quotes.detailForAdmin>) => {
   return { ...quoteOut(quote), ...around }
 }
 
-function systemData(app: AppContext, who: ReturnType<typeof session>) {
+function systemData(app: AppContext, who: ReturnType<typeof session>, request: IncomingMessage) {
   requirePermission(who, 'system:read')
   return {
+    // The command center's first screen (PROMPT 25): backups, migrations and snapshots, disk, e-mail, the assistant, the network as seen, the deployment.
+    operations: operationsData(app, request),
     config: redactedConfig(app.config),
     migrations: migrationStatus(app.db),
     stats: app.stats,
@@ -319,7 +323,7 @@ export function adminRoutes(_app: AppContext): RouteDef[] {
     }),
 
     // ---- system (administrators only) ----
-    api('GET', '/api/admin/system', (ctx) => json(systemData(ctx.app, session(ctx)))),
+    api('GET', '/api/admin/system', (ctx) => json(systemData(ctx.app, session(ctx), ctx.req))),
     api('POST', '/api/admin/system/maintenance', async (ctx) => {
       await ctx.json()
       const who = requirePermission(ctx.session, 'system:write')

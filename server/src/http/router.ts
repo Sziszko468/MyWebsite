@@ -29,6 +29,11 @@ export type Match = { kind: 'found'; def: RouteDef; params: Record<string, strin
 export class Router {
   private readonly routes: Compiled[] = []
 
+  /** Every route that is registered, in the order it was added: for tests and tools that must know what the server answers to (the admin route coverage test). */
+  list(): readonly RouteDef[] {
+    return this.routes.map(({ def }) => def)
+  }
+
   add(...defs: RouteDef[]): this {
     for (const def of defs) this.routes.push({ def, segments: def.pattern.split('/').filter(Boolean) })
     return this

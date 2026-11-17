@@ -28,10 +28,12 @@ const Context = createContext<Toasts | null>(null)
 
 const LIFETIME_MS: Record<Tone, number | null> = { success: 5000, info: 6000, error: null }
 
-export function ToastNotification({ toast, onDismiss }: { toast: Pick<ToastItem, 'tone' | 'message'>; onDismiss: () => void }) {
+export function ToastNotification({ toast, onDismiss }: { toast: Pick<ToastItem, 'tone' | 'message'> & { id?: number }; onDismiss: () => void }) {
   const t = useText()
+  // The test hooks (data-*) say what happened without the wording: a browser journey waits for "a success toast newer than the one it saw" and
+  // is not broken by a reworded or translated message. The visible text and the roles are what a person (and an assistive technology) gets.
   return (
-    <div className={cx(styles.toast, toast.tone === 'success' && styles.toastSuccess, toast.tone === 'error' && styles.toastError, toast.tone === 'info' && styles.toastInfo)} role={toast.tone === 'error' ? 'alert' : 'status'}>
+    <div data-testid="toast" data-tone={toast.tone} data-seq={toast.id} className={cx(styles.toast, toast.tone === 'success' && styles.toastSuccess, toast.tone === 'error' && styles.toastError, toast.tone === 'info' && styles.toastInfo)} role={toast.tone === 'error' ? 'alert' : 'status'}>
       <Icon name={toast.tone === 'error' ? 'alert' : toast.tone === 'success' ? 'checkCircle' : 'info'} className={styles.toastIcon} />
       <span className={styles.toastText}>{toast.message}</span>
       <button type="button" className={styles.iconButton} onClick={onDismiss} aria-label={t.toast.dismiss}>

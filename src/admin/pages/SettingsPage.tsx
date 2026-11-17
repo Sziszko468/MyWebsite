@@ -4,6 +4,7 @@ import { ApiError } from '../api/client'
 import * as endpoints from '../api/endpoints'
 import type { InterfaceLanguage, ThemePreference } from '../api/types'
 import { AdminButton } from '../components/AdminButton'
+import { CommandCenter } from '../components/CommandCenter'
 import { useConfirm } from '../components/Confirm'
 import { SelectField, TextField } from '../components/form'
 import { Icon } from '../components/Icon'
@@ -254,6 +255,8 @@ function System() {
 
   return (
     <div className={styles.stackLg}>
+      <CommandCenter data={data.operations} />
+
       <DetailPanel title={s.server}>
         <dl className={styles.definitions}>
           <dt>{s.schema}</dt>

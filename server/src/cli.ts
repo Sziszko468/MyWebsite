@@ -1,9 +1,11 @@
 import { existsSync, mkdirSync, statSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { createApp } from './app.ts'
-import { ConfigError, loadConfig, redactedConfig } from './config.ts'
+import { ConfigError, loadConfig, redactedConfig, type Config } from './config.ts'
 import { Database } from './db/database.ts'
-import { migrate, migrationStatus } from './db/migrate.ts'
+import { migrationStatus } from './db/migrate.ts'
+import { migrateWithSnapshot } from './db/snapshot.ts'
+import { decryptFile, restoreBackup, RestoreError, verifyBackupDirectory, writeBackupToDirectory } from './modules/backups/local.ts'
 import { seedCatalog } from './db/seed.ts'
 import { seedProjects } from './modules/projects/service.ts'
 import { seedConsultationTypes } from './modules/bookings/suggested.ts'
@@ -27,6 +29,10 @@ import { eraseByEmail, runMaintenance } from './modules/system/maintenance.ts'
  *   admin disable|enable <email>
  *   admin list
  *   backup <file>                        write a consistent copy of the database to a new file (safe while the server runs)
+ *   backup create <folder>               a whole backup (database, pictures, manifest; encrypted if BACKUP_ENCRYPTION_KEY is set) into a new folder
+ *   backup verify <folder>               check a backup folder against its manifest (sizes, SHA-256, a whole SQLite file); changes nothing
+ *   backup decrypt <file.enc> <output>   decrypt one backed-up file with BACKUP_ENCRYPTION_KEY, into a new file
+ *   backup restore <folder> <new.sqlite> [--media <new folder>]   verify, then write the database (and pictures) to NEW paths; never overwrites, never the live database
  *   maintenance                          remove expired sessions and, if RETENTION_DAYS is set, old finished requests
  *   erase <email>                        delete everything held about an e-mail address
  *   ai check [message]                   one real request to the configured model (spends a few tokens): proves the key, the model and the address
@@ -98,6 +104,45 @@ async function askPassword(email: string): Promise<string> {
   return first
 }
 
+/** The backup commands that work on files only (a restore drill needs no live database, and must never open one). */
+function backupFiles(config: Config, args: string[]): void {
+  const [action, ...rest] = args
+  const key = config.backup.encryptionKey
+  const out = (text: string) => process.stdout.write(`${text}\n`)
+  try {
+    if (action === 'verify') {
+      const [directory] = rest
+      if (!directory) throw new Error('Give the backup folder (for example the day\'s folder downloaded from Google Drive).')
+      const report = verifyBackupDirectory(directory, key)
+      out(`${report.ok ? 'Backup OK' : 'Backup NOT OK'}: ${report.files} file(s) checked, database ${report.databaseBytes} bytes, ${report.encrypted ? `encrypted (key id ${report.keyId})` : 'not encrypted'}${report.manifest ? `, schema version ${report.manifest.schemaVersion}, made ${report.manifest.createdAt}` : ''}.`)
+      for (const problem of report.problems) out(`PROBLEM: ${problem}`)
+      for (const warning of report.warnings) out(`note: ${warning}`)
+      if (!report.ok) process.exitCode = 1
+      return
+    }
+    if (action === 'decrypt') {
+      const [input, output] = rest
+      if (!input || !output) throw new Error('Use: backup decrypt <file.enc> <output file>')
+      if (!key) throw new Error('Set BACKUP_ENCRYPTION_KEY (the key the backup was made with) in the environment, then run this again.')
+      out(`Decrypted to ${resolve(output)} (${decryptFile(input, output, key).bytes} bytes).`)
+      return
+    }
+    if (action === 'restore') {
+      const [directory, target, ...flags] = rest
+      if (!directory || !target) throw new Error('Use: backup restore <backup folder> <new database file> [--media <new folder>]')
+      const mediaAt = flags.indexOf('--media')
+      const result = restoreBackup({ directory, key, target, mediaTarget: mediaAt >= 0 ? flags[mediaAt + 1] : undefined, protectedPaths: [config.databasePath] })
+      out(`Restored the database to ${result.database} (${result.databaseBytes} bytes).`)
+      if (result.media) out(`Restored ${result.media.files} picture(s) to ${result.media.directory}.`)
+      out('Nothing that existed was changed. To use it, stop the server and point DATABASE_PATH at the restored file (docs/operations/RESTORE_DRILL.md).')
+      return
+    }
+  } catch (error) {
+    if (error instanceof RestoreError) for (const problem of error.problems) process.stderr.write(`PROBLEM: ${problem}\n`)
+    throw error
+  }
+}
+
 async function run(): Promise<void> {
   const [command, ...args] = process.argv.slice(2)
   let config
@@ -116,17 +161,23 @@ async function run(): Promise<void> {
     return
   }
 
+  if (command === 'backup' && ['verify', 'decrypt', 'restore'].includes(args[0] ?? '')) {
+    backupFiles(config, args)
+    return
+  }
+
   const db = new Database(config.databasePath)
   const log = createLogger({ level: config.logLevel === 'info' ? 'warn' : config.logLevel })
   try {
+    // PROMPT 25: pending migrations on an existing database are preceded by a snapshot of it (db/snapshot.ts), whichever command brings them.
+    const migrated = migrateWithSnapshot(db, systemClock, { databasePath: config.databasePath, snapshots: config.migrationSnapshots })
     if (command === 'migrate') {
-      const applied = migrate(db, systemClock)
       const status = migrationStatus(db)
-      process.stdout.write(applied.length > 0 ? `Applied migrations: ${applied.join(', ')}.\n` : 'The schema is up to date.\n')
+      if (migrated.snapshot) process.stdout.write(`Snapshot of the database written before migrating: ${join(config.migrationSnapshots.directory, migrated.snapshot.file)} (${migrated.snapshot.bytes} bytes).\n`)
+      process.stdout.write(migrated.applied.length > 0 ? `Applied migrations: ${migrated.applied.join(', ')}.\n` : 'The schema is up to date.\n')
       process.stdout.write(`Schema version ${status.current}.\n`)
       return
     }
-    migrate(db, systemClock)
     const app = createApp({ config, db, clock: systemClock, log, mailer: null })
 
     switch (command) {
@@ -174,7 +225,13 @@ async function run(): Promise<void> {
         throw new Error('Use: admin create|password|disable|enable <email>, or admin list.')
       }
       case 'backup': {
-        const [file] = args
+        const [file, folder] = args
+        if (file === 'create') {
+          if (!folder) throw new Error('Give the new folder to write the backup to.')
+          const made = await writeBackupToDirectory({ db, mediaDir: config.mediaDir, key: config.backup.encryptionKey, clock: systemClock, directory: folder })
+          process.stdout.write(`Backup written to ${made.directory}: ${made.fileCount} file(s), ${made.totalBytes} bytes${made.encrypted ? ', encrypted' : ', NOT encrypted (BACKUP_ENCRYPTION_KEY is not set)'}.\nDatabase SHA-256 ${made.databaseSha256}\n`)
+          return
+        }
         if (!file) throw new Error('Give the file to write the backup to.')
         const target = resolve(file)
         if (existsSync(target)) throw new Error(`${target} already exists; choose a new file name.`)

@@ -5,6 +5,7 @@ import type { AppContext, Handler, RequestCtx, Stats } from './context.ts'
 import type { Database } from './db/database.ts'
 import { DatabaseUnavailableError, ConstraintError, HttpError, csrfFailed, notFound, unauthorized } from './http/errors.ts'
 import { Limiters } from './http/rateLimit.ts'
+import { canonicalRedirect } from './http/canonical.ts'
 import { clientIp, parseCookies, readBody, readForm, readJson } from './http/request.ts'
 import { empty, errorReply, type Reply } from './http/reply.ts'
 import { Router, type RouteDef } from './http/router.ts'
@@ -64,6 +65,8 @@ export interface App {
   context: AppContext
   server: Server
   handle(req: IncomingMessage, res: ServerResponse): Promise<void>
+  /** The registered routes, as they are (the route coverage test discovers the administration's from here). */
+  routes(): readonly RouteDef[]
   /** Starts background work (the outbox timer). */
   start(): void
   close(): Promise<void>
@@ -75,7 +78,7 @@ const REQUEST_ID = /^[A-Za-z0-9_-]{8,64}$/
 export function createApp(deps: AppDeps): App {
   const { config, db, clock, log } = deps
   // Whatever a provider's error text or a library's exception quotes of these is masked in every log line and every stored reason.
-  for (const secret of [config.email.apiKey, config.email.webhookSecret, config.email.smtp?.password, config.email.cloudflare?.apiToken, config.ai.apiKey]) registerSecret(secret)
+  for (const secret of [config.email.apiKey, config.email.webhookSecret, config.email.smtp?.password, config.email.cloudflare?.apiToken, config.ai.apiKey, config.backup.encryptionKey?.toString('base64'), config.backup.encryptionKey?.toString('hex')]) registerSecret(secret)
   const stats: Stats = { startedAt: Date.now(), requests: 0, clientErrors: 0, serverErrors: 0, rateLimited: 0 }
   const limiters = new Limiters(clock, config.rateLimitsEnabled)
   const notifier = new Notifier({ db, config, clock, log, mailer: deps.mailer })
@@ -147,6 +150,8 @@ export function createApp(deps: AppDeps): App {
       area = url.pathname === '/admin' || url.pathname.startsWith('/admin/') || url.pathname.startsWith('/api/admin/') ? 'admin' : url.pathname.startsWith('/api/') ? 'api' : 'static'
       limiters.check('global', ip)
       const redirect = area === 'static' && config.staticDir ? languageRedirect({ countryHeader: config.countryHeader, method, pathname: url.pathname, search: url.search, headers: req.headers }) : null
+      // PROMPT 25: with CANONICAL_REDIRECT on, a page asked for on another host than PUBLIC_URL's is sent to PUBLIC_URL (http/canonical.ts).
+      const canonical = config.canonicalRedirect && config.publicUrl ? canonicalRedirect({ publicUrl: config.publicUrl, method, host: req.headers.host, pathname: url.pathname, search: url.search }) : null
 
       let formCache: Promise<URLSearchParams> | null = null
       // A client that closes the connection before the response was written completely cancels what the request started.
@@ -175,7 +180,10 @@ export function createApp(deps: AppDeps): App {
         signal: gone.signal,
       }
 
-      if (method === 'OPTIONS') {
+      if (canonical !== null) {
+        label = 'canonical'
+        reply = empty(canonical.status, canonical.headers)
+      } else if (method === 'OPTIONS') {
         const cors = area === 'api' ? corsHeaders(origin, config) : null
         reply = cors ? empty(204, { ...cors, ...PREFLIGHT_HEADERS }) : empty(204)
         label = 'preflight'
@@ -309,6 +317,7 @@ export function createApp(deps: AppDeps): App {
     context,
     server,
     handle,
+    routes: () => router.list(),
     start: () => notifier.start(),
     async close() {
       clearInterval(sweeper)

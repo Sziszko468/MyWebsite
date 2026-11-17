@@ -231,7 +231,11 @@ function TypeEditor({ type, canEdit, onSaved, onCancel }: { type: ConsultationTy
           void save()
         }}
       >
-        {type ? <p className={styles.hint}>{type.complete ? g.complete : g.incomplete}</p> : <TextField label={g.code} hint={g.codeHint} value={code} error={errors.code} autoComplete="off" onChange={(event) => setCode(event.target.value.toLowerCase())} />}
+        {type ? (
+          <p className={styles.hint} data-testid="type-readiness" data-complete={type.complete}>
+            {type.complete ? g.complete : g.incomplete}
+          </p>
+        ) : <TextField label={g.code} hint={g.codeHint} value={code} error={errors.code} autoComplete="off" onChange={(event) => setCode(event.target.value.toLowerCase())} />}
         <div className={styles.grid2}>
           <TextField label={g.duration} hint={duration === '' ? g.durationNone : undefined} type="number" inputMode="numeric" min={5} max={480} value={duration} disabled={!canEdit} error={errors.durationMinutes} onChange={(event) => setDuration(event.target.value)} />
           <TextField label={g.order} type="number" inputMode="numeric" min={0} value={order} disabled={!canEdit} error={errors.sortOrder} onChange={(event) => setOrder(event.target.value)} />

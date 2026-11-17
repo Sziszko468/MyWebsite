@@ -1,0 +1,39 @@
+name: Smoke test a deployed site (manual)
+
+# A read-only check of a site that is already deployed (PROMPT 25): GET /api/health and GET /api/ready, nothing else. It is run by hand from
+# the Actions tab, for example a few minutes after the host has finished a deploy. Nothing starts it automatically, and it cannot start a
+# deploy: it holds no deploy hook, no token and no secret, sends no cookie and no body, and prints only the status and the names of the checks.
+# A redirect is reported as a failure on purpose: give the canonical address, and an answer that sends the visitor elsewhere is the finding.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: The site's canonical address, with no path (for example https://szilardkiss.com)
+        required: true
+        default: https://szilardkiss.com
+      attempts:
+        description: How many times to try before giving up (a site that is still starting needs a few)
+        default: '6'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18
+
+      # The inputs go through the environment, never into the command line, so a value cannot become part of the shell script.
+      - name: Check the readiness endpoint
+        env:
+          SMOKE_URL: ${{ inputs.url }}
+          SMOKE_ATTEMPTS: ${{ inputs.attempts }}
+        run: node scripts/smoke-ready.mjs --url="$SMOKE_URL" --attempts="$SMOKE_ATTEMPTS"

@@ -1,7 +1,8 @@
 import { createApp } from './app.ts'
 import { ConfigError, loadConfig } from './config.ts'
 import { Database } from './db/database.ts'
-import { migrate, migrationStatus } from './db/migrate.ts'
+import { migrationStatus } from './db/migrate.ts'
+import { migrateWithSnapshot } from './db/snapshot.ts'
 import { seedCatalog } from './db/seed.ts'
 import { mediaStorage } from './modules/media/storage.ts'
 import { seedProjects } from './modules/projects/service.ts'
@@ -34,8 +35,12 @@ async function main(): Promise<void> {
 
   const db = new Database(config.databasePath)
   if (config.migrateOnStart) {
-    const applied = migrate(db, systemClock)
-    if (applied.length > 0) log.info('migrations applied', { versions: applied })
+    // PROMPT 25: an existing database with pending migrations is copied first (db/snapshot.ts). If the copy cannot be made, or a migration
+    // fails, the server does not start, and the error says where the copy is.
+    const migrated = migrateWithSnapshot(db, systemClock, { databasePath: config.databasePath, snapshots: config.migrationSnapshots })
+    if (migrated.snapshot) log.info('database snapshot written before migrating', { file: migrated.snapshot.file, bytes: migrated.snapshot.bytes, from: migrated.snapshot.from, to: migrated.snapshot.to })
+    if (migrated.applied.length > 0) log.info('migrations applied', { versions: migrated.applied })
+    if (migrated.pruned.length > 0) log.info('old migration snapshots removed', { count: migrated.pruned.length })
   } else if (migrationStatus(db).pending > 0) {
     log.error('the database has pending migrations; run `npm run server:migrate` (or set MIGRATE_ON_START=true)')
     process.exit(1)
@@ -76,7 +81,8 @@ async function main(): Promise<void> {
   const address = app.server.address()
   log.info('server listening', { host: config.host, port: typeof address === 'object' && address ? address.port : config.port, env: config.env, mailer: config.email.provider, database: config.databasePath === ':memory:' ? 'memory' : 'file' })
 
-  const backupScheduler = config.backup.enabled ? startBackupScheduler({ config, db, log, mailer: createMailer(config.email) }, config.backup.hourUtc) : null
+  // The daily backup, and (PROMPT 25) one catch-up a minute after a start that finds no successful backup in the last 24 hours.
+  const backupScheduler = config.backup.enabled ? startBackupScheduler({ config, db, log, mailer: createMailer(config.email), clock: systemClock }, config.backup.hourUtc, { catchUp: true }) : null
   if (!config.backup.enabled) log.info('Google Drive backup is not configured; automatic backups are disabled')
 
   const maintenance = setInterval(() => {

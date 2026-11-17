@@ -3,15 +3,29 @@ name: CI
 # The checks a change has to pass before it is merged. The language checks are part of it (PROMPT 18): a text that is missing in
 # Hungarian, English or Dutch, a placeholder that was lost in translation, a word the dictionary does not know, or a customer-facing
 # word written into a component fails the run.
+#
+# PROMPT 25: the branch the host deploys from is checked on every push as well, so a broken change is seen in this run and not first in the
+# host's build log. This workflow only reads the repository and runs checks: it holds no deploy hook, no token and no secret, and nothing
+# in it can start a deploy or change a hosting setting (server/test/ciWorkflow.test.ts keeps it that way). The steps below are the same
+# ones `npm run check:deploy` runs on a developer's machine, plus the language checks.
 
 on:
   push:
-    branches: [main]
+    branches: [main, deployment/render-cloudflare]
   pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch makes an older, unfinished run of it pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +51,13 @@ jobs:
           npm run i18n:check
           npm run i18n:validate
 
+      # The site's canonical address (an owner decision, recorded in docs/operations/README.md). The build and the SEO check both use it, so the
+      # sitemap, the canonical links and the hreflang addresses are checked for the host the site really answers on; without an address the build is
+      # deliberately noindex and those checks would have nothing to look at. It is set for this step only: the tests above run without it.
       - name: Build and check the pages the build wrote
+        env:
+          VITE_SITE_URL: https://szilardkiss.com
+          EXPECTED_SITE_ORIGIN: https://szilardkiss.com
         run: |
           npm run build
           npm run check:seo

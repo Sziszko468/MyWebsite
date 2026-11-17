@@ -95,7 +95,11 @@ export function BookingsPage() {
       cell: (row) => (
         <span className={styles.stack}>
           <BookingStatusBadge status={row.status} />
-          {row.openChange && <span className={cx(styles.badge, styles.toneAccent)}>{b.list.openChange[row.openChange]}</span>}
+          {row.openChange && (
+            <span className={cx(styles.badge, styles.toneAccent)} data-testid="booking-open-change" data-kind={row.openChange}>
+              {b.list.openChange[row.openChange]}
+            </span>
+          )}
         </span>
       ),
     },
@@ -117,7 +121,7 @@ export function BookingsPage() {
       />
       <div className={styles.stackLg}>
         {config.data && (
-          <div className={cx(styles.notice, closed.length > 0 && styles.noticeWarning)} role="status">
+          <div className={cx(styles.notice, closed.length > 0 && styles.noticeWarning)} role="status" data-testid="booking-open-state" data-open={closed.length === 0}>
             {closed.length > 0 ? (
               <>
                 <strong>{b.closed.title}</strong>
@@ -177,7 +181,11 @@ export function BookingsPage() {
                   <p className={styles.small}>{formatInZone(row.startAt, row.timeZone, language)} · {row.timeZone}</p>
                   <div className={styles.listCardMeta}>
                     <span className={styles.mono}>{row.reference}</span>
-                    {row.openChange && <span>{b.list.openChange[row.openChange]}</span>}
+                    {row.openChange && (
+                      <span data-testid="booking-open-change" data-kind={row.openChange}>
+                        {b.list.openChange[row.openChange]}
+                      </span>
+                    )}
                     <span>{formatDateTime(row.createdAt, language)}</span>
                   </div>
                 </>

@@ -70,7 +70,7 @@ export function BookingPage() {
   if (state.status === 'failed') {
     return (
       <Frame words={words}>
-        <div className={consult.notice} role="alert">
+        <div className={consult.notice} role="alert" data-testid="booking-link-problem" data-reason={state.failure.kind}>
           <p>{problemText(state.failure, words)}</p>
           {(state.failure.kind === 'network' || state.failure.kind === 'unavailable' || state.failure.kind === 'rate_limited') && (
             <button type="button" className={consult.linkButton} onClick={reload}>
@@ -144,13 +144,13 @@ function Booking({ token, booking, words, notice, onChanged }: { token: string; 
         <h1 ref={pageTitle} tabIndex={-1} className={consult.panelTitle}>
           {booking.type.name}
         </h1>
-        <p className={consult.statusBadge} data-tone={tone}>
+        <p className={consult.statusBadge} data-tone={tone} data-testid="booking-status" data-status={booking.status}>
           {m.statuses[booking.status]}
         </p>
       </header>
 
       {notice && (
-        <p className={consult.notice} role="status">
+        <p className={consult.notice} role="status" data-testid="booking-notice">
           {notice}
         </p>
       )}
@@ -175,14 +175,14 @@ function Booking({ token, booking, words, notice, onChanged }: { token: string; 
       </dl>
 
       {booking.cancellation && (
-        <div className={consult.card}>
+        <div className={consult.card} data-testid="booking-cancellation">
           <h2>{m.cancelled.title}</h2>
           {booking.cancellation.note && <p>{fill(m.cancelled.note, { note: booking.cancellation.note })}</p>}
         </div>
       )}
 
       {open && open.kind === 'cancel' && (
-        <div className={consult.card}>
+        <div className={consult.card} data-testid="booking-change" data-kind="cancel">
           <h2>{m.pending.cancelTitle}</h2>
           <p>{m.pending.cancelBody}</p>
           {open.canWithdraw && <Button variant="secondary" onClick={() => void run({ action: 'withdraw' }, () => m.actions.withdrawn)} loading={busy} loadingLabel={m.actions.sending}>{m.pending.withdraw}</Button>}
@@ -190,7 +190,7 @@ function Booking({ token, booking, words, notice, onChanged }: { token: string; 
       )}
 
       {open && open.kind === 'reschedule' && open.newStartAt && open.initiator === 'customer' && (
-        <div className={consult.card}>
+        <div className={consult.card} data-testid="booking-change" data-kind="move">
           <h2>{m.pending.moveTitle}</h2>
           <p>{fill(m.pending.moveBody, { time: instantMoment(open.newStartAt, booking.timeZone, lang) })}</p>
           {open.canWithdraw && <Button variant="secondary" onClick={() => void run({ action: 'withdraw' }, () => m.actions.withdrawn)} loading={busy} loadingLabel={m.actions.sending}>{m.pending.withdraw}</Button>}
@@ -198,7 +198,7 @@ function Booking({ token, booking, words, notice, onChanged }: { token: string; 
       )}
 
       {open && open.kind === 'reschedule' && open.newStartAt && open.initiator === 'owner' && (
-        <div className={consult.card}>
+        <div className={consult.card} data-testid="booking-change" data-kind="proposal">
           <h2>{m.proposal.title}</h2>
           <p>{fill(m.proposal.body, { time: instantMoment(open.newStartAt, booking.timeZone, lang) })}</p>
           {open.expiresAt && <p>{fill(m.proposal.until, { time: instantMoment(open.expiresAt, booking.timeZone, lang) })}</p>}

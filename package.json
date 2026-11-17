@@ -11,6 +11,8 @@
     "build": "tsc -b && npm run i18n:check && vite build && npm run build:seo",
     "build:seo": "vite build --ssr src/seo/entry.ts --outDir node_modules/.cache/seo --emptyOutDir && node scripts/prerender.mjs",
     "check:seo": "node scripts/check-seo.mjs",
+    "check:deploy": "node scripts/check-deploy.mjs",
+    "smoke:ready": "node scripts/smoke-ready.mjs",
     "catalog:seed-export": "node scripts/export-catalog-seed.mjs",
     "catalog:pull": "node scripts/pull-catalog.mjs",
     "server:start": "node --disable-warning=ExperimentalWarning server/src/main.ts",
