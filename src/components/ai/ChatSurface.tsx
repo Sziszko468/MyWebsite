@@ -38,6 +38,8 @@ function MessageView({ message, last, busy }: { message: UIMessage; last: boolea
   const [copied, setCopied] = useState(false)
   const body = textOf(message)
   const tools = message.parts.filter(isTool)
+  // An answer the model had to stop at the output limit says so (the server marks it; the words are the interface's own).
+  const truncated = message.role === 'assistant' && (message.metadata as { finishReason?: string } | undefined)?.finishReason === 'length'
   if (message.role === 'user') {
     return (
       <li className={cx(styles.message, styles.user)}>
@@ -76,6 +78,11 @@ function MessageView({ message, last, busy }: { message: UIMessage; last: boolea
         <div className={styles.bubble}>
           <RichText text={body} />
         </div>
+      )}
+      {truncated && (
+        <p className={styles.notice} role="status">
+          {text.status.truncated}
+        </p>
       )}
       {last && !busy && body && (
         <div className={styles.messageActions}>
@@ -143,13 +150,23 @@ function Composer({ disabled, max, onSend, onStop, busy, inputRef }: { disabled:
         }}
         onKeyDown={keys}
       />
+      {/* Two buttons with keys of their own, never one element whose `type` changes: a click on "Stop" that ends the answer would otherwise
+          land on a "Send" button (the same element, now of type submit) and submit the empty box ("Write a message first." flashed after every stop). */}
       {busy ? (
-        <button type="button" className={cx(styles.send, styles.stop)} onClick={onStop}>
+        <button
+          key="stop"
+          type="button"
+          className={cx(styles.send, styles.stop)}
+          onClick={(event) => {
+            event.preventDefault()
+            onStop()
+          }}
+        >
           <span className={styles.stopMark} aria-hidden="true" />
           {text.composer.stop}
         </button>
       ) : (
-        <button type="submit" className={styles.send} disabled={disabled}>
+        <button key="send" type="submit" className={styles.send} disabled={disabled}>
           {text.composer.send}
         </button>
       )}
@@ -266,7 +283,7 @@ export function ChatSurface({ variant, composerRef }: { variant: 'panel' | 'page
         {errorText && (
           <div className={styles.error} role="alert">
             <p>{errorText}</p>
-            {code !== 'unavailable' && code !== 'budget' && code !== 'model_unverified' && code !== 'model_mismatch' && code !== 'model_not_found' && code !== 'conversation_expired' && code !== 'conversation_full' && (
+            {code !== 'unavailable' && code !== 'budget' && code !== 'model_unverified' && code !== 'model_mismatch' && code !== 'model_not_found' && code !== 'conversation_expired' && code !== 'conversation_full' && code !== 'sensitive_data' && (
               <button type="button" className={styles.retry} onClick={retry}>
                 {text.actions.retry}
               </button>
@@ -277,6 +294,11 @@ export function ChatSurface({ variant, composerRef }: { variant: 'panel' | 'page
               </button>
             )}
           </div>
+        )}
+        {room.cancelled && !busy && !errorText && (
+          <p className={styles.notice} role="status">
+            {text.status.cancelled}
+          </p>
         )}
         {!busy && !errorText && lastMessage?.role === 'assistant' && textOf(lastMessage) && (
           <div className={styles.regenerate}>

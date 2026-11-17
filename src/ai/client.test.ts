@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AiError, errorFrom, newConversationId, readStored, writeStored, clearStored } from './client'
+import { aiText } from '../content/ai'
 import { chatErrorCode } from './controlRoom'
 
 /**
@@ -23,6 +24,35 @@ describe('what an error from the server means', () => {
 
 describe('what a chat error means to the interface', () => {
   const json = (code: string, reason?: string) => new Error(JSON.stringify({ error: { code, details: reason ? { reason } : {} } }))
+
+  it('has words, in all three languages, for every state the server can end an answer in (PROMPT 29): no code falls back to the generic sentence', () => {
+    const states = [
+      chatErrorCode(json('service_unavailable', 'capacity')),
+      chatErrorCode(json('validation_failed', 'sensitive_data')),
+      chatErrorCode(new Error('provider_invalid_response')),
+      chatErrorCode(new Error('output_limit')),
+      chatErrorCode(new Error('provider_rate_limit')),
+      chatErrorCode(new Error('provider_unavailable')),
+      chatErrorCode(new Error('timeout')),
+      chatErrorCode(json('service_unavailable', 'daily_budget')),
+      chatErrorCode(json('rate_limited')),
+      chatErrorCode(json('rate_limited', 'session_requests')),
+      chatErrorCode(json('service_unavailable', 'unavailable')),
+      chatErrorCode(json('service_unavailable', 'model_unverified')),
+    ]
+    expect(states).toEqual(['capacity', 'sensitive_data', 'provider_invalid_response', 'output_limit', 'provider_rate_limit', 'provider_unavailable', 'timeout', 'budget', 'rate_limited', 'session_requests', 'unavailable', 'model_unverified'])
+    const errors = aiText.errors as Record<string, { hu: string; en: string; nl: string }>
+    for (const code of states) {
+      for (const language of ['hu', 'en', 'nl'] as const) expect(errors[code as string]?.[language]?.trim(), `${code} in ${language}`).toBeTruthy()
+    }
+    // The two new notes (a stopped answer, an answer cut off at the output limit) exist in every language too.
+    for (const language of ['hu', 'en', 'nl'] as const) {
+      expect(aiText.status.cancelled[language].length).toBeGreaterThan(10)
+      expect(aiText.status.truncated[language].length).toBeGreaterThan(10)
+    }
+    // The message about a card number or key must not echo one and must say where the contact details go.
+    expect(aiText.errors.sensitive_data.en).not.toMatch(/\d{6}/)
+  })
 
   it('turns every spent budget into one code, so the visitor is told one honest thing', () => {
     for (const reason of ['daily_budget', 'monthly_budget', 'daily_tokens', 'daily_requests', 'daily_conversations']) expect(chatErrorCode(json('service_unavailable', reason))).toBe('budget')

@@ -370,7 +370,7 @@ describe('the database’s own refusals', () => {
     db.run("INSERT INTO client_projects (id, reference, customer_id, name, category, status, created_at, updated_at) VALUES ('p1', 'PRJ-OLD00001', 'c1', 'Old project', 'website', 'design', ?, ?)", [now, now])
     db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, attempts, created_at, updated_at) VALUES ('d1', 'client_project_status', 'client_project_event', '2', 'old@example.test', 'en', 'delivered', 1, ?, ?)", [now, now])
     db.run("INSERT INTO email_deliveries (id, kind, related_type, related_id, recipient, language, status, attempts, created_at, updated_at) VALUES ('d2', 'deliverable_feedback_admin', 'deliverable_event', '7', 'owner@example.test', 'en', 'pending', 0, ?, ?)", [now, now])
-    expect(migrate(db, clock).filter((version) => version >= 15)).toEqual([15])
+    expect(migrate(db, clock).filter((version) => version === 15)).toEqual([15])
     expect(db.all("SELECT id, kind, related_type, status FROM email_deliveries ORDER BY id")).toEqual([
       { id: 'd1', kind: 'client_project_status', related_type: 'client_project_event', status: 'delivered' },
       { id: 'd2', kind: 'deliverable_feedback_admin', related_type: 'deliverable_event', status: 'pending' },

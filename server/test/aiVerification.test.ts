@@ -120,7 +120,7 @@ describe('activation needs proof and a decision', () => {
     expect((await t.api.put({ enabled: false })).status).toBe(200)
     expect((await t.api.config()).available).toBe(false)
     const audited = t.s.db.all<{ action: string }>("SELECT action FROM audit_log WHERE action LIKE 'ai.%' ORDER BY id").map((row) => row.action)
-    expect(audited).toEqual(['ai.connection_test', 'ai.activate', 'ai.deactivate'])
+    expect(audited).toEqual(['ai.connection_test', 'ai.settings.update', 'ai.activate', 'ai.settings.update', 'ai.deactivate'])
   })
 
   it('cannot have its model chosen: no field of the settings, the chat or the test names one', async () => {
@@ -356,9 +356,9 @@ describe('budget alerts and limits', () => {
   }
 
   it('warns once when a limit reaches the configured percentage, once more when it is used up, refuses further generation clearly, and keeps quote requests working', async () => {
-    const t = await start()
+    const t = await start({ AI_PRICE_INPUT_PER_MTOK: '10' })
     await activate(t)
-    expect((await t.api.put({ dailyBudgetUsd: 1, monthlyBudgetUsd: 5, alertPercent: 80, priceInputPerMTok: 10, maxToolCalls: 1, maxOutputTokens: 200 })).status).toBe(200)
+    expect((await t.api.put({ dailyBudgetUsd: 1, monthlyBudgetUsd: 5, alertPercent: 80, maxToolCalls: 1, maxOutputTokens: 200 })).status).toBe(200)
     spend(t.s, 0.79)
     expect((await t.chat('Under the warning level')).status).toBe(200)
     await new Promise((resolve) => setTimeout(resolve, 50))
@@ -397,9 +397,9 @@ describe('budget alerts and limits', () => {
   })
 
   it('warns about the month on its own, with its own period', async () => {
-    const t = await start()
+    const t = await start({ AI_PRICE_INPUT_PER_MTOK: '10' })
     await activate(t)
-    expect((await t.api.put({ dailyBudgetUsd: 4, monthlyBudgetUsd: 5, alertPercent: 50, priceInputPerMTok: 10, maxToolCalls: 1, maxOutputTokens: 200 })).status).toBe(200)
+    expect((await t.api.put({ dailyBudgetUsd: 4, monthlyBudgetUsd: 5, alertPercent: 50, maxToolCalls: 1, maxOutputTokens: 200 })).status).toBe(200)
     spend(t.s, 2.6)
     expect((await t.chat('A question')).status).toBe(200)
     await new Promise((resolve) => setTimeout(resolve, 50))

@@ -1,8 +1,10 @@
 import type { ToolSet } from 'ai'
 import type { AiSettings, Language } from '../../config.ts'
 import type { AppContext } from '../../context.ts'
+import type { Logger } from '../../lib/logger.ts'
 import { cleanLine } from '../../lib/text.ts'
 import type { Knowledge } from './knowledge.ts'
+import { checkToolOutput } from './toolGuard.ts'
 import { emptyPlan, isReady, LIST_FIELDS, missingFields, planHash, readPlanChanges, readStoredPlan, TEXT_FIELDS, COMPLEXITIES, type ProjectPlan } from './plan.ts'
 import { submit, type SubmitFailure } from './quote.ts'
 import { getConversation, markPlannerCompleted, recordToolCall, savePlan, setTopic } from './store.ts'
@@ -45,6 +47,8 @@ export interface ToolContext {
   requestId: string
   /** Counted per answer; the model's own step limit is not the only bound. */
   counter: { calls: number }
+  /** The request's logger (it carries the request id); safe metadata only goes through it. */
+  log?: Logger
 }
 
 const SUBMIT_NOTES: Record<SubmitFailure, string> = {
@@ -82,12 +86,20 @@ export async function buildTools(ctx: ToolContext) {
         return { error: 'too_many_tool_calls', note: 'Too many tool calls in one answer. Answer with what you already have.' }
       }
       const result = work()
+      // Whatever a tool returns is checked before the model sees it (size, plain data, no secret-looking key or text).
+      const problem = checkToolOutput(result)
+      if (problem !== null) {
+        status = 'rejected'
+        ;(ctx.log ?? app.log).warn('assistant tool result rejected', { tool: name, problem })
+        return { error: 'tool_output_rejected', note: 'The lookup returned data that cannot be passed on. Tell the visitor you could not retrieve that right now; do not guess.' }
+      }
       if ('error' in result || ('submitted' in result && result.submitted === false) || ('ok' in result && result.ok === false)) status = 'rejected'
       setTopic(app.db, ctx.conversationId, TOPIC_OF[name])
       return result
     } catch (error) {
       status = 'error'
-      app.log.warn('assistant tool failed', { tool: name, error: error instanceof Error ? { name: error.name, message: error.message } : 'unknown' })
+      // The error's text is not logged (a tool's exception can quote what it was given); its class and the tool are enough to look into it.
+      ;(ctx.log ?? app.log).warn('assistant tool failed', { tool: name, errorKind: error instanceof Error ? error.name : 'unknown' })
       return { error: 'tool_failed', note: 'The lookup failed. Tell the visitor you could not retrieve that right now; do not guess.' }
     } finally {
       try {

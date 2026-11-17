@@ -31,6 +31,13 @@ const WORDS = {
   open: { hu: 'Control Room AI megnyitása', en: 'Open Control Room AI', nl: 'Control Room AI openen' },
   compose: { hu: 'Üzeneted a Control Room AI-nak', en: 'Your message to Control Room AI', nl: 'Je bericht aan Control Room AI' },
 }
+// The words of the states added in PROMPT 29, per language (a fragment of each sentence in src/content/ai/index.ts).
+const STATES = {
+  truncated: { hu: /hosszkorlátot, és itt megszakadt/, en: /reached its length limit and was cut off here/, nl: /lengtelimiet en is hier afgebroken/ },
+  stopped: { hu: /Leállítottad ezt a választ/, en: /You stopped this answer/, nl: /Je hebt dit antwoord gestopt/ },
+  stop: { hu: 'Leállítás', en: 'Stop', nl: 'Stop' },
+  card: { hu: /bankkártyaszám/, en: /payment card number/, nl: /betaalkaartnummer/ },
+}
 // Long words on purpose: a plan is the visitor's and the model's text, and the layout has to hold whatever they write.
 const PLAN = {
   action: 'update',
@@ -137,6 +144,25 @@ async function auditUnavailable(browser) {
             await inspect(page, `${tag} page: the send form with its problems shown`)
           } else findings.push({ label: `${tag} page`, issues: ['the send form is missing from a complete plan'] })
           if (phone) await page.locator('#cr-tab-chat').click()
+          // (They come BEFORE the provider failure: the stand-in answers every message of a conversation that still holds a FAIL marker with that failure,
+          // because the provider merges consecutive user messages into one.)
+          // PROMPT 29: the other states a visitor meets. An answer cut off at the output limit says so; a stopped answer says so, calmly;
+          // a message with a card number is refused with a plain sentence. Each in the visitor's language, audited like the others.
+          await box.fill('LENGTH go on please')
+          await box.press('Enter')
+          await page.getByText(STATES.truncated[lang]).first().waitFor({ timeout: 20000 })
+          await inspect(page, `${tag} page: an answer cut off at the output limit`)
+          await box.fill('SLOW tell me a lot')
+          await box.press('Enter')
+          await page.getByRole('button', { name: STATES.stop[lang] }).waitFor({ timeout: 10000 })
+          await page.waitForTimeout(250)
+          await page.getByRole('button', { name: STATES.stop[lang] }).click()
+          await page.getByText(STATES.stopped[lang]).first().waitFor({ timeout: 10000 })
+          await inspect(page, `${tag} page: a stopped answer`)
+          await box.fill('my card is 4242 4242 4242 4242')
+          await box.press('Enter')
+          await page.getByRole('alert').filter({ hasText: STATES.card[lang] }).first().waitFor({ timeout: 20000 })
+          await inspect(page, `${tag} page: a message refused for a card number`)
           await box.fill('FAIL:529 are you there')
           await box.press('Enter')
           await page.getByRole('alert').first().waitFor({ timeout: 20000 })

@@ -40,7 +40,7 @@ export interface ConnectionResult {
 
 const MESSAGES: Record<FailureReason | 'verified', string> = {
   verified: 'The provider answered and named Claude Haiku 5.5 as the model that produced the answer.',
-  no_api_key: 'No API key is configured. Set ANTHROPIC_API_KEY in the server environment.',
+  no_api_key: 'No usable API key is configured (it is missing, or it is malformed). Set ANTHROPIC_API_KEY in the server environment.',
   model_lock: 'The server environment names a different model (ANTHROPIC_MODEL). The model is fixed in code and that setting must be removed.',
   invalid_key: 'The provider rejected the API key.',
   billing: 'The provider refused the request because of the account balance or billing.',

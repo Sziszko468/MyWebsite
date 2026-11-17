@@ -2,9 +2,12 @@ import type { AppContext, SessionInfo } from '../../context.ts'
 import { addMs, DAY } from '../../lib/time.ts'
 import { can, requirePermission } from '../auth/permissions.ts'
 import { listAlerts, openAlertCount } from './alerts.ts'
+import { AI_CEILING_ENV, AI_CEILING_KEYS } from '../../config.ts'
 import { spent } from './budget.ts'
 import { AI_MODEL_ID, AI_MODEL_NAME, AI_PROVIDER_NAME } from './model.ts'
-import { activationBlocker, availability, loadSettings, RANGES } from './settings.ts'
+import { effectiveRanges, history, lastSuccessfulRequest, limitEvents, period, providerStatus, recentFailures } from './operations.ts'
+import { AI_PRICING, PRICES_AS_OF, PRICING_SOURCE } from './pricing.ts'
+import { activationBlocker, availability, loadSettings } from './settings.ts'
 import { dayOf, monthOf } from './store.ts'
 import { endpointOf, lastSuccessfulTest, readLastError, readVerification, recentConnectionTests, verificationLabel } from './verification.ts'
 
@@ -189,22 +192,56 @@ export function summaryOf(app: AppContext, session: SessionInfo | null) {
   const now = app.clock.now()
   const used = spent(app, now)
   const budgetState = (spentUsd: number, budgetUsd: number): 'ok' | 'warning' | 'exhausted' => (budgetUsd <= 0 || spentUsd >= budgetUsd ? 'exhausted' : spentUsd >= (budgetUsd * settings.alertPercent) / 100 ? 'warning' : 'ok')
+  const percent = (spentValue: number, limit: number): number => (limit <= 0 ? 100 : Math.min(999, Math.round((spentValue / limit) * 1000) / 10))
+  const today = dayOf(now)
+  const monthStart = `${monthOf(now)}-01`
+  const todayUsage = period(app, today, today)
+  const monthUsage = period(app, monthStart)
+  const lastRequest = lastSuccessfulRequest(app)
+  const lastTest = lastSuccessfulTest(app)
+  const lastError = readLastError(app)
   return {
     ...modelPanel(app),
-    apiKey: app.config.ai.apiKey ? 'set' : 'missing',
+    apiKey: app.config.ai.apiKey ? 'set' : app.config.ai.keyProblem === 'malformed' ? 'malformed' : 'missing',
     operatorEnabled: app.config.ai.enabled,
     availability: availability(app, settings),
     settings,
-    ranges: RANGES,
+    ranges: effectiveRanges(app),
+    /** The operator's hard limits (environment only): what the settings can never exceed, and the variable that sets each. Read-only here. */
+    ceilings: AI_CEILING_KEYS.map((key) => ({ key, value: app.config.ai.ceilings[key], variable: AI_CEILING_ENV[key] })),
     canWrite: can(actor.role, 'system:write'),
+    /** What is going on right now in this process: answers being written, and whether the server is shutting down. */
+    live: { inFlight: app.assistant.inFlight, maxConcurrent: settings.maxConcurrentRequests, shuttingDown: app.assistant.shuttingDown },
     budget: {
-      day: { spentUsd: used.dayCostUsd, budgetUsd: settings.dailyBudgetUsd, tokens: used.dayTokens, tokenBudget: settings.dailyTokenBudget, requests: used.dayRequests, requestLimit: settings.dailyRequests, state: budgetState(used.dayCostUsd, settings.dailyBudgetUsd) },
-      month: { spentUsd: used.monthCostUsd, budgetUsd: settings.monthlyBudgetUsd, state: budgetState(used.monthCostUsd, settings.monthlyBudgetUsd) },
+      day: { spentUsd: used.dayCostUsd, budgetUsd: settings.dailyBudgetUsd, percent: percent(used.dayCostUsd, settings.dailyBudgetUsd), tokens: used.dayTokens, tokenBudget: settings.dailyTokenBudget, tokenPercent: percent(used.dayTokens, settings.dailyTokenBudget), requests: used.dayRequests, requestLimit: settings.dailyRequests, requestPercent: percent(used.dayRequests, settings.dailyRequests), state: budgetState(used.dayCostUsd, settings.dailyBudgetUsd) },
+      month: { spentUsd: used.monthCostUsd, budgetUsd: settings.monthlyBudgetUsd, percent: percent(used.monthCostUsd, settings.monthlyBudgetUsd), state: budgetState(used.monthCostUsd, settings.monthlyBudgetUsd) },
       alertPercent: settings.alertPercent,
+    },
+    /** Operation: today and this month in numbers, the provider's state, the last answer and the last failures, the limit counters, what the administrators changed. */
+    operations: {
+      today: todayUsage,
+      month: monthUsage,
+      provider: { status: providerStatus(app, lastRequest?.at ?? null, lastTest?.created_at ?? null, lastError?.at ?? null), lastError },
+      lastSuccessfulRequest: lastRequest,
+      recentFailures: recentFailures(app),
+      limitEvents: limitEvents(app),
+      history: history(app),
     },
     totals: totalsOf(app),
     alerts: { open: openAlertCount(app), items: listAlerts(app, 20).map((row) => ({ id: row.id, kind: row.kind, level: row.level, period: row.period, detail: row.detail ? (JSON.parse(row.detail) as unknown) : null, createdAt: row.created_at, acknowledgedAt: row.acknowledged_at })) },
-    pricing: { inputPerMTok: settings.priceInputPerMTok, outputPerMTok: settings.priceOutputPerMTok, asOf: settings.pricesAsOf, note: 'Costs shown are estimates: the token counts the provider reported times these prices. They are not a bill.' },
+    pricing: {
+      inputPerMTok: settings.priceInputPerMTok,
+      outputPerMTok: settings.priceOutputPerMTok,
+      longPromptInputPerMTok: AI_PRICING.longInputPerMTok,
+      longPromptOutputPerMTok: AI_PRICING.longOutputPerMTok,
+      longPromptThresholdTokens: AI_PRICING.longPromptThresholdTokens,
+      asOf: settings.pricesAsOf,
+      listAsOf: PRICES_AS_OF,
+      source: PRICING_SOURCE,
+      /** The administration cannot change the prices (a price of 0 would switch the budgets off): they come from the price list in code or the operator's environment. */
+      editable: false,
+      note: 'Costs shown are estimates: the token counts the provider reported times these prices. They are not a bill.',
+    },
     knowledge: app.assistant.knowledge.status(),
     overview: usageOverview(app, 'daily'),
   }

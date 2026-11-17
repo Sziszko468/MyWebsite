@@ -28,13 +28,28 @@ export function redactText(text: string): string {
     .slice(0, 500)
 }
 
+/**
+ * Fields that carry an IDENTIFIER meant to be searched for (the HTTP request id, the usage row's id): a random UUID is 36 characters of
+ * letters, digits and hyphens, which `redactText` takes for a token and masks, so every request line used to read `"requestId":"[token]"` and
+ * one request could not be followed. These fields keep a plain identifier (letters, digits, `_`, `-`, at most 64 characters) and still lose any
+ * registered secret; anything else in them is masked as before.
+ */
+const IDENTIFIER_FIELDS = new Set(['requestId', 'requestRef', 'aiRequest'])
+const IDENTIFIER = /^[A-Za-z0-9_-]{8,64}$/
+
+function identifier(value: string): string {
+  let clean = value
+  for (const secret of SECRETS) clean = clean.split(secret).join('[secret]')
+  return clean === value && IDENTIFIER.test(clean) ? clean : redactText(value)
+}
+
 function scrub(value: unknown, depth = 0): unknown {
   if (value instanceof Error) return { name: value.name, message: redactText(value.message) }
   if (Array.isArray(value)) return depth > 3 ? '[…]' : value.slice(0, 20).map((item) => scrub(item, depth + 1))
   if (typeof value === 'object' && value !== null) {
     if (depth > 3) return '[…]'
     const out: Record<string, unknown> = {}
-    for (const [key, item] of Object.entries(value)) out[key] = SENSITIVE.test(key) ? '[redacted]' : scrub(item, depth + 1)
+    for (const [key, item] of Object.entries(value)) out[key] = SENSITIVE.test(key) ? '[redacted]' : IDENTIFIER_FIELDS.has(key) && typeof item === 'string' ? identifier(item) : scrub(item, depth + 1)
     return out
   }
   if (typeof value === 'string') return redactText(value)

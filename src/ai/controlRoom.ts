@@ -44,6 +44,8 @@ export interface Snapshot {
   loading: boolean
   /** Why the assistant cannot start (no backend, switched off, a failed start), as an error code. */
   unavailable: string | null
+  /** The visitor stopped the answer that was being written (the interface says so until the next message). */
+  cancelled: boolean
 }
 
 type Listener = () => void
@@ -65,7 +67,7 @@ class ControlRoom {
   constructor() {
     const stored = readStored()
     const id = stored.conversationId ?? newConversationId()
-    this.state = { chat: this.makeChat(id, []), conversationId: id, conversations: [], plan: null, config: null, approval: 'idle', loading: true, unavailable: null }
+    this.state = { chat: this.makeChat(id, []), conversationId: id, conversations: [], plan: null, config: null, approval: 'idle', loading: true, unavailable: null, cancelled: false }
   }
 
   subscribe = (listener: Listener): (() => void) => {
@@ -122,7 +124,7 @@ class ControlRoom {
   private async openStored(id: string): Promise<void> {
     try {
       const detail = await readConversation(id)
-      this.set({ chat: this.makeChat(id, detail.messages as UIMessage[]), conversationId: id, plan: this.planOf(detail), approval: detail.sent ? 'sent' : 'idle' })
+      this.set({ chat: this.makeChat(id, detail.messages as UIMessage[]), conversationId: id, plan: this.planOf(detail), approval: detail.sent ? 'sent' : 'idle', cancelled: false })
     } catch (error) {
       // A conversation that no longer exists (deleted, expired, another session) is simply not there: start fresh.
       if (!(error instanceof AiError) || error.status !== 404) throw error
@@ -137,7 +139,7 @@ class ControlRoom {
   private freshConversation(): void {
     const id = newConversationId()
     writeStored({ conversationId: id })
-    this.set({ chat: this.makeChat(id, []), conversationId: id, plan: null, approval: 'idle' })
+    this.set({ chat: this.makeChat(id, []), conversationId: id, plan: null, approval: 'idle', cancelled: false })
   }
 
   private async refreshList(): Promise<void> {
@@ -169,18 +171,23 @@ class ControlRoom {
   }
 
   async send(text: string): Promise<void> {
+    if (this.state.cancelled) this.set({ cancelled: false })
     await ensureSession()
     writeStored({ conversationId: this.state.conversationId })
     await this.state.chat.sendMessage({ text })
   }
 
   async regenerate(): Promise<void> {
+    if (this.state.cancelled) this.set({ cancelled: false })
     await ensureSession()
     await this.state.chat.regenerate()
   }
 
   stop(): void {
+    const { status } = this.state.chat
     void this.state.chat.stop()
+    // Said only when there was something to stop: the visitor is told the answer ended because they asked.
+    if (status === 'submitted' || status === 'streaming') this.set({ cancelled: true })
   }
 
   newConversation(): void {

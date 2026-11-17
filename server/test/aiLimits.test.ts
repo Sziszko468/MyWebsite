@@ -116,22 +116,22 @@ describe('limits', () => {
   })
 
   it('counts a day\'s spending against a month, and a new day starts a new day budget', async () => {
-    const { s } = await start((n) => say(`answer ${n}`, { input: 1_000_000, output: 100_000 }), { AI_DAILY_BUDGET: '0.155', AI_MONTHLY_BUDGET: '0.5' })
+    const { s } = await start((n) => say(`answer ${n}`, { input: 100_000, output: 10_000 }), { AI_DAILY_BUDGET: '0.0155', AI_MONTHLY_BUDGET: '0.05' })
     const headers = await newSession(s)
     const first = await post(s, headers)
     expect(first.status).toBe(200)
     await first.text()
     await waitFor(() => requests(s)[0]?.status === 'completed')
-    // 1M input tokens at $0.10 + 100K output at $0.50 per million = $0.15 spent today.
+    // 100K input tokens at $0.10 + 10K output at $0.50 per million = $0.015 spent today (100K is the last prompt size at the short-prompt rate).
     const used = spent(s.app.context, s.clock.now())
-    expect(used.dayCostUsd).toBeCloseTo(0.15, 6)
+    expect(used.dayCostUsd).toBeCloseTo(0.015, 6)
     expect((await post(s, headers)).status).toBe(503)
     s.clock.advance(86_400_000)
     const next = await post(s, headers)
     expect(next.status).toBe(200)
     await next.text()
     await waitFor(() => requests(s).every((row) => row.status === 'completed'))
-    expect(spent(s.app.context, s.clock.now()).monthCostUsd).toBeCloseTo(0.3, 6)
+    expect(spent(s.app.context, s.clock.now()).monthCostUsd).toBeCloseTo(0.03, 6)
   })
 })
 

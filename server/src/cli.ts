@@ -29,7 +29,7 @@ import { eraseByEmail, runMaintenance } from './modules/system/maintenance.ts'
  *   backup <file>                        write a consistent copy of the database to a new file (safe while the server runs)
  *   maintenance                          remove expired sessions and, if RETENTION_DAYS is set, old finished requests
  *   erase <email>                        delete everything held about an e-mail address
- *   ai check [message]                   one real request to the configured model (spends a few tokens): proves the key, the model and the address
+ *   ai check --live                      one REAL request to the model (spends a few tokens): proves the key, the model and the address; without --live nothing is sent
  *   ai status                            whether the assistant is available, and why not
  */
 
@@ -196,11 +196,23 @@ async function run(): Promise<void> {
         const { AI_MODEL_ID, AI_MODEL_NAME } = await import('./modules/ai/model.ts')
         if (what === 'status') {
           const verification = readVerification(app.context)
-          process.stdout.write(`${JSON.stringify({ requiredModel: `${AI_MODEL_NAME} (${AI_MODEL_ID})`, apiKey: config.ai.apiKey ? 'set' : 'missing', modelOverrideRejected: config.ai.modelOverride !== null, operatorEnabled: config.ai.enabled, verification: { ...verification, fingerprint: undefined, label: verificationLabel(app.context, verification) }, availability: availability(app.context), settings: loadSettings(app.context) }, null, 2)}
+          process.stdout.write(`${JSON.stringify({ requiredModel: `${AI_MODEL_NAME} (${AI_MODEL_ID})`, apiKey: config.ai.apiKey ? 'set' : config.ai.keyProblem === 'malformed' ? 'malformed' : 'missing', ceilings: config.ai.ceilings, modelOverrideRejected: config.ai.modelOverride !== null, operatorEnabled: config.ai.enabled, verification: { ...verification, fingerprint: undefined, label: verificationLabel(app.context, verification) }, availability: availability(app.context), settings: loadSettings(app.context) }, null, 2)}
 `)
           return
         }
-        if (what !== 'check') throw new Error('Use: ai check | ai status')
+        if (what !== 'check') throw new Error('Use: ai status | ai check --live')
+        // The connection test makes ONE REAL, PAID request (a few tokens) to the provider, so it never runs by accident: it needs --live.
+        if (!args.includes('--live')) {
+          process.stdout.write(
+            [
+              'This is the live smoke test: it sends ONE real request (a few tokens, a fraction of a cent) to Claude Haiku 5.5 with the key in the environment.',
+              'Nothing was sent. Run "ai check --live" to do it on purpose.',
+              '',
+            ].join('\n'),
+          )
+          process.exitCode = 2
+          return
+        }
         // The connection test: one minimal request to the required model; records the result; never switches the assistant on.
         const result = await app.context.assistant.connectionTest(null)
         process.stdout.write(`${JSON.stringify(result, null, 2)}

@@ -340,6 +340,9 @@ export function createApp(deps: AppDeps): App {
     async close() {
       clearInterval(sweeper)
       await notifier.stop()
+      // The assistant first: no new answer is accepted, the ones being written get a few seconds to finish, and what is left is cancelled and
+      // reconciled (so no reservation stays hanging and what was paid for is booked) while the database is still open.
+      await context.assistant.shutdown().catch((error) => log.error('error while stopping the assistant', { error }))
       // Stop accepting, drop connections nobody is using, let the requests in progress finish; after a grace period cut what is left.
       await new Promise<void>((resolve) => {
         if (!server.listening) return resolve()

@@ -107,6 +107,8 @@ export function aiRoutes(_app: AppContext): RouteDef[] {
           trigger: trigger as Trigger,
           text: typeof body.text === 'string' ? body.text : '',
           signal: ctx.signal,
+          requestId: ctx.requestId,
+          log: ctx.log,
         })
         const headers: Record<string, string> = {}
         response.headers.forEach((value, key) => {

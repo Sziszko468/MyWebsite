@@ -312,6 +312,16 @@
   }
 }
 
+/* A calm note, not an error: the visitor stopped an answer, or an answer was cut off at the output limit. Uses only theme tokens, so it follows the dark and light themes. */
+.notice {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: 0.2rem solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
+}
+
 .error {
   display: grid;
   gap: var(--space-2);

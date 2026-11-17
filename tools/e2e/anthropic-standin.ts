@@ -9,6 +9,10 @@ import { createServer, type IncomingMessage, type Server } from 'node:http'
  *   TOOL:<name>:<json input>   answer with a tool call (then, once the result comes back, a short text)
  *   FAIL:<status>              answer with an HTTP error of that status
  *   SLOW                       write the answer word by word, 150 ms apart
+ *   LENGTH                     an answer that stops at the output limit (stop_reason max_tokens)
+ *   EMPTY                      an answer with no content at all (a reply that cannot be used)
+ *   BADJSON                    a stream event that is not valid JSON (a reply that cannot be parsed)
+ *   HANG                       never answer (the provider does not even send its response headers: the connection timeout)
  *   a visitor's "I approved the plan" (in any of the three languages): ask to send the quote request (what a real model would
  *                              do after the visitor presses the button)
  * It also answers GET /__requests with what it has received (the e2e journeys read it) and DELETE /__requests to forget it.
@@ -96,6 +100,7 @@ export async function startStandIn(port = 0): Promise<StandIn> {
         res.writeHead(status, { 'Content-Type': 'application/json' }).end(JSON.stringify({ type: 'error', error: { type: ERROR_TYPES[status] ?? 'api_error', message: 'stand-in failure with a secret detail' } }))
         return
       }
+      if (/HANG/.test(text)) return
       // The model the reply names: what was asked for unless the stand-in is told otherwise (null: none at all).
       const reported = behaviour.reportModel === undefined ? body.model : behaviour.reportModel
       const inputTokens = 120 + requests.length
@@ -106,6 +111,15 @@ export async function startStandIn(port = 0): Promise<StandIn> {
       }
       res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' })
       res.write(sse('message_start', { type: 'message_start', message: { id: `msg_${requests.length}`, type: 'message', role: 'assistant', ...(reported === null ? {} : { model: reported }), content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: inputTokens, output_tokens: 1 } } }))
+      if (/BADJSON/.test(text)) {
+        res.end(['event: content_block_delta', 'data: {this is not json', '', ''].join('\n'))
+        return
+      }
+      if (/EMPTY/.test(text)) {
+        res.write(sse('message_delta', { type: 'message_delta', delta: { stop_reason: 'end_turn', stop_sequence: null }, usage: { output_tokens: 1 } }))
+        res.end(sse('message_stop', { type: 'message_stop' }))
+        return
+      }
       const approved = /approved the plan|jóváhagytam a tervet|goedgekeurd/i.test(text) && text !== '<tool_result>'
       const tool = approved ? [text, 'submitApprovedQuoteRequest', '{}'] : /TOOL:([A-Za-z]+):(\{.*\})/.exec(text)
       if (tool) {
@@ -125,7 +139,7 @@ export async function startStandIn(port = 0): Promise<StandIn> {
         if (/SLOW/.test(text)) await wait(150)
       }
       res.write(sse('content_block_stop', { type: 'content_block_stop', index: 0 }))
-      res.write(sse('message_delta', { type: 'message_delta', delta: { stop_reason: 'end_turn', stop_sequence: null }, usage: { output_tokens: 12 } }))
+      res.write(sse('message_delta', { type: 'message_delta', delta: { stop_reason: /LENGTH/.test(text) ? 'max_tokens' : 'end_turn', stop_sequence: null }, usage: { output_tokens: 12 } }))
       res.end(sse('message_stop', { type: 'message_stop' }))
     })
   })

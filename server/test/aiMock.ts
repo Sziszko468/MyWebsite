@@ -23,7 +23,7 @@ export interface Scripted {
   stream: ReadableStream<Chunk>
 }
 
-const finish = (reason: 'stop' | 'tool-calls' | 'error', tokens: Tokens): Chunk => ({ type: 'finish', finishReason: { unified: reason, raw: reason === 'stop' ? 'end_turn' : reason }, usage: usage(tokens) })
+const finish = (reason: 'stop' | 'tool-calls' | 'error' | 'length' | 'content-filter', tokens: Tokens): Chunk => ({ type: 'finish', finishReason: { unified: reason, raw: reason === 'stop' ? 'end_turn' : reason === 'length' ? 'max_tokens' : reason }, usage: usage(tokens) })
 
 /**
  * What the provider says about itself at the start of every answer (Anthropic: `message.model` in `message_start`). The
@@ -37,13 +37,15 @@ export interface CallOptions {
   gate?: Promise<void>
   /** The model the provider claims answered (default: the required one); `null`: the provider reports none. */
   reportedModel?: string | null
+  /** Why the model stopped (default: `stop`); `length` is an answer cut off at the output limit. */
+  finishReason?: 'stop' | 'length' | 'content-filter'
 }
 
 /** A model call that answers with text. */
 export function say(text: string, tokens: Tokens = { input: 400, output: 60 }, options: CallOptions = {}): Scripted {
   const chunks: Chunk[] = [{ type: 'stream-start', warnings: [] }, ...identity(options.reportedModel), { type: 'text-start', id: 't1' }]
   for (const word of text.split(/(?<= )/)) chunks.push({ type: 'text-delta', id: 't1', delta: word })
-  chunks.push({ type: 'text-end', id: 't1' }, finish('stop', tokens))
+  chunks.push({ type: 'text-end', id: 't1' }, finish(options.finishReason ?? 'stop', tokens))
   return scripted(chunks, options)
 }
 

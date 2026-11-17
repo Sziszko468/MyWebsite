@@ -17,6 +17,7 @@ const settings: AiSettings = {
   maxToolCalls: 6,
   maxRequestsPerSession: 40,
   maxRequestsPerIp: 30,
+  maxConcurrentRequests: 8,
   maxDailyConversations: 100,
   dailyRequests: 1000,
   dailyTokenBudget: 2_000_000,
@@ -40,11 +41,14 @@ describe('the assistant\'s settings form', () => {
     expect(form.numbers.dailyBudgetUsd).toBe('1')
     expect(form.suggestions.en).toBe('A\nB')
     const payload = payloadFrom(form)
-    expect(payload).toMatchObject({ plannerEnabled: true, alertPercent: 80, dailyBudgetUsd: 1, monthlyBudgetUsd: 10, maxOutputTokens: 1500, priceInputPerMTok: 0.1, effort: 'low', suggestions: { en: ['A', 'B'], hu: [], nl: [] }, welcome: { en: 'Hello' } })
+    expect(payload).toMatchObject({ plannerEnabled: true, alertPercent: 80, dailyBudgetUsd: 1, monthlyBudgetUsd: 10, maxOutputTokens: 1500, maxConcurrentRequests: 8, effort: 'low', suggestions: { en: ['A', 'B'], hu: [], nl: [] }, welcome: { en: 'Hello' } })
     expect(payload).not.toHaveProperty('model')
     // Saving settings can never switch the assistant on or off: that is a separate action that needs a verified model.
     expect(payload).not.toHaveProperty('enabled')
     expect(payload).not.toHaveProperty('apiKey')
+    // The prices are the operator's (a price of zero would switch the budgets off): the form neither shows nor sends them.
+    for (const field of ['priceInputPerMTok', 'priceOutputPerMTok', 'pricesAsOf']) expect(payload).not.toHaveProperty(field)
+    expect(form.numbers).not.toHaveProperty('priceInputPerMTok')
   })
 
   it('reads a decimal comma, trims chips, and sends an empty or non-numeric box as null so the server names the field', () => {

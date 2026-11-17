@@ -22,6 +22,7 @@ export interface AiSettings {
   maxToolCalls: number
   maxRequestsPerSession: number
   maxRequestsPerIp: number
+  maxConcurrentRequests: number
   maxDailyConversations: number
   dailyRequests: number
   dailyTokenBudget: number
@@ -39,7 +40,7 @@ export interface AiSettings {
   suggestions: Record<Language, string[]>
 }
 
-export type Unavailable = 'operator_disabled' | 'admin_disabled' | 'no_api_key' | 'model_lock' | 'model_unverified'
+export type Unavailable = 'operator_disabled' | 'admin_disabled' | 'no_api_key' | 'key_malformed' | 'model_lock' | 'model_unverified'
 
 export interface AiOverview {
   range: AiRange
@@ -126,6 +127,32 @@ export interface AiTestResult {
   testedAt: string
 }
 
+export type CeilingKey = 'dailyBudgetUsd' | 'monthlyBudgetUsd' | 'dailyTokenBudget' | 'dailyRequests' | 'maxConcurrentRequests' | 'maxOutputTokens' | 'maxInputChars' | 'maxToolCalls' | 'maxRequestsPerSession' | 'maxDailyConversations'
+
+/** One period of usage: counts by outcome, the provider's token counts, an ESTIMATED cost, and how well that cost is known. */
+export interface AiPeriod {
+  requests: number
+  completed: number
+  failed: number
+  aborted: number
+  inputTokens: number
+  outputTokens: number
+  estimatedCostUsd: number
+  averageResponseMs: number | null
+  costAccounting: { reported: number; none: number; unknown: number; unknownCostUsd: number }
+  truncated: number
+}
+
+export interface AiOperations {
+  today: AiPeriod
+  month: AiPeriod
+  provider: { status: 'not_configured' | 'unknown' | 'ok' | 'error'; lastError: { at: string; source: 'chat' | 'test'; code: string } | null }
+  lastSuccessfulRequest: { at: string; latencyMs: number | null; inputTokens: number | null; outputTokens: number | null; estimatedCostUsd: number | null; finishReason: string | null; modelVerified: boolean } | null
+  recentFailures: { id: string; at: string; status: string; code: string; latencyMs: number | null; steps: number | null; requestId: string | null }[]
+  limitEvents: { kind: string; today: number; month: number; lastAt: string | null }[]
+  history: { id: number; at: string; actor: string | null; action: string; detail: string | null }[]
+}
+
 export interface AiSummary {
   /** The required model. `id` is the configured identifier; it cannot be edited here (`editable` is always false). */
   model: { requiredName: string; id: string; provider: string; editable: false; changeableBy: string; overrideRejected: boolean }
@@ -142,18 +169,33 @@ export interface AiSummary {
   activation: { blocker: Unavailable | null }
   totals: { requests: number; modelVerifiedRequests: number; modelUnreportedRequests: number; modelMismatchedRequests: number; tokens: number; estimatedCostUsd: number; monthTokens: number }
   alerts: { open: number; items: AiAlert[] }
-  apiKey: 'set' | 'missing'
+  apiKey: 'set' | 'missing' | 'malformed'
   operatorEnabled: boolean
   availability: { available: true } | { available: false; reason: Unavailable }
   settings: AiSettings
   ranges: Record<string, [number, number]>
   canWrite: boolean
+  /** The operator's hard ceilings (environment only), with the variable that sets each. Read-only. */
+  ceilings: { key: CeilingKey; value: number; variable: string }[]
+  live: { inFlight: number; maxConcurrent: number; shuttingDown: boolean }
   budget: {
-    day: { spentUsd: number; budgetUsd: number; tokens: number; tokenBudget: number; requests: number; requestLimit: number; state: BudgetState }
-    month: { spentUsd: number; budgetUsd: number; state: BudgetState }
+    day: { spentUsd: number; budgetUsd: number; percent: number; tokens: number; tokenBudget: number; tokenPercent: number; requests: number; requestLimit: number; requestPercent: number; state: BudgetState }
+    month: { spentUsd: number; budgetUsd: number; percent: number; state: BudgetState }
     alertPercent: number
   }
-  pricing: { inputPerMTok: number; outputPerMTok: number; asOf: string; note: string }
+  operations: AiOperations
+  pricing: {
+    inputPerMTok: number
+    outputPerMTok: number
+    longPromptInputPerMTok: number
+    longPromptOutputPerMTok: number
+    longPromptThresholdTokens: number
+    asOf: string
+    listAsOf: string
+    source: string
+    editable: false
+    note: string
+  }
   knowledge: {
     fingerprint: string
     builds: number
@@ -183,7 +225,6 @@ export interface AiForm {
   numbers: Record<NumericSetting, string>
   effort: AiSettings['effort']
   thinking: AiSettings['thinking']
-  pricesAsOf: string
   welcome: Record<Language, string>
   suggestions: Record<Language, string>
 }
@@ -197,6 +238,7 @@ export const NUMERIC_SETTINGS = [
   'maxDailyConversations',
   'maxRequestsPerSession',
   'maxRequestsPerIp',
+  'maxConcurrentRequests',
   'maxInputChars',
   'maxHistoryMessages',
   'maxConversationMessages',
@@ -204,8 +246,6 @@ export const NUMERIC_SETTINGS = [
   'maxToolCalls',
   'conversationMaxHours',
   'retentionDays',
-  'priceInputPerMTok',
-  'priceOutputPerMTok',
 ] as const
 export type NumericSetting = (typeof NUMERIC_SETTINGS)[number]
 
@@ -217,7 +257,6 @@ export function formFrom(settings: AiSettings): AiForm {
     numbers: Object.fromEntries(NUMERIC_SETTINGS.map((key) => [key, String(settings[key])])) as Record<NumericSetting, string>,
     effort: settings.effort,
     thinking: settings.thinking,
-    pricesAsOf: settings.pricesAsOf,
     welcome: { ...settings.welcome },
     suggestions: { hu: settings.suggestions.hu.join('\n'), en: settings.suggestions.en.join('\n'), nl: settings.suggestions.nl.join('\n') },
   }
@@ -241,7 +280,6 @@ export function payloadFrom(form: AiForm): Record<string, unknown> {
     ...numbers,
     effort: form.effort,
     thinking: form.thinking,
-    pricesAsOf: form.pricesAsOf.trim(),
     welcome: form.welcome,
     suggestions: { hu: lines(form.suggestions.hu), en: lines(form.suggestions.en), nl: lines(form.suggestions.nl) },
   }

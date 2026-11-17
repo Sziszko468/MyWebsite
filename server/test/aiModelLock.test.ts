@@ -141,7 +141,7 @@ describe('the model lock: what the code contains', () => {
     expect(logging).toEqual([])
     // The key is held in configuration only; the redacted view that the System page shows names it "set" or "missing".
     const config = readFileSync(join(ROOT, 'server', 'src', 'config.ts'), 'utf8')
-    expect(config).toMatch(/apiKey: config\.ai\.apiKey \? 'set' : 'missing'/)
+    expect(config).toMatch(/apiKey: config\.ai\.apiKey \? 'set' : config\.ai\.keyProblem === 'malformed' \? 'malformed' : 'missing'/)
   })
 })
 

@@ -88,10 +88,32 @@ export function assertLockedModel(model: unknown): LockedModel {
  * The real model: the Anthropic provider asked for `AI_MODEL_ID`, nothing else. The key and the address come from the
  * server's own configuration (never from a request). The provider's package is loaded when the model is first needed.
  */
-export async function createAiModel(options: { apiKey: string; baseUrl: string | null }): Promise<LockedModel> {
+export async function createAiModel(options: { apiKey: string; baseUrl: string | null; connectTimeoutMs?: number }): Promise<LockedModel> {
   const { createAnthropic } = await import('@ai-sdk/anthropic')
-  const provider = createAnthropic({ apiKey: options.apiKey, ...(options.baseUrl ? { baseURL: options.baseUrl } : {}) })
+  const provider = createAnthropic({
+    apiKey: options.apiKey,
+    ...(options.baseUrl ? { baseURL: options.baseUrl } : {}),
+    ...(options.connectTimeoutMs ? { fetch: withConnectTimeout(globalThis.fetch, options.connectTimeoutMs) } : {}),
+  })
   return assertLockedModel(provider(AI_MODEL_ID))
+}
+
+/**
+ * The connection timeout: the provider must START answering (send its response headers) within `ms`, or the request is cut off with a
+ * `TimeoutError` (the assistant calls that `timeout`). Once the headers have arrived the timer is gone; how long the answer may take
+ * after that is the gateway's own total, per-step and first-chunk timeouts. No retry is made here: the SDK's single retry is the only one.
+ */
+export function withConnectTimeout(base: typeof fetch, ms: number): typeof fetch {
+  return (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
+    const connect = new AbortController()
+    const timer = setTimeout(() => connect.abort(new DOMException('The provider did not answer in time.', 'TimeoutError')), ms)
+    const signal = init?.signal ? AbortSignal.any([init.signal, connect.signal]) : connect.signal
+    try {
+      return await base(input, { ...init, signal })
+    } finally {
+      clearTimeout(timer)
+    }
+  }) as typeof fetch
 }
 
 /**

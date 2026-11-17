@@ -13,14 +13,14 @@ import { useToast } from '../components/Toast'
 import { useResource } from '../hooks/useResource'
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges'
 import { fill, formatDateTime, formatNumber, useInterfaceLanguage, useText } from '../i18n'
-import { AI_RANGES, dollars, duration, formFrom, payloadFrom, sameForm, share, type AiAlert, type AiForm, type AiRange, type AiSummary, type AiTestResult, type AiUsage, type ConnectionStatus, type NumericSetting } from '../lib/ai'
+import { AI_RANGES, dollars, duration, formFrom, payloadFrom, sameForm, share, type AiAlert, type AiForm, type AiPeriod, type AiRange, type AiSummary, type AiTestResult, type AiUsage, type CeilingKey, type ConnectionStatus, type NumericSetting } from '../lib/ai'
 import { describeError, fieldErrors } from '../lib/errors'
 import { useSession } from '../session/SessionProvider'
 import ai from '../styles/ai.module.scss'
 import page from '../styles/pages.module.scss'
 import styles from '../styles/ui.module.scss'
 
-const TABS = ['model', 'overview', 'settings', 'knowledge'] as const
+const TABS = ['model', 'overview', 'operations', 'settings', 'knowledge'] as const
 type Tab = (typeof TABS)[number]
 
 /**
@@ -56,6 +56,9 @@ function Screen({ summary, onChanged, reload }: { summary: AiSummary; onChanged:
         <TabPanel id="overview" idBase={base} active={tab === 'overview'}>
           <Overview summary={summary} />
         </TabPanel>
+        <TabPanel id="operations" idBase={base} active={tab === 'operations'}>
+          <Operations summary={summary} />
+        </TabPanel>
         <TabPanel id="settings" idBase={base} active={tab === 'settings'}>
           <SettingsForm summary={summary} onSaved={onChanged} />
         </TabPanel>
@@ -78,7 +81,7 @@ function Availability({ summary, onAlerts }: { summary: AiSummary; onAlerts: () 
         {!summary.availability.available && ` ${s.reasons[summary.availability.reason]}`}
       </p>
       <p className={ai.statusMeta}>
-        {s.model}: <strong>{summary.model.requiredName}</strong> (<code>{summary.model.id}</code>) · {s.provider}: {summary.model.provider} · {s.key}: {summary.apiKey === 'set' ? s.keySet : s.keyMissing}
+        {s.model}: <strong>{summary.model.requiredName}</strong> (<code>{summary.model.id}</code>) · {s.provider}: {summary.model.provider} · {s.key}: {summary.apiKey === 'set' ? s.keySet : summary.apiKey === 'malformed' ? s.keyMalformed : s.keyMissing}
       </p>
       <p className={ai.statusMeta}>{s.modelNote}</p>
       {summary.alerts.open > 0 && (
@@ -422,11 +425,146 @@ function Rows({ rows, empty }: { rows: { name: string; value: string }[]; empty:
   )
 }
 
+// ---------------------------------------------------------------------------------------------------------------- operations
+
+/** What the assistant's operation looks like: the provider, usage today and this month, how the cost is known, the limits that stopped visitors, failures, and what administrators changed. */
+function Operations({ summary }: { summary: AiSummary }) {
+  const t = useText()
+  const language = useInterfaceLanguage()
+  const o = t.ai.operations
+  const op = summary.operations
+  const b = summary.budget
+  const fmt = (value: number) => formatNumber(value, language)
+  const when = (value: string | null) => (value ? formatDateTime(value, language) : o.never)
+  const errorName = (code: string) => (t.ai.analytics.error as Record<string, string>)[code] ?? code
+  const percent = (value: number) => formatNumber(Math.round(value * 10) / 10, language)
+  const periodRows = (p: AiPeriod) => [
+    { name: o.requests, value: fmt(p.requests) },
+    { name: o.answered, value: fmt(p.completed) },
+    { name: o.failed, value: fmt(p.failed) },
+    { name: o.cancelled, value: fmt(p.aborted) },
+    { name: o.inputTokens, value: fmt(p.inputTokens) },
+    { name: o.outputTokens, value: fmt(p.outputTokens) },
+    { name: o.cost, value: dollars(p.estimatedCostUsd, language) },
+    { name: o.average, value: p.averageResponseMs === null ? '–' : `${fmt(p.averageResponseMs)} ms` },
+    { name: o.truncated, value: fmt(p.truncated) },
+  ]
+  const last = op.lastSuccessfulRequest
+  const error = op.provider.lastError
+  const accounting = op.month.costAccounting
+  // The audit log keeps a changed setting as {"field": "old → new"}; the screen names the field in words where it can.
+  const detailText = (detail: string | null) => {
+    if (!detail) return ''
+    try {
+      const parsed = JSON.parse(detail) as Record<string, unknown>
+      return Object.entries(parsed)
+        .map(([key, value]) => `${(t.ai.settings as Record<string, string>)[key] ?? key}: ${String(value)}`)
+        .join(' · ')
+    } catch {
+      return ''
+    }
+  }
+
+  return (
+    <div className={ai.sectionGap}>
+      <p className={ai.note}>{o.lead}</p>
+
+      <div className={ai.twoColumns}>
+        <DetailPanel title={o.providerTitle}>
+          <Rows
+            empty=""
+            rows={[
+              { name: o.providerTitle, value: o.providerStatus[op.provider.status] },
+              { name: o.lastRequest, value: last ? fill(o.lastRequestValue, { when: when(last.at), ms: last.latencyMs === null ? '–' : fmt(last.latencyMs), input: last.inputTokens === null ? '–' : fmt(last.inputTokens), output: last.outputTokens === null ? '–' : fmt(last.outputTokens) }) : o.never },
+              { name: o.lastError, value: error ? fill(o.lastErrorValue, { when: when(error.at), code: errorName(error.code), source: error.source === 'chat' ? o.sourceChat : o.sourceTest }) : o.none },
+            ]}
+          />
+        </DetailPanel>
+        <DetailPanel title={o.liveTitle}>
+          <Rows empty="" rows={[{ name: o.inFlight, value: fill(o.inFlightValue, { count: fmt(summary.live.inFlight), max: fmt(summary.live.maxConcurrent) }) }]} />
+          {summary.live.shuttingDown && (
+            <p className={ai.note} role="status">
+              {o.shuttingDown}
+            </p>
+          )}
+        </DetailPanel>
+      </div>
+
+      <div className={ai.twoColumns}>
+        <DetailPanel title={`${o.periodsTitle} · ${o.today}`}>
+          <Rows empty="" rows={periodRows(op.today)} />
+          <Rows empty="" rows={[{ name: o.utilization, value: fill(o.utilizationValue, { cost: percent(b.day.percent), tokens: percent(b.day.tokenPercent), requests: percent(b.day.requestPercent) }) }]} />
+        </DetailPanel>
+        <DetailPanel title={`${o.periodsTitle} · ${o.month}`}>
+          <Rows empty="" rows={periodRows(op.month)} />
+          <Rows empty="" rows={[{ name: o.utilization, value: fill(o.utilizationMonth, { cost: percent(b.month.percent) }) }]} />
+        </DetailPanel>
+      </div>
+
+      <DetailPanel title={`${o.accountingTitle} · ${o.month}`}>
+        <p className={ai.note}>{o.accountingLead}</p>
+        <Rows
+          empty=""
+          rows={[
+            { name: o.accountingReported, value: fmt(accounting.reported) },
+            { name: o.accountingNone, value: fmt(accounting.none) },
+            { name: o.accountingUnknown, value: fill(o.accountingUnknownValue, { count: fmt(accounting.unknown), amount: dollars(accounting.unknownCostUsd, language) }) },
+          ]}
+        />
+      </DetailPanel>
+
+      <div className={ai.twoColumns}>
+        <DetailPanel title={o.limitsTitle}>
+          <p className={ai.note}>{o.limitsLead}</p>
+          <Rows empty={o.limitsNone} rows={op.limitEvents.map((row) => ({ name: (o.limit as Record<string, string>)[row.kind] ?? row.kind, value: fill(o.limitRow, { today: fmt(row.today), month: fmt(row.month) }) }))} />
+        </DetailPanel>
+        <DetailPanel title={o.ceilingsTitle}>
+          <p className={ai.note}>{o.ceilingsLead}</p>
+          <Rows empty="" rows={summary.ceilings.map((ceiling) => ({ name: o.ceiling[ceiling.key as CeilingKey], value: ceiling.key.endsWith('Usd') ? dollars(ceiling.value, language) : fmt(ceiling.value) }))} />
+        </DetailPanel>
+      </div>
+
+      <DetailPanel title={o.failuresTitle}>
+        <p className={ai.note}>{o.failuresLead}</p>
+        {op.recentFailures.length === 0 ? (
+          <p className={ai.note}>{o.failuresNone}</p>
+        ) : (
+          <DataList
+            caption={o.failuresTitle}
+            rows={op.recentFailures}
+            rowKey={(row) => row.id}
+            columns={[
+              { key: 'when', header: o.failureWhen, cell: (row) => when(row.at) },
+              { key: 'code', header: o.failureCode, cell: (row) => errorName(row.code) },
+              { key: 'time', header: o.failureDuration, cell: (row) => (row.latencyMs === null ? '–' : `${fmt(row.latencyMs)} ms`) },
+              { key: 'request', header: o.failureRequest, cell: (row) => <code>{row.requestId ?? '–'}</code> },
+            ]}
+            card={(row) => (
+              <div className={styles.cellMain}>
+                <span className={styles.cellTitle}>{errorName(row.code)}</span>
+                <span>{when(row.at)}</span>
+                <span className={ai.note}>
+                  {row.latencyMs === null ? '–' : `${fmt(row.latencyMs)} ms`} · <code>{row.requestId ?? '–'}</code>
+                </span>
+              </div>
+            )}
+          />
+        )}
+      </DetailPanel>
+
+      <DetailPanel title={o.historyTitle}>
+        <p className={ai.note}>{o.historyLead}</p>
+        <Rows empty={o.historyNone} rows={op.history.map((row) => ({ name: `${(o.action as Record<string, string>)[row.action] ?? row.action} · ${when(row.at)}`, value: [row.actor ?? '–', detailText(row.detail)].filter(Boolean).join(' · ') }))} />
+      </DetailPanel>
+    </div>
+  )
+}
+
 // ---------------------------------------------------------------------------------------------------------------- settings
 
 const GROUPS: { title: 'budgets' | 'limits'; keys: NumericSetting[] }[] = [
   { title: 'budgets', keys: ['dailyBudgetUsd', 'monthlyBudgetUsd', 'alertPercent', 'dailyTokenBudget', 'dailyRequests', 'maxDailyConversations'] },
-  { title: 'limits', keys: ['maxRequestsPerSession', 'maxRequestsPerIp', 'maxInputChars', 'maxHistoryMessages', 'maxConversationMessages', 'maxOutputTokens', 'maxToolCalls', 'conversationMaxHours', 'retentionDays'] },
+  { title: 'limits', keys: ['maxRequestsPerSession', 'maxRequestsPerIp', 'maxConcurrentRequests', 'maxInputChars', 'maxHistoryMessages', 'maxConversationMessages', 'maxOutputTokens', 'maxToolCalls', 'conversationMaxHours', 'retentionDays'] },
 ]
 
 function SettingsForm({ summary, onSaved }: { summary: AiSummary; onSaved: (summary: AiSummary) => void }) {
@@ -439,9 +577,13 @@ function SettingsForm({ summary, onSaved }: { summary: AiSummary; onSaved: (summ
   const [saved, setSaved] = useState<AiForm>(initial)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
+  const pricesId = useId()
   const dirty = !sameForm(form, saved)
   useUnsavedChanges(dirty)
   const writable = summary.canWrite
+  const language = useInterfaceLanguage()
+  // The operator's ceilings (environment only): shown next to the fields they cap, never editable here.
+  const ceilings = new Map<string, number>(summary.ceilings.map((ceiling) => [ceiling.key, ceiling.value]))
 
   const setNumber = (key: NumericSetting, value: string) => setForm({ ...form, numbers: { ...form.numbers, [key]: value } })
   const toggleLanguage = (language: Language, on: boolean) => setForm({ ...form, languages: LANGUAGES.filter((code) => (code === language ? on : form.languages.includes(code))) })
@@ -494,7 +636,7 @@ function SettingsForm({ summary, onSaved }: { summary: AiSummary; onSaved: (summ
           <legend className={styles.legend}>{a[group.title]}</legend>
           <div className={styles.formGrid}>
             {group.keys.map((key) => (
-              <TextField key={key} label={a[key]} type="text" inputMode="decimal" value={form.numbers[key]} error={errors[key] ?? null} onChange={(event) => setNumber(key, event.target.value)} />
+              <TextField key={key} label={a[key]} type="text" inputMode="decimal" value={form.numbers[key]} error={errors[key] ?? null} hint={ceilings.has(key) ? fill(a.ceilingHint, { max: formatNumber(ceilings.get(key) ?? 0, language) }) : undefined} onChange={(event) => setNumber(key, event.target.value)} />
             ))}
           </div>
         </fieldset>
@@ -508,16 +650,22 @@ function SettingsForm({ summary, onSaved }: { summary: AiSummary; onSaved: (summ
         </div>
       </fieldset>
 
-      <fieldset className={styles.fieldset} disabled={!writable || busy}>
-        <legend className={styles.legend}>{a.prices}</legend>
-        <p className={ai.note}>{a.pricesLead}</p>
-        <div className={styles.formGrid}>
-          {(['priceInputPerMTok', 'priceOutputPerMTok'] as const).map((key) => (
-            <TextField key={key} label={a[key]} type="text" inputMode="decimal" value={form.numbers[key]} error={errors[key] ?? null} onChange={(event) => setNumber(key, event.target.value)} />
-          ))}
-          <TextField label={a.pricesAsOf} type="text" value={form.pricesAsOf} error={errors.pricesAsOf ?? null} onChange={(event) => setForm({ ...form, pricesAsOf: event.target.value })} />
-        </div>
-      </fieldset>
+      <section className={styles.fieldset} aria-labelledby={`${pricesId}-title`}>
+        <h3 id={`${pricesId}-title`} className={styles.legend}>
+          {a.pricesTitle}
+        </h3>
+        <p className={ai.note}>
+          {fill(a.pricesFixed, {
+            input: dollars(summary.pricing.inputPerMTok, language),
+            output: dollars(summary.pricing.outputPerMTok, language),
+            threshold: formatNumber(summary.pricing.longPromptThresholdTokens, language),
+            longInput: dollars(summary.pricing.longPromptInputPerMTok, language),
+            longOutput: dollars(summary.pricing.longPromptOutputPerMTok, language),
+            date: summary.pricing.listAsOf,
+            source: summary.pricing.source,
+          })}
+        </p>
+      </section>
 
       <fieldset className={styles.fieldset} disabled={!writable || busy}>
         <legend className={styles.legend}>{a.texts}</legend>

@@ -4,6 +4,7 @@ import { HttpError, rateLimited } from '../../http/errors.ts'
 import { RateLimiter } from '../../http/rateLimit.ts'
 import { newId } from '../../lib/crypto.ts'
 import { iso, MINUTE, HOUR } from '../../lib/time.ts'
+import { estimateCostUsd } from './pricing.ts'
 import { dayOf, monthOf } from './store.ts'
 
 /**
@@ -26,8 +27,7 @@ export interface Usage {
   reasoningTokens?: number
 }
 
-export const costOf = (usage: Pick<Usage, 'inputTokens' | 'outputTokens'>, settings: Pick<AiSettings, 'priceInputPerMTok' | 'priceOutputPerMTok'>): number =>
-  (usage.inputTokens * settings.priceInputPerMTok + usage.outputTokens * settings.priceOutputPerMTok) / 1_000_000
+export const costOf = (usage: Pick<Usage, 'inputTokens' | 'outputTokens'>, settings: Pick<AiSettings, 'priceInputPerMTok' | 'priceOutputPerMTok'>): number => estimateCostUsd(usage.inputTokens, usage.outputTokens, settings)
 
 /** A rough count for the reservation: four characters a token is the usual rule of thumb, rounded up and padded for non-English text. */
 export const estimateTokens = (characters: number): number => Math.ceil(characters / 3)
@@ -68,6 +68,8 @@ export interface ReserveInput {
   sessionId: string
   ipHash: string
   model: string
+  /** The HTTP request id of the request that started this (the `X-Request-Id` the visitor's client was given). */
+  correlationId?: string
   promptTokens: number
   /** A new conversation counts against the daily number of conversations. */
   newConversation: boolean
@@ -85,7 +87,7 @@ export function spent(app: AppContext, now: Date): { dayCostUsd: number; monthCo
     `SELECT SUM(CASE WHEN day = ? THEN COALESCE(actual_cost_usd, reserved_cost_usd) END) AS dayCost,
             SUM(COALESCE(actual_cost_usd, reserved_cost_usd)) AS monthCost,
             SUM(CASE WHEN day = ? THEN CASE
-                 WHEN status = 'failed' AND error_code IS NOT 'aborted' AND input_tokens IS NULL AND output_tokens IS NULL THEN 0
+                 WHEN status = 'failed' AND error_code IS NOT 'aborted' AND input_tokens IS NULL AND output_tokens IS NULL AND COALESCE(cost_state, 'none') = 'none' THEN 0
                  WHEN status = 'reserved' OR (input_tokens IS NULL AND output_tokens IS NULL) THEN reserved_tokens
                  ELSE COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0) END END) AS dayTokens,
             SUM(CASE WHEN day = ? THEN 1 ELSE 0 END) AS dayRequests
@@ -116,9 +118,9 @@ export function reserve(app: AppContext, settings: AiSettings, input: ReserveInp
 
     const id = newId()
     app.db.run(
-      `INSERT INTO ai_requests (id, conversation_id, session_id, ip_hash, model, status, reserved_cost_usd, reserved_tokens, day, created_at)
-       VALUES (?, ?, ?, ?, ?, 'reserved', ?, ?, ?, ?)`,
-      [id, input.conversationId, input.sessionId, input.ipHash, input.model, estimate.costUsd, estimate.tokens, day, iso(now)],
+      `INSERT INTO ai_requests (id, conversation_id, session_id, ip_hash, model, status, reserved_cost_usd, reserved_tokens, day, created_at, correlation_id)
+       VALUES (?, ?, ?, ?, ?, 'reserved', ?, ?, ?, ?, ?)`,
+      [id, input.conversationId, input.sessionId, input.ipHash, input.model, estimate.costUsd, estimate.tokens, day, iso(now), input.correlationId ?? null],
     )
     app.db.run('UPDATE ai_sessions SET request_count = request_count + 1 WHERE id = ?', [input.sessionId])
     return { id, reservedCostUsd: estimate.costUsd, reservedTokens: estimate.tokens }
@@ -136,7 +138,12 @@ export interface Outcome {
   /** The model the provider said answered (null: it said nothing) and whether that is exactly the required one. */
   actualModel?: string | null
   modelVerified?: boolean
+  /** Why the model stopped, as the provider reported it (`stop`, `length`, `tool-calls`, `content-filter`, `error`, `other`); null: it never said. */
+  finishReason?: string | null
 }
+
+/** What is known about a request's cost (see migration 0016): the provider reported usage; the provider never answered; or nobody can tell. */
+export type CostState = 'reported' | 'none' | 'unknown'
 
 /**
  * Reconciles a reservation. With token counts from the provider the cost is that (source `provider_usage`). Without them: a
@@ -148,28 +155,49 @@ export function finish(app: AppContext, settings: AiSettings, reservation: Reser
   const usage = outcome.usage
   let cost: number
   let source: 'provider_usage' | 'estimate'
+  let state: CostState
   if (usage) {
     cost = costOf(usage, settings)
     source = 'provider_usage'
-  } else if (outcome.status === 'failed' && outcome.errorCode !== 'aborted') {
+    state = 'reported'
+  } else if (outcome.status === 'failed' && outcome.errorCode !== 'aborted' && outcome.firstTokenMs === null) {
+    // The provider never produced anything we saw: nothing was generated, so nothing was billed.
     cost = 0
     source = 'estimate'
+    state = 'none'
   } else {
+    // Cancelled, abandoned, or a stream that broke after output had started: a half-finished generation may still have been billed, and the
+    // provider told us nothing. The budget keeps counting the reservation (an upper bound); the administration says the cost is UNKNOWN.
     cost = reservation.reservedCostUsd
     source = 'estimate'
+    state = 'unknown'
   }
   app.db.run(
-    `UPDATE ai_requests SET status = ?, actual_cost_usd = ?, cost_source = ?, input_tokens = ?, output_tokens = ?, cache_read_tokens = ?, cache_write_tokens = ?, reasoning_tokens = ?,
-            steps = ?, tool_calls = ?, error_code = ?, latency_ms = ?, first_token_ms = ?, finished_at = ?, actual_model = ?, model_verified = ?
+    `UPDATE ai_requests SET status = ?, actual_cost_usd = ?, cost_source = ?, cost_state = ?, input_tokens = ?, output_tokens = ?, cache_read_tokens = ?, cache_write_tokens = ?, reasoning_tokens = ?,
+            steps = ?, tool_calls = ?, error_code = ?, latency_ms = ?, first_token_ms = ?, finished_at = ?, actual_model = ?, model_verified = ?, finish_reason = ?
       WHERE id = ? AND status = 'reserved'`,
-    [outcome.status, cost, source, usage?.inputTokens ?? null, usage?.outputTokens ?? null, usage?.cacheReadTokens ?? null, usage?.cacheWriteTokens ?? null, usage?.reasoningTokens ?? null, outcome.steps, outcome.toolCalls, outcome.errorCode, Math.round(outcome.latencyMs), outcome.firstTokenMs === null ? null : Math.round(outcome.firstTokenMs), iso(now), outcome.actualModel ?? null, outcome.modelVerified ? 1 : 0, reservation.id],
+    [outcome.status, cost, source, state, usage?.inputTokens ?? null, usage?.outputTokens ?? null, usage?.cacheReadTokens ?? null, usage?.cacheWriteTokens ?? null, usage?.reasoningTokens ?? null, outcome.steps, outcome.toolCalls, outcome.errorCode, Math.round(outcome.latencyMs), outcome.firstTokenMs === null ? null : Math.round(outcome.firstTokenMs), iso(now), outcome.actualModel ?? null, outcome.modelVerified ? 1 : 0, outcome.finishReason ?? null, reservation.id],
   )
 }
 
 /** Marks reservations that never reconciled (a crash, a hung provider) abandoned; they keep counting at their reserved cost. */
 export function sweepAbandoned(app: AppContext, olderThanMs = 15 * MINUTE): number {
   const cutoff = iso(new Date(app.clock.now().getTime() - olderThanMs))
-  return app.db.run("UPDATE ai_requests SET status = 'abandoned', cost_source = 'estimate', error_code = 'abandoned', finished_at = ? WHERE status = 'reserved' AND created_at < ?", [iso(app.clock.now()), cutoff]).changes
+  return app.db.run("UPDATE ai_requests SET status = 'abandoned', cost_source = 'estimate', cost_state = 'unknown', error_code = 'abandoned', finished_at = ? WHERE status = 'reserved' AND created_at < ?", [iso(app.clock.now()), cutoff]).changes
+}
+
+// ---- the times a limit stopped somebody ------------------------------------------------------------------------------
+
+export type LimitKind = RefusalReason | 'ip_rate' | 'session_concurrent' | 'conversation_busy' | 'concurrent_global' | 'sensitive_input' | 'shutting_down'
+
+/** Counts one refusal for the day (a counter per kind: not who, not what they wrote). Never breaks the request it is counting. */
+export function recordLimitEvent(app: AppContext, kind: LimitKind): void {
+  try {
+    const now = app.clock.now()
+    app.db.run('INSERT INTO ai_limit_events (day, kind, count, last_at) VALUES (?, ?, 1, ?) ON CONFLICT (day, kind) DO UPDATE SET count = count + 1, last_at = excluded.last_at', [dayOf(now), kind, iso(now)])
+  } catch {
+    // A statistic must never turn a refusal into a crash.
+  }
 }
 
 // ---- the limit on one client address (in memory, like the website's other limits) -----------------------------------

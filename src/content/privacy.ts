@@ -333,6 +333,11 @@ export const privacyText = {
         'Voer geen gevoelige persoonsgegevens in. De assistent antwoordt alleen op basis van wat op de site is gepubliceerd.',
       ),
       tri(
+        'Az az üzenet, amely bankkártyaszámnak vagy titkos kulcsnak (például API-kulcsnak) látszik, el sem kerül a tárolásig vagy az AI-szolgáltatóig: a szerver visszautasítja. Más személyes adatot (például nevet vagy telefonszámot) a szerver nem szűr ki, ezért ne írj ilyet a beszélgetésbe.',
+        'A message that looks like a payment card number or a secret key (such as an API key) never reaches storage or the AI provider: the server refuses it. Other personal data (such as a name or a phone number) is not filtered out by the server, so do not write it in the conversation.',
+        'Een bericht dat eruitziet als een betaalkaartnummer of een geheime sleutel (zoals een API-sleutel) komt nooit in de opslag of bij de AI-aanbieder: de server weigert het. Andere persoonsgegevens (zoals een naam of telefoonnummer) filtert de server niet, schrijf ze dus niet in het gesprek.',
+      ),
+      tri(
         'Ha az asszisztensen át ajánlatot kérsz, a nevedet és az e-mail-címedet a terv melletti panelen adod meg, és csak az ajánlatkéréshez kerülnek: az AI-modell nem látja őket. Semmi nem megy el a jóváhagyásod nélkül.',
         'If you ask for a quote through the assistant, you enter your name and email address in the panel next to the plan, and they go only into the quote request: the AI model does not see them. Nothing is sent without your approval.',
         'Vraag je via de assistent een offerte aan, dan vul je je naam en e-mailadres in het paneel naast het plan in; ze komen alleen in de offerteaanvraag terecht: het AI-model ziet ze niet. Er wordt niets verstuurd zonder jouw goedkeuring.',

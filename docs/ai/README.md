@@ -4,6 +4,8 @@ The portfolio's AI assistant (PROMPT 16): a floating panel on every page and a f
 
 Everything here is read from, or enforced by, the code in this repository. Where something could not be checked, the section "What was not verified" says so.
 
+> **PROMPT 29 (production activation)** extended this manual with seven focused pages: [PRODUCTION_ACTIVATION.md](PRODUCTION_ACTIVATION.md) (start here), [SECURITY.md](SECURITY.md), [COST_CONTROL.md](COST_CONTROL.md), [OPERATIONS.md](OPERATIONS.md), [PRIVACY.md](PRIVACY.md), [TEST_RESULTS.md](TEST_RESULTS.md) and [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md). Where this README and those pages differ, **those pages are newer and win**. Changed since this README was written: the **prices are code** (`pricing.ts`) and no longer editable in the administration; the operator's **hard ceilings** (`AI_CEILING_*`); a **global limit on answers at once**; a **malformed key** no longer stops the server; `ai check` now needs **`--live`**; a new **Operations** tab; a card number or a secret key in a message is refused; migration **0016**.
+
 - [Architecture](#architecture)
 - [Packages](#packages)
 - [Configuration](#configuration)
@@ -68,7 +70,8 @@ All variables are in `.env.example` (section "CONTROL ROOM AI"). The ones that m
 | `AI_ASSISTANT_ENABLED` | The operator's master switch. The administrator's own activation (a setting, **off** until switched on) comes on top of it. | `true` |
 | `AI_SESSION_SECRET` | Signs anonymous session tokens; derived from `APP_SECRET` when empty (≥ 32 characters if set, in production). | derived |
 | `AI_EFFORT`, `AI_THINKING` | `low\|medium\|high` and `adaptive\|disabled`. Thinking counts as output tokens. | `low`, `adaptive` |
-| `AI_PRICE_INPUT_PER_MTOK`, `AI_PRICE_OUTPUT_PER_MTOK`, `AI_PRICES_AS_OF` | USD per million tokens, and when they were read. **Check them against the provider's price list**: costs are computed from these. | 0.10 / 0.50, 2026-10-06 |
+| `AI_PRICE_INPUT_PER_MTOK`, `AI_PRICE_OUTPUT_PER_MTOK`, `AI_PRICES_AS_OF` | **Optional override** of the price list that is in code (`pricing.ts`, read 2026-11-17 from the provider's pricing page). USD per million tokens. Not editable in the administration. | 0.10 / 0.50 (long prompts 0.50 / 2.50) |
+| `AI_CEILING_*`, `AI_MAX_CONCURRENT_REQUESTS`, `AI_CONNECT_TIMEOUT_MS` | The operator's hard ceilings, the global limit on answers at once, the connection timeout. See [PRODUCTION_ACTIVATION.md](PRODUCTION_ACTIVATION.md#environment-variables). | see there |
 | `AI_DAILY_BUDGET`, `AI_MONTHLY_BUDGET` | USD. | 1 / 10 |
 | `AI_ALERT_PERCENT` | An administration alert is raised when a budget (cost, tokens, requests) reaches this percentage, and again when it is used up. | 80 |
 | `AI_DAILY_TOKEN_BUDGET`, `AI_DAILY_REQUESTS`, `AI_MAX_DAILY_CONVERSATIONS` | Daily ceilings. | 2 000 000 / 1000 / 100 |
@@ -109,7 +112,7 @@ Asking for a model is not proof that it answered. The assistant therefore reads 
 
 ## The connection test and activation
 
-The server-side connection test (`POST /api/admin/ai/connection-test`, the administration's "Run connection test" button, or `npm run server:cli -- ai check`) does this, in order:
+The server-side connection test (`POST /api/admin/ai/connection-test`, the administration's "Run connection test" button, or `npm run server:cli -- ai check --live`) does this, in order:
 
 1. checks that a key is configured and that the model lock is intact (no leftover `ANTHROPIC_MODEL`);
 2. sends **one minimal request** (a short sentence, at most 400 output tokens, no retry) to `claude-haiku-5-5` with the server's key and address;
@@ -148,7 +151,7 @@ What a visitor sees: when the administrator has switched the assistant on but th
 - It is read once at start-up, registered with the log redactor, and is not part of `redactedConfig` (which says only "set" or "missing"). Use separate keys for development and production.
 - A search of the built site finds no key and no model identifier in the public bundles; the administration shows the model name it is told by the server.
 - Requests go out with adaptive thinking and low effort (`providerOptions.anthropic`), `maxOutputTokens` from the settings, and no temperature (the model family does not take one). The wire format was captured against the local stand-in: `thinking: {type: "adaptive"}`, `output_config: {effort: "low"}`, `tool_choice: {type: "auto"}`, `stream: true`, and the eight tool definitions.
-- `npm run server:cli -- ai status` says whether the assistant is available and why not (the key is shown as "set"/"missing"). `npm run server:cli -- ai check` runs the connection test: **one real request** (a few tokens). Nothing in the test suite does that: the suite uses a scripted mock model and a local stand-in for Anthropic's API.
+- `npm run server:cli -- ai status` says whether the assistant is available and why not (the key is shown as "set"/"missing"). `npm run server:cli -- ai check --live` runs the connection test: **one real request** (a few tokens). Nothing in the test suite does that: the suite uses a scripted mock model and a local stand-in for Anthropic's API.
 
 ## The eight tools
 
@@ -219,7 +222,8 @@ New tables (migration `0006_control_room_ai.sql`): `ai_sessions` (random id, key
 
 - **Model and connection** (the first tab): the required model (Claude Haiku 5.5) and its configured identifier, shown but **not editable**; the provider, the API key's state ("set"/"missing", never the value), the connection state (connected / not tested / failed / stale / no key / blocked by the lock), the model the provider named in its last proof, the last successful test and the last API error; the **Run connection test** button; the **activation** switch (off until switched on, refused while the model is unverified); total requests with how many the provider confirmed as the required model, tokens, estimated cost, today and this month against the budgets with their state (within budget / warning / used up); the **alerts** (mark as seen); and the recent tests. An administrator can switch the assistant on and off here; nobody can switch its model.
 - **Overview**: today, this month and all time against the budgets; requests, conversations, tokens, **estimated** cost, failures by cause, latency; "What visitors do" (counts only): question categories, tools used (calls, refusals/failures, time), project plans completed, quote requests sent from a conversation, average conversation length; and charts over the last 30 days, 12 weeks or 12 months, each with a "Show the numbers" table alternative.
-- **Settings**: the switches (planner, quote sending), languages, every limit and budget, the alert percentage, effort and thinking, prices and their date, welcome message and suggested questions per language. The server validates every field and marks the ones it refuses (a daily budget above the monthly one, for example).
+- **Operations** (PROMPT 29): provider status, the last answered request and the last provider error, usage today and this month, how much of each budget is used, how the cost is known (reported / none / unknown), the limits that stopped visitors, the operator's ceilings, the recent failed requests with their request ids, and the configuration history. See [OPERATIONS.md](OPERATIONS.md).
+- **Settings**: the switches (planner, quote sending), languages, every limit and budget (inside the operator's ceilings), the alert percentage, effort and thinking, welcome message and suggested questions per language. The prices are shown, read-only. The server validates every field and marks the ones it refuses (a daily budget above the monthly one, for example).
 - **Knowledge**: what the assistant can read (profile, projects, services, packages, FULL EXPERIENCE) with counts and a fingerprint, and a button that refreshes the cache. It shows nothing the assistant cannot say.
 
 The administration never shows the key, and no conversation text is listed there: it has statistics, not transcripts.
@@ -238,8 +242,8 @@ Public (`/api/ai`): `GET /config`, `POST /session`, `POST /chat` (streamed UI me
 
 ## Operating it
 
-1. Set `ANTHROPIC_API_KEY` in the backend environment (never in a `VITE_` variable) and check `ai status`. Remove any `ANTHROPIC_MODEL`. Then run the **connection test** (`ai check`, or AI > Model and connection > Run connection test): it must say the provider named `claude-haiku-5-5`.
-2. Check the prices in the environment against the provider's current list, and set the budgets you are comfortable with. The defaults are deliberately small (USD 1 a day, 10 a month).
+1. Set `ANTHROPIC_API_KEY` in the backend environment (never in a `VITE_` variable) and check `ai status`. Remove any `ANTHROPIC_MODEL`. Then run the **connection test** (`ai check --live`, or AI > Model and connection > Run connection test): it must say the provider named `claude-haiku-5-5`.
+2. Check the price list in `server/src/modules/ai/pricing.ts` against the provider's current list, and set the budgets you are comfortable with. The defaults are deliberately small (USD 1 a day, 10 a month).
 3. Read the privacy section and adapt it to your situation (processor, location, contact for data requests).
 4. After deployment, look at the AI screen: errors, refusals, latency, and the estimated cost against the provider's own usage page. **Do not trust the estimate over the provider's bill.**
 5. Switch the assistant **on** on the Model and connection tab (it starts off, and a successful test does not switch it on). To switch it off at once: the same switch (the button disappears, the page says so) or `AI_ASSISTANT_ENABLED=false`.

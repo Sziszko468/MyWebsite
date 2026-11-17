@@ -2,6 +2,7 @@ import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import type { Level } from './lib/logger.ts'
 import { AI_MODEL_ID } from './modules/ai/model.ts'
+import { AI_PRICING, PRICES_AS_OF } from './modules/ai/pricing.ts'
 
 /**
  * The server's whole configuration, read from the environment once and checked at start-up. A bad value
@@ -93,6 +94,8 @@ export interface AiSettings {
   maxRequestsPerSession: number
   /** Per client address in a ten minute window (kept in memory). */
   maxRequestsPerIp: number
+  /** Answers being written at the same moment, all visitors together. Further requests are refused at once ("busy"), not queued. */
+  maxConcurrentRequests: number
   maxDailyConversations: number
   dailyRequests: number
   dailyTokenBudget: number
@@ -116,11 +119,42 @@ export interface AiSettings {
   suggestions: Record<Language, string[]>
 }
 
+/**
+ * The operator's HARD ceilings (PROMPT 29): environment only, never a setting. An administrator can lower a limit but not raise it past
+ * its ceiling, and a saved value above a ceiling (because the ceiling was lowered later) is applied as the ceiling. Budgets cannot be used
+ * to switch cost protection off: the administration has no way to change the prices either (modules/ai/pricing.ts).
+ */
+export const AI_CEILING_KEYS = ['dailyBudgetUsd', 'monthlyBudgetUsd', 'dailyTokenBudget', 'dailyRequests', 'maxConcurrentRequests', 'maxOutputTokens', 'maxInputChars', 'maxToolCalls', 'maxRequestsPerSession', 'maxDailyConversations'] as const
+export type AiCeilingKey = (typeof AI_CEILING_KEYS)[number]
+export type AiCeilings = Record<AiCeilingKey, number>
+/** The environment variable that sets each ceiling. */
+export const AI_CEILING_ENV: Record<AiCeilingKey, string> = {
+  dailyBudgetUsd: 'AI_CEILING_DAILY_BUDGET',
+  monthlyBudgetUsd: 'AI_CEILING_MONTHLY_BUDGET',
+  dailyTokenBudget: 'AI_CEILING_DAILY_TOKENS',
+  dailyRequests: 'AI_CEILING_DAILY_REQUESTS',
+  maxConcurrentRequests: 'AI_CEILING_CONCURRENT',
+  maxOutputTokens: 'AI_CEILING_OUTPUT_TOKENS',
+  maxInputChars: 'AI_CEILING_INPUT_CHARS',
+  maxToolCalls: 'AI_CEILING_TOOL_CALLS',
+  maxRequestsPerSession: 'AI_CEILING_REQUESTS_PER_SESSION',
+  maxDailyConversations: 'AI_CEILING_DAILY_CONVERSATIONS',
+}
+
 export interface AiConfig {
   /** `AI_ASSISTANT_ENABLED`: the operator's master switch. The assistant is offered only with this on AND an API key. */
   enabled: boolean
-  /** `ANTHROPIC_API_KEY`. A secret: server only, never logged, never in an answer. */
+  /** `ANTHROPIC_API_KEY`. A secret: server only, never logged, never in an answer. Null when it is missing OR malformed (`keyProblem`). */
   apiKey: string | null
+  /**
+   * `malformed`: a key was configured but cannot be one (too short, or it contains white space). The server still starts (the website,
+   * the shop and the quote requests must not depend on the assistant), the key is NOT used and not kept, and the assistant is unavailable.
+   */
+  keyProblem: 'malformed' | null
+  /** `AI_CONNECT_TIMEOUT_MS`: the longest the provider may take to start answering (to send its response headers). */
+  connectTimeoutMs: number
+  /** `AI_CEILING_*`: the hard limits an administrator cannot go past. */
+  ceilings: AiCeilings
   /** `ANTHROPIC_BASE_URL`: another address for the provider's API (a proxy, or the local stand-in the tests use). */
   baseUrl: string | null
   /**
@@ -446,8 +480,11 @@ export function loadConfig(env: Env = process.env): Config {
   // website, the shop and the quote requests must not depend on the assistant): it only keeps the assistant switched off.
   const aiModelEnv = text('ANTHROPIC_MODEL')
   const aiModelOverride = aiModelEnv !== null && aiModelEnv !== AI_MODEL_ID ? aiModelEnv.slice(0, 80) : null
-  const aiKey = text('ANTHROPIC_API_KEY')
-  if (aiKey !== null && (aiKey.length < 20 || /\s/.test(aiKey))) bad('ANTHROPIC_API_KEY', 'does not look like an API key')
+  // A malformed key does NOT stop the server (PROMPT 29): the key is dropped, the assistant is unavailable and says why in the administration.
+  // The value is never echoed. A key the provider rejects is a different case: it is only known by asking, and is handled at run time.
+  const aiKeyRaw = text('ANTHROPIC_API_KEY')
+  const aiKeyMalformed = aiKeyRaw !== null && (aiKeyRaw.length < 20 || /\s/.test(aiKeyRaw))
+  const aiKey = aiKeyMalformed ? null : aiKeyRaw
   let aiBaseUrl: string | null = null
   const aiBaseRaw = text('ANTHROPIC_BASE_URL')
   if (aiBaseRaw !== null) {
@@ -466,6 +503,19 @@ export function loadConfig(env: Env = process.env): Config {
   const aiThinking = text('AI_THINKING') ?? 'adaptive'
   if (!['adaptive', 'disabled'].includes(aiThinking)) bad('AI_THINKING', `must be adaptive or disabled (got "${aiThinking}")`)
   const noText: Record<Language, string> = { hu: '', en: '', nl: '' }
+  // The hard ceilings: what an administrator can never go past (the defaults are generous for a portfolio and still small money).
+  const aiCeilings: AiCeilings = {
+    dailyBudgetUsd: decimal(AI_CEILING_ENV.dailyBudgetUsd, 25, 0, 100000),
+    monthlyBudgetUsd: decimal(AI_CEILING_ENV.monthlyBudgetUsd, 250, 0, 1000000),
+    dailyTokenBudget: integer(AI_CEILING_ENV.dailyTokenBudget, 50_000_000, 1000, 1_000_000_000),
+    dailyRequests: integer(AI_CEILING_ENV.dailyRequests, 20_000, 1, 1000000),
+    maxConcurrentRequests: integer(AI_CEILING_ENV.maxConcurrentRequests, 25, 1, 200),
+    maxOutputTokens: integer(AI_CEILING_ENV.maxOutputTokens, 4000, 200, 16000),
+    maxInputChars: integer(AI_CEILING_ENV.maxInputChars, 4000, 100, 8000),
+    maxToolCalls: integer(AI_CEILING_ENV.maxToolCalls, 10, 1, 20),
+    maxRequestsPerSession: integer(AI_CEILING_ENV.maxRequestsPerSession, 200, 1, 2000),
+    maxDailyConversations: integer(AI_CEILING_ENV.maxDailyConversations, 2000, 1, 100000),
+  }
   const aiDefaults: AiSettings = {
     enabled: false,
     plannerEnabled: true,
@@ -478,6 +528,7 @@ export function loadConfig(env: Env = process.env): Config {
     maxToolCalls: integer('AI_MAX_TOOL_CALLS', 6, 1, 20),
     maxRequestsPerSession: integer('AI_MAX_REQUESTS_PER_SESSION', 40, 1, 2000),
     maxRequestsPerIp: integer('AI_MAX_REQUESTS_PER_IP', 30, 1, 2000),
+    maxConcurrentRequests: integer('AI_MAX_CONCURRENT_REQUESTS', 8, 1, 200),
     maxDailyConversations: integer('AI_MAX_DAILY_CONVERSATIONS', 100, 1, 100000),
     dailyRequests: integer('AI_DAILY_REQUESTS', 1000, 1, 1000000),
     dailyTokenBudget: integer('AI_DAILY_TOKEN_BUDGET', 2_000_000, 1000, 1_000_000_000),
@@ -488,17 +539,24 @@ export function loadConfig(env: Env = process.env): Config {
     retentionDays: integer('AI_RETENTION_DAYS', 7, 1, 365),
     effort: aiEffort as AiSettings['effort'],
     thinking: aiThinking as AiSettings['thinking'],
-    // The prices Anthropic lists for Claude Haiku 5.5 (prompts up to 100K tokens) on 2026-10-06. Change them here or in the
-    // administration when the provider changes them; the code holds no other price.
-    priceInputPerMTok: decimal('AI_PRICE_INPUT_PER_MTOK', 0.1, 0, 1000),
-    priceOutputPerMTok: decimal('AI_PRICE_OUTPUT_PER_MTOK', 0.5, 0, 1000),
-    pricesAsOf: text('AI_PRICES_AS_OF') ?? '2026-10-06',
+    // The prices Anthropic lists for Claude Haiku 5.5 (modules/ai/pricing.ts, with its source and date). The operator may override them in the
+    // environment; an administrator cannot (a price of 0 would switch the budgets off).
+    priceInputPerMTok: decimal('AI_PRICE_INPUT_PER_MTOK', AI_PRICING.inputPerMTok, 0, 1000),
+    priceOutputPerMTok: decimal('AI_PRICE_OUTPUT_PER_MTOK', AI_PRICING.outputPerMTok, 0, 1000),
+    pricesAsOf: text('AI_PRICES_AS_OF') ?? PRICES_AS_OF,
     welcome: noText,
     suggestions: { hu: [], en: [], nl: [] },
+  }
+  // A starting value above its own ceiling is a mistake in the environment: say so instead of silently clamping it.
+  for (const key of AI_CEILING_KEYS) {
+    if (aiDefaults[key] > aiCeilings[key]) bad(AI_CEILING_ENV[key], `is lower than the starting value of ${key} (${aiDefaults[key]}); raise the ceiling or lower the starting value`)
   }
   const ai: AiConfig = {
     enabled: flag('AI_ASSISTANT_ENABLED', true),
     apiKey: aiKey,
+    keyProblem: aiKeyMalformed ? 'malformed' : null,
+    connectTimeoutMs: integer('AI_CONNECT_TIMEOUT_MS', 20_000, 500, 120_000),
+    ceilings: aiCeilings,
     baseUrl: aiBaseUrl,
     model: AI_MODEL_ID,
     modelOverride: aiModelOverride,
@@ -593,6 +651,6 @@ export function redactedConfig(config: Config): Record<string, unknown> {
     customerLinkDays: config.customerLinkDays,
     clientPortal: config.client,
     googleDriveBackup: { enabled: config.backup.enabled, credentials: config.backup.enabled ? 'set' : 'missing', folderIdSet: config.backup.folderId !== null, retentionDays: config.backup.retentionDays, hourUtc: config.backup.hourUtc },
-    assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : 'missing', model: config.ai.model, modelOverrideRejected: config.ai.modelOverride !== null, customBaseUrl: config.ai.baseUrl !== null },
+    assistant: { enabled: config.ai.enabled, apiKey: config.ai.apiKey ? 'set' : config.ai.keyProblem === 'malformed' ? 'malformed' : 'missing', ceilings: config.ai.ceilings, model: config.ai.model, modelOverrideRejected: config.ai.modelOverride !== null, customBaseUrl: config.ai.baseUrl !== null },
   }
 }
