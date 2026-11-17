@@ -2,6 +2,7 @@ import { LANGUAGES, type Language } from '../../config.ts'
 import type { AppContext, SessionInfo } from '../../context.ts'
 import type { Database } from '../../db/database.ts'
 import { newId, randomToken, sha256Hex } from '../../lib/crypto.ts'
+import { mirrorBookingEvent } from '../communications/events.ts'
 import { addMs, DAY, iso, type Clock } from '../../lib/time.ts'
 import type { BookingRow, BookingStatus, ChangeRow, TypeRow, TypeTranslationRow } from './model.ts'
 
@@ -87,6 +88,8 @@ export function recordBookingEvent(db: Database, clock: Clock, event: BookingEve
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [event.booking.id, event.booking.reference, event.type, event.actor.type, event.actor.type === 'admin' ? event.actor.session.userId : null, event.from ?? null, event.to ?? null, event.fromStart ?? null, event.toStart ?? null, event.changeId ?? null, event.summary ? event.summary.slice(0, 120) : null, iso(clock.now())],
   )
+  // PROMPT 28: mirrored into the activity feed of the customer the booking is linked to (communications/events.ts); never throws.
+  mirrorBookingEvent({ db, clock }, result.lastInsertRowid)
   return result.lastInsertRowid
 }
 

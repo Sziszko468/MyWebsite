@@ -67,6 +67,9 @@ export function ClientProjectPage() {
           <AdminButton variant="primary" to={`/client-projects/${project.id}/work`}>
             {t.work.open}
           </AdminButton>
+          <AdminButton variant="secondary" to={`/communications?customerId=${project.customer_id}&projectId=${project.id}`}>
+            {t.communications.title}
+          </AdminButton>
           <AdminButton variant="secondary" to={`/client-projects/${project.id}/deliverables`}>
             {t.deliverables.open}
           </AdminButton>

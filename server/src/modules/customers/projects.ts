@@ -2,6 +2,7 @@ import type { AppContext } from '../../context.ts'
 import { HttpError, notFound } from '../../http/errors.ts'
 import { newId, newReference } from '../../lib/crypto.ts'
 import { iso } from '../../lib/time.ts'
+import { mirrorProjectEvent } from '../communications/events.ts'
 import { getCustomer, recordAudit } from './accounts.ts'
 import { progressOf, type Progress } from '../projectwork/progress.ts'
 import { workSettings } from '../projectwork/settings.ts'
@@ -45,9 +46,12 @@ export function recordProjectEvent(
   input: { projectId: string; type: ProjectEventType; adminId: string | null; actor?: 'admin' | 'customer' | 'system'; actorId?: string | null; from?: string | null; to?: string | null; milestoneId?: string | null; documentId?: string | null; taskId?: string | null; actionId?: string | null; subject?: string | null; visibility?: 'customer' | 'internal'; note?: string | null },
 ): number {
   const actor = input.actor ?? (input.adminId ? 'admin' : 'system')
-  return app.db.run('INSERT INTO client_project_events (project_id, event_type, actor_type, actor_id, from_status, to_status, milestone_id, document_id, task_id, action_id, subject, visibility, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+  const id = app.db.run('INSERT INTO client_project_events (project_id, event_type, actor_type, actor_id, from_status, to_status, milestone_id, document_id, task_id, action_id, subject, visibility, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
     input.projectId, input.type, actor, input.actorId ?? input.adminId, input.from ?? null, input.to ?? null, input.milestoneId ?? null, input.documentId ?? null, input.taskId ?? null, input.actionId ?? null, input.subject ?? null, input.visibility ?? 'customer', input.note ?? null, iso(app.clock.now()),
   ]).lastInsertRowid
+  // PROMPT 28: the customer's activity feed shows the lines the customer may see (communications/events.ts). It never throws and never undoes this.
+  mirrorProjectEvent(app, id)
+  return id
 }
 
 /** Tells the project's customer about an event, in their language, unless they are switched off. Never throws. */

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ApiError } from '../api/client'
+import { communications, type CommunicationSettings } from '../api/communications'
 import { deliverables, type DeliverableSettings } from '../api/deliverables'
 import { work, type Category, type Language, type WorkSettings } from '../api/work'
 import { AdminButton } from '../components/AdminButton'
@@ -19,6 +20,7 @@ import w from '../styles/work.module.scss'
  */
 
 const LANGUAGES: readonly Language[] = ['hu', 'en', 'nl']
+const COMMUNICATION_CHOICES = ['customerCanStart', 'replies', 'announcements', 'important', 'resolution', 'messageToOwner', 'resolutionRequested'] as const
 const DELIVERABLE_CHOICES = ['ready', 'newVersion', 'approvalRequested', 'reply', 'feedback', 'changesRequested', 'approved'] as const
 const CHOICES = ['actionAssigned', 'actionDueSoon', 'actionOverdue', 'responseSubmitted', 'responseReviewed', 'changesRequested', 'milestoneCompleted', 'statusChanged'] as const
 
@@ -69,6 +71,7 @@ export function WorkSettingsPage() {
   const categories = useResource((signal) => work.categories(signal), [])
   const settings = useResource((signal) => work.settings(signal), [])
   const deliverableSettings = useResource((signal) => deliverables.settings(signal), [])
+  const communicationSettings = useResource((signal) => communications.settings(signal), [])
   const [busy, setBusy] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [fresh, setFresh] = useState<{ code: string; names: Record<Language, string> }>({ code: '', names: { hu: '', en: '', nl: '' } })
@@ -84,6 +87,7 @@ export function WorkSettingsPage() {
       categories.reload()
       settings.reload()
       deliverableSettings.reload()
+      communicationSettings.reload()
       return result
     } catch (error) {
       if (error instanceof ApiError && error.status === 422) setErrors(Object.fromEntries(Object.entries(error.fields).map(([field, code]) => [field, code === 'duplicate' ? s.duplicate : code === 'required' ? s.required : s.invalid])))
@@ -95,14 +99,17 @@ export function WorkSettingsPage() {
     }
   }
 
-  if (categories.loading || settings.loading || deliverableSettings.loading) return <LoadingState />
+  if (categories.loading || settings.loading || deliverableSettings.loading || communicationSettings.loading) return <LoadingState />
   if (categories.error && !categories.data) return <ErrorState error={categories.error} onRetry={categories.reload} />
   if (settings.error && !settings.data) return <ErrorState error={settings.error} onRetry={settings.reload} />
   if (deliverableSettings.error && !deliverableSettings.data) return <ErrorState error={deliverableSettings.error} onRetry={deliverableSettings.reload} />
+  if (communicationSettings.error && !communicationSettings.data) return <ErrorState error={communicationSettings.error} onRetry={communicationSettings.reload} />
   const list = categories.data ?? []
   const current = settings.data as WorkSettings
 
   const deliverableChoices = deliverableSettings.data as DeliverableSettings
+  const communicationChoices = communicationSettings.data as CommunicationSettings
+  const toggleCommunication = (key: (typeof COMMUNICATION_CHOICES)[number], value: boolean) => void run(`cchoice-${key}`, () => communications.saveSettings({ [key]: value }), text.communications.settings.saved)
   const toggleDeliverable = (key: (typeof DELIVERABLE_CHOICES)[number], value: boolean) => void run(`dchoice-${key}`, () => deliverables.saveSettings({ [key]: value }), text.deliverables.settings.saved)
   const toggle = (key: (typeof CHOICES)[number], value: boolean) => void run(`choice-${key}`, () => work.saveSettings({ [key]: value }), s.saved)
 
@@ -142,6 +149,16 @@ export function WorkSettingsPage() {
               <SwitchField key={key} label={text.deliverables.settings.choices[key]} checked={deliverableChoices[key]} disabled={busy === `dchoice-${key}`} onChange={(value) => toggleDeliverable(key, value)} />
             ))}
           </div>
+        </DetailPanel>
+
+        <DetailPanel title={text.communications.settings.title}>
+          <p className={styles.muted}>{text.communications.settings.lead}</p>
+          <div className={styles.stack}>
+            {COMMUNICATION_CHOICES.map((key) => (
+              <SwitchField key={key} label={text.communications.settings.choices[key]} checked={communicationChoices[key]} disabled={busy === `cchoice-${key}`} onChange={(value) => toggleCommunication(key, value)} />
+            ))}
+          </div>
+          <p className={styles.muted}>{text.communications.settings.note}</p>
         </DetailPanel>
 
         <DetailPanel title={s.categories}>

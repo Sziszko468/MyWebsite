@@ -40,3 +40,12 @@ export function formatDay(day: string, lang: Language): string {
 export function pad(position: number): string {
   return String(position).padStart(2, '0')
 }
+
+/** A moment in the time zone a record names (a consultation is read in the owner's zone, not the visitor's), date and time; the visitor's own zone when the name is not a zone. */
+export function formatZoned(iso: string, zone: string, lang: Language): string {
+  try {
+    return new Intl.DateTimeFormat(LOCALE_TAGS[lang], { dateStyle: 'long', timeStyle: 'short', timeZone: zone }).format(new Date(iso))
+  } catch {
+    return formatMoment(iso, lang)
+  }
+}

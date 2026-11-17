@@ -3,6 +3,7 @@ import { cmsHu } from './cms'
 import { bookingHu } from './booking'
 import { clientsHu } from './clients'
 import { quotationHu } from './quotation'
+import { communicationsHu } from './communications'
 import { deliverablesHu } from './deliverables'
 import { workHu } from './work'
 
@@ -13,6 +14,7 @@ export const hu: AdminText = {
   clients: clientsHu,
   work: workHu,
   deliverables: deliverablesHu,
+  communications: communicationsHu,
   cms: cmsHu,
   app: {
     name: 'Kezelőfelület',
@@ -44,6 +46,7 @@ export const hu: AdminText = {
     quotes: 'Ajánlatkérések',
     bookings: 'Konzultációk',
     clients: 'Ügyfelek',
+    communications: 'Kommunikáció',
     services: 'Szolgáltatások és csomagok',
     content: 'Weboldal-tartalom',
     translations: 'Fordítások',

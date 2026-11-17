@@ -72,6 +72,10 @@ export const LIMITS = {
   portalAuth: { windowMs: 15 * MINUTE, max: 12 },
   /** What a signed-in customer does in the portal. */
   portal: { windowMs: MINUTE, max: 180 },
+  /** Sending a message or starting a conversation (PROMPT 28): a person writes a few lines an hour; a script writes until it is stopped. */
+  messageSend: { windowMs: 10 * MINUTE, max: 40 },
+  /** Searching conversations: a person searches a few times a minute (the search reads every message, so it has its own, tighter limit). */
+  messageSearch: { windowMs: MINUTE, max: 20 },
   /** The e-mail provider's webhook: a handful of events per message, far below this, and a flood of unsigned ones is refused cheaply. */
   webhook: { windowMs: MINUTE, max: 240 },
 } as const
@@ -85,7 +89,7 @@ export class Limiters {
   constructor(clock: Clock, enabled: boolean) {
     this.enabled = enabled
     const make = (name: LimitName) => new RateLimiter(clock, LIMITS[name].windowMs, LIMITS[name].max)
-    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), customer: make('customer'), booking: make('booking'), portalAuth: make('portalAuth'), portal: make('portal'), tokenMiss: make('tokenMiss'), webhook: make('webhook') }
+    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), customer: make('customer'), booking: make('booking'), portalAuth: make('portalAuth'), portal: make('portal'), tokenMiss: make('tokenMiss'), webhook: make('webhook'), messageSend: make('messageSend'), messageSearch: make('messageSearch') }
   }
 
   /** Counts one request against a limit and throws the 429 when it is over. */

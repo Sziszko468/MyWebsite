@@ -7,6 +7,7 @@ import { cmsEn } from './cms'
 import { bookingEn } from './booking'
 import { clientsEn } from './clients'
 import { quotationEn } from './quotation'
+import { communicationsEn } from './communications'
 import { deliverablesEn } from './deliverables'
 import { workEn } from './work'
 
@@ -16,6 +17,7 @@ export const en = {
   clients: clientsEn,
   work: workEn,
   deliverables: deliverablesEn,
+  communications: communicationsEn,
   cms: cmsEn,
   app: {
     name: 'Administration',
@@ -47,6 +49,7 @@ export const en = {
     quotes: 'Quote requests',
     bookings: 'Consultations',
     clients: 'Customers',
+    communications: 'Communication',
     services: 'Services & packages',
     content: 'Website content',
     translations: 'Translations',

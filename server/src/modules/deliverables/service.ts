@@ -4,6 +4,7 @@ import { newId, newReference, sha256Hex } from '../../lib/crypto.ts'
 import { iso } from '../../lib/time.ts'
 import { TERMINAL_STATUSES } from '../customers/model.ts'
 import { getProject, refuse } from '../customers/projects.ts'
+import { mirrorDeliverableEvent } from '../communications/events.ts'
 import { tellCustomer } from './notify.ts'
 import {
   REQUIRES,
@@ -85,10 +86,13 @@ export interface NewEvent {
 }
 
 export function recordEvent(app: Pick<AppContext, 'db' | 'clock'>, e: NewEvent): number {
-  return app.db.run(
+  const id = app.db.run(
     'INSERT INTO deliverable_events (deliverable_id, version_id, version_number, comment_id, approval_id, event_type, actor_type, actor_id, from_state, to_state, subject, note, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [e.deliverableId, e.versionId ?? null, e.versionNumber ?? null, e.commentId ?? null, e.approvalId ?? null, e.type, e.actor, e.actorId ?? null, e.from ?? null, e.to ?? null, e.subject ?? null, e.note ?? null, e.visibility ?? 'customer', iso(app.clock.now())],
   ).lastInsertRowid
+  // PROMPT 28: mirrored into the customer's activity feed (communications/events.ts); never throws.
+  mirrorDeliverableEvent(app, id)
+  return id
 }
 
 export const eventOf = (app: Pick<AppContext, 'db'>, id: number): EventRow | undefined => app.db.get<EventRow>('SELECT * FROM deliverable_events WHERE id = ?', [id])

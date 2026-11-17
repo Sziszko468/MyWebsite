@@ -1,5 +1,6 @@
 import { tri } from '../trilingual'
 import { deliverablesText } from './deliverables'
+import { messagesText } from './messages'
 import { workText } from './work'
 
 /**
@@ -21,6 +22,7 @@ export const portalText = {
     label: tri('Portál menü', 'Portal menu', 'Portaalmenu'),
     overview: tri('Áttekintés', 'Overview', 'Overzicht'),
     projects: tri('Projektek', 'Projects', 'Projecten'),
+    messages: tri('Üzenetek', 'Messages', 'Berichten'),
     requests: tri('Ajánlatkérések', 'Quote requests', 'Offerteaanvragen'),
     bookings: tri('Foglalások', 'Bookings', 'Afspraken'),
     documents: tri('Dokumentumok', 'Documents', 'Documenten'),
@@ -334,6 +336,8 @@ export const portalText = {
   work: workText,
 
   deliverables: deliverablesText,
+
+  messages: messagesText,
 
   languages: {
     hu: tri('Magyar', 'Hungarian', 'Hongaars'),

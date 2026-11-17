@@ -382,6 +382,10 @@ export function DeliverablePage({ reference, deliverable, detail, apply, reload,
         </p>
       </PageHeader>
 
+      <p className={styles.fineprint}>
+        <LocalizedLink to={`/client-portal/messages?about=deliverable:${detail.reference}`}>{words.messages.ask.deliverable}</LocalizedLink>
+      </p>
+
       {notice && <Notice kind={notice.kind}>{notice.text}</Notice>}
 
       {approval && detail.can.decide && (

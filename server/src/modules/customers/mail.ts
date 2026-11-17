@@ -1,6 +1,8 @@
 import type { Language } from '../../config.ts'
 import type { AppContext } from '../../context.ts'
 import { ConstraintError } from '../../http/errors.ts'
+import { COMMUNICATION_MAIL_TO_OWNER, renderCommunicationMail, type CommunicationMailKind } from '../notifications/communicationTemplates.ts'
+import type { ConversationRow } from '../communications/model.ts'
 import { DELIVERABLE_MAIL_TO_OWNER, renderDeliverableMail, type DeliverableMailKind } from '../notifications/deliverableTemplates.ts'
 import { renderWorkMail, type WorkMailKind } from '../notifications/workTemplates.ts'
 import type { DeliverableRow, EventRow } from '../deliverables/model.ts'
@@ -21,7 +23,7 @@ import type { AuthRequestRow, DocumentRow, ProjectEventRow, ProjectRow, ProjectS
 
 type Deps = Pick<AppContext, 'db' | 'config' | 'clock'>
 
-export type ClientRelated = 'client_auth' | 'client_audit' | 'client_project_event' | 'client_document' | 'client_action_reminder' | 'deliverable_event'
+export type ClientRelated = 'client_auth' | 'client_audit' | 'client_project_event' | 'client_document' | 'client_action_reminder' | 'deliverable_event' | 'conversation_message'
 
 /** Queues one message. The database allows one of each kind per thing it is about, so a retried request or a handler that runs twice makes no second message. Never throws: a message that cannot be queued must not undo what it announces. */
 export function queueClientMail(app: Pick<AppContext, 'notifier' | 'log'>, input: { kind: ClientMailKind; relatedType: ClientRelated; relatedId: string; recipient: string; language: Language }): boolean {
@@ -120,6 +122,20 @@ export function renderClientDelivery(deps: Deps, row: { kind: string; related_ty
       const url = toOwner ? (config.publicUrl ? `${config.publicUrl}/admin/client-projects/${project.id}/deliverables/${deliverable.id}` : null) : portalUrl(deps, lang, `projects/${project.reference}/deliverables/${deliverable.reference}`)
       return renderDeliverableMail(row.kind as DeliverableMailKind, input, lang, brand, url)
     }
+    case 'conversation_message': {
+      // The message is about ONE line of a conversation: a message of the owner's, a customer's, or one of its own events (resolution). It names the project and the conversation and
+      // says nothing of what was written: no text, no subject, never a private note. A line that was removed, or that only the owner may see, is not announced.
+      const line = db.get<{ conversation_id: string; visibility: string; deleted_at: string | null }>('SELECT conversation_id, visibility, deleted_at FROM conversation_messages WHERE id = ?', [row.related_id])
+      if (!line || line.visibility !== 'customer' || line.deleted_at) return null
+      const conversation = db.get<ConversationRow>('SELECT * FROM conversations WHERE id = ?', [line.conversation_id])
+      const customer = conversation ? getCustomer(deps, conversation.customer_id) : undefined
+      if (!conversation || conversation.kind !== 'thread' || !customer) return null
+      const toOwner = COMMUNICATION_MAIL_TO_OWNER.includes(row.kind as CommunicationMailKind)
+      if (!toOwner && customer.status === 'disabled') return null
+      const project = conversation.project_id ? db.get<ProjectRow>('SELECT * FROM client_projects WHERE id = ?', [conversation.project_id]) : undefined
+      const url = toOwner ? (config.publicUrl ? `${config.publicUrl}/admin/communications/${conversation.reference}` : null) : portalUrl(deps, lang, `messages/${conversation.reference}`)
+      return renderCommunicationMail(row.kind as CommunicationMailKind, { project: project ? { name: project.name, reference: project.reference } : null, customerName: customer.name, customerEmail: toOwner ? customer.email : null, conversationReference: conversation.reference }, lang, brand, url)
+    }
     case 'client_action_reminder': {
       // `related_id` is `<action id>:<due date>`: a reminder is about one action on ONE date, so a date that moved is a different reminder and an old one is not sent.
       const [actionId, dueOn] = row.related_id.split(':')
@@ -155,6 +171,10 @@ const isWorkKind = (kind: string): kind is 'client_action_assigned' | 'client_ac
 export function clientCustomerAddress(deps: Pick<AppContext, 'db'>, relatedType: string, relatedId: string): string | null {
   if (relatedType === 'deliverable_event') {
     const owner = deps.db.get<{ customer_id: string }>('SELECT p.customer_id FROM deliverable_events e JOIN deliverables d ON d.id = e.deliverable_id JOIN client_projects p ON p.id = d.project_id WHERE e.id = ?', [Number(relatedId)])
+    return owner ? (getCustomer(deps, owner.customer_id)?.email ?? null) : null
+  }
+  if (relatedType === 'conversation_message') {
+    const owner = deps.db.get<{ customer_id: string }>('SELECT c.customer_id FROM conversation_messages m JOIN conversations c ON c.id = m.conversation_id WHERE m.id = ?', [relatedId])
     return owner ? (getCustomer(deps, owner.customer_id)?.email ?? null) : null
   }
   if (relatedType === 'client_project_event') {

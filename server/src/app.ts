@@ -21,6 +21,7 @@ import { bookingRoutes } from './modules/bookings/routes.ts'
 import { catalogRoutes } from './modules/catalog/routes.ts'
 import { customerRoutes } from './modules/customers/routes.ts'
 import { workRoutes } from './modules/projectwork/routes.ts'
+import { communicationRoutes } from './modules/communications/routes.ts'
 import { deliverableRoutes } from './modules/deliverables/routes.ts'
 import { clientCookieName, resolveClientSession, verifyClientCsrf } from './modules/customers/sessions.ts'
 import { contactRoutes } from './modules/contact/routes.ts'
@@ -88,7 +89,7 @@ export function createApp(deps: AppDeps): App {
   context.assistant = new Assistant(context, deps.aiModel ?? null)
 
   const router = new Router()
-  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...bookingRoutes(context), ...customerRoutes(context), ...workRoutes(context), ...deliverableRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
+  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...bookingRoutes(context), ...customerRoutes(context), ...workRoutes(context), ...deliverableRoutes(context), ...communicationRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
 
   const sweeper = setInterval(() => {
     limiters.sweep()

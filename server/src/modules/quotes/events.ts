@@ -1,5 +1,6 @@
 import type { AppContext, SessionInfo } from '../../context.ts'
 import { iso } from '../../lib/time.ts'
+import { mirrorQuoteEvent } from '../communications/events.ts'
 import type { RequestStatus } from './status.ts'
 
 /**
@@ -49,11 +50,13 @@ export interface EventInput {
 }
 
 export function recordEvent(app: Pick<AppContext, 'db' | 'clock'>, event: EventInput): void {
-  app.db.run(
+  const result = app.db.run(
     `INSERT INTO quote_events (quote_request_id, quote_id, reference, event_type, actor_type, actor_id, from_status, to_status, summary, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [event.requestId, event.quoteId ?? null, event.reference, event.type, event.actor.type, event.actor.type === 'admin' ? event.actor.session.userId : null, event.from ?? null, event.to ?? null, event.summary ? event.summary.slice(0, 200) : null, iso(app.clock.now())],
   )
+  // PROMPT 28: mirrored into the activity feed of the customer the request is linked to (communications/events.ts); never throws.
+  mirrorQuoteEvent(app, result.lastInsertRowid)
 }
 
 export interface EventView {

@@ -106,7 +106,7 @@ export function ClientDetailPage() {
 
   return (
     <>
-      <PageHeader title={customer.name || customer.email} lead={customer.name ? customer.email : customer.company} back={{ to: '/clients', label: d.back }} />
+      <PageHeader title={customer.name || customer.email} lead={customer.name ? customer.email : customer.company} back={{ to: '/clients', label: d.back }} actions={<AdminButton variant="secondary" to={`/communications?customerId=${customer.id}`}>{t.communications.title}</AdminButton>} />
       <div className={styles.stackLg}>
         {customer.deletionRequestedAt && (
           <div className={cx(styles.notice, styles.noticeDanger)} role="status">

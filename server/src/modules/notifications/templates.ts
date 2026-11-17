@@ -65,6 +65,13 @@ export type EmailKind =
   | 'deliverable_feedback_admin'
   | 'deliverable_changes_requested_admin'
   | 'deliverable_approved_admin'
+  // PROMPT 28: client communication (communicationTemplates.ts)
+  | 'client_message_reply'
+  | 'client_message_announcement'
+  | 'client_message_important'
+  | 'client_conversation_resolved'
+  | 'message_received_admin'
+  | 'resolution_requested_admin'
 
 export interface Rendered {
   subject: string

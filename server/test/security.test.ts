@@ -290,7 +290,10 @@ describe('abuse of the public forms', () => {
     // Only the windows still running are remembered, so the table does not grow with every address ever seen.
     server.clock.advance(16 * 60_000)
     limiters.sweep()
-    expect(Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    // (Every limiter, however many there are: a new one is a new window that must also be forgotten.)
+    const sizes = Object.values((limiters as unknown as { limiters: Record<string, { size: number }> }).limiters).map((limiter) => limiter.size)
+    expect(sizes.length).toBeGreaterThanOrEqual(14)
+    expect(sizes.filter((size) => size !== 0)).toEqual([])
     expect(() => new Limiters(server.clock, false).check('contact', 'x')).not.toThrow()
   })
 

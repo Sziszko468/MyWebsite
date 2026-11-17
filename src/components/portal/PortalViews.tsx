@@ -369,6 +369,10 @@ export function ProjectView() {
               )}
             </dl>
 
+            <p className={styles.fineprint}>
+              <LocalizedLink to={`/client-portal/messages?about=project:${reference}`}>{words.messages.ask.project}</LocalizedLink>
+            </p>
+
             <ProjectDeliverables reference={reference} />
 
             <ProjectWork reference={reference} milestones={project.milestoneList} />

@@ -350,7 +350,7 @@ export const setCsrf = (token: string | null): void => {
   csrfToken = token
 }
 
-export async function call<T>(method: 'GET' | 'POST' | 'PATCH' | 'DELETE', path: string, body?: unknown): Promise<Result<T>> {
+export async function call<T>(method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE', path: string, body?: unknown): Promise<Result<T>> {
   const url = apiEndpoint(path)
   if (url === null || !portalUsable()) return { ok: false, failure: { kind: 'no_backend' } }
   try {
@@ -423,3 +423,83 @@ export const endSession = (id: string) => call<{ current: boolean }>('DELETE', `
 export const endOtherSessions = () => call<{ closed: number }>('POST', '/api/portal/sessions/revoke-others', {})
 export const askForDeletion = () => call<{ requestedAt: string }>('POST', '/api/portal/account/deletion-request', {})
 export const withdrawDeletion = () => call<undefined>('DELETE', '/api/portal/account/deletion-request')
+
+// ---- messages (PROMPT 28) -----------------------------------------------------------------------------------------------------------
+
+export type ConversationStatus = 'open' | 'waiting_owner' | 'waiting_customer' | 'resolved' | 'archived'
+export type InboxFilter = 'all' | 'unread' | 'open' | 'resolved'
+export type ContextType = 'project' | 'deliverable' | 'task' | 'booking' | 'quote'
+
+export interface ConversationSummary {
+  reference: string
+  kind: 'thread' | 'activity'
+  subject: string | null
+  status: ConversationStatus
+  project: { reference: string; name: string } | null
+  context: { type: ContextType; reference: string; title: string | null } | null
+  lastMessageAt: string | null
+  lastActivityAt: string
+  lastSender: 'you' | 'studio' | null
+  preview: string | null
+  removed: boolean
+  unread: number
+  resolutionRequested: boolean
+  snippet?: string | null
+}
+
+export interface ConversationMessage {
+  id: string
+  seq: number
+  type: 'text' | 'announcement' | 'system_event'
+  from: 'you' | 'studio' | 'system'
+  body: string | null
+  removed: boolean
+  important: boolean
+  event: { key: string; params: Record<string, string | number | boolean | null> } | null
+  createdAt: string
+  feed: boolean
+}
+
+export interface ConversationDetail extends Omit<ConversationSummary, 'preview' | 'removed' | 'lastSender' | 'snippet'> {
+  startedBy: 'customer' | 'admin' | 'system'
+  createdAt: string
+  messages: ConversationMessage[]
+  page: { hasOlder: boolean; oldestSeq: number | null; newestSeq: number | null }
+  marker: number
+  can: { reply: boolean; requestResolution: boolean }
+}
+
+export interface MessageSummary {
+  unread: number
+  canStart: boolean
+  attachments: false
+}
+
+export interface ContextOption {
+  type: ContextType
+  reference: string
+  label: string
+  project: string | null
+}
+
+export interface MessagePreferences {
+  replies: boolean
+  announcements: boolean
+  important: boolean
+  resolution: boolean
+  customersCanStart: boolean
+  attachments: false
+}
+
+const messagesPath = '/api/portal/messages'
+export const fetchMessageSummary = () => call<MessageSummary>('GET', `${messagesPath}/summary`)
+export const fetchInbox = (filter: InboxFilter, cursor: string | null) => call<{ items: ConversationSummary[]; next: string | null }>('GET', `${messagesPath}?filter=${filter}${cursor ? `&cursor=${enc(cursor)}` : ''}`)
+export const searchInbox = (query: string) => call<{ items: ConversationSummary[] }>('GET', `${messagesPath}/search?q=${enc(query)}`)
+export const fetchMessageContexts = () => call<{ items: ContextOption[] }>('GET', `${messagesPath}/contexts`)
+export const fetchConversation = (reference: string, before: number | null = null) => call<ConversationDetail>('GET', `${messagesPath}/${enc(reference)}${before ? `?before=${before}` : ''}`)
+export const startConversation = (body: { subject: string; body: string; context: { type: ContextType; reference: string } | null; clientToken: string }) => call<ConversationDetail>('POST', messagesPath, body)
+export const sendMessage = (reference: string, body: { body: string; clientToken: string }) => call<ConversationDetail>('POST', `${messagesPath}/${enc(reference)}/messages`, body)
+export const markConversationRead = (reference: string, upTo: number) => call<{ marker: number; unread: number }>('POST', `${messagesPath}/${enc(reference)}/read`, { upTo })
+export const requestResolution = (reference: string) => call<ConversationDetail>('POST', `${messagesPath}/${enc(reference)}/request-resolution`, {})
+export const fetchMessagePreferences = () => call<MessagePreferences>('GET', '/api/portal/message-preferences')
+export const saveMessagePreferences = (changes: Partial<Pick<MessagePreferences, 'replies' | 'announcements' | 'important' | 'resolution'>>) => call<MessagePreferences>('PUT', '/api/portal/message-preferences', changes)

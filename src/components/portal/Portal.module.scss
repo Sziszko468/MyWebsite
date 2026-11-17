@@ -101,6 +101,16 @@
         border-color: transparent;
         border-left-color: var(--color-accent);
       }
+
+      /* The hover rule above is more specific than this one, so without this the current page's link lost its background under the pointer and kept the text colour made for it
+         (dark text on a dark surface in the dark theme: a contrast of 1.25). The current page looks the same hovered or not. */
+      @include m.hover {
+        background: var(--color-accent);
+
+        @include m.up(lg) {
+          background: var(--color-surface-active);
+        }
+      }
     }
   }
 }
@@ -651,4 +661,38 @@
   border-left: 3px solid var(--color-secondary);
   white-space: pre-line;
   overflow-wrap: anywhere;
+}
+
+/* The unread count beside "Messages" in the navigation (PROMPT 28): a number, never colour alone, and spoken as words. */
+.navBadge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  margin-left: var(--space-2);
+  padding: 0 var(--space-2);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  line-height: 1;
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border-radius: var(--radius-pill);
+}
+
+.nav a[aria-current='page'] .navBadge {
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
