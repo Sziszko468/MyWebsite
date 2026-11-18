@@ -56,6 +56,7 @@ export const hu: AdminText = {
     profile: 'Rólam oldal',
     comparison: 'Csomag-összehasonlítás',
     fullExperience: 'FULL EXPERIENCE',
+    assistant: 'AI admin asszisztens',
     ai: 'AI asszisztens',
     texts: 'Weboldal-szövegek',
     settings: 'Beállítások',

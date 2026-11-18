@@ -59,6 +59,7 @@ export const en = {
     profile: 'About page',
     comparison: 'Tier comparison',
     fullExperience: 'FULL EXPERIENCE',
+    assistant: 'AI admin assistant',
     ai: 'AI assistant',
     texts: 'Website texts',
     settings: 'Settings',

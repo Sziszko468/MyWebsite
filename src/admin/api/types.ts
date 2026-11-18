@@ -2,7 +2,7 @@ import type { Language } from '../../i18n/config'
 
 /** What the backend's `/api/admin/*` answers (server/src/modules/*), as the application uses it. */
 
-export type Permission = 'requests:read' | 'requests:write' | 'requests:delete' | 'catalog:write' | 'catalog:delete' | 'content:write' | 'content:delete' | 'system:read' | 'system:write'
+export type Permission = 'requests:read' | 'requests:write' | 'requests:delete' | 'catalog:write' | 'catalog:delete' | 'content:write' | 'content:delete' | 'system:read' | 'system:write' | 'clients:read' | 'clients:projects' | 'clients:write' | 'assistant:use'
 export type Role = 'admin' | 'editor'
 export type InterfaceLanguage = 'hu' | 'en'
 export type ThemePreference = 'light' | 'dark'

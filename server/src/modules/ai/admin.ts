@@ -37,6 +37,10 @@ interface DayRow {
   latencyMs: number | null
 }
 
+/**
+ * The VISITOR assistant's usage: requests, tokens, cost, tools, failures and conversations. The administrators' own requests (audience `admin`, PROMPT 31) are left out, so the
+ * public assistant's analytics never contain them; they have their own numbers (modules/ai/adminassistant/usage.ts). What both spend is added up by the budget and by Operations.
+ */
 export function usageOverview(app: AppContext, rangeValue: string | null) {
   const range = parseRange(rangeValue)
   const from = startOf(app, range)
@@ -49,7 +53,7 @@ export function usageOverview(app: AppContext, rangeValue: string | null) {
             AVG(CASE WHEN status = 'completed' THEN first_token_ms END) AS firstToken,
             SUM(tool_calls) AS toolCalls,
             SUM(CASE WHEN cost_source = 'provider_usage' THEN 1 ELSE 0 END) AS measured
-       FROM ai_requests WHERE day >= ?`,
+       FROM ai_requests WHERE day >= ? AND audience = 'visitor'`,
     [from],
   )
   const conversations = app.db.get<{ n: number; planner: number; quotes: number; avgSeconds: number | null }>(
@@ -62,10 +66,10 @@ export function usageOverview(app: AppContext, rangeValue: string | null) {
   )
   const topics = app.db.all<{ topic: string; n: number }>('SELECT topic, COUNT(*) AS n FROM ai_conversations WHERE created_at >= ? GROUP BY topic ORDER BY n DESC', [`${from}T00:00:00.000Z`])
   const tools = app.db.all<{ tool: string; calls: number; failed: number; avgMs: number | null }>(
-    `SELECT tool, COUNT(*) AS calls, SUM(CASE WHEN status != 'ok' THEN 1 ELSE 0 END) AS failed, AVG(duration_ms) AS avgMs FROM ai_tool_calls WHERE day >= ? GROUP BY tool ORDER BY calls DESC`,
+    `SELECT tool, COUNT(*) AS calls, SUM(CASE WHEN status != 'ok' THEN 1 ELSE 0 END) AS failed, AVG(duration_ms) AS avgMs FROM ai_tool_calls WHERE day >= ? AND audience = 'visitor' GROUP BY tool ORDER BY calls DESC`,
     [from],
   )
-  const errors = app.db.all<{ code: string; n: number }>("SELECT COALESCE(error_code, 'unknown') AS code, COUNT(*) AS n FROM ai_requests WHERE day >= ? AND status IN ('failed', 'abandoned', 'aborted') GROUP BY code ORDER BY n DESC", [from])
+  const errors = app.db.all<{ code: string; n: number }>("SELECT COALESCE(error_code, 'unknown') AS code, COUNT(*) AS n FROM ai_requests WHERE day >= ? AND audience = 'visitor' AND status IN ('failed', 'abandoned', 'aborted') GROUP BY code ORDER BY n DESC", [from])
   // Counts only (how many project discoveries began, how many plan versions were made): nothing a visitor wrote.
   const discovery = discoveryCounts(app.db, from)
   return {
@@ -101,7 +105,7 @@ export function usageSeries(app: AppContext, rangeValue: string | null) {
     `SELECT day, COUNT(*) AS requests, SUM(CASE WHEN status IN ('failed', 'abandoned') THEN 1 ELSE 0 END) AS failed,
             SUM(COALESCE(input_tokens, 0)) AS inputTokens, SUM(COALESCE(output_tokens, 0)) AS outputTokens,
             SUM(COALESCE(actual_cost_usd, reserved_cost_usd)) AS costUsd, AVG(latency_ms) AS latencyMs
-       FROM ai_requests WHERE day >= ? GROUP BY day ORDER BY day`,
+       FROM ai_requests WHERE day >= ? AND audience = 'visitor' GROUP BY day ORDER BY day`,
     [from],
   )
   const conversations = app.db.all<{ day: string; n: number }>('SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS n FROM ai_conversations WHERE created_at >= ? GROUP BY day', [`${from}T00:00:00.000Z`])

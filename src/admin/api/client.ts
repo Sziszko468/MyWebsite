@@ -62,6 +62,15 @@ export const setCsrfToken = (token: string | null): void => {
   csrfToken = token
 }
 
+/** The session's CSRF token, for the one request the browser's own `fetch` makes (the assistant's streamed chat): the others go through `request`. */
+export const getCsrfToken = (): string | null => csrfToken
+
+/** Tells the application that the session ended (a 401 that did not come through `request`, such as the streamed chat's). */
+export function notifySessionEnded(): void {
+  csrfToken = null
+  sessionEnded?.()
+}
+
 /** Registers the one place that learns the session ended; returns the way to unregister. */
 export function onSessionEnded(handler: () => void): () => void {
   sessionEnded = handler

@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
-import type { LanguageModel, UIMessage } from 'ai'
-import type { AiSettings, Language } from '../../config.ts'
+import type { LanguageModel, ToolSet, UIMessage } from 'ai'
+import { LANGUAGES, type AiSettings, type Language } from '../../config.ts'
 import type { AppContext } from '../../context.ts'
-import { HttpError, notFound, rateLimited } from '../../http/errors.ts'
+import { forbidden, HttpError, notFound, rateLimited, unauthorized, validationFailed } from '../../http/errors.ts'
 import { newId } from '../../lib/crypto.ts'
 import type { Logger } from '../../lib/logger.ts'
 import { cleanBlock } from '../../lib/text.ts'
@@ -14,10 +14,17 @@ import { Knowledge } from './knowledge.ts'
 import { AI_MODEL_ID, createAiModel, guardModel, ModelLockError, ModelObservation, type LockedModel } from './model.ts'
 import { instructionsFor } from './prompt.ts'
 import { findSensitive } from './sensitive.ts'
-import { availability, loadSettings } from './settings.ts'
-import { createConversation, getConversation, loadMessages, saveMessages, setLanguage, setTitle, type ConversationRow, type StoredMessage } from './store.ts'
+import { adminAvailability, availability, loadSettings } from './settings.ts'
+import { createConversation, getConversation, loadMessages, saveMessages, setLanguage, setTitle, type StoredMessage } from './store.ts'
 import { buildTools } from './tools.ts'
 import { recordFailed, recordLastError } from './verification.ts'
+import { AccessDenied, accessFor, type Authority, type Policy } from './adminassistant/access.ts'
+import { adminInstructions } from './adminassistant/prompt.ts'
+import { ContextUnavailable, resolveScope } from './adminassistant/scope.ts'
+import { ADMIN_CONVERSATION_ID, closeAdminConversation, createAdminConversation, CONTEXT_TYPES, deleteAdminConversation, getAdminConversation, loadAdminMessages, saveAdminMessages, setAdminLanguage, setAdminTitle, type ContextType } from './adminassistant/store.ts'
+import { buildAdminTools } from './adminassistant/tools.ts'
+import { REFERENCE, RECORD_ID } from './adminassistant/model.ts'
+import { audit } from '../system/audit.ts'
 
 /**
  * The gateway: one visitor's message in, a streamed answer out, with every guard in front of the model and every number
@@ -46,6 +53,24 @@ export interface ChatRequest {
   requestId?: string
   /** The HTTP request's logger (already carrying the request id). */
   log?: Logger
+}
+
+/** One administrator's message in (PROMPT 31). The administrator is the session, not a field of the body. */
+export interface AdminChatRequest {
+  authority: Authority
+  ip: string
+  ipHash: string
+  conversationId: string
+  language: Language
+  /** Where a NEW conversation is about (ignored for an existing one: a conversation keeps the context it started with). */
+  context: { type: ContextType; ref: string | null }
+  trigger: Trigger
+  text: string
+  signal: AbortSignal
+  requestId?: string
+  log?: Logger
+  /** Only tests hand in a stricter policy than the administration's own `can`. */
+  policy?: Policy
 }
 
 /** Where the model comes from: the real provider by default; tests hand in a mock. */
@@ -247,7 +272,22 @@ export class Assistant {
       if (request.trigger === 'submit-user-message') setTitle(app.db, conversation.id, [...text.replace(/\s+/g, ' ')].slice(0, 60).join(''))
       // The question is kept even if the answer fails: the visitor can retry.
       saveMessages(app.db, app.clock, conversation.id, messages.map(store))
-      return await this.stream({ request, requestId, settings, conversation, reservation, messages, windowed, instructions, release, stopper, resolveDone: () => resolveDone() })
+      return await this.stream({
+        signal: request.signal,
+        log: request.log,
+        requestId,
+        settings,
+        conversationId: conversation.id,
+        reservation,
+        messages,
+        windowed,
+        instructions,
+        tools: (counter, rid, log) => buildTools({ app, knowledge: this.knowledge, settings, conversationId: conversation.id, sessionId: request.sessionId, language: request.language, ipHash: request.ipHash, requestId: rid, counter, log }),
+        persist: (final) => saveMessages(app.db, app.clock, conversation.id, final.map(store)),
+        release,
+        stopper,
+        resolveDone: () => resolveDone(),
+      })
     } catch (error) {
       release()
       this.running.delete(reservation.id)
@@ -258,6 +298,165 @@ export class Assistant {
       ;(request.log ?? app.log).warn('assistant request could not start', { aiRequest: reservation.id, code })
       // A model that is not the required one is refused before a single token is requested: a controlled "not available".
       throw error instanceof ModelLockError ? unavailable('model_unverified') : error
+    }
+  }
+
+  /**
+   * The AI admin assistant's entry point (PROMPT 31). The same guarded core as `chat()` (the model lock, the budget RESERVATION before the provider is called, the
+   * global limit on answers, usage reconciled exactly once however the stream ends) with the differences that matter for an administrator's copilot:
+   *
+   *  - who is asking is the administrator's SESSION (`authority`), taken from the cookie by the route, never from the body; `assistant:use` is checked here, and every tool
+   *    re-checks the session and the data permission when it runs;
+   *  - the conversation belongs to that administrator and has ONE context, fixed when it starts and re-validated against the database on every turn;
+   *  - the tools are the read-only admin set (adminassistant/tools.ts), the instructions are the admin ones, and the limits are the admin assistant's own
+   *    (`adminMax…`), plus one hourly limit per administrator, counted from the shared ledger;
+   *  - the ledger row is `audience = 'admin'`, so the public assistant's analytics never include it, while the budget (one ledger) protects the money for both.
+   */
+  async adminChat(request: AdminChatRequest): Promise<Response> {
+    const { app } = this
+    const settings = loadSettings(app)
+    const state = adminAvailability(app, settings)
+    if (!state.available) throw new HttpError(503, 'service_unavailable', 'The admin assistant is not available right now.', { details: { reason: state.reason } })
+    const access = accessFor(app, request.authority, request.policy)
+    let actor
+    try {
+      actor = access.need('assistant:use')
+    } catch (error) {
+      throw error instanceof AccessDenied && error.reason === 'session_ended' ? unauthorized() : forbidden()
+    }
+    if (this.draining) {
+      recordLimitEvent(app, 'shutting_down')
+      throw new HttpError(503, 'service_unavailable', 'The assistant is not available right now.', { details: { reason: 'unavailable' }, headers: { 'Retry-After': '30' } })
+    }
+    if (!(LANGUAGES as readonly string[]).includes(request.language)) throw validationFailed({ language: 'invalid' })
+    if (!ADMIN_CONVERSATION_ID.test(request.conversationId)) throw validationFailed({ conversationId: 'invalid' })
+
+    // ---- the message
+    let text = ''
+    if (request.trigger === 'submit-user-message') {
+      text = cleanBlock(request.text)
+      if (text === '') throw new HttpError(422, 'validation_failed', 'Write a message first.', { details: { fields: { text: 'required' } } })
+      if ([...text].length > settings.adminMaxInputChars) throw new HttpError(422, 'validation_failed', `The message is longer than ${settings.adminMaxInputChars} characters.`, { details: { fields: { text: 'tooLong' }, max: settings.adminMaxInputChars } })
+      // A card number or a credential is refused before it is stored or sent anywhere, as for visitors.
+      if (findSensitive(text) !== null) {
+        recordLimitEvent(app, 'sensitive_input')
+        throw new HttpError(422, 'validation_failed', 'That message looks like it contains a payment card number or a secret key. Please leave it out.', { details: { reason: 'sensitive_data', fields: { text: 'invalid' } } })
+      }
+    }
+
+    // ---- the conversation and its context
+    const now = app.clock.now()
+    let conversation = getAdminConversation(app.db, request.authority.userId, request.conversationId)
+    const isNew = !conversation
+    if (!conversation && request.trigger === 'regenerate-assistant-message') throw notFound('The conversation')
+    // An id that belongs to ANOTHER administrator's conversation is answered like one that does not exist (and never reaches the insert below, which would collide with it).
+    if (!conversation && app.db.get('SELECT 1 AS present FROM ai_admin_conversations WHERE id = ?', [request.conversationId])) throw notFound('The conversation')
+    const contextType: ContextType = conversation ? conversation.context_type : request.context.type
+    const contextRef: string | null = conversation ? conversation.context_ref : request.context.ref
+    if (!(CONTEXT_TYPES as readonly string[]).includes(contextType) || (contextType === 'general' ? contextRef !== null : contextRef === null || !(REFERENCE.test(contextRef) || RECORD_ID.test(contextRef)))) throw validationFailed({ context: 'invalid' })
+    try {
+      // The context is a reference, not an authorization: it is resolved against the database, with this administrator's permissions, on EVERY turn.
+      resolveScope(app, access, contextType, contextRef)
+    } catch (error) {
+      if (error instanceof ContextUnavailable) throw new HttpError(404, 'not_found', 'That context is not available.', { details: { reason: 'context_unavailable' } })
+      throw error
+    }
+    if (conversation?.status === 'closed') throw new HttpError(409, 'conflict', 'This conversation is closed. Start a new one.', { details: { reason: 'conversation_closed' } })
+    if (conversation && new Date(conversation.created_at).getTime() + settings.conversationMaxHours * HOUR < now.getTime()) throw new HttpError(409, 'conflict', 'This conversation has reached its time limit. Start a new one.', { details: { reason: 'conversation_expired' } })
+    if (conversation && conversation.message_count >= settings.maxConversationMessages) throw new HttpError(409, 'conflict', 'This conversation has reached its length limit. Start a new one.', { details: { reason: 'conversation_full' } })
+    const key = `admin:${request.authority.userId}`
+    if (this.busy.has(request.conversationId)) {
+      recordLimitEvent(app, 'conversation_busy')
+      throw new HttpError(409, 'conflict', 'An answer is already being written.', { details: { reason: 'busy' } })
+    }
+    if ((this.perSession.get(key) ?? 0) >= 2) {
+      recordLimitEvent(app, 'session_concurrent')
+      throw rateLimited(10)
+    }
+    if (this.running.size >= settings.maxConcurrentRequests) {
+      recordLimitEvent(app, 'concurrent_global')
+      throw new HttpError(503, 'service_unavailable', 'The assistant is busy right now.', { details: { reason: 'capacity' }, headers: { 'Retry-After': '5' } })
+    }
+
+    const history: UIMessage[] = conversation ? loadAdminMessages(app.db, conversation.id).map(parse) : []
+    let messages = history
+    if (request.trigger === 'regenerate-assistant-message') {
+      let cut = messages.length
+      while (cut > 0 && messages[cut - 1].role === 'assistant') cut -= 1
+      messages = messages.slice(0, cut)
+      if (messages.length === 0) throw new HttpError(422, 'validation_failed', 'There is nothing to answer.', { details: { fields: { trigger: 'invalid' } } })
+    } else {
+      messages = [...messages, { id: newId(), role: 'user', parts: [{ type: 'text', text }] }]
+    }
+    let windowed = messages.slice(-settings.maxHistoryMessages)
+    while (windowed.length > 0 && windowed[0].role !== 'user') windowed = windowed.slice(1)
+
+    // The settings THIS answer runs with: the admin assistant's own tool and output limits (the budgets, prices and effort are the shared ones).
+    const adminSettings: AiSettings = { ...settings, maxToolCalls: settings.adminMaxToolCalls, maxOutputTokens: settings.adminMaxOutputTokens }
+    const instructions = adminInstructions(request.language, { type: contextType, ref: contextRef }, now)
+    const promptTokens = estimateTokens(instructions.length + JSON.stringify(windowed).length)
+
+    if (!conversation) conversation = createAdminConversation(app.db, app.clock, { id: request.conversationId, userId: request.authority.userId, language: request.language, contextType, contextRef })
+    const requestId = request.requestId ?? randomUUID()
+    let reservation: Reservation
+    try {
+      reservation = reserve(app, adminSettings, { conversationId: conversation.id, sessionId: key, ipHash: request.ipHash, model: AI_MODEL_ID, correlationId: requestId, promptTokens, newConversation: false, audience: 'admin', admin: { userId: request.authority.userId, perHour: settings.adminMaxRequestsPerHour } })
+    } catch (error) {
+      if (isNew) deleteAdminConversation(app.db, request.authority.userId, conversation.id)
+      if (error instanceof BudgetRefusal) {
+        recordLimitEvent(app, error.reason)
+        alertForRefusal(app, settings, error.reason)
+      }
+      throw error
+    }
+    // The audit log records that a conversation was started, in which kind of context and by whom: never what was said.
+    if (isNew) audit(app, actor, 'ai.admin_assistant.conversation', 'ai_admin_conversation', conversation.id, { context: contextType })
+
+    this.busy.add(conversation.id)
+    this.perSession.set(key, (this.perSession.get(key) ?? 0) + 1)
+    const stopper = new AbortController()
+    let resolveDone: () => void = () => undefined
+    this.running.set(reservation.id, { stop: () => stopper.abort(), done: new Promise<void>((resolve) => (resolveDone = resolve)) })
+    const release = () => {
+      this.busy.delete(request.conversationId)
+      const open = (this.perSession.get(key) ?? 1) - 1
+      if (open <= 0) this.perSession.delete(key)
+      else this.perSession.set(key, open)
+    }
+    const conversationId = conversation.id
+    try {
+      if (conversation.language !== request.language) setAdminLanguage(app.db, conversationId, request.language)
+      if (request.trigger === 'submit-user-message') setAdminTitle(app.db, conversationId, [...text.replace(/\s+/g, ' ')].slice(0, 60).join(''))
+      saveAdminMessages(app.db, app.clock, conversationId, messages.map(store))
+      return await this.stream({
+        signal: request.signal,
+        log: request.log,
+        requestId,
+        settings: adminSettings,
+        conversationId,
+        reservation,
+        messages,
+        windowed,
+        instructions,
+        tools: (counter, rid, log) =>
+          buildAdminTools({ app, authority: request.authority, policy: request.policy, conversationId, language: request.language, requestId: rid, maxToolCalls: adminSettings.maxToolCalls, counter, log }),
+        persist: (final) => {
+          saveAdminMessages(app.db, app.clock, conversationId, final.map(store))
+          if (final.length >= settings.maxConversationMessages) closeAdminConversation(app.db, conversationId)
+        },
+        release,
+        stopper,
+        resolveDone: () => resolveDone(),
+      })
+    } catch (error) {
+      release()
+      this.running.delete(reservation.id)
+      resolveDone()
+      const code = classify(error)
+      finish(app, adminSettings, reservation, { status: 'failed', usage: null, steps: 0, toolCalls: 0, errorCode: code, latencyMs: 0, firstTokenMs: null })
+      this.afterFailure(code, null)
+      ;(request.log ?? app.log).warn('admin assistant request could not start', { aiRequest: reservation.id, code })
+      throw error instanceof ModelLockError ? new HttpError(503, 'service_unavailable', 'The admin assistant is not available right now.', { details: { reason: 'model_unverified' } }) : error
     }
   }
 
@@ -286,27 +485,34 @@ export class Assistant {
   }
 
   private async stream(input: {
-    request: ChatRequest
+    /** Aborted when the client goes away. */
+    signal: AbortSignal
+    log?: Logger | undefined
     requestId: string
+    /** The settings THIS answer runs with (the admin assistant hands in its own tool and output limits). */
     settings: AiSettings
-    conversation: ConversationRow
+    conversationId: string
     reservation: Reservation
     messages: UIMessage[]
     windowed: UIMessage[]
     instructions: string
+    /** The tool set for this answer, built after the model is chosen (the visitor assistant's, or the admin assistant's read-only set). */
+    tools: (counter: { calls: number }, reservationId: string, log: Logger) => Promise<ToolSet>
+    /** Keeps the conversation as the server will replay it (the visitor's tables, or the administrator's). */
+    persist: (messages: UIMessage[]) => void
     release: () => void
     /** Cancels this answer (a shutdown); registered with the answer in `running` by `chat()`. */
     stopper: AbortController
     resolveDone: () => void
   }): Promise<Response> {
     const { app } = this
-    const { request, requestId, settings, conversation, reservation, messages, windowed, instructions, release, stopper, resolveDone } = input
-    const log = (request.log ?? app.log).child({ aiRequest: reservation.id })
+    const { requestId, settings, reservation, messages, windowed, instructions, release, stopper, resolveDone } = input
+    const log = (input.log ?? app.log).child({ aiRequest: reservation.id })
     const { streamText, isStepCount, convertToModelMessages, toUIMessageStream, createUIMessageStreamResponse } = await import('ai')
     const observation = new ModelObservation()
     const model = await this.model(observation)
     const counter = { calls: 0 }
-    const tools = await buildTools({ app, knowledge: this.knowledge, settings, conversationId: conversation.id, sessionId: request.sessionId, language: request.language, ipHash: request.ipHash, requestId: reservation.id, counter, log })
+    const tools = await input.tools(counter, reservation.id, log)
     const modelMessages = await convertToModelMessages(windowed, { tools, ignoreIncompleteToolCalls: true })
 
     const started = performance.now()
@@ -319,7 +525,7 @@ export class Assistant {
     let finishReason: string | null = null
     let wroteText = false
     // The visitor going away and the server shutting down both end the request through this one signal; the SDK's own timeouts abort without either.
-    const signal = AbortSignal.any([request.signal, stopper.signal])
+    const signal = AbortSignal.any([input.signal, stopper.signal])
 
     const settle = (outcome: Pick<Outcome, 'status' | 'usage'>) => {
       if (finalized) return
@@ -379,7 +585,7 @@ export class Assistant {
       },
       onAbort: ({ steps: done }) => {
         // The visitor going away aborts through the request's signal, a shutdown through the stopper; the SDK's own timeouts abort without either.
-        const byVisitor = request.signal.aborted
+        const byVisitor = input.signal.aborted
         const byShutdown = !byVisitor && stopper.signal.aborted
         errorCode = byVisitor ? 'aborted' : byShutdown ? 'shutdown' : 'timeout'
         lateError = byVisitor ? null : byShutdown ? 'unavailable' : 'timeout'
@@ -419,7 +625,7 @@ export class Assistant {
       messageMetadata: ({ part }) => (part.type === 'finish' && (part as { finishReason?: string }).finishReason === 'length' ? { finishReason: 'length' } : undefined),
       onEnd: ({ messages: finalMessages }) => {
         try {
-          saveMessages(app.db, app.clock, conversation.id, trim(finalMessages).map(store))
+          input.persist(trim(finalMessages))
         } catch (error) {
           log.warn('assistant conversation could not be saved', { errorKind: kindOf(error) })
         }

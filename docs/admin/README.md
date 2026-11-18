@@ -32,6 +32,7 @@ Languages of the interface: **Hungarian and English** (the owner's two languages
 | Services & packages (Szolgáltatások és csomagok) | `/admin/services`, `/admin/services/{service,package,extra}/:key`, `/admin/services/new/{service,package,extra}` | ✓ | Services, packages, add-ons: texts in three languages, price, availability, order |
 | Website content (Weboldal-tartalom) | `/admin/content`, `/admin/content/faq/:slug`, `/admin/content/new` | More | The FAQ (the only content the website reads from the backend) |
 | Control Room AI | `/admin/ai` (`?tab=settings\|knowledge`) | More | The assistant (PROMPT 16, [`../ai/README.md`](../ai/README.md)): usage and **estimated** cost against the budgets, what visitors do (counts only), the settings and limits, and what the assistant can read. |
+| AI admin assistant | `/admin/ai-assistant` | More | The **read-only copilot** for the administrators (PROMPT 31, [`../ai-admin-assistant/README.md`](../ai-admin-assistant/README.md)): history, conversation and context side by side (one part at a time on a phone), reports, drafts and quotation outlines that are never sent, in Hungarian, English or Dutch. Switched on, and its limits and numbers read, in the AI screen's **Admin assistant** tab (`/admin/ai?tab=assistant`). |
 | Translations (Fordítások) | `/admin/translations` | More | Every translated field by language, what is missing, edited in place |
 | Notifications (Értesítések) | `/admin/notifications` | More | Whether e-mail is configured, which messages are sent, the delivery log |
 | Settings (Beállítások) | `/admin/settings` (`?tab=profile\|preferences\|security\|system`) | More | Profile, language and theme, password and sessions, and (administrator role) the server's state |
@@ -94,6 +95,7 @@ There is **no separate Media screen**: pictures are chosen and uploaded inside t
 | `GET/POST /api/admin/projects` · `GET/PUT/PATCH/DELETE …/projects/:id` · `GET …/projects/:id/preview` · `POST …/projects/:id/{duplicate,publish,unpublish,archive,restore}` · `GET/PUT …/project-settings` · `PUT …/project-order` · `GET …/project-preview` | The portfolio (PROMPT 13.1; [`../cms/README.md`](../cms/README.md)) |
 | `GET/POST /api/admin/media` · `DELETE …/media/:id` | The picture library: the upload takes the image itself as the request body |
 | `GET /api/admin/texts` · `PUT …/texts/:key` | The website's changeable wording |
+| `GET/POST/DELETE /api/admin/ai-assistant/…` | The AI admin assistant (PROMPT 31): config, own conversations, contexts, streamed chat, usage numbers — see [`../ai-admin-assistant/README.md`](../ai-admin-assistant/README.md) |
 | `GET /api/admin/ai` · `PUT …/ai/settings` · `GET …/ai/usage?range=daily\|weekly\|monthly` · `POST …/ai/knowledge/refresh` | The assistant: overview with settings and knowledge, saving settings, the usage series, refreshing what the assistant can read |
 | `GET/PUT /api/admin/shop/documents/:code` · `POST …/shop/documents/:code/{publish,unpublish}` | The shop's two documents (`comparison`, `full_experience`): the draft and the published copy, saving a draft (`{ document, expectedUpdatedAt }`), publishing and taking it back (PROMPT 09.1) |
 

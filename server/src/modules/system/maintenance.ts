@@ -5,6 +5,7 @@ import { purgeExpiredSessions } from '../auth/sessions.ts'
 import { sweepAbandoned } from '../ai/budget.ts'
 import { loadSettings } from '../ai/settings.ts'
 import { purge as purgeAssistant } from '../ai/store.ts'
+import { deleteAdminConversationsAbout, purgeAdminConversations } from '../ai/adminassistant/store.ts'
 import { purgeBookingTokens } from '../bookings/repository.ts'
 import { purgeAuth } from '../customers/auth.ts'
 import { deleteCustomersByEmail } from '../customers/retention.ts'
@@ -37,13 +38,15 @@ export interface MaintenanceResult {
   workReminders: ReminderResult
   retentionDays: number | null
   /** The assistant: conversations whose words were removed, idle sessions removed, expired approvals cleared, reservations that never reconciled. */
-  assistant: { conversations: number; sessions: number; approvals: number; abandonedRequests: number }
+  assistant: { conversations: number; sessions: number; approvals: number; abandonedRequests: number; adminConversations: number }
 }
 
 export function runMaintenance(app: AppContext): MaintenanceResult {
   const { db, clock, config } = app
-  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, bookings: 0, deliveries: 0, expiredLinks: purgeTokens(app) + purgeBookingTokens(app), clientSessions: purgeClientSessions(app), clientLinks: purgeAuth(app), workReminders: runWorkReminders(app), retentionDays: config.retentionDays, assistant: { conversations: 0, sessions: 0, approvals: 0, abandonedRequests: 0 } }
-  result.assistant = { ...purgeAssistant(db, clock, loadSettings(app).retentionDays), abandonedRequests: sweepAbandoned(app) }
+  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, bookings: 0, deliveries: 0, expiredLinks: purgeTokens(app) + purgeBookingTokens(app), clientSessions: purgeClientSessions(app), clientLinks: purgeAuth(app), workReminders: runWorkReminders(app), retentionDays: config.retentionDays, assistant: { conversations: 0, sessions: 0, approvals: 0, abandonedRequests: 0, adminConversations: 0 } }
+  const retentionDays = loadSettings(app).retentionDays
+  // The administrators' own conversations with the AI admin assistant follow the same retention as the visitors' (PROMPT 31).
+  result.assistant = { ...purgeAssistant(db, clock, retentionDays), abandonedRequests: sweepAbandoned(app), adminConversations: purgeAdminConversations(db, clock, retentionDays) }
   if (config.retentionDays !== null) {
     const cutoff = iso(addMs(clock.now(), -config.retentionDays * DAY))
     db.transaction(() => {
@@ -71,6 +74,14 @@ export function eraseByEmail(app: AppContext, email: string): ErasureResult {
   const { db } = app
   const address = normalizeEmail(email)
   return db.transaction(() => {
+    // What an administrator discussed with the AI admin assistant ABOUT this person's records goes with them (conversations opened with one of these as their context).
+    deleteAdminConversationsAbout(db, [
+      ...db.all<{ id: string }>('SELECT id FROM customers WHERE email = ? COLLATE NOCASE', [address]).map((row) => ({ type: 'customer' as const, ref: row.id })),
+      ...db.all<{ reference: string }>('SELECT p.reference FROM client_projects p JOIN customers c ON c.id = p.customer_id WHERE c.email = ? COLLATE NOCASE', [address]).map((row) => ({ type: 'project' as const, ref: row.reference })),
+      ...db.all<{ reference: string }>('SELECT v.reference FROM conversations v JOIN customers c ON c.id = v.customer_id WHERE c.email = ? COLLATE NOCASE', [address]).map((row) => ({ type: 'conversation' as const, ref: row.reference })),
+      ...db.all<{ reference: string }>('SELECT reference FROM quote_requests WHERE email = ?', [address]).map((row) => ({ type: 'quote' as const, ref: row.reference })),
+      ...db.all<{ reference: string }>('SELECT reference FROM bookings WHERE email = ? COLLATE NOCASE', [address]).map((row) => ({ type: 'consultation' as const, ref: row.reference })),
+    ])
     // The messages about this person's requests and quotations that were addressed to someone else (the owner's notifications) go too:
     // they hold no text of their own, but they point at records that are about to disappear.
     let deliveries = 0

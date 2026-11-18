@@ -47,3 +47,40 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Printing one report of the AI admin assistant (PROMPT 31): the page marks the element (`data-printable`) and the body (`data-printing`) just before the print dialog opens, and only
+   that element is printed, from the top of the sheet. Without the marks a print is the page, as it always was. */
+@media print {
+  body[data-printing] * {
+    visibility: hidden !important;
+  }
+
+  body[data-printing] [data-printable],
+  body[data-printing] [data-printable] * {
+    visibility: visible !important;
+  }
+
+  body[data-printing] [data-printable] {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  body[data-printing] *:has([data-printable]) {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    position: static !important;
+    transform: none !important;
+    container-type: normal !important;
+  }
+
+  body[data-printing] [data-printable] [data-no-print] {
+    display: none !important;
+  }
+}

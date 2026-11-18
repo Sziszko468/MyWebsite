@@ -23,6 +23,11 @@ export const RANGES = {
   maxConversationMessages: [4, 400],
   maxOutputTokens: [200, 16000],
   maxToolCalls: [1, 20],
+  // The admin assistant's own limits (PROMPT 31). Their top values are fixed here, in code: the shared budgets (and their ceilings) apply to it as well.
+  adminMaxRequestsPerHour: [1, 600],
+  adminMaxToolCalls: [1, 20],
+  adminMaxOutputTokens: [200, 8000],
+  adminMaxInputChars: [100, 20000],
   maxRequestsPerSession: [1, 2000],
   maxRequestsPerIp: [1, 2000],
   maxConcurrentRequests: [1, 200],
@@ -39,8 +44,8 @@ export const RANGES = {
 } as const satisfies Partial<Record<keyof AiSettings, readonly [number, number]>>
 
 type NumericKey = keyof typeof RANGES
-const INTEGERS: ReadonlySet<NumericKey> = new Set(['maxInputChars', 'maxHistoryMessages', 'maxConversationMessages', 'maxOutputTokens', 'maxToolCalls', 'maxRequestsPerSession', 'maxRequestsPerIp', 'maxConcurrentRequests', 'maxDailyConversations', 'dailyRequests', 'dailyTokenBudget', 'alertPercent', 'conversationMaxHours', 'retentionDays'])
-const BOOLEANS = ['enabled', 'plannerEnabled', 'discoveryEnabled', 'quoteEnabled'] as const
+const INTEGERS: ReadonlySet<NumericKey> = new Set(['maxInputChars', 'maxHistoryMessages', 'maxConversationMessages', 'maxOutputTokens', 'maxToolCalls', 'maxRequestsPerSession', 'maxRequestsPerIp', 'maxConcurrentRequests', 'maxDailyConversations', 'dailyRequests', 'dailyTokenBudget', 'alertPercent', 'conversationMaxHours', 'retentionDays', 'adminMaxRequestsPerHour', 'adminMaxToolCalls', 'adminMaxOutputTokens', 'adminMaxInputChars'])
+const BOOLEANS = ['enabled', 'plannerEnabled', 'discoveryEnabled', 'quoteEnabled', 'adminAssistantEnabled'] as const
 
 /**
  * What the administration can NEVER change (PROMPT 29): the prices that turn tokens into cost. A price of 0 would switch every budget off, so
@@ -188,6 +193,13 @@ export function saveSettings(app: AppContext, session: SessionInfo | null, body:
     const blocker = activationBlocker(app)
     if (blocker) throw new HttpError(409, 'conflict', 'The assistant cannot be switched on until the required model is verified.', { details: { reason: 'verification_required', cause: blocker } })
   }
+  // The admin assistant is switched on the same way and for the same reason: only while the required model is verified (it uses the same key, the same
+  // model and the same lock; there is no second connection to verify). Switching it off is always allowed.
+  const adminBefore = loadSettings(app).adminAssistantEnabled
+  if (value.adminAssistantEnabled === true && !adminBefore) {
+    const blocker = activationBlocker(app)
+    if (blocker) throw new HttpError(409, 'conflict', 'The admin assistant cannot be switched on until the required model is verified.', { details: { reason: 'verification_required', cause: blocker } })
+  }
   const merged = { ...stored(app), ...value }
   // Monetary budgets are coherent only when the day does not exceed the month.
   const effective = applyCeilings(app, loadSettingsFrom(app, merged))
@@ -199,6 +211,7 @@ export function saveSettings(app: AppContext, session: SessionInfo | null, body:
   const detail = changeDetail(previous, after)
   if (detail) audit(app, actor, 'ai.settings.update', 'ai_settings', null, detail)
   if (after.enabled !== before) audit(app, actor, after.enabled ? 'ai.activate' : 'ai.deactivate', 'ai_settings', null)
+  if (after.adminAssistantEnabled !== adminBefore) audit(app, actor, after.adminAssistantEnabled ? 'ai.admin_assistant.activate' : 'ai.admin_assistant.deactivate', 'ai_settings', null)
   return after
 }
 
@@ -224,6 +237,21 @@ export type Unavailable = 'operator_disabled' | 'admin_disabled' | 'no_api_key' 
 export function availability(app: AppContext, settings: AiSettings = loadSettings(app)): { available: true } | { available: false; reason: Unavailable } {
   if (!app.config.ai.enabled) return { available: false, reason: 'operator_disabled' }
   if (!settings.enabled) return { available: false, reason: 'admin_disabled' }
+  if (app.config.ai.keyProblem === 'malformed') return { available: false, reason: 'key_malformed' }
+  if (!app.config.ai.apiKey) return { available: false, reason: 'no_api_key' }
+  if (app.config.ai.modelOverride !== null) return { available: false, reason: 'model_lock' }
+  if (!isVerified(app)) return { available: false, reason: 'model_unverified' }
+  return { available: true }
+}
+
+/**
+ * Whether the ADMIN assistant can answer, and if not, why: the operator's master switch, the administrator's own activation of it, the key, the model lock and the
+ * verification of the required model: the same chain as the visitors' assistant except that it does not depend on the visitors' switch (the owner may want the internal
+ * copilot without the public one). There is no other way for it to become available.
+ */
+export function adminAvailability(app: AppContext, settings: AiSettings = loadSettings(app)): { available: true } | { available: false; reason: Unavailable } {
+  if (!app.config.ai.enabled) return { available: false, reason: 'operator_disabled' }
+  if (!settings.adminAssistantEnabled) return { available: false, reason: 'admin_disabled' }
   if (app.config.ai.keyProblem === 'malformed') return { available: false, reason: 'key_malformed' }
   if (!app.config.ai.apiKey) return { available: false, reason: 'no_api_key' }
   if (app.config.ai.modelOverride !== null) return { available: false, reason: 'model_lock' }

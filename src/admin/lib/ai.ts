@@ -15,6 +15,12 @@ export interface AiSettings {
   plannerEnabled: boolean
   discoveryEnabled: boolean
   quoteEnabled: boolean
+  /** The AI admin assistant's own activation (PROMPT 31): switched on with the same verified connection, and with limits of its own. */
+  adminAssistantEnabled: boolean
+  adminMaxRequestsPerHour: number
+  adminMaxToolCalls: number
+  adminMaxOutputTokens: number
+  adminMaxInputChars: number
   languages: Language[]
   maxInputChars: number
   maxHistoryMessages: number

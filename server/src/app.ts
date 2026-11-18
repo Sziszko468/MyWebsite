@@ -15,6 +15,7 @@ import type { Clock } from './lib/time.ts'
 import { adminRoutes } from './modules/admin/routes.ts'
 import { Assistant, type ModelProvider } from './modules/ai/gateway.ts'
 import { aiRoutes } from './modules/ai/routes.ts'
+import { adminAssistantRoutes } from './modules/ai/adminassistant/routes.ts'
 import { originIsThisHost, resolveSession, sameOrigin, sessionCookieName, verifySessionCsrf } from './modules/auth/sessions.ts'
 import { consultationIndexable } from './modules/bookings/public.ts'
 import { bookingRoutes } from './modules/bookings/routes.ts'
@@ -89,7 +90,7 @@ export function createApp(deps: AppDeps): App {
   context.assistant = new Assistant(context, deps.aiModel ?? null)
 
   const router = new Router()
-  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...bookingRoutes(context), ...customerRoutes(context), ...workRoutes(context), ...deliverableRoutes(context), ...communicationRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminRoutes(context))
+  router.add(...healthRoutes(context), ...contactRoutes(context), ...quoteRoutes(context), ...bookingRoutes(context), ...customerRoutes(context), ...workRoutes(context), ...deliverableRoutes(context), ...communicationRoutes(context), ...catalogRoutes(context), ...projectRoutes(context), ...profileRoutes(context), ...emailRoutes(context), ...aiRoutes(context), ...adminAssistantRoutes(), ...adminRoutes(context))
 
   const sweeper = setInterval(() => {
     limiters.sweep()

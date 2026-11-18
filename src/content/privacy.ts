@@ -373,6 +373,11 @@ export const privacyText = {
         'Heeft de eigenaar van de site automatische back-ups ingeschakeld, dan wordt elke dag een kopie van de database gemaakt en opgeslagen in het Google Drive-account van de eigenaar; de afspraken staan daar ook in. De site bewaart de back-ups beperkte tijd en verwijdert ze daarna.',
       ),
       tri(
+        'Az oldal tulajdonosa az adminisztrációban használhat egy AI-asszisztenst (csak olvasásra). Ha kérdez tőle, az ehhez szükséges részletek a megkeresésekből, ajánlatkérésekből, üzenetekből és foglalásokból (például a neved, a cégneved, a leírásod és az üzeneteid szövege) a szerveren át ugyanahhoz az AI-szolgáltatóhoz (Anthropic, Claude) kerülnek, hogy megírhassa a választ. Ez nem a látogatóknak szóló Control Room AI. Semmit nem módosít és nem küld el, a tulajdonos kérdéseit és a válaszait pedig korlátozott ideig az adminisztráció őrzi.',
+        'The site’s owner can use an AI assistant (read-only) in the administration. When the owner asks it a question, the details it needs from inquiries, quote requests, messages and bookings (for example your name, your company, your description and the text of your messages) pass through the server to the same AI provider (Anthropic, Claude) so that it can write the answer. It is not the visitors’ Control Room AI. It changes and sends nothing, and the owner’s questions and its answers are kept in the administration for a limited time.',
+        'De eigenaar van de site kan in het beheer een AI-assistent gebruiken (alleen lezen). Stelt de eigenaar daar een vraag, dan gaan de gegevens die daarvoor nodig zijn uit aanvragen, offerteaanvragen, berichten en afspraken (bijvoorbeeld je naam, je bedrijf, je omschrijving en de tekst van je berichten) via de server naar dezelfde AI-aanbieder (Anthropic, Claude), zodat die het antwoord kan schrijven. Dit is niet de Control Room AI voor bezoekers. Hij wijzigt of verstuurt niets, en de vragen van de eigenaar en zijn antwoorden worden beperkte tijd in het beheer bewaard.',
+      ),
+      tri(
         'A Control Room AI nem fér hozzá a foglalásokhoz.',
         'Control Room AI has no access to bookings.',
         'Control Room AI heeft geen toegang tot afspraken.',

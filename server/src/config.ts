@@ -84,6 +84,18 @@ export interface AiSettings {
   discoveryEnabled: boolean
   /** Whether an approved plan may be sent to the quote-request system. */
   quoteEnabled: boolean
+  /**
+   * The AI ADMIN ASSISTANT (PROMPT 31): the read-only copilot inside the administration. It starts OFF, needs the same verified model as the visitor
+   * assistant (it cannot be switched on without it), and is switched on or off by an administrator with `system:write`, apart from the visitor assistant.
+   */
+  adminAssistantEnabled: boolean
+  /** Model requests one administrator may make in an hour (counted from the usage ledger, so it survives a restart). */
+  adminMaxRequestsPerHour: number
+  /** Model steps (tool rounds) in one answer of the admin assistant (analysis needs more rounds than a visitor's question). */
+  adminMaxToolCalls: number
+  adminMaxOutputTokens: number
+  /** Characters of one administrator message (a draft to translate or a long customer message to summarise is longer than a visitor's question). */
+  adminMaxInputChars: number
   languages: Language[]
   /** Limits of one message and of what is kept and replayed. */
   maxInputChars: number
@@ -523,6 +535,11 @@ export function loadConfig(env: Env = process.env): Config {
     plannerEnabled: true,
     discoveryEnabled: flag('AI_DISCOVERY_ENABLED', true),
     quoteEnabled: true,
+    adminAssistantEnabled: flag('AI_ADMIN_ASSISTANT_ENABLED', false),
+    adminMaxRequestsPerHour: integer('AI_ADMIN_MAX_REQUESTS_PER_HOUR', 60, 1, 600),
+    adminMaxToolCalls: integer('AI_ADMIN_MAX_TOOL_CALLS', 10, 1, 20),
+    adminMaxOutputTokens: integer('AI_ADMIN_MAX_OUTPUT_TOKENS', 3000, 200, 8000),
+    adminMaxInputChars: integer('AI_ADMIN_MAX_INPUT_CHARS', 4000, 100, 20000),
     languages: [...LANGUAGES],
     maxInputChars: integer('AI_MAX_INPUT_CHARS', 1200, 100, 8000),
     maxHistoryMessages: integer('AI_MAX_HISTORY_MESSAGES', 20, 2, 100),

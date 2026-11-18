@@ -196,9 +196,9 @@ export function consumeApproval(db: Database, clock: Clock, id: string, referenc
 
 // ---- tool calls ---------------------------------------------------------------------------------------------------
 
-export function recordToolCall(db: Database, clock: Clock, row: { requestId: string; conversationId: string; tool: string; status: 'ok' | 'error' | 'rejected'; durationMs: number }): void {
+export function recordToolCall(db: Database, clock: Clock, row: { requestId: string; conversationId: string; tool: string; status: 'ok' | 'error' | 'rejected'; durationMs: number; audience?: 'visitor' | 'admin' }): void {
   const now = clock.now()
-  db.run('INSERT INTO ai_tool_calls (id, request_id, conversation_id, tool, status, duration_ms, day, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [newId(), row.requestId, row.conversationId, row.tool, row.status, Math.max(0, Math.round(row.durationMs)), dayOf(now), iso(now)])
+  db.run('INSERT INTO ai_tool_calls (id, request_id, conversation_id, tool, status, duration_ms, day, created_at, audience) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [newId(), row.requestId, row.conversationId, row.tool, row.status, Math.max(0, Math.round(row.durationMs)), dayOf(now), iso(now), row.audience ?? 'visitor'])
 }
 
 export const dayOf = (date: Date): string => date.toISOString().slice(0, 10)

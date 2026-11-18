@@ -73,6 +73,10 @@ export interface ReserveInput {
   promptTokens: number
   /** A new conversation counts against the daily number of conversations. */
   newConversation: boolean
+  /** Who the request is for (PROMPT 31). The budget is ONE ledger for both; an administrator's request is not a visitor's session and counts against its own hourly limit instead. */
+  audience?: 'visitor' | 'admin'
+  /** For `admin`: the administrator the request is for, and how many requests that administrator may make in an hour. */
+  admin?: { userId: string; perHour: number }
 }
 
 /**
@@ -113,14 +117,20 @@ export function reserve(app: AppContext, settings: AiSettings, input: ReserveInp
       // The conversation row already exists (the caller created it before reserving); it counts itself.
       if (created > settings.maxDailyConversations) throw new BudgetRefusal('daily_conversations')
     }
-    const sessionRequests = app.db.get<{ n: number }>('SELECT COUNT(*) AS n FROM ai_requests WHERE session_id = ? AND created_at >= ?', [input.sessionId, iso(new Date(now.getTime() - 24 * HOUR))])?.n ?? 0
-    if (sessionRequests >= settings.maxRequestsPerSession) throw new BudgetRefusal('session_requests')
+    if (input.audience === 'admin' && input.admin) {
+      const lastHour = app.db.get<{ n: number }>('SELECT COUNT(*) AS n FROM ai_requests WHERE admin_user_id = ? AND created_at >= ?', [input.admin.userId, iso(new Date(now.getTime() - HOUR))])?.n ?? 0
+      // Not a BudgetRefusal: it is one administrator's own hourly limit, not the shared money or the visitors' limits.
+      if (lastHour >= input.admin.perHour) throw new HttpError(429, 'rate_limited', 'You have reached the hourly limit of the admin assistant. Try again later.', { details: { reason: 'admin_hourly' }, headers: { 'Retry-After': '600' } })
+    } else {
+      const sessionRequests = app.db.get<{ n: number }>('SELECT COUNT(*) AS n FROM ai_requests WHERE session_id = ? AND created_at >= ?', [input.sessionId, iso(new Date(now.getTime() - 24 * HOUR))])?.n ?? 0
+      if (sessionRequests >= settings.maxRequestsPerSession) throw new BudgetRefusal('session_requests')
+    }
 
     const id = newId()
     app.db.run(
-      `INSERT INTO ai_requests (id, conversation_id, session_id, ip_hash, model, status, reserved_cost_usd, reserved_tokens, day, created_at, correlation_id)
-       VALUES (?, ?, ?, ?, ?, 'reserved', ?, ?, ?, ?, ?)`,
-      [id, input.conversationId, input.sessionId, input.ipHash, input.model, estimate.costUsd, estimate.tokens, day, iso(now), input.correlationId ?? null],
+      `INSERT INTO ai_requests (id, conversation_id, session_id, ip_hash, model, status, reserved_cost_usd, reserved_tokens, day, created_at, correlation_id, audience, admin_user_id)
+       VALUES (?, ?, ?, ?, ?, 'reserved', ?, ?, ?, ?, ?, ?, ?)`,
+      [id, input.conversationId, input.sessionId, input.ipHash, input.model, estimate.costUsd, estimate.tokens, day, iso(now), input.correlationId ?? null, input.audience ?? 'visitor', input.admin?.userId ?? null],
     )
     app.db.run('UPDATE ai_sessions SET request_count = request_count + 1 WHERE id = ?', [input.sessionId])
     return { id, reservedCostUsd: estimate.costUsd, reservedTokens: estimate.tokens }

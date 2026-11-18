@@ -297,13 +297,21 @@ describe('the privacy notice and the consultation booking', () => {
     expect(read('server/src/config.ts')).toMatch(/provider: 'none' \| 'smtp' \| 'file' \| 'resend'/)
   })
 
-  it('says the assistant cannot reach bookings, and the assistant\'s code has no way to', () => {
+  it('says the visitors\' assistant cannot reach bookings, and its code has no way to', () => {
     expect(recipientText('en')).toMatch(/Control Room AI has no access to bookings/)
-    const aiFiles = sources(join(ROOT, 'server', 'src', 'modules', 'ai'))
-    expect(aiFiles.length).toBeGreaterThan(5)
+    // The administrators' own copilot (PROMPT 31, `ai/adminassistant/`) reads bookings with the administrator's permission, and the notice says so (the item before this
+    // one). The visitors' assistant is everything else under `ai/`, and it must stay unable to.
+    const aiRoot = join(ROOT, 'server', 'src', 'modules', 'ai')
+    const visitors = sources(aiRoot).filter((file) => !relative(aiRoot, file).split(sep).includes('adminassistant'))
+    expect(visitors.length).toBeGreaterThan(5)
     // No import from the bookings module, no consultation, no SQL on the booking tables. (The word "booking" itself is allowed since PROMPT 30: it is
     // one of the PROJECT TYPES a visitor can say they want built, "a booking platform", in the discovery vocabulary: data, not the consultation bookings.)
-    for (const file of aiFiles) expect(readFileSync(file, 'utf8'), file).not.toMatch(/\bfrom\s+['"][^'"]*\/bookings\/|consultation|\bbookings\b|\bbooking_(changes|events|notes|tokens)\b/i)
+    for (const file of visitors) expect(readFileSync(file, 'utf8'), file).not.toMatch(/\bfrom\s+['"][^'"]*\/bookings\/|consultation|\bbookings\b|\bbooking_(changes|events|notes|tokens)\b/i)
+    // And the visitors' tools cannot reach the administrators': the only files of the visitors' side that import the administrators' module are the gateway (which
+    // keeps the two entry points apart), the statistics and the settings (which filter and switch), never the tool sets.
+    const importing = visitors.filter((file) => /from\s+['"][^'"]*\/adminassistant\//.test(readFileSync(file, 'utf8'))).map((file) => relative(aiRoot, file).split(sep).join('/'))
+    expect(importing.every((file) => ['admin.ts', 'gateway.ts', 'settings.ts'].includes(file)), importing.join(', ')).toBe(true)
+    expect(readFileSync(join(aiRoot, 'tools.ts'), 'utf8')).not.toMatch(/adminassistant/)
   })
 
   it('says the booking form keeps what is typed in memory, and the code writes none of it to browser storage', () => {

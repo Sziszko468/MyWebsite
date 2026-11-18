@@ -7,12 +7,14 @@ import { forbidden, unauthorized } from '../../http/errors.ts'
  * business functions (modules/*\/admin.ts), not in the HTML, so no route can forget it.
  */
 export type Role = 'admin' | 'editor'
-export type Permission = 'requests:read' | 'requests:write' | 'requests:delete' | 'catalog:write' | 'catalog:delete' | 'content:write' | 'content:delete' | 'system:read' | 'system:write' | 'clients:read' | 'clients:projects' | 'clients:write'
+// `assistant:use` (PROMPT 31) lets an administrator use the AI admin assistant at all. It opens NO data: every tool of the assistant also needs the permission of the data it
+// reads (`requests:read`, `clients:read`, …), checked again with the administrator's current role. It exists so the owner can take the assistant away from a role by editing this one table.
+export type Permission = 'requests:read' | 'requests:write' | 'requests:delete' | 'catalog:write' | 'catalog:delete' | 'content:write' | 'content:delete' | 'system:read' | 'system:write' | 'clients:read' | 'clients:projects' | 'clients:write' | 'assistant:use'
 
 const GRANTS: Record<Role, readonly Permission[]> = {
-  admin: ['requests:read', 'requests:write', 'requests:delete', 'catalog:write', 'catalog:delete', 'content:write', 'content:delete', 'system:read', 'system:write', 'clients:read', 'clients:projects', 'clients:write'],
+  admin: ['requests:read', 'requests:write', 'requests:delete', 'catalog:write', 'catalog:delete', 'content:write', 'content:delete', 'system:read', 'system:write', 'clients:read', 'clients:projects', 'clients:write', 'assistant:use'],
   // An editor reads customers and works on their projects (a status, a milestone, an update); inviting, switching off, signing out and linking records are the administrator's.
-  editor: ['requests:read', 'requests:write', 'catalog:write', 'content:write', 'clients:read', 'clients:projects'],
+  editor: ['requests:read', 'requests:write', 'catalog:write', 'content:write', 'clients:read', 'clients:projects', 'assistant:use'],
 }
 
 export const can = (role: Role, permission: Permission): boolean => GRANTS[role].includes(permission)

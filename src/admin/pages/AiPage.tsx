@@ -12,7 +12,9 @@ import { ErrorState, LoadingState } from '../components/states'
 import { useToast } from '../components/Toast'
 import { useResource } from '../hooks/useResource'
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges'
+import { AdminAssistantSettings } from '../assistant/Settings'
 import { fill, formatDateTime, formatNumber, useInterfaceLanguage, useText } from '../i18n'
+import { assistantText } from '../i18n/assistant'
 import { AI_RANGES, dollars, duration, formFrom, payloadFrom, sameForm, share, type AiAlert, type AiForm, type AiPeriod, type AiRange, type AiSummary, type AiTestResult, type AiUsage, type CeilingKey, type ConnectionStatus, type NumericSetting } from '../lib/ai'
 import { describeError, fieldErrors } from '../lib/errors'
 import { useSession } from '../session/SessionProvider'
@@ -20,7 +22,7 @@ import ai from '../styles/ai.module.scss'
 import page from '../styles/pages.module.scss'
 import styles from '../styles/ui.module.scss'
 
-const TABS = ['model', 'overview', 'operations', 'settings', 'knowledge'] as const
+const TABS = ['model', 'overview', 'operations', 'assistant', 'settings', 'knowledge'] as const
 type Tab = (typeof TABS)[number]
 
 /**
@@ -44,12 +46,13 @@ function Screen({ summary, onChanged, reload }: { summary: AiSummary; onChanged:
   const requested = params.get('tab') as Tab | null
   const tab: Tab = requested && TABS.includes(requested) ? requested : 'model'
   const base = useId()
+  const language = useInterfaceLanguage()
   return (
     <>
       <PageHeader title={t.ai.title} lead={t.ai.lead} />
       <div className={styles.stackLg}>
         <Availability summary={summary} onAlerts={() => setParams({ tab: 'model' }, { replace: true })} />
-        <Tabs label={t.ai.tabs.label} idBase={base} value={tab} onChange={(id) => setParams({ tab: id }, { replace: true })} tabs={TABS.map((id) => ({ id, label: t.ai.tabs[id] }))} />
+        <Tabs label={t.ai.tabs.label} idBase={base} value={tab} onChange={(id) => setParams({ tab: id }, { replace: true })} tabs={TABS.map((id) => ({ id, label: id === 'assistant' ? assistantText(language).settings.tab : t.ai.tabs[id] }))} />
         <TabPanel id="model" idBase={base} active={tab === 'model'}>
           <ModelPanel summary={summary} onChanged={onChanged} />
         </TabPanel>
@@ -58,6 +61,9 @@ function Screen({ summary, onChanged, reload }: { summary: AiSummary; onChanged:
         </TabPanel>
         <TabPanel id="operations" idBase={base} active={tab === 'operations'}>
           <Operations summary={summary} />
+        </TabPanel>
+        <TabPanel id="assistant" idBase={base} active={tab === 'assistant'}>
+          <AdminAssistantSettings summary={summary} onChanged={onChanged} />
         </TabPanel>
         <TabPanel id="settings" idBase={base} active={tab === 'settings'}>
           <SettingsForm summary={summary} onSaved={onChanged} />
