@@ -80,6 +80,8 @@ export interface AiSettings {
    */
   enabled: boolean
   plannerEnabled: boolean
+  /** Project discovery (PROMPT 30): the structured discovery workflow and plan editor. Needs the planner; when off, the older free-form planner is used. */
+  discoveryEnabled: boolean
   /** Whether an approved plan may be sent to the quote-request system. */
   quoteEnabled: boolean
   languages: Language[]
@@ -519,6 +521,7 @@ export function loadConfig(env: Env = process.env): Config {
   const aiDefaults: AiSettings = {
     enabled: false,
     plannerEnabled: true,
+    discoveryEnabled: flag('AI_DISCOVERY_ENABLED', true),
     quoteEnabled: true,
     languages: [...LANGUAGES],
     maxInputChars: integer('AI_MAX_INPUT_CHARS', 1200, 100, 8000),

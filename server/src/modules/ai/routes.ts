@@ -13,6 +13,8 @@ import { approve, parseApproval } from './quote.ts'
 import { availability, loadSettings, publicConfig, saveSettings } from './settings.ts'
 import { CONVERSATION_ID, createSession, eraseConversation, getConversation, listConversations, loadMessages, markPlannerCompleted, resolveSession, savePlan, type ConversationRow, type SessionRow } from './store.ts'
 import { requirePermission } from '../auth/permissions.ts'
+import { discoveryRoutes } from './discovery/routes.ts'
+import { startOver } from './discovery/service.ts'
 
 /**
  * The assistant's HTTP surface.
@@ -145,6 +147,8 @@ export function aiRoutes(_app: AppContext): RouteDef[] {
       const { expectedVersion, ...fields } = body
       if (typeof expectedVersion !== 'number' || expectedVersion !== row.plan_version) throw new HttpError(409, 'conflict', 'The plan changed. Reload it and try again.')
       if (row.quote_reference) throw new HttpError(409, 'conflict', 'This plan has already been sent.')
+      // A plan that came from project discovery is edited in the discovery panel (confirmed information, versions): a free-form edit here would write around those rules.
+      if ((readStoredPlan(row.plan_json)?.discoveryVersion ?? 0) > 0) throw new HttpError(409, 'conflict', 'This plan is edited in the project discovery panel.', { details: { reason: 'discovery_plan' } })
       const { changes, errors } = readPlanChanges(isRecord(fields) ? fields : {})
       if (Object.keys(errors).length > 0) throw validationFailed(errors)
       const next: ProjectPlan = { ...(readStoredPlan(row.plan_json) ?? emptyPlan()), ...changes }
@@ -156,8 +160,8 @@ export function aiRoutes(_app: AppContext): RouteDef[] {
     pub('DELETE', '/api/ai/conversations/:id/plan', (ctx) => {
       const session = requireSession(ctx)
       const row = conversationOf(ctx, session)
-      if (row.quote_reference) throw new HttpError(409, 'conflict', 'This plan has already been sent.')
-      savePlan(ctx.app.db, ctx.app.clock, row.id, null, row.plan_version + 1)
+      // Starting over clears the discovery draft, its plan versions and the plan that was projected into the quote workflow, in one transaction.
+      startOver(ctx.app, row)
       return json(planState(getConversation(ctx.app.db, session.id, row.id)!))
     }),
 
@@ -173,6 +177,8 @@ export function aiRoutes(_app: AppContext): RouteDef[] {
       },
       'quote',
     ),
+
+    ...discoveryRoutes({ requireSession, conversationOf }),
 
     // ---- the administration ----
     admin('GET', '/api/admin/ai', (ctx) => json(summaryOf(ctx.app, ctx.session))),

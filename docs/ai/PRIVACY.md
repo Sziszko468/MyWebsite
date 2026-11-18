@@ -46,6 +46,10 @@ Request logs carry ids, codes, durations and token counts (see [OPERATIONS.md](O
 
 The privacy notice (`/privacy`, section "Control Room AI", `src/content/privacy.ts`) was **changed in one place**, because one thing about the processing really changed: **a message that looks like a payment card number or a secret key is now refused before it is stored or sent** — a new sentence in Hungarian, English and Dutch, directly after "Do not enter sensitive personal data". Everything else the notice says is still accurate; the new stored items are not personal data: the HTTP request id on a usage row (a random identifier, not derived from the visitor) and the per-day refusal counters. The notice still says that the provider's own terms must be reviewed by the owner and stated before launch: **that sentence stays until the owner has done it.**
 
+## What changed in the processing in PROMPT 30 (project discovery)
+
+The discovery stores the project's *structure* (type, requirements, plan versions, notes) in five tables that hang off the conversation, with the same owner session, the same retention and the same deletion (`eraseDiscovery`, in the same transaction). It adds no contact detail, price or key, and no new party. One sentence was added to the assistant section of the privacy notice (Hungarian, English, Dutch). Details: [../ai-project-discovery/PRIVACY.md](../ai-project-discovery/PRIVACY.md).
+
 ## Limitations
 
 - Anonymous does not mean unlinkable: the keyed address hash can show that two sessions came from one address to someone with the server's secret and the database.

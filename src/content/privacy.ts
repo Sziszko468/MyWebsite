@@ -328,6 +328,11 @@ export const privacyText = {
         'De server bewaart de tekst van het gesprek om het te kunnen voortzetten, gedurende beperkte tijd (de eigenaar van de site stelt die in; het gespreksvenster toont hoeveel dagen). Je kunt een gesprek op elk moment verwijderen, waarna de tekst direct wordt gewist. Aantallen en cijfers (hoeveel verzoeken, hoeveel tokens) blijven zonder tekst bewaard, zodat de kosten van de site beheersbaar blijven.',
       ),
       tri(
+        'A projektfeltárás során a projektedről rögzített adatok (a projekt típusa, a követelmények, a tervverziók és a saját megjegyzéseid) a beszélgetés szövegével együtt tárolódnak, ugyanannyi ideig, és a beszélgetés törlésekor azonnal törlődnek. Az asszisztens semmit nem erősíthet meg helyetted; a terv javaslat, nem ajánlat és nem megerősített projekt.',
+        'In the project discovery, what is recorded about your project (its type, the requirements, the plan versions and your own notes) is stored together with the conversation text, for the same time, and is removed at once when you delete the conversation. The assistant cannot confirm anything for you; the plan is a proposal, not a quote and not a confirmed project.',
+        'Bij de projectverkenning wordt wat over je project wordt vastgelegd (het soort project, de eisen, de planversies en je eigen opmerkingen) samen met de tekst van het gesprek bewaard, even lang, en direct verwijderd als je het gesprek verwijdert. De assistent kan niets voor je bevestigen; het plan is een voorstel, geen offerte en geen bevestigd project.',
+      ),
+      tri(
         'Ne írj be érzékeny személyes adatot. Az asszisztens csak abból válaszol, ami az oldalon közzé van téve.',
         'Do not enter sensitive personal data. The assistant answers only from what is published on the site.',
         'Voer geen gevoelige persoonsgegevens in. De assistent antwoordt alleen op basis van wat op de site is gepubliceerd.',

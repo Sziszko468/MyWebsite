@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { loadSettings } from '../src/modules/ai/settings.ts'
 import { instructionsFor } from '../src/modules/ai/prompt.ts'
-import { TOOL_NAMES } from '../src/modules/ai/tools.ts'
+import { TOOL_NAMES, toolNamesFor } from '../src/modules/ai/tools.ts'
 import { seedProjects } from '../src/modules/projects/service.ts'
 import { answerText, parseSse, say, scriptedModel } from './aiMock.ts'
 import { startServer, type TestServer } from './helpers.ts'
@@ -124,7 +124,7 @@ describe('the chat', () => {
     expect(prompt.indexOf('first question')).toBeLessThan(prompt.indexOf('First'))
     expect(prompt.indexOf('First')).toBeLessThan(prompt.indexOf('second question'))
     // Only the closed set of tools, and no forced tool choice (the model rejects it).
-    expect((second.tools ?? []).map((t: { name: string }) => t.name).sort()).toEqual([...TOOL_NAMES].sort())
+    expect((second.tools ?? []).map((t: { name: string }) => t.name).sort()).toEqual([...toolNamesFor(loadSettings(s.app.context))].sort())
     expect(second.toolChoice).toMatchObject({ type: 'auto' })
     expect(model.modelId).toBe('claude-haiku-5-5')
     expect(loadSettings(s.app.context).maxOutputTokens).toBe(second.maxOutputTokens)

@@ -75,9 +75,13 @@ describe('the assistant\'s interface texts', () => {
     }
   })
 
-  it('has a line for every one of the eight tools, and no line for a tool that does not exist', () => {
+  it('has a line for every one of the sixteen tools, and no line for a tool that does not exist', () => {
     // The names are the server's closed set (server/src/modules/ai/tools.ts); server/test/ai.test.ts holds the other half of this check.
-    const tools = ['getDeveloperProfile', 'searchPortfolioProjects', 'getProjectDetails', 'getPublishedServices', 'comparePackages', 'getFullExperienceDetails', 'createProjectPlan', 'submitApprovedQuoteRequest']
+    const tools = [
+      'getDeveloperProfile', 'searchPortfolioProjects', 'getProjectDetails', 'getPublishedServices', 'comparePackages', 'getFullExperienceDetails', 'createProjectPlan', 'submitApprovedQuoteRequest',
+      // PROMPT 30: the project discovery's tools (they replace createProjectPlan while the discovery is on).
+      'classifyProjectType', 'updateDiscoveryStage', 'extractProjectRequirements', 'assessProjectComplexity', 'generateProjectPlan', 'reviseProjectPlan', 'summarizeProjectDiscovery', 'validateDiscoveryCompleteness',
+    ]
     expect(Object.keys(aiText.status.tool).sort()).toEqual([...tools].sort())
   })
 

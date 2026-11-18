@@ -381,6 +381,8 @@ function Overview({ summary }: { summary: AiSummary }) {
             empty={a.analytics.none}
             rows={[
               { name: a.analytics.planner, value: fmt(o.plannerCompleted) },
+              { name: a.analytics.discoveries, value: fmt(o.discoveriesStarted) },
+              { name: a.analytics.discoveryPlans, value: fmt(o.discoveryPlans) },
               { name: a.analytics.quotes, value: fmt(o.quoteRequestsSent) },
               { name: a.analytics.session, value: duration(o.averageConversationSeconds, language) },
             ]}
@@ -614,6 +616,7 @@ function SettingsForm({ summary, onSaved }: { summary: AiSummary; onSaved: (summ
         <legend className={styles.legend}>{a.availability}</legend>
         <div className={ai.checks}>
           <SwitchField label={a.planner} checked={form.plannerEnabled} onChange={(plannerEnabled) => setForm({ ...form, plannerEnabled })} />
+          <SwitchField label={a.discovery} checked={form.discoveryEnabled && form.plannerEnabled} disabled={!form.plannerEnabled} onChange={(discoveryEnabled) => setForm({ ...form, discoveryEnabled })} />
           <SwitchField label={a.quote} checked={form.quoteEnabled} onChange={(quoteEnabled) => setForm({ ...form, quoteEnabled })} />
         </div>
       </fieldset>

@@ -145,7 +145,7 @@ describe('the key never leaves the server', () => {
   it('never offers the browser more than it needs: the public configuration has no limit, price, ceiling, model or key', async () => {
     const { s } = await start()
     const config = (await s.api('/api/ai/config')).json.data
-    expect(Object.keys(config).sort()).toEqual(['available', 'languages', 'maxInputChars', 'plannerEnabled', 'quoteEnabled', 'retentionDays', 'suggestions', 'unavailableReason', 'welcome'])
+    expect(Object.keys(config).sort()).toEqual(['available', 'discoveryEnabled', 'languages', 'maxInputChars', 'plannerEnabled', 'quoteEnabled', 'retentionDays', 'suggestions', 'unavailableReason', 'welcome'])
     const health = JSON.stringify([(await s.api('/api/health')).json, (await s.api('/api/ready')).json])
     expect(health).not.toMatch(/anthropic|haiku|assistant|apikey|model/i)
   })
@@ -563,8 +563,8 @@ describe('private data stays out of reach of the model', () => {
     expect(store).toMatch(/WHERE id = \? AND session_id = \?/)
   })
 
-  it('has no tool that takes a model, an address, a query, a key or a file name, and exactly the eight tools of the brief', async () => {
-    const { s } = await start()
+  it('has no tool that takes a model, an address, a query, a key or a file name, and exactly the tools of the brief (the eight of PROMPT 16 with the free-form planner, the discovery set with project discovery)', async () => {
+    const { s } = await start([], { AI_DISCOVERY_ENABLED: 'false' })
     const app = s.app.context
     const created = createSession(app.db, app.clock, app.config.ai.sessionSecret, 'iphash')
     createConversation(app.db, app.clock, created.id, 'conv-names-0123456789', 'en')
@@ -660,7 +660,7 @@ describe('the upgrade to migration 0016', () => {
     const now = '2026-11-01T10:00:00.000Z'
     db.run("INSERT INTO ai_requests (id, ip_hash, model, status, reserved_cost_usd, actual_cost_usd, cost_source, input_tokens, output_tokens, day, created_at) VALUES ('old-1', 'h', 'claude-haiku-5-5', 'completed', 0.01, 0.002, 'provider_usage', 400, 60, '2026-11-01', ?)", [now])
     db.run("INSERT INTO ai_requests (id, ip_hash, model, status, reserved_cost_usd, cost_source, day, created_at) VALUES ('old-2', 'h', 'claude-haiku-5-5', 'abandoned', 0.01, 'estimate', '2026-11-01', ?)", [now])
-    expect(migrate(db, clock).filter((version) => version >= 16)).toEqual([16])
+    expect(migrate(db, clock).filter((version) => version === 16)).toEqual([16])
     expect(db.all('SELECT id, status, actual_cost_usd, cost_source, input_tokens, correlation_id, finish_reason, cost_state FROM ai_requests ORDER BY id')).toEqual([
       { id: 'old-1', status: 'completed', actual_cost_usd: 0.002, cost_source: 'provider_usage', input_tokens: 400, correlation_id: null, finish_reason: null, cost_state: null },
       { id: 'old-2', status: 'abandoned', actual_cost_usd: null, cost_source: 'estimate', input_tokens: null, correlation_id: null, finish_reason: null, cost_state: null },

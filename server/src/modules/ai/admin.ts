@@ -4,6 +4,7 @@ import { can, requirePermission } from '../auth/permissions.ts'
 import { listAlerts, openAlertCount } from './alerts.ts'
 import { AI_CEILING_ENV, AI_CEILING_KEYS } from '../../config.ts'
 import { spent } from './budget.ts'
+import { discoveryCounts } from './discovery/store.ts'
 import { AI_MODEL_ID, AI_MODEL_NAME, AI_PROVIDER_NAME } from './model.ts'
 import { effectiveRanges, history, lastSuccessfulRequest, limitEvents, period, providerStatus, recentFailures } from './operations.ts'
 import { AI_PRICING, PRICES_AS_OF, PRICING_SOURCE } from './pricing.ts'
@@ -65,6 +66,8 @@ export function usageOverview(app: AppContext, rangeValue: string | null) {
     [from],
   )
   const errors = app.db.all<{ code: string; n: number }>("SELECT COALESCE(error_code, 'unknown') AS code, COUNT(*) AS n FROM ai_requests WHERE day >= ? AND status IN ('failed', 'abandoned', 'aborted') GROUP BY code ORDER BY n DESC", [from])
+  // Counts only (how many project discoveries began, how many plan versions were made): nothing a visitor wrote.
+  const discovery = discoveryCounts(app.db, from)
   return {
     range,
     from,
@@ -83,6 +86,8 @@ export function usageOverview(app: AppContext, rangeValue: string | null) {
     topics,
     errors,
     plannerCompleted: conversations?.planner ?? 0,
+    discoveriesStarted: discovery.discoveries,
+    discoveryPlans: discovery.plans,
     quoteRequestsSent: conversations?.quotes ?? 0,
     averageConversationSeconds: conversations?.avgSeconds === null || conversations?.avgSeconds === undefined ? null : Math.round(conversations.avgSeconds),
   }

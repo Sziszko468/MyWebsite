@@ -5,14 +5,16 @@ import type { Logger } from '../../lib/logger.ts'
 import { cleanLine } from '../../lib/text.ts'
 import type { Knowledge } from './knowledge.ts'
 import { checkToolOutput } from './toolGuard.ts'
+import { discoveryTools } from './discovery/tools.ts'
 import { emptyPlan, isReady, LIST_FIELDS, missingFields, planHash, readPlanChanges, readStoredPlan, TEXT_FIELDS, COMPLEXITIES, type ProjectPlan } from './plan.ts'
 import { submit, type SubmitFailure } from './quote.ts'
 import { getConversation, markPlannerCompleted, recordToolCall, savePlan, setTopic } from './store.ts'
 
 /**
- * The assistant's eight tools, and nothing else. The set is closed: the browser cannot add one, rename one or choose which
+ * The assistant's tools, and nothing else (PROMPT 30: sixteen names in the closed set; a configuration offers fifteen at most, because the eight discovery tools
+ * replace the older `createProjectPlan`). The set is closed: the browser cannot add one, rename one or choose which
  * run (the request carries no tool at all), and the model can call only these, each with an input schema that is checked before
- * `execute` runs. Seven of them read PUBLISHED content through `Knowledge` or edit the plan of THIS conversation; the eighth
+ * `execute` runs. Most of them read PUBLISHED content through `Knowledge` or edit the plan or the discovery of THIS conversation; one
  * submits a request and is refused unless the server holds a matching, unused approval from the visitor (quote.ts), whatever
  * the model says. No tool takes an address, a query, a file name, a key or a model; none can write anything but the plan of
  * this conversation, the usage record and (after an approval) the quote request.
@@ -21,7 +23,7 @@ import { getConversation, markPlannerCompleted, recordToolCall, savePlan, setTop
  * recorded (name, outcome, duration) for the administration's tool statistics, and the number of calls in one answer is capped.
  */
 
-export const TOOL_NAMES = ['getDeveloperProfile', 'searchPortfolioProjects', 'getProjectDetails', 'getPublishedServices', 'comparePackages', 'getFullExperienceDetails', 'createProjectPlan', 'submitApprovedQuoteRequest'] as const
+export const TOOL_NAMES = ['getDeveloperProfile', 'searchPortfolioProjects', 'getProjectDetails', 'getPublishedServices', 'comparePackages', 'getFullExperienceDetails', 'createProjectPlan', 'submitApprovedQuoteRequest', 'classifyProjectType', 'updateDiscoveryStage', 'extractProjectRequirements', 'assessProjectComplexity', 'generateProjectPlan', 'reviseProjectPlan', 'summarizeProjectDiscovery', 'validateDiscoveryCompleteness'] as const
 export type ToolName = (typeof TOOL_NAMES)[number]
 
 /** The coarse topic a conversation is filed under for the aggregate statistics: derived from the tool, never from words. */
@@ -34,6 +36,22 @@ export const TOPIC_OF: Record<ToolName, string> = {
   getFullExperienceDetails: 'full_experience',
   createProjectPlan: 'planner',
   submitApprovedQuoteRequest: 'planner',
+  classifyProjectType: 'planner',
+  updateDiscoveryStage: 'planner',
+  extractProjectRequirements: 'planner',
+  assessProjectComplexity: 'planner',
+  generateProjectPlan: 'planner',
+  reviseProjectPlan: 'planner',
+  summarizeProjectDiscovery: 'planner',
+  validateDiscoveryCompleteness: 'planner',
+}
+
+/** The tools a configuration offers the model: with project discovery on, the discovery tools replace the older free-form `createProjectPlan`. */
+export function toolNamesFor(settings: Pick<AiSettings, 'plannerEnabled' | 'discoveryEnabled' | 'quoteEnabled'>): ToolName[] {
+  const read: ToolName[] = ['getDeveloperProfile', 'searchPortfolioProjects', 'getProjectDetails', 'getPublishedServices', 'comparePackages', 'getFullExperienceDetails']
+  const discovery = settings.plannerEnabled && settings.discoveryEnabled
+  const planner: ToolName[] = settings.plannerEnabled ? (discovery ? ['classifyProjectType', 'updateDiscoveryStage', 'extractProjectRequirements', 'assessProjectComplexity', 'generateProjectPlan', 'reviseProjectPlan', 'summarizeProjectDiscovery', 'validateDiscoveryCompleteness'] : ['createProjectPlan']) : []
+  return [...read, ...planner, ...(settings.quoteEnabled ? (['submitApprovedQuoteRequest'] as ToolName[]) : [])]
 }
 
 export interface ToolContext {
@@ -76,7 +94,7 @@ export async function buildTools(ctx: ToolContext) {
   const [{ tool }, { z }] = await Promise.all([import('ai'), import('zod')])
   const { app, knowledge, settings, language } = ctx
 
-  async function run<T extends object>(name: ToolName, work: () => T): Promise<T | { error: string; note: string }> {
+  async function run<T extends object>(name: ToolName, work: () => T, schema?: import('zod').ZodType): Promise<T | { error: string; note: string }> {
     const started = performance.now()
     let status: 'ok' | 'error' | 'rejected' = 'ok'
     try {
@@ -88,9 +106,11 @@ export async function buildTools(ctx: ToolContext) {
       const result = work()
       // Whatever a tool returns is checked before the model sees it (size, plain data, no secret-looking key or text).
       const problem = checkToolOutput(result)
-      if (problem !== null) {
+      // A tool that declares an output schema must meet it exactly (PROMPT 30): a result of the wrong shape is rejected, not passed on.
+      const shape = problem === null && schema ? schema.safeParse(result) : null
+      if (problem !== null || (shape !== null && !shape.success)) {
         status = 'rejected'
-        ;(ctx.log ?? app.log).warn('assistant tool result rejected', { tool: name, problem })
+        ;(ctx.log ?? app.log).warn('assistant tool result rejected', { tool: name, problem: problem ?? 'schema' })
         return { error: 'tool_output_rejected', note: 'The lookup returned data that cannot be passed on. Tell the visitor you could not retrieve that right now; do not guess.' }
       }
       if ('error' in result || ('submitted' in result && result.submitted === false) || ('ok' in result && result.ok === false)) status = 'rejected'
@@ -151,7 +171,10 @@ export async function buildTools(ctx: ToolContext) {
     }),
   }
 
-  const planner = settings.plannerEnabled
+  // With project discovery on, the plan is built by the discovery tools (structured, confirmed-vs-suggested, versioned); the older free-form
+  // `createProjectPlan` is then not offered, because it would let a plan be written around the discovery rules.
+  const discovery = settings.plannerEnabled && settings.discoveryEnabled
+  const planner = settings.plannerEnabled && !discovery
     ? {
         createProjectPlan: tool({
           description:
@@ -202,7 +225,8 @@ export async function buildTools(ctx: ToolContext) {
       }
     : {}
 
-  return { ...tools, ...planner, ...quote } as ToolSet
+  const discoverySet = discovery ? discoveryTools({ app, z, tool, run: run as never, sessionId: ctx.sessionId, conversationId: ctx.conversationId }) : {}
+  return { ...tools, ...planner, ...discoverySet, ...quote } as ToolSet
 }
 
 export { planHash }

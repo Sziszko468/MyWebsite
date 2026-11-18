@@ -7,6 +7,7 @@ import { contentHashOf, DUPLICATE_WINDOW_MS } from '../contact/service.ts'
 import { afterRequestStored, createQuoteRequest } from '../quotes/create.ts'
 import { findRecentQuoteDuplicate } from '../quotes/repository.ts'
 import { FE_LIMITS } from '../shop/fullExperience.ts'
+import { approvalProblem, briefWithDiscovery, snapshotOf } from './discovery/service.ts'
 import { isReady, planBrief, planDescription, planHash, readStoredPlan, type ProjectPlan } from './plan.ts'
 import { APPROVAL_TTL_MS, consumeApproval, insertApproval, liveApproval, markQuoteSent, type ConversationRow } from './store.ts'
 import type { AiSettings } from '../../config.ts'
@@ -51,6 +52,10 @@ export function approve(app: AppContext, settings: AiSettings, conversation: Con
   if (!plan || !isReady(plan)) throw validationFailed({ plan: 'required' }, 'There is no complete plan to send yet.')
   if (conversation.quote_reference) throw new HttpError(409, 'conflict', 'This plan has already been sent.')
   if (input.planVersion !== conversation.plan_version) throw new HttpError(409, 'conflict', 'The plan changed. Review it again before approving.')
+  // A plan made by project discovery must be the NEWEST snapshot of an unchanged draft, and the visitor must have confirmed at least one requirement.
+  const problem = approvalProblem(app, conversation, plan)
+  if (problem?.includes('planStale')) throw new HttpError(409, 'conflict', 'The plan is out of date. Generate it again, review it and approve it again.', { details: { reason: 'plan_stale' } })
+  if (problem) throw validationFailed({ requirements: 'required' }, 'Confirm at least one requirement before sending the request.')
   const row = insertApproval(app.db, app.clock, { conversationId: conversation.id, planVersion: conversation.plan_version, planHash: planHash(plan), name: input.name, email: input.email, company: input.company, consent: input.consent })
   return { approvedAt: row.created_at, expiresAt: row.expires_at }
 }
@@ -80,7 +85,13 @@ export function submit(app: AppContext, settings: AiSettings, conversation: Conv
 
   const now = app.clock.now()
   const description = planDescription(plan, language)
-  const brief = planBrief(plan, language)
+  let brief = planBrief(plan, language)
+  if (plan.discoveryVersion > 0) {
+    // The request carries the structured discovery plan the visitor approved: the snapshot is read back and checked against its hash, never rebuilt from the draft.
+    const snapshot = snapshotOf(app, conversation.id, plan)
+    if (!snapshot || approvalProblem(app, conversation, plan)) return { ok: false, error: 'plan_changed' }
+    brief = briefWithDiscovery(brief, snapshot, plan.discoveryVersion)
+  }
   const hash = contentHashOf(app.config.appSecret, 'ai_assistant', approval.email, description)
   const existing = findRecentQuoteDuplicate(app.db, hash, iso(addMs(now, -DUPLICATE_WINDOW_MS)))
   if (existing) {

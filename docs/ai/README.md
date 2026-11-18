@@ -6,6 +6,8 @@ Everything here is read from, or enforced by, the code in this repository. Where
 
 > **PROMPT 29 (production activation)** extended this manual with seven focused pages: [PRODUCTION_ACTIVATION.md](PRODUCTION_ACTIVATION.md) (start here), [SECURITY.md](SECURITY.md), [COST_CONTROL.md](COST_CONTROL.md), [OPERATIONS.md](OPERATIONS.md), [PRIVACY.md](PRIVACY.md), [TEST_RESULTS.md](TEST_RESULTS.md) and [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md). Where this README and those pages differ, **those pages are newer and win**. Changed since this README was written: the **prices are code** (`pricing.ts`) and no longer editable in the administration; the operator's **hard ceilings** (`AI_CEILING_*`); a **global limit on answers at once**; a **malformed key** no longer stops the server; `ai check` now needs **`--live`**; a new **Operations** tab; a card number or a secret key in a message is refused; migration **0016**.
 
+> **PROMPT 30 (project discovery)** added a guided, structured discovery (project type, requirements, rule-based complexity, personalised plan in immutable versions, review before sending) on top of this assistant. It is documented in [../ai-project-discovery/README.md](../ai-project-discovery/README.md). With the discovery on (the default), the model is offered eight discovery tools **instead of** `createProjectPlan`; with it off, everything below is exactly as described.
+
 - [Architecture](#architecture)
 - [Packages](#packages)
 - [Configuration](#configuration)

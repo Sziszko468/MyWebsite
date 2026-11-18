@@ -2,6 +2,7 @@ import type { Language } from '../../config.ts'
 import type { Database } from '../../db/database.ts'
 import { newId, hmacHex, safeEqual } from '../../lib/crypto.ts'
 import { addMs, DAY, iso, type Clock } from '../../lib/time.ts'
+import { eraseDiscovery } from './discovery/store.ts'
 
 /**
  * Everything the assistant stores, in one place (the only SQL of the module besides the budget's). A conversation belongs to
@@ -90,6 +91,8 @@ export function eraseConversation(db: Database, clock: Clock, id: string): void 
   db.transaction(() => {
     db.run('DELETE FROM ai_messages WHERE conversation_id = ?', [id])
     db.run('DELETE FROM ai_approvals WHERE conversation_id = ?', [id])
+    // The discovery state (facts, requirements, plan versions, notes) is words of the visitor's too: it goes with the conversation and by the same retention.
+    eraseDiscovery(db, id)
     db.run('UPDATE ai_conversations SET title = NULL, plan_json = NULL, deleted_at = ?, updated_at = ? WHERE id = ?', [iso(clock.now()), iso(clock.now()), id])
   })
 }
@@ -175,6 +178,11 @@ export function insertApproval(db: Database, clock: Clock, row: { conversationId
     db.run('INSERT INTO ai_approvals (id, conversation_id, plan_version, plan_hash, name, email, company, consent_at, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [id, row.conversationId, row.planVersion, row.planHash, row.name, row.email, row.company, row.consent ? iso(now) : null, iso(now), iso(addMs(now, APPROVAL_TTL_MS))])
   })
   return db.get<ApprovalRow>('SELECT * FROM ai_approvals WHERE id = ?', [id])!
+}
+
+/** Any change to what a plan is built from makes an approval that was waiting meaningless: it is removed, so an approval is always for the plan as it is now. */
+export function dropLiveApprovals(db: Database, conversationId: string): void {
+  db.run('DELETE FROM ai_approvals WHERE conversation_id = ? AND consumed_at IS NULL', [conversationId])
 }
 
 export function liveApproval(db: Database, clock: Clock, conversationId: string): ApprovalRow | undefined {

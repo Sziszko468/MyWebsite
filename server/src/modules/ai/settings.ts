@@ -40,7 +40,7 @@ export const RANGES = {
 
 type NumericKey = keyof typeof RANGES
 const INTEGERS: ReadonlySet<NumericKey> = new Set(['maxInputChars', 'maxHistoryMessages', 'maxConversationMessages', 'maxOutputTokens', 'maxToolCalls', 'maxRequestsPerSession', 'maxRequestsPerIp', 'maxConcurrentRequests', 'maxDailyConversations', 'dailyRequests', 'dailyTokenBudget', 'alertPercent', 'conversationMaxHours', 'retentionDays'])
-const BOOLEANS = ['enabled', 'plannerEnabled', 'quoteEnabled'] as const
+const BOOLEANS = ['enabled', 'plannerEnabled', 'discoveryEnabled', 'quoteEnabled'] as const
 
 /**
  * What the administration can NEVER change (PROMPT 29): the prices that turn tokens into cost. A price of 0 would switch every budget off, so
@@ -254,6 +254,7 @@ export function publicConfig(app: AppContext): Record<string, unknown> {
     unavailableReason: publicReason(state),
     languages: settings.languages,
     plannerEnabled: settings.plannerEnabled,
+    discoveryEnabled: settings.plannerEnabled && settings.discoveryEnabled,
     quoteEnabled: settings.quoteEnabled,
     maxInputChars: settings.maxInputChars,
     retentionDays: settings.retentionDays,

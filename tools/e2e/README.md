@@ -105,6 +105,16 @@ The assistant starts **switched off and unverified**, as in production, so the j
 
 It needs a fresh server (sign-in is limited to 10 per 15 minutes) and an administrator of a **throw-away database**; it changes the assistant's settings (and puts them back) and creates one quote request. This journey found a real defect: the second answer of a conversation was not being saved (its message id was empty), which is why steps D and E continue one conversation across several turns and a reload.
 
+## Project discovery journey (PROMPT 30)
+
+```bash
+AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/discovery-journey.cjs --base=http://127.0.0.1:8788 --standin=http://127.0.0.1:9911   --email=admin@example.test --password=<the test password> [--db=<the scratch database file>] [--out=<dir>]
+```
+
+The guided project discovery in a real Chrome against the **built** site, the real backend and the local Anthropic stand-in, which *plays the assistant* from `TOOL:<name>:<json>` markers (so the real tools, schemas, database and quote workflow run; nothing is spent and nothing about the real model is proven). Needs a fresh scratch backend started with `RATE_LIMITS=false`; it verifies the model and switches the assistant on through the administration's own API, and it creates one quote request. 38 steps in sections: **A** the assistant fills the discovery (proposals shown as unconfirmed; the visitor confirms, edits, rejects, restores, adds, skips; the assistant cannot overwrite what the visitor confirmed or wrote; a script in a title is only text), **B** the plan (generated, stale, regenerated, versions, an older version read only, a note kept through a regeneration, the assistant's own plan tools), **C** the review, the approval form, the quote request (what the model saw, what the administration lists, every change refused after sending), **D** a plan of suggestions only cannot be sent, **E** Hungarian and Dutch, **F** security (another session, another origin, a stale write, invalid and oversize input, SQL in an id, response headers), **G** deleting the conversation deletes the discovery (with `--db`, the five tables are read directly), **H** a phone (one tap from the chat, nothing scrolls sideways, every control at least 44 px, arrow keys on the tabs).
+
+`ai-journey.cjs` still covers the older short plan form: its section D switches the discovery off through the administration and back on.
+
 ## Security probe
 
 ```bash

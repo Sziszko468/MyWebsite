@@ -301,7 +301,9 @@ describe('the privacy notice and the consultation booking', () => {
     expect(recipientText('en')).toMatch(/Control Room AI has no access to bookings/)
     const aiFiles = sources(join(ROOT, 'server', 'src', 'modules', 'ai'))
     expect(aiFiles.length).toBeGreaterThan(5)
-    for (const file of aiFiles) expect(readFileSync(file, 'utf8'), file).not.toMatch(/booking/i)
+    // No import from the bookings module, no consultation, no SQL on the booking tables. (The word "booking" itself is allowed since PROMPT 30: it is
+    // one of the PROJECT TYPES a visitor can say they want built, "a booking platform", in the discovery vocabulary: data, not the consultation bookings.)
+    for (const file of aiFiles) expect(readFileSync(file, 'utf8'), file).not.toMatch(/\bfrom\s+['"][^'"]*\/bookings\/|consultation|\bbookings\b|\bbooking_(changes|events|notes|tokens)\b/i)
   })
 
   it('says the booking form keeps what is typed in memory, and the code writes none of it to browser storage', () => {

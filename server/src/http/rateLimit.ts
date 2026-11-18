@@ -62,6 +62,8 @@ export const LIMITS = {
   /** A new assistant session, and the assistant's reads (the session's conversations, the public configuration). */
   aiSession: { windowMs: HOUR, max: 20 },
   aiRead: { windowMs: MINUTE, max: 120 },
+  /** The project discovery panel's reads and writes (a visitor edits, confirms and regenerates; a script floods). */
+  aiDiscovery: { windowMs: MINUTE, max: 90 },
   /** The customer's pages (a quotation, a request's status) and what they do there. */
   customer: { windowMs: MINUTE, max: 90 },
   /** Answers to a link that does not exist or no longer works are counted separately, against whoever keeps asking: guessing a token costs the guesser. */
@@ -89,7 +91,7 @@ export class Limiters {
   constructor(clock: Clock, enabled: boolean) {
     this.enabled = enabled
     const make = (name: LimitName) => new RateLimiter(clock, LIMITS[name].windowMs, LIMITS[name].max)
-    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), customer: make('customer'), booking: make('booking'), portalAuth: make('portalAuth'), portal: make('portal'), tokenMiss: make('tokenMiss'), webhook: make('webhook'), messageSend: make('messageSend'), messageSearch: make('messageSearch') }
+    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), aiDiscovery: make('aiDiscovery'), customer: make('customer'), booking: make('booking'), portalAuth: make('portalAuth'), portal: make('portal'), tokenMiss: make('tokenMiss'), webhook: make('webhook'), messageSend: make('messageSend'), messageSearch: make('messageSearch') }
   }
 
   /** Counts one request against a limit and throws the 429 when it is over. */

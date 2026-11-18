@@ -16,6 +16,7 @@ import { walkTexts } from './walk'
 
 // Loaded lazily and one by one: a module that fails to load is reported, and the rest are still checked.
 const loaders = import.meta.glob<Record<string, unknown>>([
+  // (PROMPT 30: content/ai/discovery.ts and content/ai/discoveryLabels.ts, the project discovery's words, are read through this pattern.)
   '../../content/**/*.ts',
   '!../../content/**/*.test.ts',
   // The seed exporters, the live overlay and the text-override store hold functions and stores, not texts.

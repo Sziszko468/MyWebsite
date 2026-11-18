@@ -66,6 +66,12 @@ export interface ProjectPlan {
   dependencies: string[]
   openQuestions: string[]
   nextSteps: string[]
+  /**
+   * Set only by project discovery (never by a visitor's edit or a tool): the version and the content hash of the immutable discovery plan this
+   * plan was projected from, so an approval of this plan is an approval of exactly that snapshot, and the quote request can carry it. 0 / '': none.
+   */
+  discoveryVersion: number
+  discoveryHash: string
 }
 
 export const emptyPlan = (): ProjectPlan => ({
@@ -91,6 +97,8 @@ export const emptyPlan = (): ProjectPlan => ({
   dependencies: [],
   openQuestions: [],
   nextSteps: [],
+  discoveryVersion: 0,
+  discoveryHash: '',
 })
 
 export type PlanErrors = Record<string, 'invalid' | 'tooLong' | 'tooMany'>
@@ -136,7 +144,11 @@ export function readStoredPlan(json: string | null): ProjectPlan | null {
   try {
     const parsed: unknown = JSON.parse(json)
     const { changes, errors } = readPlanChanges(parsed)
-    return Object.keys(errors).length === 0 ? { ...emptyPlan(), ...changes } : null
+    if (Object.keys(errors).length > 0) return null
+    // The two discovery fields are not editable fields (readPlanChanges ignores them): they are read back from what the server stored.
+    const version = isRecord(parsed) && typeof parsed.discoveryVersion === 'number' && Number.isInteger(parsed.discoveryVersion) && parsed.discoveryVersion > 0 ? parsed.discoveryVersion : 0
+    const hash = version > 0 && isRecord(parsed) && typeof parsed.discoveryHash === 'string' && /^[0-9a-f]{32}$/.test(parsed.discoveryHash) ? parsed.discoveryHash : ''
+    return { ...emptyPlan(), ...changes, discoveryVersion: hash === '' ? 0 : version, discoveryHash: hash }
   } catch {
     return null
   }
@@ -163,7 +175,7 @@ export function planHash(plan: ProjectPlan): string {
 
 // ---- what the quote request carries ---------------------------------------------------------------------------------
 
-const FIELD_LABELS: Record<keyof ProjectPlan, Record<Language, string>> = {
+const FIELD_LABELS: Record<Exclude<keyof ProjectPlan, 'discoveryVersion' | 'discoveryHash'>, Record<Language, string>> = {
   projectType: { hu: 'Projekt típusa', en: 'Project type', nl: 'Type project' },
   businessGoal: { hu: 'Üzleti cél', en: 'Business goal', nl: 'Zakelijk doel' },
   targetAudience: { hu: 'Célközönség', en: 'Target audience', nl: 'Doelgroep' },
@@ -195,7 +207,7 @@ const COMPLEXITY_LABELS: Record<Complexity, Record<Language, string>> = {
   unsure: { hu: 'még nem eldöntött', en: 'not decided yet', nl: 'nog niet bepaald' },
 }
 
-export const planFieldLabel = (field: keyof ProjectPlan, lang: Language): string => FIELD_LABELS[field][lang]
+export const planFieldLabel = (field: keyof typeof FIELD_LABELS, lang: Language): string => FIELD_LABELS[field][lang]
 
 const sameInEveryLanguage = (text: string): Record<Language, string> => Object.fromEntries(LANGUAGES.map((lang) => [lang, text])) as Record<Language, string>
 
@@ -206,7 +218,7 @@ const sameInEveryLanguage = (text: string): Record<Language, string> => Object.f
  */
 export function planBrief(plan: ProjectPlan, preferredLanguage: Language): Brief {
   const questions: BriefQuestion[] = []
-  for (const field of Object.keys(FIELD_LABELS) as (keyof ProjectPlan)[]) {
+  for (const field of Object.keys(FIELD_LABELS) as (keyof typeof FIELD_LABELS)[]) {
     const value = plan[field]
     if (field === 'complexity') {
       questions.push({ id: field, kind: 'single', title: FIELD_LABELS[field], answers: [{ id: plan.complexity, label: COMPLEXITY_LABELS[plan.complexity] }] })

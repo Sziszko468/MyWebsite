@@ -22,6 +22,28 @@ import {
   type PlanState,
 } from './client'
 import { loadAiConfig, type AiPublicConfig } from './availability'
+import * as discoveryApi from './discoveryClient'
+import type { DiscoveryState, FactKey, ProjectType, Section, Stage } from './discoveryModel'
+
+/** Why a discovery change did not happen, as a code the panel has words for (`content/ai/discovery.ts`, `errors`). */
+export interface DiscoveryProblem {
+  code: 'conflict' | 'invalid' | 'duplicate' | 'limit' | 'sent' | 'notEnough' | 'network' | 'generic'
+  fields: Record<string, string>
+}
+
+function discoveryProblemOf(error: unknown): DiscoveryProblem {
+  if (!(error instanceof AiError)) return { code: 'generic', fields: {} }
+  if (error.code === 'network') return { code: 'network', fields: {} }
+  if (error.status === 409) {
+    if (error.reason === 'sent') return { code: 'sent', fields: {} }
+    if (error.reason === 'duplicate') return { code: 'duplicate', fields: {} }
+    if (error.reason === 'limit') return { code: 'limit', fields: {} }
+    if (error.reason === 'unknown_dependency') return { code: 'invalid', fields: {} }
+    return { code: 'conflict', fields: {} }
+  }
+  if (error.status === 422) return error.fields.plan ? { code: 'notEnough', fields: {} } : { code: 'invalid', fields: error.fields }
+  return { code: 'generic', fields: {} }
+}
 
 /**
  * The one conversation both the floating assistant and the /control-room page show. It lives here, outside any component, so
@@ -46,6 +68,12 @@ export interface Snapshot {
   unavailable: string | null
   /** The visitor stopped the answer that was being written (the interface says so until the next message). */
   cancelled: boolean
+  /** The structured project discovery the server holds for this conversation (`null`: not loaded, switched off, or nothing started yet). */
+  discovery: DiscoveryState | null
+  /** A discovery change is on its way (the panel disables its controls so two changes never race). */
+  discoveryBusy: boolean
+  /** Why the last discovery change did not happen. */
+  discoveryProblem: DiscoveryProblem | null
 }
 
 type Listener = () => void
@@ -67,7 +95,7 @@ class ControlRoom {
   constructor() {
     const stored = readStored()
     const id = stored.conversationId ?? newConversationId()
-    this.state = { chat: this.makeChat(id, []), conversationId: id, conversations: [], plan: null, config: null, approval: 'idle', loading: true, unavailable: null, cancelled: false }
+    this.state = { chat: this.makeChat(id, []), conversationId: id, conversations: [], plan: null, config: null, approval: 'idle', loading: true, unavailable: null, cancelled: false, discovery: null, discoveryBusy: false, discoveryProblem: null }
   }
 
   subscribe = (listener: Listener): (() => void) => {
@@ -124,7 +152,8 @@ class ControlRoom {
   private async openStored(id: string): Promise<void> {
     try {
       const detail = await readConversation(id)
-      this.set({ chat: this.makeChat(id, detail.messages as UIMessage[]), conversationId: id, plan: this.planOf(detail), approval: detail.sent ? 'sent' : 'idle', cancelled: false })
+      this.set({ chat: this.makeChat(id, detail.messages as UIMessage[]), conversationId: id, plan: this.planOf(detail), approval: detail.sent ? 'sent' : 'idle', cancelled: false, discovery: null, discoveryProblem: null })
+      await this.loadDiscovery(id)
     } catch (error) {
       // A conversation that no longer exists (deleted, expired, another session) is simply not there: start fresh.
       if (!(error instanceof AiError) || error.status !== 404) throw error
@@ -139,7 +168,7 @@ class ControlRoom {
   private freshConversation(): void {
     const id = newConversationId()
     writeStored({ conversationId: id })
-    this.set({ chat: this.makeChat(id, []), conversationId: id, plan: null, approval: 'idle', cancelled: false })
+    this.set({ chat: this.makeChat(id, []), conversationId: id, plan: null, approval: 'idle', cancelled: false, discovery: null, discoveryProblem: null })
   }
 
   private async refreshList(): Promise<void> {
@@ -156,7 +185,79 @@ class ControlRoom {
     writeStored({ conversationId })
     await this.refreshList()
     await this.refreshPlan()
+    await this.refreshDiscovery()
   }
+
+  /** Whether the structured project discovery is on (the plan panel is then the discovery panel). */
+  get discoveryOn(): boolean {
+    return this.state.config?.discoveryEnabled === true
+  }
+
+  private async loadDiscovery(id: string): Promise<void> {
+    if (!this.discoveryOn) return
+    try {
+      const discovery = await discoveryApi.readDiscovery(id)
+      if (id === this.state.conversationId) this.set({ discovery })
+    } catch (error) {
+      // "Not found": the discovery is no longer offered (the administrator switched it off after this page read its configuration, which is cached for a minute): ask again what is offered.
+      // Anything else: keep what is shown, the panel works from the last state it had.
+      if (error instanceof AiError && error.status === 404) await this.refreshConfig()
+    }
+  }
+
+  /** Asks again what the assistant offers, and follows the answer: the plan side becomes the discovery panel, or the older plan form, as the administrator set it. */
+  private async refreshConfig(): Promise<void> {
+    const config = await loadAiConfig(true)
+    const known = this.state.config
+    if (!config || !known || (config.discoveryEnabled === known.discoveryEnabled && config.plannerEnabled === known.plannerEnabled && config.quoteEnabled === known.quoteEnabled)) return
+    this.set({ config, discovery: null })
+    if (config.discoveryEnabled === true) await this.loadDiscovery(this.state.conversationId)
+  }
+
+  /** Reads the discovery the server holds (after an answer: the assistant may have recorded something). Nothing is asked for a conversation the server does not know yet. */
+  async refreshDiscovery(): Promise<void> {
+    const { conversationId } = this.state
+    if (!this.discoveryOn || !this.state.conversations.some((conversation) => conversation.id === conversationId)) return
+    await this.loadDiscovery(conversationId)
+  }
+
+  /**
+   * Runs one change of the discovery draft. It names the version the visitor saw; a draft that moved on answers 409 and the panel is refreshed
+   * instead of overwritten. One change at a time. Returns whether it happened (and what the server said about it).
+   */
+  private async discoveryRun<T>(work: (id: string, version: number) => Promise<discoveryApi.Mutation<T>>): Promise<{ ok: boolean; result?: T }> {
+    const { conversationId, discovery, discoveryBusy } = this.state
+    if (discoveryBusy) return { ok: false }
+    this.set({ discoveryBusy: true, discoveryProblem: null })
+    try {
+      const out = await work(conversationId, discovery?.version ?? 0)
+      if (conversationId === this.state.conversationId) this.set({ discovery: out.state, approval: this.state.approval === 'sent' ? 'sent' : 'idle' })
+      await this.refreshPlan()
+      return { ok: true, result: out.result }
+    } catch (error) {
+      const problem = discoveryProblemOf(error)
+      this.set({ discoveryProblem: problem })
+      if (problem.code === 'conflict' || problem.code === 'sent') await this.loadDiscovery(conversationId)
+      else if (error instanceof AiError && error.status === 404) await this.refreshConfig()
+      return { ok: false }
+    } finally {
+      this.set({ discoveryBusy: false })
+    }
+  }
+
+  clearDiscoveryProblem(): void {
+    if (this.state.discoveryProblem) this.set({ discoveryProblem: null })
+  }
+
+  discoveryFacts = (facts: Partial<Record<FactKey, string | null>>, confirm: FactKey[] = []) => this.discoveryRun((id, version) => discoveryApi.saveFacts(id, version, facts, confirm))
+  discoveryType = (change: { type?: ProjectType; confirm?: boolean }) => this.discoveryRun((id, version) => discoveryApi.saveClassification(id, version, change))
+  discoverySignals = (signals: Record<string, string | number | null>) => this.discoveryRun((id, version) => discoveryApi.saveSignals(id, version, signals))
+  discoveryAdd = (requirement: Partial<discoveryApi.RequirementFields>) => this.discoveryRun((id, version) => discoveryApi.addRequirement(id, version, requirement))
+  discoveryChange = (requirementId: string, change: discoveryApi.RequirementChange) => this.discoveryRun((id, version) => discoveryApi.changeRequirement(id, version, requirementId, change))
+  discoveryRemove = (requirementId: string) => this.discoveryRun((id, version) => discoveryApi.removeRequirement(id, version, requirementId))
+  discoverySkip = (stage: Stage, skip: boolean) => this.discoveryRun((id, version) => discoveryApi.skipStage(id, version, stage, skip))
+  discoveryNote = (section: Section, note: string) => this.discoveryRun((id, version) => discoveryApi.saveNote(id, version, section, note))
+  discoveryGenerate = (sections?: Section[]) => this.discoveryRun((id, version) => discoveryApi.generatePlan(id, version, sections))
 
   async refreshPlan(): Promise<void> {
     const { conversationId } = this.state
@@ -217,7 +318,9 @@ class ControlRoom {
 
   async startOverPlan(): Promise<void> {
     const next = await restartPlan(this.state.conversationId)
-    this.set({ plan: next, approval: 'idle' })
+    // Starting over clears the discovery draft, its requirements and its plan versions on the server too.
+    this.set({ plan: next, approval: 'idle', discovery: null, discoveryProblem: null })
+    await this.loadDiscovery(this.state.conversationId)
   }
 
   /** The visitor's "Send this request": the approval is recorded on the server, then the assistant is asked to send it. */

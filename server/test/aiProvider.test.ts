@@ -3,7 +3,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { startStandIn, type StandIn } from '../../tools/e2e/anthropic-standin.ts'
-import { TOOL_NAMES } from '../src/modules/ai/tools.ts'
+import { toolNamesFor } from '../src/modules/ai/tools.ts'
+import { loadSettings } from '../src/modules/ai/settings.ts'
 import { answerText, parseSse } from './aiMock.ts'
 import { activateThroughAdmin, startServer, type TestServer } from './helpers.ts'
 
@@ -41,7 +42,7 @@ async function start(env: Record<string, string> = {}) {
 
 describe('the Anthropic provider, over HTTP', () => {
   it('sends the configured model, the key, the limits, the closed tool set and the thinking setting, and nothing the model rejects', async () => {
-    const { standIn: provider, say } = await start({ AI_EFFORT: 'low', AI_MAX_OUTPUT_TOKENS: '900' })
+    const { s: backend, standIn: provider, say } = await start({ AI_EFFORT: 'low', AI_MAX_OUTPUT_TOKENS: '900' })
     const { chunks } = await say('Hello there')
     expect(answerText(chunks)).toBe('Stand-in answer. ')
 
@@ -56,7 +57,7 @@ describe('the Anthropic provider, over HTTP', () => {
     expect(JSON.stringify(body.system)).toContain('CONTROL ROOM AI')
     expect(body.messages).toEqual([{ role: 'user', content: [{ type: 'text', text: 'Hello there' }] }])
     // The closed tool set, each with a schema.
-    expect(body.tools.map((tool: { name: string }) => tool.name).sort()).toEqual([...TOOL_NAMES].sort())
+    expect(body.tools.map((tool: { name: string }) => tool.name).sort()).toEqual([...toolNamesFor(loadSettings(backend.app.context))].sort())
     expect(body.tools.every((tool: { input_schema: { type: string } }) => tool.input_schema.type === 'object')).toBe(true)
     // Haiku 5.5 rejects sampling settings and forced tool use: neither is sent.
     for (const forbidden of ['temperature', 'top_p', 'top_k']) expect(body).not.toHaveProperty(forbidden)

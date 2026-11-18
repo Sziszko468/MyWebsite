@@ -13,6 +13,7 @@ export interface AiSettings {
   /** The administrator's activation. It is changed only by the activation switch on the Model tab (never with the other settings). */
   enabled: boolean
   plannerEnabled: boolean
+  discoveryEnabled: boolean
   quoteEnabled: boolean
   languages: Language[]
   maxInputChars: number
@@ -59,6 +60,8 @@ export interface AiOverview {
   topics: { topic: string; n: number }[]
   errors: { code: string; n: number }[]
   plannerCompleted: number
+  discoveriesStarted: number
+  discoveryPlans: number
   quoteRequestsSent: number
   averageConversationSeconds: number | null
 }
@@ -220,6 +223,7 @@ export interface AiUsage extends AiOverview {
 /** The settings form's state: numbers as the text in their boxes, the chips as one line each. */
 export interface AiForm {
   plannerEnabled: boolean
+  discoveryEnabled: boolean
   quoteEnabled: boolean
   languages: Language[]
   numbers: Record<NumericSetting, string>
@@ -252,6 +256,7 @@ export type NumericSetting = (typeof NUMERIC_SETTINGS)[number]
 export function formFrom(settings: AiSettings): AiForm {
   return {
     plannerEnabled: settings.plannerEnabled,
+    discoveryEnabled: settings.discoveryEnabled,
     quoteEnabled: settings.quoteEnabled,
     languages: [...settings.languages],
     numbers: Object.fromEntries(NUMERIC_SETTINGS.map((key) => [key, String(settings[key])])) as Record<NumericSetting, string>,
@@ -275,6 +280,7 @@ export function payloadFrom(form: AiForm): Record<string, unknown> {
   // Not `enabled`: switching the assistant on or off is its own action (it needs a verified model), so saving other settings can never do it.
   return {
     plannerEnabled: form.plannerEnabled,
+    discoveryEnabled: form.discoveryEnabled,
     quoteEnabled: form.quoteEnabled,
     languages: form.languages,
     ...numbers,

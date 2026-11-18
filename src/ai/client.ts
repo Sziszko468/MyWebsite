@@ -89,7 +89,8 @@ export async function ensureSession(fresh = false): Promise<string> {
 
 export const currentToken = (): string | null => token
 
-async function request<T>(method: string, path: string, body: unknown, authenticated = true, retry = true): Promise<T> {
+/** One JSON call to the assistant's API (shared with the project discovery client). Throws an `AiError`. */
+export async function request<T>(method: string, path: string, body: unknown, authenticated = true, retry = true): Promise<T> {
   const url = apiEndpoint(path)
   if (url === null) throw new AiError(0, 'unavailable', 'no_backend')
   const headers: Record<string, string> = { Accept: 'application/json' }

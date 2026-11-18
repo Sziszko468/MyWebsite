@@ -7,7 +7,8 @@
 // usage: AUDIT_PLAYWRIGHT=... node tools/audit/audit-ai.cjs --base=http://127.0.0.1:8811 --standin=http://127.0.0.1:9911 \
 //          --sizes=320x640,360x740,390x844,430x932,768x1024,1024x768,1366x768,1440x900,1920x1080 [--langs=en,hu,nl] [--themes=dark,light] [--no-axe] [--out=dir]
 //
-// The assistant must be verified and switched on first (node tools/e2e/ai-activate.cjs ...). With --unavailable the script audits ONE
+// The assistant must be verified and switched on first (node tools/e2e/ai-activate.cjs ...). It audits the OLDER short plan form (the tool it plays is
+// createProjectPlan): start the backend with AI_DISCOVERY_ENABLED=false. The guided project discovery (the default) is audited by audit-discovery.cjs. With --unavailable the script audits ONE
 // other state instead: the /control-room page after the required model could not be verified (PROMPT 16.1). It makes the stand-in name
 // another model, sends one message to break the verification, audits the page, and puts the stand-in right again; the assistant stays
 // unverified afterwards (run ai-activate.cjs again before auditing anything else).

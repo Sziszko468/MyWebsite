@@ -15,6 +15,8 @@ export interface AiPublicConfig {
   unavailableReason?: 'model' | null
   languages: Language[]
   plannerEnabled: boolean
+  /** The structured project discovery (PROMPT 30) is on: the plan panel is the discovery panel. Absent in an older backend (= off). */
+  discoveryEnabled?: boolean
   quoteEnabled: boolean
   maxInputChars: number
   /** How many days the words of a conversation stay on the server. */
@@ -34,7 +36,8 @@ export function loadAiConfig(force = false): Promise<AiPublicConfig | null> {
     const url = apiEndpoint('/api/ai/config')
     if (url === null) return null
     try {
-      const response = await fetch(url, { credentials: 'omit', referrerPolicy: 'no-referrer', headers: { Accept: 'application/json' } })
+      // A forced reload revalidates with the server (the answer is otherwise cached for a minute), so a change the administrator just made is seen.
+      const response = await fetch(url, { credentials: 'omit', referrerPolicy: 'no-referrer', headers: { Accept: 'application/json' }, ...(force ? { cache: 'no-cache' as const } : {}) })
       if (!response.ok) return null
       const body = (await response.json()) as { data?: unknown }
       return valid(body.data) ? body.data : null

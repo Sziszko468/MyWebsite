@@ -217,7 +217,8 @@ const PLAN = {
   console.log('B  The Control Room page: workspace, conversation list, reload')
   await step('three areas on a desktop: the conversations, the conversation and the plan', async () => {
     expect((await page.getByRole('heading', { name: 'Conversations' }).count()) === 1, 'no conversation list')
-    expect((await page.getByRole('heading', { name: 'Project plan' }).count()) === 1, 'no plan area')
+    // PROMPT 30: the plan area is the project discovery by default (its heading), the short plan form's ("Project plan") when it is switched off.
+    expect((await page.getByRole('heading', { name: /^Project (plan|discovery)$/ }).count()) === 1, 'no plan area')
     expect((await page.getByRole('log').count()) === 1, 'no conversation log')
     await noSideways(page, 'the Control Room')
     await shot(page, 'B-control-room')
@@ -286,6 +287,13 @@ const PLAN = {
 
   console.log('D  Plan a project, approve it, and the request arrives in the administration')
   await forget()
+  // PROMPT 30: the guided project discovery is the default plan experience (tools/e2e/discovery-journey.cjs covers it). This section is the OLDER
+  // short plan form, which stays available behind the administrator's switch: the journey flips it off here and back on after the section.
+  await step('the administrator keeps the short plan form (the guided discovery is switched off for this section)', async () => {
+    expect((await adm.call('PUT', '/api/admin/ai/settings', { discoveryEnabled: false })).status === 200, 'could not switch the discovery off')
+    await page.reload({ waitUntil: 'load' })
+    await composer().waitFor({ timeout: 15000 })
+  })
   await step('the assistant fills the plan through its tool; the plan panel shows it, and says it is complete', async () => {
     await composer().fill(`TOOL:createProjectPlan:${JSON.stringify(PLAN)}`)
     await composer().press('Enter')
@@ -347,13 +355,16 @@ const PLAN = {
     expect(text.includes('Web application') && text.includes('Driver app') && text.includes('this autumn'), 'the brief is incomplete')
     await shot(adm.page, 'D-admin-quote')
   })
+  await step('the guided discovery is switched on again', async () => {
+    expect((await adm.call('PUT', '/api/admin/ai/settings', { discoveryEnabled: true })).status === 200, 'could not switch the discovery on')
+  })
 
   console.log('E  Languages')
   await step('the same conversation continues in Hungarian and in Dutch, and the model is told which language to answer in', async () => {
     await forget()
     await page.goto(`${BASE}/hu/control-room/`, { waitUntil: 'load' })
     await page.getByText('Üdvözöllek a Control Room AI-ban!').waitFor({ timeout: 15000 })
-    expect((await page.locator('main').innerText()).includes('Projektterv'), 'the plan panel is not in Hungarian')
+    expect(/Projektterv|Projektfeltárás/.test(await page.locator('main').innerText()), 'the plan panel is not in Hungarian')
     await page.getByLabel('Üzeneted a Control Room AI-nak').fill('Szia, mit tudsz?')
     await page.getByLabel('Üzeneted a Control Room AI-nak').press('Enter')
     await page.getByText('Stand-in answer.').last().waitFor({ timeout: 15000 })
@@ -635,7 +646,7 @@ const PLAN = {
   await step('the plan is one tap away in the same panel, and the panel closes with its own button', async () => {
     const dialog = p.locator('dialog[open]')
     await dialog.getByRole('tab', { name: 'Project plan' }).click()
-    await dialog.getByRole('heading', { name: 'Project plan' }).waitFor()
+    await dialog.getByRole('heading', { name: /^Project (plan|discovery)$/ }).waitFor()
     await shot(p, 'H-phone-plan')
     await dialog.getByRole('button', { name: 'Close', exact: true }).tap()
     await p.waitForFunction(() => !document.querySelector('dialog[open]'))
@@ -661,7 +672,7 @@ const PLAN = {
     await p.getByRole('heading', { name: 'Conversations' }).waitFor()
     await p.keyboard.press('Escape')
     await p.getByRole('tab', { name: 'Project plan' }).tap()
-    await p.getByRole('heading', { name: 'Project plan' }).waitFor()
+    await p.getByRole('heading', { name: /^Project (plan|discovery)$/ }).waitFor()
     await shot(p, 'H-phone-page')
     expect(!h.problems.length, h.problems.join(' | '))
   })

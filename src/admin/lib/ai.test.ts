@@ -8,6 +8,7 @@ import { dollars, duration, formFrom, payloadFrom, sameForm, share, type AiSetti
 const settings: AiSettings = {
   enabled: true,
   plannerEnabled: true,
+  discoveryEnabled: true,
   quoteEnabled: true,
   languages: ['hu', 'en', 'nl'],
   maxInputChars: 1200,
