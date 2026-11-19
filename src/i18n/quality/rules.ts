@@ -19,6 +19,8 @@ export interface Allowances {
   numbersMayDiffer: (entry: TextEntry) => boolean
   /** Names and fixed terms that are written in another language inside a sentence on purpose; removed before the foreign-word scan. */
   foreignPhrases?: readonly RegExp[]
+  /** Texts that are blank in every language on purpose (an optional field the site draws only when it has text). When this is given, a text that is blank everywhere and not named here is an error. */
+  blankOnPurpose?: (entry: TextEntry) => boolean
 }
 
 export const noAllowances: Allowances = { sameOnPurpose: () => false, numbersMayDiffer: () => false, foreignPhrases: [] }
@@ -58,7 +60,11 @@ export function checkEntry(entry: TextEntry, allowances: Allowances = noAllowanc
 
   // A field that is blank in every language is an optional field left blank on purpose (a help line, a note): not a translation gap.
   const blankEverywhere = present.length === LANGUAGES.length && LANGUAGES.every((lang) => (entry.texts[lang] ?? '').trim() === '')
-  if (blankEverywhere) return out
+  if (blankEverywhere) {
+    // A blank text is a decision, like every other allowance: it has to be written down with its reason (allowances.ts), so a text that was simply forgotten cannot hide among them.
+    if (allowances.blankOnPurpose && !allowances.blankOnPurpose(entry)) out.push(finding('blank', 'error', entry, 'blank in every language, and not listed as blank on purpose (allowances.ts)'))
+    return out
+  }
   for (const lang of LANGUAGES) {
     const text = entry.texts[lang]
     if (typeof text !== 'string') out.push(finding('missing', 'error', entry, `no ${lang.toUpperCase()} text`, lang))

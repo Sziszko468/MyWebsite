@@ -4,16 +4,19 @@ import { createElement as h, type ReactElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
-import { ANALYTICS_LANGUAGES, SECTION_NAMES, type AnalyticsAnswer, type AnalyticsLanguage, type Metric, type MoneyMetric, type Section } from '../api/analytics'
+import { ANALYTICS_LANGUAGES, SECTION_NAMES, type AnalyticsAnswer, type AnalyticsLanguage, type FilterNote, type Metric, type MoneyMetric, type Section } from '../api/analytics'
+import { checkEntries } from '../../i18n/quality/rules'
+import { allowances } from '../../i18n/quality/allowances'
 import { NAVIGATION } from '../components/navigation'
 import { AdminTextProvider } from '../i18n'
 import { analyticsEn, analyticsHu, analyticsNl, analyticsText } from '../i18n/analytics'
+import { clientsEn, clientsHu } from '../i18n/clients'
 import { en } from '../i18n/en'
 import { hu } from '../i18n/hu'
 import { BarChart, BarList, DonutChart, FunnelChart, LineChart } from './Charts'
-import { formatCount, formatDayKey, formatHours, formatMoney, formatPercent, formatUsd, humanize, word } from './format'
+import { formatCount, formatDayKey, formatDays, formatHours, formatMoney, formatPercent, formatUsd, humanize, word } from './format'
 import { KpiCard, MoneyCard } from './Kpi'
-import { DEFAULT_FILTERS, SECTION_FILTERS, canOpen, directionOf, queryFor, rangeProblem, readFilters, sectionOf, unitOf, writeFilters } from './model'
+import { DEFAULT_FILTERS, SECTION_FILTERS, canOpen, directionOf, ignoredFilters, queryFor, rangeProblem, readFilters, sectionOf, unitOf, writeFilters } from './model'
 import { SectionView } from './Sections'
 import { AnalyticsTextProvider } from './text'
 
@@ -344,7 +347,7 @@ describe('money is shown per currency and never added', () => {
     const html = render(h(MoneyCard, { metric: sum }))
     expect(html).toContain('€12,500.00')
     expect(html).toContain('HUF 4,500,000')
-    expect(html).toContain('3 of 4 quotations carry an amount')
+    expect(html).toContain('Quotations with an amount: 3 of 4')
     expect(html).toContain('1 without an amount')
     expect(html).toContain('Previous period: €9,000.00')
     expect(html).toContain('NOT cash received')
@@ -393,7 +396,7 @@ describe('every chart carries its numbers as a table and says what it is', () =>
       render(h(BarList, { title: 'Empty list', items: [], format })),
       render(h(FunnelChart, { title: 'Empty funnel', steps: [{ label: 'Received', count: 0, notes: [] }], format })),
     ]) {
-      expect(html).toContain('No data in this period.')
+      expect(html).toContain('Nothing to show here.')
       expect(html).not.toContain('<svg')
     }
   })
@@ -440,7 +443,7 @@ describe('a section, from what the server sent', () => {
     expect(html).toContain('Requests received 5 Oct 2026 to 3 Nov 2026')
     expect(html).toContain('Reviewed')
     expect(html).toContain('75% of the previous stage')
-    expect(html).toContain('on average 1.5 after the previous stage')
+    expect(html).toContain('on average 1.5 days after the previous stage')
     expect(html).toContain('Decline reasons are not stored as categories')
     expect(html).toContain('Conversion follows the requests received in the period')
   })
@@ -514,6 +517,145 @@ describe('a section, from what the server sent', () => {
       // A limitation the dictionary does not know yet is shown humanised, never dropped.
       expect(html, language).toContain('Some future code')
     }
+  })
+})
+
+describe('PROMPT 32.1: what the project status filter did to a figure is said in words, in every language', () => {
+  const NOTE = (effect: FilterNote['effect'], reason: string | null): FilterNote => ({ filter: 'projectStatus', effect, reason })
+
+  it('offers the project status in the overview, the projects and the alerts, and says which filters a section does not use instead of dropping them', () => {
+    expect(SECTION_FILTERS.executive).toContain('projectStatus')
+    expect(SECTION_FILTERS.projects).toContain('projectStatus')
+    expect(SECTION_FILTERS.alerts).toContain('projectStatus')
+    expect(queryFor({ ...DEFAULT_FILTERS, projectStatus: 'review' }, 'executive', 'en')).toMatchObject({ projectStatus: 'review' })
+    expect(queryFor({ ...DEFAULT_FILTERS, projectStatus: 'review' }, 'financial', 'en')).not.toHaveProperty('projectStatus')
+    const set = { ...DEFAULT_FILTERS, projectStatus: 'review', currency: 'EUR' as const, language: 'hu' as const }
+    expect(ignoredFilters(set, 'financial')).toEqual(['projectStatus'])
+    expect(ignoredFilters(set, 'ai')).toEqual(['currency', 'language', 'projectStatus'])
+    expect(ignoredFilters(set, 'projects')).toEqual(['currency', 'language'])
+    expect(ignoredFilters(DEFAULT_FILTERS, 'projects')).toEqual([])
+  })
+
+  it('says a figure is filtered (and by which status), or not filtered and why, or empty by definition: in all three languages', () => {
+    const base = metric({ id: 'activeProjects', previous: null, change: null, changePercent: null, comparison: 'snapshot' })
+    const filtered = (language: AnalyticsLanguage) => render(h(KpiCard, { metric: { ...base, filterNote: NOTE('applied', null) } }), language)
+    expect(filtered('en')).toContain('Filtered by project status')
+    expect(filtered('hu')).toContain('Projektállapot szerint szűrve')
+    expect(filtered('nl')).toContain('Gefilterd op projectstatus')
+    const event = metric({ id: 'completedProjects', filterNote: NOTE('not_applied', 'historical_event') })
+    expect(render(h(KpiCard, { metric: event }))).toMatch(/Not filtered by project status.*A project or task completed in the period is counted whatever status the project has today/)
+    expect(render(h(KpiCard, { metric: event }), 'hu')).toContain('Az időszakban befejezett projekt vagy feladat attól függetlenül szerepel')
+    expect(render(h(KpiCard, { metric: event }), 'nl')).toContain('Een in de periode afgerond project of afgeronde taak telt mee')
+    const other = metric({ id: 'newQuoteRequests', filterNote: NOTE('not_applied', 'not_project_data') })
+    expect(render(h(KpiCard, { metric: other }))).toContain('It is not about projects, so the project status filter does not apply to it.')
+    const empty = metric({ id: 'activeProjects', state: 'unavailable', value: null, previous: null, change: null, changePercent: null, comparison: 'none', reason: 'status_not_active', filterNote: NOTE('empty_by_definition', 'status_not_active') })
+    const html = render(h(KpiCard, { metric: empty }))
+    expect(html).toContain('Empty by definition')
+    expect(html).toContain('defined for active projects only')
+    expect(html).not.toMatch(/>0<|vs previous/)
+    // A figure with no note (no status selected) shows no note at all.
+    expect(render(h(KpiCard, { metric: base }))).not.toMatch(/project status/i)
+  })
+
+  it('writes the section summary with the status, and for the alerts which kinds are filtered and which are not', () => {
+    const summary = (effect: 'partial' | 'not_applicable', more = {}) => answer({ name: 'projects', filterSummary: { projectStatus: { status: 'review', effect, ...more } } })
+    const partial = render(h(SectionView, { answer: summary('partial') }))
+    expect(partial).toContain('Project status filter: Review.')
+    expect(partial).toContain('keep their own meaning and are not that subset')
+    expect(render(h(SectionView, { answer: summary('not_applicable') }))).toContain('does not apply to this section')
+    const alerts = render(h(SectionView, { answer: summary('partial', { appliedKinds: ['blocked_task', 'overdue_milestone'], notAppliedKinds: ['request_not_reviewed'] }) }), 'nl')
+    expect(alerts).toContain('Gefilterd op projectstatus: Geblokkeerde taak, Verlopen mijlpaal.')
+    expect(alerts).toContain('Niet gefilterd op projectstatus: Aanvraag niet beoordeeld.')
+  })
+
+  it('puts the note on the charts and tables too, so a chart of events is never read as the selected subset', () => {
+    const point = (key: string, value: number) => ({ key, from: key, to: key, value })
+    const html = render(
+      h(SectionView, {
+        answer: answer({
+          name: 'projects',
+          filterSummary: { projectStatus: { status: 'on_hold', effect: 'partial' } },
+          series: [{ id: 'completedProjectsSeries', granularity: 'day', unit: 'count', points: [point('2026-11-01', 2)], filterNote: NOTE('not_applied', 'historical_event') }],
+          distributions: [
+            { id: 'projectsByStatus', total: 1, items: [{ key: 'on_hold', value: 1 }], filterNote: NOTE('applied', null) },
+            { id: 'tasksByStatus', total: 0, items: [], filterNote: NOTE('empty_by_definition', 'status_not_active') },
+          ],
+          tables: [{ id: 'projectWorkload', columns: ['reference', 'status', 'openTasks', 'overdueTasks', 'expectedOn'], rows: [], filterNote: NOTE('empty_by_definition', 'status_not_active') }],
+        }),
+      }),
+    )
+    expect(html).toContain('Not filtered by project status')
+    expect(html).toContain('Counts only projects whose status now is On hold.')
+    expect((html.match(/Empty by definition/g) ?? []).length).toBe(2)
+  })
+
+  it('has a sentence for every reason the server can give for a filter note, and for every reason a figure is empty by definition', () => {
+    const source = readFileSync(join(SERVER, 'operations.ts'), 'utf8') + readFileSync(join(SERVER, 'service.ts'), 'utf8')
+    const reasons = [...new Set([...source.matchAll(/(?:emptyNote\('|effect: 'not_applied', reason: ')([a-z_]+)'/g)].map((match) => match[1]))].sort()
+    expect(reasons).toEqual(['historical_event', 'not_project_data', 'status_not_active', 'status_not_on_hold'])
+    for (const dictionary of [analyticsEn, analyticsHu, analyticsNl]) {
+      expect(Object.keys(dictionary.scope.reasons).sort()).toEqual(reasons)
+      for (const code of ['status_not_active', 'status_not_on_hold']) expect(dictionary.reasons).toHaveProperty(code)
+    }
+  })
+
+  it('writes a length of time with its unit and the language\'s own plural, never "1 days" and never a number without its unit', () => {
+    expect(formatDays(1, 'en')).toBe('1 day')
+    expect(formatDays(30, 'en')).toBe('30 days')
+    expect(formatDays(1, 'nl')).toBe('1 dag')
+    expect(formatDays(30, 'nl')).toBe('30 dagen')
+    expect(formatDays(1, 'hu')).toBe('1 nap')
+    for (const dictionary of [analyticsEn, analyticsHu, analyticsNl]) {
+      // The period line and the funnel's time between stages take an already formatted length: no unit word after the placeholder that would then be written twice.
+      expect(dictionary.meta.period).toMatch(/\(\{days\}\)/)
+      expect(dictionary.funnel.daysFromPrevious).not.toMatch(/\{value\}\s+(days|dagen|nap|nappal)/)
+    }
+    // No sentence puts a Hungarian suffix on a number, or counts "1 of 1 quotations".
+    for (const [name, entries] of [['en', english], ['hu', hungarian], ['nl', dutch]] as const) {
+      const bad = [...entries].filter(([, value]) => /\{(count|priced|days|value)\}-(nak|nek|val|vel|tól|től|ban|ben)/.test(value) || /\{(count|priced)\} of \{(count|priced)\} \w+s\b/.test(value)).map(([key]) => key)
+      expect(bad, name).toEqual([])
+    }
+  })
+
+  it('shows a failure in the language of the screen, with a way to try again', () => {
+    for (const dictionary of [analyticsEn, analyticsHu, analyticsNl]) {
+      expect(dictionary.states.retry.length).toBeGreaterThan(2)
+      for (const key of ['generic', 'forbidden', 'invalid'] as const) expect(dictionary.errors[key].length).toBeGreaterThan(10)
+    }
+    expect(strip(page)).toContain('function AnalyticsError')
+    expect(strip(page)).not.toContain('ErrorState')
+  })
+})
+
+describe('PROMPT 32.1: the dashboard\'s words pass the platform\'s own language rules, and use the administration\'s own words for the same things', () => {
+  const entries = [...english.keys()].map((id) => ({ id: `admin/i18n/analytics.ts#${id}`, source: 'admin/i18n/analytics.ts', area: 'analytics', texts: { hu: hungarian.get(id), en: english.get(id), nl: dutch.get(id) } }))
+
+  it('has no placeholder, number, whitespace, quote, bracket, register or untranslated-text finding (the website glossary is for the customer pages: the administration says "quotation")', () => {
+    const findings = checkEntries(entries, allowances).filter((finding) => finding.rule !== 'glossary')
+    expect(findings.map((finding) => `[${finding.rule}] ${finding.id} ${finding.lang ?? ''}: ${finding.message}`)).toEqual([])
+    expect(entries.length).toBeGreaterThan(500)
+  })
+
+  it('writes a project status exactly as the rest of the administration writes it (Hungarian and English), and as the customer portal does (Dutch)', () => {
+    const find = (node: unknown): Record<string, string> | null => {
+      if (node && typeof node === 'object') {
+        const record = node as Record<string, unknown>
+        if (record.statuses && typeof record.statuses === 'object' && 'awaiting_start' in (record.statuses as object)) return record.statuses as Record<string, string>
+        for (const child of Object.values(record)) {
+          const found = find(child)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    const admin = { hu: find(clientsHu), en: find(clientsEn) }
+    expect(admin.hu && admin.en).toBeTruthy()
+    for (const status of ['awaiting_start', 'discovery', 'planning', 'design', 'development', 'review', 'waiting_customer', 'finalization', 'completed', 'on_hold', 'cancelled']) {
+      expect(analyticsHu.keys[status as keyof typeof analyticsHu.keys], `hu ${status}`).toBe(admin.hu![status])
+      expect(analyticsEn.keys[status as keyof typeof analyticsEn.keys], `en ${status}`).toBe(admin.en![status])
+    }
+    // The client portal (content/portal) says "Gepauzeerd" for a project that is on hold; the dashboard says the same.
+    expect(analyticsNl.keys.on_hold).toBe('Gepauzeerd')
   })
 })
 

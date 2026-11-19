@@ -32,6 +32,8 @@ export function sectionCsv(section: Section, meta: Meta, filters: Filters, repor
   if (meta.previous) note(`Previous equivalent period: ${meta.previous.from} to ${meta.previous.to}`)
   note(`Generated at: ${meta.generatedAt} (UTC)`)
   note(`Filters: ${Object.entries({ currency: filters.currency, language: filters.language, service: filters.service, package: filters.packageCode, projectStatus: filters.projectStatus, quoteStatus: filters.quoteStatus, consultationStatus: filters.consultationStatus }).filter(([, value]) => value !== null).map(([key, value]) => `${key}=${value}`).join(' ') || 'none'}`)
+  const filter = section.filterSummary?.projectStatus
+  if (filter) note(`Project status filter: ${filter.status} (${filter.effect === 'partial' ? 'applies to part of this report: see [filter-scope] for each figure' : 'does not apply to this report'}). A figure marked not_applied keeps its own meaning and is not the selected subset.`)
   note('Money is in whole minor units (cents for EUR, forints for HUF) and is NEVER added across currencies; an accepted quotation is accepted contract value, not cash.')
   note('Rows with kind "estimate" are estimates (for example the AI cost, in US dollars: not an invoice); "unavailable" means the system does not store the data, it is not zero.')
   out.push('')
@@ -72,6 +74,23 @@ export function sectionCsv(section: Section, meta: Meta, filters: Filters, repor
   if (extra?.items) {
     out.push(line(['[alerts]']), line(['severity', 'kind', 'reason', 'reference', 'date', 'nextAction']))
     for (const item of extra.items) out.push(line([item.severity as string, item.kind as string, item.reason as string, item.reference as string, item.date as string, item.nextAction as string]))
+    out.push('')
+  }
+  // What the selected project status does to each figure (only when one is selected): applied, not_applied (an event of the period, or not project data) or empty_by_definition.
+  const scope: Array<Array<string | null>> = []
+  const noted = (kind: string, id: string, item: { filterNote?: { filter: string; effect: string; reason: string | null } }) => {
+    if (item.filterNote) scope.push([kind, id, item.filterNote.filter, item.filterNote.effect, item.filterNote.reason])
+  }
+  for (const item of section.metrics) noted('metric', item.id, item)
+  for (const item of section.money) noted('money', item.id, item)
+  for (const item of section.series) noted('series', item.id, item)
+  for (const item of section.distributions) noted('distribution', item.id, item)
+  for (const item of section.tables) noted('table', item.id, item)
+  for (const kind of filter?.appliedKinds ?? []) scope.push(['alert', kind, 'projectStatus', 'applied', null])
+  for (const kind of filter?.notAppliedKinds ?? []) scope.push(['alert', kind, 'projectStatus', 'not_applied', 'not_project_data'])
+  if (scope.length > 0) {
+    out.push(line(['[filter-scope]']), line(['kind', 'id', 'filter', 'effect', 'reason']))
+    for (const row of scope) out.push(line(row))
     out.push('')
   }
   out.push(line(['[limitations]']))

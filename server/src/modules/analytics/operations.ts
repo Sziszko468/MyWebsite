@@ -1,5 +1,5 @@
 import { addDays, bucketsOf, daysBetween, type Span } from './period.ts'
-import { emptySection, flow, snapshot, unavailable, type Metric, type Section, type Series } from './model.ts'
+import { emptySection, flow, snapshot, unavailable, withNote, type FilterNote, type Metric, type Section, type Series } from './model.ts'
 import type { Ctx } from './quotes.ts'
 
 /**
@@ -16,7 +16,7 @@ const LAST_SENDER = "(SELECT m.sender_type FROM conversation_messages m WHERE m.
 
 const ACTIVE_BOOKING_LIST = "('pending', 'confirmed', 'reschedule_requested', 'rescheduled')"
 /** Fixed SQL fragments (see quotes.ts): constants of this file, never input. */
-const sql = { activeProject: ACTIVE_PROJECT, live: LIVE, lastSender: LAST_SENDER, activeBooking: ACTIVE_BOOKING_LIST, filter: '' }
+const sql = { activeProject: ACTIVE_PROJECT, status: '(? IS NULL OR p.status = ?)', live: LIVE, lastSender: LAST_SENDER, activeBooking: ACTIVE_BOOKING_LIST, filter: '' }
 
 export const one = (ctx: Ctx, sql: string, params: Array<string | number | null> = []): number => ctx.db.get<{ n: number }>(sql, params)?.n ?? 0
 
@@ -94,17 +94,54 @@ function accountSeries(ctx: Ctx): Series {
 
 // ---- projects -----------------------------------------------------------------------------------------------------------------------------
 
+/**
+ * The project-status filter (PROMPT 32.1, docs/business-intelligence/FILTER_SEMANTICS.md). `projectStatus` is the project's CURRENT status. With respect to it a figure is one of
+ * three things, and it says which (`filterNote`) whenever a status is selected (with none selected nothing changes and no note is added):
+ *   - SCOPED: a figure about the projects, and their tasks and milestones, as they are NOW counts only the projects whose current status is the selected one;
+ *   - EMPTY BY DEFINITION: a figure defined for active projects only (or for projects On hold only) has nothing to show when the selected status lies outside that definition: it is
+ *     `unavailable` with the reason, never a zero;
+ *   - NOT APPLIED: a figure that counts events of the period (a project completed, a task completed, a duration) keeps its historical meaning: a project that was completed in the
+ *     period is not reinterpreted by the status it has today.
+ */
+const NOT_ACTIVE = new Set(['completed', 'cancelled'])
+const selectedStatus = (ctx: Ctx): string | null => ctx.f.projectStatus
+const scopedNote = (ctx: Ctx): FilterNote | undefined => (selectedStatus(ctx) === null ? undefined : { filter: 'projectStatus', effect: 'applied', reason: null })
+const eventNote = (ctx: Ctx): FilterNote | undefined => (selectedStatus(ctx) === null ? undefined : { filter: 'projectStatus', effect: 'not_applied', reason: 'historical_event' })
+const emptyNote = (reason: string): FilterNote => ({ filter: 'projectStatus', effect: 'empty_by_definition', reason })
+/** True when the selected status lies outside "active": a figure defined for active projects has nothing to show. */
+const outsideActive = (ctx: Ctx): boolean => {
+  const selected = selectedStatus(ctx)
+  return selected !== null && NOT_ACTIVE.has(selected)
+}
+
+/** A figure defined for ACTIVE projects now, scoped by the selected status (the statement ends with `AND ${sql.status}`). */
+function activeFigure(ctx: Ctx, id: string, kind: 'actual' | 'derived', statement: string, params: Array<string | number | null>, drill: string | null): Metric {
+  if (outsideActive(ctx)) return withNote(unavailable(id, 'status_not_active'), emptyNote('status_not_active'))
+  return withNote(snapshot(id, kind, one(ctx, statement, [...params, ...opt(selectedStatus(ctx))]), drill), scopedNote(ctx))
+}
+
 export function projectMetrics(ctx: Ctx) {
   const today = ctx.period.today
-  const status = opt(ctx.f.projectStatus)
+  const selected = selectedStatus(ctx)
+  const onHold: Metric =
+    selected !== null && selected !== 'on_hold'
+      ? withNote(unavailable('projectsOnHold', 'status_not_on_hold'), emptyNote('status_not_on_hold'))
+      : withNote(snapshot('projectsOnHold', 'actual', one(ctx, "SELECT COUNT(*) AS n FROM client_projects p WHERE p.status = 'on_hold'"), '/clients'), scopedNote(ctx))
   return {
-    active: snapshot('activeProjects', 'actual', one(ctx, `SELECT COUNT(*) AS n FROM client_projects p WHERE ${sql.activeProject}`), '/clients'),
-    completed: flowOf(ctx, 'completedProjects', 'SELECT COUNT(*) AS n FROM client_projects p WHERE p.completed_at >= ? AND p.completed_at < ?', [], '/clients'),
-    overdueMilestones: snapshot('overdueMilestones', 'derived', one(ctx, `SELECT COUNT(*) AS n FROM client_milestones m JOIN client_projects p ON p.id = m.project_id WHERE ${sql.activeProject} AND m.completed_at IS NULL AND m.status NOT IN ('completed', 'cancelled') AND m.due_on IS NOT NULL AND m.due_on < ?`, [today]), '/clients'),
-    delayedProjects: snapshot('delayedProjects', 'derived', one(ctx, `SELECT COUNT(*) AS n FROM client_projects p WHERE ${sql.activeProject} AND p.expected_on IS NOT NULL AND p.expected_on < ?`, [today]), '/clients'),
-    onHold: snapshot('projectsOnHold', 'actual', one(ctx, "SELECT COUNT(*) AS n FROM client_projects p WHERE p.status = 'on_hold'"), '/clients'),
-    cancelled: flowOf(ctx, 'cancelledProjects', "SELECT COUNT(*) AS n FROM client_projects p WHERE p.status = 'cancelled' AND p.updated_at >= ? AND p.updated_at < ?", [], '/clients', 'derived'),
-    status,
+    active: activeFigure(ctx, 'activeProjects', 'actual', `SELECT COUNT(*) AS n FROM client_projects p WHERE ${sql.activeProject} AND ${sql.status}`, [], '/clients'),
+    completed: withNote(flowOf(ctx, 'completedProjects', 'SELECT COUNT(*) AS n FROM client_projects p WHERE p.completed_at >= ? AND p.completed_at < ?', [], '/clients'), eventNote(ctx)),
+    overdueMilestones: activeFigure(
+      ctx,
+      'overdueMilestones',
+      'derived',
+      `SELECT COUNT(*) AS n FROM client_milestones m JOIN client_projects p ON p.id = m.project_id WHERE ${sql.activeProject} AND m.completed_at IS NULL AND m.status NOT IN ('completed', 'cancelled') AND m.due_on IS NOT NULL AND m.due_on < ? AND ${sql.status}`,
+      [today],
+      '/clients',
+    ),
+    delayedProjects: activeFigure(ctx, 'delayedProjects', 'derived', `SELECT COUNT(*) AS n FROM client_projects p WHERE ${sql.activeProject} AND p.expected_on IS NOT NULL AND p.expected_on < ? AND ${sql.status}`, [today], '/clients'),
+    onHold,
+    cancelled: withNote(flowOf(ctx, 'cancelledProjects', "SELECT COUNT(*) AS n FROM client_projects p WHERE p.status = 'cancelled' AND p.updated_at >= ? AND p.updated_at < ?", [], '/clients', 'derived'), eventNote(ctx)),
+    status: opt(selected),
   }
 }
 
@@ -112,32 +149,52 @@ export function projectSection(ctx: Ctx): Section {
   const section = emptySection('projects')
   const m = projectMetrics(ctx)
   const today = ctx.period.today
+  const status = opt(selectedStatus(ctx))
   section.metrics.push(m.active, m.completed, m.onHold, m.delayedProjects, m.overdueMilestones)
-  const tasks = (status: string) => one(ctx, 'SELECT COUNT(*) AS n FROM project_tasks t JOIN client_projects p ON p.id = t.project_id WHERE ' + ACTIVE_PROJECT + ' AND t.status = ?', [status])
+  const taskFigure = (id: string, taskStatus: string) =>
+    activeFigure(ctx, id, 'actual', `SELECT COUNT(*) AS n FROM project_tasks t JOIN client_projects p ON p.id = t.project_id WHERE ${sql.activeProject} AND t.status = ? AND ${sql.status}`, [taskStatus], null)
   section.metrics.push(
-    flowOf(ctx, 'tasksCompleted', 'SELECT COUNT(*) AS n FROM project_tasks t WHERE t.completed_at >= ? AND t.completed_at < ?', [], null),
-    snapshot('tasksInProgress', 'actual', tasks('in_progress')),
-    snapshot('blockedTasks', 'actual', tasks('blocked')),
-    snapshot('tasksAwaitingCustomer', 'actual', one(ctx, `SELECT COUNT(*) AS n FROM project_customer_actions a JOIN client_projects p ON p.id = a.project_id WHERE ${sql.activeProject} AND a.status IN ('not_started', 'changes_requested')`)),
+    withNote(flowOf(ctx, 'tasksCompleted', 'SELECT COUNT(*) AS n FROM project_tasks t WHERE t.completed_at >= ? AND t.completed_at < ?', [], null), eventNote(ctx)),
+    taskFigure('tasksInProgress', 'in_progress'),
+    taskFigure('blockedTasks', 'blocked'),
+    activeFigure(
+      ctx,
+      'tasksAwaitingCustomer',
+      'actual',
+      `SELECT COUNT(*) AS n FROM project_customer_actions a JOIN client_projects p ON p.id = a.project_id WHERE ${sql.activeProject} AND a.status IN ('not_started', 'changes_requested') AND ${sql.status}`,
+      [],
+      null,
+    ),
   )
+  // The average duration counts projects COMPLETED in the period: an event, kept as it is whatever status a project has today.
   const dur = ctx.db.get<{ n: number; days: number | null }>(
     "SELECT COUNT(*) AS n, AVG(julianday(substr(p.completed_at, 1, 10)) - julianday(p.started_on)) AS days FROM client_projects p WHERE p.completed_at >= ? AND p.completed_at < ? AND p.started_on IS NOT NULL AND substr(p.completed_at, 1, 10) >= p.started_on",
     [ctx.period.fromUtc, ctx.period.toUtc],
   )
-  section.metrics.push(dur && dur.n > 0 && dur.days !== null ? { ...snapshot('averageProjectDurationDays', 'derived', Math.round(dur.days * 10) / 10), comparison: 'none' } : unavailable('averageProjectDurationDays', 'no_completed_projects_with_start_date'))
-  const mile = ctx.db.get<{ total: number; done: number }>(
-    "SELECT COUNT(*) AS total, SUM(CASE WHEN m.completed_at IS NOT NULL OR m.status = 'completed' THEN 1 ELSE 0 END) AS done FROM client_milestones m WHERE m.due_on >= ? AND m.due_on <= ? AND m.status <> 'cancelled'",
-    [ctx.period.from, ctx.period.to],
+  section.metrics.push(
+    withNote(dur && dur.n > 0 && dur.days !== null ? { ...snapshot('averageProjectDurationDays', 'derived', Math.round(dur.days * 10) / 10), comparison: 'none' } : unavailable('averageProjectDurationDays', 'no_completed_projects_with_start_date'), eventNote(ctx)),
   )
-  section.metrics.push(mile && mile.total > 0 ? { ...snapshot('milestoneCompletionRate', 'derived', Math.round(((mile.done ?? 0) / mile.total) * 1000) / 10), comparison: 'none' } : unavailable('milestoneCompletionRate', 'no_milestones_due_in_period'))
-  const dist = (id: string, sql: string, params: Array<string | null> = []) => {
-    const rows = ctx.db.all<{ key: string; n: number }>(sql, params)
-    section.distributions.push({ id, total: rows.reduce((sum, row) => sum + row.n, 0), items: rows.map((row) => ({ key: row.key, value: row.n })) })
+  // The share of the milestones DUE in the period that are completed now, of the projects whose current status is the selected one (any status: a milestone of a completed project counts).
+  const mile = ctx.db.get<{ total: number; done: number }>(
+    `SELECT COUNT(*) AS total, SUM(CASE WHEN m.completed_at IS NOT NULL OR m.status = 'completed' THEN 1 ELSE 0 END) AS done
+       FROM client_milestones m JOIN client_projects p ON p.id = m.project_id WHERE m.due_on >= ? AND m.due_on <= ? AND m.status <> 'cancelled' AND ${sql.status}`,
+    [ctx.period.from, ctx.period.to, ...status],
+  )
+  section.metrics.push(
+    withNote(
+      mile && mile.total > 0 ? { ...snapshot('milestoneCompletionRate', 'derived', Math.round(((mile.done ?? 0) / mile.total) * 1000) / 10), comparison: 'none' } : unavailable('milestoneCompletionRate', 'no_milestones_due_in_period'),
+      scopedNote(ctx),
+    ),
+  )
+  const dist = (id: string, statement: string, params: Array<string | null> = [], note?: FilterNote) => {
+    const rows = ctx.db.all<{ key: string; n: number }>(statement, params)
+    section.distributions.push(withNote({ id, total: rows.reduce((sum, row) => sum + row.n, 0), items: rows.map((row) => ({ key: row.key, value: row.n })) }, note))
   }
-  dist('projectsByStatus', 'SELECT p.status AS key, COUNT(*) AS n FROM client_projects p WHERE (? IS NULL OR p.status = ?) GROUP BY p.status ORDER BY n DESC', opt(ctx.f.projectStatus))
-  dist('tasksByStatus', `SELECT t.status AS key, COUNT(*) AS n FROM project_tasks t JOIN client_projects p ON p.id = t.project_id WHERE ${sql.activeProject} AND (? IS NULL OR p.status = ?) GROUP BY t.status ORDER BY n DESC`, opt(ctx.f.projectStatus))
-  dist('milestonesByStatus', `SELECT m.status AS key, COUNT(*) AS n FROM client_milestones m JOIN client_projects p ON p.id = m.project_id WHERE (? IS NULL OR p.status = ?) GROUP BY m.status ORDER BY n DESC`, opt(ctx.f.projectStatus))
-  // Completed projects over time (the completion timestamp, through the zone's midnights).
+  dist('projectsByStatus', `SELECT p.status AS key, COUNT(*) AS n FROM client_projects p WHERE ${sql.status} GROUP BY p.status ORDER BY n DESC`, status, scopedNote(ctx))
+  if (outsideActive(ctx)) section.distributions.push({ id: 'tasksByStatus', total: 0, items: [], filterNote: emptyNote('status_not_active') })
+  else dist('tasksByStatus', `SELECT t.status AS key, COUNT(*) AS n FROM project_tasks t JOIN client_projects p ON p.id = t.project_id WHERE ${sql.activeProject} AND ${sql.status} GROUP BY t.status ORDER BY n DESC`, status, scopedNote(ctx))
+  dist('milestonesByStatus', `SELECT m.status AS key, COUNT(*) AS n FROM client_milestones m JOIN client_projects p ON p.id = m.project_id WHERE ${sql.status} GROUP BY m.status ORDER BY n DESC`, status, scopedNote(ctx))
+  // Completed projects over time (the completion timestamp, through the zone's midnights): events, not filtered by the status a project has today.
   const { granularity, buckets } = bucketsOf(ctx.period, ctx.period.zone)
   const json = JSON.stringify(buckets.map((bucket) => ({ d: bucket.key, s: bucket.fromUtc, e: bucket.toUtc })))
   const done = ctx.db.all<{ day: string; n: number }>(
@@ -148,39 +205,56 @@ export function projectSection(ctx: Ctx): Section {
      SELECT day, COUNT(*) AS n FROM lab WHERE ord = 1 AND day IS NOT NULL GROUP BY day`,
     [json, ctx.period.fromUtc, ctx.period.toUtc],
   )
-  section.series.push({ id: 'completedProjectsSeries', granularity, unit: 'count', points: buckets.map((bucket) => ({ key: bucket.key, from: bucket.from, to: bucket.to, value: done.find((row) => row.day === bucket.key)?.n ?? 0 })) })
-  // Workload (open tasks per active project) and the deadlines of the next two weeks: references and dates only.
-  section.tables.push({
-    id: 'projectWorkload',
-    columns: ['reference', 'status', 'openTasks', 'overdueTasks', 'expectedOn'],
-    rows: ctx.db
-      .all<{ reference: string; status: string; open: number; overdue: number; expected_on: string | null }>(
-        `SELECT p.reference AS reference, p.status AS status,
+  section.series.push(
+    withNote({ id: 'completedProjectsSeries', granularity, unit: 'count' as const, points: buckets.map((bucket) => ({ key: bucket.key, from: bucket.from, to: bucket.to, value: done.find((row) => row.day === bucket.key)?.n ?? 0 })) } satisfies Series, eventNote(ctx)),
+  )
+  // Workload (open tasks per active project) and the deadlines of the next two weeks: active projects, in the selected status; references and dates only.
+  const horizon = addDays(today, 14)
+  const empty = outsideActive(ctx)
+  section.tables.push(
+    withNote(
+      {
+        id: 'projectWorkload',
+        columns: ['reference', 'status', 'openTasks', 'overdueTasks', 'expectedOn'],
+        rows: empty
+          ? []
+          : ctx.db
+              .all<{ reference: string; status: string; open: number; overdue: number; expected_on: string | null }>(
+                `SELECT p.reference AS reference, p.status AS status,
                 SUM(CASE WHEN t.status NOT IN ('completed', 'cancelled') THEN 1 ELSE 0 END) AS open,
                 SUM(CASE WHEN t.status NOT IN ('completed', 'cancelled') AND t.due_on IS NOT NULL AND t.due_on < ? THEN 1 ELSE 0 END) AS overdue,
                 p.expected_on AS expected_on
-           FROM client_projects p LEFT JOIN project_tasks t ON t.project_id = p.id WHERE ${sql.activeProject} AND (? IS NULL OR p.status = ?)
+           FROM client_projects p LEFT JOIN project_tasks t ON t.project_id = p.id WHERE ${sql.activeProject} AND ${sql.status}
           GROUP BY p.id ORDER BY open DESC, p.reference LIMIT 10`,
-        [today, ...opt(ctx.f.projectStatus)],
-      )
-      .map((row) => [row.reference, row.status, row.open ?? 0, row.overdue ?? 0, row.expected_on]),
-  })
-  const horizon = addDays(today, 14)
-  section.tables.push({
-    id: 'upcomingDeadlines',
-    columns: ['kind', 'reference', 'dueOn'],
-    rows: ctx.db
-      .all<{ kind: string; reference: string; due_on: string }>(
-        `SELECT 'milestone' AS kind, p.reference AS reference, m.due_on AS due_on FROM client_milestones m JOIN client_projects p ON p.id = m.project_id
-          WHERE ${sql.activeProject} AND m.completed_at IS NULL AND m.status NOT IN ('completed', 'cancelled') AND m.due_on >= ? AND m.due_on <= ?
+                [today, ...status],
+              )
+              .map((row) => [row.reference, row.status, row.open ?? 0, row.overdue ?? 0, row.expected_on]),
+      },
+      empty ? emptyNote('status_not_active') : scopedNote(ctx),
+    ),
+  )
+  section.tables.push(
+    withNote(
+      {
+        id: 'upcomingDeadlines',
+        columns: ['kind', 'reference', 'dueOn'],
+        rows: empty
+          ? []
+          : ctx.db
+              .all<{ kind: string; reference: string; due_on: string }>(
+                `SELECT 'milestone' AS kind, p.reference AS reference, m.due_on AS due_on FROM client_milestones m JOIN client_projects p ON p.id = m.project_id
+          WHERE ${sql.activeProject} AND ${sql.status} AND m.completed_at IS NULL AND m.status NOT IN ('completed', 'cancelled') AND m.due_on >= ? AND m.due_on <= ?
          UNION ALL
          SELECT 'task', t.reference, t.due_on FROM project_tasks t JOIN client_projects p ON p.id = t.project_id
-          WHERE ${sql.activeProject} AND t.status NOT IN ('completed', 'cancelled') AND t.due_on >= ? AND t.due_on <= ?
+          WHERE ${sql.activeProject} AND ${sql.status} AND t.status NOT IN ('completed', 'cancelled') AND t.due_on >= ? AND t.due_on <= ?
          ORDER BY due_on, reference LIMIT 25`,
-        [today, horizon, today, horizon],
-      )
-      .map((row) => [row.kind, row.reference, row.due_on]),
-  })
+                [...status, today, horizon, ...status, today, horizon],
+              )
+              .map((row) => [row.kind, row.reference, row.due_on]),
+      },
+      empty ? emptyNote('status_not_active') : scopedNote(ctx),
+    ),
+  )
   section.limitations.push('project_history_is_events_only', 'duration_needs_start_date', 'cancellation_time_is_last_update')
   void daysBetween
   return section

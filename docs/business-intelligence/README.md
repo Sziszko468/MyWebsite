@@ -19,6 +19,8 @@ PROMPT 32 · branch `feature/business-intelligence` (base: `feature/ai-admin-ass
 | [PRIVACY.md](PRIVACY.md) | What an analytics answer can and cannot contain |
 | [PERFORMANCE.md](PERFORMANCE.md) | Measured on a synthetic dataset; the one bottleneck found and fixed |
 | [LOCALIZATION.md](LOCALIZATION.md) | Hungarian, English, Dutch: words, numbers, dates |
+| [LOCALIZATION_AUDIT.md](LOCALIZATION_AUDIT.md) | PROMPT 32.1: the four "incomplete" entries (blank on purpose) and the audit of the dashboard's own dictionary, with every correction |
+| [FILTER_SEMANTICS.md](FILTER_SEMANTICS.md) | PROMPT 32.1: what the project status filter does to every figure (filtered, empty by definition, not filtered) and why |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Where the code is and how a request flows |
 | [TEST_RESULTS.md](TEST_RESULTS.md) | What was run and what it showed |
 | [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) | What the owner decides and checks before relying on it |
@@ -36,7 +38,8 @@ A read-only backend module (`server/src/modules/analytics`) computes nine sectio
 5. **Snapshots are not compared with the past.** "Active projects now" has no previous-period value, because no history of it is stored and none is reconstructed from current statuses.
 6. **A funnel is a cohort**: the requests received in the period, followed to wherever they got. Statuses *now* are a separate snapshot and never feed a conversion.
 7. **The assistant reads, it does not compute.** Its three tools return the dashboard's own compact figures; the Haiku 5.5 lock, the permissions re-check and the read-only rule of PROMPT 31 are unchanged.
-8. **The business time zone is the consultations' zone** (booking settings); UTC when none is set. A period is whole local days; daylight-saving days of 23 or 25 hours are handled.
+8. **A selected filter is never silently ignored** (PROMPT 32.1): every figure the project status can touch says whether it was filtered, empty by definition or not filtered (an event of the period, or not about projects); events keep their historical meaning ([FILTER_SEMANTICS.md](FILTER_SEMANTICS.md)).
+9. **The business time zone is the consultations' zone** (booking settings); UTC when none is set. A period is whole local days; daylight-saving days of 23 or 25 hours are handled.
 
 ## Changes against the plan in the data dictionary
 

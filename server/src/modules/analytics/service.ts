@@ -6,7 +6,7 @@ import { CURRENCIES, type Currency } from '../quotes/money.ts'
 import { can } from '../auth/permissions.ts'
 import { aiSection } from './ai.ts'
 import { alertsSection } from './alerts.ts'
-import { emptySection, notPermitted, unavailable, type Filters, type Meta, type Section, type SectionName, SECTIONS } from './model.ts'
+import { emptySection, notPermitted, unavailable, withNote, type Filters, type FilterNote, type Meta, type Section, type SectionName, SECTIONS } from './model.ts'
 import { communicationMetrics, communicationSection, consultationSection, customerSection, flowOf, projectMetrics, projectSection } from './operations.ts'
 import { resolvePeriod, validZone, type Period } from './period.ts'
 import { financialSection, funnelSection, interestDistributions, quoteMetrics, type Ctx } from './quotes.ts'
@@ -111,6 +111,16 @@ function executiveSection(ctx: Ctx, access: Access): Section {
   return section
 }
 
+/**
+ * The project-status filter on a section that is not entirely about projects (the overview): the figures that come from the projects module carry their own note; every other
+ * figure says that it is NOT the selected subset (PROMPT 32.1). Figures the role may not read stay as they are (nothing about them is said).
+ */
+function declareNotProject(section: Section): void {
+  const note: FilterNote = { filter: 'projectStatus', effect: 'not_applied', reason: 'not_project_data' }
+  section.metrics = section.metrics.map((m) => (m.filterNote || m.state === 'not_permitted' ? m : withNote(m, note)))
+  section.money = section.money.map((m) => (m.filterNote || m.state === 'not_permitted' ? m : withNote(m, note)))
+}
+
 const notAllowed = (name: SectionName): Section => ({ ...emptySection(name, 'not_permitted'), limitations: ['not_permitted'] })
 
 /** One section for this administrator and these filters. */
@@ -151,6 +161,12 @@ export function buildSectionFor(app: AppContext, access: Access, name: SectionNa
     case 'alerts':
       section = access.requests || access.clients ? alertsSection(ctx, { requests: access.requests, clients: access.clients }) : notAllowed(name)
       break
+  }
+  const selected = filters.projectStatus
+  if (selected !== null && section.state !== 'not_permitted') {
+    if (name === 'executive') declareNotProject(section)
+    if (name === 'executive' || name === 'projects') section.filterSummary = { projectStatus: { status: selected, effect: 'partial' } }
+    else if (name !== 'alerts') section.filterSummary = { projectStatus: { status: selected, effect: 'not_applicable' } }
   }
   return { meta: metaOf(app, period), filters, section }
 }

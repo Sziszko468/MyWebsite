@@ -25,7 +25,7 @@ interface TableData {
   rows: string[][]
 }
 
-function Frame({ title, description, total, legend, table, children }: { title: string; description?: string; total?: string; legend?: ReactNode; table?: TableData; children: ReactNode }) {
+function Frame({ title, description, note, total, legend, table, children }: { title: string; description?: string; note?: ReactNode; total?: string; legend?: ReactNode; table?: TableData; children: ReactNode }) {
   const id = useId()
   const t = useAnalyticsText()
   return (
@@ -41,6 +41,7 @@ function Frame({ title, description, total, legend, table, children }: { title: 
           {description}
         </p>
       )}
+      {note}
       {children}
       {legend}
       {table && (
@@ -72,10 +73,10 @@ function Frame({ title, description, total, legend, table, children }: { title: 
   )
 }
 
-function Empty({ title, description }: { title: string; description?: string }) {
+function Empty({ title, description, note }: { title: string; description?: string; note?: ReactNode }) {
   const t = useAnalyticsText()
   return (
-    <Frame title={title} description={description}>
+    <Frame title={title} description={description} note={note}>
       <p className={styles.chartEmpty}>{t.charts.noData}</p>
     </Frame>
   )
@@ -116,6 +117,8 @@ function axisLabels(labels: readonly string[]) {
 interface SeriesChartProps {
   title: string
   description?: string
+  /** What the project status filter did to this chart (only when one is selected). */
+  note?: ReactNode
   /** One label per period, in order. */
   labels: string[]
   series: ChartSeries[]
@@ -141,15 +144,15 @@ function peakOf(values: number[][], stacked: boolean): number {
 /** A line per series over the periods (values of one unit: the chart never mixes units, and money in two currencies is two charts). */
 export function LineChart(props: SeriesChartProps) {
   const t = useAnalyticsText()
-  const { title, description, labels, series, format } = props
+  const { title, description, note, labels, series, format } = props
   const peak = peakOf(series.map((item) => item.values), false)
-  if (labels.length === 0 || peak === 0) return <Empty title={title} description={description} />
+  if (labels.length === 0 || peak === 0) return <Empty title={title} description={description} note={note} />
   const x = (index: number) => PAD.left + (labels.length === 1 ? INNER_W / 2 : (index / (labels.length - 1)) * INNER_W)
   const y = (value: number) => PAD.top + INNER_H - (value / peak) * INNER_H
   const total = series.length === 1 ? series[0].values.reduce((sum, value) => sum + value, 0) : null
   const summary = `${title}: ${labels[0]} – ${labels[labels.length - 1]} · ${t.charts.peak} ${format(peak)}`
   return (
-    <Frame title={title} description={description} total={total === null ? undefined : `${t.charts.total}: ${format(total)}`} legend={series.length > 1 ? <Legend items={series} /> : undefined} table={tableOf(props, t)}>
+    <Frame title={title} description={description} note={note} total={total === null ? undefined : `${t.charts.total}: ${format(total)}`} legend={series.length > 1 ? <Legend items={series} /> : undefined} table={tableOf(props, t)}>
       <svg className={styles.chartSvg} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={summary} focusable="false">
         {[0, 0.5, 1].map((share) => (
           <line key={share} x1={PAD.left} x2={W - PAD.right} y1={PAD.top + INNER_H * (1 - share)} y2={PAD.top + INNER_H * (1 - share)} className={share === 0 ? styles.axis : styles.grid} />
@@ -177,16 +180,16 @@ export function LineChart(props: SeriesChartProps) {
 /** Bars per period: one group of bars per period (`grouped`), or the series stacked into one bar (`stacked`: for parts of a whole). */
 export function BarChart(props: SeriesChartProps & { mode: 'grouped' | 'stacked' }) {
   const t = useAnalyticsText()
-  const { title, description, labels, series, format, mode } = props
+  const { title, description, note, labels, series, format, mode } = props
   const peak = peakOf(series.map((item) => item.values), mode === 'stacked')
-  if (labels.length === 0 || peak === 0) return <Empty title={title} description={description} />
+  if (labels.length === 0 || peak === 0) return <Empty title={title} description={description} note={note} />
   const slot = INNER_W / labels.length
   const bar = Math.max(1, (slot * 0.74) / (mode === 'grouped' ? series.length : 1))
   const scale = INNER_H / peak
   const total = series.length === 1 ? series[0].values.reduce((sum, value) => sum + value, 0) : null
   const summary = `${title}: ${labels[0]} – ${labels[labels.length - 1]} · ${t.charts.peak} ${format(peak)}`
   return (
-    <Frame title={title} description={description} total={total === null ? undefined : `${t.charts.total}: ${format(total)}`} legend={<Legend items={series} />} table={tableOf(props, t)}>
+    <Frame title={title} description={description} note={note} total={total === null ? undefined : `${t.charts.total}: ${format(total)}`} legend={<Legend items={series} />} table={tableOf(props, t)}>
       <svg className={styles.chartSvg} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={summary} focusable="false">
         {[0, 0.5, 1].map((share) => (
           <line key={share} x1={PAD.left} x2={W - PAD.right} y1={PAD.top + INNER_H * (1 - share)} y2={PAD.top + INNER_H * (1 - share)} className={share === 0 ? styles.axis : styles.grid} />
@@ -225,10 +228,10 @@ export interface Slice {
 }
 
 /** A ring for the parts of one whole. Each part is written in the legend with its count and its share, so the colour is never the only way to tell them apart. */
-export function DonutChart({ title, description, items, format, share }: { title: string; description?: string; items: Slice[]; format: (value: number) => string; share: (fraction: number) => string }) {
+export function DonutChart({ title, description, note, items, format, share }: { title: string; description?: string; note?: ReactNode; items: Slice[]; format: (value: number) => string; share: (fraction: number) => string }) {
   const t = useAnalyticsText()
   const total = items.reduce((sum, item) => sum + item.value, 0)
-  if (items.length === 0 || total === 0) return <Empty title={title} description={description} />
+  if (items.length === 0 || total === 0) return <Empty title={title} description={description} note={note} />
   const radius = 40
   const circumference = 2 * Math.PI * radius
   const tone = (index: number): Tone => (index % 6) as Tone
@@ -239,6 +242,7 @@ export function DonutChart({ title, description, items, format, share }: { title
     <Frame
       title={title}
       description={description}
+      note={note}
       total={`${t.charts.total}: ${format(total)}`}
       legend={<Legend items={items.map((item, index) => ({ label: item.label, tone: tone(index), value: `${format(item.value)} · ${share(item.value / total)}` }))} />}
       table={{ head: [title, t.charts.value, t.charts.share], rows: items.map((item) => [item.label, format(item.value), share(item.value / total)]) }}
@@ -267,12 +271,12 @@ export interface BarItem {
 }
 
 /** Horizontal bars for independent counts (a request can ask for several services, a customer can be in several segments): each bar is its own count against the largest. */
-export function BarList({ title, description, items, format }: { title: string; description?: string; items: BarItem[]; format: (value: number) => string }) {
+export function BarList({ title, description, note, items, format }: { title: string; description?: string; note?: ReactNode; items: BarItem[]; format: (value: number) => string }) {
   const t = useAnalyticsText()
   const peak = Math.max(0, ...items.map((item) => item.value))
-  if (items.length === 0 || peak === 0) return <Empty title={title} description={description} />
+  if (items.length === 0 || peak === 0) return <Empty title={title} description={description} note={note} />
   return (
-    <Frame title={title} description={description} table={{ head: [title, t.charts.value], rows: items.map((item) => [item.label, format(item.value)]) }}>
+    <Frame title={title} description={description} note={note} table={{ head: [title, t.charts.value], rows: items.map((item) => [item.label, format(item.value)]) }}>
       <ul className={styles.barList}>
         {items.map((item) => (
           <li key={item.label} className={styles.barRow}>
@@ -297,12 +301,12 @@ export interface FunnelStep {
 }
 
 /** The funnel: one bar per stage, each as wide as its count against the first stage, with its own conversion written out. */
-export function FunnelChart({ title, description, steps, format }: { title: string; description?: string; steps: FunnelStep[]; format: (value: number) => string }) {
+export function FunnelChart({ title, description, note, steps, format }: { title: string; description?: string; note?: ReactNode; steps: FunnelStep[]; format: (value: number) => string }) {
   const t = useAnalyticsText()
   const first = steps[0]?.count ?? 0
-  if (steps.length === 0 || first === 0) return <Empty title={title} description={description} />
+  if (steps.length === 0 || first === 0) return <Empty title={title} description={description} note={note} />
   return (
-    <Frame title={title} description={description} table={{ head: [title, t.charts.value], rows: steps.map((step) => [step.label, format(step.count)]) }}>
+    <Frame title={title} description={description} note={note} table={{ head: [title, t.charts.value], rows: steps.map((step) => [step.label, format(step.count)]) }}>
       <ol className={styles.funnel}>
         {steps.map((step) => (
           <li key={step.label} className={styles.funnelRow}>

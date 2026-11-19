@@ -1,12 +1,13 @@
+import { createContext, useContext } from 'react'
 import { Link } from 'react-router'
 import { cx } from '../../utils/cx'
-import type { Metric, MoneyMetric, Series } from '../api/analytics'
+import type { FilterNote, Metric, MoneyMetric, Series } from '../api/analytics'
 import { Icon } from '../components/Icon'
 import { fill } from '../i18n'
 import type { AnalyticsText } from '../i18n/analytics'
 import styles from '../styles/analytics.module.scss'
 import { Sparkline } from './Charts'
-import { formatCount, formatDays, formatHours, formatMoney, formatPercent, formatUsd, humanize } from './format'
+import { formatCount, formatDays, formatHours, formatMoney, formatPercent, formatUsd, humanize, word } from './format'
 import { directionOf, unitOf, type Unit } from './model'
 import { useAnalyticsLanguage, useAnalyticsText } from './text'
 
@@ -36,6 +37,27 @@ export function formatValue(unit: Unit, value: number, language: Language): stri
 const dictionary = (t: AnalyticsText, id: string, group: 'metrics' | 'moneyMetrics'): { label: string; help: string } => (t[group] as Record<string, { label: string; help: string }>)[id] ?? { label: humanize(id), help: '' }
 
 export const reasonText = (t: AnalyticsText, code: string | null): string => (code ? ((t.reasons as Record<string, string>)[code] ?? humanize(code)) : '')
+
+/** The project status the section is filtered by, for the notes of the figures; null when none is selected. */
+export const ScopeStatus = createContext<string | null>(null)
+
+/**
+ * What the selected project status did to ONE figure, in words: filtered (and by which status), not filtered (and why: an event of the period, or not about projects) or empty by
+ * definition. A figure is never left looking filtered when it is not. Nothing is shown when no status is selected.
+ */
+export function ScopeNote({ note }: { note: FilterNote | undefined }) {
+  const t = useAnalyticsText()
+  const status = useContext(ScopeStatus)
+  if (!note) return null
+  const reason = note.reason ? ((t.scope.reasons as Record<string, string>)[note.reason] ?? humanize(note.reason)) : null
+  return (
+    <p className={styles.scope} data-effect={note.effect}>
+      <span className={styles.scopeBadge}>{t.scope.badge[note.effect]}</span>
+      {note.effect === 'applied' && status !== null && <span>{fill(t.scope.applied, { status: word(t.keys as Record<string, string>, status) })}</span>}
+      {note.effect === 'not_applied' && reason && <span>{reason}</span>}
+    </p>
+  )
+}
 
 function KindBadge({ kind }: { kind: Metric['kind'] }) {
   const t = useAnalyticsText()
@@ -108,6 +130,7 @@ export function KpiCard({ metric, trend }: { metric: Metric; trend?: Series | nu
         ) : (
           <Unavailable reason={metric.reason} state={metric.state === 'not_permitted' ? 'not_permitted' : 'unavailable'} />
         )}
+        <ScopeNote note={metric.filterNote} />
         <Definition help={help} />
         {available && metric.drill && (
           <Link className={styles.drill} to={metric.drill}>
@@ -153,6 +176,7 @@ export function MoneyCard({ metric }: { metric: MoneyMetric }) {
         )}
         {available && metric.withoutAmount > 0 && <p className={styles.kpiNote}>{fill(t.kpi.withoutAmount, { count: metric.withoutAmount })}</p>}
         {available && metric.comparison === 'snapshot' && <p className={styles.kpiNote}>{t.kpi.snapshot}</p>}
+        <ScopeNote note={metric.filterNote} />
         <Definition help={help} />
         {available && metric.drill && (
           <Link className={styles.drill} to={metric.drill}>

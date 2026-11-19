@@ -119,7 +119,8 @@ afterAll(async () => {
 })
 
 describe('every section answers, for every period, with the facts it was given', () => {
-  it('answers all nine sections for all ten presets with a custom range, in one shape', async () => {
+  // 90 requests through the real server: a little under 5 s on a quiet machine, so the default timeout is too tight for a loaded one (the full suite runs 160 files at once).
+  it('answers all nine sections for all ten presets with a custom range, in one shape', { timeout: 60_000 }, async () => {
     for (const name of SECTIONS) {
       for (const preset of ['today', 'yesterday', 'last_7_days', 'last_30_days', 'last_90_days', 'this_month', 'previous_month', 'this_year', 'previous_year', 'period=custom&from=2026-10-01&to=2026-11-30']) {
         const reply = await api('owner', preset.startsWith('period') ? preset : `period=${preset}`, name)

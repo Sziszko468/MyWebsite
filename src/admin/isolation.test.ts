@@ -50,7 +50,9 @@ describe('the administration takes only the shared parts of the website', () => 
   )
 
   it('every import that leaves src/admin is one of the shared parts', () => {
-    expect(leaving.filter(({ path }) => !SHARED.some((pattern) => pattern.test(path))).map(({ file, spec }) => `${file} → ${spec}`)).toEqual([])
+    // One narrow exception, for TESTS only (a test is never bundled): the language-quality rules of the platform may be run over the administration's own dictionaries.
+    const testOnly = ({ file, path }: { file: string; path: string }) => file.endsWith('.test.ts') && /^i18n\/quality\/(rules|allowances)$/.test(path)
+    expect(leaving.filter((item) => !SHARED.some((pattern) => pattern.test(item.path)) && !testOnly(item)).map(({ file, spec }) => `${file} → ${spec}`)).toEqual([])
   })
 
   it('so it never reaches the website’s pages, the lab, the shop, the analytics or three.js', () => {

@@ -29,7 +29,7 @@ That is far beyond what one studio produces in years; it is a scale test, not a 
 | AI | 36 | 133 | 305 |
 | alerts | 27 | 28 | 28 |
 
-CSV rendering of the five-year financial section: 1 ms. The test asserts generous ceilings (1.5 s / 2.5 s / 4 s per section) that catch an accidental full-table scan or a quadratic join, not a 20 % change; the numbers above are the recorded run.
+CSV rendering of the five-year financial section: 1–2 ms. **The test asserts the CPU time** (user + system, of the test's own process) of each synchronous section build, so a loaded machine (the full suite runs 160 files at once) cannot make it fail, and prints the wall-clock time beside it (on a quiet machine the two agree to a few percent; the 150,000-message communication section: 750 / 1,047 / 1,687 ms CPU for 30 days / a year / five years in the last run). It asserts generous ceilings (1.5 s / 2.5 s / 4 s per section) that catch an accidental full-table scan or a quadratic join, not a 20 % change; the numbers above are the recorded run.
 
 **Correctness at this size** is checked too: the accepted value per currency and the funnel's first and "sent" stages equal direct `COUNT`/`SUM` queries on the stored rows.
 

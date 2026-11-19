@@ -29,6 +29,10 @@ A section the role may not read is returned as `state: "not_permitted"` with **n
 
 Both are read-only. There is no state change, so there is no CSRF-protected write; the session cookie is `HttpOnly; SameSite=Strict` like the rest of the administration, and a cross-site page cannot read the response. Responses are `private, no-store` and `noindex`.
 
+## The project status filter and authorization
+
+A filter or an address parameter never widens what a role may read: a section the role may not read is `not_permitted` with no figure and **no filter summary** whatever filter is asked, a figure the role may not read in the overview stays `not_permitted` with no note, the CSV of such a section is `403`, and the assistant's analytics tools have no project-status input at all (a strict schema rejects it). See [FILTER_SEMANTICS.md](FILTER_SEMANTICS.md).
+
 ## Input handling
 
 * Parameters are whitelisted (`section`, `period`, `from`, `to`, `currency`, `language`, `service`, `package`, `projectStatus`, `quoteStatus`, `consultationStatus`, `lang`, `report`); an unknown one is a 422 naming it. Values are matched against fixed lists (statuses, currencies, languages, presets) or a slug pattern (`service`, `package`); dates must be real calendar days within limits.

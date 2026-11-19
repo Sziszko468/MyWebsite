@@ -27,16 +27,24 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // The measured times are printed (and written where ANALYTICS_PERFORMANCE_OUT says, for the documentation); nothing is written into the repository by default.
-  console.log(`analytics performance (synthetic, ms): ${JSON.stringify({ rows: N, timingsMs: timings })}`)
-  if (process.env.ANALYTICS_PERFORMANCE_OUT) writeFileSync(process.env.ANALYTICS_PERFORMANCE_OUT, JSON.stringify({ rows: N, timingsMs: timings }, null, 2))
+  console.log(`analytics performance (synthetic; cpu ms, and wall-clock ms): ${JSON.stringify({ rows: N, cpuMs: timings, wallMs: wall })}`)
+  if (process.env.ANALYTICS_PERFORMANCE_OUT) writeFileSync(process.env.ANALYTICS_PERFORMANCE_OUT, JSON.stringify({ rows: N, cpuMs: timings, wallMs: wall }, null, 2))
   await s.close()
 })
 
 const session = () => ({ userId: 'x', email: 'x', role: 'admin', csrfToken: '', tokenHash: '' }) as never
+/**
+ * The time of a section is its CPU time (user + system, of this test's own process): the queries are synchronous, so that is the work they cost, and it does not grow when 160 other
+ * test files share the machine (a wall-clock ceiling did, and a loaded run once failed on a section that takes 0.8 s alone). The wall-clock time is printed beside it.
+ */
+const wall: Record<string, number> = {}
 const run = (name: SectionName, query: string) => {
+  const cpuStart = process.cpuUsage()
   const started = performance.now()
   const built = buildSection(s.app.context, session(), name, new URLSearchParams(query))
-  const ms = Math.round(performance.now() - started)
+  wall[`${name} ${query}`] = Math.round(performance.now() - started)
+  const used = process.cpuUsage(cpuStart)
+  const ms = Math.round((used.user + used.system) / 1000)
   timings[`${name} ${query}`] = ms
   return { built, ms }
 }

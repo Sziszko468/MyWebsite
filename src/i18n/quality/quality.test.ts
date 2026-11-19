@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { allowances } from './allowances'
+import { allowances, blankOnPurposeReasons } from './allowances'
 import { scanHardcoded } from './hardcoded'
 import { buildInventory } from './inventory'
 import { checkEntry, noAllowances, numbersOf, placeholdersOf } from './rules'
@@ -49,6 +49,14 @@ describe('the rules', () => {
 
   it('leaves a field that is blank in every language alone', () => {
     expect(rules(entry('', '', ''))).toEqual([])
+  })
+
+  it('wants a text that is blank in every language to be listed as blank on purpose, with its reason, when the allowances are given', () => {
+    const blank = entry('', '', '', 'content/somewhere.ts#forgotten.text')
+    expect(checkEntry(blank, allowances).map((finding) => finding.rule)).toEqual(['blank'])
+    expect(checkEntry(blank, { ...noAllowances, blankOnPurpose: () => true })).toEqual([])
+    // A text that is blank in only some of the languages is a translation gap whatever the list says.
+    expect(checkEntry(entry('a', '', 'c'), { ...noAllowances, blankOnPurpose: () => true }).map((finding) => finding.rule)).toContain('empty')
   })
 
   it('compares placeholders and numbers across languages', () => {
@@ -117,6 +125,17 @@ describe('the website’s own texts', () => {
     expect(inventory.entries.length).toBeGreaterThan(2000)
     const errors = inventory.entries.flatMap((text) => checkEntry(text, allowances)).filter((finding) => finding.severity === 'error')
     expect(errors.map((finding) => `${finding.rule} ${finding.id} ${finding.lang ?? ''}: ${finding.message}`)).toEqual([])
+  })
+
+  it('has exactly the four texts that are blank in every language, each documented with its reason (4221 of 4225 are "complete": the other four are blank on purpose, not missing)', async () => {
+    const inventory = await buildInventory()
+    const blank = inventory.entries.filter((text) => (['hu', 'en', 'nl'] as const).every((lang) => typeof text.texts[lang] === 'string' && text.texts[lang]!.trim() === ''))
+    expect(blank.map((text) => text.id).sort()).toEqual(blankOnPurposeReasons.map((item) => item.id).sort())
+    for (const item of blankOnPurposeReasons) expect(item.reason.length, item.id).toBeGreaterThan(60)
+    // Nothing is blank in only some of the languages.
+    const partly = inventory.entries.filter((text) => (['hu', 'en', 'nl'] as const).some((lang) => (text.texts[lang] ?? '').trim() === '') && !blank.includes(text))
+    expect(partly.map((text) => text.id)).toEqual([])
+    expect(inventory.entries.length - blank.length).toBe(inventory.entries.filter((text) => (['hu', 'en', 'nl'] as const).every((lang) => typeof text.texts[lang] === 'string' && text.texts[lang]!.trim() !== '')).length)
   })
 
   it('reads every file that writes texts with tri() (a new content file must be added to the inventory on purpose)', async () => {

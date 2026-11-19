@@ -24,6 +24,8 @@ const THEMES = arg('themes', 'dark,light').split(',')
 const LANGS = arg('langs', 'en,hu,nl').split(',')
 const SECTIONS = arg('sections', 'executive,financial,customers,funnel,projects,consultations,communication,ai,alerts').split(',')
 const OUT = arg('out', '')
+// An extra query string for every view (PROMPT 32.1), for example `--extra=projectStatus=development`: the notes the project status filter adds are laid out and checked like everything else.
+const EXTRA = arg('extra', '')
 if (!EMAIL || !PASSWORD) {
   console.error('Give --email and --password (or ADMIN_EMAIL and ADMIN_PASSWORD) of an administrator in a throw-away database.')
   process.exit(2)
@@ -134,7 +136,8 @@ function content(page) {
         for (const section of SECTIONS) {
           const view = `${tag} ${section}`
           errors.length = 0
-          await page.goto(`${BASE}/admin/analytics${section === 'executive' ? '' : `?section=${section}`}`, { waitUntil: 'domcontentloaded' })
+          const query = [section === 'executive' ? '' : `section=${section}`, EXTRA].filter(Boolean).join('&')
+          await page.goto(`${BASE}/admin/analytics${query ? `?${query}` : ''}`, { waitUntil: 'domcontentloaded' })
           await settle(page)
           checked += 1
           const m = await measure(page)

@@ -23,6 +23,7 @@ const ORDER = { high: 0, medium: 1, low: 2 } as const
 const TOTAL = 100
 const LIMIT = 25
 const sql = {
+  status: '(? IS NULL OR p.status = ?)',
   live: "c.kind = 'thread' AND c.status IN ('open', 'waiting_owner', 'waiting_customer') AND c.archived_at IS NULL",
   active: "p.status NOT IN ('completed', 'cancelled')",
 }
@@ -35,21 +36,24 @@ export function alertsSection(ctx: Ctx, allowed: { requests: boolean; clients: b
     if (!found.has(id)) found.set(id, { id, ...alert })
   }
   const today = ctx.period.today
+  // The selected project status (PROMPT 32.1) scopes the alerts ABOUT PROJECTS to projects whose current status it is; the other alerts are not about projects and are not filtered.
+  const selected = ctx.f.projectStatus
+  const status: Array<string | null> = [selected, selected]
   const ago = (days: number) => new Date(ctx.now.getTime() - days * 86_400_000).toISOString()
   const left: string[] = []
 
   if (allowed.clients) {
     for (const row of ctx.db.all<{ pid: string; reference: string; due_on: string }>(
       `SELECT p.id AS pid, p.reference AS reference, MIN(m.due_on) AS due_on FROM client_milestones m JOIN client_projects p ON p.id = m.project_id
-        WHERE ${sql.active} AND m.completed_at IS NULL AND m.status NOT IN ('completed', 'cancelled') AND m.due_on IS NOT NULL AND m.due_on < ? GROUP BY p.id ORDER BY due_on LIMIT ?`,
-      [today, LIMIT],
+        WHERE ${sql.active} AND m.completed_at IS NULL AND m.status NOT IN ('completed', 'cancelled') AND m.due_on IS NOT NULL AND m.due_on < ? AND ${sql.status} GROUP BY p.id ORDER BY due_on LIMIT ?`,
+      [today, ...status, LIMIT],
     ))
       add({ kind: 'overdue_milestone', severity: 'high', reason: 'milestone_past_due', reference: row.reference, date: row.due_on, nextAction: 'review_project_schedule', path: `/client-projects/${row.pid}/work` })
-    for (const row of ctx.db.all<{ pid: string; reference: string; updated_at: string }>("SELECT p.id AS pid, p.reference AS reference, p.updated_at AS updated_at FROM client_projects p WHERE p.status = 'on_hold' ORDER BY p.updated_at LIMIT ?", [LIMIT]))
+    for (const row of ctx.db.all<{ pid: string; reference: string; updated_at: string }>(`SELECT p.id AS pid, p.reference AS reference, p.updated_at AS updated_at FROM client_projects p WHERE p.status = 'on_hold' AND ${sql.status} ORDER BY p.updated_at LIMIT ?`, [...status, LIMIT]))
       add({ kind: 'project_on_hold', severity: 'medium', reason: 'project_is_on_hold', reference: row.reference, date: row.updated_at, nextAction: 'decide_about_held_project', path: `/client-projects/${row.pid}` })
     for (const row of ctx.db.all<{ pid: string; reference: string; updated_at: string }>(
-      `SELECT p.id AS pid, t.reference AS reference, t.updated_at AS updated_at FROM project_tasks t JOIN client_projects p ON p.id = t.project_id WHERE ${sql.active} AND t.status = 'blocked' ORDER BY t.updated_at LIMIT ?`,
-      [LIMIT],
+      `SELECT p.id AS pid, t.reference AS reference, t.updated_at AS updated_at FROM project_tasks t JOIN client_projects p ON p.id = t.project_id WHERE ${sql.active} AND t.status = 'blocked' AND ${sql.status} ORDER BY t.updated_at LIMIT ?`,
+      [...status, LIMIT],
     ))
       add({ kind: 'blocked_task', severity: 'high', reason: 'task_is_blocked', reference: row.reference, date: row.updated_at, nextAction: 'unblock_the_task', path: `/client-projects/${row.pid}/work` })
     for (const row of ctx.db.all<{ reference: string; at: string }>(
@@ -64,8 +68,8 @@ export function alertsSection(ctx: Ctx, allowed: { requests: boolean; clients: b
       add({ kind: 'unanswered_customer_message', severity: row.at < ago(4) ? 'high' : 'medium', reason: 'customer_waiting_two_days', reference: row.reference, date: row.at, nextAction: 'reply_to_the_customer', path: `/communications/${row.reference}` })
     for (const row of ctx.db.all<{ pid: string; reference: string; requested_at: string }>(
       `SELECT d.project_id AS pid, d.reference AS reference, ap.requested_at AS requested_at FROM deliverable_approvals ap JOIN deliverables d ON d.id = ap.deliverable_id JOIN client_projects p ON p.id = d.project_id
-        WHERE ap.state = 'requested' AND ap.requested_at < ? AND ${sql.active} ORDER BY ap.requested_at LIMIT ?`,
-      [ago(7), LIMIT],
+        WHERE ap.state = 'requested' AND ap.requested_at < ? AND ${sql.active} AND ${sql.status} ORDER BY ap.requested_at LIMIT ?`,
+      [ago(7), ...status, LIMIT],
     ))
       add({ kind: 'pending_customer_approval', severity: 'low', reason: 'approval_unanswered_a_week', reference: row.reference, date: row.requested_at, nextAction: 'remind_the_customer', path: `/client-projects/${row.pid}` })
   } else left.push('projects_and_communication')
@@ -91,6 +95,7 @@ export function alertsSection(ctx: Ctx, allowed: { requests: boolean; clients: b
   const list = [...found.values()].sort((a, b) => ORDER[a.severity] - ORDER[b.severity] || a.date.localeCompare(b.date)).slice(0, TOTAL)
   section.extra = { items: list, leftOut: left, truncated: found.size > TOTAL }
   section.distributions.push({ id: 'alertsBySeverity', total: list.length, items: (['high', 'medium', 'low'] as const).map((key) => ({ key, value: list.filter((item) => item.severity === key).length })) })
+  if (selected !== null) section.filterSummary = { projectStatus: { status: selected, effect: 'partial', appliedKinds: ['overdue_milestone', 'project_on_hold', 'blocked_task', 'pending_customer_approval'], notAppliedKinds: ['unanswered_customer_message', 'quotation_waiting_long', 'request_not_reviewed', 'consultation_requires_attention'] } }
   section.limitations.push('fixed_rules', 'no_status_changes', 'one_alert_per_record_and_kind')
   return section
 }

@@ -7,10 +7,10 @@ import { catalog } from '../api/endpoints'
 import { AdminButton } from '../components/AdminButton'
 import { SelectField, TextField } from '../components/form'
 import { PageHeader, TabPanel, Tabs } from '../components/layout'
-import { EmptyState, ErrorState, LoadingState } from '../components/states'
+import { EmptyState, LoadingState } from '../components/states'
 import { useToast } from '../components/Toast'
 import { printElement } from '../assistant/exporters'
-import { formatDayKey, formatMoment, word } from '../analytics/format'
+import { formatDays, formatDayKey, formatMoment, word } from '../analytics/format'
 import {
   CONSULTATION_STATUS_OPTIONS,
   CURRENCY_OPTIONS,
@@ -20,6 +20,7 @@ import {
   SECTION_FILTERS,
   SLUG,
   canOpen,
+  ignoredFilters,
   queryFor,
   rangeProblem,
   readFilters,
@@ -52,11 +53,18 @@ export function AnalyticsPage() {
     storeLanguage(next)
   }
   const allowed = SECTION_NAMES.filter((name) => canOpen(name, session.can))
-  if (allowed.length === 0) return <ErrorState error={new ApiError(403, 'forbidden', '')} level={1} />
   return (
-    <AnalyticsTextProvider language={language}>
-      <Screen allowed={allowed} language={language} onLanguage={choose} />
-    </AnalyticsTextProvider>
+    <AnalyticsTextProvider language={language}>{allowed.length === 0 ? <NoSection /> : <Screen allowed={allowed} language={language} onLanguage={choose} />}</AnalyticsTextProvider>
+  )
+}
+
+function NoSection() {
+  const t = useAnalyticsText()
+  return (
+    <>
+      <PageHeader title={t.title} lead={t.lead} />
+      <EmptyState icon="alert" title={t.states.noSection} />
+    </>
   )
 }
 
@@ -100,6 +108,7 @@ function FilterBar({ section, filters, onChange, onReset, problem }: { section: 
   const options = (codes: readonly string[]) => codes.map((code) => ({ value: code, label: word(keys, code) }))
   const problemText = problem === 'order' ? t.filters.rangeOrder : problem === 'length' ? fill(t.filters.rangeLength, { days: MAX_CUSTOM_DAYS }) : problem === 'missing' ? t.filters.rangeMissing : null
   const dirty = JSON.stringify(filters) !== JSON.stringify(DEFAULT_FILTERS)
+  const ignored = ignoredFilters(filters, section)
   return (
     <section className={styles.filters} aria-label={t.filters.title}>
       <h2 className={styles.filtersTitle}>{t.filters.title}</h2>
@@ -115,13 +124,21 @@ function FilterBar({ section, filters, onChange, onReset, problem }: { section: 
         {shown.has('language') && <SelectField label={t.filters.language} value={filters.language} onChange={(event) => onChange({ language: event.target.value as FilterState['language'] })} options={[any(t.filters.allLanguages), ...ANALYTICS_LANGUAGES.map((code) => ({ value: code, label: word(keys, code) }))]} compact />}
         {(shown.has('service') || shown.has('package')) && <CatalogFilters filters={filters} onChange={onChange} showService={shown.has('service')} showPackage={shown.has('package')} language={language} />}
         {shown.has('quoteStatus') && <SelectField label={t.filters.quoteStatus} value={filters.quoteStatus} onChange={(event) => onChange({ quoteStatus: event.target.value })} options={[any(t.filters.any), ...options(QUOTATION_STATUS_OPTIONS)]} compact />}
-        {shown.has('projectStatus') && <SelectField label={t.filters.projectStatus} value={filters.projectStatus} onChange={(event) => onChange({ projectStatus: event.target.value })} options={[any(t.filters.any), ...options(PROJECT_STATUS_OPTIONS)]} compact />}
+        {shown.has('projectStatus') && <SelectField label={t.filters.projectStatus} value={filters.projectStatus} onChange={(event) => onChange({ projectStatus: event.target.value })} options={[any(t.filters.any), ...options(PROJECT_STATUS_OPTIONS)]} hint={t.filters.projectStatusHint} compact />}
         {shown.has('consultationStatus') && <SelectField label={t.filters.consultationStatus} value={filters.consultationStatus} onChange={(event) => onChange({ consultationStatus: event.target.value })} options={[any(t.filters.any), ...options(CONSULTATION_STATUS_OPTIONS)]} compact />}
       </div>
       <div className={styles.filterFoot}>
         {problemText && (
           <p className={styles.problem} role="alert">
             {problemText}
+          </p>
+        )}
+        {ignored.length > 0 && (
+          <p className={styles.problem} role="note">
+            {fill(t.filters.ignored, { names: ignored.map((key) => (t.filters as Record<string, string>)[key]).join(', ') })}{' '}
+            <AdminButton variant="text" type="button" onClick={() => onChange(Object.fromEntries(ignored.map((key) => [key, ''])) as Partial<FilterState>)}>
+              {t.filters.clearIgnored}
+            </AdminButton>
           </p>
         )}
         <p className={styles.filterNote}>{t.filters.appliesNote}</p>
@@ -147,6 +164,18 @@ function CatalogFilters({ filters, onChange, showService, showPackage, language 
       {showService && serviceOptions.length > 0 && <SelectField label={t.filters.service} value={filters.service} onChange={(event) => onChange({ service: event.target.value })} options={[{ value: '', label: t.filters.allServices }, ...serviceOptions]} compact />}
       {showPackage && packageOptions.length > 0 && <SelectField label={t.filters.package} value={filters.package} onChange={(event) => onChange({ package: event.target.value })} options={[{ value: '', label: t.filters.allPackages }, ...packageOptions]} compact />}
     </>
+  )
+}
+
+/** A failure in the language of the screen: what happened (no technical detail), and a way to try again. */
+function AnalyticsError({ error, onRetry }: { error: unknown; onRetry: () => void }) {
+  const t = useAnalyticsText()
+  const status = error instanceof ApiError ? error.status : 0
+  const sentence = status === 403 ? t.errors.forbidden : status === 422 ? t.errors.invalid : t.errors.generic
+  return (
+    <EmptyState icon="alert" title={t.states.failedTitle} action={<AdminButton variant="secondary" type="button" onClick={onRetry}>{t.states.retry}</AdminButton>}>
+      {sentence}
+    </EmptyState>
   )
 }
 
@@ -181,7 +210,7 @@ function Results({ section, query }: { section: SectionName; query: ReturnType<t
   }
 
   if (resource.loading || !answer) {
-    return resource.error ? <ErrorState error={resource.error} onRetry={resource.reload} title={t.states.failedTitle} /> : <LoadingState label={t.states.loading} />
+    return resource.error ? <AnalyticsError error={resource.error} onRetry={resource.reload} /> : <LoadingState label={t.states.loading} />
   }
   const { meta } = answer
   const permitted = answer.section.state !== 'not_permitted'
@@ -209,7 +238,7 @@ function Results({ section, query }: { section: SectionName; query: ReturnType<t
         </div>
       </div>
       <ul className={styles.meta} aria-label={t.meta.label}>
-        <li>{fill(t.meta.period, { from: formatDay(meta.period.from, language), to: formatDay(meta.period.to, language), days: meta.period.days })}</li>
+        <li>{fill(t.meta.period, { from: formatDay(meta.period.from, language), to: formatDay(meta.period.to, language), days: formatDays(meta.period.days, language) })}</li>
         <li>{meta.previous ? fill(t.meta.previous, { from: formatDay(meta.previous.from, language), to: formatDay(meta.previous.to, language) }) : t.meta.noPrevious}</li>
         <li>{fill(t.meta.zone, { zone: meta.period.zone })}</li>
         <li>{fill(t.meta.generated, { time: formatMoment(meta.generatedAt, language, meta.period.zone) })}</li>
@@ -219,7 +248,7 @@ function Results({ section, query }: { section: SectionName; query: ReturnType<t
         <div className={styles.printHeader}>
           <p className={styles.printKicker}>{t.print.heading}</p>
           <h2 className={styles.printTitle}>{info.name}</h2>
-          <p>{fill(t.meta.period, { from: formatDay(meta.period.from, language), to: formatDay(meta.period.to, language), days: meta.period.days })}</p>
+          <p>{fill(t.meta.period, { from: formatDay(meta.period.from, language), to: formatDay(meta.period.to, language), days: formatDays(meta.period.days, language) })}</p>
           {meta.previous && <p>{fill(t.meta.previous, { from: formatDay(meta.previous.from, language), to: formatDay(meta.previous.to, language) })}</p>}
           <p>
             {fill(t.meta.zone, { zone: meta.period.zone })} · {fill(t.meta.generated, { time: formatMoment(meta.generatedAt, language, meta.period.zone) })}

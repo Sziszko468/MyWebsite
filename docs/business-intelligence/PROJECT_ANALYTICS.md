@@ -4,6 +4,8 @@ Permissions: projects `clients:read`; consultations `requests:read`; alerts `req
 
 ## Projects
 
+The project-status filter is described figure by figure in [FILTER_SEMANTICS.md](FILTER_SEMANTICS.md) (filtered, empty by definition, or not filtered because the figure counts events of the period).
+
 Source: `client_projects`, `client_milestones`, `project_tasks`, `project_customer_actions`. Filter: project status.
 
 | id | kind | type | meaning |

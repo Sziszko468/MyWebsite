@@ -1,5 +1,55 @@
 # Test results
 
+## PROMPT 32.1 — refinement (project status filter, localization audit)
+
+Branch `feature/business-intelligence-refinement`, base `7756d72` (the pushed `feature/business-intelligence`). Same machine as below (Windows 11, `node:sqlite`, system Chrome through Playwright); nothing was run against production data, no real Anthropic call was made (the model was a scripted model in tests and the local stand-in in the browser checks).
+
+**Commands actually run, and what they showed**
+
+| Command | Result |
+| --- | --- |
+| `npx tsc -b` | clean |
+| `npx oxlint` | clean (0 warnings) |
+| `npm run build` (= `tsc -b` + `i18n:check` + `vite build` + SEO prerender; the backend has no build step: it runs from TypeScript and is type-checked by `tsc -b`) | OK — `i18n:check`: 4,225 texts × 3 languages, 4,221 complete, **4 blank on purpose** (listed), 0 errors, 0 warnings; 103 pages prerendered |
+| `npm run i18n:validate` | OK — 0 errors, 0 warnings, spelling HU / EN / NL: 0 words not found |
+| `npm run check:seo` | OK — 104 files, 82 indexable, 22 noindex |
+| `npm audit` | 0 vulnerabilities |
+| secrets scan of `dist` | no key, token or private key; the one match is still the **name** `ANTHROPIC_API_KEY` in the administration's pre-existing AI settings text |
+| `npx vitest run` (the whole suite, run alone) | **164 files, 3,450 tests, all passed** (≈ 116 s) — see "two timing failures" below |
+| `npx vitest run server/test/analyticsProjectFilter.test.ts` | **18 / 18** (new) |
+| `npx vitest run server/test/analytics.test.ts server/test/analyticsPeriod.test.ts` | 31 + 14 passed (the earlier regressions, unchanged) |
+| `npx vitest run server/test/analyticsPerformance.test.ts` | 12 / 12 |
+| `npx vitest run server/test/aiAdminTools.test.ts server/test/aiAdminApi.test.ts` | 44 + 31 passed (the assistant's analytics reader: permissions, context, no `projectStatus` input) |
+| `npx vitest run src/admin/analytics` | **51 / 51** (was 42; 9 new: filter notes, summaries, plural rules, platform language rules over the dashboard dictionary, administration vocabulary) |
+| `npx vitest run src/admin` | 369 passed, including the isolation tests (one narrow, tests-only exception added: a test inside the administration may run the platform's language rules) |
+| `npx vitest run src/i18n/quality` | 39 passed (two new: an undocumented blank text is an error; the blank texts equal the documented four) |
+| `node tools/e2e/analytics-journey.cjs` (fresh scratch server, synthetic rows) | **16 / 16** (new step: the project status filter), run twice |
+| `node tools/audit/audit-analytics.cjs --extra=projectStatus=development` | **270 views, 0 findings** — 9 sections × 1440 / 1024 / 768 / 390 / 320 × dark / light × hu / en / nl |
+| `node tools/audit/audit-analytics.cjs --extra=projectStatus=completed --sections=executive,projects,alerts,financial --sizes=1440x900,390x844,320x640` | **72 views, 0 findings** (a status outside "active": the "empty by definition" notes) |
+| `node tools/e2e/admin-assistant-journey.cjs` (regression) | **30 / 30** |
+| `python mutate-analytics.py` | see "Mutation checks" below |
+
+The audits check, per view, sideways scrolling, elements outside the viewport, controls under 24 × 24 px, unnamed controls, exactly one `h1`, axe-core WCAG 2.2 A/AA + best practice with the page's real CSP, that the section drew figures and every chart opens its table, no raw key / `undefined` / `NaN`, no console error, and reduced motion (the audits load every page with reduced motion on, and check that nothing animates). Keyboard navigation is covered by the journey (the section tabs with the arrow keys, Home and End; filters are native controls reached with Tab) and by axe; dark and light by the audits.
+
+**Two timing failures in full runs, and what was done**
+
+* The first full run failed one test: the 90-request test of `analytics.test.ts` took 5.08 s against the default 5 s timeout on a loaded machine (it takes ≈ 4 s alone). Its timeout is now explicit (60 s); the assertions are unchanged.
+* The second full run failed one test of `analyticsPerformance.test.ts`: a *wall-clock* ceiling on the communication section (0.8 s alone) was exceeded while 160 other files ran. The test now asserts the **CPU time** of the synchronous queries (load-independent) and prints the wall time beside it; the ceilings are unchanged. The third full run — the one in the table — passed.
+
+**The project-status filter tests** (`analyticsProjectFilter.test.ts`, 18): with no status selected nothing changes and no section, metric, series, breakdown or table carries a note; with *Development* selected the figures about projects as they are now are scoped and say so (active, delayed, overdue milestones, tasks in progress / blocked, customer actions, the milestone completion rate, the breakdowns, the workload and deadline tables); the **events of the period are not reinterpreted** (completed projects 2, tasks completed 1, average duration 23.5 days, the completed-projects series, for every status — including a project completed in the period that is back in development); *On hold* is unavailable for any other status and applied for itself; for *Completed* and *Cancelled* every active-only figure is **unavailable with a reason, never a zero**, the lists are empty with the note, while the milestones, the breakdown by status and the events still answer; the overview follows the filter for its project KPIs and declares every other figure and every money card `not_project_data`, leaves a figure the role may not read untouched, and says nothing for it; the alerts about projects follow the filter (and their references are those of the selected status), the others do not; every other section says the filter does not apply and none of its figures changes; a role without access gets no figure and no summary whatever filter is asked; the API refuses an unknown status, an injection string and a wrong case with a 422, answers the editor the same, refuses the AI section for them; the CSV has the note line, the `[filter-scope]` block (including the alert kinds), no private text, and a `403` for a section the role cannot read; the assistant's analytics tools reject a `projectStatus` input.
+
+**Mutation checks** — `mutate-analytics.py` breaks one rule at a time and requires the tests to fail, then restores the file. 14 new rules for this task (active projects ignore the status; an event reinterpreted by today's status; a status outside "active" giving a zero; an event not marked; non-project figures not declared in the overview; project alerts ignoring the status; the CSV dropping the scope; another section not told; a note not shown; an unused filter dropped silently; the overview not offering the filter; undocumented blank texts allowed; "1 days" back in the dictionary; a different Hungarian word for "on hold"): **14 / 14 caught** on their own run. The **whole script was then re-run** (the 27 rules of PROMPT 32 and the 14 new ones, 41 in all) against the final code: **41 / 41 caught**, every file restored.
+
+**Not verified**
+
+* No production data, no deployment, no live model (as before).
+* The other regression journeys of the platform (discovery, visitor AI, quote lifecycle, portal, booking, communication) were not re-run; the full suite, which includes their tests, passed. The administration-wide audit (`audit-admin.cjs`) was not re-run: nothing in the shared navigation or shell changed in this task (its three known findings on the Media and AI screens are listed in the original results below).
+* Screen readers and a printed sheet on paper were not tried.
+
+---
+
+# PROMPT 32 — the original results
+
 PROMPT 32, branch `feature/business-intelligence`, run on the development machine (Windows 11, Node with the built-in `node:sqlite`, system Chrome through Playwright). Nothing here was run against production data, and no real Anthropic call was made (the model was a scripted model in tests and a local stand-in in the browser checks).
 
 The kinds of evidence are kept apart, as the brief asks:

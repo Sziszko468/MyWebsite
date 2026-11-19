@@ -23,7 +23,7 @@ import type { Finding, Inventory } from './types'
 
 export type Mode = 'check' | 'validate' | 'report'
 
-const CHECK_RULES = new Set(['load', 'missing', 'empty', 'placeholders', 'numbers', 'junk', 'glossary', 'register', 'untranslated', 'length', 'hardcoded', 'foreign', 'locale', 'literal'])
+const CHECK_RULES = new Set(['load', 'missing', 'empty', 'blank', 'placeholders', 'numbers', 'junk', 'glossary', 'register', 'untranslated', 'length', 'hardcoded', 'foreign', 'locale', 'literal'])
 const VALIDATE_RULES = new Set(['encoding', 'diacritics', 'whitespace', 'quotes', 'brackets', 'spelling'])
 
 export interface RunResult {
@@ -116,6 +116,11 @@ export async function run(options: { root: string; mode: Mode; all?: boolean }):
   const lines: string[] = []
   lines.push(`i18n ${mode}: ${inventory.entries.length} texts × ${LANGUAGES.length} languages from ${inventory.sources.length} sources`)
   lines.push(`  complete in all languages: ${complete} of ${inventory.entries.length}`)
+  // The rest are optional texts left blank in every language on purpose (each is documented in allowances.ts and guarded where it is shown): not missing translations.
+  const blank = inventory.entries.filter((entry) => LANGUAGES.every((lang) => typeof entry.texts[lang] === 'string' && entry.texts[lang]!.trim() === ''))
+  lines.push(`  blank on purpose in all languages: ${blank.length} (${blank.map((entry) => entry.id).join('; ') || 'none'})`)
+  const partial = inventory.entries.length - complete - blank.length
+  if (partial > 0) lines.push(`  PARTLY missing or blank: ${partial} (see the findings)`)
   if (mode === 'report') {
     lines.push(`  words: ${LANGUAGES.map((lang) => `${lang.toUpperCase()} ${words[lang]}`).join(', ')}`)
     lines.push('  by area:')

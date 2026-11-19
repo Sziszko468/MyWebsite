@@ -36,7 +36,7 @@ export type FilterKey = 'currency' | 'language' | 'service' | 'package' | 'quote
 
 /** Which filters each section honours (the server ignores a filter a section has no use for; the screen does not offer it). */
 export const SECTION_FILTERS: Record<SectionName, readonly FilterKey[]> = {
-  executive: ['language'],
+  executive: ['language', 'projectStatus'],
   financial: ['currency', 'language', 'service', 'package', 'quoteStatus'],
   customers: ['language'],
   funnel: ['language', 'service', 'package'],
@@ -44,7 +44,13 @@ export const SECTION_FILTERS: Record<SectionName, readonly FilterKey[]> = {
   consultations: ['language', 'consultationStatus'],
   communication: ['language'],
   ai: [],
-  alerts: [],
+  alerts: ['projectStatus'],
+}
+
+/** The filters that are set (in the address) but that this section does not use: the screen says so instead of dropping them silently. */
+export function ignoredFilters(filters: FilterState, section: SectionName): FilterKey[] {
+  const used = new Set<FilterKey>(SECTION_FILTERS[section])
+  return (['currency', 'language', 'service', 'package', 'quoteStatus', 'projectStatus', 'consultationStatus'] as const).filter((key) => filters[key] !== '' && !used.has(key))
 }
 
 export const CURRENCY_OPTIONS: readonly Currency[] = ['EUR', 'HUF']

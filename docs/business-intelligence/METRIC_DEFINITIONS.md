@@ -34,6 +34,10 @@ The identifiers the API, the CSV and the screen's dictionary use. `A` actual (st
 
 See the dedicated documents: [CUSTOMER_ANALYTICS.md](CUSTOMER_ANALYTICS.md), [CONVERSION_FUNNEL.md](CONVERSION_FUNNEL.md), [PROJECT_ANALYTICS.md](PROJECT_ANALYTICS.md) (also consultations and alerts), [COMMUNICATION_ANALYTICS.md](COMMUNICATION_ANALYTICS.md), [AI_USAGE_ANALYTICS.md](AI_USAGE_ANALYTICS.md).
 
+## What a selected project status does to a figure
+
+When a project status is selected, each project-related figure carries `filterNote` (`applied`, `not_applied` with a reason, or `empty_by_definition`), and a section carries `filterSummary`. Events of the period (`completedProjects`, `tasksCompleted`, `averageProjectDurationDays`, `completedProjectsSeries`) are never filtered by today's status. Full table: [FILTER_SEMANTICS.md](FILTER_SEMANTICS.md).
+
 ## The three kinds of "missing"
 
 | What the screen says | `state` | Meaning |

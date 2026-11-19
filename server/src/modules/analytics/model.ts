@@ -28,6 +28,22 @@ export interface Metric {
   reason: string | null
   /** The page of the administration that lists the records behind the number (relative to `/admin`). */
   drill: string | null
+  /** What the selected project status does to this figure (present only when a status is selected). */
+  filterNote?: FilterNote
+}
+
+/**
+ * What a selected filter does to ONE figure (PROMPT 32.1, docs/business-intelligence/FILTER_SEMANTICS.md). It is present only when the filter is selected; with no filter nothing is
+ * added. `applied`: the figure counts only what the filter selects. `empty_by_definition`: the figure is defined for a set the selection lies outside (active projects, projects On
+ * hold), so there is nothing to count: it is `unavailable` with the reason, never a zero. `not_applied`: the figure keeps its own meaning (an event of the period, or data that is not
+ * about projects) and is NOT the selected subset.
+ */
+export type FilterEffect = 'applied' | 'not_applied' | 'empty_by_definition'
+export interface FilterNote {
+  filter: 'projectStatus'
+  effect: FilterEffect
+  /** A code the screen words: `historical_event`, `not_project_data`, `status_not_active`, `status_not_on_hold`; null when the figure is simply filtered. */
+  reason: string | null
 }
 
 const round1 = (value: number): number => Math.round(value * 10) / 10
@@ -65,6 +81,7 @@ export interface MoneyMetric {
   withoutAmount: number
   reason: string | null
   drill: string | null
+  filterNote?: FilterNote
 }
 
 export const moneyUnavailable = (id: string, reason: string): MoneyMetric => ({ id, kind: 'actual', state: 'unavailable', comparison: 'none', lines: [], withoutAmount: 0, reason, drill: null })
@@ -83,6 +100,7 @@ export interface Series {
   unit: 'count' | 'minor' | 'usd' | 'days'
   currency?: Currency
   points: SeriesPoint[]
+  filterNote?: FilterNote
 }
 
 export interface Distribution {
@@ -90,6 +108,24 @@ export interface Distribution {
   total: number
   /** `accepted`: for the interest lists, how many of the requests that asked for it were followed by an accepted quotation. */
   items: Array<{ key: string; value: number; drill?: string | null; accepted?: number }>
+  filterNote?: FilterNote
+}
+
+export interface Table {
+  id: string
+  columns: string[]
+  rows: Array<Array<string | number | null>>
+  filterNote?: FilterNote
+}
+
+/** What the selected project status does to a whole section (present only when a status is selected). */
+export interface FilterSummary {
+  status: string
+  /** `partial`: some figures are filtered and some are not (each says which); `not_applicable`: nothing in this section is about projects. */
+  effect: 'partial' | 'not_applicable'
+  /** For the alerts: which kinds of alert the status filters and which it does not. */
+  appliedKinds?: string[]
+  notAppliedKinds?: string[]
 }
 
 export interface Filters {
@@ -126,10 +162,15 @@ export interface Section {
   money: MoneyMetric[]
   series: Series[]
   distributions: Distribution[]
-  tables: Array<{ id: string; columns: string[]; rows: Array<Array<string | number | null>> }>
+  tables: Table[]
   limitations: string[]
   /** Only some sections add their own shape (the funnel's stages, the alerts' list). */
   extra?: Record<string, unknown>
+  /** What the selected project status does to this section (only when one is selected). */
+  filterSummary?: { projectStatus: FilterSummary }
 }
+
+/** The figure with its note, or untouched when there is no note (no filter selected). */
+export const withNote = <T extends object>(item: T, note: FilterNote | undefined): T => (note ? ({ ...item, filterNote: note } as T) : item)
 
 export const emptySection = (name: SectionName, state: State = 'available'): Section => ({ name, state, metrics: [], money: [], series: [], distributions: [], tables: [], limitations: [] })

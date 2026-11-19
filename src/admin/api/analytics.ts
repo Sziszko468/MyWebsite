@@ -22,6 +22,21 @@ export type State = 'available' | 'unavailable' | 'not_permitted'
 export type Comparison = 'period' | 'snapshot' | 'none'
 export type Currency = 'EUR' | 'HUF'
 
+/** What a selected project status does to ONE figure (only present when a status is selected): `applied`, `not_applied` (an event of the period, or not about projects) or `empty_by_definition`. */
+export type FilterEffect = 'applied' | 'not_applied' | 'empty_by_definition'
+export interface FilterNote {
+  filter: 'projectStatus'
+  effect: FilterEffect
+  reason: string | null
+}
+
+export interface FilterSummary {
+  status: string
+  effect: 'partial' | 'not_applicable'
+  appliedKinds?: string[]
+  notAppliedKinds?: string[]
+}
+
 export interface Metric {
   id: string
   kind: Kind
@@ -34,6 +49,7 @@ export interface Metric {
   reason: string | null
   /** A page of the administration (relative to `/admin`) that lists the records behind the number. */
   drill: string | null
+  filterNote?: FilterNote
 }
 
 export interface MoneyLine {
@@ -54,6 +70,7 @@ export interface MoneyMetric {
   withoutAmount: number
   reason: string | null
   drill: string | null
+  filterNote?: FilterNote
 }
 
 export interface SeriesPoint {
@@ -69,18 +86,21 @@ export interface Series {
   unit: 'count' | 'minor' | 'usd' | 'days'
   currency?: Currency
   points: SeriesPoint[]
+  filterNote?: FilterNote
 }
 
 export interface Distribution {
   id: string
   total: number
   items: Array<{ key: string; value: number; drill?: string | null; accepted?: number }>
+  filterNote?: FilterNote
 }
 
 export interface Table {
   id: string
   columns: string[]
   rows: Array<Array<string | number | null>>
+  filterNote?: FilterNote
 }
 
 export interface FunnelStage {
@@ -111,6 +131,7 @@ export interface Section {
   tables: Table[]
   limitations: string[]
   extra?: { cohort?: { from: string; to: string }; stages?: FunnelStage[]; items?: AlertItem[]; leftOut?: string[]; truncated?: boolean }
+  filterSummary?: { projectStatus: FilterSummary }
 }
 
 export interface Span {

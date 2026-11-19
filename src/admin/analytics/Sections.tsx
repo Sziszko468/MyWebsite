@@ -6,8 +6,8 @@ import { EmptyState } from '../components/states'
 import { fill } from '../i18n'
 import styles from '../styles/analytics.module.scss'
 import { BarChart, BarList, DonutChart, FunnelChart, LineChart, type ChartSeries, type Tone } from './Charts'
-import { formatCount, formatDateOnly, formatDayKey, formatMilliseconds, formatMoney, formatPercent, formatUsd, humanize, word } from './format'
-import { KpiCard, Limitations, MoneyCard } from './Kpi'
+import { formatCount, formatDateOnly, formatDayKey, formatDays, formatMilliseconds, formatMoney, formatPercent, formatUsd, humanize, word } from './format'
+import { KpiCard, Limitations, MoneyCard, ScopeNote, ScopeStatus } from './Kpi'
 import { PART_OF_WHOLE, SERIES_GROUPS, TREND_OF } from './model'
 import { useAnalyticsLanguage, useAnalyticsText } from './text'
 
@@ -45,11 +45,11 @@ function SeriesCharts({ section }: { section: Section }) {
     const values = series.points.map((point) => point.value)
     if (series.unit === 'minor' && series.currency) {
       const currency = series.currency
-      charts.push(<LineChart key={`${series.id}-${currency}`} title={`${info.label} · ${currency}`} description={info.help} labels={labelsOf(series)} series={[{ label: (t.money as Record<string, string>)[currency] ?? currency, values, tone: 0 }]} format={(value) => formatMoney(value, currency, language)} />)
+      charts.push(<LineChart key={`${series.id}-${currency}`} title={`${info.label} · ${currency}`} description={info.help} note={<ScopeNote note={series.filterNote} />} labels={labelsOf(series)} series={[{ label: (t.money as Record<string, string>)[currency] ?? currency, values, tone: 0 }]} format={(value) => formatMoney(value, currency, language)} />)
     } else if (series.unit === 'usd') {
-      charts.push(<LineChart key={series.id} title={info.label} description={info.help} labels={labelsOf(series)} series={[{ label: info.label, values, tone: 0 }]} format={(value) => formatUsd(value, language)} />)
+      charts.push(<LineChart key={series.id} title={info.label} description={info.help} note={<ScopeNote note={series.filterNote} />} labels={labelsOf(series)} series={[{ label: info.label, values, tone: 0 }]} format={(value) => formatUsd(value, language)} />)
     } else {
-      charts.push(<BarChart key={series.id} title={info.label} description={info.help} labels={labelsOf(series)} series={[{ label: info.label, values, tone: 0 }]} mode="grouped" format={(value) => formatCount(value, language)} />)
+      charts.push(<BarChart key={series.id} title={info.label} description={info.help} note={<ScopeNote note={series.filterNote} />} labels={labelsOf(series)} series={[{ label: info.label, values, tone: 0 }]} mode="grouped" format={(value) => formatCount(value, language)} />)
     }
   }
   return charts.length === 0 ? null : <div className={styles.charts}>{charts}</div>
@@ -62,12 +62,13 @@ function DistributionChart({ distribution }: { distribution: Distribution }) {
   const label = (key: string) => (INTEREST.has(distribution.id) ? key : word(t.keys as Record<string, string>, key))
   const count = (value: number) => formatCount(value, language)
   if (PART_OF_WHOLE.has(distribution.id) && distribution.items.length <= 6) {
-    return <DonutChart title={info.label} description={info.help} items={distribution.items.map((item) => ({ label: label(item.key), value: item.value }))} format={count} share={(fraction) => formatPercent(fraction * 100, language)} />
+    return <DonutChart title={info.label} description={info.help} note={<ScopeNote note={distribution.filterNote} />} items={distribution.items.map((item) => ({ label: label(item.key), value: item.value }))} format={count} share={(fraction) => formatPercent(fraction * 100, language)} />
   }
   return (
     <BarList
       title={info.label}
       description={info.help}
+      note={<ScopeNote note={distribution.filterNote} />}
       items={distribution.items.map((item) => ({ label: label(item.key), value: item.value, detail: item.accepted === undefined ? undefined : fill(t.charts.accepted, { count: formatCount(item.accepted, language) }) }))}
       format={count}
     />
@@ -95,6 +96,7 @@ function DataTable({ table }: { table: Table }) {
         {info.label}
       </h3>
       {info.help && <p className={styles.blockHelp}>{info.help}</p>}
+      <ScopeNote note={table.filterNote} />
       <div className={styles.tableScroll} tabIndex={0} role="group" aria-label={info.label}>
         <table>
           <thead>
@@ -136,7 +138,7 @@ function FunnelView({ section }: { section: Section }) {
     notes: [
       ...(stage.conversionFromPrevious === null ? [] : [fill(t.funnel.fromPrevious, { value: formatPercent(stage.conversionFromPrevious, language) })]),
       ...(stage.conversionFromReceived === null ? [] : [fill(t.funnel.fromReceived, { value: formatPercent(stage.conversionFromReceived, language) })]),
-      ...(stage.daysFromPrevious === null ? [] : [fill(t.funnel.daysFromPrevious, { value: formatCount(stage.daysFromPrevious, language) })]),
+      ...(stage.daysFromPrevious === null ? [] : [fill(t.funnel.daysFromPrevious, { value: formatDays(stage.daysFromPrevious, language) })]),
     ],
   }))
   return (
@@ -192,6 +194,22 @@ function AlertsView({ section }: { section: Section }) {
   )
 }
 
+/** What the selected project status does to the section as a whole; for the alerts, which kinds it filters and which it does not. */
+function FilterBanner({ section }: { section: Section }) {
+  const t = useAnalyticsText()
+  const summary = section.filterSummary?.projectStatus
+  if (!summary) return null
+  const status = word(t.keys as Record<string, string>, summary.status)
+  const kinds = (codes: string[]) => codes.map((code) => (t.alerts.kinds as Record<string, string>)[code] ?? humanize(code)).join(', ')
+  return (
+    <div className={styles.scopeBanner} role="note" data-effect={summary.effect}>
+      <p>{fill(summary.effect === 'partial' ? t.scope.summaryPartial : t.scope.summaryNotApplicable, { status })}</p>
+      {summary.appliedKinds && summary.appliedKinds.length > 0 && <p>{fill(t.scope.alertsApplied, { kinds: kinds(summary.appliedKinds) })}</p>}
+      {summary.notAppliedKinds && summary.notAppliedKinds.length > 0 && <p>{fill(t.scope.alertsNotApplied, { kinds: kinds(summary.notAppliedKinds) })}</p>}
+    </div>
+  )
+}
+
 export function SectionView({ answer }: { answer: AnalyticsAnswer }) {
   const t = useAnalyticsText()
   const { section } = answer
@@ -202,7 +220,9 @@ export function SectionView({ answer }: { answer: AnalyticsAnswer }) {
   }
   const alsoCurrency = section.money.some((money) => money.lines.length > 0)
   return (
+    <ScopeStatus value={section.filterSummary?.projectStatus.status ?? null}>
     <div className={styles.sectionBody}>
+      <FilterBanner section={section} />
       {section.metrics.length + section.money.length > 0 && (
         <>
           <ul className={styles.kpis}>
@@ -231,5 +251,6 @@ export function SectionView({ answer }: { answer: AnalyticsAnswer }) {
       ))}
       <Limitations codes={section.limitations} />
     </div>
+    </ScopeStatus>
   )
 }
