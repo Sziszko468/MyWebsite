@@ -54,6 +54,9 @@ export const assistantEn = {
     failed: 'Not available',
     names: {
       getBusinessOverview: 'Business overview',
+      getAnalyticsOverview: 'Business analytics overview',
+      getFinancialAnalytics: 'Financial analytics (by currency)',
+      getFunnelAnalytics: 'Quote conversion funnel',
       getBusinessActivity: 'Recent activity',
       getAdministrativeAlerts: 'Alerts',
       generateDailyBriefing: 'Daily briefing',
@@ -350,6 +353,9 @@ export const assistantHu: AssistantText = {
     failed: 'Nem elérhető',
     names: {
       getBusinessOverview: 'Üzleti áttekintés',
+      getAnalyticsOverview: 'Üzleti analitika áttekintés',
+      getFinancialAnalytics: 'Pénzügyi analitika (pénznemenként)',
+      getFunnelAnalytics: 'Árajánlati tölcsér',
       getBusinessActivity: 'Legutóbbi tevékenység',
       getAdministrativeAlerts: 'Figyelmeztetések',
       generateDailyBriefing: 'Napi összefoglaló',
@@ -644,6 +650,9 @@ export const assistantNl: AssistantText = {
     failed: 'Niet beschikbaar',
     names: {
       getBusinessOverview: 'Bedrijfsoverzicht',
+      getAnalyticsOverview: 'Overzicht bedrijfsanalyse',
+      getFinancialAnalytics: 'Financiële analyse (per valuta)',
+      getFunnelAnalytics: 'Offerte-trechter',
       getBusinessActivity: 'Recente activiteit',
       getAdministrativeAlerts: 'Waarschuwingen',
       generateDailyBriefing: 'Dagelijkse briefing',

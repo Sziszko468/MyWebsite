@@ -79,10 +79,10 @@ afterAll(async () => {
 })
 
 describe('the set of tools', () => {
-  it('is closed: thirty-one tools, named for reading, drafting and reporting, and no others', async () => {
+  it('is closed: thirty-four tools, named for reading, drafting and reporting, and no others', async () => {
     const tools = await k.tools(k.owner, general())
     expect(Object.keys(tools.set).sort()).toEqual([...ADMIN_TOOL_NAMES].sort())
-    expect(ADMIN_TOOL_NAMES).toHaveLength(31)
+    expect(ADMIN_TOOL_NAMES).toHaveLength(34)
     for (const name of ADMIN_TOOL_NAMES) expect(name, name).toMatch(/^(get|search|summarize|compare|prepare|generate|draft|translate)[A-Z]/)
     // No verb that changes something, sends something or decides something.
     for (const name of ADMIN_TOOL_NAMES) expect(name, name).not.toMatch(/(create|update|delete|remove|send|cancel|reschedule|accept|reject|approve|decline|set|change|assign|invite|disable|archive|publish|pay|refund)/i)
@@ -107,6 +107,9 @@ describe('the set of tools', () => {
       ['getBusinessActivity', [{}, { days: 90 }]],
       ['getAdministrativeAlerts', [{}]],
       ['generateDailyBriefing', [{}]],
+      ['getAnalyticsOverview', [{}, { period: 'this_year' }]],
+      ['getFinancialAnalytics', [{}, { period: 'last_90_days', currency: 'EUR' }]],
+      ['getFunnelAnalytics', [{}]],
       ['searchAdminProjects', [{}, { query: 'anna' }]],
       ['getAdminProjectDetails', [{ projectRef: annaProject.reference }]],
       ['summarizeProject', [{ projectRef: annaProject.reference }]],
@@ -291,7 +294,7 @@ describe('context: a reference, never an authorization', () => {
     expect(overview.id).toBe(anna.id)
     expect(overview.projects.map((item: any) => item.reference)).toEqual([annaProject.reference])
     // The business as a whole is not available from here (it would turn a conversation about one person into counts of the others).
-    for (const name of ['getBusinessOverview', 'getBusinessActivity', 'getAdministrativeAlerts', 'generateDailyBriefing']) expect(await tools.call(name as never, {}), name).toMatchObject({ error: 'out_of_context' })
+    for (const name of ['getBusinessOverview', 'getBusinessActivity', 'getAdministrativeAlerts', 'generateDailyBriefing', 'getAnalyticsOverview', 'getFinancialAnalytics', 'getFunnelAnalytics']) expect(await tools.call(name as never, {}), name).toMatchObject({ error: 'out_of_context' })
     expect(await tools.call('generateBusinessReport', { reportKind: 'weekly_business_overview', observations: [], recommendations: [] })).toMatchObject({ error: 'out_of_context' })
     sweep.push(projects, customers, quotes, conversations, bookings, overview, await tools.call('getAdminConversation', {}).catch(() => null))
     expect(text(sweep)).not.toMatch(new RegExp(`${WORDS.bela}|Béla|Garage|${bela.id}|${belaProject.reference}|${belaQuote.reference}|${belaTalk}`))
@@ -807,5 +810,93 @@ describe('conversations: what the assistant may and may not take from them', () 
     const before = read()
     await tools.call('getAdminConversation', { conversationRef: annaTalk })
     expect(read()).toBe(before)
+  })
+})
+
+describe('business analytics: the dashboard\'s own figures, read-only, in the general context', () => {
+  const without = (...denied: string[]) => (role: 'admin' | 'editor', permission: string) => !denied.includes(permission) && can(role, permission as never)
+  const NAMES = ['getAnalyticsOverview', 'getFinancialAnalytics', 'getFunnelAnalytics'] as const
+  const SECTION = { getAnalyticsOverview: 'executive', getFinancialAnalytics: 'financial', getFunnelAnalytics: 'funnel' } as const
+
+  it('gives exactly the figures the dashboard gives (one source of truth), each with its kind, state and period', async () => {
+    const tools = await k.tools(k.owner, general(), { maxToolCalls: 100 })
+    for (const name of NAMES) {
+      const answer = (await tools.call(name, { period: 'last_30_days' })) as any
+      const api = await k.s.api(`/api/admin/analytics?section=${SECTION[name]}&period=last_30_days`, { headers: k.headers.owner })
+      expect(api.status, api.text).toBe(200)
+      const section = api.json.data.section
+      expect(answer, name).toMatchObject({ basis: 'computed_by_the_server_from_stored_records', section: SECTION[name], state: 'available', businessTimeZone: api.json.data.meta.period.zone })
+      expect(answer.period).toMatchObject({ preset: 'last_30_days', from: api.json.data.meta.period.from, to: api.json.data.meta.period.to })
+      expect(answer.metrics.map((m: any) => [m.id, m.value, m.state, m.kind])).toEqual(section.metrics.map((m: any) => [m.id, m.value, m.state, m.kind]))
+      expect(answer.money.map((m: any) => [m.id, m.byCurrency.map((l: any) => [l.currency, l.minorUnits])])).toEqual(section.money.map((m: any) => [m.id, m.lines.map((l: any) => [l.currency, l.minor])]))
+      expect(answer.limitations).toEqual(section.limitations)
+      // The model is told what the figures are and are not.
+      expect(answer.note).toMatch(/NEVER added together/)
+      expect(answer.note).toMatch(/not cash/)
+      expect(answer.note).toMatch(/never zero/)
+    }
+    // Money is never one number across currencies: every money metric lists each currency once.
+    const financial = (await tools.call('getFinancialAnalytics', { period: 'this_year' })) as any
+    for (const metric of financial.money) {
+      const currencies = metric.byCurrency.map((line: any) => line.currency)
+      expect(new Set(currencies).size, metric.id).toBe(currencies.length)
+    }
+    // A recorded revenue is not available: no payment is stored. The assistant is told so, not given a zero.
+    const overview = (await tools.call('getAnalyticsOverview', {})) as any
+    expect(overview.metrics.find((m: any) => m.id === 'recordedRevenue')).toMatchObject({ state: 'unavailable', value: null, reason: 'no_payment_data' })
+  })
+
+  it('takes a preset or a real custom range and a currency, and refuses anything else before it reads', async () => {
+    const tools = await k.tools(k.owner, general(), { maxToolCalls: 100 })
+    const custom = (await tools.call('getFinancialAnalytics', { period: 'custom', fromDay: '2026-10-01', toDay: '2026-10-31', currency: 'EUR' })) as any
+    expect(custom.period).toMatchObject({ preset: 'custom', from: '2026-10-01', to: '2026-10-31', days: 31 })
+    for (const name of NAMES) {
+      // Not a preset, not a date, an unknown currency, an unknown field, SQL in a date.
+      for (const input of [{ period: 'last_year' }, { fromDay: '01/10/2026' }, { toDay: "2026-10-01'; DROP TABLE quotes; --" }, { currency: 'USD' }, { section: 'ai' }, { language: 'hu' }]) {
+        expect(await tools.call(name, input), `${name} ${text(input)}`).toEqual({ schemaRejected: true })
+      }
+      // A range that cannot be: the wrong way round, longer than about five years, a custom period without its dates, a day that does not exist.
+      for (const input of [{ period: 'custom', fromDay: '2026-11-05', toDay: '2026-11-01' }, { period: 'custom', fromDay: '2015-01-01', toDay: '2026-11-01' }, { period: 'custom' }, { period: 'custom', fromDay: '2026-02-30', toDay: '2026-03-01' }]) {
+        expect(await tools.call(name, input), `${name} ${text(input)}`).toMatchObject({ error: 'invalid' })
+      }
+    }
+  })
+
+  it('is for the whole business only: in a conversation about one record it is out of context', async () => {
+    for (const [type, ref] of [['project', annaProject.reference], ['quote', annaQuote.reference], ['conversation', annaTalk]] as const) {
+      const tools = await k.tools(k.owner, inContext(type, ref), { maxToolCalls: 100 })
+      for (const name of NAMES) expect(await tools.call(name, {}), `${name} in ${type}`).toMatchObject({ error: 'out_of_context' })
+    }
+  })
+
+  it('applies the administrator\'s CURRENT permissions: what the role may not read is not available, and never a zero', async () => {
+    const noRequests = await k.tools(k.owner, general(), { policy: without('requests:read'), maxToolCalls: 100 })
+    expect(await noRequests.call('getFinancialAnalytics', {})).toMatchObject({ error: 'not_available' })
+    expect(await noRequests.call('getFunnelAnalytics', {})).toMatchObject({ error: 'not_available' })
+    const partial = (await noRequests.call('getAnalyticsOverview', {})) as any
+    for (const id of ['newQuoteRequests', 'openQuotations', 'acceptedQuotations']) expect(partial.metrics.find((m: any) => m.id === id), id).toMatchObject({ state: 'not_permitted', value: null })
+    expect(partial.metrics.find((m: any) => m.id === 'activeProjects').state).toBe('available')
+    for (const metric of partial.money) expect(metric, metric.id).toMatchObject({ state: 'not_permitted', byCurrency: [] })
+    const noClients = await k.tools(k.owner, general(), { policy: without('clients:read'), maxToolCalls: 100 })
+    const other = (await noClients.call('getAnalyticsOverview', {})) as any
+    for (const id of ['newCustomers', 'activeProjects', 'completedProjects', 'overdueMilestones', 'customerWaitingForAdministrator']) expect(other.metrics.find((m: any) => m.id === id), id).toMatchObject({ state: 'not_permitted', value: null })
+    expect(other.metrics.find((m: any) => m.id === 'newQuoteRequests').state).toBe('available')
+    // Taken away between two calls of one answer: the second is refused.
+    let allowed = true
+    const live = await k.tools(k.owner, general(), { policy: (role, permission) => (permission === 'requests:read' ? allowed : can(role, permission)), maxToolCalls: 100 })
+    expect(await live.call('getFinancialAnalytics', {})).toMatchObject({ basis: 'computed_by_the_server_from_stored_records' })
+    allowed = false
+    expect(await live.call('getFinancialAnalytics', {})).toMatchObject({ error: 'not_available' })
+  })
+
+  it('hands over no customer, no address, no message text and no key: figures and codes only, within the size limit', async () => {
+    const tools = await k.tools(k.owner, general(), { maxToolCalls: 100 })
+    const sweep: unknown[] = []
+    for (const name of NAMES) sweep.push(await tools.call(name, { period: 'custom', fromDay: '2021-12-01', toDay: '2026-11-03' }))
+    const json = text(sweep)
+    expect(json).not.toMatch(/Anna|Kovács|Béla|anna@example\.com|bela@example\.com|@example\.|Garage|Bakery/)
+    expect(json).not.toMatch(new RegExp(`${annaQuote.reference}|${belaQuote.reference}|${annaProject.reference}|${annaTalk}`))
+    expect(json).not.toMatch(/"(password|secret|apiKey|token|cookie|privateNote|internalNote)"/i)
+    expect(json.length / sweep.length).toBeLessThan(24_000)
   })
 })

@@ -1,0 +1,788 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The business analytics screen (PROMPT 32). Colours come from the administration's own tokens (Racing Red, Cobalt Blue, Carbon Black, Warm Paper, Graphite and the working green and
+ * amber), which are checked against both themes; a chart is never told apart by colour alone (the second series is dashed, every value is written beside its swatch and every chart has
+ * its numbers as a table). Nothing here moves, so there is nothing to switch off for reduced motion.
+ */
+
+/* ---- the page ---- */
+
+.filters {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.filtersTitle {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+.filterGrid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+  align-items: end;
+}
+
+.filterFoot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filterNote {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.problem {
+  margin: 0;
+  color: var(--admin-danger);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+.results {
+  --tone-0: var(--color-accent);
+  --tone-1: var(--color-secondary);
+  --tone-2: var(--admin-warning);
+  --tone-3: var(--admin-success);
+  --tone-4: var(--color-text-muted);
+  --tone-5: var(--color-text-secondary);
+
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  margin-top: var(--space-4);
+}
+
+.resultsHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+}
+
+.sectionLead {
+  margin: var(--space-1) 0 0;
+  max-width: 64ch;
+  color: var(--color-text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.printable {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.printHeader {
+  display: none;
+}
+
+.printKicker {
+  margin: 0;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.printTitle {
+  margin: 0;
+  font-size: var(--fs-xl);
+}
+
+/* ---- a section ---- */
+
+.sectionBody {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.kpis {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kpi {
+  min-width: 0;
+
+  > article {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+    height: 100%;
+    padding: var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+  }
+
+  &[data-state='unavailable'] > article,
+  &[data-state='not_permitted'] > article {
+    border-style: dashed;
+    border-color: var(--color-border-strong);
+    background-color: var(--color-bg-subtle);
+  }
+}
+
+.kpiMoney {
+  grid-column: span 1;
+
+  @include m.up(md) {
+    grid-column: span 2;
+  }
+}
+
+.kpiHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.kpiLabel {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-secondary);
+}
+
+.kind {
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+
+  &[data-kind='estimate'] {
+    border-style: dashed;
+    color: var(--admin-warning);
+  }
+}
+
+.kpiValue {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.kpiChange {
+  display: flex;
+  gap: var(--space-1);
+  align-items: flex-start;
+  margin: 0;
+  font-size: var(--fs-sm);
+
+  &[data-direction='up'] {
+    color: var(--admin-success);
+  }
+
+  &[data-direction='down'] {
+    color: var(--admin-danger);
+  }
+
+  &[data-direction='same'] {
+    color: var(--color-text-secondary);
+  }
+}
+
+.kpiArrow {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.15rem;
+}
+
+.kpiNote {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.unavailable {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.unavailableIcon {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.1rem;
+}
+
+.definition {
+  font-size: var(--fs-sm);
+
+  summary {
+    display: flex;
+    align-items: center;
+    min-height: var(--size-touch);
+    cursor: pointer;
+    color: var(--color-text-secondary);
+  }
+
+  p {
+    margin: 0 0 var(--space-2);
+    color: var(--color-text-secondary);
+  }
+}
+
+.drill {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  min-height: var(--size-touch);
+  color: var(--color-accent-text);
+  font-size: var(--fs-sm);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.drillIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.currencies {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(12.5rem, 100%), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.currency {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-width: 0;
+
+  /* An amount is never broken in the middle: it gets a smaller size and its own line instead. */
+  .kpiValue {
+    font-size: var(--fs-lg);
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
+}
+
+.currencyName {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.currencyNote {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.limitations {
+  padding: var(--space-4);
+  border-left: 4px solid var(--color-border-strong);
+  background-color: var(--color-bg-subtle);
+
+  ul {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding-left: var(--space-5);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+  }
+}
+
+.limitationsTitle {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+/* ---- charts ---- */
+
+.charts {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+
+  @include m.up(lg) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.chart {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.chartCaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.chartTitle {
+  font-weight: var(--fw-semibold);
+}
+
+.chartTotal {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.chartDescription {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.chartSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 640 / 180;
+  max-height: 13rem;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg);
+}
+
+.axis {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+
+.grid {
+  stroke: var(--color-border);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.line {
+  stroke: var(--tone);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.dot {
+  fill: var(--tone);
+}
+
+.bar {
+  fill: var(--tone);
+}
+
+.ring {
+  stroke: var(--tone);
+}
+
+.donutSvg {
+  display: block;
+  width: min(100%, 11rem);
+  height: auto;
+  margin-inline: auto;
+}
+
+.donutTotal {
+  fill: var(--color-text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.spark {
+  display: block;
+  width: 100%;
+  max-width: 9rem;
+  height: 1.75rem;
+}
+
+.sparkLine {
+  stroke: var(--tone);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* A series is told apart by more than its colour: the second one is dashed. */
+.lineGroup[data-tone='1'] .line {
+  stroke-dasharray: 7 5;
+}
+
+@each $tone in 0, 1, 2, 3, 4, 5 {
+  .swatch[data-tone='#{$tone}'],
+  .lineGroup[data-tone='#{$tone}'],
+  .bar[data-tone='#{$tone}'],
+  .ring[data-tone='#{$tone}'],
+  .spark[data-tone='#{$tone}'] {
+    --tone: var(--tone-#{$tone});
+  }
+}
+
+.axisLabels {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.peak {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.chartEmpty {
+  margin: 0;
+  padding: var(--space-5) var(--space-4);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.legendItem {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  align-items: center;
+  min-width: 0;
+}
+
+.legendValue {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.swatch {
+  flex: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 2px;
+  background-color: var(--tone);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.chartTable {
+  font-size: var(--fs-sm);
+
+  summary {
+    display: flex;
+    align-items: center;
+    min-height: var(--size-touch);
+    cursor: pointer;
+    color: var(--color-text-secondary);
+  }
+}
+
+.tableScroll {
+  max-width: 100%;
+  max-height: 20rem;
+  overflow: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+  }
+
+  th,
+  td {
+    padding: var(--space-1) var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-divider);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.tableBlock {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.blockTitle {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+.blockHelp {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+/* ---- bars, funnel ---- */
+
+.barList,
+.funnel {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barRow,
+.funnelRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+}
+
+.barLabel,
+.funnelLabel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--fs-sm);
+}
+
+.barValue,
+.funnelCount {
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+}
+
+.barTrack,
+.funnelTrack {
+  grid-column: 1 / -1;
+  display: block;
+  height: 0.7rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-subtle);
+  border: var(--border-width) solid var(--color-border);
+}
+
+.barFill,
+.funnelFill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--tone-1);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.funnelFill {
+  background-color: var(--tone-0);
+}
+
+.barDetail,
+.funnelNotes {
+  grid-column: 1 / -1;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.funnelBlock {
+  min-width: 0;
+}
+
+/* ---- alerts ---- */
+
+.alertsBlock {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.alertsEmpty {
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+}
+
+.alertList {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
+}
+
+.alertItem {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+
+  p {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  &[data-severity='high'] {
+    border-left-color: var(--admin-danger);
+  }
+
+  &[data-severity='medium'] {
+    border-left-color: var(--admin-warning);
+  }
+
+  &[data-severity='low'] {
+    border-left-color: var(--color-border-strong);
+  }
+}
+
+.alertHead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: center;
+}
+
+.alertReason {
+  color: var(--color-text);
+}
+
+.alertMeta,
+.alertAction {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.severity {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+  font-weight: var(--fw-semibold);
+
+  &[data-severity='high'] {
+    color: var(--admin-danger);
+  }
+
+  &[data-severity='medium'] {
+    color: var(--admin-warning);
+  }
+
+  &[data-severity='low'] {
+    color: var(--color-text-secondary);
+  }
+}
+
+.severityIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* ---- print: one section, from the top of the sheet, in black on white (the page's own print rules show only the marked element) ---- */
+
+@media print {
+  .printHeader {
+    display: block;
+  }
+
+  .printable *:not(.swatch):not(.barFill):not(.funnelFill) {
+    color: #000 !important;
+    background-color: transparent !important;
+  }
+
+  .chart,
+  .kpi > article,
+  .limitations {
+    break-inside: avoid;
+  }
+
+  .kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .definition,
+  .chartTable {
+    display: none;
+  }
+}

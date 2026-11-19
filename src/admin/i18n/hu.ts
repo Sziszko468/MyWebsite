@@ -47,6 +47,7 @@ export const hu: AdminText = {
     bookings: 'Konzultációk',
     clients: 'Ügyfelek',
     communications: 'Kommunikáció',
+    analytics: 'Üzleti analitika',
     services: 'Szolgáltatások és csomagok',
     content: 'Weboldal-tartalom',
     translations: 'Fordítások',

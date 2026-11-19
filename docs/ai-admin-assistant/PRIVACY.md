@@ -7,7 +7,7 @@ What the AI admin assistant holds, what it sends to the AI provider, how long it
 On every question the server sends, over its own key, to the Anthropic Messages API:
 
 1. the **instructions** (`prompt.ts`; they contain the language, today's date and the context's kind and reference);
-2. the **tool definitions** (names, descriptions, schemas of the thirty-one tools);
+2. the **tool definitions** (names, descriptions, schemas of the thirty-four tools);
 3. the **last messages of this conversation** (20 by default): the administrator's questions, the assistant's earlier answers and **the results of the tools it called earlier**;
 4. the new question, and the **tool results of this answer**.
 

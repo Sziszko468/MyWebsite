@@ -1,6 +1,6 @@
 # Tool security
 
-The assistant's tools are the only way it touches the business. There are **thirty-one**, the set is **closed** (the browser cannot add, rename or choose one), and every one is read-only.
+The assistant's tools are the only way it touches the business. There are **thirty-four** (thirty-one from PROMPT 31 and the three read-only business-analytics tools of PROMPT 32), the set is **closed** (the browser cannot add, rename or choose one), and every one is read-only.
 
 ## The tools
 
@@ -12,6 +12,9 @@ The assistant's tools are the only way it touches the business. There are **thir
 | `getBusinessActivity` | one line per kind of stored event, last N days | `requests:read` / `clients:read` per part | general only |
 | `getAdministrativeAlerts` | fixed-rule alerts with thresholds | per part | general only |
 | `generateDailyBriefing` | the daily briefing from stored records | per part | general only |
+| `getAnalyticsOverview` | the dashboard's overview figures for a period (compact form), from the same service the dashboard uses | per part | general only |
+| `getFinancialAnalytics` | the financial pipeline per currency, interest in services and packages | `requests:read` | general only |
+| `getFunnelAnalytics` | the quote funnel of the requests received in a period | `requests:read` | general only |
 | `searchAdminProjects` · `getAdminProjectDetails` · `summarizeProject` · `getProjectRisks` · `getProjectPendingActions` | projects, milestones, tasks, customer actions, approvals | `clients:read` | project / customer / conversation / quote contexts, within scope |
 | `searchAdminQuotes` · `getAdminQuoteDetails` · `summarizeQuoteRequest` · `compareQuoteRequests` · `prepareQuotationOutline` | quote requests, items, brief, quotations (stored figures), revision requests | `requests:read` | within scope |
 | `searchAdminCustomers` · `getAdminCustomerOverview` · `getCustomerActivity` | stored customer fields, linked records, one line per event | `clients:read` | within scope |

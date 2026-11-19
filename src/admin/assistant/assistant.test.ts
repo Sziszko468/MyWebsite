@@ -77,11 +77,11 @@ describe('the three languages of the screen', () => {
     expect(assistantHu.language.names.hu).toBe('magyar')
   })
 
-  it('has a name for every one of the server\'s thirty-one tools, and for nothing else', () => {
+  it('has a name for every one of the server\'s thirty-four tools, and for nothing else', () => {
     const tools = serverFile('tools.ts')
     const block = /export const ADMIN_TOOL_NAMES = \[([\s\S]*?)\] as const/.exec(tools)?.[1] ?? ''
     const names = [...block.matchAll(/'([A-Za-z]+)'/g)].map((match) => match[1])
-    expect(names).toHaveLength(31)
+    expect(names).toHaveLength(34)
     for (const dictionary of [assistantEn, assistantHu, assistantNl]) expect(Object.keys(dictionary.tools.names).sort()).toEqual([...names].sort())
   })
 

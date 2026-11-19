@@ -12,7 +12,7 @@ It uses **the same Claude Haiku 5.5, the same verified connection and the same k
 | --- | --- |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | What exists, the design, the eight boundaries, and what changed against the plan |
 | [CAPABILITIES.md](CAPABILITIES.md) | What it can do (A–G), what it will never do, what is deliberately not included |
-| [TOOL_SECURITY.md](TOOL_SECURITY.md) | The thirty-one tools, how each call is checked, injection and validation |
+| [TOOL_SECURITY.md](TOOL_SECURITY.md) | The thirty-four tools (31 + the three analytics tools of PROMPT 32), how each call is checked, injection and validation |
 | [PERMISSIONS.md](PERMISSIONS.md) | Roles, the permission of every tool, what the permission system cannot express |
 | [CONTEXT_MANAGEMENT.md](CONTEXT_MANAGEMENT.md) | The six contexts, what each reaches, re-validation, isolation between customers |
 | [REPORTING.md](REPORTING.md) | The seven reports, facts versus AI words, export and print |

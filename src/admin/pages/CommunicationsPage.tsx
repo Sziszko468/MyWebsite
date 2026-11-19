@@ -136,8 +136,9 @@ export function CommunicationsPage() {
   const language = useInterfaceLanguage()
   const overview = useResource((signal) => communications.overview(signal), [])
   const customers = useResource((signal) => clients.list({ pageSize: 100 }, signal), [])
-  const [filter, setFilter] = useState<AdminFilter>('all')
   const [params] = useSearchParams()
+  // The analytics link here with `?filter=waiting_owner` (and the like): a known filter in the address is where the list starts.
+  const [filter, setFilter] = useState<AdminFilter>(() => ((ADMIN_FILTERS as readonly string[]).includes(params.get('filter') ?? '') ? (params.get('filter') as AdminFilter) : 'all'))
   const [customerId, setCustomerId] = useState(params.get('customerId') ?? '')
   const [projectId, setProjectId] = useState(params.get('projectId') ?? '')
   const [context, setContext] = useState<ContextType | ''>('')

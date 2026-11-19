@@ -50,6 +50,7 @@ export const en = {
     bookings: 'Consultations',
     clients: 'Customers',
     communications: 'Communication',
+    analytics: 'Business analytics',
     services: 'Services & packages',
     content: 'Website content',
     translations: 'Translations',

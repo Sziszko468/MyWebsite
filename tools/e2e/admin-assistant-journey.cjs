@@ -231,12 +231,12 @@ const noSideways = async (page, label) => {
     answers += 1
     await shot(page, 'D-answered')
   })
-  await step('what was sent to the provider is the server\'s doing: the required model, the instructions, the thirty-one read tools, the question, and nothing of the browser\'s', async () => {
+  await step('what was sent to the provider is the server\'s doing: the required model, the instructions, the thirty-four read tools (31 + the three analytics tools of PROMPT 32), the question, and nothing of the browser\'s', async () => {
     const requests = await received()
     const last = requests.at(-1)
     expect(last.body.model === 'claude-haiku-5-5', `the model is ${last.body.model}`)
     const names = (last.body.tools || []).map((entry) => entry.name)
-    expect(names.length === 31, `${names.length} tools`)
+    expect(names.length === 34, `${names.length} tools`)
     expect(!names.some((name) => /^(create|update|delete|send|set|cancel|reschedule|accept|reject|approve)/i.test(name)), 'a tool that changes something')
     const system = JSON.stringify(last.body.system)
     expect(/AI ADMIN ASSISTANT/.test(system) && /READ-ONLY, ALWAYS/.test(system) && /Answer in English/.test(system), 'the instructions are not the admin assistant\'s')

@@ -12,6 +12,7 @@ import { checkToolOutput } from '../toolGuard.ts'
 import { AccessDenied, accessFor, type Authority, type Policy } from './access.ts'
 import { containsMoney, LIMITS, RECORD_ID, REFERENCE, ToolRefusal } from './model.ts'
 import { generateReport, type ReportKind } from './reports.ts'
+import { analyticsReport } from './readers/analytics.ts'
 import { administrativeAlerts, businessActivity, businessOverview, dailyBriefing } from './readers/business.ts'
 import type { ReadCtx } from './readers/common.ts'
 import { conversationByReference, conversationDetails, searchConversations, summarizeConversation } from './readers/conversations.ts'
@@ -23,7 +24,7 @@ import { ContextUnavailable, resolveScope } from './scope.ts'
 import { getAdminConversation } from './store.ts'
 
 /**
- * The AI admin assistant's tools (PROMPT 31): thirty-one narrow, READ-ONLY tools and nothing else. The set is closed; the browser cannot add, rename or choose one.
+ * The AI admin assistant's tools (PROMPT 31): thirty-four narrow, READ-ONLY tools and nothing else (thirty-one from PROMPT 31 and three business-analytics tools from PROMPT 32). The set is closed; the browser cannot add, rename or choose one.
  *
  * What every tool does, in this order, on EVERY call (`run` below):
  *   1. counts itself against the answer's tool limit;
@@ -40,6 +41,7 @@ import { getAdminConversation } from './store.ts'
 
 export const ADMIN_TOOL_NAMES = [
   'getBusinessOverview', 'getBusinessActivity', 'getAdministrativeAlerts', 'generateDailyBriefing',
+  'getAnalyticsOverview', 'getFinancialAnalytics', 'getFunnelAnalytics',
   'searchAdminProjects', 'getAdminProjectDetails', 'summarizeProject', 'getProjectRisks', 'getProjectPendingActions',
   'searchAdminQuotes', 'getAdminQuoteDetails', 'summarizeQuoteRequest', 'compareQuoteRequests', 'prepareQuotationOutline',
   'searchAdminCustomers', 'getAdminCustomerOverview', 'getCustomerActivity',
@@ -144,6 +146,12 @@ export async function buildAdminTools(ctx: AdminToolContext): Promise<ToolSet> {
     recommendations: z.array(z.string().min(3).max(LIMITS.observationChars)).max(LIMITS.recommendations).describe('Your recommendations for the administrator, one per item. They are suggestions for a person to decide, never actions taken.'),
   }
   const clean = (value: string | undefined): string => cleanLine(value ?? '').slice(0, LIMITS.query)
+  const analyticsInput = z.strictObject({
+    period: z.enum(['today', 'yesterday', 'last_7_days', 'last_30_days', 'last_90_days', 'this_month', 'previous_month', 'this_year', 'previous_year', 'custom']).optional().describe('Default last_30_days. "custom" needs fromDay and toDay.'),
+    fromDay: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe('First day (YYYY-MM-DD) of a custom period.'),
+    toDay: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe('Last day (YYYY-MM-DD) of a custom period.'),
+    currency: z.enum(['EUR', 'HUF']).optional().describe('Only quotations in this currency.'),
+  })
 
   // ---- output pieces -----------------------------------------------------------------------------------------------------------------
   const base = z.looseObject({ basis: z.string() })
@@ -189,6 +197,23 @@ export async function buildAdminTools(ctx: AdminToolContext): Promise<ToolSet> {
       description: `The daily administrative briefing built from stored records: new quote requests, upcoming consultations, project changes, overdue tasks, pending customer approvals, unanswered messages, alerts. Summarise it for the administrator without adding anything. General business context only. ${RULES}`,
       inputSchema: z.strictObject({}),
       execute: async () => run('generateDailyBriefing', (rc) => dailyBriefing(rc), base.or(refused)),
+    }),
+
+    // ---- business analytics (PROMPT 32): the dashboard's own deterministic figures, read-only, general context ---------------------------
+    getAnalyticsOverview: tool({
+      description: `The business analytics overview for a period: new quote requests, new customers, active and completed projects, open and accepted quotations (with their value by currency), the pipeline, the average quotation value, customers waiting for an answer, overdue milestones; each with its kind (stored fact, derived or estimate), the previous equivalent period where a comparison is valid, and whether it is unavailable. Computed by the server, not by you. General business context only. ${RULES}`,
+      inputSchema: analyticsInput,
+      execute: async (input) => run('getAnalyticsOverview', (rc) => analyticsReport(rc, 'overview', input), base.or(refused)),
+    }),
+    getFinancialAnalytics: tool({
+      description: `The financial pipeline for a period, by currency (never summed across currencies): requested, quoted, accepted and declined quotation values, the open pipeline, average values, conversion of quotations, and the interest in services and packages (an inquiry is not a purchase). An accepted quotation is accepted contract value, NOT cash: no payment is recorded, so there is no revenue figure. Computed by the server, not by you. Needs permission to read quote requests. General business context only. ${RULES}`,
+      inputSchema: analyticsInput,
+      execute: async (input) => run('getFinancialAnalytics', (rc) => analyticsReport(rc, 'financial', input), base.or(refused)),
+    }),
+    getFunnelAnalytics: tool({
+      description: `The quote conversion funnel for the requests RECEIVED in a period: how many reached each stage (reviewed, quotation prepared, sent, accepted, project started, completed), conversion from the previous stage and from the start, and the days between stages. It is a cohort of requests, not a count of events in the period. Decline reasons are not recorded. Computed by the server, not by you. Needs permission to read quote requests. General business context only. ${RULES}`,
+      inputSchema: analyticsInput,
+      execute: async (input) => run('getFunnelAnalytics', (rc) => analyticsReport(rc, 'funnel', input), base.or(refused)),
     }),
 
     // ---- projects -------------------------------------------------------------------------------------------------------------------

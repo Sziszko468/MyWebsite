@@ -27,7 +27,7 @@ The administration's own dictionaries have two languages; this screen has three 
 
 - the three dictionaries have **exactly the same keys**, the same placeholders, no empty text, no open placeholder;
 - no long sentence (over 40 characters) is **identical to the English one** in Hungarian or Dutch (an untranslated sentence is caught);
-- there are names for **every one of the server's 31 tools**, a title for every report kind, a sentence for every limitation code, a label for every missing-information code the readers can emit, a text for every area a business report can leave out, and an error text for every refusal reason the gateway can give — all read **from the server's source**, so the two sides cannot drift;
+- there are names for **every one of the server's 34 tools**, a title for every report kind, a sentence for every limitation code, a label for every missing-information code the readers can emit, a text for every area a business report can leave out, and an error text for every refusal reason the gateway can give — all read **from the server's source**, so the two sides cannot drift;
 - suggested questions exist for every kind of context in every language;
 - the screen is rendered in each language (reports, drafts, outlines, threads, history, insights), and its source holds **no sentence of its own** (no text between tags, no literal `aria-label`/`placeholder`/`title`).
 

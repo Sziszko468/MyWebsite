@@ -66,6 +66,8 @@ export const LIMITS = {
   aiDiscovery: { windowMs: MINUTE, max: 90 },
   /** The admin assistant's chat (PROMPT 31): a burst limit per client address; the real limit is each administrator's hourly one, counted from the usage ledger. */
   aiAdmin: { windowMs: MINUTE, max: 20 },
+  /** The business analytics (PROMPT 32): every request runs aggregate queries, so a burst limit of its own. */
+  analytics: { windowMs: MINUTE, max: 60 },
   /** The customer's pages (a quotation, a request's status) and what they do there. */
   customer: { windowMs: MINUTE, max: 90 },
   /** Answers to a link that does not exist or no longer works are counted separately, against whoever keeps asking: guessing a token costs the guesser. */
@@ -93,7 +95,7 @@ export class Limiters {
   constructor(clock: Clock, enabled: boolean) {
     this.enabled = enabled
     const make = (name: LimitName) => new RateLimiter(clock, LIMITS[name].windowMs, LIMITS[name].max)
-    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), aiDiscovery: make('aiDiscovery'), aiAdmin: make('aiAdmin'), customer: make('customer'), booking: make('booking'), portalAuth: make('portalAuth'), portal: make('portal'), tokenMiss: make('tokenMiss'), webhook: make('webhook'), messageSend: make('messageSend'), messageSearch: make('messageSearch') }
+    this.limiters = { global: make('global'), contact: make('contact'), quote: make('quote'), catalog: make('catalog'), login: make('login'), admin: make('admin'), aiSession: make('aiSession'), aiRead: make('aiRead'), aiDiscovery: make('aiDiscovery'), aiAdmin: make('aiAdmin'), analytics: make('analytics'), customer: make('customer'), booking: make('booking'), portalAuth: make('portalAuth'), portal: make('portal'), tokenMiss: make('tokenMiss'), webhook: make('webhook'), messageSend: make('messageSend'), messageSearch: make('messageSearch') }
   }
 
   /** Counts one request against a limit and throws the 429 when it is over. */

@@ -188,7 +188,7 @@ describe('an answer: what is sent to the model, what comes back, what is stored'
     expect(text(stored.messages)).toContain('Nothing needs attention right now.')
   })
 
-  it('sends the model its instructions, the thirty-one tools, the administrator\'s words and the tool\'s result, and no key, no address, no history of anyone else', async () => {
+  it('sends the model its instructions, the thirty-four tools, the administrator\'s words and the tool\'s result, and no key, no address, no history of anyone else', async () => {
     await start([callTool('getAdministrativeAlerts', {}), say('Done.')])
     await chat('owner', chatBody({ text: 'What needs my attention today?' })).then((reply) => reply.text())
     await waitFor(settled)
