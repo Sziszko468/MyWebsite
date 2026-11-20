@@ -6,6 +6,7 @@ import { sha256Hex } from '../src/lib/crypto.ts'
 import type { Authority, Policy } from '../src/modules/ai/adminassistant/access.ts'
 import { createAdminConversation, type ContextType } from '../src/modules/ai/adminassistant/store.ts'
 import { ADMIN_TOOL_NAMES, buildAdminTools, type AdminToolName } from '../src/modules/ai/adminassistant/tools.ts'
+import type { AutomationToolName } from '../src/modules/ai/automation/tools.ts'
 import { scriptedModel } from './aiMock.ts'
 import { makePortalKit, type Customer, type PortalKit } from './portalKit.ts'
 import { startServer, type TestServer } from './helpers.ts'
@@ -32,7 +33,7 @@ export interface AdminAiKit {
   /** A conversation row for an administrator (the tools find the context there). */
   conversation(authority: Authority, context?: { type: ContextType; ref: string | null }, language?: 'hu' | 'en' | 'nl'): string
   /** The tools of one answer, called as the model would call them. */
-  tools(authority: Authority, conversationId: string, options?: { policy?: Policy; maxToolCalls?: number; language?: 'hu' | 'en' | 'nl' }): Promise<{ call(name: AdminToolName, input?: Record<string, unknown>): Promise<any>; set: Record<string, any>; counter: { calls: number } }>
+  tools(authority: Authority, conversationId: string, options?: { policy?: Policy; maxToolCalls?: number; language?: 'hu' | 'en' | 'nl' }): Promise<{ call(name: AdminToolName | AutomationToolName, input?: Record<string, unknown>): Promise<any>; set: Record<string, any>; counter: { calls: number } }>
   customer(email: string, extra?: Record<string, unknown>): Promise<Customer>
   task(project: { id: string }, body?: Record<string, unknown>): Promise<{ id: string; reference: string }>
   /** A conversation a customer starts, with the owner's switch turned on first. Returns its reference. */

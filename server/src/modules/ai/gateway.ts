@@ -393,7 +393,7 @@ export class Assistant {
 
     // The settings THIS answer runs with: the admin assistant's own tool and output limits (the budgets, prices and effort are the shared ones).
     const adminSettings: AiSettings = { ...settings, maxToolCalls: settings.adminMaxToolCalls, maxOutputTokens: settings.adminMaxOutputTokens }
-    const instructions = adminInstructions(request.language, { type: contextType, ref: contextRef }, now)
+    const instructions = adminInstructions(request.language, { type: contextType, ref: contextRef }, now, { automation: app.config.ai.automation.enabled })
     const promptTokens = estimateTokens(instructions.length + JSON.stringify(windowed).length)
 
     if (!conversation) conversation = createAdminConversation(app.db, app.clock, { id: request.conversationId, userId: request.authority.userId, language: request.language, contextType, contextRef })

@@ -155,9 +155,24 @@ export const AI_CEILING_ENV: Record<AiCeilingKey, string> = {
   maxDailyConversations: 'AI_CEILING_DAILY_CONVERSATIONS',
 }
 
+/**
+ * Controlled automation (PROMPT 33): the operator's own switch for the assistant's APPROVAL-GATED actions. Off by default, and separate from the assistant itself: with it off the
+ * assistant has no proposal tool at all, the administration's automation screen says so, and nothing can be proposed, approved or executed. It changes no model, key or budget.
+ */
+export interface AutomationConfig {
+  /** `AI_AUTOMATION_ENABLED` (default off). */
+  enabled: boolean
+  /** `AI_AUTOMATION_TTL_MINUTES`: how long a proposal waits for a decision before it expires (default 60, 5 to 1440). */
+  ttlMinutes: number
+  /** `AI_AUTOMATION_MAX_PENDING`: how many proposals one administrator may have waiting (default 20). */
+  maxPending: number
+}
+
 export interface AiConfig {
   /** `AI_ASSISTANT_ENABLED`: the operator's master switch. The assistant is offered only with this on AND an API key. */
   enabled: boolean
+  /** Approval-gated actions (PROMPT 33). */
+  automation: AutomationConfig
   /** `ANTHROPIC_API_KEY`. A secret: server only, never logged, never in an answer. Null when it is missing OR malformed (`keyProblem`). */
   apiKey: string | null
   /**
@@ -573,6 +588,7 @@ export function loadConfig(env: Env = process.env): Config {
   }
   const ai: AiConfig = {
     enabled: flag('AI_ASSISTANT_ENABLED', true),
+    automation: { enabled: flag('AI_AUTOMATION_ENABLED', false), ttlMinutes: integer('AI_AUTOMATION_TTL_MINUTES', 60, 5, 1440), maxPending: integer('AI_AUTOMATION_MAX_PENDING', 20, 1, 100) },
     apiKey: aiKey,
     keyProblem: aiKeyMalformed ? 'malformed' : null,
     connectTimeoutMs: integer('AI_CONNECT_TIMEOUT_MS', 20_000, 500, 120_000),

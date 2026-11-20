@@ -302,7 +302,10 @@ describe('the privacy notice and the consultation booking', () => {
     // The administrators' own copilot (PROMPT 31, `ai/adminassistant/`) reads bookings with the administrator's permission, and the notice says so (the item before this
     // one). The visitors' assistant is everything else under `ai/`, and it must stay unable to.
     const aiRoot = join(ROOT, 'server', 'src', 'modules', 'ai')
-    const visitors = sources(aiRoot).filter((file) => !relative(aiRoot, file).split(sep).includes('adminassistant'))
+    // The administrators' approval-gated actions (PROMPT 33, `ai/automation/`) are on the administrators' side too: they change a consultation's hours and read bookings through the
+    // administration's own functions, with the approving administrator's session.
+    const administrators = ['adminassistant', 'automation']
+    const visitors = sources(aiRoot).filter((file) => !relative(aiRoot, file).split(sep).some((part) => administrators.includes(part)))
     expect(visitors.length).toBeGreaterThan(5)
     // No import from the bookings module, no consultation, no SQL on the booking tables. (The word "booking" itself is allowed since PROMPT 30: it is
     // one of the PROJECT TYPES a visitor can say they want built, "a booking platform", in the discovery vocabulary: data, not the consultation bookings.)
@@ -312,6 +315,9 @@ describe('the privacy notice and the consultation booking', () => {
     const importing = visitors.filter((file) => /from\s+['"][^'"]*\/adminassistant\//.test(readFileSync(file, 'utf8'))).map((file) => relative(aiRoot, file).split(sep).join('/'))
     expect(importing.every((file) => ['admin.ts', 'gateway.ts', 'settings.ts'].includes(file)), importing.join(', ')).toBe(true)
     expect(readFileSync(join(aiRoot, 'tools.ts'), 'utf8')).not.toMatch(/adminassistant/)
+    // Nothing on the visitors' side reaches the administrators' actions at all.
+    expect(visitors.filter((file) => /\/automation\//.test(readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, ''))).map((file) => relative(aiRoot, file))).toEqual([])
+    expect(readFileSync(join(aiRoot, 'tools.ts'), 'utf8')).not.toMatch(/automation/i)
   })
 
   it('says the booking form keeps what is typed in memory, and the code writes none of it to browser storage', () => {

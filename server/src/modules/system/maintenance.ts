@@ -5,6 +5,7 @@ import { purgeExpiredSessions } from '../auth/sessions.ts'
 import { sweepAbandoned } from '../ai/budget.ts'
 import { loadSettings } from '../ai/settings.ts'
 import { purge as purgeAssistant } from '../ai/store.ts'
+import { expireDue as expireAutomation, recoverStuck as recoverAutomation } from '../ai/automation/lifecycle.ts'
 import { deleteAdminConversationsAbout, purgeAdminConversations } from '../ai/adminassistant/store.ts'
 import { purgeBookingTokens } from '../bookings/repository.ts'
 import { purgeAuth } from '../customers/auth.ts'
@@ -39,14 +40,17 @@ export interface MaintenanceResult {
   retentionDays: number | null
   /** The assistant: conversations whose words were removed, idle sessions removed, expired approvals cleared, reservations that never reconciled. */
   assistant: { conversations: number; sessions: number; approvals: number; abandonedRequests: number; adminConversations: number }
+  /** Controlled automation (PROMPT 33): proposals whose time was up (now `expired`) and actions a crash left half-way (now `failed`, never run). Nothing is ever deleted. */
+  automation: { expired: number; interrupted: number }
 }
 
 export function runMaintenance(app: AppContext): MaintenanceResult {
   const { db, clock, config } = app
-  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, bookings: 0, deliveries: 0, expiredLinks: purgeTokens(app) + purgeBookingTokens(app), clientSessions: purgeClientSessions(app), clientLinks: purgeAuth(app), workReminders: runWorkReminders(app), retentionDays: config.retentionDays, assistant: { conversations: 0, sessions: 0, approvals: 0, abandonedRequests: 0, adminConversations: 0 } }
+  const result: MaintenanceResult = { expiredSessions: purgeExpiredSessions(app), inquiries: 0, quoteRequests: 0, bookings: 0, deliveries: 0, expiredLinks: purgeTokens(app) + purgeBookingTokens(app), clientSessions: purgeClientSessions(app), clientLinks: purgeAuth(app), workReminders: runWorkReminders(app), retentionDays: config.retentionDays, assistant: { conversations: 0, sessions: 0, approvals: 0, abandonedRequests: 0, adminConversations: 0 }, automation: { expired: 0, interrupted: 0 } }
   const retentionDays = loadSettings(app).retentionDays
   // The administrators' own conversations with the AI admin assistant follow the same retention as the visitors' (PROMPT 31).
   result.assistant = { ...purgeAssistant(db, clock, retentionDays), abandonedRequests: sweepAbandoned(app), adminConversations: purgeAdminConversations(db, clock, retentionDays) }
+  result.automation = { expired: expireAutomation(app), interrupted: recoverAutomation(app) }
   if (config.retentionDays !== null) {
     const cutoff = iso(addMs(clock.now(), -config.retentionDays * DAY))
     db.transaction(() => {

@@ -113,6 +113,14 @@ AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/analytics-journey.cjs --base
 
 The analytics dashboard in a real Chrome against the **built** administration and a **fresh scratch backend** seeded with SYNTHETIC rows (`tools/audit/seed-analytics.mjs`): the screen shows the server's own figures; the project status filter marks every figure as filtered, not filtered (and why) or empty by definition (overview, projects, alerts, an unused filter in the address, the CSV `[filter-scope]`, Hungarian and Dutch); a period and the filters live in the address and survive a reload and the back button; a bad custom range is refused before the server is asked; hostile addresses are dropped or refused (422/404); the currency filter separates money; the three languages and their number formats; tab keyboard; drill-down opens the named page with the named filter; every chart has its table; alerts have a rule and a next step; the CSV is the section (byte order mark, period, zone, time, kinds, limits, nothing private); printing marks one section and cleans up; an editor does not see the AI section and cannot export it; nobody signed out can read or export anything.
 
+## Controlled AI automation journey (PROMPT 33)
+
+```bash
+AUDIT_PLAYWRIGHT=/path/to/playwright node tools/e2e/automation-journey.cjs --base=http://127.0.0.1:8790 --standin=http://127.0.0.1:9911 --email=admin@example.test --password=<the test password> --editor=editor@example.test --editor-password=<the editor's password> --db=<the scratch database> --mail=<the scratch mail directory> [--out=<dir>]
+```
+
+The approval-gated actions in a real Chrome against the **built** administration, the real backend (started with `AI_AUTOMATION_ENABLED=true` and `RATE_LIMITS=false`) and the local Anthropic stand-in, which plays the model from `TOOL:<name>:<json>` markers. 16 steps: the screen and its catalogue; a proposal made in the chat is a card that says nothing has been done and has no button, and "looks good" typed in the chat changes nothing; the decision page (why, before and after, side effects, history) and the approval reached by the keyboard; the second confirmation for a project moved to Completed; a replay refused; a record that changed after the proposal ends it with the reason in words; a rejection and a cancellation; closing consultation days; a proposal left waiting; the list, its filters in the address and a hand-edited address; an editor sees only their own and cannot get the consultation hours proposed; Hungarian and Dutch; tablet, phone and narrow phone in the light theme; no console error, the audit lines, the history's integrity. With `--db` the scratch database is read (read only) to prove what each decision wrote and did not write; with `--mail` it proves no e-mail was written. Nothing about the real model is proved.
+
 ## AI admin assistant journey (PROMPT 31)
 
 ```bash

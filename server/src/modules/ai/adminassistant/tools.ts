@@ -9,6 +9,7 @@ import type { Logger } from '../../../lib/logger.ts'
 import { recordToolCall } from '../store.ts'
 import { findSensitive } from '../sensitive.ts'
 import { checkToolOutput } from '../toolGuard.ts'
+import { automationTools, type AutomationToolName } from '../automation/tools.ts'
 import { AccessDenied, accessFor, type Authority, type Policy } from './access.ts'
 import { containsMoney, LIMITS, RECORD_ID, REFERENCE, ToolRefusal } from './model.ts'
 import { generateReport, type ReportKind } from './reports.ts'
@@ -84,7 +85,7 @@ export async function buildAdminTools(ctx: AdminToolContext): Promise<ToolSet> {
   const [{ tool }, { z }] = await Promise.all([import('ai'), import('zod')])
   const { app } = ctx
 
-  async function run<T extends object>(name: AdminToolName, work: (rc: ReadCtx) => T, schema?: Zod.ZodType): Promise<T | { error: string; note: string }> {
+  async function run<T extends object>(name: AdminToolName | AutomationToolName, work: (rc: ReadCtx) => T, schema?: Zod.ZodType): Promise<T | { error: string; note: string }> {
     const started = performance.now()
     let status: 'ok' | 'error' | 'rejected' = 'ok'
     try {
@@ -458,5 +459,8 @@ export async function buildAdminTools(ctx: AdminToolContext): Promise<ToolSet> {
     generateConversationReport: reportTool('generateConversationReport', 'communication_summary', 'Generate a communication summary report for one conversation.', { conversationRef: optionalRef('The conversation reference.') }, (input) => input.conversationRef as string | undefined),
     generateConsultationReport: reportTool('generateConsultationReport', 'consultation_briefing', 'Generate a consultation briefing report for one consultation.', { consultationRef: optionalRef('The consultation (booking) reference.') }, (input) => input.consultationRef as string | undefined),
   }
-  return tools as unknown as ToolSet
+  // PROMPT 33: the tools that PROPOSE (never execute) approval-gated actions exist only while the operator has switched controlled automation on. With it off, the assistant is exactly
+  // the read-only assistant of PROMPT 31 and 32.
+  const automation = app.config.ai.automation.enabled ? automationTools({ tool, z, run, app, conversationId: ctx.conversationId, language: ctx.language }) : {}
+  return { ...tools, ...automation } as unknown as ToolSet
 }

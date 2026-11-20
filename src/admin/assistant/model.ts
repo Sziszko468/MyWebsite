@@ -142,6 +142,27 @@ export function draftOf(call: ToolCall): Draft | null {
   }
 }
 
+/** A proposal the assistant made (PROMPT 33): nothing was done, an administrator decides it on its own page. Only a result the server marked as a proposal, with a path that is exactly the page of an action. */
+export interface Proposal {
+  reference: string
+  type: string
+  expiresAt: string | null
+  requiresSecondConfirmation: boolean
+  duplicate: boolean
+  path: string
+}
+
+const ACTION_PATH = /^\/automation\/ACT-[A-Z0-9]{8}$/
+
+export function proposalOf(call: ToolCall): Proposal | null {
+  const output = call.output
+  if (!isRecord(output) || output.status !== 'awaiting_approval' || output.approvalRequired !== true || !isRecord(output.proposal) || !isRecord(output.link)) return null
+  const proposal = output.proposal
+  const path = output.link.path
+  if (typeof proposal.reference !== 'string' || typeof proposal.type !== 'string' || typeof path !== 'string' || !ACTION_PATH.test(path) || path !== `/automation/${proposal.reference}`) return null
+  return { reference: proposal.reference, type: proposal.type, expiresAt: typeof proposal.expiresAt === 'string' ? proposal.expiresAt : null, requiresSecondConfirmation: proposal.requiresSecondConfirmation === true, duplicate: output.duplicate === true, path }
+}
+
 export const OUTLINE_SECTIONS = ['introduction', 'understanding', 'scope', 'deliverables', 'exclusions', 'assumptions', 'openQuestions'] as const
 export type OutlineSection = (typeof OUTLINE_SECTIONS)[number]
 

@@ -58,6 +58,7 @@ export const hu: AdminText = {
     comparison: 'Csomag-összehasonlítás',
     fullExperience: 'FULL EXPERIENCE',
     assistant: 'AI admin asszisztens',
+    automation: 'Automatizálás',
     ai: 'AI asszisztens',
     texts: 'Weboldal-szövegek',
     settings: 'Beállítások',

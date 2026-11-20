@@ -140,6 +140,8 @@ function measure(page) {
   if (conversationRef) await converse(ids.draft, `TOOL:draftCustomerReply:${JSON.stringify({ conversationRef, language: 'en', draft: 'Thank you for your message. We will get back to you this week.' })}`)
   if (quoteRef) await converse('ac-audit-outline-0000000001', `TOOL:prepareQuotationOutline:${JSON.stringify({ quoteRef, outline: { introduction: 'Thank you for the request.', understanding: 'A website for the audit.', scope: ['Home page'], deliverables: ['A responsive website'], exclusions: [], assumptions: [], openQuestions: ['Which domain is wanted?'] } })}`)
   await converse(ids.refused, `TOOL:getAdminProjectDetails:${JSON.stringify({ projectRef: 'PRJ-NOSUCH000' })}`)
+  // PROMPT 33: a proposal card (the server must have been started with AI_AUTOMATION_ENABLED=true; without it the tool does not exist and this conversation has no card).
+  if (project?.json?.data?.reference) await converse('ac-audit-proposal-0000000001', `TOOL:proposeProjectNote:${JSON.stringify({ projectRef: project.json.data.reference, body: 'A note the audit asked for.', reason: 'Asked by the audit.' })}`)
   if (project?.json?.data?.reference) await converse(ids.project, 'Summarise this project', 'en', { type: 'project', ref: project.json.data.reference })
 
   for (const lang of LANGS) {
@@ -160,9 +162,12 @@ function measure(page) {
           if (m.overflow > 0 || m.offenders.length || m.small.length || m.unnamed.length || m.h1 !== 1 || m.animated.length) findings.push({ view: `${tag} ${name}`, kind: 'layout', ...m })
           for (const v of await axeRun(page)) findings.push({ view: `${tag} ${name}`, kind: 'axe', id: v.id, impact: v.impact, count: v.count, nodes: v.nodes })
         }
+        // The three parts sit side by side when the screen's own container is 1000 px wide (a container query, not the window's width): the page says which it is once it has loaded
+        // (until then the window's width is the guess). At 1280 px the container is a little under 1000 px, so the parts are shown one at a time there too.
+        let sideBySide = width >= 1000 + 260
         const part = async (name) => {
           // On a narrow screen the parts are shown one at a time; on a wide one all three are there.
-          if (width >= 1000 + 260) return
+          if (sideBySide) return
           const nav = page.getByRole('navigation', { name: w.nav })
           if (await nav.count()) await nav.getByRole('button', { name }).click()
           await sleep(150)
@@ -174,13 +179,14 @@ function measure(page) {
         // A wide screen has the three parts side by side; a narrow one has the navigation and shows one part at a time.
         const wide = await page.evaluate(() => document.querySelector('[data-pane="history"]')?.getBoundingClientRect().width > 0 && document.querySelector('[data-pane="context"]')?.getBoundingClientRect().width > 0)
         const navShown = (await page.getByRole('navigation', { name: w.nav }).count()) > 0 && (await page.getByRole('navigation', { name: w.nav }).isVisible())
+        sideBySide = wide
         if (wide === navShown) findings.push({ view: `${tag} layout`, kind: 'structure', what: `wide=${wide}, navigation shown=${navShown}` })
         await check('empty')
 
         await part(w.history)
         await check('history')
         // Open the conversations that have something to show, one by one.
-        for (const [name, id] of Object.entries({ answered: ids.plain, tools: ids.tools, report: ids.report, draft: ids.draft, outline: 'ac-audit-outline-0000000001', refused: ids.refused, project: ids.project })) {
+        for (const [name, id] of Object.entries({ answered: ids.plain, tools: ids.tools, report: ids.report, draft: ids.draft, outline: 'ac-audit-outline-0000000001', refused: ids.refused, project: ids.project, proposal: 'ac-audit-proposal-0000000001' })) {
           const detail = await page.evaluate(async (id) => (await fetch(`/api/admin/ai-assistant/conversations/${id}`)).status, id)
           if (detail !== 200) continue
           await part(w.history)
@@ -192,6 +198,7 @@ function measure(page) {
             const show = page.getByRole('button', { name: /Show the data|Az adatok megjelenítése|Gegevens tonen/ }).first()
             if (await show.count()) await show.click()
           }
+          if (name === 'proposal' && process.env.AUDIT_AUTOMATION === '1' && (await page.locator('article[data-kind="proposal"]').count()) === 0) findings.push({ view: `${tag} proposal`, kind: 'missing', what: 'the proposal card' })
           await check(name)
         }
         await part(w.context)
@@ -200,10 +207,14 @@ function measure(page) {
         // The confirmation dialog.
         const clear = page.getByRole('button', { name: w.clear })
         if (await clear.count()) {
-          await clear.click()
-          await page.getByRole('dialog').waitFor({ timeout: 3000 }).catch(() => undefined)
-          await check('dialog')
-          await page.keyboard.press('Escape')
+          // A control that stays off is a finding of this view (with what the page showed), not a crash of the whole audit.
+          const opened = await clear.click({ timeout: 8000 }).then(() => true, () => false)
+          if (!opened) findings.push({ view: `${tag} dialog`, kind: 'missing', what: 'the clear-conversation control did not become usable', page: (await page.locator('main').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 300) })
+          else {
+            await page.getByRole('dialog').waitFor({ timeout: 3000 }).catch(() => undefined)
+            await check('dialog')
+            await page.keyboard.press('Escape')
+          }
         }
         if (errors.length) findings.push({ view: tag, kind: 'console', errors: errors.slice(0, 3) })
         await context.close()

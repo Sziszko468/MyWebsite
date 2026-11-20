@@ -61,6 +61,7 @@ export const en = {
     comparison: 'Tier comparison',
     fullExperience: 'FULL EXPERIENCE',
     assistant: 'AI admin assistant',
+    automation: 'Automation',
     ai: 'AI assistant',
     texts: 'Website texts',
     settings: 'Settings',

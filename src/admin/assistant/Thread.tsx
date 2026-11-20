@@ -3,10 +3,10 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type 
 import { cx } from '../../utils/cx'
 import { AdminButton } from '../components/AdminButton'
 import { fill } from '../i18n'
-import { DraftCard, OutlineCard, ReportCard } from './Cards'
+import { DraftCard, OutlineCard, ProposalCard, ReportCard } from './Cards'
 import { RichText } from './Markup'
 import { NEEDS_NEW_CONVERSATION, NOT_RETRIABLE, chatErrorCode } from './useAssistantChat'
-import { draftOf, outlineOf, reportOf, textOf, toolCallsOf, type ToolCall } from './model'
+import { draftOf, outlineOf, proposalOf, reportOf, textOf, toolCallsOf, type ToolCall } from './model'
 import { copyText } from './exporters'
 import { useAssistantText } from './text'
 import styles from '../styles/assistant.module.scss'
@@ -80,6 +80,8 @@ export function MessageView({ message, links, last, busy, onCopy, onRegenerate }
         if (draft) return <DraftCard key={call.id} draft={draft} />
         const outline = outlineOf(call)
         if (outline) return <OutlineCard key={call.id} outline={outline} />
+        const proposal = proposalOf(call)
+        if (proposal) return <ProposalCard key={call.id} proposal={proposal} />
         return null
       })}
       {truncated && (

@@ -1,15 +1,16 @@
 import { LANGUAGES, type Language } from '../../config.ts'
 import type { AppContext, SessionInfo } from '../../context.ts'
-import { ConstraintError, notFound, validationFailed, type FieldCode, type FieldErrors } from '../../http/errors.ts'
+import { ConstraintError, HttpError, notFound, validationFailed, type FieldCode, type FieldErrors } from '../../http/errors.ts'
 import { newId } from '../../lib/crypto.ts'
 import { cleanBlock, cleanLine, isRecord } from '../../lib/text.ts'
 import { iso } from '../../lib/time.ts'
 import { requirePermission } from '../auth/permissions.ts'
 import { audit } from '../system/audit.ts'
 import { ACTION_TARGET, BOOKING_STATUSES, closedReasons, loadSettings, parseSettings, saveSettings, TRANSITIONS, type BookingRow, type BookingSettings, type BookingStatus, type ChangeRow, type ExceptionRow, type RuleRow } from './model.ts'
+import { blockersBetween } from './availability.ts'
 import { changesOf, eventsOf, getBooking, hasAllWords, loadTypes, recordBookingEvent, revokeBookingTokens, typeByCode, typeById, type TypeView } from './repository.ts'
 import { cancelBooking, confirmBooking, decideRequest, expireChanges, finishBooking, parseDate, parseInstant, parseMessage, proposeNewTime, publicDays } from './service.ts'
-import { addDays, minuteText, parseMinute, resolveLocal, startOfLocalDay, type DateKey } from './zone.ts'
+import { addDays, daysBetween, localDateKey, minuteText, parseMinute, resolveLocal, startOfLocalDay, type DateKey } from './zone.ts'
 
 /**
  * The administration's side of the booking system. Reading needs `requests:read`; working with a booking (confirming, cancelling, proposing a time, a
@@ -466,5 +467,73 @@ export function saveHours(app: AppContext, session: SessionInfo | null, body: Re
   })
   audit(app, actor, 'booking.hours', 'settings', null, { rules: rules.length, exceptions: exceptions.length })
   return configuration(app, session)
+}
+
+// ---- closing days (PROMPT 33) --------------------------------------------------------------------------------------------------------------
+// The one change to the consultation hours the assistant's approval-gated actions may make: CLOSE some days. It can only take availability away, never add any; it never touches a
+// booking that exists (it refuses when there is one); and it is the same kind of row the hours editor writes (`availability_exceptions`, kind `closed`), so the owner removes it
+// in the same place. `saveHours` (above) is unchanged and still replaces the whole set.
+
+/** The longest run of days one closing may cover, and how far ahead it may reach. */
+export const CLOSURE_MAX_DAYS = 31
+export const CLOSURE_HORIZON_DAYS = 366
+
+export interface ClosureInput {
+  startDate: string
+  endDate: string
+  label: string | null
+}
+
+export interface ClosurePlan {
+  zone: string
+  startDate: DateKey
+  endDate: DateKey
+  days: number
+  label: string | null
+  /** Today in the scheduling zone. */
+  today: DateKey
+  /** Bookings and held reschedule times that fall inside the days: closing is refused while there is any. */
+  conflicts: number
+  /** The exceptions that exist now. */
+  exceptions: number
+}
+
+/** What closing these days would touch, without writing anything. A range that cannot be closed is a validation error naming the field. */
+export function checkClosure(app: AppContext, session: SessionInfo | null, input: ClosureInput): ClosurePlan {
+  requirePermission(session, 'system:write')
+  const settings = loadSettings(app.db)
+  const errors: FieldErrors = {}
+  const start = parseDate(input.startDate)
+  const end = parseDate(input.endDate)
+  if (!start) errors.startDate = 'invalid'
+  if (!end) errors.endDate = 'invalid'
+  if (start && end && end < start) errors.endDate = 'invalid'
+  if (settings.timeZone === null) errors.timeZone = 'required'
+  const label = input.label === null ? null : cleanLine(input.label).slice(0, 120) || null
+  if (Object.keys(errors).length > 0 || !start || !end || settings.timeZone === null) throw validationFailed(errors)
+  const zone = settings.timeZone
+  const today = localDateKey(app.clock.now().getTime(), zone)
+  const days = daysBetween(start, end) + 1
+  if (start < today) errors.startDate = 'invalid'
+  if (days > CLOSURE_MAX_DAYS) errors.endDate = 'tooLong'
+  if (daysBetween(today, end) > CLOSURE_HORIZON_DAYS) errors.endDate = 'invalid'
+  const exceptions = app.db.get<{ n: number }>('SELECT COUNT(*) AS n FROM availability_exceptions')!.n
+  if (exceptions >= MAX_EXCEPTIONS) errors.exceptions = 'tooMany'
+  if (Object.keys(errors).length > 0) throw validationFailed(errors)
+  const conflicts = blockersBetween(app.db, startOfLocalDay(start, zone), startOfLocalDay(addDays(end, 1), zone)).length
+  return { zone, startDate: start, endDate: end, days, label, today, conflicts, exceptions }
+}
+
+/** Closes the days: one `closed` exception for the whole range. Refused (409 `bookings_in_range`) while a booking falls inside it; the owner handles those through the booking itself. */
+export function closeDays(app: AppContext, session: SessionInfo | null, input: ClosureInput): { id: string; plan: ClosurePlan } {
+  const actor = requirePermission(session, 'system:write')
+  return app.db.transaction(() => {
+    const plan = checkClosure(app, session, input)
+    if (plan.conflicts > 0) throw new HttpError(409, 'conflict', 'There are bookings in those days. Handle them first.', { details: { reason: 'bookings_in_range' } })
+    const id = newId()
+    app.db.run('INSERT INTO availability_exceptions (id, kind, start_date, end_date, start_minute, end_minute, label, created_at) VALUES (?, ?, ?, ?, NULL, NULL, ?, ?)', [id, 'closed', plan.startDate, plan.endDate, plan.label, iso(app.clock.now())])
+    audit(app, actor, 'booking.closed_days', 'settings', null, { from: plan.startDate, to: plan.endDate, days: plan.days })
+    return { id, plan }
+  })
 }
 

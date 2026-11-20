@@ -3,7 +3,9 @@ import { Link } from 'react-router'
 import { AdminButton } from '../components/AdminButton'
 import { fill } from '../i18n'
 import { copyText, downloadText, draftToText, exportFileName, factLines, formatMoment, humanKey, printElement, reportToText } from './exporters'
-import { OUTLINE_SECTIONS, type Draft, type Outline, type Report } from './model'
+import { OUTLINE_SECTIONS, type Draft, type Outline, type Proposal, type Report } from './model'
+import { automationText } from '../i18n/automation'
+import { moment, typeName } from '../automation/model'
 import { useAssistantLanguage, useAssistantText } from './text'
 import styles from '../styles/assistant.module.scss'
 
@@ -213,6 +215,37 @@ export function DraftCard({ draft }: { draft: Draft }) {
             {t.draft.open}
           </AdminButton>
         )}
+      </div>
+    </article>
+  )
+}
+
+// ------------------------------------------------------------------------------------------------------------------------ proposals
+
+/**
+ * A proposal the assistant made (PROMPT 33). It says in its first line that nothing has been done, and it has no approval control of its own: the only control is on the action's page, which
+ * the card links to. (A chat reply is never an approval.) The words are the automation dictionary's, in the language of the assistant's screen.
+ */
+export function ProposalCard({ proposal }: { proposal: Proposal }) {
+  const language = useAssistantLanguage()
+  const titleId = useId()
+  const t = automationText(language)
+  return (
+    <article className={styles.draft} aria-labelledby={titleId} data-kind="proposal">
+      <h3 id={titleId}>{t.card.title}</h3>
+      <p className={styles.draftNotice} role="note">
+        <strong>{t.card.notDone}</strong> {proposal.duplicate ? t.card.duplicate : (t.types as Record<string, { summary: string }>)[proposal.type]?.summary}
+      </p>
+      <p className={styles.reportMeta}>
+        <span>{typeName(t, proposal.type as never)}</span>
+        <span>{proposal.reference}</span>
+        {proposal.expiresAt && <span>{fill(t.card.expires, { when: moment(proposal.expiresAt, language) })}</span>}
+        {proposal.requiresSecondConfirmation && <span>{t.card.secondConfirmation}</span>}
+      </p>
+      <div className={styles.cardActions}>
+        <AdminButton variant="secondary" to={proposal.path}>
+          {t.card.open}
+        </AdminButton>
       </div>
     </article>
   )

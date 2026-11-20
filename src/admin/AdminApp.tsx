@@ -39,6 +39,8 @@ import { TextsPage } from './pages/TextsPage'
 import { ExtraEditPage, PackageEditPage, ServiceEditPage } from './pages/CatalogEditPages'
 import { AiAssistantPage } from './pages/AiAssistantPage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
+import { AutomationActionPage } from './pages/AutomationActionPage'
+import { AutomationPage } from './pages/AutomationPage'
 import { AiPage } from './pages/AiPage'
 import { ShopComparisonPage } from './pages/ShopComparisonPage'
 import { ShopOfferPage } from './pages/ShopOfferPage'
@@ -130,6 +132,8 @@ function Gate() {
           <Route path="ai" element={<AiPage />} />
           <Route path="ai-assistant" element={<AiAssistantPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="automation" element={<AutomationPage />} />
+          <Route path="automation/:reference" element={<AutomationActionPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/new" element={<ProjectEditPage />} />
           <Route path="projects/settings" element={<ProjectSettingsPage />} />
