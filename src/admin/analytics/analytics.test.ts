@@ -15,7 +15,7 @@ import { en } from '../i18n/en'
 import { hu } from '../i18n/hu'
 import { BarChart, BarList, DonutChart, FunnelChart, LineChart } from './Charts'
 import { formatCount, formatDayKey, formatDays, formatHours, formatMoney, formatPercent, formatUsd, humanize, word } from './format'
-import { KpiCard, MoneyCard } from './Kpi'
+import { KpiCard, MoneyCard, ScopeNote } from './Kpi'
 import { DEFAULT_FILTERS, SECTION_FILTERS, canOpen, directionOf, ignoredFilters, queryFor, rangeProblem, readFilters, sectionOf, unitOf, writeFilters } from './model'
 import { SectionView } from './Sections'
 import { AnalyticsTextProvider } from './text'
@@ -624,6 +624,153 @@ describe('PROMPT 32.1: what the project status filter did to a figure is said in
     }
     expect(strip(page)).toContain('function AnalyticsError')
     expect(strip(page)).not.toContain('ErrorState')
+  })
+})
+
+describe('PROMPT 32.2: a figure that is empty by definition says why, wherever it is drawn, in every language, without saying it twice', () => {
+  const NOTE = (effect: FilterNote['effect'], reason: string | null): FilterNote => ({ filter: 'projectStatus', effect, reason })
+  const DICTIONARY = { en: analyticsEn, hu: analyticsHu, nl: analyticsNl }
+  const LANGUAGES = ['en', 'hu', 'nl'] as const
+  const count = (html: string, text: string): number => html.split(text).length - 1
+  const EMPTY = NOTE('empty_by_definition', 'status_not_active')
+  const point = (key: string, value: number) => ({ key, from: key, to: key, value })
+  /** The sentence of the figure's own reason (an unavailable card writes it) and the sentence of the note (the one under the badge): two dictionaries, two different wordings. */
+  const ownSentence = (language: (typeof LANGUAGES)[number], code: string): string => (DICTIONARY[language].reasons as Record<string, string>)[code]
+  const noteSentence = (language: (typeof LANGUAGES)[number], code: string): string => (DICTIONARY[language].scope.reasons as Record<string, string>)[code]
+  const projects = (language: (typeof LANGUAGES)[number], over: Partial<Section> = {}) =>
+    render(
+      h(SectionView, {
+        answer: answer({
+          name: 'projects',
+          filterSummary: { projectStatus: { status: 'completed', effect: 'partial' } },
+          metrics: [metric({ id: 'activeProjects', state: 'unavailable', value: null, previous: null, change: null, changePercent: null, comparison: 'none', reason: 'status_not_active', filterNote: EMPTY })],
+          distributions: [{ id: 'tasksByStatus', total: 0, items: [], filterNote: EMPTY }],
+          tables: [
+            { id: 'projectWorkload', columns: ['reference', 'status', 'openTasks', 'overdueTasks', 'expectedOn'], rows: [], filterNote: EMPTY },
+            { id: 'upcomingDeadlines', columns: ['reference', 'kind', 'dueOn'], rows: [], filterNote: EMPTY },
+          ],
+          ...over,
+        }),
+      }),
+      language,
+    )
+
+  it('writes the reason under the badge of a distribution and of a table that is empty by definition, from the dictionary of the language on the screen', () => {
+    for (const language of LANGUAGES) {
+      const html = projects(language)
+      const reason = noteSentence(language, 'status_not_active')
+      expect(reason.length, language).toBeGreaterThan(20)
+      // The distribution and the two tables: three notes, each with its reason (the card's own sentence is a different wording and is counted apart).
+      expect(count(html, reason), language).toBe(3)
+      expect(count(html, DICTIONARY[language].scope.badge.empty_by_definition), language).toBe(4)
+    }
+  })
+
+  it('does not say the same reason twice on an unavailable card: the card writes it, the note keeps its badge', () => {
+    for (const language of LANGUAGES) {
+      const card = render(h(KpiCard, { metric: metric({ id: 'activeProjects', state: 'unavailable', value: null, previous: null, change: null, changePercent: null, comparison: 'none', reason: 'status_not_active', filterNote: EMPTY }) }), language)
+      expect(count(card, ownSentence(language, 'status_not_active')), language).toBe(1)
+      expect(count(card, noteSentence(language, 'status_not_active')), language).toBe(0)
+      expect(count(card, DICTIONARY[language].scope.badge.empty_by_definition), language).toBe(1)
+      const hold = render(h(KpiCard, { metric: metric({ id: 'projectsOnHold', state: 'unavailable', value: null, previous: null, change: null, changePercent: null, comparison: 'none', reason: 'status_not_on_hold', filterNote: NOTE('empty_by_definition', 'status_not_on_hold') }) }), language)
+      expect(count(hold, ownSentence(language, 'status_not_on_hold')), language).toBe(1)
+      expect(count(hold, noteSentence(language, 'status_not_on_hold')), language).toBe(0)
+    }
+    // A note whose reason the card does NOT state (the card is available, or states another reason) is not left without one.
+    const other = render(h(KpiCard, { metric: metric({ id: 'activeProjects', state: 'unavailable', value: null, previous: null, change: null, changePercent: null, comparison: 'none', reason: 'no_data', filterNote: EMPTY }) }))
+    expect(count(other, noteSentence('en', 'status_not_active'))).toBe(1)
+    const available = render(h(KpiCard, { metric: metric({ id: 'activeProjects', filterNote: EMPTY }) }))
+    expect(count(available, noteSentence('en', 'status_not_active'))).toBe(1)
+    const moneyCard = render(h(MoneyCard, { metric: money({ id: 'acceptedQuotationValue', state: 'unavailable', reason: 'status_not_active', filterNote: EMPTY }) }))
+    expect(count(moneyCard, ownSentence('en', 'status_not_active'))).toBe(1)
+    expect(count(moneyCard, noteSentence('en', 'status_not_active'))).toBe(0)
+  })
+
+  it('explains an empty chart of every kind (line, bar, donut, bar list, funnel), not only the badge', () => {
+    for (const language of LANGUAGES) {
+      const note = h(ScopeNote, { note: EMPTY })
+      const format = (value: number) => String(value)
+      const charts = [
+        h(LineChart, { title: 'Line', note, labels: ['2026-11-01'], series: [{ label: 'x', values: [0], tone: 0 }], format }),
+        h(BarChart, { title: 'Bar', note, labels: ['2026-11-01'], series: [{ label: 'x', values: [0], tone: 0 }], mode: 'grouped', format }),
+        h(DonutChart, { title: 'Donut', note, items: [], format, share: format }),
+        h(BarList, { title: 'List', note, items: [], format }),
+        h(FunnelChart, { title: 'Funnel', note, steps: [], format }),
+      ]
+      for (const chart of charts) {
+        const html = render(chart, language)
+        expect(count(html, noteSentence(language, 'status_not_active')), `${language} ${html.slice(0, 80)}`).toBe(1)
+        expect(html).toContain(DICTIONARY[language].charts.noData)
+      }
+    }
+  })
+
+  it('explains an empty series of the section the same way (a chart that has points still shows its own note unchanged)', () => {
+    const html = projects('en', {
+      series: [
+        { id: 'tasksCompletedSeries', granularity: 'day', unit: 'count', points: [point('2026-11-01', 0)], filterNote: EMPTY },
+        { id: 'completedProjectsSeries', granularity: 'day', unit: 'count', points: [point('2026-11-01', 2)], filterNote: NOTE('not_applied', 'historical_event') },
+      ],
+    })
+    expect(count(html, noteSentence('en', 'status_not_active'))).toBe(4)
+    expect(count(html, noteSentence('en', 'historical_event'))).toBe(1)
+  })
+
+  it('keeps what a filtered figure and a figure that is not filtered say exactly as before: no reason added, none lost', () => {
+    for (const language of LANGUAGES) {
+      const applied = render(h(KpiCard, { metric: metric({ id: 'activeProjects', previous: null, change: null, changePercent: null, comparison: 'snapshot', filterNote: NOTE('applied', null) }) }), language)
+      for (const code of ['status_not_active', 'status_not_on_hold', 'historical_event', 'not_project_data']) expect(count(applied, noteSentence(language, code)), `${language} applied ${code}`).toBe(0)
+      const event = render(h(KpiCard, { metric: metric({ id: 'completedProjects', filterNote: NOTE('not_applied', 'historical_event') }) }), language)
+      expect(count(event, noteSentence(language, 'historical_event')), language).toBe(1)
+      expect(count(event, noteSentence(language, 'status_not_active')), language).toBe(0)
+      const elsewhere = render(h(KpiCard, { metric: metric({ id: 'newQuoteRequests', filterNote: NOTE('not_applied', 'not_project_data') }) }), language)
+      expect(count(elsewhere, noteSentence(language, 'not_project_data')), language).toBe(1)
+      // A table that is filtered or not filtered is not pointed at its note: only an empty-by-definition one is.
+      for (const filterNote of [NOTE('applied', null), NOTE('not_applied', 'historical_event')]) {
+        const table = render(h(SectionView, { answer: answer({ name: 'projects', filterSummary: { projectStatus: { status: 'design', effect: 'partial' } }, tables: [{ id: 'projectWorkload', columns: ['reference'], rows: [['P-1']], filterNote }] }) }), language)
+        expect(table, language).not.toContain('aria-describedby')
+      }
+    }
+  })
+
+  it('lets the focusable table region point at the reason, so it is announced when the region is entered', () => {
+    const html = projects('en')
+    for (const id of ['projectWorkload', 'upcomingDeadlines']) {
+      const described = new RegExp(`role="group" aria-label="[^"]*" aria-describedby="table-${id}-scope"`)
+      expect(html, id).toMatch(described)
+      expect(html, id).toContain(`id="table-${id}-scope"`)
+    }
+  })
+
+  it('has a reason sentence for every reason an empty-by-definition figure can carry, in all three languages, without a placeholder to fill in', () => {
+    for (const language of LANGUAGES) {
+      for (const code of ['status_not_active', 'status_not_on_hold']) {
+        const sentence = noteSentence(language, code)
+        expect(sentence, `${language} ${code}`).toBeTruthy()
+        expect(sentence, `${language} ${code}`).not.toMatch(/[{}]/)
+        expect(sentence, `${language} ${code}`).toMatch(/[.!]$/)
+      }
+    }
+  })
+
+  it('takes the words from the dictionary: the note component holds no sentence of its own', () => {
+    const source = strip(readFileSync(join(process.cwd(), 'src', 'admin', 'analytics', 'Kpi.tsx'), 'utf8'))
+    const body = source.slice(source.indexOf('export function ScopeNote'), source.indexOf('const statesItsReason'))
+    expect(body.length).toBeGreaterThan(300)
+    expect(body).toContain('t.scope.reasons')
+    // Every string literal of the component, read one by one (a quote opens a literal, the same quote closes it): none is a sentence (none has a space in it).
+    const literals: string[] = []
+    for (let index = 0; index < body.length; index += 1) {
+      const quote = body[index]
+      if (quote !== "'" && quote !== '"' && quote !== '`') continue
+      const end = body.indexOf(quote, index + 1)
+      literals.push(body.slice(index + 1, end))
+      index = end
+    }
+    expect(literals.length).toBeGreaterThan(2)
+    expect(literals.filter((literal) => /\s/.test(literal))).toEqual([])
+    // The text between tags (JSX text) is none either: every child of the note is an expression.
+    expect(body).not.toMatch(/>\s*[A-Za-z][^<{}]*</)
   })
 })
 

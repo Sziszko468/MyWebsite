@@ -170,6 +170,19 @@ const valueOf = async (page, name) => (await card(page, name).locator('p').first
     expect(/Empty by definition/.test(empty) && /defined for active projects only/.test(empty), `empty by definition: ${empty.slice(0, 160)}`)
     expect(!/\n0\n/.test(empty), 'and no zero is drawn for it')
     expect((await card(page, 'Completed projects').innerText()).includes('Not filtered by project status'), 'the events of the period stay as they are')
+    // PROMPT 32.2: the chart and the tables that are empty by definition say WHY (the card writes its own sentence, so the note does not repeat it).
+    const reason = 'It is defined for active projects only; the selected status is not an active one.'
+    expect(!empty.includes(reason) && /This figure is defined for active projects only/.test(empty), 'the card says its reason once, in its own sentence')
+    for (const title of ['Tasks by status']) {
+      const chart = await page.locator('[role=tabpanel]:not([hidden]) figure', { hasText: title }).first().innerText()
+      expect(chart.includes('Empty by definition') && chart.includes(reason), `the chart "${title}" says why it is empty: ${chart.slice(0, 200)}`)
+    }
+    for (const title of ['Workload of active projects', 'Deadlines in the next 14 days']) {
+      const block = await page.locator('[role=tabpanel]:not([hidden]) section', { has: page.getByRole('heading', { name: title }) }).first().innerText()
+      expect(block.includes('Empty by definition') && block.includes(reason), `the table "${title}" says why it is empty: ${block.slice(0, 200)}`)
+      const described = await page.locator('[role=tabpanel]:not([hidden]) section', { has: page.getByRole('heading', { name: title }) }).first().locator('[role=group][aria-describedby]').getAttribute('aria-describedby')
+      expect(!!described && (await page.locator(`[id="${described}"]`).innerText()).includes(reason), 'the table region points at its reason')
+    }
     // The overview: the project figures follow the filter, every other figure says that it is not about projects.
     await open(page, '?projectStatus=design')
     expect((await card(page, 'Active projects').innerText()).includes('Filtered by project status'), 'overview: a project figure is filtered')

@@ -1,6 +1,6 @@
 # Business intelligence and analytics dashboard
 
-PROMPT 32 · branch `feature/business-intelligence` (base: `feature/ai-admin-assistant`, `c64cf75`).
+PROMPT 32 · branch `feature/business-intelligence` (base: `feature/ai-admin-assistant`, `c64cf75`). Refined in PROMPT 32.1 (`feature/business-intelligence-refinement`) and PROMPT 32.2 (`feature/business-intelligence-final-fixes`, **the current implementation branch**, containing both earlier ones); see [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) for the branch chain.
 
 `/admin/analytics` is the administration's executive dashboard: what came in, what is out with customers, what is running, what is waiting, what the assistants cost — **every number counted by the server from stored records, none estimated unless it says so, none computed in the browser, none produced by a language model**.
 

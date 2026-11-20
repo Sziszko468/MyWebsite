@@ -90,14 +90,17 @@ function DataTable({ table }: { table: Table }) {
     return ['audience', 'status', 'kind', 'scope'].includes(column) ? word(t.keys as Record<string, string>, value) : value
   }
   const columnName = (column: string) => (t.columns as Record<string, string>)[column] ?? humanize(column)
+  // A table that is empty by definition says why in its note; the focusable table region points at that note, so a keyboard or screen-reader user who lands on it hears the reason too.
+  const emptyByDefinition = table.filterNote?.effect === 'empty_by_definition'
+  const noteId = `table-${table.id}-scope`
   return (
     <section className={styles.tableBlock} aria-labelledby={`table-${table.id}`}>
       <h3 id={`table-${table.id}`} className={styles.blockTitle}>
         {info.label}
       </h3>
       {info.help && <p className={styles.blockHelp}>{info.help}</p>}
-      <ScopeNote note={table.filterNote} />
-      <div className={styles.tableScroll} tabIndex={0} role="group" aria-label={info.label}>
+      <ScopeNote note={table.filterNote} id={emptyByDefinition ? noteId : undefined} />
+      <div className={styles.tableScroll} tabIndex={0} role="group" aria-label={info.label} aria-describedby={emptyByDefinition ? noteId : undefined}>
         <table>
           <thead>
             <tr>

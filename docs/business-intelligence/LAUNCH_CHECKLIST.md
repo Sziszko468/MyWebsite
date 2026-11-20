@@ -1,6 +1,24 @@
 # Launch checklist
 
-Nothing here has been deployed, merged or run against the production database. The branch is `feature/business-intelligence`; it adds **no migration** and changes **no environment variable or setting**, so it can be deployed and rolled back like any code-only change.
+Nothing here has been deployed, merged into `main` or `deployment/render-cloudflare`, or run against the production database or production data. Everything below was verified **in development only** (see "Verified where" below); production verification is the list under "Check" and is **not done**.
+
+**The implementation, branch by branch.** The dashboard was built in three steps, each on its own branch and each based on the one before it:
+
+| Step | Branch | Head when written | What it holds |
+| --- | --- | --- | --- |
+| PROMPT 32 | `feature/business-intelligence` | `7756d72` | the analytics dashboard, API, CSV, print view, three assistant tools |
+| PROMPT 32.1 | `feature/business-intelligence-refinement` | `f8b1655` | the project status filter semantics and notes, the localization audit, regression hardening |
+| PROMPT 32.2 | `feature/business-intelligence-final-fixes` | the commit on top of `f8b1655` | the reason shown for every figure that is empty by definition, this checklist's corrections |
+
+**The branch that describes the current implementation is `feature/business-intelligence-final-fixes`** (it contains the other two). `feature/business-intelligence` and `feature/business-intelligence-refinement` are earlier stages of the same work: deploying either of them alone would leave out the later fixes. The whole chain adds **no migration** and changes **no environment variable or setting**, so it can be deployed and rolled back like any code-only change.
+
+## Verified where
+
+| | Done | How |
+| --- | --- | --- |
+| **Development** (this machine: Windows 11, Node with `node:sqlite`, system Chrome through Playwright; **synthetic** rows in a throw-away database) | yes | typecheck, lint, the whole automated suite, the production build, journeys and audits at five widths, dark and light, three languages — results in [TEST_RESULTS.md](TEST_RESULTS.md) |
+| **Staging / a safe environment with real data** | **no** | the "Check" list below |
+| **Production** (the live site and its data) | **no** | nothing was deployed or read there; performance was measured on synthetic data, not on production volumes; the assistant's analytics tools were exercised with a scripted model, never a live one |
 
 ## Decide (the owner)
 
@@ -23,13 +41,14 @@ Nothing here has been deployed, merged or run against the production database. T
 - [ ] **Print the overview** on your printer or to PDF: black on white, header with period and time, no navigation.
 - [ ] Switch the screen to **Hungarian, English and Dutch** and read one section in each.
 - [ ] **Select a project status** in *Projects*, *Overview* and *Alerts*: each figure says *Filtered*, *Not filtered* (with the reason) or *Empty by definition*; compare *Active projects* for one status with the project list filtered the same way, and check that *Completed projects* does **not** change.
+- [ ] **Select *Completed* (or *Cancelled*) in *Projects*** and read every figure that is empty: the cards, the *Tasks by status* chart, the *Workload* and *Deadlines* tables each say **why** ("defined for active projects only…"), in Hungarian, English and Dutch, and none shows a zero. Select *Design* and check the *Projects on hold* card says it counts projects On hold only (PROMPT 32.2).
 - [ ] Look at **dark and light** themes and a **phone**.
 - [ ] If the AI admin assistant is on: ask "How many quote requests did we get in the last 30 days, and what is the accepted quotation value?" and confirm the figures equal the dashboard's and that it says accepted value is not cash. *This has not been tried with the real model (no paid call was made); only a scripted model and the tools themselves were tested.*
 
 ## Known limitations (stated on the screen where they matter)
 
-No revenue, cash or receivables · the project status filter is the **current** status (no status history exists) and the API gives a per-figure filter note only for it (the other filters keep their per-section behaviour, listed on the screen when set but unused) · no open-pipeline history · no numeric requested budget · no customer country or source · no decline-reason breakdown · funnel history only from the start of the event log · average reply time is wall-clock time · communication analytics are the heaviest query (fine at real sizes; see [PERFORMANCE.md](PERFORMANCE.md)) · performance was measured on **synthetic** data on a development machine, not on production · no PDF · the assistant's analytics tools were not exercised with a live model.
+No revenue, cash or receivables · the project status filter is the **current** status (no status history exists) and the API gives a per-figure filter note only for it (the other filters keep their per-section behaviour, listed on the screen when set but unused) · in the **alerts** section the banner says which alert kinds the status filters, but does not single out the kinds a status can never produce (for example an overdue milestone under *Completed*): the list is simply shorter, and the empty-list sentence says that no rule matched, not that nothing needs attention · no open-pipeline history · no numeric requested budget · no customer country or source · no decline-reason breakdown · funnel history only from the start of the event log · average reply time is wall-clock time · communication analytics are the heaviest query (fine at real sizes; see [PERFORMANCE.md](PERFORMANCE.md)) · performance was measured on **synthetic** data on a development machine, not on production · no PDF · the assistant's analytics tools were not exercised with a live model.
 
 ## If something is wrong
 
-Nothing is stored, so there is nothing to repair: fix the code and the next request is right. To switch the screen off without a deploy there is no flag (it is read-only); remove the tab by reverting the branch. The assistant's three tools are separate: reverting `tools.ts` returns it to its 31 tools.
+Nothing is stored, so there is nothing to repair: fix the code and the next request is right. To switch the screen off without a deploy there is no flag (it is read-only); remove the tab by reverting the three branches' commits (PROMPT 32, 32.1, 32.2: the 32.2 commit only removes the reasons, the 32.1 commit the filter notes). The assistant's three tools are separate: reverting `tools.ts` returns it to its 31 tools.

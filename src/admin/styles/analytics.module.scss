@@ -808,6 +808,16 @@
   }
 }
 
+/* Why a figure is empty by definition (PROMPT 32.2): the sentence under the badge, in the body text colour and a readable size, never only a colour or a border to tell it apart. */
+.scopeReason {
+  flex: 1 1 100%;
+  min-width: 0;
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal, 1.5);
+  overflow-wrap: anywhere;
+}
+
 .scopeBadge {
   padding: 0 var(--space-2);
   border: var(--border-width) solid var(--color-border-strong);

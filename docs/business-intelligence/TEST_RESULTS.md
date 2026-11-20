@@ -1,5 +1,59 @@
 # Test results
 
+## PROMPT 32.2 — final fixes (the reason of every figure that is empty by definition; the launch checklist)
+
+Branch `feature/business-intelligence-final-fixes`, base `f8b1655` (`feature/business-intelligence-refinement`). Same machine as the sections below (Windows 11, `node:sqlite`, system Chrome through Playwright). **Development verification only**: synthetic rows in throw-away databases; nothing was run against production data or a production database, nothing was deployed or merged, and no real Anthropic call was made. No server file, API field, calculation, dictionary entry or CSV changed in this step (`git diff --name-only -- server` is empty): it changes how the screen writes a reason the server already sent, and the documentation.
+
+### Automated checks (commands actually run; results as they came out)
+
+| Command | Result |
+| --- | --- |
+| `npx tsc -b` (typecheck, frontend and backend) | exit 0, no output |
+| `npx oxlint` (lint) | exit 0, clean |
+| `npx vitest run server/test/analyticsProjectFilter.test.ts` (the existing filter tests, unchanged) | **18 / 18** passed |
+| `npx vitest run src/admin/analytics` (cards, charts, tables, the dictionary in **all three languages**) | **59 / 59** passed (was 51; **8 new**) |
+| `npx vitest run src/admin src/i18n/quality` | 16 files, **416** tests passed |
+| `npx vitest run server/test/analytics.test.ts analyticsPeriod.test.ts analyticsPerformance.test.ts aiAdminTools.test.ts aiAdminApi.test.ts` | 5 files, **132** tests passed |
+| `npx vitest run` (the whole suite, run alone) | **164 files, 3,458 tests, all passed** (3,450 + the 8 new; 121.9 s) |
+| `npm run build` (= `tsc -b` + `i18n:check` + `vite build` + SEO prerender) | exit 0 — `i18n:check` OK (4,225 texts × 3 languages from 79 sources), 103 pages prerendered |
+| `npm run i18n:validate` | OK — 0 errors, 0 warnings; spelling HU / EN / NL 0 words not found; "blank on purpose in all languages: 4" (unchanged, listed) |
+| `npm run check:seo` | OK — 104 files, 82 indexable, 22 noindex |
+| `npm audit` | found 0 vulnerabilities |
+| secrets scan of `dist` | no key, token or private key; the match is the **name** `ANTHROPIC_API_KEY` (4 times) in the administration's pre-existing AI settings text, no value |
+| `node tools/e2e/analytics-journey.cjs` (fresh scratch server, synthetic rows) | **16 / 16** steps — the project-status step now also checks, in the real page, that the *Tasks by status* chart and the *Workload* and *Deadlines* tables say **why** they are empty, that the card says its reason **once**, and that the table region points at the reason |
+| `node tools/audit/audit-analytics.cjs --extra=projectStatus=completed --sections=executive,projects,alerts,financial` | **120 views, 0 findings** (4 sections × 1440 / 1024 / 768 / 390 / 320 × dark / light × hu / en / nl); **390 notes of figures empty by definition inspected**, every one with a visible reason |
+| `… --extra=projectStatus=cancelled --sections=projects` | **30 views, 0 findings** (5 widths × dark / light × 3 languages); 300 notes inspected |
+| `… --extra=projectStatus=development` (every section) | **270 views, 0 findings** (regression; 30 notes inspected: the *Projects on hold* card) |
+| `… ` (no status selected, every section) | **270 views, 0 findings** (regression; 0 notes, as it must be) |
+| `python mutate-analytics.py` for the 6 new rules and the 4 earlier rules that touch the edited files | **10 / 10 caught**; the files were restored byte for byte |
+
+What the audits check, per view (automated): sideways scrolling, elements outside the viewport, controls under 24 × 24 px, unnamed controls, exactly one `h1`, **axe-core WCAG 2.0 / 2.1 / 2.2 A and AA + best practice with the page's real CSP (this includes colour contrast, in dark and light)**, that the section drew figures and every chart opens its table, no raw key / `undefined` / `NaN`, no console error, reduced motion (the pages are loaded with reduced motion on and nothing may animate), and — new in this step — that **every note of a figure that is empty by definition has a visible reason sentence** (its own on an unavailable card, the note's on a chart, breakdown or table), and that a status outside "active" really produces such figures in *Projects* (so the check cannot pass on an empty page).
+
+**The 8 new frontend tests** (`src/admin/analytics/analytics.test.ts`, "PROMPT 32.2"): the reason appears under the badge of a breakdown and of two tables in English, Hungarian and Dutch, from the dictionary of the language on the screen · an unavailable card (and the *Projects on hold* card) writes its reason **once** and its note keeps the badge only, while a note whose reason the figure does not write itself is not left without one · an empty line, bar, donut, bar-list and funnel chart each show the reason · an empty series of a section shows it · a filtered and a not-filtered figure say exactly what they said before, no reason added or lost, no `aria-describedby` · the focusable table region points at its reason by `aria-describedby` · both reason codes have a finished sentence, without a placeholder, in all three languages · the note component holds no sentence of its own (every string literal in it is a code, every child an expression).
+
+### Visual inspection (screenshots taken with Playwright and the system Chrome, then looked at by eye; **not** an automated check)
+
+*Projects* with *Completed* selected, on the scratch server with synthetic rows:
+
+| What was looked at | Seen |
+| --- | --- |
+| full page, 1440 px, dark, English | each unavailable card: its own sentence once, badge below it; *Tasks by status*: badge, then the reason line, then "Nothing to show here."; *Workload* and *Deadlines*: badge and reason above the empty table; "Filtered" and "Not filtered" figures unchanged |
+| full page, 1024 px, light, Hungarian | the same, in Hungarian; the *Projects on hold* card says it counts only projects On hold |
+| full page, 390 px, light, English (a phone) | no sideways scroll; the reason wraps under the badge |
+| crop of the chart, 768 px, dark, Dutch · of the chart, 320 px, dark, Hungarian · of the table, 390 px, light, English · of a card, 1440 px, light, English | the reason is legible, wraps inside the box (no clipping at 320 px), reads as body text, not as a faint caption |
+| computed style of the reason | 14 px / line height 21 px; colour `rgb(11, 11, 13)` in light and `rgb(244, 240, 232)` in dark (the body text colours) |
+
+768 px and 320 px were looked at only as the two chart crops above (their full-page images were taken but not viewed), and the English / Hungarian / Dutch and dark / light pairs shown are a sample, not every combination: every width, both themes and all three languages were covered by the automated audits, not by eye.
+
+### Not verified
+
+* No staging or production data, no deployment, no live model.
+* The assistant journey (`admin-assistant-journey.cjs`), the other regression journeys (discovery, visitor AI, quote lifecycle, portal, booking, communication) and `audit-admin.cjs` were **not re-run**: this step changes only the dashboard's note component, a table attribute, one style rule and documentation; the full unit suite, which contains their tests, passed.
+* Screen readers and a printed sheet were not tried; `aria-describedby` on the table region is checked as markup (unit test, journey), not heard.
+* The *alerts* section does not single out the alert kinds a status can never produce (see "Limitations" in [FILTER_SEMANTICS.md](FILTER_SEMANTICS.md)).
+
+---
+
 ## PROMPT 32.1 — refinement (project status filter, localization audit)
 
 Branch `feature/business-intelligence-refinement`, base `7756d72` (the pushed `feature/business-intelligence`). Same machine as below (Windows 11, `node:sqlite`, system Chrome through Playwright); nothing was run against production data, no real Anthropic call was made (the model was a scripted model in tests and the local stand-in in the browser checks).

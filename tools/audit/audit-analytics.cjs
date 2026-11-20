@@ -8,7 +8,8 @@
 //   - layout: sideways scrolling, elements outside the viewport, controls under 24x24 px (WCAG 2.5.8), controls with no accessible name, exactly one h1;
 //   - accessibility: axe-core (WCAG 2.0/2.1/2.2 A and AA, best practice) with the page's real Content-Security-Policy;
 //   - content: the section drew figures, every chart has its numbers as a table, no raw key, "undefined", "NaN" or open placeholder is visible, no console error;
-//   - reduced motion: nothing animates (the page is loaded with reduced motion on).
+//   - reduced motion: nothing animates (the page is loaded with reduced motion on);
+//   - the project status filter's notes (PROMPT 32.2): every figure that is empty by definition says why, in a visible sentence (its own, or the note's).
 // Exit code 1 when anything is found.
 const { launch, axeRun } = require('./lib.cjs')
 
@@ -102,6 +103,24 @@ function content(page) {
       raw: (text.match(/undefined|\[object|NaN|\{[a-zA-Z]+\}|\bnull\b/g) || []).slice(0, 3),
       length: text.length,
       heading: panel ? !!panel.querySelector('h2') : false,
+      // PROMPT 32.2: a figure that is empty by definition says WHY. Its note has a reason sentence after the badge, or the figure is an unavailable card that writes the same reason itself;
+      // either way the sentence is visible (not hidden, not empty).
+      emptyNotes: (() => {
+        const notes = [...(panel ? panel.querySelectorAll('[data-effect="empty_by_definition"]') : [])]
+        const visible = (el) => {
+          const box = el.getBoundingClientRect()
+          const style = getComputedStyle(el)
+          return box.width > 0 && box.height > 0 && style.visibility !== 'hidden' && style.display !== 'none' && (el.innerText || '').trim().length > 10
+        }
+        const withoutReason = notes.filter((note) => {
+          const spans = note.querySelectorAll('span')
+          if (spans.length > 1 && visible(spans[spans.length - 1])) return false
+          const card = note.closest('article')
+          const own = card ? card.querySelector('[data-state="unavailable"]') : null
+          return !(own && visible(own))
+        })
+        return { count: notes.length, without: withoutReason.length, sample: withoutReason.slice(0, 2).map((note) => note.outerHTML.slice(0, 120)) }
+      })(),
     }
   })
 }
@@ -110,6 +129,7 @@ function content(page) {
   const browser = await launch()
   const findings = []
   let checked = 0
+  let emptyChecked = 0
 
   const boot = await browser.newContext({ bypassCSP: true, locale: 'en-GB' })
   const bootPage = await boot.newPage()
@@ -149,6 +169,10 @@ function content(page) {
           if (c.figures !== c.figuresEmptyOrWithImage) findings.push({ view, kind: 'content', what: 'a chart with neither a drawing nor a sentence' })
           if (section !== 'executive' && c.cards + c.figures + c.tables === 0) findings.push({ view, kind: 'content', what: 'no figure, no chart, no table', ...c })
           if (errors.length) findings.push({ view, kind: 'console', errors: errors.slice(0, 3) })
+          // PROMPT 32.2: every figure that is empty by definition says why; and a status outside "active" really does produce such figures in Projects (the check is not vacuous).
+          emptyChecked += c.emptyNotes.count
+          if (c.emptyNotes.without > 0) findings.push({ view, kind: 'content', what: 'a figure empty by definition without a visible reason', ...c.emptyNotes })
+          if (/projectStatus=(completed|cancelled)/.test(EXTRA) && section === 'projects' && c.emptyNotes.count === 0) findings.push({ view, kind: 'content', what: 'no figure empty by definition for a status outside active' })
           // A chart's table opens: the numbers are there for a person who cannot see the picture.
           const summary = page.locator('[role=tabpanel]:not([hidden]) figure details summary').first()
           if (await summary.count()) {
@@ -163,7 +187,7 @@ function content(page) {
   }
   await browser.close()
   if (OUT) require('fs').writeFileSync(OUT, JSON.stringify({ checked, findings }, null, 2))
-  console.log(`checked ${checked} views, ${findings.length} finding(s)`)
+  console.log(`checked ${checked} views (${emptyChecked} notes of figures empty by definition inspected), ${findings.length} finding(s)`)
   for (const f of findings.slice(0, 40)) console.log(JSON.stringify(f).slice(0, 500))
   process.exit(findings.length ? 1 : 0)
 })().catch((error) => {

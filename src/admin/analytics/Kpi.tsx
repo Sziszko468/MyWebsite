@@ -43,21 +43,29 @@ export const ScopeStatus = createContext<string | null>(null)
 
 /**
  * What the selected project status did to ONE figure, in words: filtered (and by which status), not filtered (and why: an event of the period, or not about projects) or empty by
- * definition. A figure is never left looking filtered when it is not. Nothing is shown when no status is selected.
+ * definition (and why: the figure is defined for active projects, or for projects On hold, only). A figure is never left looking filtered when it is not, and never left empty without
+ * a reason. Nothing is shown when no status is selected.
+ *
+ * `explained`: the figure itself already states this very reason (an unavailable card shows it as its own sentence), so the note keeps its badge and does not say it twice.
+ * `id`: lets the element that holds the (empty) figure point at the note with `aria-describedby`.
  */
-export function ScopeNote({ note }: { note: FilterNote | undefined }) {
+export function ScopeNote({ note, explained = false, id }: { note: FilterNote | undefined; explained?: boolean; id?: string }) {
   const t = useAnalyticsText()
   const status = useContext(ScopeStatus)
   if (!note) return null
   const reason = note.reason ? ((t.scope.reasons as Record<string, string>)[note.reason] ?? humanize(note.reason)) : null
   return (
-    <p className={styles.scope} data-effect={note.effect}>
+    <p id={id} className={styles.scope} data-effect={note.effect}>
       <span className={styles.scopeBadge}>{t.scope.badge[note.effect]}</span>
       {note.effect === 'applied' && status !== null && <span>{fill(t.scope.applied, { status: word(t.keys as Record<string, string>, status) })}</span>}
       {note.effect === 'not_applied' && reason && <span>{reason}</span>}
+      {note.effect === 'empty_by_definition' && reason && !explained && <span className={styles.scopeReason}>{reason}</span>}
     </p>
   )
 }
+
+/** True when an unavailable card already writes the reason of its filter note as its own sentence (so the note need not repeat it). */
+const statesItsReason = (metric: { state: string; reason: string | null; filterNote?: FilterNote }): boolean => metric.state === 'unavailable' && metric.reason !== null && metric.filterNote?.reason === metric.reason
 
 function KindBadge({ kind }: { kind: Metric['kind'] }) {
   const t = useAnalyticsText()
@@ -130,7 +138,7 @@ export function KpiCard({ metric, trend }: { metric: Metric; trend?: Series | nu
         ) : (
           <Unavailable reason={metric.reason} state={metric.state === 'not_permitted' ? 'not_permitted' : 'unavailable'} />
         )}
-        <ScopeNote note={metric.filterNote} />
+        <ScopeNote note={metric.filterNote} explained={statesItsReason(metric)} />
         <Definition help={help} />
         {available && metric.drill && (
           <Link className={styles.drill} to={metric.drill}>
@@ -176,7 +184,7 @@ export function MoneyCard({ metric }: { metric: MoneyMetric }) {
         )}
         {available && metric.withoutAmount > 0 && <p className={styles.kpiNote}>{fill(t.kpi.withoutAmount, { count: metric.withoutAmount })}</p>}
         {available && metric.comparison === 'snapshot' && <p className={styles.kpiNote}>{t.kpi.snapshot}</p>}
-        <ScopeNote note={metric.filterNote} />
+        <ScopeNote note={metric.filterNote} explained={statesItsReason(metric)} />
         <Definition help={help} />
         {available && metric.drill && (
           <Link className={styles.drill} to={metric.drill}>
