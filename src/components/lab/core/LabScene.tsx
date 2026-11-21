@@ -178,7 +178,10 @@ function Runtime({
     const paletteMoving = blendPalette(palette, latestTarget.current, dt)
     busy.current = paletteMoving || !pointer.settled
 
-    if (clock.frame === 2) onReady()
+    // A canvas that draws on demand (the Calm view) would otherwise stop after its first frame and never reach the second, so it would
+    // never be shown: the first few frames are always asked for.
+    if (clock.frame < READY_FRAMES + 1) invalidate()
+    if (clock.frame === READY_FRAMES) onReady()
 
     // Frame-rate watchdog (only meaningful when the canvas draws continuously).
     if (view !== 'live') return
@@ -214,6 +217,9 @@ function Runtime({
 
   return <SceneContext.Provider value={context}>{children}</SceneContext.Provider>
 }
+
+/** Frames drawn before a stage counts as showing its first picture (the canvas fades in over the poster then). */
+const READY_FRAMES = 2
 
 /** Shadows are off until a scene turns them on. This keeps react-three-fiber from setting a shadow-map type that three no longer has. */
 const SHADOWS = { enabled: false, type: PCFShadowMap } as const

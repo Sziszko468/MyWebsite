@@ -9,6 +9,44 @@ const OWN_INPUT = 'a, button, input, select, textarea, label, [role="switch"], [
 const KEY_STEP = 0.1
 
 /**
+ * What a key does on a focused stage, on the same pointer the mouse and the finger use, so every experiment is steerable
+ * without a mouse: the arrow keys move the virtual pointer, Home brings it back to the middle, Enter and Space are a click.
+ * Returns whether the key was one of these (the caller then stops the page from scrolling on it).
+ */
+export function applyStageKey(pointer: LabPointer, key: string, time: number): boolean {
+  switch (key) {
+    case 'ArrowLeft':
+      pointer.touch = false
+      pointer.nudge(-KEY_STEP, 0)
+      return true
+    case 'ArrowRight':
+      pointer.touch = false
+      pointer.nudge(KEY_STEP, 0)
+      return true
+    case 'ArrowUp':
+      pointer.touch = false
+      pointer.nudge(0, KEY_STEP)
+      return true
+    case 'ArrowDown':
+      pointer.touch = false
+      pointer.nudge(0, -KEY_STEP)
+      return true
+    case 'Home':
+      pointer.touch = false
+      pointer.setTarget(0, 0)
+      return true
+    case 'Enter':
+    case ' ':
+      pointer.touch = false
+      pointer.inside = true
+      pointer.pulse(pointer.x, pointer.y, time, 1)
+      return true
+    default:
+      return false
+  }
+}
+
+/**
  * Feeds a stage element's pointer, touch, pen and keyboard input to a LabPointer. Nothing here
  * touches React state: the pointer object is mutated in place and the scene reads it every frame.
  *
@@ -93,35 +131,8 @@ export function useLabInput(
 
     const onKey = (event: KeyboardEvent) => {
       if (event.target !== element) return
-      let dx = 0
-      let dy = 0
-      switch (event.key) {
-        case 'ArrowLeft':
-          dx = -KEY_STEP
-          break
-        case 'ArrowRight':
-          dx = KEY_STEP
-          break
-        case 'ArrowUp':
-          dy = KEY_STEP
-          break
-        case 'ArrowDown':
-          dy = -KEY_STEP
-          break
-        case 'Enter':
-        case ' ':
-          event.preventDefault()
-          pointer.touch = false
-          pointer.inside = true
-          pointer.pulse(pointer.x, pointer.y, clock.t, 1)
-          markTouched()
-          return
-        default:
-          return
-      }
+      if (!applyStageKey(pointer, event.key, clock.t)) return
       event.preventDefault()
-      pointer.touch = false
-      pointer.setTarget(pointer.x + dx, pointer.y + dy)
       markTouched()
     }
 

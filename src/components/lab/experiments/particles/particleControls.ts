@@ -26,6 +26,8 @@ export interface ParticleControls {
   speed: number
   palette: ParticlePalette
   shape: ShapeId
+  /** 0..99: which cloud of the shape. The same number is always the same cloud, so a look can be found again. */
+  arrangement: number
   /** Bumped by the panel to ask the scene for a burst from the middle, or a reset. */
   burstVersion: number
   resetVersion: number
@@ -39,11 +41,13 @@ export const PARTICLE_DEFAULTS: Readonly<ParticleControls> = {
   speed: 1,
   palette: 'racing',
   shape: 'sphere',
+  arrangement: 0,
   burstVersion: 0,
   resetVersion: 0,
 }
 
 export const particleText = {
+  arrangement: tri('Elrendezés', 'Arrangement', 'Opstelling'),
   shape: tri('Alakzat', 'Shape', 'Vorm'),
   shapes: {
     sphere: tri('Gömb', 'Sphere', 'Bol'),

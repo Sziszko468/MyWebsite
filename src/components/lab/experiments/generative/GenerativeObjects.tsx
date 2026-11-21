@@ -11,6 +11,8 @@ import {
   LIGHT_NAMES,
   makeFrom,
   MATERIAL_IDS,
+  parseSeed,
+  seedFieldText,
   MATERIAL_NAMES,
   SIZE_RANGE,
   startControls,
@@ -35,14 +37,20 @@ function GenerativePanel({
   const t = useLocalized(generativeText)
   const materials = useLocalized(MATERIAL_NAMES)
   const lights = useLocalized(LIGHT_NAMES)
-  const { lang } = useLabText()
+  const { lang, text } = useLabText()
   const [state, setState] = useState<GenerativeControls>(() => ({ ...controls.current }))
   // What is in the field is not the object on show until the visitor presses Make (or Enter).
   const [draft, setDraft] = useState(controls.current.text)
 
-  const update = (next: GenerativeControls) => {
+  // What is being typed into the seed field, or null while the field simply shows the seed. Any other change of the controls ends it.
+  const [seedDraft, setSeedDraft] = useState<string | null>(null)
+  const commit = (next: GenerativeControls) => {
     controls.current = next
     setState(next)
+  }
+  const update = (next: GenerativeControls) => {
+    setSeedDraft(null)
+    commit(next)
   }
   const patchLook = (patch: Partial<GenerativeControls['look']>) => update({ ...controls.current, look: { ...controls.current.look, ...patch } })
   const make = (text: string) => {
@@ -52,6 +60,20 @@ function GenerativePanel({
   const submit = (event: FormEvent) => {
     event.preventDefault()
     make(draft)
+  }
+
+  // The seed is shown, and can be typed: the same words with the same seed are always the same object. The field keeps what is being typed
+  // (so "007" stays "007", and "7x" stays until it is fixed) and shows the seed itself whenever something else has changed it.
+  const seedShown = seedFieldText(seedDraft, state.seed)
+  const applySeed = (text: string) => {
+    setSeedDraft(text)
+    const seed = parseSeed(text)
+    if (seed !== null && seed !== controls.current.seed) commit({ ...controls.current, seed, version: controls.current.version + 1 })
+  }
+  const reset = () => {
+    const start = startControls(lang)
+    update({ ...start, version: controls.current.version + 1 })
+    setDraft(start.text)
   }
 
   const { made } = state
@@ -77,6 +99,7 @@ function GenerativePanel({
               {t.example}
             </LabAction>
             <LabAction onClick={() => update({ ...controls.current, seed: Math.floor(Math.random() * 2 ** 31), version: controls.current.version + 1 })}>{t.vary}</LabAction>
+            <LabAction onClick={reset}>{text.panel.reset}</LabAction>
           </LabActions>
         </LabGroup>
       </form>
@@ -111,6 +134,7 @@ function GenerativePanel({
           onChange={(scale) => patchLook({ scale })}
         />
         <LabToggle label={t.spin} checked={state.look.spin} onChange={(spin) => patchLook({ spin })} />
+        <LabTextField label={t.seed} value={seedShown} onChange={applySeed} maxLength={10} help={t.seedHelp} />
       </LabGroup>
 
       <SaveImage name={() => 'generative-objects'} stage={stage} />

@@ -1,0 +1,47 @@
+@use '../../../styles/mixins' as m;
+
+.help {
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-divider);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--size-touch);
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+  cursor: pointer;
+
+  /* An underline, not the accent colour: small red text on the paper theme is under 4.5:1. */
+  @include m.hover {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.list {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+  list-style: '– ' outside;
+}
+
+.keys {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+}

@@ -171,6 +171,7 @@ export class ParticleSim {
   active: number
 
   private shape: ShapeId
+  private arrangement = 0
   private readonly current = { x: 0, y: 0 }
 
   constructor(capacity: number, shape: ShapeId) {
@@ -206,11 +207,16 @@ export class ParticleSim {
     this.loosen = 0
   }
 
-  /** Re-forms the cloud as another shape: the particles fly to their new homes, loosely. */
-  setShape(shape: ShapeId): void {
-    if (shape === this.shape) return
+  get currentArrangement(): number {
+    return this.arrangement
+  }
+
+  /** Re-forms the cloud as another shape, or as another arrangement of the same shape: the particles fly to their new homes, loosely. */
+  setShape(shape: ShapeId, arrangement = this.arrangement): void {
+    if (shape === this.shape && arrangement === this.arrangement) return
     this.shape = shape
-    this.targets.set(generateShape(shape, this.capacity))
+    this.arrangement = arrangement
+    this.targets.set(generateShape(shape, this.capacity, arrangement))
     this.loosen = Math.max(this.loosen, 0.7)
   }
 

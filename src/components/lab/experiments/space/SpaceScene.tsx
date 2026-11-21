@@ -21,7 +21,7 @@ import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { useDisposable } from '../../core/resources'
 import { useStageCapture, type StageCapture } from '../../core/useStageCapture'
 import { PALETTE_COLOURS } from '../particles/particleControls'
-import type { SpaceControls } from './spaceControls'
+import { lookAfterDrag, type SpaceControls } from './spaceControls'
 import {
   DUST_FRAGMENT,
   DUST_VERTEX,
@@ -218,8 +218,25 @@ function Rig({ controls, shared }: { controls: RefObject<SpaceControls>; shared:
     energy: 0,
     pulses: controls.current.pulseVersion,
     warps: controls.current.warpVersion,
+    recentres: controls.current.recentreVersion,
     seenPointerPulses: -1,
+    // Where a drag has turned the view (the target) and where the camera is on its way there.
+    look: { yaw: 0, pitch: 0 },
+    lookYaw: 0,
+    lookPitch: 0,
   })
+  const drag = useMemo(() => ({ x: 0, y: 0 }), [])
+
+  // Development only: where the dragged look is, for the browser journey (production has no such handle).
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const debug = window as Window & { __labView?: () => { yaw: number; pitch: number } }
+    const read = () => ({ yaw: state.current.lookYaw, pitch: state.current.lookPitch })
+    debug.__labView = read
+    return () => {
+      if (debug.__labView === read) delete debug.__labView
+    }
+  }, [])
 
   useLabFrame((s) => {
     const { pointer, clock, palette, motion, autonomous } = s
@@ -232,6 +249,12 @@ function Rig({ controls, shared }: { controls: RefObject<SpaceControls>; shared:
       st.warps = ctl.warpVersion
       st.boost = Math.max(st.boost, 1.6)
       pointer.pulse(0, 0, clock.t, 1)
+    }
+    // Back to straight ahead: the dragged look, and the pointer's own steering with it.
+    if (st.recentres !== ctl.recentreVersion) {
+      st.recentres = ctl.recentreVersion
+      st.look = { yaw: 0, pitch: 0 }
+      pointer.setTarget(0, 0)
     }
     // A pulse, from the click or tap or the panel's button.
     if (st.pulses !== ctl.pulseVersion) {
@@ -257,12 +280,17 @@ function Rig({ controls, shared }: { controls: RefObject<SpaceControls>; shared:
     st.travel += speed * dt
     st.boost = damp(st.boost, 0, 0.55, dt)
 
-    // Where the camera looks: the pointer's direction turns it, its movement rolls it.
-    const present = pointer.presence
+    // Where the camera looks: a drag turns the view and it stays there; the pointer's direction steers it a little
+    // on top (not while dragging, so the two never add up), and its movement rolls it.
+    pointer.takeDrag(drag)
+    if (drag.x !== 0 || drag.y !== 0) st.look = lookAfterDrag(st.look, drag.x, drag.y)
+    st.lookYaw = damp(st.lookYaw, st.look.yaw, 0.12, dt)
+    st.lookPitch = damp(st.lookPitch, st.look.pitch, 0.12, dt)
+    const present = pointer.down ? 0 : pointer.presence
     st.yaw = damp(st.yaw, -pointer.x * 0.5 * ctl.intensity * motion * present, 0.22, dt)
     st.pitch = damp(st.pitch, pointer.y * 0.32 * ctl.intensity * motion * present, 0.22, dt)
     st.roll = damp(st.roll, clamp(-pointer.vx * 0.06, -0.12, 0.12) * ctl.intensity * motion, 0.3, dt)
-    camera.rotation.set(st.pitch, st.yaw, st.roll, 'YXZ')
+    camera.rotation.set(st.pitch + st.lookPitch, st.yaw + st.lookYaw, st.roll, 'YXZ')
     // The faster you move, the wider the lens opens: the tunnel pulls away at the edges.
     const fov = SPACE_CAMERA.fov + st.energy * 14 * motion + st.boost * 12 * motion
     if (Math.abs(camera.fov - fov) > 0.01) {
@@ -291,7 +319,8 @@ function Rig({ controls, shared }: { controls: RefObject<SpaceControls>; shared:
     shared.uStretch.value = (0.1 + st.energy * 0.9) * ctl.streak * (0.5 + 0.5 * motion) + st.boost * 0.5
     shared.uPulseGlow.value = Math.max(0, 1 - (clock.t - shared.uPulseT.value) / 1.6) * 0.8
 
-    return st.energy > 0.01 || st.boost > 0.01 || clock.t - shared.uPulseT.value < 7
+    const turning = Math.abs(st.lookYaw - st.look.yaw) > 0.001 || Math.abs(st.lookPitch - st.look.pitch) > 0.001
+    return st.energy > 0.01 || st.boost > 0.01 || turning || clock.t - shared.uPulseT.value < 7
   })
 
   return null

@@ -1,7 +1,18 @@
 import { tri } from '../../../../content/trilingual'
 
+/**
+ * How the channels are pulled apart:
+ *  - `mixed`: a drift along the chosen direction and a lens around the pointer (the original look);
+ *  - `linear`: every channel moves along the chosen direction only, with no lens, so the fringes are clean and parallel;
+ *  - `radial`: the channels move outwards from the pointer, the direction is ignored.
+ */
+export const CHROMATIC_MODES = ['mixed', 'linear', 'radial'] as const
+export type ChromaticMode = (typeof CHROMATIC_MODES)[number]
+
 /** What the panel sets and the scene reads each frame. One mutable object, never React state. */
 export interface ChromaticControls {
+  /** How the channels are pulled apart (see `CHROMATIC_MODES`). */
+  mode: ChromaticMode
   /** 0..2: how far the channels drift apart. */
   separation: number
   /** 0..2: how much the background waves. */
@@ -19,6 +30,7 @@ export interface ChromaticControls {
 }
 
 export const CHROMATIC_DEFAULTS: Readonly<ChromaticControls> = {
+  mode: 'mixed',
   separation: 1,
   waves: 1,
   lens: 0.45,
@@ -29,6 +41,29 @@ export const CHROMATIC_DEFAULTS: Readonly<ChromaticControls> = {
 }
 
 export const chromaticText = {
+  mode: tri('Mód', 'Mode', 'Modus'),
+  modes: {
+    mixed: tri('Vegyes', 'Mixed', 'Gemengd'),
+    linear: tri('Lineáris', 'Linear', 'Lineair'),
+    radial: tri('Sugaras', 'Radial', 'Radiaal'),
+  },
+  modeHelp: {
+    mixed: tri(
+      'Eltolás a választott irányba, plusz egy lencse a pointer körül',
+      'A drift in the chosen direction, plus a lens around the pointer',
+      'Een verschuiving in de gekozen richting, plus een lens rond de aanwijzer',
+    ),
+    linear: tri(
+      'Minden csatorna csak a választott irányba tolódik el, tiszta párhuzamos szegélyekkel',
+      'Every channel moves only in the chosen direction, with clean parallel fringes',
+      'Elk kanaal beweegt alleen in de gekozen richting, met zuivere parallelle randen',
+    ),
+    radial: tri(
+      'A csatornák kifelé tolódnak a pointertől, az irány nem számít',
+      'The channels move outwards from the pointer; the direction does not matter',
+      'De kanalen bewegen naar buiten vanaf de aanwijzer; de richting doet er niet toe',
+    ),
+  },
   separation: tri('Csatornák eltolása', 'Channel separation', 'Kanaalscheiding'),
   waves: tri('Háttérhullámok', 'Background waves', 'Achtergrondgolven'),
   lens: tri('Lencse mérete', 'Lens size', 'Lensgrootte'),

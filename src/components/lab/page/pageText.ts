@@ -27,6 +27,14 @@ export const pageText = {
       'Beweeg, raak aan of sleep over een voorbeeld: elk antwoordt op zijn eigen manier. Open het daarna.',
     ),
     open: tri('Megnyitás', 'Open', 'Openen'),
+    /** Said on every tile: which experiences answer the visitor, and with what. */
+    inputsLabel: tri('Így irányíthatod', 'Steer it with', 'Bedien het met'),
+    inputs: {
+      pointer: tri('Pointer', 'Pointer', 'Aanwijzer'),
+      touch: tri('Érintés', 'Touch', 'Aanraking'),
+      keys: tri('Billentyűk', 'Keys', 'Toetsen'),
+      text: tri('Saját szavak', 'Your own words', 'Eigen woorden'),
+    },
     previewHint: {
       'particle-universe': tri('Mozgasd: eltaszítja őket. Nyomd: magához húzza.', 'Move to push them away. Press to pull them in.', 'Beweeg om ze weg te duwen. Druk om ze aan te trekken.'),
       'liquid-matter': tri('Mozgasd: a foltok követnek és összeolvadnak.', 'Move: the blobs follow and merge.', 'Beweeg: de vlekken volgen en smelten samen.'),

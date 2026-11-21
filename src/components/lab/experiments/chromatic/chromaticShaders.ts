@@ -26,7 +26,7 @@ export const CHROMATIC_VERTEX = /* glsl */ `
 export const CHROMATIC_FRAGMENT = /* glsl */ `
   uniform vec2 uRes, uMouse, uVel;
   uniform float uAspect, uPhase, uSep, uLocal, uLensR, uWave, uBoost, uLayers, uEnergy;
-  uniform float uGlitch, uNoise, uAngle, uTime;
+  uniform float uGlitch, uNoise, uAngle, uTime, uMode;
   uniform vec3 uBg, uInk, uRed, uBlue;
   varying vec2 vP;
 
@@ -138,7 +138,11 @@ export const CHROMATIC_FRAGMENT = /* glsl */ `
     vec2 drift = normalize(vec2(cos(uAngle), sin(uAngle)) + uVel * 2.0);
     float global = uSep * (0.005 + 0.016 * uEnergy) * surge;
     float local = uSep * uLocal * lens * (0.012 + 0.028 * uEnergy) * surge;
-    vec2 offset = drift * global + radial * local + vec2(slip * 0.6, 0.0);
+    // The mode: 0 mixed (drift and lens), 1 directional (drift only, a little stronger), 2 radial (outwards from the pointer).
+    float directional = step(0.5, uMode) * (1.0 - step(1.5, uMode));
+    float outward = step(1.5, uMode);
+    vec2 axis = mix(drift, radial, outward);
+    vec2 offset = axis * global * (1.0 + 0.5 * directional) + radial * local * (1.0 - directional) + vec2(slip * 0.6, 0.0);
 
     vec3 fr = forms(p + offset);
     vec3 fg = forms(p);

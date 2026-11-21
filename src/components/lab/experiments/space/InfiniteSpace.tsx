@@ -75,9 +75,15 @@ function SpacePanel({ controls, stage }: { controls: RefObject<SpaceControls>; s
       <LabActions>
         <LabAction onClick={() => update({ pulseVersion: controls.current.pulseVersion + 1 })}>{t.pulse}</LabAction>
         <LabAction onClick={() => update({ warpVersion: controls.current.warpVersion + 1 })}>{t.warp}</LabAction>
+        <LabAction onClick={() => update({ recentreVersion: controls.current.recentreVersion + 1 })}>{t.recentre}</LabAction>
         <LabAction
           onClick={() =>
-            update({ ...SPACE_DEFAULTS, pulseVersion: controls.current.pulseVersion, warpVersion: controls.current.warpVersion })
+            update({
+              ...SPACE_DEFAULTS,
+              pulseVersion: controls.current.pulseVersion,
+              warpVersion: controls.current.warpVersion,
+              recentreVersion: controls.current.recentreVersion + 1,
+            })
           }
         >
           {text.panel.reset}

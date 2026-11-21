@@ -5,7 +5,7 @@ import { clamp, damp } from '../../../hero/heroMath'
 import { useLabFrame, useLabScene } from '../../core/sceneContext'
 import { useDisposable } from '../../core/resources'
 import { useStageCapture, type StageCapture } from '../../core/useStageCapture'
-import type { ChromaticControls } from './chromaticControls'
+import { CHROMATIC_MODES, type ChromaticControls } from './chromaticControls'
 import { CHROMATIC_FRAGMENT, CHROMATIC_VERTEX } from './chromaticShaders'
 
 /** One big triangle covers the screen: no seam down a diagonal and one vertex fewer than a quad. */
@@ -35,6 +35,7 @@ function Field({ controls }: { controls: RefObject<ChromaticControls> }) {
       uGlitch: { value: 0 },
       uNoise: { value: 0 },
       uAngle: { value: 0.245 },
+      uMode: { value: 0 },
       uTime: { value: 0 },
       uEnergy: { value: 0 },
       uBg: { value: new Color() },
@@ -110,6 +111,7 @@ function Field({ controls }: { controls: RefObject<ChromaticControls> }) {
     uniforms.uGlitch.value = ctl.glitch * (autonomous ? 1 : 0)
     uniforms.uNoise.value = ctl.noise
     uniforms.uAngle.value = (ctl.angle * Math.PI) / 180
+    uniforms.uMode.value = CHROMATIC_MODES.indexOf(ctl.mode)
     uniforms.uTime.value = clock.t
     uniforms.uBg.value.copy(palette.bg)
     uniforms.uInk.value.copy(palette.ink)

@@ -45,6 +45,27 @@ export function makeFrom(text: string, current: GenerativeControls): GenerativeC
   }
 }
 
+/** The largest seed (the generator takes a 31-bit integer). */
+export const MAX_SEED = 2 ** 31 - 1
+
+/** A seed typed by hand: digits only, as a whole number inside the generator's range; anything else is `null`. */
+export function parseSeed(text: string): number | null {
+  const digits = text.trim()
+  if (!/^\d{1,10}$/.test(digits)) return null
+  const value = Number(digits)
+  return value <= MAX_SEED ? value : null
+}
+
+/**
+ * What the seed field shows. While the visitor is typing (`draft`), what they typed, as long as it is not yet a number or is the seed in use
+ * (so "007" stays "007" and "7x" stays until it is fixed); the seed itself whenever anything else has changed it, or nothing is being typed.
+ */
+export function seedFieldText(draft: string | null, seed: number): string {
+  if (draft === null) return String(seed)
+  const typed = parseSeed(draft)
+  return typed === null || typed === seed ? draft : String(seed)
+}
+
 /** The start: the first example, in the visitor's language. */
 export function startControls(language: Language): GenerativeControls {
   const base = { text: '', made: interpret(''), seed: 0, look: interpret('').look, version: 0, example: 0 }
@@ -68,6 +89,12 @@ export const generativeText = {
   surprise: tri('Lepj meg', 'Surprise me', 'Verras me'),
   example: tri('Példa', 'Example', 'Voorbeeld'),
   vary: tri('Másik változat', 'Another version', 'Andere variant'),
+  seed: tri('Mag (seed)', 'Seed', 'Seed'),
+  seedHelp: tri(
+    'Ugyanaz a szöveg és ugyanaz a mag mindig ugyanazt a tárgyat építi: írd be egy korábbi mag számát, és újra megkapod.',
+    'The same words and the same seed always build the same object: type the number of an earlier seed to get it back.',
+    'Dezelfde woorden en dezelfde seed bouwen altijd hetzelfde voorwerp: typ het nummer van een eerdere seed om het terug te krijgen.',
+  ),
   material: tri('Anyag', 'Material', 'Materiaal'),
   light: tri('Fény', 'Light', 'Licht'),
   size: tri('Méret', 'Size', 'Grootte'),

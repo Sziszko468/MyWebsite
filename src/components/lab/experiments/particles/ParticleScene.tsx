@@ -130,7 +130,7 @@ function Cloud({ controls }: { controls: RefObject<ParticleControls> }) {
       seen.current.burst = ctl.burstVersion
       sim.burst(0, 0, 1 * (autonomous ? 1 : 0.55))
     }
-    sim.setShape(ctl.shape)
+    sim.setShape(ctl.shape, ctl.arrangement)
     const wanted = Math.max(1, Math.round(capacity * clamp(ctl.density, 0.05, 1)))
     if (wanted !== sim.active) {
       sim.setActive(wanted)

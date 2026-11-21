@@ -85,6 +85,14 @@ export class LabPointer {
     this.onActivity?.()
   }
 
+  /**
+   * Moves the goal by a step (a key press). It starts from the goal, not from the eased position that is still on its way,
+   * so two keys pressed within a frame add up instead of the second one cancelling the first.
+   */
+  nudge(dx: number, dy: number): void {
+    this.setTarget(this.targetX + dx, this.targetY + dy)
+  }
+
   press(x: number, y: number, touch: boolean): void {
     this.touch = touch
     this.down = true

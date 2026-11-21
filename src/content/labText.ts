@@ -320,6 +320,23 @@ export const labText = {
     reset: tri('Alaphelyzet', 'Reset', 'Herstellen'),
   },
 
+  fullscreen: {
+    enter: tri('Teljes képernyő', 'Full screen', 'Volledig scherm'),
+    exit: tri('Kilépés a teljes képernyőből', 'Exit full screen', 'Volledig scherm verlaten'),
+    enterShort: tri('Teljes kép', 'Full screen', 'Volledig'),
+    exitShort: tri('Kilépés', 'Exit', 'Sluiten'),
+    entered: tri(
+      'Teljes képernyő bekapcsolva. Az Esc billentyű kilép belőle.',
+      'Full screen is on. Press Escape to leave it.',
+      'Volledig scherm staat aan. Druk op Escape om het te verlaten.',
+    ),
+    left: tri('Teljes képernyő kikapcsolva.', 'Full screen is off.', 'Volledig scherm staat uit.'),
+  },
+
+  help: {
+    title: tri('Hogyan használd', 'How to use it', 'Zo gebruik je het'),
+  },
+
   view: {
     label: tri('Megjelenítés', 'Display', 'Weergave'),
     live: tri('Élő', 'Live', 'Live'),
@@ -436,9 +453,9 @@ export const labText = {
     interaction: tri('Interakció', 'Interaction', 'Interactie'),
     more: tri('További kísérletek', 'More experiments', 'Meer experimenten'),
     keyboard: tri(
-      'Billentyűzet: a Tab a vezérlők között léptet, a nyílbillentyűk a színpadon mozgatják a pointert, az Enter vagy a szóköz kattintást helyettesít.',
-      'Keyboard: Tab moves between the controls, the arrow keys move the pointer on the stage, Enter or Space stand in for a click.',
-      'Toetsenbord: Tab gaat langs de bediening, de pijltjestoetsen bewegen de aanwijzer op het podium, Enter of spatie vervangt een klik.',
+      'Billentyűzet: a Tab a vezérlők között léptet, a nyílbillentyűk a színpadon mozgatják a pointert, az Enter vagy a szóköz kattintást helyettesít, a Home középre viszi a pointert, az Esc kilép a teljes képernyőből.',
+      'Keyboard: Tab moves between the controls, the arrow keys move the pointer on the stage, Enter or Space stand in for a click, Home brings the pointer back to the centre, Escape leaves full screen.',
+      'Toetsenbord: Tab gaat langs de bediening, de pijltjestoetsen bewegen de aanwijzer op het podium, Enter of spatie vervangt een klik, Home brengt de aanwijzer terug naar het midden, Escape verlaat volledig scherm.',
     ),
   },
 } as const

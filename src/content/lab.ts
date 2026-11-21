@@ -21,6 +21,13 @@ export type LabId =
 
 export type LabStatus = 'ready' | 'in-progress' | 'concept'
 
+/**
+ * How an experiment can be steered. Every experiment answers the pointer, a finger and the keyboard (the stage's arrow keys,
+ * Enter and Space); `text` marks the ones that also take words. The overview shows these on each tile, so which experiences
+ * are interactive, and how, is said before the visitor opens one.
+ */
+export type LabInput = 'pointer' | 'touch' | 'keys' | 'text'
+
 /** The brand colour an experiment's tile and numeral lean on. */
 export type LabAccent = 'red' | 'blue' | 'paper' | 'graphite'
 
@@ -34,6 +41,8 @@ export interface LabExperiment {
   tagline: Trilingual
   status: LabStatus
   accent: LabAccent
+  /** The ways the visitor can steer it, in the order the overview lists them. */
+  inputs: readonly LabInput[]
   /** What it is built with, as proper nouns and technical terms that are the same in every language. */
   tech: readonly string[]
 }
@@ -50,6 +59,7 @@ export const experiments: readonly LabExperiment[] = [
     ),
     status: 'ready',
     accent: 'red',
+    inputs: ['pointer', 'touch', 'keys'],
     tech: ['Three.js', 'GLSL', 'Typed-array simulation', 'Flow field'],
   },
   {
@@ -63,6 +73,7 @@ export const experiments: readonly LabExperiment[] = [
     ),
     status: 'ready',
     accent: 'graphite',
+    inputs: ['pointer', 'touch', 'keys'],
     tech: ['Three.js', 'GLSL vertex displacement', 'Simplex noise', 'Procedural studio light'],
   },
   {
@@ -72,6 +83,7 @@ export const experiments: readonly LabExperiment[] = [
     tagline: tri('Betűk, amelyek a térben élnek.', 'Letters that live in space.', 'Letters die in de ruimte leven.'),
     status: 'ready',
     accent: 'paper',
+    inputs: ['pointer', 'touch', 'keys', 'text'],
     tech: ['Three.js', 'Canvas 2D glyphs', 'Instanced layers', 'Spring physics'],
   },
   {
@@ -81,6 +93,7 @@ export const experiments: readonly LabExperiment[] = [
     tagline: tri('Végtelen fényalagút.', 'A tunnel of light with no end.', 'Een tunnel van licht zonder einde.'),
     status: 'ready',
     accent: 'blue',
+    inputs: ['pointer', 'touch', 'keys'],
     tech: ['Three.js', 'GLSL', 'Instanced streaks', 'Perspective camera rig'],
   },
   {
@@ -94,6 +107,7 @@ export const experiments: readonly LabExperiment[] = [
     ),
     status: 'ready',
     accent: 'red',
+    inputs: ['pointer', 'touch', 'keys'],
     tech: ['GLSL fragment shader', 'Signed distance fields', 'Per-channel sampling'],
   },
   {
@@ -107,6 +121,7 @@ export const experiments: readonly LabExperiment[] = [
     ),
     status: 'ready',
     accent: 'blue',
+    inputs: ['pointer', 'touch', 'keys', 'text'],
     // Procedural and local: no AI model, no external service, no server. The words are read by a fixed word list.
     tech: ['Three.js', 'Procedural geometry', 'Seeded random', 'Rule-based word list'],
   },

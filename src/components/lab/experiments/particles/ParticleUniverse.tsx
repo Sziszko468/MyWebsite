@@ -5,7 +5,7 @@ import { useLabText, useLocalized } from '../../core/useLabText'
 import { LabAction, LabActions, LabChoice, LabGroup, LabSlider } from '../../ui/LabControls'
 import { ExperimentFrame } from '../../ui/ExperimentFrame'
 import { PARTICLE_DEFAULTS, PARTICLE_PALETTES, particleText, type ParticleControls, type ParticlePalette } from './particleControls'
-import { SHAPES, type ShapeId } from './particleShapes'
+import { ARRANGEMENTS, SHAPES, type ShapeId } from './particleShapes'
 
 // The scene (Three.js, the shaders, the simulation) loads after the page's words and controls.
 const ParticleScene = lazy(() => import('./ParticleScene'))
@@ -59,6 +59,15 @@ function ParticlePanel({ controls, stage }: { controls: RefObject<ParticleContro
           onChange={(mode) => update({ mode })}
         />
         <LabSlider
+          label={t.arrangement}
+          value={state.arrangement}
+          min={0}
+          max={ARRANGEMENTS - 1}
+          step={1}
+          format={(value) => `#${value + 1}`}
+          onChange={(arrangement) => update({ arrangement })}
+        />
+        <LabSlider
           label={t.strength}
           value={state.strength}
           min={0.2}
@@ -103,6 +112,7 @@ function ParticlePanel({ controls, stage }: { controls: RefObject<ParticleContro
             const pick = <T,>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)]
             update({
               shape: pick(SHAPES),
+              arrangement: Math.floor(Math.random() * ARRANGEMENTS),
               mode: pick(['attract', 'repel'] as const),
               palette: pick(PARTICLE_PALETTES),
               strength: 0.5 + Math.random() * 1.4,

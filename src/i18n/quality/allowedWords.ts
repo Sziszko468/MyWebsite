@@ -31,7 +31,7 @@ const abbreviations = ['seo', 'api', 'ui', 'ux', 'cms', 'faq', 'url', 'html', 'c
  * (a database, a protocol, a library, a command) in the English that engineers use in all three languages.
  */
 const technical = [
-  'actions', 'adapter', 'appointments', 'auth', 'cmd', 'compose', 'config', 'ctrl', 'degraded', 'dependencies', 'floating', 'floats', 'hook', 'hooks',
+  'actions', 'adapter', 'appointments', 'auth', 'cmd', 'compose', 'config', 'ctrl', 'esc', 'home', 'degraded', 'dependencies', 'floating', 'floats', 'hook', 'hooks',
   'hookok', 'hookot', 'hookon', 'jitter', 'keychain', 'keystore', 'lang', 'layout', 'layouts', 'number', 'offset', 'origin', 'placeholder', 'placeholders',
   'point', 'protected', 'queryset', 'querysets', 'querysetek', 'refetches', 'repositories', 'repository', 'root', 'scheduler', 'scroll', 'seed', 'serializers',
   'shader', 'shaderrel', 'shift', 'sortable', 'src', 'swappable', 'timeout', 'tooltips', 'unavailable', 'uptime', 'users', 'vertex', 'waypoints', 'worker',

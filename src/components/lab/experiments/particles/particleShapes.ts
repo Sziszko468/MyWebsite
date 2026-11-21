@@ -93,9 +93,15 @@ function mark(random: Random): Point {
 
 const GENERATORS: Record<ShapeId, (random: Random) => Point> = { sphere, ring, wave, spiral, mark }
 
-/** `count` points of a shape, as x, y, z triples. Each shape has its own seed, so two shapes are never the same cloud. */
-export function generateShape(shape: ShapeId, count: number): Float32Array {
-  const random = seededRandom(1013 + SHAPES.indexOf(shape) * 7919)
+/** The arrangements the panel offers: one cloud of every shape per number, the same every time. Zero is the original. */
+export const ARRANGEMENTS = 100
+
+/**
+ * `count` points of a shape, as x, y, z triples. Each shape has its own seed, so two shapes are never the same cloud,
+ * and `arrangement` picks another cloud of the same shape: the same number always gives the same points.
+ */
+export function generateShape(shape: ShapeId, count: number, arrangement = 0): Float32Array {
+  const random = seededRandom(1013 + SHAPES.indexOf(shape) * 7919 + Math.trunc(arrangement) * 104729)
   const generate = GENERATORS[shape]
   const out = new Float32Array(count * 3)
   for (let i = 0; i < count; i++) {

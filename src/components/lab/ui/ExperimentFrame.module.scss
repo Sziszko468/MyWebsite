@@ -89,7 +89,8 @@
  */
 .top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  /* On a phone the way back keeps its own width and the switches wrap beneath each other when there is not room for all four (at 320 px). */
+  grid-template-columns: minmax(max-content, 1fr) auto;
   grid-template-areas:
     'crumb utils'
     'title title';
@@ -97,6 +98,7 @@
   column-gap: var(--space-4);
 
   @include m.up('md') {
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas: 'heading utils';
   }
 }
@@ -162,8 +164,10 @@
 .utils {
   grid-area: utils;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-1) var(--space-3);
   flex: none;
 }
 
@@ -282,6 +286,36 @@
   & .utils > :not([data-keep]) {
     visibility: hidden;
   }
+}
+
+/*
+ * Full screen. The browser's own full screen (`:fullscreen`) fills the screen by itself; the fallback
+ * (`data-fullscreen='expanded'`, where the browser has no Fullscreen API for an element or refuses
+ * it) lays the same frame over the viewport. Both drop the way down to the details, which are not on
+ * the screen; the dock, the panel and the full-screen button stay, so the way out is always there.
+ */
+.frame[data-fullscreen='expanded'] {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  height: 100dvh;
+  min-height: 0;
+}
+
+.frame:fullscreen {
+  height: 100dvh;
+  min-height: 0;
+}
+
+.frame[data-fullscreen='native'] .scrollCue,
+.frame[data-fullscreen='expanded'] .scrollCue {
+  display: none;
+}
+
+/* The page behind an expanded experiment does not scroll, and gives back the scrollbar's gutter so the frame covers the whole window. */
+:global(html[data-lab-expanded]) {
+  overflow: hidden;
+  scrollbar-gutter: auto;
 }
 
 @supports not (height: 100svh) {

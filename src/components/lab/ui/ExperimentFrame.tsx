@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { findExperiment, type LabId } from '../../../content/lab'
 import { LanguageSwitcher } from '../../LanguageSwitcher/LanguageSwitcher'
 import { LocalizedLink } from '../../LocalizedLink/LocalizedLink'
@@ -8,12 +8,15 @@ import { labProfileFor, type LabProfile } from '../core/labProfile'
 import { LabPointer } from '../core/LabPointer'
 import { LabStage } from '../core/LabStage'
 import { useLabText } from '../core/useLabText'
+import { useFullscreen } from '../core/useFullscreen'
 import { useLabView } from '../core/useLabView'
 import { ExperimentDetails } from './ExperimentDetails'
 import styles from './ExperimentFrame.module.scss'
 import { LabArt } from './LabArt'
 import { LabChoice } from './LabControls'
 import { LabDock } from './LabDock'
+import { LabFullscreen } from './LabFullscreen'
+import { LabHelp } from './LabHelp'
 import { LabPanel } from './LabPanel'
 import type { LabView } from '../core/labMode'
 
@@ -65,9 +68,29 @@ export function ExperimentFrame({
   const state = useLabView()
   const touchFirst = useTouchFirst()
   const panelOpen = useDefaultPanelOpen()
+  const frameRef = useRef<HTMLDivElement | null>(null)
+  const fullscreen = useFullscreen(frameRef)
+  // The stage's own pointer, so a change made in the panel can ask the stage for a frame (see `wake`).
+  const stagePointer = useRef<LabPointer | null>(null)
   const experiment = findExperiment(id)
   const copy = experiments[id]
+
+  // Hands the stage's pointer on to the experience that asked for it (the generative full view).
+  useEffect(() => {
+    if (!pointerRef) return
+    pointerRef.current = stagePointer.current
+    return () => {
+      pointerRef.current = null
+    }
+  }, [pointerRef])
   if (!experiment) return null
+
+  /**
+   * The Calm view draws only while something asks for a frame, and the controls are read by the scene from a plain object, so a
+   * change in the panel would not show until the visitor next touched the stage (never, for a keyboard or touch visitor). Any input,
+   * change or click inside the panel asks for a frame, so a changed slider is seen at once in every view.
+   */
+  const wake = () => stagePointer.current?.onActivity?.()
 
   const viewOptions: Array<{ value: LabView; label: string; help: string }> = [
     { value: 'live', label: text.view.live, help: text.view.liveHelp },
@@ -88,7 +111,14 @@ export function ExperimentFrame({
 
   return (
     <>
-      <div className={styles.frame} data-clean={clean} data-view={state.view} data-lab-experiment={id}>
+      <div
+        ref={frameRef}
+        className={styles.frame}
+        data-clean={clean}
+        data-view={state.view}
+        data-fullscreen={fullscreen.mode}
+        data-lab-experiment={id}
+      >
         <div className={styles.stageArea}>
           <LabStage
             label={copy.stageLabel}
@@ -104,7 +134,7 @@ export function ExperimentFrame({
             onHeadroom={state.onHeadroom}
             onFail={state.onFail}
             notices={{ loading: text.notices.loading, contextLost: text.notices.contextLost }}
-            pointerRef={pointerRef}
+            pointerRef={stagePointer}
           >
             {scene}
           </LabStage>
@@ -122,6 +152,7 @@ export function ExperimentFrame({
             </div>
             <div className={styles.utils}>
               {topExtra}
+              <LabFullscreen state={fullscreen} />
               <ThemeToggle />
               <LanguageSwitcher />
             </div>
@@ -142,7 +173,7 @@ export function ExperimentFrame({
               </p>
             )}
 
-            <div className={styles.side}>
+            <div className={styles.side} onInputCapture={wake} onChangeCapture={wake} onClickCapture={wake}>
               <LabPanel
                 title={text.panel.controls}
                 showLabel={text.panel.show}
@@ -158,6 +189,7 @@ export function ExperimentFrame({
                   />
                 }
               >
+                <LabHelp id={id} />
                 {panel}
               </LabPanel>
             </div>

@@ -1,0 +1,47 @@
+@use '../../../styles/mixins' as m;
+
+/*
+ * The full-screen switch sits beside the theme and language switches. Its name is always on the
+ * button (an icon alone would be a guess); the visible word is the short form so it fits the row
+ * on a phone, where it is dropped and the icon keeps its accessible name.
+ */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: var(--size-touch);
+  min-height: var(--size-touch);
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--color-bg) 84%, transparent);
+  color: var(--color-text);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    background-color: var(--color-surface-hover);
+  }
+
+  @include m.pressed {
+    background-color: var(--color-surface-active);
+  }
+
+  /* On while it is on: the border says so as well as the icon and the name. */
+  &[data-active='true'] {
+    border-color: var(--color-accent);
+  }
+}
+
+.word {
+  display: none;
+
+  @include m.up('md') {
+    display: inline;
+  }
+}

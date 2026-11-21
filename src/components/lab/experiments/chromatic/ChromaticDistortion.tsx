@@ -3,8 +3,14 @@ import { useLabText, useLocalized } from '../../core/useLabText'
 import { ExperimentFrame } from '../../ui/ExperimentFrame'
 import { SaveImage } from '../../artifacts/SaveImage'
 import type { StageCapture } from '../../core/useStageCapture'
-import { LabAction, LabActions, LabGroup, LabNote, LabSlider } from '../../ui/LabControls'
-import { CHROMATIC_DEFAULTS, chromaticText, type ChromaticControls } from './chromaticControls'
+import { LabAction, LabActions, LabChoice, LabGroup, LabNote, LabSlider } from '../../ui/LabControls'
+import {
+  CHROMATIC_DEFAULTS,
+  CHROMATIC_MODES,
+  chromaticText,
+  type ChromaticControls,
+  type ChromaticMode,
+} from './chromaticControls'
 
 // The scene (Three.js and the shader) loads after the page's words and controls.
 const ChromaticScene = lazy(() => import('./ChromaticScene'))
@@ -26,6 +32,13 @@ function ChromaticPanel({ controls, stage }: { controls: RefObject<ChromaticCont
   return (
     <>
       <LabGroup>
+        <LabChoice<ChromaticMode>
+          label={t.mode}
+          value={state.mode}
+          options={CHROMATIC_MODES.map((mode) => ({ value: mode, label: t.modes[mode], help: t.modeHelp[mode] }))}
+          onChange={(mode) => update({ mode })}
+          columns={3}
+        />
         <LabSlider
           label={t.separation}
           value={state.separation}
@@ -53,15 +66,17 @@ function ChromaticPanel({ controls, stage }: { controls: RefObject<ChromaticCont
           format={percent}
           onChange={(lens) => update({ lens })}
         />
-        <LabSlider
-          label={t.angle}
-          value={state.angle}
-          min={0}
-          max={360}
-          step={5}
-          format={(v) => `${v}°`}
-          onChange={(angle) => update({ angle })}
-        />
+        {state.mode !== 'radial' && (
+          <LabSlider
+            label={t.angle}
+            value={state.angle}
+            min={0}
+            max={360}
+            step={5}
+            format={(v) => `${v}°`}
+            onChange={(angle) => update({ angle })}
+          />
+        )}
       </LabGroup>
 
       <LabGroup>
@@ -91,6 +106,7 @@ function ChromaticPanel({ controls, stage }: { controls: RefObject<ChromaticCont
         <LabAction
           onClick={() =>
             update({
+              mode: CHROMATIC_MODES[Math.floor(Math.random() * CHROMATIC_MODES.length)],
               separation: 0.4 + Math.random() * 1.6,
               waves: Math.random() * 2,
               lens: 0.2 + Math.random() * 0.6,

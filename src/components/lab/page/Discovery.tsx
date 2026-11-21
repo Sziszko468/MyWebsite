@@ -5,6 +5,7 @@ import { LocalizedLink } from '../../LocalizedLink/LocalizedLink'
 import { Reveal } from '../../motion/Reveal'
 import { Section } from '../../Section/Section'
 import { useLabText, useLocalized } from '../core/useLabText'
+import { LabStatusBadge } from '../ui/LabStatusBadge'
 import styles from './Discovery.module.scss'
 import { pageText } from './pageText'
 import { Preview, PreviewHint } from './previews'
@@ -40,6 +41,16 @@ function Tile({ experiment }: { experiment: LabExperiment }) {
             {experiment.name}
           </h3>
           <p className={styles.tagline}>{experiment.tagline[lang]}</p>
+          <div className={styles.how}>
+            <LabStatusBadge status={experiment.status} />
+            <ul className={styles.inputs} aria-label={t.discovery.inputsLabel}>
+              {experiment.inputs.map((input) => (
+                <li key={input} className={styles.input} data-input={input}>
+                  {t.discovery.inputs[input]}
+                </li>
+              ))}
+            </ul>
+          </div>
           <p className={styles.hint}>
             <PreviewHint id={experiment.id} />
           </p>
