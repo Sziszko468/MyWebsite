@@ -213,7 +213,9 @@ async function loadMetrics(page) {
     }
   }
 
-  // 4. What is left: the heap after three rounds through every experience and back to the overview.
+  // 4. What is left: the heap after three rounds. (The waits here are locator waits: `page.waitForSelector` returns an element handle that Playwright keeps alive in the
+  // page, which keeps every page it was taken from alive too, and would make any page look like it leaks.)
+  // The heap after three rounds through every experience and back to the overview.
   if (want('heap')) {
     const { context, page } = await newPage(browser, { width: 1440, height: 900 })
     const client = await context.newCDPSession(page)
@@ -224,16 +226,16 @@ async function loadMetrics(page) {
       return usage.usedSize / 1024 / 1024
     }
     await page.goto(`${srv.url}/en/lab/`, { waitUntil: 'load' })
-    await page.waitForSelector('#experiments article', { timeout: 30000 })
+    await page.locator('#experiments article').first().waitFor({ timeout: 30000 })
     await page.waitForTimeout(1500)
     const series = [round(await heap(), 2)]
     for (let round_ = 0; round_ < ROUNDS; round_ += 1) {
       for (const id of IDS) {
         await page.locator(`#experiments article[data-id="${id}"] a[href*="/lab/"]`).click()
-        await page.waitForSelector('[data-ready="true"]', { timeout: 40000 })
+        await page.locator('[data-ready="true"]').first().waitFor({ timeout: 40000 })
         await page.waitForTimeout(600)
         await page.locator('nav[aria-label="Lab navigation"]').getByRole('link', { name: 'All experiments' }).click()
-        await page.waitForSelector('#experiments article', { timeout: 20000 })
+        await page.locator('#experiments article').first().waitFor({ timeout: 20000 })
         await page.locator('#experiments').scrollIntoViewIfNeeded()
         await page.waitForTimeout(700)
       }

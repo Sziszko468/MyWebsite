@@ -5,7 +5,7 @@ import { startingLanguage } from './i18n/preference'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { lazyRoute } from './motion/loading'
-import { PAGES, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type AiPageId, type ConsultationPageId, type CustomerPageId, type LegalPageId, type NavPageId, type PageDef, type PortalPageId, type ShopPageId } from './routes/pages'
+import { PAGES, demoSlugOfPage, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type AiPageId, type ConsultationPageId, type CustomerPageId, type LegalPageId, type NavPageId, type PageDef, type PortalPageId, type ShopPageId } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
 import { IntroProvider } from './components/intro/IntroProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
@@ -17,6 +17,9 @@ const DesignSystemPage = import.meta.env.DEV ? lazyRoute(() => import('./pages/D
 // A project's page and its three-language content are their own chunk: the home page and the rest of
 // the site do not pay for them, and they load when a project is opened.
 const ProjectRoute = lazyRoute(() => import('./pages/ProjectPage').then((module) => ({ default: module.ProjectRoute })))
+
+// A project's interactive demo (PROMPT 35): the frame and each demo are chunks of their own, loaded only when a demo page is opened.
+const DemoRoute = lazyRoute(() => import('./demos/DemoPage').then((module) => ({ default: module.DemoRoute })))
 
 // The portfolio page: the published projects as cards, filtered by category.
 const WorkPage = lazyRoute(() => import('./pages/WorkPage').then((module) => ({ default: module.WorkPage })))
@@ -118,12 +121,13 @@ export default function App() {
               <Route path="work/preview/link/:token" element={<ProjectRoute linkPreview />} />
               <Route path="work/preview/:id" element={<ProjectRoute preview />} />
               <Route path="work/:slug" element={<ProjectRoute />} />
+              <Route path="work/:slug/demo" element={<DemoRoute />} />
               <Route path="quote/:token" element={<QuotePage />} />
               <Route path="request/:token" element={<RequestStatusPage />} />
               <Route path="consultation/booking/:token" element={<BookingPage />} />
               {/* The client portal and everything below it: one page, so the signed-in state stays mounted while a customer moves around. */}
               <Route path="client-portal/*" element={<ClientPortalPage />} />
-              {PAGES.filter((page) => projectIdOfPage(page.id) === null && page.id !== 'client-portal').map((page) =>
+              {PAGES.filter((page) => projectIdOfPage(page.id) === null && demoSlugOfPage(page.id) === null && page.id !== 'client-portal').map((page) =>
                 page.path === '/' ? (
                   <Route key={page.id} index element={elementFor(page)} />
                 ) : (

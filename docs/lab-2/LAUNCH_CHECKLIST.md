@@ -35,8 +35,8 @@ devices what a development machine cannot show.
 
 ## Remaining work (found, measured, not fixed)
 
-- **A slow heap growth when experiences are opened and left**: about 0.13 MB per visit, no levelling off in ten rounds. The base commit (`4761c8e`) grows at the same rate, so Lab 2.0 did not introduce it, but its cause was not found
-  ([PERFORMANCE](PERFORMANCE.md) §5). Worth a heap-snapshot session before the Lab is promoted heavily; at this rate it takes about a hundred visits to add 13 MB.
+- **The heap over a long session** was measured for eight rounds of "open every experience, come back" and its growth per round fell from 1.0 MB to about 0.1 MB ([PERFORMANCE](PERFORMANCE.md) §5).
+  An earlier version of this checklist and of PERFORMANCE listed a "slow leak"; that was a measurement artifact (element handles kept by the test), corrected in PROMPT 35. A longer run on a real device is still worth one look.
 - **Generative Objects keeps one texture in three.js' own counter after it unmounts** (stable under use; the lost context frees it). Its source was not identified.
 - **A flaky timing test outside the Lab**: `server/test/analyticsPerformance.test.ts` fails in full-suite runs on this shared development machine (a 1.5 s ceiling, 2.5 s measured under load) and passes alone (12 of 12, 15 s). Nothing in this branch touches the server.
 

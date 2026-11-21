@@ -1,3 +1,4 @@
+import type { ProjectDemo } from '../../demos/ids'
 import type { Trilingual } from '../trilingual'
 
 /**
@@ -150,4 +151,9 @@ export interface ProjectDetail {
   blocks?: readonly DetailBlock[]
   /** Only on a project managed in the administration: the addresses the owner marked as checked. */
   links?: { demo: string | null; source: string | null; extra: { url: string; label: Trilingual } | null; video: string | null }
+  /**
+   * The project's interactive demo (PROMPT 35): a registered type that suits the project, and optionally the owner's own instructions. Absent or `null`: the
+   * project has no demo and its page and its address are exactly what they were. See src/demos/ids.ts.
+   */
+  demo?: ProjectDemo | null
 }

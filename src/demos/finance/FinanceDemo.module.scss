@@ -1,0 +1,256 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The finance demo's layout. On a phone it is one column in the order a visitor works: the month at a glance, the form, the budgets, the
+ * spending by category, then the list. From a laptop up the list takes the wide left column and the month, the form and the budgets stack on the right.
+ */
+.layout {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'summary'
+    'form'
+    'budgets'
+    'categories'
+    'list';
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    grid-template-areas:
+      'summary summary'
+      'list form'
+      'list budgets'
+      'list categories';
+    align-items: start;
+  }
+}
+
+.summary {
+  grid-area: summary;
+}
+
+.formPanel {
+  grid-area: form;
+}
+
+.budgets {
+  grid-area: budgets;
+}
+
+.categories {
+  grid-area: categories;
+}
+
+.listPanel {
+  grid-area: list;
+}
+
+/* The month's three figures: large numerals, small labels. */
+.figures {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  margin: 0;
+
+  & > div {
+    display: grid;
+    gap: var(--space-1);
+    padding-left: var(--space-4);
+    border-left: 3px solid var(--color-text);
+  }
+
+  & > div:last-child {
+    border-left-color: var(--color-accent);
+  }
+
+  & dt {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+
+  & dd {
+    margin: 0;
+    font-size: var(--fs-xl);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--fw-black);
+    letter-spacing: var(--ls-tight);
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.submit {
+  justify-self: start;
+  border-color: var(--color-text);
+  background-color: var(--color-text);
+  color: var(--color-bg);
+
+  @include m.hover {
+    background-color: var(--color-text-secondary);
+  }
+}
+
+.budgetList {
+  gap: var(--space-5);
+}
+
+.budget {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.budgetHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.budgetName {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+/* A budget's state is a word and a shape; the colour only backs it up. Text stays the page's text colour (an amber text would fail on one of the two themes), the warning is
+   an amber frame, over budget the accent. */
+.state {
+  color: var(--color-text);
+}
+
+.budget[data-state='warning'] .state {
+  border-color: #d98a00;
+  border-width: 2px;
+}
+
+.budget[data-state='over'] .state {
+  color: var(--color-accent-text, var(--color-accent));
+  border-color: var(--color-accent-text, var(--color-accent));
+  border-width: 2px;
+}
+
+.categoryList {
+  gap: var(--space-3);
+
+  & > li {
+    display: grid;
+    grid-template-columns: minmax(6rem, 0.8fr) minmax(0, 1.2fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--fs-sm);
+  }
+}
+
+.categoryName {
+  overflow-wrap: anywhere;
+}
+
+.categoryBar {
+  display: block;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-divider);
+  overflow: hidden;
+
+  & > span {
+    display: block;
+    height: 100%;
+    background-color: var(--color-text);
+  }
+}
+
+.categoryAmount {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-bold);
+}
+
+.filters {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  align-items: end;
+
+  & > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.rows {
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.row {
+  display: grid;
+  gap: var(--space-1) var(--space-3);
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'description amount'
+    'date category'
+    'remove remove';
+  padding-block: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-divider);
+  font-size: var(--fs-sm);
+
+  @include m.up('md') {
+    grid-template-columns: 7rem minmax(0, 1fr) 8rem 8rem auto;
+    grid-template-areas: 'date description category amount remove';
+    align-items: center;
+  }
+}
+
+.date {
+  grid-area: date;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+.description {
+  grid-area: description;
+  font-weight: var(--fw-bold);
+  overflow-wrap: anywhere;
+}
+
+.category {
+  grid-area: category;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  text-align: right;
+
+  @include m.up('md') {
+    text-align: left;
+  }
+}
+
+.amount {
+  grid-area: amount;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-black);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.remove {
+  grid-area: remove;
+  justify-self: start;
+
+  @include m.up('md') {
+    justify-self: end;
+  }
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}

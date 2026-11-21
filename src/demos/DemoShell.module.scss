@@ -1,0 +1,290 @@
+@use '../styles/mixins' as m;
+
+/*
+ * The frame of a demo. It is a part of the page (the site's header and footer stay), laid out like a project's own bands: an editorial head, three
+ * labels that never go away, short instructions, an account of what is real and what is simulated, two tools, and the workspace.
+ */
+.frame {
+  display: grid;
+  gap: var(--space-5);
+  padding-block: var(--space-7);
+  color: var(--color-text);
+}
+
+/* Full screen. The browser's own (`:fullscreen`) fills the screen; the fallback lays the same frame over the window. Both let the frame scroll, since the demo can be taller than the screen. */
+.frame[data-fullscreen='expanded'] {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  overflow: auto;
+  padding: var(--space-5) var(--gutter);
+  background-color: var(--color-bg);
+}
+
+.frame:fullscreen {
+  overflow: auto;
+  padding: var(--space-5) var(--gutter);
+  background-color: var(--color-bg);
+}
+
+/* The page behind an expanded demo does not scroll, and gives back the scrollbar's gutter so the frame covers the whole window. */
+:global(html[data-lab-expanded]) {
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
+.head {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 60rem;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-touch);
+  width: fit-content;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-decoration: none;
+  text-transform: uppercase;
+
+  @include m.hover {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--fs-2xl);
+  font-stretch: var(--fstretch-expanded);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-snug);
+  text-wrap: balance;
+  text-transform: uppercase;
+}
+
+.kindName {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+}
+
+/* The three labels: a word and a shape each, so none is told by colour alone. */
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.label[data-kind='simulated'] {
+  border-style: dashed;
+}
+
+.dot,
+.diamond,
+.ring {
+  flex: none;
+  width: 0.65em;
+  height: 0.65em;
+}
+
+.dot {
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+.diamond {
+  background-color: currentColor;
+  transform: rotate(45deg) scale(0.85);
+}
+
+.ring {
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.how {
+  display: grid;
+  gap: var(--space-2);
+  max-width: 60rem;
+  padding-left: var(--space-4);
+  border-left: 3px solid var(--color-accent);
+
+  & p {
+    margin: 0;
+    font-size: var(--fs-md);
+    line-height: var(--lh-relaxed);
+  }
+}
+
+.own {
+  color: var(--color-text-secondary);
+}
+
+.subhead {
+  margin: 0;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.about {
+  max-width: 60rem;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+
+  & > summary {
+    display: flex;
+    align-items: center;
+    min-height: var(--size-touch);
+    padding: 0 var(--space-4);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+    cursor: pointer;
+
+    @include m.hover {
+      text-decoration: underline;
+      text-decoration-color: var(--color-accent);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.3em;
+    }
+
+    &:focus-visible {
+      outline: var(--focus-ring-width) solid var(--color-focus);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.columns {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-2) var(--space-4) var(--space-5);
+
+  @include m.up('md') {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.listTitle {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  list-style: '– ' outside;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--size-touch);
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+
+  @include m.hover {
+    background-color: var(--color-surface-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.toolOn {
+  border-color: var(--color-accent);
+}
+
+.stage {
+  min-width: 0;
+}
+
+.loading {
+  margin: 0;
+  padding: var(--space-6) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.state {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 44rem;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+
+  & p {
+    margin: 0;
+    line-height: var(--lh-relaxed);
+  }
+}
+
+.stateActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}

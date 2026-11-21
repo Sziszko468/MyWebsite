@@ -5,6 +5,23 @@
  */
 export const cmsEn = {
   project: {
+    demo: {
+      title: 'Interactive demo',
+      lead: 'A demo lets visitors try a sample of the project on invented data. Demos are made of code that ships with the website, so you can switch on only a registered one, and only for a project it was made for. The labels that say what is simulated and what is real cannot be changed here.',
+      enabled: 'Show the interactive demo on this project’s page',
+      enabledHelp: 'Switched off, the project’s page and address are exactly what they were.',
+      type: 'Demo',
+      choose: 'Choose a demo…',
+      none: 'No registered demo suits this project (its address is /work/{slug}). Demos exist for projects whose own repository documents the behaviour they reproduce.',
+      types: {
+        'finance-workbench': 'Transactions and budgets (a finance app)',
+        'booking-flow': 'Booking flow (a booking app)',
+        'shipment-board': 'Shipment board (a logistics platform)',
+      },
+      instructions: 'Your own instructions (optional)',
+      instructionsHelp: 'Plain text, up to {max} characters per language, shown under the demo’s built-in instructions. No formatting and no links.',
+      open: 'Open the demo page',
+    },
     internalTitle: 'Internal name',
     internalTitleHelp: 'Only you see it: it tells two projects apart in the list. It is never shown on the website.',
     services: 'Services provided',
@@ -179,6 +196,23 @@ export const cmsEn = {
 
 export const cmsHu: typeof cmsEn = {
   project: {
+    demo: {
+      title: 'Interaktív bemutató',
+      lead: 'A bemutató kitalált adatokon engedi kipróbálni a projekt egy mintáját. A bemutatók a weboldallal együtt szállított kódból állnak, ezért csak regisztrált bemutatót kapcsolhatsz be, és csak olyan projekthez, amelyhez készült. A szimulált és a valódi részeket jelölő feliratokat itt nem lehet módosítani.',
+      enabled: 'Az interaktív bemutató megjelenítése a projekt oldalán',
+      enabledHelp: 'Kikapcsolva a projekt oldala és címe pontosan olyan, mint előtte.',
+      type: 'Bemutató',
+      choose: 'Válassz bemutatót…',
+      none: 'Ehhez a projekthez nem tartozik regisztrált bemutató (a címe /work/{slug}). Bemutató azokhoz a projektekhez készült, amelyeknek a saját tárolója dokumentálja az utánzott működést.',
+      types: {
+        'finance-workbench': 'Tranzakciók és költségkeretek (pénzügyi alkalmazás)',
+        'booking-flow': 'Időpontfoglalás (foglalási alkalmazás)',
+        'shipment-board': 'Szállítmánytábla (logisztikai platform)',
+      },
+      instructions: 'Saját útmutató (nem kötelező)',
+      instructionsHelp: 'Egyszerű szöveg, nyelvenként legfeljebb {max} karakter, a bemutató beépített útmutatója alatt jelenik meg. Nincs formázás és nincs hivatkozás.',
+      open: 'A bemutató oldalának megnyitása',
+    },
     internalTitle: 'Belső név',
     internalTitleHelp: 'Csak te látod: a listában ez különbözteti meg a két projektet. A weboldalon soha nem jelenik meg.',
     services: 'Elvégzett szolgáltatások',

@@ -1,4 +1,5 @@
 import { experimentPath, playableExperiments, type LabId } from '../content/lab'
+import { DEMO_SLUGS, demoPath } from '../demos/ids'
 import { projects } from '../content/projects'
 import type { PackageId } from '../content/packages'
 import { PACKAGE_IDS, SERVICE_IDS, type ServiceId } from '../content/services/ids'
@@ -15,6 +16,8 @@ import { SHOP_PATHS, servicePath } from '../shop/paths'
 export type NavPageId = 'home' | 'work' | 'services' | 'about' | 'lab' | 'contact'
 /** A project's details page: `project-spendly`, `project-bookinghub`, and any slug an administrator publishes. */
 export type ProjectPageId = `project-${string}`
+/** A project's interactive demo (PROMPT 35): `demo-spendly`, `demo-bookinghub`, and the slug of any project an administrator switches a registered demo on for. */
+export type DemoPageId = `demo-${string}`
 /** An experiment's own page: `lab-particle-universe`, `lab-liquid-matter`... */
 export type LabPageId = `lab-${LabId}`
 /** A service's product page: `service-website`, `service-webapp`... */
@@ -33,7 +36,7 @@ export type CustomerPageId = 'customer-quote' | 'customer-request'
 export type ConsultationPageId = 'consultation' | 'customer-booking'
 /** The client portal (PROMPT 25): one private page for every address below `/client-portal`. */
 export type PortalPageId = 'client-portal'
-export type PageId = PortalPageId | NavPageId | ProjectPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | 'designSystem'
+export type PageId = PortalPageId | NavPageId | ProjectPageId | DemoPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | 'designSystem'
 
 export interface PageDef<Id extends PageId = PageId> {
   id: Id
@@ -83,6 +86,18 @@ export const PROJECT_PAGES: readonly PageDef<ProjectPageId>[] = projects.flatMap
 /** The project a page shows, or `null` when the page is not a project's. */
 export function projectIdOfPage(id: PageId): string | null {
   return id.startsWith('project-') ? id.slice('project-'.length) : null
+}
+
+/**
+ * One page per project that has a demo type that suits it (src/demos/ids.ts), at `/work/<slug>/demo`. The page is a workspace on invented sample data, not
+ * content: it is not indexed and not in the sitemap (the project's own page is), it says so to crawlers, and it exists in every language. A project an
+ * administrator publishes later gets its demo page through `resolvePage`, the same way its project page does.
+ */
+export const DEMO_PAGES: readonly PageDef<DemoPageId>[] = DEMO_SLUGS.map((slug) => page<DemoPageId>(`demo-${slug}`, demoPath(slug), LANGUAGES, false))
+
+/** The project a demo page belongs to, or `null` when the page is not a demo's. */
+export function demoSlugOfPage(id: PageId): string | null {
+  return id.startsWith('demo-') ? id.slice('demo-'.length) : null
 }
 
 /**
@@ -169,7 +184,7 @@ const PORTAL_PATH = /^\/client-portal\/[A-Za-z0-9_\-/]+$/
 /** Dev-only reference page; absent from production builds. */
 const DEV_PAGES: readonly PageDef[] = import.meta.env.DEV ? [page('designSystem', '/design-system', LANGUAGES, false)] : []
 
-export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...CUSTOMER_PAGES, ...CONSULTATION_PAGES, ...PORTAL_PAGES, ...DEV_PAGES]
+export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...DEMO_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...CUSTOMER_PAGES, ...CONSULTATION_PAGES, ...PORTAL_PAGES, ...DEV_PAGES]
 
 function normalize(path: string): string {
   const trimmed = path.replace(/\/+$/, '')
@@ -185,6 +200,8 @@ export function findPage(path: string, pages: readonly PageDef[] = PAGES): PageD
 const dynamic = new Map<string, PageDef>()
 const SLUG_PATH = /^\/work\/([a-z0-9][a-z0-9-]{1,59})$/
 const PREVIEW_PATH = /^\/work\/preview\/(\d{1,9})$/
+/** A project's demo: `/work/<slug>/demo`. The page itself says "not found" when the project has no demo. */
+const DEMO_PATH = /^\/work\/([a-z0-9][a-z0-9-]{1,59})\/demo$/
 /** A preview link (PROMPT 22): 256 random bits as base64url are 43 characters; a little room either way. The secret is not part of the page's identity. */
 const PREVIEW_LINK_PATH = /^\/work\/preview\/link\/[A-Za-z0-9_-]{20,64}$/
 const LINK_PREVIEW_PAGE = page<ProjectPageId>('project-preview', '/work/preview/link', LANGUAGES, false)
@@ -207,6 +224,11 @@ export function resolvePage(path: string): PageDef | undefined {
   const preview = PREVIEW_PATH.exec(wanted)
   if (preview) {
     if (!dynamic.has(wanted)) dynamic.set(wanted, page<ProjectPageId>('project-preview', wanted, LANGUAGES, false))
+    return dynamic.get(wanted)
+  }
+  const demo = DEMO_PATH.exec(wanted)
+  if (demo && demo[1] !== 'preview') {
+    if (!dynamic.has(wanted)) dynamic.set(wanted, page<DemoPageId>(`demo-${demo[1]}`, wanted, LANGUAGES, false))
     return dynamic.get(wanted)
   }
   const match = SLUG_PATH.exec(wanted)

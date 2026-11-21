@@ -1,6 +1,7 @@
 import { LANGUAGES, type Language } from '../../config.ts'
 import { validationFailed, type FieldCode, type FieldErrors } from '../../http/errors.ts'
 import { cleanBlock, cleanLine, isRecord, length } from '../../lib/text.ts'
+import { INSTRUCTIONS_MAX, isDemoType, isEligible, type DemoType } from './demo.ts'
 
 /**
  * The document behind a project: what the website's own project pages already say (src/content/projectDetails/types.ts),
@@ -61,6 +62,18 @@ export interface ProjectSeo {
   imageAlt: Tri
 }
 
+/**
+ * The project's interactive demo (PROMPT 35). Only data: a switch, a type from the closed list in demo.ts, and the owner's own plain-text instructions. There is no
+ * code, markup, address or component name in it, and `type` can only be a registered one.
+ */
+export interface DemoConfig {
+  enabled: boolean
+  type: DemoType | ''
+  instructions: Tri
+}
+
+export const emptyDemo = (): DemoConfig => ({ enabled: false, type: '', instructions: emptyTri() })
+
 export interface ProjectContent {
   /** A name only the administration shows (to tell two projects apart in the list); never sent to a visitor. */
   internalTitle: string
@@ -103,6 +116,8 @@ export interface ProjectContent {
   links: { demo: LinkEntry | null; source: LinkEntry | null; extra: (LinkEntry & { label: Tri }) | null; video: LinkEntry | null }
   blocks: Block[]
   seo: ProjectSeo
+  /** Documents saved before demos existed have none: they read as a demo that is switched off. */
+  demo: DemoConfig
   hidden: SectionId[]
 }
 
@@ -255,6 +270,21 @@ function block(errors: Errors, path: string, value: Input): Block {
   }
 }
 
+/** The demo switch, read from what the form sends: a type outside the closed list is refused (never stored), and a demo cannot be switched on without one. */
+function demoConfig(errors: Errors, path: string, value: Input): DemoConfig {
+  if (value === undefined || value === null) return emptyDemo()
+  if (!isRecord(value)) {
+    errors.fail(path, 'invalid')
+    return emptyDemo()
+  }
+  const enabled = value.enabled === true
+  let type: DemoType | '' = ''
+  if (isDemoType(value.type)) type = value.type
+  else if (value.type !== undefined && value.type !== null && value.type !== '') errors.fail(`${path}.type`, 'invalid')
+  if (enabled && type === '') errors.fail(`${path}.type`, 'required')
+  return { enabled, type, instructions: tri(errors, `${path}.instructions`, value.instructions, INSTRUCTIONS_MAX, true) }
+}
+
 /** Builds the canonical document from an administrator's input. Every problem is collected; the caller throws them together. */
 export function normalizeContent(input: Input, referenceCheck?: (id: number) => boolean): { content: ProjectContent; errors: FieldErrors } {
   const errors = new Errors()
@@ -366,6 +396,7 @@ export function normalizeContent(input: Input, referenceCheck?: (id: number) => 
       imageMediaId: typeof seoIn.imageMediaId === 'number' && Number.isInteger(seoIn.imageMediaId) && seoIn.imageMediaId > 0 ? seoIn.imageMediaId : seoIn.imageMediaId === undefined || seoIn.imageMediaId === null ? null : (errors.fail(`${p}.seo.imageMediaId`, 'invalid'), null),
       imageAlt: tri(errors, `${p}.seo.imageAlt`, seoIn.imageAlt, LIMITS.line),
     },
+    demo: demoConfig(errors, `${p}.demo`, body.demo),
     hidden: [...new Set(list(errors, `${p}.hidden`, body.hidden, SECTIONS.length, (item, at) => pick(errors, at, item, SECTIONS, 'overview')))],
   }
 
@@ -392,6 +423,15 @@ export function normalizeContent(input: Input, referenceCheck?: (id: number) => 
  * A stored document read back: a project saved before PROMPT 22 has no internal title, services, blocks or SEO, so each is given its empty
  * value. Nothing is validated here (a document was validated when it was written) and nothing is written back until the project is saved.
  */
+/** A stored demo read defensively: only a registered type, a real switch, and plain strings. A document from before demos existed has none. */
+function storedDemo(value: unknown): DemoConfig {
+  if (!isRecord(value)) return emptyDemo()
+  const read = isRecord(value.instructions) ? value.instructions : {}
+  const instructions = emptyTri()
+  for (const language of LANGUAGES) instructions[language] = typeof read[language] === 'string' ? (read[language] as string).slice(0, INSTRUCTIONS_MAX) : ''
+  return { enabled: value.enabled === true && isDemoType(value.type), type: isDemoType(value.type) ? value.type : '', instructions }
+}
+
 export function upgradeContent(stored: unknown): ProjectContent {
   const content = (isRecord(stored) ? stored : {}) as unknown as ProjectContent
   const seo = (isRecord(content.seo) ? content.seo : {}) as Partial<ProjectSeo>
@@ -400,6 +440,7 @@ export function upgradeContent(stored: unknown): ProjectContent {
     internalTitle: typeof content.internalTitle === 'string' ? content.internalTitle : '',
     services: Array.isArray(content.services) ? content.services : [],
     blocks: Array.isArray(content.blocks) ? content.blocks : [],
+    demo: storedDemo((content as unknown as Record<string, unknown>).demo),
     seo: {
       title: seo.title ?? emptyTri(),
       description: seo.description ?? emptyTri(),
@@ -635,6 +676,16 @@ function stripHidden(content: ProjectContent): ProjectContent {
 
 const shownLink = (entry: LinkEntry | null): string | null => (entry && entry.verified ? entry.url : null)
 
+/**
+ * What a visitor's page may know about the demo: a registered type that suits THIS project, switched on, with the owner's instructions (plain text, bounded).
+ * Anything else, including a type that no longer suits the slug (the slug of an unpublished project can change), is `null`: the project has no demo.
+ */
+export function publicDemo(demo: DemoConfig, slug: string): { type: DemoType; instructions: Tri | null } | null {
+  if (!demo.enabled || demo.type === '' || !isDemoType(demo.type) || !isEligible(demo.type, slug)) return null
+  const hasText = LANGUAGES.some((language) => demo.instructions[language] !== '')
+  return { type: demo.type, instructions: hasText ? demo.instructions : null }
+}
+
 export function publicProject(
   row: { slug: string; featured: number; position: number; category: string; status: ProjectState; published_at: string | null; updated_at: string },
   stored: ProjectContent,
@@ -702,6 +753,7 @@ export function publicProject(
     },
     sourceUrl: shownLink(content.links.source),
     reviewed: row.updated_at.slice(0, 10),
+    demo: publicDemo(content.demo, row.slug),
   }
   return out
 }

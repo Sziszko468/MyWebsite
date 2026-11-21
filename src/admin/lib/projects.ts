@@ -1,5 +1,5 @@
 import { LANGUAGES, type Language } from '../../i18n/config'
-import type { LanguageReport, ProjectBlock, ProjectContent, Tri } from '../api/projectTypes'
+import type { DemoType, LanguageReport, ProjectBlock, ProjectContent, Tri } from '../api/projectTypes'
 
 /**
  * What the project editor knows besides what it draws: the empty document a new project starts from, the limits it counts
@@ -20,6 +20,17 @@ export const STACK_GROUPS = ['frontend', 'backend', 'data', 'infrastructure', 't
 export const FEATURE_STATUSES = ['done', 'partial', 'planned'] as const
 export const SECTIONS = ['overview', 'challenge', 'approach', 'architecture', 'features', 'decisions', 'learned', 'results', 'gallery', 'blocks', 'links'] as const
 export const BLOCK_TYPES = ['text', 'image', 'gallery', 'features', 'technologies', 'highlight', 'links'] as const
+/** The interactive demos (PROMPT 35): the registered types, the projects each one suits, and the longest instruction text. The same lists as the server's (modules/projects/demo.ts). */
+export const DEMO_TYPES = ['finance-workbench', 'booking-flow', 'shipment-board'] as const satisfies readonly DemoType[]
+export const DEMO_PROJECTS: Readonly<Record<DemoType, readonly string[]>> = {
+  'finance-workbench': ['spendly'],
+  'booking-flow': ['bookinghub'],
+  'shipment-board': ['logistics-platform'],
+}
+export const DEMO_INSTRUCTIONS_MAX = 400
+/** The types that may be switched on for a project with this address. */
+export const demoTypesFor = (slug: string): DemoType[] => DEMO_TYPES.filter((type) => DEMO_PROJECTS[type].includes(slug))
+
 /** The longest side a picture keeps before it is uploaded, and the size above which a picture is re-encoded. */
 export const IMAGE_MAX_SIDE = 1600
 export const IMAGE_COMFORTABLE_BYTES = 600 * 1024
@@ -58,6 +69,7 @@ export function emptyContent(): ProjectContent {
     next: [],
     links: { demo: null, source: null, extra: null, video: null },
     blocks: [],
+    demo: { enabled: false, type: '', instructions: emptyTri() },
     seo: { title: emptyTri(), description: emptyTri(), ogTitle: emptyTri(), ogDescription: emptyTri(), imageMediaId: null, imageAlt: emptyTri() },
     hidden: [],
   }

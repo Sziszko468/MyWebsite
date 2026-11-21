@@ -1,3 +1,4 @@
+import { demoMeta } from '../content/demos/meta'
 import { findExperiment } from '../content/lab'
 import { aiMeta } from '../content/ai/meta'
 import { experimentSummary, labMeta } from '../content/labMeta'
@@ -11,9 +12,10 @@ import { consultationText } from '../content/consultation'
 import { portalText } from '../content/portal'
 import { quoteText } from '../content/quotes'
 import { shopMeta } from '../content/shop/meta'
+import { demoTypesFor } from '../demos/ids'
 import type { Language } from '../i18n/config'
 import type { Dictionary } from '../i18n/locales/hu'
-import { labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type NavPageId, type PageDef } from './pages'
+import { demoSlugOfPage, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type NavPageId, type PageDef } from './pages'
 
 const NAV_IDS: readonly string[] = ['work', 'services', 'about', 'lab', 'contact']
 
@@ -56,6 +58,15 @@ export function buildDocumentMeta(
 ): DocumentMeta {
   const site = { title: `${brandName} — ${t.meta.title}`, description: t.meta.description, ogType: 'website' as const }
   if (!page) return { ...site, title: `${t.notFound.title} — ${brandName}`, description: t.notFound.description }
+
+  // A project's demo: titled by the project's name and the demo's, described by what the demo is. The page is a workspace, so it is never indexed (routes/pages.ts).
+  const demoSlug = demoSlugOfPage(page.id)
+  if (demoSlug) {
+    const name = runtimeProject(demoSlug)?.name[lang] || (projectMeta as Record<string, (typeof projectMeta)[keyof typeof projectMeta]>)[demoSlug]?.title[lang] || ''
+    const type = demoTypesFor(demoSlug)[0]
+    if (name === '' || !type) return { ...site, title: `${t.nav.work} — ${brandName}`, description: t.workPage.meta.description }
+    return { title: `${demoMeta.title[lang].replace('{name}', name)} — ${brandName}`, description: demoMeta.descriptions[type][lang], ogType: 'website' }
+  }
 
   const projectId = projectIdOfPage(page.id)
   const own = projectId ? (projectMeta as Record<string, (typeof projectMeta)[keyof typeof projectMeta]>)[projectId] : undefined

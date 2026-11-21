@@ -13,6 +13,8 @@ import { visibleBlocks } from '../components/project/blocks'
 import { BlockBody } from '../components/project/ProjectBlocks'
 import { Approach, ArchitectureText, Band, Challenges, Decisions, Lessons, Overview, Results } from '../components/project/ProjectSections'
 import type { SectionTone } from '../components/Section/tone'
+import { DemoEntry } from '../demos/DemoEntry'
+import { parseProjectDemo } from '../demos/ids'
 import { useI18n } from '../i18n/useI18n'
 import { useProjectDetail, useProjectList } from '../projects/store'
 import { isAvailable, neighboursIn, viewOf, type ProjectRecord } from '../projects/types'
@@ -70,6 +72,8 @@ export function ProjectPage({ record, viaLink = false }: { record: ProjectRecord
   }, [card.slug, record.preview])
 
   const view = viewOf(card, lang)
+  // Read again here, not trusted: the type must be registered and must suit this project (the website's own content and the backend's answer both pass through it).
+  const demo = parseProjectDemo(detail.demo, card.slug)
   const heroImage = detail.gallery.find((image) => image.hero) ?? detail.gallery[0]
   const sections = t.project.sections
   const hasText = (text: { hu: string; en: string; nl: string } | undefined | null) => Boolean(text && text[lang])
@@ -113,6 +117,9 @@ export function ProjectPage({ record, viaLink = false }: { record: ProjectRecord
         </div>
       )}
       <ProjectHero entry={entry} detail={detail} image={heroImage} onOpenImage={setActiveImage} />
+
+      {/* A demo switched on for this project (a registered type that suits it) has its entry here, outside the numbered bands, so they keep their numbers. A preview has none. */}
+      {demo && !record.preview && card.detailPath !== null && <DemoEntry slug={card.slug} demo={demo} />}
 
       {bands.map((band, position) => (
         <Band key={band.id} id={band.id} tone={toneOf(position)} index={pad(position + 1)} title={band.title} large={band.large}>

@@ -76,6 +76,8 @@ function content(entry: ProjectEntry, detail: ProjectDetail | undefined): Record
     next: [...(detail?.next ?? [])],
     // A link is only shown once it has been marked as checked; the website's own pages have no demo, and a source address only where the owner gave one.
     links: { demo: entry.demoUrl ? { url: entry.demoUrl, verified: true } : null, source: detail?.sourceUrl ? { url: detail.sourceUrl, verified: true } : null, extra: null, video: null },
+    // The interactive demo (PROMPT 35): switched on for the projects whose static content names one, so a freshly seeded backend shows what the website shows.
+    demo: { enabled: detail?.demo != null, type: detail?.demo?.type ?? '', instructions: { hu: '', en: '', nl: '' } },
     hidden: [],
   }
 }

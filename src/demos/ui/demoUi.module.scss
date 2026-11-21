@@ -1,0 +1,294 @@
+@use '../../styles/mixins' as m;
+
+/*
+ * The pieces every demo is built from. A demo is a workspace on a project's page, so it is quiet: hairline panels, small uppercase labels, large numerals,
+ * and the Racing Red only where something needs attention. Nothing here moves unless the visitor acts, and every transition is behind
+ * `prefers-reduced-motion: no-preference`.
+ */
+
+.panel {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.panelHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+/* The small tag that says a figure or a list is sample data. */
+.sample {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border: var(--border-width) dashed var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+/* A toggle that looks like a chip: a real button (or radio) underneath, so the keyboard and a screen reader get it for free. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-touch);
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+
+  @include m.hover {
+    background-color: var(--color-surface-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  &[aria-pressed='true'],
+  &[data-selected='true'] {
+    border-color: var(--color-text);
+    background-color: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+/* A plain action: quieter than the site's primary button, for the demo's own small controls. */
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-touch);
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+
+  @include m.hover {
+    background-color: var(--color-surface-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.danger {
+  border-color: var(--color-accent);
+}
+
+/* A status that never relies on colour: a word, and a shape that differs per state. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px var(--space-3);
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.glyph {
+  flex: none;
+  width: 0.7em;
+  height: 0.7em;
+  background-color: currentColor;
+}
+
+.glyphRound {
+  border-radius: 50%;
+}
+
+.glyphDiamond {
+  transform: rotate(45deg) scale(0.85);
+}
+
+.glyphSquare {
+  border-radius: 1px;
+}
+
+.glyphRing {
+  border-radius: 50%;
+  background-color: transparent;
+  border: 2px solid currentColor;
+}
+
+.list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.live {
+  margin: 0;
+  min-height: 1.4em;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}
+
+/* The progress bar of a budget: the fill is the measure, the word beside it says the state. */
+.bar {
+  position: relative;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-divider);
+  overflow: hidden;
+
+  /* The fill is full width and scaled from its left edge (a compositor property: the site never transitions layout); the track's rounded ends clip it. */
+  & > span {
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-text);
+    transform-origin: left center;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: transform var(--dur-base) var(--ease-out);
+    }
+  }
+}
+
+.barWarning > span {
+  background-color: #b36b00;
+}
+
+.barOver > span {
+  background-color: var(--color-accent);
+}
+
+@media (forced-colors: active) {
+  .bar > span {
+    background-color: Highlight;
+  }
+}
+
+/* A field set of chips that are really radio buttons: the arrow keys move between them and the chosen one is filled and says so in words. */
+.fieldset {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+.radioChip {
+  position: relative;
+  cursor: pointer;
+
+  &:focus-within {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  &[data-disabled='true'] {
+    border-style: dashed;
+    opacity: 0.6;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+}
+
+.radioInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-error, var(--color-accent-text, var(--color-accent)));
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-normal);
+}

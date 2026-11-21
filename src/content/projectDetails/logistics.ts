@@ -16,6 +16,8 @@ export const logistics: ProjectDetail = {
   accent: 'ink',
   hero: 'route',
   reviewed: '2026-10-28',
+  // The interactive demo (PROMPT 35): a registered type that reproduces behaviour this project's own documentation describes (src/demos/).
+  demo: { type: 'shipment-board', instructions: null },
   sourceUrl: null,
 
   summary: tri(

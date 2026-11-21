@@ -1171,6 +1171,15 @@
           "extra": null,
           "video": null
         },
+        "demo": {
+          "enabled": true,
+          "type": "finance-workbench",
+          "instructions": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          }
+        },
         "hidden": []
       }
     },
@@ -1831,6 +1840,15 @@
           "extra": null,
           "video": null
         },
+        "demo": {
+          "enabled": true,
+          "type": "booking-flow",
+          "instructions": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          }
+        },
         "hidden": []
       }
     },
@@ -1923,6 +1941,15 @@
           "source": null,
           "extra": null,
           "video": null
+        },
+        "demo": {
+          "enabled": false,
+          "type": "",
+          "instructions": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          }
         },
         "hidden": []
       }
@@ -2829,6 +2856,15 @@
           "source": null,
           "extra": null,
           "video": null
+        },
+        "demo": {
+          "enabled": true,
+          "type": "shipment-board",
+          "instructions": {
+            "hu": "",
+            "en": "",
+            "nl": ""
+          }
         },
         "hidden": []
       }

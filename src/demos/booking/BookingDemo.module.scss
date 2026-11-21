@@ -1,0 +1,110 @@
+@use '../../styles/mixins' as m;
+
+.layout {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+}
+
+.formPanel,
+.side {
+  min-width: 0;
+}
+
+.side {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.submit {
+  justify-self: start;
+  border-color: var(--color-text);
+  background-color: var(--color-text);
+  color: var(--color-bg);
+
+  @include m.hover {
+    background-color: var(--color-text-secondary);
+  }
+}
+
+.summary {
+  border-color: var(--color-text);
+  border-width: 2px;
+
+  & h3:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: 4px;
+  }
+}
+
+/* The sentence that says nothing was booked: set apart so it cannot be read as a confirmation. */
+.banner {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-accent);
+  background-color: var(--color-surface-hover);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-normal);
+}
+
+.details {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  margin: 0;
+
+  & dt {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wider);
+    text-transform: uppercase;
+  }
+
+  & dd {
+    margin: 0;
+    font-weight: var(--fw-bold);
+    overflow-wrap: anywhere;
+  }
+}
+
+.bookings {
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.booking {
+  display: grid;
+  gap: var(--space-2);
+  padding-block: var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.bookingHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.bookingService {
+  font-weight: var(--fw-bold);
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

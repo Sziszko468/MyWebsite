@@ -6,6 +6,7 @@ import { conflict, notFound, validationFailed, type FieldErrors } from '../../ht
 import { iso } from '../../lib/time.ts'
 import { cleanLine, isRecord } from '../../lib/text.ts'
 import { requirePermission } from '../auth/permissions.ts'
+import { isEligible } from './demo.ts'
 import { mediaById, mediaUrl, mediaOut, type MediaRow } from '../media/service.ts'
 import { audit } from '../system/audit.ts'
 import { getSetting, setSetting } from '../system/settings.ts'
@@ -348,6 +349,15 @@ function insert(app: AppContext, input: { slug: string; status: ProjectState; fe
   ).lastInsertRowid
 }
 
+/**
+ * A demo can be switched on only for a project it was made for: the type must suit the project's slug (src/demos/ids.ts has the list the website uses). Called with the
+ * slug the project will have after this save, so a slug change cannot leave a demo on a project it does not suit.
+ */
+function demoSuits(content: ProjectContent, slug: string, errors: FieldErrors): void {
+  const demo = content.demo
+  if (demo.enabled && demo.type !== '' && slug !== '' && !isEligible(demo.type, slug)) errors['content.demo.type'] ??= 'invalid'
+}
+
 export function create(app: AppContext, session: SessionInfo | null, body: Record<string, unknown>) {
   const who = requirePermission(session, 'content:write')
   const errors: FieldErrors = {}
@@ -355,6 +365,7 @@ export function create(app: AppContext, session: SessionInfo | null, body: Recor
   const category = parseCategory(app, body.category, errors)
   const parsed = normalizeContent(body.content ?? {}, existingMedia(app))
   Object.assign(errors, parsed.errors, errors)
+  demoSuits(parsed.content, slug, errors)
   if (slug && app.db.get('SELECT 1 AS x FROM projects WHERE slug = ?', [slug])) errors.slug = 'duplicate'
   if (!parsed.content.title.hu && !parsed.content.title.en && !parsed.content.title.nl) errors['content.title.hu'] = 'required'
   if (Object.keys(errors).length > 0) throw validationFailed(errors)
@@ -379,6 +390,7 @@ export function update(app: AppContext, session: SessionInfo | null, id: unknown
   const category = body.category !== undefined ? parseCategory(app, body.category, errors) : row.category
   const parsed = normalizeContent(body.content ?? parseContent(row), existingMedia(app))
   Object.assign(errors, parsed.errors, errors)
+  demoSuits(parsed.content, slug, errors)
   if (!parsed.content.title.hu && !parsed.content.title.en && !parsed.content.title.nl) errors['content.title.hu'] = 'required'
   // A project that is public stays valid to publish: saving may not strip what publication requires.
   if (row.status === 'published') {
@@ -437,7 +449,10 @@ export function duplicate(app: AppContext, session: SessionInfo | null, id: unkn
   const row = find(app, id)
   let slug = `${row.slug}-copy`.slice(0, 60)
   for (let n = 2; app.db.get('SELECT 1 AS x FROM projects WHERE slug = ?', [slug]); n += 1) slug = `${row.slug}-copy-${n}`.slice(0, 60)
-  const newId = app.db.transaction(() => insert(app, { slug, status: 'draft', featured: false, position: nextPosition(app), category: row.category, content: parseContent(row), publishedAt: null }))
+  // A copy has another slug, so a demo made for the original does not suit it: the copy starts without one.
+  const copied = parseContent(row)
+  copied.demo = { ...copied.demo, enabled: false }
+  const newId = app.db.transaction(() => insert(app, { slug, status: 'draft', featured: false, position: nextPosition(app), category: row.category, content: copied, publishedAt: null }))
   audit(app, who, 'project.duplicate', 'project', newId, { from: row.slug, slug })
   return adminGet(app, session, newId)
 }

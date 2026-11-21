@@ -70,18 +70,24 @@ of the pixel budget (`chooseDpr`); that is the Lab's existing behaviour, unchang
 
 ## 5. What is left after leaving: the JavaScript heap
 
-Heap used (MB, after two forced garbage collections) before, then after each round of "open every experience, come back to the overview":
+**Correction (PROMPT 35).** The first version of this section reported a heap that grew by about 0.13 MB for every experience opened and left, with no levelling off, and
+called it a slow growth that "exists without Lab 2.0". **That was a measurement artifact, and the claim is withdrawn.** The script waited for each page with
+`page.waitForSelector(...)`, which returns an element handle that Playwright keeps alive inside the page; every handle kept the page it was taken from, with its
+canvas and its DOM, from being collected. Any page looks like it leaks under that method (the same loop on the Contact and About pages, which the script's author had
+no reason to suspect, showed no growth only because those loops did not take a handle). `lab2-perf.cjs` now waits with locators (`page.locator(...).first().waitFor()`),
+which keep nothing.
 
-| | Start | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Base commit `4761c8e` (no Lab 2.0) | 4.86 | 11.93 | 13.39 | 14.29 | 15.04 | 15.81 | 16.57 | 17.20 | 17.85 |
-| Lab 2.0 | 4.98 | 12.09 | 13.69 | 14.67 | 15.45 | 16.30 | 17.11 | 17.81 | 18.57 |
+Heap used (MB, after two forced garbage collections) before, then after each round of "open every experience, come back to the overview", **measured with locator waits**
+(production build, one run of eight rounds):
 
-(A longer Lab 2.0 run, ten rounds: 4.96 → 20.06 MB.) The first round's jump (about +7 MB) is the engine and the six experiences' code arriving. After that the heap grows **about 0.75 to 0.8 MB per round, i.e. roughly
-0.13 MB for every experience opened and left, and does not level off within ten rounds.** The base commit grows the same way (0.74 MB per round from round 2 to 8; Lab 2.0: 0.81), so **this slow growth exists
-without Lab 2.0**. Lab 2.0's slope was about 9% higher in these two single runs: with one run each that cannot be told apart from noise, and it was not investigated further, so "Lab 2.0 does not make it worse" is *not* proven either.
-It was not fixed and **its cause was not found** (the GPU side is clean, see 4; what is retained is on the JavaScript side). At that rate it takes about a hundred experience visits to add 13 MB. Listed in
-[LAUNCH_CHECKLIST](LAUNCH_CHECKLIST.md) as remaining work.
+| Start | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 4.58 | 11.50 | 12.50 | 12.88 | 13.11 | 13.38 | 13.55 | 13.68 | 13.78 |
+
+The first round's jump (about +7 MB) is the engine and the six experiences' code arriving. After that the growth per round falls: +1.0, +0.4, +0.2, +0.3, +0.2, +0.1, +0.1 MB.
+That is what caches and compiled code filling up looks like, not a leak, but **eight rounds do not prove the curve is flat**; the series is not extended further here. The DOM does not
+grow at all: after the same kind of round trip the page's node and listener counts are identical from one round to the next (see the interactive demos' test results for the method). No
+base-commit comparison is reported for the heap any more: the one that was made used the faulty method.
 
 ## What adapts, and where it lives (unchanged by Lab 2.0, relied on by it)
 
@@ -102,5 +108,5 @@ It was not fixed and **its cause was not found** (the GPU side is clean, see 4; 
 * Phone emulation does not slow the GPU. A mid-range phone's GPU is the likelier limit for Particle Universe and Liquid Matter; the tiers and the watchdog exist for that and were not exercised on one.
 * The frame-rate figures are capped by a 60 Hz display; they cannot show headroom.
 * No Safari, no Firefox, no memory-pressure or background-tab behaviour on a phone.
-* The slow heap growth in section 5, and Generative Objects' single three.js-internal texture in section 4.
+* The heap was measured over eight rounds only (section 5), and Generative Objects' single three.js-internal texture in section 4 was not traced to its source.
 * The measurements were taken once (loads and activations: the median of three). They are not a statistical study.

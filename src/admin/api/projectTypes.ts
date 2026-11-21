@@ -29,6 +29,15 @@ export interface ProjectSeo {
   imageAlt: Tri
 }
 
+/** The demos a project can have (PROMPT 35): a closed list; the server (modules/projects/demo.ts) is the authority and a test holds the lists together. */
+export type DemoType = 'finance-workbench' | 'booking-flow' | 'shipment-board'
+
+export interface DemoConfig {
+  enabled: boolean
+  type: DemoType | ''
+  instructions: Tri
+}
+
 export interface ProjectContent {
   internalTitle: string
   title: Tri
@@ -63,6 +72,7 @@ export interface ProjectContent {
   links: { demo: LinkEntry | null; source: LinkEntry | null; extra: (LinkEntry & { label: Tri }) | null; video: LinkEntry | null }
   blocks: ProjectBlock[]
   seo: ProjectSeo
+  demo: DemoConfig
   hidden: string[]
 }
 

@@ -3,6 +3,7 @@ import type { Accent, Architecture, Challenge, DetailBlock, Feature, GalleryImag
 import type { MockupKind, ProjectLayout } from '../content/projects'
 import type { Trilingual } from '../content/trilingual'
 import { API_BASE } from '../config/api'
+import { parseProjectDemo } from '../demos/ids'
 import { LANGUAGES, type Language } from '../i18n/config'
 import type { ProjectCard, ProjectCategory, ProjectRecord } from './types'
 
@@ -174,6 +175,8 @@ function parseDetail(slug: string, raw: unknown): ProjectDetail | null {
     architectureText: tri(raw.architectureText),
     results: triList(raw.results),
     links: { demo: httpsUrl(links.demo), source: httpsUrl(links.source), extra, video: httpsUrl(links.video) },
+    // A demo the backend names that is not registered here, or does not suit this project, is dropped: the page then has no demo.
+    demo: parseProjectDemo(raw.demo, slug),
   }
 }
 

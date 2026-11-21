@@ -20,7 +20,7 @@ import { useResource } from '../hooks/useResource'
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges'
 import { fill, formatDay, useInterfaceLanguage, useText } from '../i18n'
 import { describeError, fieldErrors } from '../lib/errors'
-import { ACCENTS, FEATURE_STATUSES, HEROES, LAYOUTS, LIMITS, MOCKUPS, PROJECT_STATUSES, SECTIONS, STACK_GROUPS, completenessOf, emptyContent, emptyTri, linesToList, sameDocument, setIn, titleOf } from '../lib/projects'
+import { DEMO_INSTRUCTIONS_MAX, demoTypesFor, ACCENTS, FEATURE_STATUSES, HEROES, LAYOUTS, LIMITS, MOCKUPS, PROJECT_STATUSES, SECTIONS, STACK_GROUPS, completenessOf, emptyContent, emptyTri, linesToList, sameDocument, setIn, titleOf } from '../lib/projects'
 import { useSession } from '../session/SessionProvider'
 import page from '../styles/pages.module.scss'
 import styles from '../styles/ui.module.scss'
@@ -498,6 +498,31 @@ function Editor({ initial, categories, language, onSaved, t }: { initial: Projec
               ))}
               <LinkEditor label={t.projects.edit.links.extra} value={content.links.extra} onChange={(value) => set(['links', 'extra'], value ? { ...value, label: content.links.extra?.label ?? emptyTri() } : null)} error={err('content.links.extra.url')} t={t} />
               {content.links.extra && <TriField label={t.projects.edit.links.extraLabel} {...triProps('links.extra.label', 120)} />}
+            </DetailPanel>
+            {/* The interactive demo (PROMPT 35): only a registered type that suits this project's address can be chosen; the server refuses anything else. */}
+            <DetailPanel title={t.cms.project.demo.title}>
+              <p className={styles.hint}>{t.cms.project.demo.lead}</p>
+              {demoTypesFor(draft.slug).length === 0 && !content.demo.enabled ? (
+                <p className={styles.hint}>{fill(t.cms.project.demo.none, { slug: draft.slug || '…' })}</p>
+              ) : (
+                <>
+                  <SwitchField label={t.cms.project.demo.enabled} hint={t.cms.project.demo.enabledHelp} checked={content.demo.enabled} onChange={(checked) => set(['demo', 'enabled'], checked)} />
+                  <SelectField
+                    label={t.cms.project.demo.type}
+                    value={content.demo.type}
+                    onChange={(event) => set(['demo', 'type'], event.target.value)}
+                    options={[{ value: '', label: t.cms.project.demo.choose }, ...demoTypesFor(draft.slug).map((type) => ({ value: type, label: t.cms.project.demo.types[type] }))]}
+                    error={err('content.demo.type')}
+                  />
+                  <TriField label={t.cms.project.demo.instructions} hint={fill(t.cms.project.demo.instructionsHelp, { max: DEMO_INSTRUCTIONS_MAX })} optional {...triProps('demo.instructions', DEMO_INSTRUCTIONS_MAX, { multiline: true, rows: 3 })} />
+                  <Counter value={content.demo.instructions[editing]} max={DEMO_INSTRUCTIONS_MAX} />
+                  {record && content.demo.enabled && (
+                    <AdminButton href={`/${language}/work/${record.slug}/demo`} target="_blank" rel="noopener noreferrer" variant="text">
+                      {t.cms.project.demo.open}
+                    </AdminButton>
+                  )}
+                </>
+              )}
             </DetailPanel>
           </div>
         </TabPanel>

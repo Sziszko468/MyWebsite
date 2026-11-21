@@ -16,6 +16,8 @@ export const spendly: ProjectDetail = {
   accent: 'red',
   hero: 'split',
   reviewed: '2026-10-28',
+  // The interactive demo (PROMPT 35): a registered type that reproduces behaviour this project's own documentation describes (src/demos/).
+  demo: { type: 'finance-workbench', instructions: null },
   sourceUrl: null,
 
   summary: tri(

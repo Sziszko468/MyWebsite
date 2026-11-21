@@ -18,6 +18,8 @@ export const bookinghub: ProjectDetail = {
   accent: 'blue',
   hero: 'stack',
   reviewed: '2026-10-28',
+  // The interactive demo (PROMPT 35): a registered type that reproduces behaviour this project's own documentation describes (src/demos/).
+  demo: { type: 'booking-flow', instructions: null },
   sourceUrl: null,
 
   summary: tri(

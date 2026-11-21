@@ -69,4 +69,4 @@ Seen: the overview tiles at 1440 px (the "Interactive" badge and the input tags 
 * **A screen reader**, switch access, voice control, forced-colours mode, a magnifier.
 * **Native proofreading** of the new Hungarian and Dutch wording (rules and spell checker only).
 * **Production or any hosted environment**; load under real network conditions; a long-running session on a real device.
-* **Before/after performance**: no comparison with the base commit was made for load or frame rate (only for the heap, see PERFORMANCE §5); no improvement is claimed.
+* **Before/after performance**: no comparison with the base commit was made for load, frame rate or the heap; no improvement is claimed.
