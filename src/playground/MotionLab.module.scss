@@ -1,0 +1,292 @@
+@use '../styles/mixins' as m;
+
+/*
+ * The motion laboratory's examples. Every duration, curve, distance and delay is a custom property of the stage (--pg-*), set from the visitor's parameters; under reduced
+ * motion (the system's or the switch's) the stage sets them to nothing, and the media query below says the same in CSS, so an animation can never outlive the setting.
+ * Nothing loops. Only opacity, transform and clip-path move.
+ */
+
+.stage {
+  padding: var(--space-4);
+}
+
+.examples {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.example {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+
+.exampleHead {
+  display: grid;
+  gap: var(--space-3);
+  align-items: start;
+
+  @include m.up('sm') {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.exampleTitle {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+}
+
+.exampleText {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+}
+
+.exampleBody {
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-normal);
+}
+
+.reduced {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-accent);
+  background-color: var(--color-surface);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+/* ── hover and focus ──────────────────────────────────────────────── */
+
+.hoverCard {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  max-width: 20rem;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-raised);
+  transition:
+    transform var(--pg-duration) var(--pg-ease),
+    box-shadow var(--pg-duration) var(--pg-ease),
+    border-color var(--pg-duration) var(--pg-ease);
+
+  &:focus-within,
+  &[data-hot='true'] {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(calc(var(--pg-distance) * -0.5));
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-md);
+      transform: translateY(calc(var(--pg-distance) * -0.5));
+    }
+  }
+}
+
+.hoverTitle {
+  margin: 0;
+  font-weight: var(--fw-bold);
+}
+
+/* ── card entrance ────────────────────────────────────────────────── */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.enter {
+  min-width: 0;
+  animation: pg-enter var(--pg-duration) var(--pg-ease) both;
+  animation-delay: calc(var(--i) * var(--pg-stagger));
+}
+
+@keyframes pg-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--pg-distance));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── scroll-inspired reveal ───────────────────────────────────────── */
+
+.scroller {
+  max-height: 13rem;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-subtle);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.items {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 3.5rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-raised);
+  font-weight: var(--fw-semibold);
+  transition:
+    transform var(--pg-duration) var(--pg-ease),
+    opacity var(--pg-duration) var(--pg-ease);
+
+  &[data-state='hidden'] {
+    opacity: 0;
+    transform: translateY(var(--pg-distance));
+  }
+}
+
+.itemNumber {
+  color: var(--color-accent-text);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-black);
+}
+
+/* ── micro-interactions ───────────────────────────────────────────── */
+
+.micro {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 22rem;
+}
+
+/* ── page transition concept ──────────────────────────────────────── */
+
+.page {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.screens {
+  min-height: 8rem;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-subtle);
+  overflow: hidden;
+}
+
+.screen {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  min-height: 8rem;
+  padding: var(--space-4);
+  background-color: var(--color-surface-raised);
+
+  &[data-screen='1'] {
+    background-color: var(--color-surface-active);
+  }
+
+  &[data-kind='fade'] {
+    animation: pg-fade var(--pg-duration) var(--pg-ease) both;
+  }
+
+  &[data-kind='rise'] {
+    animation: pg-enter var(--pg-duration) var(--pg-ease) both;
+  }
+
+  &[data-kind='wipe'] {
+    animation: pg-wipe var(--pg-duration) var(--pg-ease) both;
+  }
+}
+
+.bars {
+  display: grid;
+  gap: var(--space-2);
+
+  & > i {
+    display: block;
+    height: 0.5rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-border-strong);
+
+    &:nth-child(1) {
+      width: 70%;
+    }
+
+    &:nth-child(2) {
+      width: 90%;
+    }
+
+    &:nth-child(3) {
+      width: 45%;
+    }
+  }
+}
+
+@keyframes pg-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pg-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* The same answer in CSS as the parameters give from the page: no movement, no wait. */
+@media (prefers-reduced-motion: reduce) {
+  .enter,
+  .screen {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
+
+  .hoverCard,
+  .item {
+    transition-duration: 0.01ms;
+  }
+}

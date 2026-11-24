@@ -1,4 +1,5 @@
 import { findExperiment } from '../content/lab'
+import { playgroundMeta } from '../content/playground/meta'
 import { projectMeta } from '../content/projectDetails/meta'
 import { projects } from '../content/projects'
 import { serviceAreas } from '../content/services/areas'
@@ -50,6 +51,7 @@ function trail(page: PageDef, lang: Language): Crumb[] {
   if (serviceId) return [home, nav('services'), here(serviceAreas.find((a) => a.id === serviceId)?.name[lang] ?? serviceId)]
   const labId = labIdOfPage(page.id)
   if (labId) return [home, nav('lab'), here(findExperiment(labId)?.name ?? labId)]
+  if (page.id === 'design-playground') return [home, nav('lab'), here(playgroundMeta.title[lang])]
   const label = page.id === 'privacy' ? t.footer.legal.privacy : (t.nav as Record<string, string>)[page.id]
   return [home, here(label ?? page.id)]
 }

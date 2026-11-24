@@ -30,13 +30,15 @@ export type ShopPageId = 'configure' | 'cart' | 'full-experience' | 'full-experi
 export type LegalPageId = 'privacy'
 /** CONTROL ROOM AI: the assistant's own page. */
 export type AiPageId = 'control-room'
+/** The Design System Playground (PROMPT 36): a tool of the Lab at `/lab/design-system`. Its id does not start with `lab-`, because those are the experiments' pages. */
+export type PlaygroundPageId = 'design-playground'
 /** The customer's private pages (PROMPT 17): a quotation and a request's status. Each is reached only through a secret in its address. */
 export type CustomerPageId = 'customer-quote' | 'customer-request'
 /** The consultation booking (PROMPT 24): the public page, and the customer's own booking page behind a secret link. */
 export type ConsultationPageId = 'consultation' | 'customer-booking'
 /** The client portal (PROMPT 25): one private page for every address below `/client-portal`. */
 export type PortalPageId = 'client-portal'
-export type PageId = PortalPageId | NavPageId | ProjectPageId | DemoPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | 'designSystem'
+export type PageId = PortalPageId | NavPageId | ProjectPageId | DemoPageId | LabPageId | ServicePageId | PackagePageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | PlaygroundPageId | 'designSystem'
 
 export interface PageDef<Id extends PageId = PageId> {
   id: Id
@@ -138,6 +140,12 @@ export function serviceIdOfPage(id: PageId): ServiceId | null {
   return id.startsWith('service-') ? (id.slice('service-'.length) as ServiceId) : null
 }
 
+/**
+ * The Design System Playground: a tool in the Lab's ecosystem, NOT a seventh experience (the Lab has exactly six, and this page is in none of their lists). It is indexable,
+ * exists in every language, is in no menu, and the Lab's overview links to it from a band of its own.
+ */
+export const PLAYGROUND_PAGES: readonly PageDef<PlaygroundPageId>[] = [page<PlaygroundPageId>('design-playground', '/lab/design-system')]
+
 /** The legal pages the footer links to (config/site.ts `legal`). They are not in the navigation and exist in every language. */
 export const LEGAL_PAGES: readonly PageDef<LegalPageId>[] = [page<LegalPageId>('privacy', '/privacy')]
 
@@ -184,7 +192,7 @@ const PORTAL_PATH = /^\/client-portal\/[A-Za-z0-9_\-/]+$/
 /** Dev-only reference page; absent from production builds. */
 const DEV_PAGES: readonly PageDef[] = import.meta.env.DEV ? [page('designSystem', '/design-system', LANGUAGES, false)] : []
 
-export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...DEMO_PAGES, ...LAB_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...CUSTOMER_PAGES, ...CONSULTATION_PAGES, ...PORTAL_PAGES, ...DEV_PAGES]
+export const PAGES: readonly PageDef[] = [...NAV_PAGES, ...SHOP_PAGES, ...PROJECT_PAGES, ...DEMO_PAGES, ...LAB_PAGES, ...PLAYGROUND_PAGES, ...AI_PAGES, ...LEGAL_PAGES, ...CUSTOMER_PAGES, ...CONSULTATION_PAGES, ...PORTAL_PAGES, ...DEV_PAGES]
 
 function normalize(path: string): string {
   const trimmed = path.replace(/\/+$/, '')

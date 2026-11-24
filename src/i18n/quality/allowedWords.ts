@@ -21,6 +21,8 @@ const names = [
   'node', 'nodejs', 'next', 'expo', 'native', 'tailwind', 'playwright', 'webgl', 'glsl', 'three', 'openapi', 'yaml', 'apns', 'fcm',
   // The standards the privacy notice names: "Global Privacy Control", "Do Not Track".
   'global', 'privacy', 'not', 'track',
+  // PROMPT 36: the Design System Playground's own name and the brand typeface it offers.
+  'design', 'system', 'playground', 'archivo',
 ]
 
 /** Everyday abbreviations and shortened forms. */
@@ -37,6 +39,8 @@ const technical = [
   'shader', 'shaderrel', 'shift', 'sortable', 'src', 'swappable', 'timeout', 'tooltips', 'unavailable', 'uptime', 'users', 'vertex', 'waypoints', 'worker',
   'wrappers', 'send-email', 'email-status', 'if-match', 'blacklist', 'bottom', 'client', 'clients', 'commit', 'constraints', 'face', 'content', 'site',
   'dialogs', 'biometric', 'runnable', 'tooltips', 'integrations', 'webhook', 'apis', 'api’s', 'api\'s', 'id’s', 'id\'s', 'add-ons', 'add-on',
+  // PROMPT 36: the typography and motion laboratories name a font stack and a timing function by their technical names.
+  'monospace', 'monospace-stack', 'easing',
 ]
 
 /**
@@ -50,7 +54,7 @@ const hungarianForms = [
   'összegzés', 'papírokról', 'sávokat', 'sávokkal', 'sebességet', 'sorok', 'sorokat', 'sorokra', 'soronként', 'szállítólevelen', 'szerveren',
   'szöveget', 'szövegen', 'tableten', 'tanulságok', 'tervet', 'től', 'tulajdonságok', 'újdonságokról', 'fuvarokat', 'adminisztrátorok', 'demócéget',
   'buildet', 'commitját', 'commit-előzmények', 'celery-feladatok', 'full-stack', 'boxutcába', 'reszponzív', 'reszponzívan', 'reszponzívvá',
-  'labba', 'labban', 'labhoz', 'lab-élmény', 'matterben', 'motionben', 'admin', 'push', 'push-értesítések', 'push-ellenőrzések',
+  'labba', 'labban', 'labhoz', 'labra', 'lab-élmény', 'matterben', 'motionben', 'admin', 'push', 'push-értesítések', 'push-ellenőrzések',
   'backend', 'frontend', 'backend-kép', 'ecb-referenciaárfolyammal', 'fetch-burkoló', 'szerializálók', 'zsályazöld',
   // "anyag" (a thing shared for review, PROMPT 27): the dictionary has the stem, not these regular forms.
   'anyagok', 'anyagoknál', 'anyagodból',

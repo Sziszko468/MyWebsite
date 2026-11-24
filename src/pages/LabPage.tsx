@@ -4,6 +4,7 @@ import { ArtifactsPanel } from '../components/lab/artifacts/ArtifactsPanel'
 import { useLocalized } from '../components/lab/core/useLabText'
 import { RacingEggLayer } from '../components/lab/easter/RacingEgg'
 import { useSecretSequence } from '../components/lab/easter/useSecretSequence'
+import { DesignToolBand } from '../components/lab/page/DesignToolBand'
 import { Discovery } from '../components/lab/page/Discovery'
 import { LabHero } from '../components/lab/page/LabHero'
 import { pageText } from '../components/lab/page/pageText'
@@ -24,6 +25,7 @@ export function LabPage() {
     <>
       <LabHero onFind={() => setEgg(true)} />
       <Discovery />
+      <DesignToolBand />
       <Philosophy />
       <ArtifactsPanel />
       <FinalCta

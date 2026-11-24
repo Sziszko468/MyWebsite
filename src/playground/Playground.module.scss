@@ -1,0 +1,284 @@
+@use '../styles/mixins' as m;
+
+/*
+ * The playground's page: its sections, the bar under the header and the shared workbench layout. Everything is a token of the site; nothing here has a colour of its own.
+ * Under 36rem a section is one column in the order a visitor works (the controls, then what they do); from the large breakpoint up the preview stays beside the controls.
+ */
+
+.page {
+  display: block;
+
+  /* A control that takes focus (by Tab, or by a link to it) is scrolled to clear the site's header and this page's bar, never left under them (WCAG 2.2: focus not obscured). */
+  :is(a, button, input, select, textarea, summary, [tabindex]) {
+    scroll-margin-block: calc(var(--header-height) + 6.5rem) 2rem;
+  }
+}
+
+/* ── the introduction ───────────────────────────────────────────── */
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--size-touch);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-decoration: none;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    color: var(--color-text);
+  }
+}
+
+.facts {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+
+  @include m.up('md') {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+
+  & > li {
+    padding-top: var(--space-3);
+    border-top: 2px solid var(--color-text);
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-normal);
+  }
+
+  & > li:first-child {
+    border-top-color: var(--color-accent);
+  }
+}
+
+/* ── the bar: sections, preview theme, reset ───────────────────────── */
+
+.bar {
+  z-index: var(--z-sticky);
+  border-top: var(--border-width) solid var(--color-divider);
+  border-bottom: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg);
+
+  @include m.up('md') {
+    position: sticky;
+    top: var(--header-height);
+  }
+}
+
+.barInner {
+  display: grid;
+  /* A grid item never grows past the container because of its content. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+  padding-block: var(--space-3);
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: var(--space-5);
+  }
+}
+
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* On a phone the five links scroll sideways inside the bar; they never widen the page. */
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-touch);
+  padding-inline: var(--space-3);
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wide);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    color: var(--color-text);
+  }
+
+  &[aria-current='location'] {
+    border-bottom-color: var(--color-accent);
+    color: var(--color-text);
+  }
+}
+
+.themeSwitch {
+  /* Two chips side by side: the choice control needs 8rem for each. */
+  min-width: min(100%, 17rem);
+}
+
+.barActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.state {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+
+  &[data-changed='true'] {
+    color: var(--color-accent-text);
+  }
+}
+
+/* ── a laboratory ─────────────────────────────────────────────────── */
+
+.section {
+  padding-block: var(--space-8);
+  border-bottom: var(--border-width) solid var(--color-divider);
+  /* The anchor lands below the site header and the bar. */
+  scroll-margin-top: calc(var(--header-height) + 5rem);
+
+  @include m.up('lg') {
+    padding-block: var(--space-9);
+  }
+}
+
+.head {
+  display: grid;
+  gap: var(--space-4);
+  align-items: start;
+  margin-bottom: var(--space-6);
+
+  @include m.up('md') {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-5);
+  }
+}
+
+.number {
+  color: var(--color-accent-text);
+  font-size: var(--fs-md);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-wider);
+}
+
+.headText {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-snug);
+}
+
+.lead {
+  max-width: 48rem;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+}
+
+.bench {
+  display: grid;
+  gap: var(--space-5);
+  align-items: start;
+
+  @include m.up('lg') {
+    grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+.controls {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+
+.preview {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+
+  @include m.up('lg') {
+    position: sticky;
+    top: calc(var(--header-height) + 5rem);
+  }
+}
+
+.readout {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-wide);
+}
+
+.groupTitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.code {
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-raised);
+  font-family: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+/* ── what to know ────────────────────────────────────────────────── */
+
+.limits {
+  padding-block: var(--space-8);
+
+  & ul {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 52rem;
+    margin: var(--space-5) 0 0;
+    padding-left: var(--space-5);
+    color: var(--color-text-secondary);
+    line-height: var(--lh-normal);
+  }
+}

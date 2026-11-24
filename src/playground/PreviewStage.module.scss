@@ -1,0 +1,18 @@
+/*
+ * The stage a preview is drawn on. It is a surface of its own: it takes the page colour of ITS theme (the `data-theme` on it sets the tokens), so a dark preview is dark
+ * on a light page and the other way round. Nothing here reads or writes the page's theme.
+ */
+.stage {
+  min-width: 0;
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  /* A wide preview (the real navigation bar, a desktop frame) scrolls inside its stage and never widens the page. */
+  overflow-x: auto;
+
+  @media (max-width: 36rem) {
+    padding: var(--space-4);
+  }
+}

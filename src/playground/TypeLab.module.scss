@@ -1,0 +1,82 @@
+/*
+ * The three styles the typography laboratory draws. The stage sets custom properties (--pg-*) from the visitor's choices; the rules below only read them, so the
+ * stage's own theme (dark or light) decides the colours and nothing here reaches outside it.
+ */
+
+.stage {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.stageLabel {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.sample {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  font-family: var(--pg-font);
+  letter-spacing: var(--pg-ls);
+  line-height: var(--pg-lh);
+  font-stretch: var(--pg-wd);
+}
+
+.heading,
+.body,
+.caption {
+  /* The site's own heading rule sets a family, a spacing and a line height on every heading, and a rule on the element beats what it would inherit: so the three styles
+     say what the visitor chose themselves. */
+  font-family: var(--pg-font);
+  font-stretch: var(--pg-wd);
+  letter-spacing: var(--pg-ls);
+  line-height: var(--pg-lh);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--pg-h-size);
+  font-weight: var(--pg-h-weight);
+  overflow-wrap: anywhere;
+}
+
+.body {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--pg-b-size);
+  font-weight: var(--pg-b-weight);
+  overflow-wrap: anywhere;
+}
+
+.caption {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--pg-c-size);
+  font-weight: var(--pg-b-weight);
+  overflow-wrap: anywhere;
+}
+
+.texts {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.groupTitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-xs);
+}

@@ -28,6 +28,8 @@ const loaders = import.meta.glob<Record<string, unknown>>([
   '!../../content/imageVariants.ts',
   // PROMPT 35: the interactive demos' words (content/demos/: shell, entry, meta and the three demos' own) are read through the content pattern above; the explicit entry keeps a new file from being missed.
   '../../content/demos/*.ts',
+  // PROMPT 36: the Design System Playground's words (content/playground/: the page, the Lab's band, the head) are read through the content pattern above too; the explicit entry keeps a new file from being missed.
+  '../../content/playground/*.ts',
   '../../seo/text.ts',
   '../../ai/availability.ts',
   '../../projects/static.ts',

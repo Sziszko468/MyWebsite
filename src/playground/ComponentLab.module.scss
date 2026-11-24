@@ -1,0 +1,70 @@
+@use '../styles/mixins' as m;
+
+.about {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+
+  & p {
+    margin: 0;
+  }
+}
+
+.source {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+.code {
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-raised);
+  font-family: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+
+.props {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.stage {
+  min-height: 14rem;
+}
+
+.canvas {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.center {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.fields {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 28rem;
+}
+
+.sentence {
+  max-width: 36rem;
+  margin: 0;
+  line-height: var(--lh-relaxed);
+}
+
+.projectFrame {
+  max-width: 44rem;
+}
+
+.inert {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
