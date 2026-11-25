@@ -5,7 +5,7 @@ import { startingLanguage } from './i18n/preference'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { lazyRoute } from './motion/loading'
-import { PAGES, demoSlugOfPage, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type AiPageId, type ConsultationPageId, type CustomerPageId, type LegalPageId, type NavPageId, type PageDef, type PlaygroundPageId, type PortalPageId, type ShopPageId } from './routes/pages'
+import { PAGES, demoSlugOfPage, labIdOfPage, packageIdOfPage, projectIdOfPage, serviceIdOfPage, type AiPageId, type ConsultationPageId, type CustomerPageId, type LegalPageId, type NavPageId, type PageDef, type PlaygroundPageId, type PortalPageId, type ShopPageId, type SystemPageId } from './routes/pages'
 import { LanguageLayout } from './routes/LanguageLayout'
 import { IntroProvider } from './components/intro/IntroProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
@@ -69,13 +69,17 @@ const LabExperimentPage = lazyRoute(() =>
 // The Design System Playground (PROMPT 36): a tool of the Lab with its own chunk, loaded only when /lab/design-system is opened.
 const DesignPlaygroundPage = lazyRoute(() => import('./pages/DesignPlaygroundPage').then((module) => ({ default: module.DesignPlaygroundPage })))
 
+// The Command Center and the Digital Archive (PROMPT 37): each a chunk of its own, loaded only when it is opened.
+const CommandCenterPage = lazyRoute(() => import('./pages/CommandCenterPage').then((module) => ({ default: module.CommandCenterPage })))
+const ArchivePage = lazyRoute(() => import('./pages/ArchivePage').then((module) => ({ default: module.ArchivePage })))
+
 // What renders at each registered page. Paths and languages live in routes/pages.ts.
 // Work is a placeholder until its page is built; a project's
 // details page is the same component for every project, fed by content/projectDetails.
 // The pages that are chunks carry no Suspense of their own: the one boundary above the page frame
 // (routes/LanguageLayout.tsx) stays mounted from page to page, so a navigation keeps the page on
 // screen until the next one's code has arrived instead of swapping it for a blank placeholder.
-const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | PortalPageId | PlaygroundPageId | 'designSystem', ReactElement | null> = {
+const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | PortalPageId | PlaygroundPageId | SystemPageId | 'designSystem', ReactElement | null> = {
   home: <HomePage />,
   work: <WorkPage />,
   services: <ServicesPage />,
@@ -86,6 +90,8 @@ const PAGE_ELEMENTS: Record<NavPageId | ShopPageId | LegalPageId | AiPageId | Cu
   about: <AboutPage />,
   lab: <LabPage />,
   'design-playground': <DesignPlaygroundPage />,
+  'command-center': <CommandCenterPage />,
+  archive: <ArchivePage />,
   contact: <ContactPage />,
   privacy: <PrivacyPage />,
   'control-room': <ControlRoomPage />,
@@ -106,7 +112,7 @@ function elementFor(page: PageDef): ReactElement | null {
   if (pack) return <PackagePage packageId={pack} />
   const experiment = labIdOfPage(page.id)
   if (experiment) return <LabExperimentPage id={experiment} />
-  return PAGE_ELEMENTS[page.id as NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | PortalPageId | PlaygroundPageId | 'designSystem']
+  return PAGE_ELEMENTS[page.id as NavPageId | ShopPageId | LegalPageId | AiPageId | CustomerPageId | ConsultationPageId | PortalPageId | PlaygroundPageId | SystemPageId | 'designSystem']
 }
 
 export default function App() {

@@ -77,10 +77,10 @@ export const MOTION_SCOPES = Object.keys(MOTION.scope) as MotionScope[]
  */
 export function scopeOfPage(id: PageId | undefined): MotionScope {
   if (!id) return 'site'
-  if (id === 'lab' || id.startsWith('lab-') || id === 'design-playground') return 'lab'
+  if (id === 'lab' || id.startsWith('lab-') || id === 'design-playground' || id === 'command-center') return 'lab'
   if (id === 'configure' || id === 'cart' || id === 'full-experience-start') return 'checkout'
   if (id === 'services' || id === 'full-experience' || id.startsWith('service-') || id.startsWith('package-')) return 'shop'
-  if (id === 'work' || id === 'about' || id === 'contact' || id.startsWith('project-')) return 'portfolio'
+  if (id === 'work' || id === 'about' || id === 'contact' || id === 'archive' || id.startsWith('project-')) return 'portfolio'
   return 'site'
 }
 

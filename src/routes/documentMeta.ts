@@ -1,4 +1,5 @@
 import { demoMeta } from '../content/demos/meta'
+import { archiveMeta, commandCenterMeta } from '../content/archive/meta'
 import { playgroundMeta } from '../content/playground/meta'
 import { findExperiment } from '../content/lab'
 import { aiMeta } from '../content/ai/meta'
@@ -101,6 +102,10 @@ export function buildDocumentMeta(
       title: `${experiment.name} — ${t.nav.lab} — ${brandName}`,
       description: experimentSummary[experiment.id][lang],
     }
+  }
+  if (page.id === 'command-center' || page.id === 'archive') {
+    const meta = page.id === 'archive' ? archiveMeta : commandCenterMeta
+    return { ...site, title: `${meta.title[lang]} — ${brandName}`, description: meta.description[lang] }
   }
   if (page.id === 'design-playground') {
     return { ...site, title: `${playgroundMeta.title[lang]} — ${t.nav.lab} — ${brandName}`, description: playgroundMeta.description[lang] }

@@ -1,4 +1,5 @@
 import { findExperiment } from '../content/lab'
+import { archiveMeta, commandCenterMeta } from '../content/archive/meta'
 import { playgroundMeta } from '../content/playground/meta'
 import { projectMeta } from '../content/projectDetails/meta'
 import { projects } from '../content/projects'
@@ -27,6 +28,8 @@ const PAGE_TYPE: Partial<Record<PageDef['id'], string>> = {
   work: 'CollectionPage',
   services: 'CollectionPage',
   lab: 'CollectionPage',
+  'command-center': 'CollectionPage',
+  archive: 'CollectionPage',
 }
 
 interface Crumb {
@@ -52,6 +55,8 @@ function trail(page: PageDef, lang: Language): Crumb[] {
   const labId = labIdOfPage(page.id)
   if (labId) return [home, nav('lab'), here(findExperiment(labId)?.name ?? labId)]
   if (page.id === 'design-playground') return [home, nav('lab'), here(playgroundMeta.title[lang])]
+  if (page.id === 'command-center') return [home, here(commandCenterMeta.title[lang])]
+  if (page.id === 'archive') return [home, { name: commandCenterMeta.title[lang], path: seoPath(lang, '/command-center') }, here(archiveMeta.title[lang])]
   const label = page.id === 'privacy' ? t.footer.legal.privacy : (t.nav as Record<string, string>)[page.id]
   return [home, here(label ?? page.id)]
 }

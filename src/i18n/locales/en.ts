@@ -57,6 +57,8 @@ export const en: Dictionary = {
     role: 'Websites and web applications, designed and built.',
     navLabel: 'Footer navigation',
     pagesHeading: 'Pages',
+    commandCenter: 'Command Center',
+    archive: 'Digital Archive',
     contactHeading: 'Contact',
     contactIntro: "Have an idea or a question? Let’s talk.",
     contactLink: 'Get in touch',

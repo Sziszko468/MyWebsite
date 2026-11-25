@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { API_BASE } from '../config/api'
 import { getJson, parseCard, parseCategories, parseRecord } from './api'
 import { staticCards, staticCategories, staticRecord } from './static'
@@ -158,6 +158,22 @@ export function useProjectDetail(slug: string, previewId: string | null = null, 
 }
 const MISSING_DETAIL: DetailState = { status: 'missing' }
 const LOADING_DETAIL: DetailState = { status: 'loading' }
+
+/**
+ * Several projects in full at once, for a list that needs more than their cards (the Digital Archive reads which projects have a demo). The same cache and the same PUBLIC
+ * endpoint as a project's own page; it never reads a preview.
+ */
+export function useProjectDetails(slugs: readonly string[]): ReadonlyMap<string, DetailState> {
+  const key = slugs.join(' ')
+  useEffect(() => {
+    for (const slug of key ? key.split(' ') : []) ensureDetail(slug, null)
+  }, [key])
+  const seen = useSyncExternalStore(subscribe, () => version, () => 0)
+  return useMemo(() => {
+    void seen
+    return new Map<string, DetailState>((key ? key.split(' ') : []).map((slug) => [slug, API_BASE !== null ? (details.get(slug) ?? LOADING_DETAIL) : offlineState(slug)]))
+  }, [key, seen])
+}
 
 /** What the head knows about a project's title and description: the data's own once it has arrived. */
 export function runtimeProject(slug: string): ProjectCard | null {

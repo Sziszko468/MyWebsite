@@ -1,0 +1,80 @@
+@use '../styles/mixins' as m;
+
+/* The rail: big numerals and a label per section, in a row that wraps; chosen = filled bar and a darker face, not colour alone. */
+.rail {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  border-top: var(--border-width) solid var(--color-divider);
+}
+
+.option {
+  position: relative;
+  min-width: 0;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.face {
+  display: grid;
+  gap: var(--space-1);
+  min-height: 100%;
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    background-color: var(--color-surface-hover);
+  }
+}
+
+.input:checked + .face {
+  border-bottom-color: var(--color-accent);
+  background-color: var(--color-surface);
+}
+
+.input:focus-visible + .face {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: -2px;
+}
+
+.count {
+  font-size: var(--fs-2xl);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight);
+  line-height: 1;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  overflow-wrap: anywhere;
+}
+
+.input:checked + .face .label {
+  color: var(--color-text);
+}

@@ -23,6 +23,8 @@ const names = [
   'global', 'privacy', 'not', 'track',
   // PROMPT 36: the Design System Playground's own name and the brand typeface it offers.
   'design', 'system', 'playground', 'archivo',
+  // PROMPT 37: "Command Center" is the name the owner gave the page, written in the American spelling although the site's English is British.
+  'center',
 ]
 
 /** Everyday abbreviations and shortened forms. */

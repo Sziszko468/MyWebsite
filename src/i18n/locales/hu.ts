@@ -57,6 +57,8 @@ export const hu = {
     role: 'Weboldalak és webalkalmazások tervezése és fejlesztése.',
     navLabel: 'Lábléc menü',
     pagesHeading: 'Oldalak',
+    commandCenter: 'Irányítóközpont',
+    archive: 'Digitális archívum',
     contactHeading: 'Kapcsolat',
     contactIntro: 'Van egy ötleted vagy kérdésed? Beszéljük meg.',
     contactLink: 'Írj nekem',

@@ -1,0 +1,118 @@
+@use '../styles/mixins' as m;
+
+/* The archive page: a search desk over a ledger. */
+.page {
+  display: block;
+
+  :is(a, button, input, select, [tabindex]) {
+    scroll-margin-block: calc(var(--header-height) + var(--space-5)) var(--space-5);
+  }
+}
+
+.finder {
+  padding-block: var(--space-6);
+  border-bottom: var(--border-width) solid var(--color-divider);
+  background-color: var(--color-bg-subtle);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.search {
+  max-width: 40rem;
+
+  & input {
+    font-size: var(--fs-lg);
+  }
+}
+
+.selects {
+  display: grid;
+  gap: var(--space-4);
+  align-items: end;
+
+  @include m.up('md') {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+}
+
+.results {
+  padding-block: var(--space-7) var(--space-9);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-tight);
+}
+
+.count {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--fw-semibold);
+}
+
+.loading {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A row that appears (after a search or a filter) arrives quietly; one that stays is not replayed. */
+.item {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: archive-arrive var(--dur-base) var(--ease-out) both;
+  }
+}
+
+@keyframes archive-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-sm));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.empty {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding: var(--space-7) var(--space-5);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+
+  & p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-black);
+}

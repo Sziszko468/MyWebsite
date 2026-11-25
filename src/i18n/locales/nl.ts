@@ -57,6 +57,8 @@ export const nl: Dictionary = {
     role: 'Websites en webapplicaties, ontworpen en gebouwd.',
     navLabel: 'Menu onderaan de pagina',
     pagesHeading: "Pagina’s",
+    commandCenter: 'Commandocentrum',
+    archive: 'Digitaal archief',
     contactHeading: 'Contact',
     contactIntro: 'Heb je een idee of een vraag? Laten we praten.',
     contactLink: 'Neem contact op',

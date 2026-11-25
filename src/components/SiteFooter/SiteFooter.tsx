@@ -46,6 +46,19 @@ export function SiteFooter() {
         <div className={styles.pages}>
           <h2 className={styles.heading}>{t.footer.pagesHeading}</h2>
           <MainNav variant="footer" label={t.footer.navLabel} />
+          {/* PROMPT 37: the Command Center and the archive, beside the six main pages (the header's navigation is unchanged). */}
+          <ul className={styles.list}>
+            <li>
+              <LocalizedLink className={styles.link} to="/command-center">
+                {t.footer.commandCenter}
+              </LocalizedLink>
+            </li>
+            <li>
+              <LocalizedLink className={styles.link} to="/archive">
+                {t.footer.archive}
+              </LocalizedLink>
+            </li>
+          </ul>
         </div>
 
         <div className={styles.contact}>

@@ -1,0 +1,55 @@
+@use '../styles/mixins' as m;
+
+/* The system's own navigation: four stops in a row, numbered like coordinates. On a phone it is two by two. */
+.bar {
+  border-top: var(--border-width) solid var(--color-divider);
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include m.up('md') {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stop {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: calc(var(--size-touch) + var(--space-3));
+  padding-inline: var(--space-2);
+  border-bottom: 3px solid transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-decoration: none;
+  /* A long name ("Commandocentrum") goes under its number on a narrow phone; it is never cut in the middle unless it cannot fit at all. */
+  flex-wrap: wrap;
+  align-content: center;
+  row-gap: 0;
+  overflow-wrap: break-word;
+  transition: var(--transition-colors);
+
+  @include m.hover {
+    color: var(--color-text);
+  }
+
+  &[aria-current='page'] {
+    border-bottom-color: var(--color-accent);
+    color: var(--color-text);
+  }
+}
+
+.number {
+  color: var(--color-accent-text);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-wider);
+}
