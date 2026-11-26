@@ -40,8 +40,12 @@ export const EntryRow = memo(function EntryRow({ entry, position, labels, words,
       <div className={styles.body}>
         <p className={styles.meta}>
           <span className={styles.kind}>{labels.kind[entry.kind]}</span>
-          <span aria-hidden="true">·</span>
-          <span>{entry.categoryLabel}</span>
+          {entry.categoryLabel !== '' && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{entry.categoryLabel}</span>
+            </>
+          )}
           {status === 'ready' ? <span className={styles.ready}>{labels.status.ready}</span> : <Badge status={status} />}
         </p>
         <h3 id={headingId} className={styles.title}>

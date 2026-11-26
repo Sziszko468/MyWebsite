@@ -34,8 +34,9 @@ afterAll(async () => {
 
 const session = () => ({ userId: 'x', email: 'x', role: 'admin', csrfToken: '', tokenHash: '' }) as never
 /**
- * The time of a section is its CPU time (user + system, of this test's own process): the queries are synchronous, so that is the work they cost, and it does not grow when 160 other
- * test files share the machine (a wall-clock ceiling did, and a loaded run once failed on a section that takes 0.8 s alone). The wall-clock time is printed beside it.
+ * The time of a section is its CPU time (user + system, of this test's own process): the queries are synchronous, so that is the work they cost, and waiting for a processor
+ * is not counted. It is NOT independent of the machine's other work: processes that compete for memory, cache and cores made the same queries take two to three times as much
+ * CPU time. So this file runs after all the others, alone (vitest.timed.ts). The wall-clock time is printed beside it.
  */
 const wall: Record<string, number> = {}
 const run = (name: SectionName, query: string) => {

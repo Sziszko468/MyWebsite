@@ -81,6 +81,8 @@ function sourcesIn(lang: Language, patch: Partial<ArchiveSources> = {}): Archive
     words: {
       creativeCoding: words.categories.creativeCoding,
       designTools: words.categories.designTools,
+      unnamedCategory: words.categories.unnamed,
+      unnamedCategoryNumbered: words.categories.unnamedNumbered,
       demoName: (type) => demos.kinds[type].name,
       demoSummary: (type) => demos.kinds[type].summary,
       toolTitle: playgroundEntry.title[lang],

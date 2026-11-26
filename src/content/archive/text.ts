@@ -30,6 +30,9 @@ export const archiveText = {
   categories: {
     creativeCoding: tri('Kreatív programozás', 'Creative coding', 'Creatief programmeren'),
     designTools: tri('Dizájneszközök', 'Design tools', 'Ontwerpgereedschappen'),
+    /** A project category the CMS gives no readable name in this language. Its key is never shown; the numbered form tells several apart. */
+    unnamed: tri('Névtelen kategória', 'Unnamed category', 'Naamloze categorie'),
+    unnamedNumbered: tri('Névtelen kategória {number}', 'Unnamed category {number}', 'Naamloze categorie {number}'),
   },
   demoTitle: tri('{project}: {demo}', '{project}: {demo}', '{project}: {demo}'),
 

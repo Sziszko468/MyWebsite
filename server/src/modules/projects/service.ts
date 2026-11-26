@@ -71,15 +71,29 @@ function find(app: AppContext, id: unknown): ProjectRow {
 // categories and settings
 // ---------------------------------------------------------------------------------------------------------------
 
+/**
+ * The stored categories. What is saved is validated, but it is read back from the database: a record without a text key is left out and a name that is not text reads
+ * as empty, so that one bad record cannot take the public project list down. A name is passed on exactly as stored.
+ */
 export function categories(app: AppContext): Category[] {
   const raw = getSetting(app.db, KEYS.categories)
   if (!raw) return []
+  let parsed: unknown
   try {
-    const parsed: unknown = JSON.parse(raw)
-    return Array.isArray(parsed) ? (parsed as Category[]) : []
+    parsed = JSON.parse(raw)
   } catch {
     return []
   }
+  if (!Array.isArray(parsed)) return []
+  return parsed.flatMap((item): Category[] => {
+    if (!isRecord(item) || typeof item.key !== 'string') return []
+    const label = emptyTri()
+    for (const language of LANGUAGES) {
+      const value = isRecord(item.label) ? item.label[language] : undefined
+      if (typeof value === 'string') label[language] = value
+    }
+    return [{ key: item.key, label }]
+  })
 }
 
 export const requireAllLanguages = (app: AppContext): boolean => getSetting(app.db, KEYS.allLanguages) !== '0'

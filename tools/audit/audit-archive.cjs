@@ -53,7 +53,7 @@ async function waitForData(page) {
       const { context, page } = await newPage(browser, { width: w, height: h, mobile, scheme })
       const consoleErrors = []
       page.on('console', (m) => {
-        // The static build has no backend behind it here: a request for the public project list fails and the website uses its own content, which is what is audited.
+        // There is no backend behind the static server: a build with a backend address gets failed requests here, one without makes none; either way the website's own content is audited.
         if (m.type() === 'error' && !/WebGL|GPU stall|GL Driver|ReadPixels|Automatic fallback|swiftshader|Failed to load resource|\/api\//i.test(m.text())) consoleErrors.push(m.text().slice(0, 120))
       })
       page.on('pageerror', (e) => consoleErrors.push(`pageerror ${e.message}`.slice(0, 120)))

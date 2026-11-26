@@ -1,8 +1,9 @@
 # Performance
 
 Part of the [Command Center and Digital Archive](README.md). Measured on 2026-11-25 with `tools/audit/archive-perf.cjs` on the **production build**, served with its real headers and brotli
-compression by `tools/audit/serve.cjs`, in headless Chrome 158 on one development machine (Windows 11, i9-13900H). **No backend** ran: a request for the project list fails and the website's own
-content appears. "Phone" is 390×844, DPR 2, CPU slowed 4×: **not a phone**. Compared with the base commit `9d39cc6` (PROMPT 36), built the same way (prerendered). These are one machine's
+compression by `tools/audit/serve.cjs`, in headless Chrome 158 on one development machine (Windows 11, i9-13900H). The measured build had **no backend address** (`VITE_API_URL` not set), so no
+request for projects was made and the website's own content was there at once. (Corrected in PROMPT 37.1: this said a request failed. The layout-shift figures below therefore saw no loading state.)
+"Phone" is 390×844, DPR 2, CPU slowed 4×: **not a phone**. Compared with the base commit `9d39cc6` (PROMPT 36), built the same way (prerendered). These are one machine's
 numbers, not a promise.
 
 ## 1. Chunks

@@ -3,6 +3,7 @@
 PROMPT 37. Branch `feature/command-center-digital-archive`, based on `feature/design-system-playground` (`9d39cc6`). Nothing here is merged or deployed, and nothing was verified in
 production. Documents: [INFORMATION_ARCHITECTURE](INFORMATION_ARCHITECTURE.md) · [ARCHITECTURE](ARCHITECTURE.md) · [ARCHIVE_DATA_MODEL](ARCHIVE_DATA_MODEL.md) ·
 [ACCESSIBILITY](ACCESSIBILITY.md) · [PERFORMANCE](PERFORMANCE.md) · [TEST_RESULTS](TEST_RESULTS.md) · [LAUNCH_CHECKLIST](LAUNCH_CHECKLIST.md).
+PROMPT 37.1 (branch `feature/archive-data-integrity`) hardened the data rules and the test schedule: [DATA_INTEGRITY](DATA_INTEGRITY.md).
 
 ## What was implemented
 
@@ -30,7 +31,7 @@ Two public pages in hu / en / nl, built entirely on the website's existing publi
 | Components: `PageHero`, `Container`, `Button`, `Badge`, `TextField`, `SelectField`, `LocalizedLink`, `Reveal`, `usePointerField`, `ProjectMockup` | The pages |
 | The localization engine (`tri()`, `i18n:check` / `validate`), the design tokens, the motion system (scopes, `--dur-*`, reduced motion), the head and SEO pipeline | Everything |
 
-**No backend change**, no new endpoint, no database, no migration, no new dependency, no external service.
+PROMPT 37 made **no backend change** (37.1 later fixed two things in the server, see [DATA_INTEGRITY](DATA_INTEGRITY.md)): no new endpoint, no database, no migration, no new dependency, no external service.
 
 ## What is public, and what is deliberately not
 
@@ -64,6 +65,7 @@ npm run build ; npm run check:seo
 node tools/e2e/archive-journey.cjs                                         # 21-step journey against the dev server (npm run dev on :5173)
 node tools/audit/audit-archive.cjs dist [--quick]                          # responsive + accessibility matrix on the production build
 node tools/audit/archive-perf.cjs dist --base <dist of the base commit>    # load and interaction measurements
+node tools/e2e/archive-backend-check.cjs                                    # against a real server and scratch database (build first: see its header)
 ```
 
 ## Limits (honest)

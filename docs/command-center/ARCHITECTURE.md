@@ -24,7 +24,7 @@ Part of the [Command Center and Digital Archive](README.md). Everything below is
 * The public project **list** (`/api/projects`, or the static content with no backend) arrives first. The Lab, the tool and the services need nothing and are there at once; while the
   projects arrive the pages say *"Loading the projects…"* and the Command Center's counts that depend on them show `…`.
 * A project can have a **demo** only if its slug is eligible (`demoTypesFor`) and it has a page; for those (at most the three registered slugs) the hook reads the project's **public
-  detail** — the same endpoint and cache as the project's own page — and `parseProjectDemo` decides. The pages never ask for a preview.
+  detail** — the same endpoint and cache as the project's own page — and `parseProjectDemo` decides, after the checks of [DATA_INTEGRITY](DATA_INTEGRITY.md) §3. The pages never ask for a preview.
 * A list an administrator loaded earlier in the same visit through `?preview=1` (it holds drafts) is **ignored** and the public list is requested.
 
 ## 3. The archive's search: state, not address

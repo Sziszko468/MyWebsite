@@ -221,7 +221,7 @@ export function createApp(deps: AppDeps): App {
         } else if (area === 'static' && config.staticDir && (method === 'GET' || method === 'HEAD')) {
           // The sitemap is a live answer: the built one, with the project pages that exist now (an unpublished project is not in it).
           let served = url.pathname === '/sitemap.xml' ? liveSitemap(context, config.staticDir) : null
-          served ??= serveStatic(config.staticDir, url.pathname)
+          served ??= serveStatic(config.staticDir, url.pathname, url.search)
           // A project page exists only while the project is published, has a page of its own and has something to say in that language.
           // The build's prerendered file is not the truth: after an unpublish it is a stale, indexable page, so it is not served.
           // A project published after the site was built has no prerendered page: answer with the Work page's shell (200) so the browser

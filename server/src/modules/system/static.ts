@@ -52,7 +52,8 @@ function parseHeadersFile(text: string): Rule[] {
   return rules
 }
 
-export function serveStatic(directory: string, urlPath: string): Reply | null {
+/** `search` is the address's query (`?…`, already percent-encoded, or empty): a redirect to the slash form carries it along, so a shared filtered address stays one. */
+export function serveStatic(directory: string, urlPath: string, search = ''): Reply | null {
   const root = resolve(directory)
   let decoded: string
   try {
@@ -74,7 +75,7 @@ export function serveStatic(directory: string, urlPath: string): Reply | null {
 
   let status = 200
   if (existsSync(file) && statSync(file).isDirectory()) {
-    if (!decoded.endsWith('/')) return { status: 301, headers: { Location: `${decoded}/` }, body: '' }
+    if (!decoded.endsWith('/')) return { status: 301, headers: { Location: `${decoded}/${search}` }, body: '' }
     file = join(file, 'index.html')
   }
   // Only the kinds of file a website is made of are served: a database or a log pointed at by mistake is "not found".

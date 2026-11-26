@@ -9,7 +9,7 @@ import { demoTypesFor, parseProjectDemo, type DemoType } from '../demos/ids'
 import { useI18n } from '../i18n/useI18n'
 import { useProjectDetails, useProjectList } from '../projects/store'
 import { isAvailable, viewOf, type CardView } from '../projects/types'
-import { buildEntries, facetsOf, type ArchiveEntry, type ArchiveLabels, type Facets } from './model'
+import { buildEntries, categoryNames, facetsOf, publicProjects, type ArchiveEntry, type ArchiveLabels, type Facets } from './model'
 
 export interface Archive {
   entries: readonly ArchiveEntry[]
@@ -35,21 +35,30 @@ export function useArchive(): Archive {
   // A list that was loaded through an administrator's preview elsewhere in this visit is not the public one: it is not used, and the public one is being asked for.
   const publicList = list.preview ? null : list
 
-  const names = useMemo(() => new Map((publicList?.categories ?? []).map((category) => [category.key, category.label[lang]])), [publicList, lang])
-  const cards = useMemo(() => (publicList?.cards ?? []).filter((card) => !card.draft && isAvailable(card, lang)).map((card) => viewOf(card, lang, names.get(card.category))), [publicList, lang, names])
+  const categoryName = useMemo(() => categoryNames(publicList?.categories ?? [], lang), [publicList, lang])
+  const cards = useMemo(
+    () => publicProjects((publicList?.cards ?? []).filter((card) => isAvailable(card, lang)).map((card) => viewOf(card, lang, categoryName(card.category)))),
+    [publicList, lang, categoryName],
+  )
 
   const slugs = useMemo(() => cards.filter((card) => card.detailPath !== null && demoTypesFor(card.slug).length > 0).map((card) => card.slug), [cards])
   const details = useProjectDetails(slugs)
 
+  const fromBackend = publicList?.source === 'api'
   const demos = useMemo(
     () =>
       slugs.flatMap((slug) => {
         const state = details.get(slug)
-        if (state?.status !== 'ready' || state.record.preview) return []
-        const demo = parseProjectDemo(state.record.detail.demo, slug)
+        if (state?.status !== 'ready') return []
+        const { record, source } = state
+        // A demo is listed only on the word of a public answer about this very project, which still has a page and exists in this language.
+        if (record.preview || record.card.draft || record.card.slug !== slug || record.card.detailPath === null || !isAvailable(record.card, lang)) return []
+        // When the backend listed the projects, the website's own copy of one (used when its detail cannot be read) must not switch on a demo the CMS may have switched off.
+        if (fromBackend && source !== 'api') return []
+        const demo = parseProjectDemo(record.detail.demo, slug)
         return demo ? [{ slug, type: demo.type }] : []
       }),
-    [slugs, details],
+    [slugs, details, lang, fromBackend],
   )
 
   const loading = publicList === null || publicList.status === 'loading' || slugs.some((slug) => details.get(slug)?.status === 'loading')
@@ -61,10 +70,12 @@ export function useArchive(): Archive {
         projects: cards,
         demos,
         experiments,
-        categoryName: (key) => names.get(key) ?? '',
+        categoryName,
         words: {
           creativeCoding: words.categories.creativeCoding,
           designTools: words.categories.designTools,
+          unnamedCategory: words.categories.unnamed,
+          unnamedCategoryNumbered: words.categories.unnamedNumbered,
           demoName: (type) => demoWords.kinds[type].name,
           demoSummary: (type) => demoWords.kinds[type].summary,
           toolTitle: playgroundEntry.title[lang],
@@ -72,7 +83,7 @@ export function useArchive(): Archive {
           demoTitle: words.demoTitle,
         },
       }),
-    [lang, cards, demos, names, words, demoWords],
+    [lang, cards, demos, categoryName, words, demoWords],
   )
 
   const labels = useMemo<ArchiveLabels>(

@@ -1,7 +1,8 @@
 import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import type { Plugin } from 'vite'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
+import { TIMED_TESTS } from './vitest.timed.ts'
 
 /**
  * The administration is a second page of the same build (`admin.html`, its own bundle) served by the backend at `/admin` and
@@ -43,8 +44,15 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts', 'server/**/*.test.ts', 'worker/**/*.test.ts', 'scripts/**/*.test.ts'],
     // Tests read tokens.css as text (?raw); by default Vitest blanks every non-module CSS file.
     css: { include: [/tokens\.css/] },
+    // Two groups, run one after the other: every test file side by side, then the files with a time budget, alone (vitest.timed.ts says why).
+    projects: [
+      {
+        extends: true,
+        test: { name: 'main', include: ['src/**/*.test.ts', 'server/**/*.test.ts', 'worker/**/*.test.ts', 'scripts/**/*.test.ts'], exclude: [...configDefaults.exclude, ...TIMED_TESTS], sequence: { groupOrder: 0 } },
+      },
+      { extends: true, test: { name: 'timed', include: [...TIMED_TESTS], fileParallelism: false, sequence: { groupOrder: 1 } } },
+    ],
   },
 })

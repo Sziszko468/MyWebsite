@@ -3,7 +3,7 @@ import type { DemoType } from '../demos/ids'
 import { demoPath } from '../demos/ids'
 import { experimentPath, type LabExperiment, type LabId, type LabStatus } from '../content/lab'
 import { LOCALE_TAGS, type Language } from '../i18n/config'
-import type { CardView } from '../projects/types'
+import type { CardView, ProjectCategory } from '../projects/types'
 
 /**
  * The Digital Archive's data (PROMPT 37): one list of what the site has made PUBLIC, built from what the site already has and nothing else: the published projects
@@ -25,6 +25,13 @@ export const LAB_CATEGORY = 'creative-coding'
 export const TOOL_CATEGORY = 'design-tools'
 export const TOOL_PATH = '/lab/design-system'
 
+/** The shape of a category key (the backend accepts 2 to 40 of these characters). Only such a key can be filtered by and carried in an address. */
+const CATEGORY_KEY = /^[a-z0-9][a-z0-9-]{0,39}$/
+const OWN_CATEGORIES: readonly string[] = [LAB_CATEGORY, TOOL_CATEGORY]
+/** A CMS category that happens to use one of the archive's own two keys is filtered under this prefix (a CMS key cannot hold a dot), so the two are never mixed. */
+const PROJECT_PREFIX = 'project.'
+const QUERY_CATEGORY = new RegExp(`^(?:project\\.(?:${OWN_CATEGORIES.join('|')})|[a-z0-9][a-z0-9-]{0,39})$`)
+
 export type ArchiveVisual =
   | { type: 'image'; src: string; width: number; height: number; alt: string }
   | { type: 'mockup'; kind: MockupKind }
@@ -37,7 +44,7 @@ export interface ArchiveEntry {
   kind: ArchiveKind
   title: string
   description: string
-  /** The key and the name of its category, in the page's language. */
+  /** The key of its category (the filter's value) and the name shown for it, in the page's language. Both empty for a project whose record names no usable category. */
   category: string
   categoryLabel: string
   status: ArchiveStatus
@@ -55,6 +62,9 @@ export interface ArchiveEntry {
 export interface ArchiveWords {
   creativeCoding: string
   designTools: string
+  /** What stands for a project category that has no readable name in this language; the numbered form ("… {number}") tells several apart. */
+  unnamedCategory: string
+  unnamedCategoryNumbered: string
   demoName: (type: DemoType) => string
   demoSummary: (type: DemoType) => string
   toolTitle: string
@@ -70,7 +80,7 @@ export interface ArchiveSources {
   /** Which of those projects have a demo switched on. */
   demos: ReadonlyArray<{ slug: string; type: DemoType }>
   experiments: readonly LabExperiment[]
-  /** The name of a project category (the CMS's own list), in the page's language; empty when the key is unknown. */
+  /** The name of a project category (the CMS's own list), in the page's language; empty when the list gives none. */
   categoryName: (key: string) => string
   words: ArchiveWords
 }
@@ -78,6 +88,35 @@ export interface ArchiveSources {
 const SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/
 const PROJECT_STATUSES: readonly string[] = ['live', 'demo', 'in-progress', 'concept']
 const LAB_STATUSES: Record<LabStatus, ArchiveStatus> = { ready: 'ready', 'in-progress': 'in-progress', concept: 'concept' }
+
+/** A text a visitor can read: it holds something that is not a space or an invisible character. */
+export const isName = (value: unknown): value is string => typeof value === 'string' && /[^\s\p{C}]/u.test(value)
+
+/**
+ * The CMS's name of each category key in one language, exactly as supplied. Of several records for a key the first with a readable name in that language counts.
+ * No other language is borrowed and no other source is asked: a key without a name has none.
+ */
+export function categoryNames(categories: readonly ProjectCategory[], lang: Language): (key: string) => string {
+  const names = new Map<string, string>()
+  for (const category of categories) {
+    const name = category.label[lang]
+    if (!names.has(category.key) && isName(name)) names.set(category.key, name)
+  }
+  return (key) => names.get(key) ?? ''
+}
+
+/**
+ * The projects both pages may show, from a list already in the page's language: published, with a valid address, a name and a known state, each address once (its
+ * first usable record). The public list should need none of this; the pages do not rely on that.
+ */
+export function publicProjects(projects: readonly CardView[]): CardView[] {
+  const seen = new Set<string>()
+  return projects.filter((project) => {
+    if (project.draft || !SLUG.test(project.slug) || !isName(project.name) || !PROJECT_STATUSES.includes(project.status) || seen.has(project.slug)) return false
+    seen.add(project.slug)
+    return true
+  })
+}
 
 export const entryAnchor = (kind: ArchiveKind, slug: string): string => `entry-${kind}-${slug}`
 
@@ -98,10 +137,19 @@ export function buildEntries(sources: ArchiveSources): ArchiveEntry[] {
     entries.push({ ...entry, order: entries.length })
   }
 
-  // A draft is not public, and a project the data cannot describe is not shown: the public list should hold neither, and this does not rely on it.
-  const visible = projects.filter((project) => !project.draft && SLUG.test(project.slug) && project.name.trim() !== '' && PROJECT_STATUSES.includes(project.status))
+  const visible = publicProjects(projects)
   const demoOf = new Map(demos.map((demo) => [demo.slug, demo.type]))
-  const categoryLabelOf = (project: CardView) => categoryName(project.category) || project.category
+  // The categories that have no name here, in key order, so that a number given to one does not move when the administrator reorders the projects.
+  const unnamed = [...new Set(visible.map((project) => project.category))].filter((key) => CATEGORY_KEY.test(key) && !isName(categoryName(key))).sort()
+  // A key is never shown: a visitor reads the CMS's name, or the neutral words.
+  const categoryOf = ({ category: key }: CardView): Pick<ArchiveEntry, 'category' | 'categoryLabel'> => {
+    if (!CATEGORY_KEY.test(key)) return { category: '', categoryLabel: '' }
+    const at = unnamed.indexOf(key)
+    return {
+      category: OWN_CATEGORIES.includes(key) ? `${PROJECT_PREFIX}${key}` : key,
+      categoryLabel: at < 0 ? categoryName(key) : unnamed.length === 1 ? words.unnamedCategory : words.unnamedCategoryNumbered.replace('{number}', String(at + 1)),
+    }
+  }
 
   for (const project of visible) {
     const type = project.detailPath !== null ? demoOf.get(project.slug) : undefined
@@ -110,8 +158,7 @@ export function buildEntries(sources: ArchiveSources): ArchiveEntry[] {
       kind: 'project',
       title: project.name,
       description: project.description,
-      category: project.category,
-      categoryLabel: categoryLabelOf(project),
+      ...categoryOf(project),
       status: project.status,
       tags: project.tags,
       href: project.detailPath,
@@ -127,8 +174,7 @@ export function buildEntries(sources: ArchiveSources): ArchiveEntry[] {
       kind: 'demo',
       title: words.demoTitle.replace('{project}', project.name).replace('{demo}', words.demoName(type)),
       description: words.demoSummary(type),
-      category: project.category,
-      categoryLabel: categoryLabelOf(project),
+      ...categoryOf(project),
       status: project.status,
       tags: project.tags,
       href: demoPath(project.slug),
@@ -191,7 +237,7 @@ export function readQuery(params: URLSearchParams): ArchiveQuery {
   return {
     text,
     kind: oneOf(params.get('kind'), ARCHIVE_KINDS),
-    category: /^[a-z0-9][a-z0-9-]{0,39}$/.test(category) ? category : '',
+    category: QUERY_CATEGORY.test(category) ? category : '',
     status: oneOf(params.get('status'), ARCHIVE_STATUSES),
     sort: oneOf(params.get('sort'), SORTS) || 'curated',
   }
@@ -268,7 +314,7 @@ export interface Facets {
 export function facetsOf(entries: readonly ArchiveEntry[]): Facets {
   const count = <K extends string>(keys: readonly K[], read: (entry: ArchiveEntry) => K): Facet<K>[] =>
     keys.map((key) => ({ key, count: entries.filter((entry) => read(entry) === key).length })).filter((facet) => facet.count > 0)
-  const categoryKeys = [...new Set(entries.map((entry) => entry.category))]
+  const categoryKeys = [...new Set(entries.map((entry) => entry.category))].filter((key) => key !== '')
   return {
     kinds: count(ARCHIVE_KINDS, (entry) => entry.kind),
     categories: categoryKeys.map((key) => ({

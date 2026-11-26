@@ -50,7 +50,10 @@ const subscribe = (listener: () => void): (() => void) => {
   return () => listeners.delete(listener)
 }
 
-/** Loads the list once per mode (public, or the administrator's preview with drafts). */
+/**
+ * Loads the list once per mode (public, or the administrator's preview with drafts). An answer counts only while its mode is still the one asked for: a slow preview
+ * must not replace the public list a later page asked for (drafts would show there, or a page that wants the public list would wait for ever), nor the other way round.
+ */
 export function ensureList(preview: boolean): void {
   const wanted = preview ? 'preview' : 'public'
   if (listKey === wanted || API_BASE === null) return
@@ -58,6 +61,7 @@ export function ensureList(preview: boolean): void {
   void (async () => {
     if (preview) {
       const outcome = await getJson('/api/admin/project-preview', { credentials: true })
+      if (listKey !== 'preview') return
       if (outcome.kind === 'ok' && typeof outcome.data === 'object' && outcome.data !== null) {
         const data = outcome.data as { projects?: unknown; categories?: unknown }
         const cards = (Array.isArray(data.projects) ? data.projects : []).map(parseCard).filter((card): card is ProjectCard => card !== null)
@@ -68,6 +72,7 @@ export function ensureList(preview: boolean): void {
       listKey = 'public'
     }
     const outcome = await getJson('/api/projects')
+    if (listKey !== 'public') return
     if (outcome.kind === 'ok' && Array.isArray(outcome.data)) {
       const cards = outcome.data.map(parseCard).filter((card): card is ProjectCard => card !== null)
       const meta = outcome.meta as { categories?: unknown } | undefined
