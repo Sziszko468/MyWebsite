@@ -147,6 +147,12 @@ failed on a different test, see below).
   `-t "says what the administrator wrote"`, and 9 of 9 for a temporary copy with a slower mail stub (removed afterwards), although the whole file alone passed 5 of 5. So it is not the load: the test can
   look before the Hungarian e-mail has been sent. From reading the code (not proven): several callers of `Notifier.processDue` can run at once and a run skips what another is sending, so the test's
   waiting step returns early. The test and the notification code are as on the base branch. Left as a follow-up: fixing it means changing communication code or its tests, outside this task.
+  * **Follow-up, 2026-11-26: the test is fixed, the cause is proven.** The wait in `email.test.ts` now ends only when no message is being sent and none is due, and a new test holds the provider's
+    answers back so that the overlap happens on every run (with the old wait it failed 20 of 20, with the new one it passed 30 of 30). The test of this section passed 30 of 30 on its own, the file
+    10 of 10, and the whole suite 3 of 3 (3951 tests, 180 files).
+  * **Still open, in the product code, not changed:** when two or more calls of `Notifier.processDue` wait for the same run, each then starts a run of its own, although the method says it runs one
+    at a time. Messages are then sent in parallel, a call can return while others are still being sent, and `stop()` waits only for the run started last, after which the server closes the database.
+    The first three were reproduced with the provider's answers held back; what a shutdown in that moment does to a message was read from the code, not run. Changing it is the owner's decision.
 
 ## 7. Remaining limitations
 

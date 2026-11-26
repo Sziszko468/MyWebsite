@@ -23,7 +23,8 @@ address) except where the backend build is named.
 **The remaining failure:** `email.test.ts` › "says what the administrator wrote about timing …" (`Cannot read properties of undefined` on the Hungarian e-mail). Not the timing test of this task,
 not touched by it, and **not fixed**: the untouched test fails 3 of 5 times run on its own (`npx vitest run server/test/email.test.ts -t "says what the administrator wrote"`), while
 `npx vitest run server/test/email.test.ts` passed 5 of 5. Details: [DATA_INTEGRITY](DATA_INTEGRITY.md) §6. **The full suite is therefore not reliably green.** (In this agent environment Vitest uses its
-compact reporter, which prints a file's console output only when it fails; the timing figures come from runs with `--reporter=default`.)
+compact reporter, which prints a file's console output only when it fails; the timing figures come from runs with `--reporter=default`.) *Later the same day that test was fixed; the figures of the
+follow-up are in [DATA_INTEGRITY](DATA_INTEGRITY.md) §6.*
 
 ## A2. In a browser
 

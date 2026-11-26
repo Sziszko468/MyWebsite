@@ -31,9 +31,20 @@ const resendEnv = (extra: Record<string, string> = {}) => ({
   ...extra,
 })
 
+/**
+ * Waits until the outbox has nothing left to do: no message is being sent and none is due. One `processDue()` does not promise that: when several
+ * callers waited for the same run, each starts a run of its own, and one of them can return while another is still delivering.
+ */
 const settle = async () => {
-  await new Promise((resolve) => setImmediate(resolve))
-  await server.app.context.notifier.processDue()
+  const { db, clock, app } = server
+  const busy = () => db.get<{ n: number }>("SELECT COUNT(*) AS n FROM email_deliveries WHERE status = 'sending' OR (status = 'pending' AND next_attempt_at <= ?)", [clock.now().toISOString()])!.n
+  const deadline = Date.now() + 4000
+  for (;;) {
+    await new Promise((resolve) => setImmediate(resolve))
+    await app.context.notifier.processDue()
+    if (busy() === 0) return
+    if (Date.now() > deadline) throw new Error(`the outbox did not become idle: ${busy()} message(s) still being sent or due`)
+  }
 }
 
 beforeEach(async () => {
@@ -371,6 +382,21 @@ describe('the confirmation to the person who wrote', () => {
     expect(bySubject(/^We received/).text).toContain('I usually answer within two working days.')
     expect(bySubject(/^Megkaptuk/).text).toContain('Általában két munkanapon belül válaszolok.')
     expect(bySubject(/^We hebben/).text).not.toMatch(/dagen|werkdag|binnen twee/i)
+  })
+
+  it('delivers every message that arrives while the provider is still answering the first, and the tests’ wait ends only then', async () => {
+    await turnOn()
+    // The answers are held until all three messages are in. Every later run of the outbox is then asked for while the first one is still going,
+    // so those runs overlap: the order in which a single `processDue()` returns while other messages are still on their way to the provider.
+    let release = () => {}
+    const held = new Promise<void>((resolve) => (release = resolve))
+    provider.onSend = () => held
+    for (const index of [1, 2, 3]) await server.api('/api/contact', { body: contact({ subject: `Subject ${index}`, message: `A different message number ${index}, long enough to be a message.` }) })
+    const waited = settle()
+    release()
+    await waited
+    expect(rows().map((row) => row.status)).toEqual(Array(6).fill('accepted'))
+    expect(toVisitor()).toHaveLength(3)
   })
 
   it('refuses a note that is too long, or not text, and only an administrator may write it', async () => {
