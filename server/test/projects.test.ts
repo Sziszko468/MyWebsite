@@ -29,6 +29,8 @@ afterEach(async () => {
 
 const tri = (text: string) => ({ hu: `${text} hu`, en: `${text} en`, nl: `${text} nl` })
 const emptyTri = { hu: '', en: '', nl: '' }
+/** An id as `newId` makes them: a version 4 UUID, and nothing of any other shape. */
+const RANDOM_ID = /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/g
 
 /** A document with just enough for a draft, or for publication when `full` (every language has what it needs). */
 function document(title = 'Test project', full = true): Record<string, unknown> {
@@ -409,9 +411,14 @@ describe('the shop: edits reach the public catalogue at once, and what was alrea
     expect(server.db.get<{ price_snapshot: string }>('SELECT price_snapshot FROM quote_request_items')!.price_snapshot).toBe(before)
     const stored = (await server.api('/api/admin/quote-requests', { headers: as(admin) })).json.data[0]
     const detail = (await server.api(`/api/admin/quote-requests/${stored.id}`, { headers: as(admin) })).json.data
-    expect(JSON.stringify(detail)).toContain('launch')
-    expect(JSON.stringify(detail)).not.toContain('990')
-    expect(JSON.stringify(detail)).not.toContain('Launch, renamed')
+    expect(detail.items.map((item: { snapshot: unknown }) => item.snapshot)).toEqual([JSON.parse(before)])
+    expect(detail.items[0].names.package.en).toBe('Launch')
+    expect(detail.pricing).toEqual({ fixed: [], quotedParts: 2 })
+    // Nor may the new price or name turn up anywhere else in the answer. Its ids are random and can spell "990" (`…-a990-…`), so they are set aside first.
+    const answer = JSON.stringify(detail).replace(RANDOM_ID, '<id>')
+    expect(answer).toContain('launch')
+    expect(answer).not.toContain('990')
+    expect(answer).not.toContain('Launch, renamed')
 
     // Disabling the package stops new requests for it at once; the old one is untouched.
     await server.api('/api/admin/packages/launch', { method: 'PUT', body: { ...body, status: 'disabled' }, headers: as(admin) })
