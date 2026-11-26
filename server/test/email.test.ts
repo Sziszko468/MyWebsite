@@ -302,7 +302,7 @@ describe('the confirmation to the person who wrote', () => {
 
   it('confirms a message once it is on: in the visitor’s language, from the verified sender, answered at the public address', async () => {
     await turnOn()
-    await server.api('/api/contact', { body: contact({ language: 'hu', name: 'Kovács Ánna', subject: 'Új weboldal' }) })
+    const sent = await server.api('/api/contact', { body: contact({ language: 'hu', name: 'Kovács Ánna', subject: 'Új weboldal' }) })
     await settle()
     await settle()
     const [mail] = toVisitor()
@@ -314,7 +314,10 @@ describe('the confirmation to the person who wrote', () => {
     expect(mail.text).toContain('Új weboldal')
     // Nothing of the owner's inbox, no promise of when.
     expect(JSON.stringify(mail)).not.toContain('owner-private@mail.test')
-    expect(mail.text).not.toMatch(/\b(\d+ (óra|nap|hour|day)|24|48|hétköznap|working day)/i)
+    // The reference is random and can start like a number of hours (`C-24…`, `C-48…`), so it is set aside before looking.
+    const { reference } = sent.json.data
+    expect(mail.text).toContain(reference)
+    expect(mail.text.replaceAll(reference, '<reference>')).not.toMatch(/\b(\d+ (óra|nap|hour|day)|24|48|hétköznap|working day)/i)
   })
 
   it('confirms a quote request with what was chosen and no price, no estimate and no promise', async () => {

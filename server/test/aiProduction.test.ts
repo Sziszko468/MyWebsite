@@ -483,10 +483,12 @@ describe('what must not be sent', () => {
     const { s, model } = await start([() => say('ok')].map((f) => f()))
     const headers = await newSession(s)
     for (const text of ['my card is 4242 4242 4242 4242 please', 'use sk-ant-api03-abcdefghijklmnopqrstuv for it', 'token: Bearer abcdefghijklmnopqrstuvwxyz0123456789']) {
-      const response = await post(s, headers, text, 'conv-card-0123456789')
+      // The request brings its own id: the answer repeats it, and one made up by the server is random and can spell "4242".
+      const response = await post(s, headers, text, 'conv-card-0123456789', { 'X-Request-Id': 'card-refusal-check' })
       expect(response.status, text).toBe(422)
       const body = (await response.json()) as any
       expect(body.error.details.reason).toBe('sensitive_data')
+      expect(body.error.requestId).toBe('card-refusal-check')
       expect(JSON.stringify(body)).not.toContain('4242')
     }
     expect(model.doStreamCalls).toHaveLength(0)
