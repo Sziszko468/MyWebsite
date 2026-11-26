@@ -1,5 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react'
 import { observeInView } from './inView'
+import { useReducedMotion } from './reducedMotion'
 
 /**
  * Scroll-linked motion without hijacking the scroll. There is one passive scroll listener for the
@@ -79,10 +80,19 @@ export function passOffset(progress: number): number {
   return progress * 2 - 1
 }
 
+/**
+ * How much of an element has left through the top of the viewport: 0 while its top edge is on screen or below it, 1 once all of it is above. For depth on a
+ * page's first screen, which must sit exactly at rest before anyone scrolls.
+ */
+export function exitProgress(top: number, height: number): number {
+  if (height <= 0) return 0
+  return Math.min(1, Math.max(0, -top / height))
+}
+
 const round = (value: number) => Math.round(value * 1000) / 1000
 
 /**
- * Writes `--sp` (0 to 1) and `--sp-c` (-1 to 1) on the element while it is on screen, and nothing
+ * Writes `--sp` (0 to 1), `--sp-c` (-1 to 1) and `--sp-exit` (0 at rest, 1 once it has left upwards) on the element while it is on screen, and nothing
  * while it is not: the listener is attached only while the element is within a screen of view. CSS
  * decides what the numbers do (a parallax shift, the fill of a line, a fade), multiplied by
  * `--motion-intensity` and `--motion-parallax`, so reduced motion and touch screens scale it down
@@ -90,22 +100,25 @@ const round = (value: number) => Math.round(value * 1000) / 1000
  */
 export function useScrollProgress<T extends HTMLElement>(): RefObject<T | null> {
   const ref = useRef<T | null>(null)
+  const reduced = useReducedMotion()
 
   useEffect(() => {
     const element = ref.current
-    if (!element) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (!element || reduced) return
 
     let stopScroll: (() => void) | null = null
-    let lastSp = -1
+    let last = ''
     const read: ScrollReader = () => {
       const box = element.getBoundingClientRect()
       const sp = round(passProgress(box.top, box.height, window.innerHeight))
-      if (sp === lastSp) return
+      const exit = round(exitProgress(box.top, box.height))
+      const next = `${sp} ${exit}`
+      if (next === last) return
       return () => {
-        lastSp = sp
+        last = next
         element.style.setProperty('--sp', String(sp))
         element.style.setProperty('--sp-c', String(round(passOffset(sp))))
+        element.style.setProperty('--sp-exit', String(exit))
       }
     }
 
@@ -126,8 +139,9 @@ export function useScrollProgress<T extends HTMLElement>(): RefObject<T | null> 
       stopScroll?.()
       element.style.removeProperty('--sp')
       element.style.removeProperty('--sp-c')
+      element.style.removeProperty('--sp-exit')
     }
-  }, [])
+  }, [reduced])
 
   return ref
 }

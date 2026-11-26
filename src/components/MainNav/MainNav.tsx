@@ -1,7 +1,9 @@
-import { useLayoutEffect, useRef, type CSSProperties, type MouseEventHandler, type RefObject } from 'react'
+import { useState, type CSSProperties, type MouseEventHandler } from 'react'
 import { NavLink, useLocation } from 'react-router'
 import { localizedPath } from '../../i18n/paths'
 import { useI18n } from '../../i18n/useI18n'
+import { useSlidingIndicator } from '../../motion/indicator'
+import { followsHere } from '../../motion/navigation'
 import { NAV_PAGES } from '../../routes/pages'
 import { cx } from '../../utils/cx'
 import styles from './MainNav.module.scss'
@@ -16,68 +18,40 @@ interface MainNavProps {
   onNavigate?: MouseEventHandler<HTMLAnchorElement>
 }
 
+/** The marker follows the page being opened while there is one, and the current page otherwise. */
+const MARKED = ['a[data-pending] [data-nav-label]', 'a[aria-current="page"] [data-nav-label]']
+
 /**
- * Keeps the header bar's red indicator under the current page's label. It is one element that glides
- * from the old label to the new one (a transform: it is moved with `--ind-x` and `--ind-w`, never
- * laid out again), measured after layout, again when the bar changes size and again when the fonts
- * arrive. Until it has been placed (and in any browser where this does not run) each label draws its
- * own underline as before, so the current page is marked either way.
+ * The six main pages, generated from the page registry. The current page gets aria-current="page".
+ *
+ * In the header bar one red marker glides under it (motion/indicator.ts). A click moves the marker to the chosen page at once, while that page's code may still be
+ * on its way, so the answer to a click never waits for the network; `aria-current` stays on the page that is really shown until the new one replaces it. Until the
+ * marker is placed (and wherever it does not run) each label draws its own underline, so the current page is marked either way.
  */
-function useIndicator(enabled: boolean): RefObject<HTMLElement | null> {
-  const { pathname } = useLocation()
-  const nav = useRef<HTMLElement>(null)
-
-  useLayoutEffect(() => {
-    const element = nav.current
-    if (!enabled || !element) return
-
-    const place = () => {
-      const label = element.querySelector<HTMLElement>('a[aria-current="page"] [data-nav-label]')
-      if (!label) {
-        element.dataset.indicator = 'none'
-        return
-      }
-      const box = label.getBoundingClientRect()
-      const frame = element.getBoundingClientRect()
-      element.style.setProperty('--ind-x', `${Math.round(box.left - frame.left)}px`)
-      element.style.setProperty('--ind-y', `${Math.round(box.bottom - frame.top + 4)}px`)
-      element.style.setProperty('--ind-w', String(Math.max(1, Math.round(box.width))))
-      element.dataset.indicator = 'on'
-    }
-
-    place()
-    // The first placement is instant; every later one glides.
-    const ready = requestAnimationFrame(() => {
-      element.dataset.ready = ''
-    })
-    const resize = new ResizeObserver(place)
-    resize.observe(element)
-    void document.fonts?.ready.then(place)
-    return () => {
-      cancelAnimationFrame(ready)
-      resize.disconnect()
-    }
-  }, [enabled, pathname])
-
-  return nav
-}
-
-/** The six main pages, generated from the page registry. The current page gets aria-current="page". */
 export function MainNav({ variant, label, onNavigate }: MainNavProps) {
   const { lang, t } = useI18n()
-  const nav = useIndicator(variant === 'bar')
+  const { pathname } = useLocation()
+  // What was clicked, and from where: it counts only while the visitor is still on the page they clicked it on.
+  const [asked, setAsked] = useState<{ from: string; to: string } | null>(null)
+  const pending = asked !== null && asked.from === pathname && asked.to !== pathname ? asked.to : null
+  const nav = useSlidingIndicator<HTMLElement>(MARKED, `${pathname} ${pending ?? ''}`, variant === 'bar')
 
   return (
     <nav ref={nav} aria-label={label ?? t.nav.primary} className={cx(styles.nav, styles[variant])}>
       <ul className={styles.list}>
         {NAV_PAGES.map((page, position) => {
+          const to = localizedPath(lang, page.path)
           const link = (
             <NavLink
-              to={localizedPath(lang, page.path)}
+              to={to}
               // Only Home matches exactly; Work stays current on a project's page beneath it.
               end={page.path === '/'}
               className={({ isActive }) => cx(styles.link, isActive && styles.active)}
-              onClick={onNavigate}
+              data-pending={pending === to || undefined}
+              onClick={(event) => {
+                if (variant === 'bar' && followsHere(event)) setAsked({ from: pathname, to })
+                onNavigate?.(event)
+              }}
             >
               {variant === 'panel' && (
                 <span className={styles.index} aria-hidden="true">

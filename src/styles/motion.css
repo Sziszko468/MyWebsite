@@ -16,6 +16,16 @@ html[data-lang-switch] main {
   animation: language-cue var(--dur-base) var(--ease-in-out);
 }
 
+/* While the next page's code is on its way (longer than a blink: the loading bar shows), the page being left recedes a little. It stays on screen, readable and
+   usable; nothing is covered and nothing waits for it. */
+main > :first-child {
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+html[data-route-loading] main > :first-child {
+  opacity: 0.65;
+}
+
 /* Pressing anything that is a button or a link gives at once; the cue never waits for an animation. */
 @media (hover: none) {
   :where(a, button, summary, label):active {

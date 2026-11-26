@@ -11,14 +11,16 @@
   transition:
     var(--transition-colors),
     box-shadow var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+    translate var(--dur-base) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
 }
 
 .linked {
+  @include m.lift;
+
   @include m.hover {
     border-color: var(--color-border-strong);
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
 
     .image,
     .placeholder {
@@ -26,10 +28,23 @@
     }
   }
 
-  /* The stretched title link would only ring the title; ring the whole card instead. */
+  /* Pressing the card's own link settles the card (the demo link beside it does not). */
+  &:has(.link:active) {
+    scale: calc(1 - (1 - var(--motion-press)) * 0.5);
+  }
+
+  /* The stretched title link would only ring the title; ring the whole card instead, and give a keyboard what a mouse gets. */
   &:has(.link:focus-visible) {
     outline: var(--focus-ring-width) solid var(--color-focus);
     outline-offset: var(--focus-ring-offset);
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+    translate: 0 calc(var(--motion-lift) * var(--motion-intensity) * -1);
+
+    .image,
+    .placeholder {
+      transform: scale(1.03);
+    }
   }
 }
 

@@ -37,6 +37,29 @@ $enabled: ':not(:disabled):not([aria-disabled="true"])';
   }
 }
 
+// A card that answers a mouse by rising a little. `translate` composes with whatever transform the card already has, and the distance is the
+// interaction token times the page's intensity, so it is nothing under reduced motion. The element names `translate` in its transition.
+@mixin lift {
+  @include hover {
+    translate: 0 calc(var(--motion-lift) * var(--motion-intensity) * -1);
+  }
+}
+
+// What a press feels like: the control settles under the finger or the button (`scale`, so it composes too). 1, nothing, under reduced motion,
+// where the change of colour says it. The element names `scale` in its transition.
+@mixin press {
+  @include pressed {
+    scale: var(--motion-press);
+  }
+}
+
+// The same for a whole card, which is large: half as far.
+@mixin press-card {
+  @include pressed {
+    scale: calc(1 - (1 - var(--motion-press)) * 0.5);
+  }
+}
+
 // For a first section (the Hero) that should run underneath the sticky header:
 // it slides up by the header's height and pads itself back down.
 @mixin under-header {

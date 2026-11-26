@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { labelFor, placeLabel } from '../../motion/cursorLabel'
+import { useReducedMotion } from '../../motion/reducedMotion'
 import styles from './CursorLabel.module.scss'
 
 const FINE_POINTER = '(hover: hover) and (pointer: fine)'
-const REDUCED = '(prefers-reduced-motion: reduce)'
 
 /**
  * A small label that follows the mouse over the things that say what a click does (a project, a
@@ -17,11 +17,12 @@ const REDUCED = '(prefers-reduced-motion: reduce)'
  */
 export function CursorLabel() {
   const ref = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotion()
 
   useEffect(() => {
     const element = ref.current
-    if (!element) return
-    if (!window.matchMedia(FINE_POINTER).matches || window.matchMedia(REDUCED).matches) return
+    if (!element || reduced) return
+    if (!window.matchMedia(FINE_POINTER).matches) return
 
     let frame = 0
     let x = 0
@@ -84,8 +85,10 @@ export function CursorLabel() {
       document.removeEventListener('scroll', away, { capture: true })
       document.documentElement.removeEventListener('pointerleave', away)
       window.removeEventListener('blur', away)
+      // A label that is showing when the effect ends (the setting changed) must not stay behind.
+      hide()
     }
-  }, [])
+  }, [reduced])
 
   return <div ref={ref} className={styles.label} aria-hidden="true" />
 }

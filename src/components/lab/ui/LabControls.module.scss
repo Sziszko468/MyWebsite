@@ -179,7 +179,14 @@
   text-align: center;
   text-transform: uppercase;
   overflow-wrap: break-word;
-  transition: var(--transition-colors);
+  transition:
+    var(--transition-colors),
+    scale var(--dur-fast) var(--ease-out);
+}
+
+/* The choice settles under the finger or the button. */
+.optionInput:active + .optionFace {
+  scale: var(--motion-press);
 }
 
 .optionInput:checked + .optionFace {

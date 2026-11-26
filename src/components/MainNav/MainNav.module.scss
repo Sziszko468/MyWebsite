@@ -19,7 +19,8 @@
 }
 
 /* Current page: full-strength text plus a red bar, so it never relies on colour alone. */
-.active {
+.active,
+.link[data-pending] {
   color: var(--color-text);
 }
 
@@ -62,7 +63,8 @@
     display: none;
   }
 
-  /* One red bar, 1px wide and scaled to the label, glides to the current page's label: a transform only, on the brand's racing curve. */
+  /* One red bar, 1px wide and scaled to the label, glides under the current page's label (or the one being opened): a transform only, on the brand's racing curve.
+     --ind-x/y/w/h are the label's box (motion/indicator.ts); the bar sits just below it. */
   .indicator {
     position: absolute;
     top: 0;
@@ -71,7 +73,7 @@
     height: 2px;
     background-color: var(--color-accent);
     opacity: 0;
-    transform: translate3d(var(--ind-x, 0px), var(--ind-y, 0px), 0) scaleX(var(--ind-w, 1));
+    transform: translate3d(var(--ind-x, 0px), calc(var(--ind-y, 0px) + var(--ind-h, 0) * 1px + 4px), 0) scaleX(var(--ind-w, 1));
     transform-origin: left;
     pointer-events: none;
   }

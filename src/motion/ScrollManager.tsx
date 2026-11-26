@@ -1,16 +1,16 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useLocation, useNavigationType } from 'react-router'
-import { readPositions, remember, restoreTarget, scrollAction, writePositions, type PositionMap } from './scrollRestoration'
+import { documentArrival, entryKeyOf, readPositions, remember, restoreTarget, scrollAction, writePositions, type PositionMap } from './scrollRestoration'
 
-/** How many frames to wait for a page that is still being drawn to become tall enough to scroll to a saved position. */
-const RESTORE_FRAMES = 40
+/** How many frames to wait for a page that is still being drawn to become tall enough to scroll to a saved position (about two seconds). */
+const RESTORE_FRAMES = 120
 
 /**
  * The page frame's scroll manager, in place of the browser's own restoration (which cannot work for
  * a page drawn by script and is switched off here).
  *
- * - A new page starts at the top, instantly.
- * - Back and Forward return to where that page was left: positions are recorded while the visitor
+ * - A new page starts at the top, instantly, and so does a page opened by its address in a tab that has shown others.
+ * - Back, Forward and a reload return to where that page was left: positions are recorded while the visitor
  *   scrolls (one passive listener, one write per frame) under the history entry's own key, and
  *   restored once the page is tall enough; a page that is still drawing is waited for, for a
  *   moment, and then scrolled as far as it goes.
@@ -24,14 +24,15 @@ const RESTORE_FRAMES = 40
 export function ScrollManager({ path, hash }: { path: string; hash: string }) {
   const location = useLocation()
   const navigation = useNavigationType()
+  const entry = entryKeyOf(location.key, location.pathname)
   const positions = useRef<PositionMap | null>(null)
   const previousPath = useRef<string | null>(null)
   // The entry the page is on, set in the commit itself (a layout effect), so a scroll event that the
   // browser fires because the new page is shorter than the old one is not recorded against the old entry.
-  const currentKey = useRef(location.key)
+  const currentKey = useRef(entry)
   useLayoutEffect(() => {
-    currentKey.current = location.key
-  }, [location.key])
+    currentKey.current = entry
+  }, [entry])
 
   // The browser's restoration would fight this one.
   useEffect(() => {
@@ -46,7 +47,7 @@ export function ScrollManager({ path, hash }: { path: string; hash: string }) {
   useEffect(() => {
     positions.current ??= readPositions()
     let frame = 0
-    const key = location.key
+    const key = entry
     const save = () => {
       frame = 0
       if (currentKey.current !== key) return
@@ -69,12 +70,14 @@ export function ScrollManager({ path, hash }: { path: string; hash: string }) {
       if (frame) cancelAnimationFrame(frame)
       writePositions(positions.current ?? {})
     }
-  }, [location.key])
+  }, [entry])
 
   useEffect(() => {
+    // The first page of a visit, opened by its address (not reloaded, not returned to): there is nothing of its own to restore.
+    const fresh = previousPath.current === null && documentArrival() === 'navigate'
     const samePage = previousPath.current === path
     previousPath.current = path
-    const action = scrollAction({ samePage, hash, navigation })
+    const action = scrollAction({ samePage, hash, navigation, fresh })
     let frame = 0
 
     if (action === 'top') {
@@ -89,21 +92,22 @@ export function ScrollManager({ path, hash }: { path: string; hash: string }) {
       }
       seek()
     } else if (action === 'restore') {
-      const saved = (positions.current ?? readPositions())[location.key]
+      const saved = (positions.current ?? readPositions())[entry]
       const wanted = restoreTarget(saved, document.documentElement.scrollHeight, window.innerHeight)
       if (!wanted) {
         window.scrollTo({ top: 0, behavior: 'instant' })
       } else {
+        // Until the page is tall enough it waits at the top, so nothing is shown half way and nothing moves under the visitor when the rest of the page arrives.
+        if (!wanted.reachable) window.scrollTo({ top: 0, behavior: 'instant' })
         let attempts = 0
-        let placed = window.scrollY
+        const waitingAt = window.scrollY
         const place = () => {
           // The visitor moved the page themselves: leave it.
-          if (Math.abs(window.scrollY - placed) > 2 && attempts > 0) return
+          if (Math.abs(window.scrollY - waitingAt) > 2) return
           const target = restoreTarget(saved, document.documentElement.scrollHeight, window.innerHeight)
-          if (target) {
+          if (target && (target.reachable || attempts >= RESTORE_FRAMES)) {
             window.scrollTo({ top: target.y, behavior: 'instant' })
-            placed = window.scrollY
-            if (target.reachable) return
+            return
           }
           if (attempts++ < RESTORE_FRAMES) frame = requestAnimationFrame(place)
         }
@@ -112,7 +116,7 @@ export function ScrollManager({ path, hash }: { path: string; hash: string }) {
     }
     return () => cancelAnimationFrame(frame)
     // The key says which history entry this is; the path and the fragment say whether the page changed.
-  }, [path, hash, navigation, location.key])
+  }, [path, hash, navigation, entry])
 
   return null
 }

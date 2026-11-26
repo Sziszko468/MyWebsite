@@ -1,4 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react'
+import { pageCovered, subscribeCover } from '../../../motion/cover'
+import { useReducedMotion } from '../../../motion/reducedMotion'
 
 export interface PreviewPointer {
   /** Position in CSS pixels inside the canvas (the middle until the pointer has been there). */
@@ -24,12 +26,12 @@ export function useCanvasLoop(draw: DrawFrame): RefObject<HTMLCanvasElement | nu
   useEffect(() => {
     latest.current = draw
   })
+  const reduced = useReducedMotion()
 
   useEffect(() => {
     const canvas = ref.current
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const pointer: PreviewPointer = { x: 0, y: 0, vx: 0, vy: 0, inside: false, down: false }
     let width = 0
     let height = 0
@@ -62,7 +64,7 @@ export function useCanvasLoop(draw: DrawFrame): RefObject<HTMLCanvasElement | nu
 
     const tick = (now: number) => {
       frame = 0
-      if (!visible || document.hidden) return
+      if (!visible || document.hidden || pageCovered()) return
       const dt = Math.min(0.05, (now - last) / 1000 || 0.016)
       last = now
       time += dt
@@ -70,7 +72,7 @@ export function useCanvasLoop(draw: DrawFrame): RefObject<HTMLCanvasElement | nu
       frame = requestAnimationFrame(tick)
     }
     const start = () => {
-      if (reduced || frame || !visible || document.hidden) return
+      if (reduced || frame || !visible || document.hidden || pageCovered()) return
       last = performance.now()
       frame = requestAnimationFrame(tick)
     }
@@ -115,6 +117,7 @@ export function useCanvasLoop(draw: DrawFrame): RefObject<HTMLCanvasElement | nu
     sizes.observe(canvas)
     const onVisibility = () => start()
     document.addEventListener('visibilitychange', onVisibility)
+    const uncovered = subscribeCover(start)
     canvas.addEventListener('pointerenter', enter)
     canvas.addEventListener('pointermove', move)
     canvas.addEventListener('pointerleave', leave)
@@ -131,6 +134,7 @@ export function useCanvasLoop(draw: DrawFrame): RefObject<HTMLCanvasElement | nu
       observer.disconnect()
       sizes.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
+      uncovered()
       canvas.removeEventListener('pointerenter', enter)
       canvas.removeEventListener('pointermove', move)
       canvas.removeEventListener('pointerleave', leave)
@@ -138,7 +142,7 @@ export function useCanvasLoop(draw: DrawFrame): RefObject<HTMLCanvasElement | nu
       canvas.removeEventListener('pointerup', up)
       canvas.removeEventListener('pointercancel', leave)
     }
-  }, [])
+  }, [reduced])
 
   return ref
 }

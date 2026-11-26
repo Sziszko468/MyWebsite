@@ -27,6 +27,14 @@
 
 /* ── The light field ───────────────────────────────────────────────── */
 
+/* The field is one layer behind the words; as the hero leaves, its two parts fall behind at different rates (none under reduced motion, half on a touch screen). */
+.field {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+}
+
 .glow {
   position: absolute;
   z-index: 0;
@@ -36,6 +44,7 @@
     color-mix(in srgb, var(--brand-red) 15%, transparent),
     transparent 100%
   );
+  translate: 0 calc(var(--sp-exit, 0) * 24px * var(--motion-parallax) * var(--motion-intensity));
   pointer-events: none;
 }
 
@@ -48,6 +57,7 @@
   opacity: 0.4;
   /* Narrow screens: the words cover the hero, so the lines keep to the top and fade out. */
   mask-image: linear-gradient(to bottom, #000 0%, transparent 62%);
+  translate: 0 calc(var(--sp-exit, 0) * 56px * var(--motion-parallax) * var(--motion-intensity));
   pointer-events: none;
 
   @include m.up('lg') {
@@ -161,6 +171,37 @@
   flex-wrap: wrap;
   gap: var(--space-3);
   margin-top: var(--space-2);
+}
+
+/* ── Arriving ──────────────────────────────────────────────────────── */
+
+/*
+ * On a navigation (never on the page a visit starts on, which must paint at once, and not on Back or Forward, which are returns) the label, the sentence and the
+ * buttons follow the headline in order. Opacity and transform only; the words are clickable from the first frame; nothing happens under reduced motion.
+ */
+@keyframes hero-follow {
+  from {
+    opacity: 0;
+    transform: translate3d(0, calc(var(--motion-distance-md) * var(--motion-intensity)), 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :global([data-nav='push']:not([data-enter='none'])) {
+    .eyebrow,
+    .lead,
+    .actions {
+      animation: hero-follow calc(var(--dur-slow) * var(--motion-time)) var(--ease-out) backwards;
+    }
+
+    .lead {
+      animation-delay: calc(var(--motion-stagger) * 2);
+    }
+
+    .actions {
+      animation-delay: calc(var(--motion-stagger) * 3);
+    }
+  }
 }
 
 @media (forced-colors: active) {

@@ -1,6 +1,7 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { useLocation, useNavigationType } from 'react-router'
 import { MOTION, type MotionScope } from './config'
+import { arrivalOf } from './navigation'
 import styles from './PageTransition.module.scss'
 
 interface PageTransitionProps {
@@ -23,23 +24,26 @@ interface PageTransitionProps {
  * first paint). Only opacity and clip-path are animated, never a transform: a transform on the wrapper
  * would turn it into the containing block of every fixed bar inside the page. Under reduced motion
  * there is no entrance.
+ *
+ * How a page arrives is decided once, when it arrives. A later change of its own address (a search or a filter written into it, another language) is not an
+ * arrival and replays nothing.
  */
 export function PageTransition({ routeKey, scope, children }: PageTransitionProps) {
+  return (
+    <Arrival key={routeKey} scope={scope}>
+      {children}
+    </Arrival>
+  )
+}
+
+function Arrival({ scope, children }: { scope: MotionScope; children: ReactNode }) {
   const navigation = useNavigationType()
   const { key } = useLocation()
+  const [{ startPage, returning }] = useState(() => arrivalOf(navigation, key))
   const { kind, duration } = MOTION.scope[scope].enter
 
-  // The history entry a visit starts on is the one with the router's default key: nothing to arrive from.
-  const startPage = navigation === 'POP' && key === 'default'
-
   return (
-    <div
-      key={routeKey}
-      className={styles.page}
-      data-enter={startPage ? 'none' : kind}
-      data-nav={navigation === 'POP' ? 'pop' : 'push'}
-      style={{ '--page-enter-dur': `${duration}ms` } as CSSProperties}
-    >
+    <div className={styles.page} data-enter={startPage ? 'none' : kind} data-nav={returning ? 'pop' : 'push'} style={{ '--page-enter-dur': `${duration}ms` } as CSSProperties}>
       {children}
     </div>
   )

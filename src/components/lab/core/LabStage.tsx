@@ -1,4 +1,5 @@
 import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode, type Ref } from 'react'
+import { useCovered } from '../../../motion/cover'
 import { useTheme } from '../../../theme/useTheme'
 import { cx } from '../../../utils/cx'
 import type { QualityTier } from '../../hero/velocityHeroConfig'
@@ -153,7 +154,7 @@ export interface LabStageProps {
  *
  *  - It mounts the canvas only when the view is live or calm, and only once the global intro (which
  *    owns the page's one WebGL context while it is open) has gone.
- *  - It stops drawing while the stage is off screen or the tab is hidden.
+ *  - It stops drawing while the stage is off screen, the tab is hidden or something covers the whole page.
  *  - A scene that throws is caught here and reported; the picture stays.
  *  - The picture is the stage's first paint and fades under the canvas when the first frame is drawn.
  */
@@ -184,6 +185,7 @@ export function LabStage({
   const [inView, setInView] = useState(true)
   const [tabVisible, setTabVisible] = useState(() => typeof document === 'undefined' || !document.hidden)
 
+  const covered = useCovered()
   const heldByIntro = phase !== 'completed'
   const hasScene = view !== 'still' && !heldByIntro
 
@@ -242,7 +244,7 @@ export function LabStage({
             clock={clock}
             tier={tier}
             view={view === 'calm' ? 'calm' : 'live'}
-            active={inView && tabVisible}
+            active={inView && tabVisible && !covered}
             camera={camera}
             antialias={antialias}
             maxDpr={maxDpr}

@@ -108,6 +108,10 @@
   --motion-time: 1;
   /* How far scroll-linked parallax may move things, as a factor; halved on touch screens (below). */
   --motion-parallax: 1;
+  /* How a control answers a hand: it rises this far under a mouse (times --motion-intensity, so a quieter page lifts less and reduced motion not at all) and
+     settles to this scale while it is pressed (1 under reduced motion: the colour change says it there). */
+  --motion-lift: 2px;
+  --motion-press: 0.985;
   --transition-colors: color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out);
@@ -314,5 +318,6 @@
     --motion-stagger: 0ms;
     --motion-intensity: 0;
     --motion-parallax: 0;
+    --motion-press: 1;
   }
 }

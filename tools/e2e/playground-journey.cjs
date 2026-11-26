@@ -54,11 +54,28 @@ async function open(page, lang = 'en') {
   await page.waitForTimeout(600)
 }
 
-/** What belongs to the SITE: its theme, its tokens on the root, its header, and anything written on <html> or <body>. A visitor's play must leave all of it as it was. */
-const siteState = (page) =>
-  page.evaluate(() => {
-    const root = getComputedStyle(document.documentElement)
+/**
+ * The header's background follows the scroll position (clear at the very top, filled further down), so it is always read at one fixed, scrolled position,
+ * and the page is put back where it was. Two snapshots then differ only if the header's own styling changed.
+ */
+const headerBackground = async (page) => {
+  const was = await page.evaluate(() => scrollY)
+  const scrollToY = (y) => page.evaluate((top) => scrollTo({ top, behavior: 'instant' }), y)
+  await scrollToY(600)
+  await page.waitForTimeout(600)
+  const background = await page.evaluate(() => {
     const header = document.querySelector('header')
+    return header ? getComputedStyle(header).backgroundColor : ''
+  })
+  await scrollToY(was)
+  return background
+}
+
+/** What belongs to the SITE: its theme, its tokens on the root, its header, and anything written on <html> or <body>. A visitor's play must leave all of it as it was. */
+const siteState = async (page) => ({
+  headerBg: await headerBackground(page),
+  ...(await page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement)
     return {
       theme: document.documentElement.getAttribute('data-theme'),
       rootStyle: document.documentElement.getAttribute('style'),
@@ -68,11 +85,11 @@ const siteState = (page) =>
       colorBg: root.getPropertyValue('--color-bg').trim(),
       colorAccent: root.getPropertyValue('--color-accent').trim(),
       dur: root.getPropertyValue('--dur-base').trim(),
-      headerBg: header ? getComputedStyle(header).backgroundColor : '',
       themeColor: document.querySelector('meta[name="theme-color"]')?.getAttribute('content') ?? '',
       lang: document.documentElement.getAttribute('lang'),
     }
-  })
+  })),
+})
 const storages = (page) => page.evaluate(() => JSON.stringify({ l: { ...localStorage }, s: { ...sessionStorage }, c: document.cookie }))
 const sameSite = (a, b, what) => {
   for (const key of Object.keys(a)) ok(JSON.stringify(a[key]) === JSON.stringify(b[key]), `${what}: the site's ${key} changed from ${JSON.stringify(a[key])} to ${JSON.stringify(b[key])}`)

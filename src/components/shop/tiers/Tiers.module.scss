@@ -479,6 +479,14 @@
   &:focus-visible {
     outline-offset: 0;
   }
+
+  transition:
+    var(--transition-colors),
+    scale var(--dur-fast) var(--ease-out);
+
+  &:active {
+    scale: var(--motion-press);
+  }
 }
 
 .swipeHint {

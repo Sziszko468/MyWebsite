@@ -27,6 +27,13 @@
     width: var(--space-7);
     height: 1px;
     background-color: currentColor;
+    transform-origin: left;
+    /* The brand's stripe draws in on its own curve when a heading below the fold arrives (inside a Reveal); otherwise it is simply there. */
+    transition: transform calc(var(--dur-scene) * var(--motion-time)) var(--ease-racing);
+  }
+
+  :global([data-reveal='hidden']) &::after {
+    transform: scaleX(0);
   }
 
   @include m.up('lg') {

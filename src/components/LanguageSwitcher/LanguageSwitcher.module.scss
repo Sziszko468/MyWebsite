@@ -1,6 +1,35 @@
 @use '../../styles/mixins' as m;
 
+.switcher {
+  position: relative;
+  width: fit-content;
+}
+
+/* The marker behind the current language: moved by a transform only (its size is set, never animated). */
+.marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--ind-w, 0) * 1px);
+  height: calc(var(--ind-h, 0) * 1px);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-text);
+  opacity: 0;
+  transform: translate3d(var(--ind-x, 0px), var(--ind-y, 0px), 0);
+  pointer-events: none;
+}
+
+.switcher[data-indicator='on'] .marker {
+  opacity: 1;
+}
+
+.switcher[data-ready] .marker {
+  transition: transform var(--dur-base) var(--ease-racing);
+}
+
 .list {
+  /* Above the marker, so the words stay on top of it. */
+  position: relative;
   display: inline-flex;
   gap: var(--space-1);
   padding: var(--space-1);
@@ -22,7 +51,9 @@
   font-stretch: var(--fstretch-expanded);
   letter-spacing: var(--ls-wide);
   text-decoration: none;
-  transition: var(--transition-colors);
+  transition:
+    var(--transition-colors),
+    scale var(--dur-fast) var(--ease-out);
 
   @include m.up('md') {
     min-width: 2.5rem;
@@ -39,11 +70,30 @@
 
   &:active {
     background-color: var(--color-surface-active);
+    scale: var(--motion-press);
   }
 
   /* The current language is marked by fill, not by colour alone: it is also bold-on-solid. */
   &[aria-current='true'] {
     background-color: var(--color-text);
     color: var(--color-bg);
+  }
+}
+
+/* Once the marker is placed it is the fill; the current link only keeps the contrasting colour. */
+.switcher[data-indicator='on'] .link[aria-current='true'] {
+  background-color: transparent;
+}
+
+/* Forced colours drop backgrounds: the current link states itself with the system's own highlight, and the marker steps aside. */
+@media (forced-colors: active) {
+  .marker {
+    display: none;
+  }
+
+  .switcher[data-indicator='on'] .link[aria-current='true'],
+  .link[aria-current='true'] {
+    background-color: Highlight;
+    color: HighlightText;
   }
 }

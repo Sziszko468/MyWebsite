@@ -34,6 +34,9 @@ export const MOTION = {
   /** Pixels at intensity 1 (`--motion-distance-*`). */
   distance: { sm: 8, md: 16, lg: 32 },
 
+  /** How a control answers a hand (`--motion-lift`, `--motion-press`): a rise under a mouse, scaled by the scope's intensity, and the scale while it is pressed. */
+  interaction: { lift: 2, press: 0.985 },
+
   /** Delay between siblings that arrive together, in ms; a row never waits longer than `max` for its last one. */
   stagger: { step: 60, max: 360 },
 
@@ -59,7 +62,7 @@ export const MOTION = {
    * duration collapses (tokens.css), looping decoration stops, and state changes are instant. What
    * says "this happened" (a tick, a message, a changed border) stays: feedback is not decoration.
    */
-  reduced: { intensity: 0, parallax: 0 },
+  reduced: { intensity: 0, parallax: 0, press: 1 },
 
   /** A touch screen moves things half as far as a mouse does (`--motion-parallax`). */
   touch: { parallax: 0.5 },

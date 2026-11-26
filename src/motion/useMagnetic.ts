@@ -1,8 +1,8 @@
 import { useEffect, useRef, type RefObject } from 'react'
 import { isMagnetic, magneticOffset } from './magnetic'
+import { useReducedMotion } from './reducedMotion'
 
 const FINE_POINTER = '(hover: hover) and (pointer: fine)'
-const REDUCED = '(prefers-reduced-motion: reduce)'
 
 /**
  * Lets a large call to action lean toward a mouse that is over it (`--mag-x`, `--mag-y`, which the
@@ -14,11 +14,12 @@ const REDUCED = '(prefers-reduced-motion: reduce)'
  */
 export function useMagnetic<T extends HTMLElement>(enabled: boolean): RefObject<T | null> {
   const ref = useRef<T | null>(null)
+  const reduced = useReducedMotion()
 
   useEffect(() => {
     const element = ref.current
-    if (!enabled || !element) return
-    if (!window.matchMedia(FINE_POINTER).matches || window.matchMedia(REDUCED).matches) return
+    if (!enabled || reduced || !element) return
+    if (!window.matchMedia(FINE_POINTER).matches) return
 
     let frame = 0
     let intensity = 1
@@ -61,7 +62,7 @@ export function useMagnetic<T extends HTMLElement>(enabled: boolean): RefObject<
       element.removeEventListener('pointerleave', reset)
       element.removeEventListener('pointercancel', reset)
     }
-  }, [enabled])
+  }, [enabled, reduced])
 
   return ref
 }

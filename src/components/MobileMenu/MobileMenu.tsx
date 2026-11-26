@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
 import { useI18n } from '../../i18n/useI18n'
+import { coverPage } from '../../motion/cover'
 import { closeDialog } from '../../motion/dialog'
 import { cx } from '../../utils/cx'
 import { BrandMark } from '../BrandMark/BrandMark'
@@ -63,6 +64,9 @@ export function MobileMenu() {
   useEffect(() => {
     closeMenu()
   }, [pathname, closeMenu])
+
+  // The open menu fills the screen: a scene behind it stops drawing until it is gone (motion/cover.ts).
+  useEffect(() => (open ? coverPage() : undefined), [open])
 
   // If the window grows until the menu button disappears, the open menu has no way to be
   // closed by the visitor, so it closes itself. CSS decides when the button is hidden.

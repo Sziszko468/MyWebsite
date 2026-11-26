@@ -2,8 +2,11 @@ import { Link, useLocation } from 'react-router'
 import { LANGUAGES, LANGUAGE_META } from '../../i18n/config'
 import { saveLanguage } from '../../i18n/preference'
 import { useI18n } from '../../i18n/useI18n'
+import { useSlidingIndicator } from '../../motion/indicator'
 import { resolveLanguageSwitch } from '../../routes/languageSwitch'
 import styles from './LanguageSwitcher.module.scss'
+
+const CURRENT = ['a[aria-current="true"]']
 
 /**
  * Real links to the same page in each language, so it works without JS and is crawlable.
@@ -13,9 +16,12 @@ import styles from './LanguageSwitcher.module.scss'
 export function LanguageSwitcher({ label }: { label?: string } = {}) {
   const { lang, t } = useI18n()
   const { pathname, search, hash } = useLocation()
+  // One marker behind the current language glides to the newly chosen one (motion/indicator.ts); until it is placed the current link is filled by itself.
+  const row = useSlidingIndicator<HTMLElement>(CURRENT, `${pathname} ${lang}`)
 
   return (
-    <nav aria-label={label ?? t.language.label}>
+    <nav ref={row} className={styles.switcher} aria-label={label ?? t.language.label}>
+      <span className={styles.marker} aria-hidden="true" />
       <ul className={styles.list}>
         {LANGUAGES.map((code) => {
           const { code: label, name } = LANGUAGE_META[code]

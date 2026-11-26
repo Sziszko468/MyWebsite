@@ -74,14 +74,14 @@
     --_bg: var(--color-accent-hover);
     --_border: var(--color-accent-hover);
     box-shadow: var(--shadow-glow);
-    transform: translateY(-1px);
+    transform: translateY(calc(-1px * var(--motion-intensity)));
   }
 
   @include m.pressed {
     --_bg: var(--color-accent-active);
     --_border: var(--color-accent-active);
     box-shadow: none;
-    transform: translateY(0) scale(0.985);
+    transform: translateY(0) scale(var(--motion-press));
   }
 }
 
@@ -96,7 +96,7 @@
   @include m.pressed {
     --_bg: var(--color-surface-active);
     --_border: var(--color-text);
-    transform: scale(0.985);
+    transform: scale(var(--motion-press));
   }
 }
 

@@ -11,6 +11,7 @@ import { useLocalized } from '../components/lab/core/useLabText'
 import { LabArt } from '../components/lab/ui/LabArt'
 import { LocalizedLink } from '../components/LocalizedLink/LocalizedLink'
 import { Reveal } from '../components/motion/Reveal'
+import { ScrollLinked } from '../components/motion/ScrollLinked'
 import { usePointerField } from '../components/motion/usePointerField'
 import { PageHero, HeroLine } from '../components/PageHero/PageHero'
 import { archiveText } from '../content/archive/text'
@@ -117,7 +118,7 @@ export function CommandCenterPage() {
           <ul ref={map} className={styles.map}>
             {sectors.map((sector, index) => (
               <li key={sector.id} className={styles.sector} data-sector={sector.id}>
-                <LocalizedLink to={sector.to} className={styles.sectorLink}>
+                <LocalizedLink to={sector.to} className={styles.sectorLink} data-cursor={words.archive.entry.open}>
                   <span className={styles.sectorNumber} aria-hidden="true">
                     {pad(index + 1)}
                   </span>
@@ -142,7 +143,10 @@ export function CommandCenterPage() {
             {shownProjects.map((project, index) => (
               <li key={project.slug} className={styles.feature}>
                 <Reveal variant={index % 2 === 0 ? 'left' : 'right'} className={styles.featurePicture}>
-                  <EntryVisual visual={project.image ? { type: 'image', ...project.image } : { type: 'mockup', kind: project.mockup }} />
+                  {/* The picture drifts a little against the words beside it: depth, never information. */}
+                  <ScrollLinked range="-16px">
+                    <EntryVisual visual={project.image ? { type: 'image', ...project.image } : { type: 'mockup', kind: project.mockup }} />
+                  </ScrollLinked>
                 </Reveal>
                 <div className={styles.featureBody}>
                   <p className={styles.featureMeta}>
@@ -163,7 +167,7 @@ export function CommandCenterPage() {
         <ol className={styles.lab}>
           {playableExperiments.map((experiment) => (
             <li key={experiment.id} className={styles.experiment}>
-              <LocalizedLink to={experimentPath(experiment.id)} className={styles.experimentLink}>
+              <LocalizedLink to={experimentPath(experiment.id)} className={styles.experimentLink} data-cursor={words.archive.entry.open}>
                 <span className={styles.experimentArt} aria-hidden="true">
                   <LabArt id={experiment.id} />
                 </span>

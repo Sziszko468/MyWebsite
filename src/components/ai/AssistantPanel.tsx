@@ -3,6 +3,7 @@ import { controlRoom, useControlRoom } from '../../ai/controlRoom'
 import { useAiText } from '../../ai/useAiText'
 import { useVisualViewport } from '../../ai/viewport'
 import { useI18n } from '../../i18n/useI18n'
+import { coverPage } from '../../motion/cover'
 import { cx } from '../../utils/cx'
 import { LocalizedLink } from '../LocalizedLink/LocalizedLink'
 import { ChatSurface } from './ChatSurface'
@@ -32,6 +33,9 @@ export default function AssistantPanel({ onClose }: { onClose: () => void }) {
   const [phone, setPhone] = useState(() => window.matchMedia(PHONE).matches)
 
   useVisualViewport(element, phone)
+
+  // On a phone the panel is the whole screen: a scene behind it stops drawing until it is closed (motion/cover.ts).
+  useEffect(() => (phone ? coverPage() : undefined), [phone])
 
   useEffect(() => {
     const query = window.matchMedia(PHONE)

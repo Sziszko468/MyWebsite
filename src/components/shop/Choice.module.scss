@@ -67,16 +67,14 @@
     border-color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
+    scale var(--dur-fast) var(--ease-out);
 
   @include m.hover {
     border-color: var(--color-text);
     background-color: var(--color-surface-hover);
   }
 
-  &:active {
-    transform: scale(0.99);
-  }
+  @include m.press-card;
 
   &:has(.input:focus-visible) {
     outline: var(--focus-ring-width) solid var(--color-focus);

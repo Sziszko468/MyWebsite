@@ -97,10 +97,14 @@
   text-decoration: none;
   transition:
     border-color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+    transform var(--dur-base) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
+
+  @include m.press-card;
 
   &:focus-visible {
     border-color: var(--color-accent);
+    transform: translateY(calc(var(--motion-distance-sm) * var(--motion-intensity) * -0.5));
   }
 
   @include m.hover {
@@ -330,10 +334,14 @@
   text-decoration: none;
   transition:
     border-color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+    transform var(--dur-base) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
+
+  @include m.press-card;
 
   &:focus-visible {
     border-color: var(--color-accent);
+    transform: translateY(calc(var(--motion-distance-sm) * var(--motion-intensity) * -0.5));
   }
 
   @include m.hover {

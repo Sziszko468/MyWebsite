@@ -27,6 +27,16 @@ export function LoadingBar() {
     }
   }, [pending])
 
+  // The same wait, said on the document, so the page being left can recede while it lasts (styles/motion.css).
+  useEffect(() => {
+    if (!shown) return
+    const root = document.documentElement
+    root.dataset.routeLoading = ''
+    return () => {
+      delete root.dataset.routeLoading
+    }
+  }, [shown])
+
   return (
     <div className={styles.bar} data-active={shown || undefined} role="status" aria-live="polite">
       <span className={styles.line} aria-hidden="true" />

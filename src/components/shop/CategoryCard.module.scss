@@ -15,7 +15,8 @@
   transition:
     border-color var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+    translate var(--dur-base) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
 
   &::before {
     content: '';
@@ -36,10 +37,22 @@
     opacity: 1;
   }
 
+  @include m.lift;
+
   @include m.hover {
     border-color: var(--color-border-strong);
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+  }
+
+  &:has(.nameLink:active) {
+    scale: calc(1 - (1 - var(--motion-press)) * 0.5);
+  }
+
+  /* A keyboard on the card's name gets what a mouse over the card gets. */
+  &:has(.nameLink:focus-visible) {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+    translate: 0 calc(var(--motion-lift) * var(--motion-intensity) * -1);
   }
 }
 

@@ -1,4 +1,5 @@
 import { useEffect, useState, type RefObject } from 'react'
+import { useCovered } from '../../motion/cover'
 import { HeroDriver } from './HeroDriver'
 
 /**
@@ -41,5 +42,6 @@ export function useHeroDriver(
     }
   }, [driver, section, stage, root, motion])
 
-  return { driver, inView: inView && tabVisible }
+  const covered = useCovered()
+  return { driver, inView: inView && tabVisible && !covered }
 }

@@ -4,6 +4,7 @@ import { Container } from '../Container/Container'
 import { KineticText } from '../motion/KineticText'
 import { SpeedLines } from '../motion/SpeedLines'
 import { usePointerField } from '../motion/usePointerField'
+import { useScrollProgress } from '../../motion/scroll'
 import styles from './PageHero.module.scss'
 
 /**
@@ -39,16 +40,20 @@ interface PageHeroProps {
  * The shell of a page's first screen: the eyebrow, the headline, a sentence and buttons over a
  * faint light field (speed lines and a glow that lean towards a mouse and sit still otherwise). It
  * runs under the sticky header, like the home page's hero. The words keep their contrast: the
- * field fades away from them.
+ * field fades away from them. As the screen scrolls away the field falls behind the words a little,
+ * the lines further than the glow (motion/scroll.ts); at rest it sits exactly in place.
  */
 export function PageHero({ eyebrow, title, lead, actions, seed = 0, compact = false, children }: PageHeroProps) {
   const titleId = useId()
   const ref = usePointerField<HTMLElement>()
+  const depth = useScrollProgress<HTMLDivElement>()
 
   return (
     <section ref={ref} className={styles.hero} aria-labelledby={titleId}>
-      <div className={styles.glow} aria-hidden="true" />
-      <SpeedLines className={cx(styles.lines, compact && styles.compactLines)} seed={seed} />
+      <div ref={depth} className={styles.field} aria-hidden="true">
+        <div className={styles.glow} aria-hidden="true" />
+        <SpeedLines className={cx(styles.lines, compact && styles.compactLines)} seed={seed} />
+      </div>
 
       <Container size="wide" className={styles.inner}>
         <div className={cx(styles.copy, compact && styles.compactCopy)}>

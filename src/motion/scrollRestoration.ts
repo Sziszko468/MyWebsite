@@ -6,6 +6,8 @@
  * without a browser.
  */
 
+import { pageKeyOf } from './navigation'
+
 const STORAGE_KEY = 'cc:scroll-positions'
 export const MAX_REMEMBERED = 60
 
@@ -58,15 +60,28 @@ export function restoreTarget(saved: number | undefined, pageHeight: number, vie
   return { y: Math.min(saved, max), reachable: saved <= max + 1 }
 }
 
+/**
+ * The key a history entry's position is kept under. Every page opened by its address gets the router's same first key, so that one is told apart by its page:
+ * otherwise the position left on one page would be given to the next page opened in the same tab.
+ */
+export const entryKeyOf = (key: string, pathname: string): string => (key === 'default' ? `default ${pageKeyOf(pathname)}` : key)
+
+/** How the document itself was reached: typed or followed from elsewhere (`navigate`), reloaded, or returned to. Unknown counts as `navigate`. */
+export function documentArrival(timing: Pick<Performance, 'getEntriesByType'> | undefined = typeof performance === 'undefined' ? undefined : performance): string {
+  const entry = timing?.getEntriesByType('navigation')[0] as { type?: string } | undefined
+  return entry?.type ?? 'navigate'
+}
+
 /** What a navigation should do about the scroll position. */
 export type ScrollAction = 'keep' | 'top' | 'restore' | 'hash'
 
 /**
  * `hash`: the address names an element. `restore`: Back or Forward to a page that was left at some
- * position. `keep`: the same page in another language stays where it is. Anything else starts at the top.
+ * position, or a reload. `keep`: the same page in another language stays where it is. Anything else starts at the top,
+ * and so does a page that was opened afresh by its address (`fresh`): the router calls that a POP too.
  */
-export function scrollAction(input: { samePage: boolean; hash: string; navigation: 'POP' | 'PUSH' | 'REPLACE' }): ScrollAction {
+export function scrollAction(input: { samePage: boolean; hash: string; navigation: 'POP' | 'PUSH' | 'REPLACE'; fresh?: boolean }): ScrollAction {
   if (input.hash) return 'hash'
   if (input.samePage) return 'keep'
-  return input.navigation === 'POP' ? 'restore' : 'top'
+  return input.navigation === 'POP' && !input.fresh ? 'restore' : 'top'
 }

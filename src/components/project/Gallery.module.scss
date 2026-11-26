@@ -85,7 +85,19 @@
   cursor: zoom-in;
   transition:
     border-color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
+    box-shadow var(--dur-base) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out);
+
+  @include m.press-card;
+
+  &:focus-visible {
+    border-color: var(--pa, var(--color-accent));
+    box-shadow: var(--shadow-md);
+
+    img {
+      transform: scale(calc(1 + 0.025 * var(--motion-intensity)));
+    }
+  }
 
   img {
     display: block;
@@ -103,7 +115,7 @@
     box-shadow: var(--shadow-md);
 
     img {
-      transform: scale(1.025);
+      transform: scale(calc(1 + 0.025 * var(--motion-intensity)));
     }
   }
 }
