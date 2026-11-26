@@ -298,7 +298,12 @@ async function mockSmtp(options: MockOptions = {}, port = 0): Promise<MockServer
   const onConnection = (socket: net.Socket) => {
     sockets.add(socket)
     socket.on('close', () => sockets.delete(socket))
-    if (options.silent) return
+    if (options.silent) {
+      // Read and ignore what arrives, so that the client closing the connection is noticed.
+      socket.on('error', () => undefined)
+      socket.resume()
+      return
+    }
     handle(socket, options.implicitTls !== undefined, true)
   }
   const server = options.implicitTls
@@ -465,6 +470,16 @@ describe('the SMTP client', () => {
     if (outcome === 'still waiting') expect.fail('the send was still waiting for the TLS handshake 10 s later, with a 2 s time limit')
     expect(outcome.transient).toBe(true)
     expect(outcome.message).toMatch(/TLS handshake in time/)
+    await vi.waitFor(() => expect(mock!.connections()).toBe(0))
+  })
+
+  it('closes the connection when connecting takes too long: here a server that accepts and never starts TLS', { timeout: 20_000 }, async () => {
+    mock = await mockSmtp({ silent: true })
+    const send = failure(sendSmtp(smtp(mock.port, { secure: 'tls', timeoutMs: 2000 }), message()))
+    await vi.waitFor(() => expect(mock!.connections()).toBe(1))
+    const error = await send
+    expect(error.transient).toBe(true)
+    expect(error.message).toMatch(/Connecting to the mail server timed out/)
     await vi.waitFor(() => expect(mock!.connections()).toBe(0))
   })
 

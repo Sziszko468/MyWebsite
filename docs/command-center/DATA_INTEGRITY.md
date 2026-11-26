@@ -162,6 +162,8 @@ failed on a different test, see below).
   * **Follow-up, 2026-11-26: the STARTTLS upgrade is reproduced and fixed.** Against a mock server that answers `220` to `STARTTLS` and then stays silent, a send with a 2 s time limit was still
     waiting after 10 s. The handshake now has the same limit as a reply (`SMTP_TIMEOUT_MS`): the send ends as a temporary failure, the connection is closed, and the outbox tries again later. The
     test is in `notifications.test.ts`; it covers the SMTP sender, not the outbox behind it. Not run against a real mail server. The first point above (a run asked for while stopping) is unchanged.
+  * **Follow-up, 2026-11-26: a connect that times out no longer leaves its socket open.** The send ended as a temporary failure, but the connection stayed. The time limit now closes it. Reproduced
+    and tested with a server that accepts and never starts TLS (implicit TLS); a plain TCP connect that hangs goes through the same timer and was not reproduced.
 
 ## 7. Remaining limitations
 

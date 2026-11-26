@@ -153,22 +153,21 @@ class Connection {
 
 function open(config: SmtpConfig): Promise<net.Socket | tls.TLSSocket> {
   return new Promise((resolve, reject) => {
+    const implicitTls = config.secure === 'tls'
+    const socket = implicitTls
+      ? tls.connect({ host: config.host, port: config.port, servername: config.host, rejectUnauthorized: config.rejectUnauthorized })
+      : net.connect({ host: config.host, port: config.port })
     const onError = (error: Error) => reject(new MailError(`Could not connect to the mail server: ${error.message}`, { transient: true }))
-    const timer = setTimeout(() => reject(new MailError('Connecting to the mail server timed out.', { transient: true })), config.timeoutMs)
-    const done = <T extends net.Socket>(socket: T) => {
+    const timer = setTimeout(() => {
+      socket.destroy()
+      reject(new MailError('Connecting to the mail server timed out.', { transient: true }))
+    }, config.timeoutMs)
+    socket.once(implicitTls ? 'secureConnect' : 'connect', () => {
       clearTimeout(timer)
       socket.removeListener('error', onError)
       resolve(socket)
-    }
-    if (config.secure === 'tls') {
-      const socket = tls.connect({ host: config.host, port: config.port, servername: config.host, rejectUnauthorized: config.rejectUnauthorized })
-      socket.once('secureConnect', () => done(socket))
-      socket.once('error', onError)
-    } else {
-      const socket = net.connect({ host: config.host, port: config.port })
-      socket.once('connect', () => done(socket))
-      socket.once('error', onError)
-    }
+    })
+    socket.once('error', onError)
   })
 }
 
