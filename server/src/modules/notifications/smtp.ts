@@ -117,7 +117,7 @@ class Connection {
     this.socket.write(data)
   }
 
-  /** Replaces the socket with a TLS one over it (STARTTLS). */
+  /** Replaces the socket with a TLS one over it (STARTTLS). The handshake has the same time limit as a reply. */
   upgrade(options: tls.ConnectionOptions): Promise<void> {
     return new Promise((resolve, reject) => {
       const old = this.socket
@@ -128,12 +128,21 @@ class Connection {
       this.pending = []
       this.failure = null
       const secured = tls.connect({ ...options, socket: old as net.Socket })
+      const timer = setTimeout(() => {
+        secured.destroy()
+        old.destroy()
+        reject(new MailError('The mail server did not complete the TLS handshake in time.', { transient: true }))
+      }, this.timeoutMs)
       secured.once('secureConnect', () => {
+        clearTimeout(timer)
         this.socket = secured
         this.attach(secured)
         resolve()
       })
-      secured.once('error', (error) => reject(new MailError(`TLS to the mail server failed: ${error.message}`, { transient: true })))
+      secured.once('error', (error) => {
+        clearTimeout(timer)
+        reject(new MailError(`TLS to the mail server failed: ${error.message}`, { transient: true }))
+      })
     })
   }
 

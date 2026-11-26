@@ -170,6 +170,8 @@ interface MockOptions {
   password?: string
   /** Offer STARTTLS (the certificate pair), and refuse AUTH until it has happened. */
   starttls?: { key: string; cert: string }
+  /** Offer STARTTLS, answer it with 220, and then never take part in the handshake. */
+  stallStartTls?: boolean
   /** Speak TLS from the first byte. */
   implicitTls?: { key: string; cert: string }
   /** Replace the reply to a command: `greeting`, `mail`, `rcpt`, `data`, `end`. */
@@ -186,6 +188,8 @@ interface MockServer {
   transcript: string[]
   /** Every message body that reached the end of DATA, with dot-stuffing removed. */
   messages: string[]
+  /** How many connections are open right now. */
+  connections(): number
   close(): Promise<void>
 }
 
@@ -227,10 +231,17 @@ async function mockSmtp(options: MockOptions = {}, port = 0): Promise<MockServer
       const command = line.toUpperCase()
       if (command.startsWith('EHLO')) {
         const extensions = ['250-mock.test', '250-SIZE 10485760']
-        if (options.starttls && !secured) extensions.push('250-STARTTLS')
+        if ((options.starttls || options.stallStartTls) && !secured) extensions.push('250-STARTTLS')
         if (mayAuth) extensions.push(`250-AUTH ${options.auth === 'plain' ? 'PLAIN' : options.auth === 'login' ? 'LOGIN' : 'PLAIN LOGIN'}`)
         extensions.push('250 8BITMIME')
         return extensions.forEach(say)
+      }
+      if (command === 'STARTTLS' && options.stallStartTls) {
+        say('220 2.0.0 Ready to start TLS')
+        // Whatever the client sends from here on is read and ignored, so that its closing the connection is still noticed.
+        socket.removeAllListeners('data')
+        socket.on('data', () => undefined)
+        return
       }
       if (command === 'STARTTLS' && options.starttls) {
         say('220 2.0.0 Ready to start TLS')
@@ -298,6 +309,7 @@ async function mockSmtp(options: MockOptions = {}, port = 0): Promise<MockServer
     port: (server.address() as net.AddressInfo).port,
     transcript,
     messages,
+    connections: () => sockets.size,
     close: () =>
       new Promise<void>((resolve) => {
         for (const socket of sockets) socket.destroy()
@@ -441,6 +453,19 @@ describe('the SMTP client', () => {
     expect(error.transient).toBe(false)
     expect(error.message).toMatch(/does not offer STARTTLS/)
     expect(mock.transcript.map((line) => line.split(' ')[0])).toEqual(['EHLO'])
+  })
+
+  it('gives up on a STARTTLS handshake the server never joins, as a temporary failure, and closes the connection', { timeout: 20_000 }, async () => {
+    mock = await mockSmtp({ stallStartTls: true })
+    const send = failure(sendSmtp(smtp(mock.port, { secure: 'starttls', timeoutMs: 2000 }), message()))
+    let deadline: NodeJS.Timeout | undefined
+    const outcome = await Promise.race([send, new Promise<'still waiting'>((resolve) => (deadline = setTimeout(() => resolve('still waiting'), 10_000)))])
+    clearTimeout(deadline)
+    expect(mock.transcript.map((line) => line.split(' ')[0])).toEqual(['EHLO', 'STARTTLS'])
+    if (outcome === 'still waiting') expect.fail('the send was still waiting for the TLS handshake 10 s later, with a 2 s time limit')
+    expect(outcome.transient).toBe(true)
+    expect(outcome.message).toMatch(/TLS handshake in time/)
+    await vi.waitFor(() => expect(mock!.connections()).toBe(0))
   })
 
   itTls('talks TLS from the first byte on the implicit-TLS port, and checks the certificate unless told not to', async () => {

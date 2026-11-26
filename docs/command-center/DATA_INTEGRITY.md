@@ -159,6 +159,9 @@ failed on a different test, see below).
     happened to contain the digits "990", which that test forbids. It is unrelated and not changed.
   * **Not covered, read from the code, not run:** a run asked for while the server is stopping can still start; and the SMTP sender's STARTTLS upgrade has no time limit of its own, so a mail
     server that never finishes that handshake would hold up every later message (as it did before for every call made while that run was going).
+  * **Follow-up, 2026-11-26: the STARTTLS upgrade is reproduced and fixed.** Against a mock server that answers `220` to `STARTTLS` and then stays silent, a send with a 2 s time limit was still
+    waiting after 10 s. The handshake now has the same limit as a reply (`SMTP_TIMEOUT_MS`): the send ends as a temporary failure, the connection is closed, and the outbox tries again later. The
+    test is in `notifications.test.ts`; it covers the SMTP sender, not the outbox behind it. Not run against a real mail server. The first point above (a run asked for while stopping) is unchanged.
 
 ## 7. Remaining limitations
 
