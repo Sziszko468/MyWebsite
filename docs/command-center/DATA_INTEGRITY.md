@@ -150,9 +150,15 @@ failed on a different test, see below).
   * **Follow-up, 2026-11-26: the test is fixed, the cause is proven.** The wait in `email.test.ts` now ends only when no message is being sent and none is due, and a new test holds the provider's
     answers back so that the overlap happens on every run (with the old wait it failed 20 of 20, with the new one it passed 30 of 30). The test of this section passed 30 of 30 on its own, the file
     10 of 10, and the whole suite 3 of 3 (3951 tests, 180 files).
-  * **Still open, in the product code, not changed:** when two or more calls of `Notifier.processDue` wait for the same run, each then starts a run of its own, although the method says it runs one
-    at a time. Messages are then sent in parallel, a call can return while others are still being sent, and `stop()` waits only for the run started last, after which the server closes the database.
-    The first three were reproduced with the provider's answers held back; what a shutdown in that moment does to a message was read from the code, not run. Changing it is the owner's decision.
+  * **The cause was in the product too, and is fixed (the owner's decision, the same day).** When two or more calls of `Notifier.processDue` waited for the same run, each then started a run of its
+    own, although the method says it runs one at a time: messages went out in parallel, a call could return while others were still being sent, and `stop()` waited only for the run started last,
+    after which the server closes the database. Each new run is now chained behind the last one. Three tests in `notifications.test.ts` hold the sends back and failed on the code before the change;
+    a fourth checks that a failing run does not take the waiting ones with it. The base branch's untouched `email.test.ts` also passed 30 of 30 on the changed code.
+    **What is different now:** messages go out strictly one after another, so a slow provider delays the later ones, and a shutdown waits for every run already asked for (the process still ends
+    itself after 10 s). Whole suite on the changed code, three runs: two passed all 3955 tests (180 files); in the first, one test of `projects.test.ts` failed because a random id in the answer
+    happened to contain the digits "990", which that test forbids. It is unrelated and not changed.
+  * **Not covered, read from the code, not run:** a run asked for while the server is stopping can still start; and the SMTP sender's STARTTLS upgrade has no time limit of its own, so a mail
+    server that never finishes that handshake would hold up every later message (as it did before for every call made while that run was going).
 
 ## 7. Remaining limitations
 

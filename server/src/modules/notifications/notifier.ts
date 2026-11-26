@@ -358,12 +358,10 @@ export class Notifier {
     await this.running?.catch(() => undefined)
   }
 
-  /** Sends what is due. Runs one at a time; a call made while one is running waits for it. */
+  /** Sends what is due. Runs one at a time: a run asked for while others are running or waiting starts after the last of them has ended. */
   async processDue(): Promise<{ accepted: number; failed: number; retried: number }> {
-    if (this.running) {
-      await this.running.catch(() => undefined)
-    }
-    const run = this.runOnce()
+    // The new run takes its place at the end of the line before anything is awaited, so `running` (what `stop` waits for) is always the last one.
+    const run = this.running ? this.running.catch(() => undefined).then(() => this.runOnce()) : this.runOnce()
     this.running = run
     try {
       return await run

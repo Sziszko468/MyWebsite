@@ -32,8 +32,8 @@ const resendEnv = (extra: Record<string, string> = {}) => ({
 })
 
 /**
- * Waits until the outbox has nothing left to do: no message is being sent and none is due. One `processDue()` does not promise that: when several
- * callers waited for the same run, each starts a run of its own, and one of them can return while another is still delivering.
+ * Waits until the outbox has nothing left to do: no message is being sent and none is due. One `processDue()` is not always enough for that: a
+ * message queued while its run is going (the alert about a failed one, say) is sent by a run that comes after it.
  */
 const settle = async () => {
   const { db, clock, app } = server
@@ -386,8 +386,8 @@ describe('the confirmation to the person who wrote', () => {
 
   it('delivers every message that arrives while the provider is still answering the first, and the tests’ wait ends only then', async () => {
     await turnOn()
-    // The answers are held until all three messages are in. Every later run of the outbox is then asked for while the first one is still going,
-    // so those runs overlap: the order in which a single `processDue()` returns while other messages are still on their way to the provider.
+    // The answers are held until all three messages are in, so every later run of the outbox is asked for while the first one is still going (the
+    // order in which those runs once overlapped). Over real HTTP, all six messages must have arrived when the wait ends.
     let release = () => {}
     const held = new Promise<void>((resolve) => (release = resolve))
     provider.onSend = () => held

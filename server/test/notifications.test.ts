@@ -4,9 +4,9 @@ import net from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import tls from 'node:tls'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SmtpConfig } from '../src/config.ts'
-import { createMailer } from '../src/modules/notifications/mailer.ts'
+import { createMailer, type Mailer } from '../src/modules/notifications/mailer.ts'
 import { assertSingleLine, buildMime, encodeWords, formatAddress, MimeError, splitSender, type MailMessage } from '../src/modules/notifications/mime.ts'
 import { MailError, sendSmtp } from '../src/modules/notifications/smtp.ts'
 import { renderRequestNotification } from '../src/modules/notifications/quoteTemplates.ts'
@@ -598,6 +598,91 @@ describe('the outbox', () => {
     expect(overview.json.data.counts.delivered).toBe(0)
     expect(overview.json.data.deliveries.every((d: { status: string }) => d.status !== 'delivered')).toBe(true)
     expect(server.db.get("SELECT COUNT(*) AS n FROM email_deliveries WHERE status = 'delivered' OR delivered_at IS NOT NULL")).toEqual({ n: 0 })
+  })
+})
+
+/** A mailer whose sends stay unanswered until the test answers them. */
+class HeldMailer implements Mailer {
+  readonly name = 'held'
+  readonly unanswered: (() => void)[] = []
+  send(): Promise<{ providerMessageId: string | null }> {
+    return new Promise((resolve) => this.unanswered.push(() => resolve({ providerMessageId: null })))
+  }
+}
+
+describe('the outbox while a message is still being sent', () => {
+  let server: TestServer
+  let mailer: HeldMailer
+  const notifier = () => server.app.context.notifier
+  const statuses = () => server.db.all<{ status: string }>('SELECT status FROM email_deliveries ORDER BY rowid').map((row) => row.status)
+  /** Everything that does not wait for an answer happens now: nothing here touches the network, so one turn of the loop is enough. */
+  const turn = () => new Promise((resolve) => setImmediate(resolve))
+  const answerOne = async () => {
+    mailer.unanswered.shift()!()
+    await turn()
+  }
+
+  // Three messages arrive; the first is being sent, and the runs asked for by the other two are waiting for it.
+  beforeEach(async () => {
+    mailer = new HeldMailer()
+    server = await startServer({ mailer })
+    for (const index of [1, 2, 3]) await server.api('/api/contact', { body: contact({ subject: `Subject ${index}`, message: `A different message number ${index}, long enough to be a message.` }) })
+    await turn()
+    expect(statuses()).toEqual(['sending', 'pending', 'pending'])
+  })
+  afterEach(async () => {
+    while (mailer.unanswered.length > 0) await answerOne()
+    await server.close()
+  })
+
+  it('sends one message at a time, however many runs were asked for in the meantime', async () => {
+    await answerOne()
+    expect(statuses()).toEqual(['accepted', 'sending', 'pending'])
+    expect(mailer.unanswered).toHaveLength(1)
+    await answerOne()
+    expect(statuses()).toEqual(['accepted', 'accepted', 'sending'])
+    expect(mailer.unanswered).toHaveLength(1)
+    await answerOne()
+    expect(statuses()).toEqual(['accepted', 'accepted', 'accepted'])
+  })
+
+  it('answers a later processDue() only when what was being sent before it is finished', async () => {
+    let answered = false
+    void notifier()
+      .processDue()
+      .then(() => (answered = true))
+    await answerOne()
+    expect(answered).toBe(false)
+    await answerOne()
+    expect(answered).toBe(false)
+    await answerOne()
+    expect(answered).toBe(true)
+    expect(statuses()).toEqual(['accepted', 'accepted', 'accepted'])
+  })
+
+  it('stops only when nothing is being sent any more, so that the database can be closed after it', async () => {
+    void notifier().processDue() // one run more than there are messages left, as the timer asks for
+    await answerOne()
+    let stopped = false
+    void notifier()
+      .stop()
+      .then(() => (stopped = true))
+    await turn()
+    expect(stopped).toBe(false)
+    await answerOne()
+    expect(stopped).toBe(false)
+    await answerOne()
+    expect(stopped).toBe(true)
+    expect(statuses()).toEqual(['accepted', 'accepted', 'accepted'])
+  })
+
+  it('goes on with the runs that are waiting when one of them fails', async () => {
+    vi.spyOn(server.db, 'all').mockImplementationOnce(() => {
+      throw new Error('database is locked')
+    }) // the next run's look for what is due
+    await answerOne()
+    expect(server.logs.join('\n')).toContain('outbox run failed')
+    expect(statuses()).toEqual(['accepted', 'sending', 'pending'])
   })
 })
 
