@@ -50,6 +50,101 @@ export function writePositions(positions: PositionMap, store: Pick<Storage, 'set
   }
 }
 
+/** A page held waiting for its saved position counts as moved by the visitor once it is further than this (in pixels) from where it was left waiting. */
+export const OWN_MOVE = 2
+
+/**
+ * One visit's positions, in memory and in the store. While an entry's saved position is still being waited for (`hold`), the window does not show where the visitor
+ * was, so it is not taken down under that entry, unless the visitor has moved the page themselves.
+ */
+export function createScrollMemory(store: Pick<Storage, 'getItem' | 'setItem'> | null = storage()) {
+  let positions: PositionMap | null = null
+  let held: { key: string; y: number } | null = null
+  const all = () => (positions ??= readPositions(store))
+  return {
+    saved: (key: string): number | undefined => all()[key],
+    record(key: string, y: number): void {
+      if (held?.key === key) {
+        if (Math.abs(y - held.y) <= OWN_MOVE) return
+        held = null
+      }
+      positions = remember(all(), key, y)
+    },
+    hold(key: string, y: number): void {
+      held = { key, y }
+    },
+    release(): void {
+      held = null
+    },
+    write: (): void => writePositions(all(), store),
+  }
+}
+
+export type ScrollMemory = ReturnType<typeof createScrollMemory>
+
+/** What the recording needs of the window; a test hands in its own. */
+export interface ScrollView {
+  readonly scrollY: number
+  requestAnimationFrame(run: () => void): number
+  cancelAnimationFrame(frame: number): void
+  addEventListener(type: 'scroll' | 'pagehide', listener: () => void, options?: { passive?: boolean }): void
+  removeEventListener(type: 'scroll' | 'pagehide', listener: () => void): void
+}
+
+/**
+ * Follows one history entry while its page is on screen: one passive scroll listener, at most one reading per frame, and the store written when the page is hidden or
+ * the entry is left.
+ *
+ * `leave` must be called while the window still shows this entry's page. It reads the window itself, because a frame may still be waiting, or the browser may not
+ * even have announced the last scroll yet. After it, nothing can be recorded under this key any more.
+ */
+export function trackEntry(key: string, view: ScrollView, memory: ScrollMemory) {
+  let frame = 0
+  let left = false
+  const drop = () => {
+    if (frame) view.cancelAnimationFrame(frame)
+    frame = 0
+  }
+  const save = () => {
+    frame = 0
+    if (!left) memory.record(key, view.scrollY)
+  }
+  const onScroll = () => {
+    if (!left && !frame) frame = view.requestAnimationFrame(save)
+  }
+  const flush = (read: boolean) => {
+    if (left) return
+    drop()
+    if (read) memory.record(key, view.scrollY)
+    memory.write()
+  }
+  const onPageHide = () => flush(true)
+  const leave = (read: boolean) => {
+    flush(read)
+    left = true
+  }
+  view.addEventListener('scroll', onScroll, { passive: true })
+  view.addEventListener('pagehide', onPageHide)
+  return {
+    /** The entry is being left. `read`: the window still shows where the visitor was (see `readsOnLeave`); otherwise only what scrolling had recorded is kept. */
+    leave,
+    /** Stops listening. An entry not left through `leave` is not read now: the window may already show another page. */
+    stop() {
+      view.removeEventListener('scroll', onScroll)
+      view.removeEventListener('pagehide', onPageHide)
+      leave(false)
+    },
+  }
+}
+
+/**
+ * Whether, as an entry is left for `next`, the window should be read for it. Not after a REPLACE: that entry is gone from history, and would only push a real one out
+ * of the remembered ones. And not on the way to a plain `#fragment` link's entry: the browser follows such a link itself and may have moved the window to the element
+ * before the router hears of it. Those entries carry no key of the router's.
+ */
+export const readsOnLeave = (next: { navigation: 'POP' | 'PUSH' | 'REPLACE'; key: string; hash: string }): boolean =>
+  next.navigation !== 'REPLACE' && !(next.key === 'default' && next.hash !== '')
+
 /**
  * Where to scroll to, given what was remembered and how tall the page is now: never past the end
  * (a page that has not finished drawing is shorter than it will be, and the caller tries again).

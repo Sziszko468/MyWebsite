@@ -2,6 +2,7 @@
 
 Part of [Advanced motion and visual experiences](README.md). Only what was actually run is listed. 2026-11-26, branch `feature/advanced-motion-visuals` (base `46ba3d8`), Windows 11 (10.0.26300),
 Intel i9-13900H, Node 22.23.1, Vitest 5.0.5, headless system Chrome. No physical device. A backend was used only for the two shop journeys (a throw-away local one).
+Sections 1–7 describe PROMPT 38 (commit `93b385a`); the scroll restoration fix made afterwards (PROMPT 38.1) is in [section 8](#8-prompt-381-scroll-restoration-reliability-2026-11-27).
 
 ## 1. Project checks, on the final code
 
@@ -85,3 +86,53 @@ other sessions, **none merged into this one**. The earlier timing-sensitive grou
 Production or staging; Safari, Firefox; physical phones or tablets; screen readers; Windows high contrast; Lighthouse; `npm audit`; the GPU. Scenarios F and G of the shop journey (security over plain
 HTTP and the rate limit) and the journeys for booking, quotations, the client portal, the administration and the assistant were not run: no backend or business code changed; in the assistant only the
 panel changed, which now tells the scenes when it covers a phone's screen.
+
+## 8. PROMPT 38.1: scroll restoration reliability (2026-11-27)
+
+The cause and the fix are in [ARCHITECTURE](ARCHITECTURE.md) §8.
+
+### Commands, on the final code
+
+| Command | Result |
+| --- | --- |
+| `npx vitest run src/motion/scrollRestoration.test.ts` | **26 of 26 passed** |
+| `npx vitest run src/motion` | **86 of 86 passed** (5 files) |
+| `npx vitest run` | **4003 of 4003 passed** (182 files), 112 s |
+| `npx tsc -b` | passed |
+| `npx oxlint` | passed, no findings |
+| `npm run build` | passed: 121 pages, `404.html`, `robots.txt`, `sitemap.xml` and `_headers` written |
+| `npm run check:seo` | passed: 122 files, 91 indexable, 31 noindex |
+| `node tools/e2e/motion-journey.cjs dist` | **25 of 25 steps passed** |
+
+### New unit tests (`src/motion/scrollRestoration.test.ts`)
+
+A stand-in window whose scroll events and frames happen only when the test says so: leaving before the frame, before the event, and reading the window itself; each entry its own position, a frame
+that runs after all, rapid Back and Forward, the cap and stored form; when the window is not read; the waiting restore (leave, reload, a visitor's own move); page hidden and returning; a store
+that throws or is missing; the existing top / restore / fragment / keep decisions; and three checks that read how `ScrollManager.tsx` wires this (the wiring itself is shown by the journey).
+**Checked that they bite:** removing the reading on leave failed 10 of them, letting a late frame write 1, removing the hold 3, reading after a REPLACE 1, reading on a plain `#link` 1.
+No existing test was changed, skipped or removed.
+
+### Browser journey: five new steps, the same journey on both builds
+
+| Step | Build before the fix | With the fix |
+| --- | --- | --- |
+| A scroll and a navigation in the same moment (link, Forward), then Back | **failed**: came back at 600, left at 1400 | passed |
+| Rapid navigation over three entries, 12 hops, 10 returns compared | **failed**: at 0, left at 900 | passed |
+| A place left again while it was still being restored | **failed**: at 0, left at 1400 | passed |
+| A plain `#link`, by a real click and from a script | passed | passed |
+| `sessionStorage` refusing every call | passed | passed |
+| All 25 steps | **22 of 25** | **25 of 25** |
+
+The last two guard against a wrong fix and pass on the old code by design. The `#link` step was **first written with a real click only, and a build that wrongly read the window passed it**; following
+the link from a script was added, after which that build failed (*stored at 6545, not 700*). Repeated runs: the other four new steps 3 of 3 each, the corrected `#link` step 3 of 3.
+"The same place" means within 2 px (positions are stored as whole pixels); each step first checks that the page can really be scrolled to the position it asks for.
+
+### Other checks
+
+* Development server (StrictMode): Back and Forward returned to 1400 and 1100, no console error or warning. A reload there opens at the top, also with the previous `ScrollManager.tsx` put back
+  temporarily for comparison (existing, development only).
+* The path where the whole language frame is removed (a navigation to `/` inside the app, driven by a script): the entry was stored at 1400, 3 of 3; the build before the fix stored 600.
+
+### Not run again for 38.1
+
+`npm run i18n` (no text changed), the other journeys and the audits of sections 4 and 5, the performance measurements. Safari, Firefox, real devices and screen readers: not tested.

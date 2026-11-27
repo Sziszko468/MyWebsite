@@ -71,3 +71,47 @@ PROMPT 34) is unchanged.
 3. **The magnetic pull stays on large calls to action only** (unchanged).
 4. **The cart and the request builder stay plain** (their scope's intensity is 0.25 and reveals are off).
 5. **Scroll is never intercepted**: no smooth-scroll takeover, no snapping.
+
+## 8. Leaving a history entry without losing its place (PROMPT 38.1)
+
+### Root cause
+
+A position was taken down only by an animation frame requested from a scroll event. Leaving an entry meant React cleaning up the scroll manager's effect, which **cancelled a waiting frame and
+wrote the older value**. Reproduced on the production build of `93b385a` (`left at` → `came back to`):
+
+| Way of leaving | Result before |
+| --- | --- |
+| The scroll event had arrived, its frame had not run (frames held back) | 1400 → **600** |
+| Scroll and a link in one task, the next page's code already loaded (the browser had not even announced the scroll) | 1400 → **600**, 5 of 5 |
+| The same with `history.forward()` | 1400 → **600**, 3 of 3 |
+| A page left again **while its restore was still waiting** for it to grow: the wait at the top was recorded over the saved place | 1400 → **0**, 3 of 3 |
+
+When the next page's code still had to be fetched, the frame usually ran during the wait and nothing was lost. Reading the window in the effect's cleanup would not have been a fix: by then the
+document shows the next page, and a shorter one has already pulled the window back.
+
+### The lifecycle now
+
+1. `trackEntry` (`scrollRestoration.ts`) owns one entry's passive listener and frame.
+2. `LeaveWatch` (in `ScrollManager.tsx`) calls `leave` from `getSnapshotBeforeUpdate`: React has the next page ready and **has not touched the document yet**. This is why it is a class.
+3. `leave` cancels the waiting frame, reads `window.scrollY` itself, writes the store and closes the entry: no event or late frame can write under that key again.
+4. Only then does React change the page; the effect's cleanup removes the listeners, and the next entry gets its own tracker.
+5. When the whole language frame goes away (no link of the site does this), the same reading happens in `componentWillUnmount`, while the page that follows in the tree is still in the document.
+
+| Rule | Why |
+| --- | --- |
+| A restore that is still waiting **holds** its entry (`createScrollMemory().hold`): nothing is recorded there until it is placed, or the visitor moves the page by more than 2 px | The window does not show where the visitor was. Also protects a reload during the wait |
+| **No reading after a REPLACE** | That entry is gone from history; reading it would let a typed search (one entry per letter) push real positions out of the sixty |
+| **No reading on the way to a plain `<a href="#…">` entry** (`readsOnLeave`) | The browser follows such a link itself. Followed from a script, Chrome has already jumped when the page frame hears of it (measured: 6545 would have been stored instead of 700); after a real click it jumps later. What scrolling recorded is kept |
+
+Unchanged: the stored form and key, the sixty-entry cap, `history.scrollRestoration = 'manual'` only while mounted, and what a navigation does (top, keep, restore, fragment). One difference in
+what is stored: every entry that is left by a push, Back or Forward now has a position, also one that was never scrolled.
+
+### Limits that remain
+
+* On the way to a plain `#link` entry, and on any step to an entry without a router key whose address has a fragment, there is no final reading: a scroll made in the last frame before it can be
+  missed.
+* Entries made by plain `#links` share their page's key (`default <page>`), so they also share one remembered position with a typed visit of the same page (as before).
+* The wait for a page to grow is **120 frames, not a time**: about 2 s on a 60 Hz screen, about 1 s at 120 Hz, about 0.7 s at 165 Hz. A page that takes longer is scrolled as far as it goes,
+  and that shorter position then replaces the saved one. As before; not changed here.
+* In the development server (React's StrictMode runs effects twice) a reload does not restore the position. The previous code behaved the same there; production builds are not affected.
+* Verified in headless Chrome only. The order in which a browser jumps to a fragment and tells the page may differ elsewhere; the rule above does not depend on it.

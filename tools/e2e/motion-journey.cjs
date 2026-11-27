@@ -251,6 +251,180 @@ const INSTRUMENT = `
     await context.close()
   })
 
+  // ── Where each history entry was left (PROMPT 38.1) ───────────────────
+  // Stored positions are whole pixels and a window can sit between two, so "the same place" is within two pixels. Every position asked for is also checked to be
+  // one the page can really scroll to: on a page too short for it, every comparison would pass with the end of the page.
+  const NEAR = 2
+  const place = (page) => page.evaluate(() => Math.round(window.scrollY))
+  /** The address changes before the next page is drawn; its title changes with it. */
+  const arrive = async (page, was) => {
+    await page.waitForFunction((title) => document.title !== title, was, { timeout: 30000 })
+    await page.waitForTimeout(600)
+  }
+  /** `how`: a footer link's address, or a step through history. */
+  const travel = async (page, how, top) => {
+    const was = await page.title()
+    const at = await page.evaluate(
+      ([to, y]) => {
+        if (y !== null) window.scrollTo({ top: y, behavior: 'instant' })
+        const read = Math.round(window.scrollY)
+        if (typeof to === 'number') history.go(to)
+        else document.querySelector(`footer a[href="${to}"]`).click()
+        return read
+      },
+      [how, top ?? null],
+    )
+    await arrive(page, was)
+    return at
+  }
+  /** Scrolls and leaves in ONE task: no frame, and not even the scroll event, comes in between. */
+  const leaveAt = async (page, top, how) => {
+    const at = await travel(page, how, top)
+    ok(Math.abs(at - top) <= 1, `the page cannot be scrolled to ${top}: ${at}`)
+    return at
+  }
+  const settleAt = async (page, top) => {
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), top)
+    await page.waitForTimeout(350)
+    ok(Math.abs((await place(page)) - top) <= 1, `the page cannot be scrolled to ${top}: ${await place(page)}`)
+  }
+  const returnedTo = async (page, wanted, where) => ok(Math.abs((await place(page)) - wanted) <= NEAR, `${where}: at ${await place(page)}, left at ${wanted}`)
+
+  await step('a scroll and a navigation in the same moment: Back returns to the latest place, after a link and after Forward', async () => {
+    const { context, page } = await open()
+    await go(page, '/en/about/')
+    // The next pages' code is loaded first, so the navigation that follows is drawn at once, before the browser has announced the scroll.
+    await travel(page, '/en/services')
+    await travel(page, '/en/work')
+    await travel(page, -1)
+    await settleAt(page, 600)
+    const first = await leaveAt(page, 1400, '/en/work')
+    await travel(page, -1)
+    await returnedTo(page, first, 'Back after a link')
+    await settleAt(page, 600)
+    const second = await leaveAt(page, 1100, 1)
+    await travel(page, -1)
+    await returnedTo(page, second, 'Back after Forward')
+    await context.close()
+  })
+
+  await step('rapid navigation: every history entry keeps its own latest place and none are exchanged', async () => {
+    const { context, page } = await open()
+    await go(page, '/en/about/')
+    await travel(page, '/en/services')
+    await travel(page, '/en/work')
+    await travel(page, -2)
+    const left = new Map()
+    const hops = [
+      [500, '/en/services'],
+      [1400, '/en/work'],
+      [900, -1],
+      [1200, -1],
+      [700, 1],
+      [1100, 1],
+      [800, -1],
+      [300, -1],
+      [600, 1],
+      [1000, 1],
+      [400, -2],
+      [200, 2],
+    ]
+    let returns = 0
+    for (const [top, how] of hops) {
+      const from = new URL(page.url()).pathname.replace(/\/$/, '')
+      left.set(from, await leaveAt(page, top, how))
+      const to = new URL(page.url()).pathname.replace(/\/$/, '')
+      ok(to !== from, `the hop ${how} stayed on ${from}`)
+      // A link makes a new entry, which starts at the top; a step through history returns to what was left there.
+      if (typeof how === 'string') ok((await place(page)) === 0, `a new page opened at ${await place(page)}`)
+      else {
+        await returnedTo(page, left.get(to), `${from} → ${to} by history.go(${how})`)
+        returns += 1
+      }
+    }
+    ok(returns === 10, `only ${returns} returns were compared`)
+    await context.close()
+  })
+
+  await step('leaving a place that is still being restored does not write over it', async () => {
+    const { context, page } = await open()
+    await go(page, '/en/about/')
+    await travel(page, '/en/services')
+    await settleAt(page, 1400)
+    await travel(page, '/en/work')
+    // Every page is made short, as one that is still being drawn is, with some room left to scroll.
+    await page.evaluate(() => {
+      const main = document.querySelector('main')
+      main.style.maxHeight = '600px'
+      main.style.overflow = 'hidden'
+    })
+    await settleAt(page, 300)
+    await page.evaluate(() => history.back())
+    await page.waitForFunction(() => location.pathname === '/en/services')
+    await page.waitForTimeout(150)
+    const was = await page.title()
+    const waiting = await page.evaluate(() => {
+      const state = { y: window.scrollY, room: document.documentElement.scrollHeight - window.innerHeight }
+      history.forward()
+      return state
+    })
+    ok(waiting.y === 0 && waiting.room < 1400, `the restore was not waiting when it was left: ${JSON.stringify(waiting)}`)
+    await arrive(page, was)
+    await page.evaluate(() => document.querySelector('main').removeAttribute('style'))
+    await travel(page, -1)
+    await returnedTo(page, 1400, 'Back to the page left while it waited')
+    await context.close()
+  })
+
+  await step('a plain #link leaves the saved place of the entry before it alone, however the link is followed', async () => {
+    // Followed from a script, Chrome has already jumped when the page frame hears of the link (with reduced motion the jump is instant): the window then shows the
+    // target, not the place being left, and must not be read. After a real click Chrome jumps later; both ways are checked.
+    for (const way of ['a real click', 'a script']) {
+      const { context, page } = await open({ reduced: true })
+      await go(page, '/en/lab/', '[data-design-tool]')
+      const was = await page.title()
+      await page.evaluate(() => document.querySelector('[data-design-tool] a').click())
+      await arrive(page, was)
+      await page.locator('#color').waitFor({ timeout: 30000 })
+      const key = await page.evaluate(() => history.state.key)
+      await settleAt(page, 700)
+      if (way === 'a script') await page.evaluate(() => document.querySelector('a[href="#motion"]').click())
+      else await page.locator('a[href="#motion"]').first().click()
+      await page.waitForFunction(() => location.hash === '#motion')
+      await page.waitForTimeout(600)
+      const after = await page.evaluate((k) => ({ y: Math.round(window.scrollY), saved: JSON.parse(sessionStorage.getItem('cc:scroll-positions') || '{}')[k] }), key)
+      ok(after.y > 1400, `${way}: the link did not jump: ${after.y}`)
+      ok(Math.abs(after.saved - 700) <= NEAR, `${way}: the entry left by the link is stored at ${after.saved}, not 700`)
+      await travel(page, '/en/about')
+      await travel(page, -2)
+      await returnedTo(page, 700, `${way}: two steps Back to the entry before the link`)
+      await context.close()
+    }
+  })
+
+  await step('with session storage refusing, navigation works and Back still returns to the place', async () => {
+    const { context, page } = await open()
+    await page.addInitScript(() => {
+      for (const name of ['getItem', 'setItem']) {
+        const real = Storage.prototype[name]
+        Storage.prototype[name] = function (...args) {
+          if (this === window.sessionStorage) {
+            window.__refused = (window.__refused || 0) + 1
+            throw new DOMException('refused by the journey', 'SecurityError')
+          }
+          return real.apply(this, args)
+        }
+      }
+    })
+    await go(page, '/en/about/')
+    await travel(page, '/en/services')
+    const at = await leaveAt(page, 1400, '/en/work')
+    await travel(page, -1)
+    await returnedTo(page, at, 'Back without storage')
+    ok((await page.evaluate(() => window.__refused)) > 0, 'the storage was never asked, so nothing was proved')
+    await context.close()
+  })
+
   // ── Markers, depth, states ────────────────────────────────────────────
   await step('the language marker sits behind the current language and glides to the chosen one', async () => {
     const { context, page } = await open()

@@ -13,6 +13,9 @@ Part of [Advanced motion and visual experiences](README.md). **Nothing here is d
 
 - [ ] Open a page by its address, switch the language: the page must stay where it is, without a blink.
 - [ ] Scroll one page far down, type another page's address in the same tab: it must open at the top. Reload a long page half way: it must come back there.
+- [ ] Scroll and press a header link or Back at once, then return: the page must be exactly where it was left, also after several quick Back and Forward presses (PROMPT 38.1).
+- [ ] On a long page use an in-page link (the playground's tabs, the skip link), move to another page and go back: no jump to a wrong place.
+- [ ] On a slow connection and on a 120 Hz screen: Back to a long page. A page slower than the wait of 120 frames ends higher up ([ARCHITECTURE](ARCHITECTURE.md) §8).
 - [ ] Throttle the network and click through the header: the marker moves at once, the old page dims, links still work.
 - [ ] On a real iPhone and a real Android phone: scrolling smoothness on the home page, the Lab and the Command Center; the phone menu over the hero; taps on cards and the language buttons.
 - [ ] Safari and Firefox (the code uses the individual `translate` and `scale` properties, `:has()` and `IntersectionObserver`).

@@ -46,5 +46,5 @@ node tools/audit/motion-perf.cjs dist --base <dist of the base commit>
 
 * Headless Chrome on one Windows machine only: no physical device, Safari, Firefox or screen reader; the GPU was not measured.
 * The new effects are deliberately small; their look was checked in screenshots, not judged with users.
-* The scroll position of a very slow page (more than about two seconds to arrive) is restored only as far as the page then reaches.
+* The scroll position of a very slow page is restored only as far as the page reaches after 120 frames (about two seconds at 60 Hz, less on faster screens; [ARCHITECTURE](ARCHITECTURE.md) §8).
 * The header's pending marker is for the desktop bar; the phone menu closes at once and the loading bar speaks for it.
